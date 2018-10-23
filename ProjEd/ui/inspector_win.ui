@@ -23,7 +23,14 @@
       <height>361</height>
      </rect>
     </property>
-    <layout class="QVBoxLayout" name="propertySpace"/>
+    <layout class="QVBoxLayout" name="propertySpace">
+     <property name="spacing">
+      <number>3</number>
+     </property>
+     <property name="sizeConstraint">
+      <enum>QLayout::SetNoConstraint</enum>
+     </property>
+    </layout>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">

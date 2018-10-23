@@ -7,11 +7,18 @@ InspectorWin::InspectorWin(QWidget *parent) :
     ui(new Ui::InspectorWin)
 {
     ui->setupUi(this);
-
-
+    x_win_start = 411 + 480;
 }
 
 InspectorWin::~InspectorWin()
 {
     delete ui;
+}
+
+QVBoxLayout* InspectorWin::getContentLayout(){
+    return ui->propertySpace;
+}
+
+void InspectorWin::clearContentLayout(){
+   // ui->propertySpace->removeWidget();
 }

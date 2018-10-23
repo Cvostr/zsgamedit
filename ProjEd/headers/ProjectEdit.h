@@ -40,6 +40,7 @@ class EditWindow : public QMainWindow
 
 public slots:
     void onFileListItemClicked();
+    void onObjectListItemClicked();
 
     void onAddNewGameObject();
     void onSceneSave();

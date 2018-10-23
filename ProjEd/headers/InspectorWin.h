@@ -3,6 +3,7 @@
 
 
 #include <QMainWindow>
+#include <QVBoxLayout>
 #include <vector>
 
 
@@ -21,10 +22,12 @@ public:
 
     explicit InspectorWin(QWidget *parent = nullptr);
     ~InspectorWin();
-
+    QVBoxLayout* getContentLayout();
+    void clearContentLayout();
 
 private:
     Ui::InspectorWin *ui;
+    int x_win_start;
 };
 
 

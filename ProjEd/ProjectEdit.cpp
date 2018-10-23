@@ -24,6 +24,10 @@ EditWindow::EditWindow(QWidget *parent) :
                 this, SLOT(onSceneSave())); //Signal comes, when user clicks on File->Save
     QObject::connect(ui->actionSave_As, SIGNAL(triggered()),
                 this, SLOT(onSceneSaveAs())); //Signal comes, when user clicks on File->Save As
+
+    QObject::connect(ui->objsList, SIGNAL(itemClicked(QTreeWidgetItem *, int)),
+                this, SLOT(onObjectListItemClicked())); //Signal comes, when user clicks on File->Save As
+
     ready = false; //Firstly set it to 0
     hasSceneFile = false;
 
@@ -78,15 +82,15 @@ void EditWindow::setViewDirectory(QString dir_path){
 }
 //Slots
 void EditWindow::openFile(QString file_path){
-    if(file_path.endsWith(".scn")){
-        //world.openFromFile(file_path);
+    if(file_path.endsWith(".scn")){ //If it is scene
+        world.openFromFile(file_path); //Open this scene
     }
 }
 
 void EditWindow::onSceneSaveAs(){
     QString filename = QFileDialog::getSaveFileName(this, tr("Save scene file"), project.root_path, ".scn");
     world.saveToFile(filename); //Save to picked file
-    scene_path = filename;
+    scene_path = filename; //Assign scene path
 }
 
 void EditWindow::onSceneSave(){
@@ -99,6 +103,7 @@ void EditWindow::onSceneSave(){
 
 void EditWindow::onAddNewGameObject(){
     GameObject* obj_ptr = this->world.newObject(); //Add new object to world
+    obj_ptr->addTransformPropety(); //TO TEST!!!
     this->column_item_go->addChild(obj_ptr->item_ptr);
 }
 
@@ -110,17 +115,7 @@ void EditWindow::setupObjectsHieList(){
 }
 
 void EditWindow::updateObjectsHieList(){
-    QTreeWidget* w_ptr = ui->objsList; //Getting pointer to objects list widget
-    //w_ptr->clear(); //Clears widget
-    unsigned int objs_num = this->world.objects.size(); //Getting objects amoun
-//    QTreeWidgetItem* objs_c = new QTreeWidgetItem[objs_num]; //Allocating memory for items pointers(all objects)
-    for(unsigned int objs_it = 0; objs_it < objs_num; objs_it ++){
-         //QTreeWidgetItem child = objs_c[objs_it]; //Declaring our object item
-         QTreeWidgetItem* child = new QTreeWidgetItem;
-         GameObject* obj_ptr = &this->world.objects[objs_it];
-         child->setText(0, obj_ptr->label);
-         column_item_go->addChild(child);
-    }
+
 }
 
 void EditWindow::updateFileList(){
@@ -163,6 +158,18 @@ void EditWindow::onFileListItemClicked(){
                 return;
             } //If it isn't directory, it is a file
         }
+    }
+}
+
+void EditWindow::onObjectListItemClicked(){
+    QTreeWidgetItem* selected_item = ui->objsList->currentItem(); //Obtain pointer to clicked obj item
+    QString obj_name = selected_item->text(0); //Get label of clicked obj
+
+    GameObject* obj_ptr = world.getObjectByLabel(obj_name); //Obtain pointer to selected object by label
+    unsigned int props_num = static_cast<unsigned int>(obj_ptr->properties.size());
+    for(unsigned int prop_it = 0; prop_it < props_num; prop_it ++){ //iterate over all properties and send them to inspector
+        TransformProperty* property_ptr = (TransformProperty*)(obj_ptr->properties[prop_it]);
+        property_ptr->addPropertyInterfaceToInspector(_inspector_win);
     }
 }
 
