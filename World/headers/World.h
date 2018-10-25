@@ -15,6 +15,7 @@ class GameObjectProperty{
 public:
     int type; //Describe TYPE of property
     bool active; //Is property working
+    QString type_label;
 
     GameObjectProperty();
     virtual ~GameObjectProperty();
@@ -46,7 +47,7 @@ public:
 
     QTreeWidgetItem* item_ptr;
 
-    bool addTransformPropety();
+    bool addTransformProperty();
 
     GameObject(); //Default constructor
 };

@@ -14,6 +14,13 @@ GameObjectProperty::~GameObjectProperty(){
 
 void GameObjectProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
      //QTextEdit* pos = new QTextEdit;
+    switch(this->type){
+        case GO_PROPERTY_TYPE_TRANSFORM:{ //If it is transform
+            TransformProperty* transfrom = static_cast<TransformProperty*>(this);
+            transfrom->addPropertyInterfaceToInspector(inspector);
+            break;
+        }
+    }
 }
 
 GameObject::GameObject(){
@@ -22,7 +29,7 @@ GameObject::GameObject(){
     genRandomString(&this->str_id, 15); //Generate random string ID
 }
 
-bool GameObject::addTransformPropety(){
+bool GameObject::addTransformProperty(){
     unsigned int props = static_cast<unsigned int>(this->properties.size());
     for(unsigned int prop_i = 0; prop_i < props; prop_i ++){
         GameObjectProperty* property = this->properties[prop_i];
@@ -38,6 +45,7 @@ bool GameObject::addTransformPropety(){
 TransformProperty::TransformProperty(){
     type = GO_PROPERTY_TYPE_TRANSFORM; //Type of property is transform
     active = true; //property is active
+    type_label = "Transform";
 
     this->transform_mat = getIdentity(); //Result matrix is identity by default
     this->translation = ZSVECTOR3(0.0f, 0.0f, 0.0f); //Position is zero by default
@@ -45,17 +53,10 @@ TransformProperty::TransformProperty(){
 }
 
 void TransformProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
-    QHBoxLayout* pos_layout = new QHBoxLayout;
 
-    QLineEdit* pos = new QLineEdit;
-    pos->setFixedWidth(60);
-    pos_layout->addWidget(pos);
-
-    QLineEdit* scale = new QLineEdit;
-    scale->setFixedWidth(60);
-    pos_layout->addWidget(scale);
-
-    inspector->getContentLayout()->addLayout(pos_layout);
+    Float3PropertyArea* area = new Float3PropertyArea;
+    area->setLabel("Position");
+    inspector->addPropertyArea(area);
 }
 
 void TransformProperty::updateMat(){

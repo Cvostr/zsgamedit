@@ -77,6 +77,8 @@ public:
 
     void glRender();
 
+    InspectorWin* getInspector();
+
     explicit EditWindow(QWidget *parent = nullptr);
     ~EditWindow();
 

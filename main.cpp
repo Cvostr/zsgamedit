@@ -12,9 +12,11 @@ int main(int argc, char *argv[])
     while (working) {
        // if (a.hasPendingEvents())
             a.processEvents();
-            if(w.edit_win_ptr != nullptr)
-                if(w.edit_win_ptr->ready == true)
-                    w.edit_win_ptr->glRender();
+            if(w.edit_win_ptr != nullptr){ //Check if project editor window is created
+                w.edit_win_ptr->getInspector()->area_update();
+                if(w.edit_win_ptr->ready == true) //If GL is ready to draw
+                    w.edit_win_ptr->glRender(); //Draw OpenGL window
+             }
 
             SDL_Event event;
                 while (SDL_PollEvent(&event))
