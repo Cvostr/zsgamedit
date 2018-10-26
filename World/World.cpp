@@ -23,6 +23,10 @@ void GameObjectProperty::addPropertyInterfaceToInspector(InspectorWin* inspector
     }
 }
 
+void GameObjectProperty::onValueChanged(){
+
+}
+
 GameObject::GameObject(){
     this->hasParent = false; //No parent by default
     item_ptr = new QTreeWidgetItem; //Allocate tree widget item
@@ -54,9 +58,15 @@ TransformProperty::TransformProperty(){
 
 void TransformProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
 
-    Float3PropertyArea* area = new Float3PropertyArea;
-    area->setLabel("Position");
-    inspector->addPropertyArea(area);
+    Float3PropertyArea* area_pos = new Float3PropertyArea; //New property area
+    area_pos->setLabel("Position"); //Its label
+    area_pos->vector = &this->translation; //Ptr to our vector
+    inspector->addPropertyArea(area_pos);
+
+    Float3PropertyArea* area_scale = new Float3PropertyArea; //New property area
+    area_scale->setLabel("Scale"); //Its label
+    area_scale->vector = &this->scale; //Ptr to our vector
+    inspector->addPropertyArea(area_scale);
 }
 
 void TransformProperty::updateMat(){
@@ -64,9 +74,10 @@ void TransformProperty::updateMat(){
     ZSMATRIX4x4 translation_mat = getTranslationMat(this->translation);
     //Calculate scale matrix
     ZSMATRIX4x4 scale_mat = getScaleMat(scale);
-    ZSMATRIX4x4 rotation_mat;
+    //Calculate rotation matrix
+    ZSMATRIX4x4 rotation_mat = getRotationMat(rotation);
     //S * R * T
-    this->transform_mat = scale_mat * translation_mat;
+    this->transform_mat = scale_mat * rotation_mat * translation_mat;
 }
 
 GameObject* World::addObject(GameObject obj){

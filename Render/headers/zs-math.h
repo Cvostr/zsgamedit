@@ -169,6 +169,8 @@
 	ZSMATRIX4x4 getRotationYMat(float thetaN);
 	ZSMATRIX4x4 getRotationZMat(float thetaN);
     ZSMATRIX4x4 getRotationMat(float thetaX, float thetaY, float thetaZ);
+    ZSMATRIX4x4 getRotationMat(ZSVECTOR3 rotation);
+
 
 	float getDistance(ZSVECTOR3 p1, ZSVECTOR3 p2);
 	ZSVECTOR3 _getDirection(float pitch, float yaw, float roll);

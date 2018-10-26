@@ -186,6 +186,25 @@ ZSMATRIX4x4 getRotationZMat(float thetaN) {
 	return mat;
 }
 
+ZSMATRIX4x4 getRotationMat(float thetaX, float thetaY, float thetaZ){
+    //Calculate matrices
+    ZSMATRIX4x4 xmat = getRotationXMat(thetaX);
+    ZSMATRIX4x4 ymat = getRotationYMat(thetaY);
+    ZSMATRIX4x4 zmat = getRotationZMat(thetaZ);
+
+    ZSMATRIX4x4 result = getIdentity(); //Define identity
+    //Sequantily multiply it by xmat,ymat,zmat
+    result = result * xmat;
+    result = result * ymat;
+    result = result * zmat;
+
+    return result;
+}
+
+ZSMATRIX4x4 getRotationMat(ZSVECTOR3 rotation){
+    return getRotationMat(rotation.X, rotation.Y, rotation.Z);
+}
+
 ZSMATRIX4x4 getOrthogonal(float left, float right, float bottom, float top)
 {
 	ZSMATRIX4x4 out = getIdentity();

@@ -1,13 +1,13 @@
 #ifndef INSPECTORWIN_H
 #define INSPECTORWIN_H
 
-
 #include <QMainWindow>
 #include <QVBoxLayout>
 #include <QLineEdit>
 #include <QLabel>
 #include <vector>
 
+//#include "../../World/headers/World.h"
 #include "../../Render/headers/zs-math.h"
 
 #define PEA_TYPE_NONE 0
@@ -23,13 +23,13 @@ class PropertyEditArea{
 public:
     int type;
     QString label; //Label, describing content
-    QLabel* label_widget; //Widget for upper variable
+    QLabel* label_widget; //Widget for upper variableW
     PropertyEditArea(); //Default construct
 
     virtual ~PropertyEditArea();
 
-    virtual bool valuesChanged();
-    virtual void applyValues();
+
+    virtual void setup();
     virtual void updateState(); //Updates value
     virtual void clear(InspectorWin* win); //Clears all widget in layout
     virtual void addToInspector(InspectorWin* win);
@@ -59,6 +59,7 @@ public:
     Float3PropertyArea();
     ~Float3PropertyArea();
 
+    void setup(); //Virtual
     void addToInspector(InspectorWin* win);
     void clear(InspectorWin* win);
     void updateState();

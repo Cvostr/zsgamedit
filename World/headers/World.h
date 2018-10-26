@@ -21,6 +21,7 @@ public:
     virtual ~GameObjectProperty();
 
     virtual void addPropertyInterfaceToInspector(InspectorWin* inspector);
+    virtual void onValueChanged();
 };
 
 class TransformProperty : public GameObjectProperty {
