@@ -24,7 +24,13 @@ void GameObjectProperty::addPropertyInterfaceToInspector(InspectorWin* inspector
 }
 
 void GameObjectProperty::onValueChanged(){
-
+    switch(this->type){
+        case GO_PROPERTY_TYPE_TRANSFORM:{ //If it is transform
+            TransformProperty* transfrom = static_cast<TransformProperty*>(this);
+            transfrom->onValueChanged();
+            break;
+        }
+    }
 }
 
 GameObject::GameObject(){
@@ -54,6 +60,7 @@ TransformProperty::TransformProperty(){
     this->transform_mat = getIdentity(); //Result matrix is identity by default
     this->translation = ZSVECTOR3(0.0f, 0.0f, 0.0f); //Position is zero by default
     this->scale = ZSVECTOR3(1.0f, 1.0f, 1.0f); //Scale is 1 by default
+    this->rotation = ZSVECTOR3(0.0f, 0.0f, 0.0f); //Rotation is 0 by default
 }
 
 void TransformProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
@@ -61,12 +68,24 @@ void TransformProperty::addPropertyInterfaceToInspector(InspectorWin* inspector)
     Float3PropertyArea* area_pos = new Float3PropertyArea; //New property area
     area_pos->setLabel("Position"); //Its label
     area_pos->vector = &this->translation; //Ptr to our vector
+    area_pos->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
     inspector->addPropertyArea(area_pos);
 
     Float3PropertyArea* area_scale = new Float3PropertyArea; //New property area
     area_scale->setLabel("Scale"); //Its label
     area_scale->vector = &this->scale; //Ptr to our vector
+    area_scale->go_property = static_cast<void*>(this);
     inspector->addPropertyArea(area_scale);
+
+    Float3PropertyArea* area_rotation = new Float3PropertyArea; //New property area
+    area_rotation->setLabel("Rotation"); //Its label
+    area_rotation->vector = &this->rotation; //Ptr to our vector
+    area_rotation->go_property = static_cast<void*>(this);
+    inspector->addPropertyArea(area_rotation);
+}
+
+void TransformProperty::onValueChanged(){
+    updateMat();
 }
 
 void TransformProperty::updateMat(){

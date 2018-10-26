@@ -34,6 +34,7 @@ public:
 
     void updateMat();
     void addPropertyInterfaceToInspector(InspectorWin* inspector);
+    void onValueChanged();
 
     TransformProperty();
 };

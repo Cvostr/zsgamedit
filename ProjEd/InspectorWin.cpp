@@ -1,6 +1,7 @@
 #include "headers/InspectorWin.h"
 #include "ui_inspector_win.h"
 
+#include "../World/headers/World.h"
 #include <QDoubleValidator>
 
 InspectorWin::InspectorWin(QWidget *parent) :
@@ -38,6 +39,7 @@ void InspectorWin::addPropertyArea(PropertyEditArea* area){
 PropertyEditArea::PropertyEditArea(){
     type = PEA_TYPE_NONE;
     label_widget = new QLabel; //Allocating label
+    go_property = nullptr; //Nullptr by default
 }
 
 PropertyEditArea::~PropertyEditArea(){
@@ -62,7 +64,11 @@ void PropertyEditArea::addToInspector(InspectorWin* win){
 
 }
 void PropertyEditArea::updateState(){
-    switch(this->type){
+    if(go_property != nullptr){ //If parent property has defined
+        GameObjectProperty* property_ptr = static_cast<GameObjectProperty*>(this->go_property);
+        property_ptr->onValueChanged(); //Then call changed
+    }
+        switch(this->type){
     case PEA_TYPE_FLOAT3:{
         Float3PropertyArea* ptr = static_cast<Float3PropertyArea*>(this);
         ptr->updateState();
@@ -172,4 +178,19 @@ void InspectorWin::area_update(){
         PropertyEditArea* pea_ptr = this->property_areas[area_i]; //Obtain pointer to area
         pea_ptr->updateState(); //Update state on it.
     }
+}
+
+StringPropertyArea::StringPropertyArea(){
+    this->str_layout = new QHBoxLayout; //Allocating layout
+    this->value_ptr = nullptr;
+    this->edit_field = new QLineEdit; //Allocation of QLineEdit
+}
+
+StringPropertyArea::~StringPropertyArea(){
+    delete this->str_layout;
+}
+
+void StringPropertyArea::clear(InspectorWin* win){
+    this->str_layout->removeWidget(this->edit_field);
+    this->str_layout->removeWidget(this->label_widget);
 }

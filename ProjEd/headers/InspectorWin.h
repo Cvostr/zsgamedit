@@ -7,7 +7,6 @@
 #include <QLabel>
 #include <vector>
 
-//#include "../../World/headers/World.h"
 #include "../../Render/headers/zs-math.h"
 
 #define PEA_TYPE_NONE 0
@@ -23,7 +22,8 @@ class PropertyEditArea{
 public:
     int type;
     QString label; //Label, describing content
-    QLabel* label_widget; //Widget for upper variableW
+    QLabel* label_widget; //Widget for upper variable
+    void* go_property; //Pointer to connected property
     PropertyEditArea(); //Default construct
 
     virtual ~PropertyEditArea();
@@ -32,14 +32,23 @@ public:
     virtual void setup();
     virtual void updateState(); //Updates value
     virtual void clear(InspectorWin* win); //Clears all widget in layout
-    virtual void addToInspector(InspectorWin* win);
+    virtual void addToInspector(InspectorWin* win); //Add edit area to inspector layout
 
     void setLabel(QString label);
 };
 
 class StringPropertyArea : public PropertyEditArea{
 public:
-    QString* value_ptr;
+    QHBoxLayout* str_layout; //Layout to contain everything
+    QString* value_ptr; //Modifying string
+    QLineEdit* edit_field;
+
+    StringPropertyArea();
+    ~StringPropertyArea();
+
+    //void setup(); //Virtual
+    void clear(InspectorWin* win); //Virtual, clears all qt classes
+
 };
 
 class Float3PropertyArea : public PropertyEditArea{
@@ -61,8 +70,8 @@ public:
 
     void setup(); //Virtual
     void addToInspector(InspectorWin* win);
-    void clear(InspectorWin* win);
-    void updateState();
+    void clear(InspectorWin* win); //Virtual, clears all qt classes
+    void updateState(); //Virtual, on values changed
 };
 
 namespace Ui {
