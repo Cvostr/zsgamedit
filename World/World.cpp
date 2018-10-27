@@ -57,19 +57,21 @@ bool GameObject::addProperty(int property){
             return false; //Exit function
         }
     }
-    GameObjectProperty* ptr;
+    GameObjectProperty* _ptr;
     switch (property) {
         case GO_PROPERTY_TYPE_TRANSFORM:{ //If type is transfrom
-            ptr = static_cast<GameObjectProperty*>(new TransformProperty); //Allocation of transform in heap
+            _ptr = static_cast<GameObjectProperty*>(new TransformProperty); //Allocation of transform in heap
             break;
         }
         case GO_PROPERTY_TYPE_LABEL:{
-            ptr = static_cast<GameObjectProperty*>(new LabelProperty);
+            LabelProperty* ptr = new LabelProperty;
+            _ptr = static_cast<GameObjectProperty*>(ptr);
+            ptr->list_item_ptr = this->item_ptr;
             break;
         }
     }
-    ptr->object_str_id = this->str_id; //Connect to gameobject via string id
-    this->properties.push_back(ptr); //Store poroperty in gameobject
+    _ptr->object_str_id = this->str_id; //Connect to gameobject via string id
+    this->properties.push_back(_ptr); //Store poroperty in gameobject
     return true;
 }
 
@@ -160,7 +162,8 @@ void LabelProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
 }
 
 void LabelProperty::onValueChanged(){
-    this->gobject_ptr->item_ptr->setText(0, this->label);
+    this->list_item_ptr->setText(0, this->label);
+    //this->gobject_ptr->item_ptr->setText(0, this->label);
 }
 
 GameObject* World::addObject(GameObject obj){

@@ -32,6 +32,7 @@ public:
 class LabelProperty : public GameObjectProperty {
 public:
     QString label; //Label of gameobject
+    QTreeWidgetItem* list_item_ptr;
 
     void addPropertyInterfaceToInspector(InspectorWin* inspector);
     void onValueChanged();
