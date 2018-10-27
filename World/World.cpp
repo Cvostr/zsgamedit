@@ -20,6 +20,11 @@ void GameObjectProperty::addPropertyInterfaceToInspector(InspectorWin* inspector
             transfrom->addPropertyInterfaceToInspector(inspector);
             break;
         }
+        case GO_PROPERTY_TYPE_LABEL:{ //If it is label
+            LabelProperty* label = static_cast<LabelProperty*>(this);
+            label->addPropertyInterfaceToInspector(inspector);
+            break;
+        }
     }
 }
 
@@ -28,6 +33,11 @@ void GameObjectProperty::onValueChanged(){
         case GO_PROPERTY_TYPE_TRANSFORM:{ //If it is transform
             TransformProperty* transfrom = static_cast<TransformProperty*>(this);
             transfrom->onValueChanged();
+            break;
+        }
+        case GO_PROPERTY_TYPE_LABEL:{ //If it is label
+            LabelProperty* label = static_cast<LabelProperty*>(this);
+            label->onValueChanged();
             break;
         }
     }
@@ -39,17 +49,54 @@ GameObject::GameObject(){
     genRandomString(&this->str_id, 15); //Generate random string ID
 }
 
-bool GameObject::addTransformProperty(){
+bool GameObject::addProperty(int property){
     unsigned int props = static_cast<unsigned int>(this->properties.size());
     for(unsigned int prop_i = 0; prop_i < props; prop_i ++){
-        GameObjectProperty* property = this->properties[prop_i];
-        if(property->type == GO_PROPERTY_TYPE_TRANSFORM){
-            return false;
+        GameObjectProperty* property_ptr = this->properties[prop_i];
+        if(property_ptr->type == property){ //If object already has one
+            return false; //Exit function
         }
     }
-    TransformProperty* property = new TransformProperty;
-    this->properties.push_back(property);
+    GameObjectProperty* ptr;
+    switch (property) {
+        case GO_PROPERTY_TYPE_TRANSFORM:{ //If type is transfrom
+            ptr = static_cast<GameObjectProperty*>(new TransformProperty); //Allocation of transform in heap
+            break;
+        }
+        case GO_PROPERTY_TYPE_LABEL:{
+            ptr = static_cast<GameObjectProperty*>(new LabelProperty);
+            break;
+        }
+    }
+    ptr->object_str_id = this->str_id; //Connect to gameobject via string id
+    this->properties.push_back(ptr); //Store poroperty in gameobject
     return true;
+}
+
+bool GameObject::addTransformProperty(){
+    return addProperty(GO_PROPERTY_TYPE_TRANSFORM);
+}
+
+bool GameObject::addLabelProperty(){
+    return addProperty(GO_PROPERTY_TYPE_LABEL);
+}
+
+GameObjectProperty* GameObject::getPropertyPtrByType(int property){
+    unsigned int props = static_cast<unsigned int>(this->properties.size());
+    for(unsigned int prop_i = 0; prop_i < props; prop_i ++){
+        GameObjectProperty* property_ptr = this->properties[prop_i];
+        if(property_ptr->type == property){ //If object already has one
+            return property_ptr; //return it
+        }
+    }
+    return nullptr;
+}
+
+LabelProperty* GameObject::getLabelProperty(){
+    return static_cast<LabelProperty*>(getPropertyPtrByType(GO_PROPERTY_TYPE_LABEL));
+}
+TransformProperty* GameObject::getTransformProperty(){
+    return static_cast<TransformProperty*>(getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
 }
 
 TransformProperty::TransformProperty(){
@@ -99,6 +146,23 @@ void TransformProperty::updateMat(){
     this->transform_mat = scale_mat * rotation_mat * translation_mat;
 }
 
+LabelProperty::LabelProperty(){
+    type = GO_PROPERTY_TYPE_LABEL; //its an label
+    active = true;
+}
+
+void LabelProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
+    StringPropertyArea* area = new StringPropertyArea;
+    area->setLabel("Label");
+    area->value_ptr = &this->label;
+    area->go_property = static_cast<void*>(this);
+    inspector->addPropertyArea(area);
+}
+
+void LabelProperty::onValueChanged(){
+    this->gobject_ptr->item_ptr->setText(0, this->label);
+}
+
 GameObject* World::addObject(GameObject obj){
     this->objects.push_back(obj);
     return &objects[objects.size() - 1];
@@ -108,8 +172,13 @@ GameObject* World::newObject(){
     GameObject obj; //Creating base gameobject
     int add_num = 0; //Declaration of addititonal integer
     getAvailableNumObjLabel("GameObject ", &add_num);
-    obj.label = "GameObject " + QString::number(add_num); //Assigning label to object
-    obj.item_ptr->setText(0, obj.label);
+
+    obj.addLabelProperty();
+    obj.label = &obj.getLabelProperty()->label;
+    *obj.label = "GameObject " + QString::number(add_num); //Assigning label to object
+    obj.item_ptr->setText(0, *obj.label);
+
+    obj.addProperty(GO_PROPERTY_TYPE_TRANSFORM);
     return this->addObject(obj); //Return pointer to new object
 }
 
@@ -117,7 +186,7 @@ GameObject* World::getObjectByLabel(QString label){
     unsigned int objs_num = static_cast<unsigned int>(this->objects.size());
     for(unsigned int obj_it = 0; obj_it < objs_num; obj_it ++){ //Iterate over all objs in scene
         GameObject* obj_ptr = &this->objects[obj_it]; //Get pointer to checking object
-        if(obj_ptr->label.compare(label) == 0) //if labels are same
+        if(obj_ptr->label->compare(label) == 0) //if labels are same
             return obj_ptr; //Return founded object
     }
     return nullptr; //if we haven't found one
@@ -129,7 +198,7 @@ void World::getAvailableNumObjLabel(QString label, int* result){
      bool hasEqualName = false; //true if we already have this obj
      for(unsigned int obj_it = 0; obj_it < objs_num; obj_it ++){ //Iterate over all objs in scene
          GameObject* obj_ptr = &this->objects[obj_it]; //Get pointer to checking object
-         if(obj_ptr->label.compare(tocheck_str) == 0) //If label on object is same
+         if(obj_ptr->label->compare(tocheck_str) == 0) //If label on object is same
              hasEqualName = true; //Then we founded equal name
      }
      if(hasEqualName == true){

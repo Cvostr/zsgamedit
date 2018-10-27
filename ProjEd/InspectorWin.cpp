@@ -48,12 +48,16 @@ PropertyEditArea::~PropertyEditArea(){
 //Defaults
 void PropertyEditArea::setup(){
     switch(this->type){
-    case PEA_TYPE_FLOAT3:{
-        Float3PropertyArea* ptr = static_cast<Float3PropertyArea*>(this);
-        ptr->setup();
-        break;
-    }
-
+        case PEA_TYPE_FLOAT3:{
+            Float3PropertyArea* ptr = static_cast<Float3PropertyArea*>(this);
+            ptr->setup();
+            break;
+        }
+        case PEA_TYPE_STRING:{
+            StringPropertyArea* ptr = static_cast<StringPropertyArea*>(this);
+            ptr->setup();
+            break;
+        }
     }
 }
 
@@ -64,17 +68,18 @@ void PropertyEditArea::addToInspector(InspectorWin* win){
 
 }
 void PropertyEditArea::updateState(){
-    if(go_property != nullptr){ //If parent property has defined
-        GameObjectProperty* property_ptr = static_cast<GameObjectProperty*>(this->go_property);
-        property_ptr->onValueChanged(); //Then call changed
-    }
-        switch(this->type){
-    case PEA_TYPE_FLOAT3:{
-        Float3PropertyArea* ptr = static_cast<Float3PropertyArea*>(this);
-        ptr->updateState();
-        break;
-    }
 
+    switch(this->type){
+        case PEA_TYPE_FLOAT3:{
+            Float3PropertyArea* ptr = static_cast<Float3PropertyArea*>(this);
+            ptr->updateState();
+            break;
+        }
+        case PEA_TYPE_STRING:{
+            StringPropertyArea* ptr = static_cast<StringPropertyArea*>(this);
+            ptr->updateState();
+            break;
+        }
     }
 }
 
@@ -85,6 +90,7 @@ void PropertyEditArea::setLabel(QString label){
 Float3PropertyArea::Float3PropertyArea(){
     pos_layout = new QHBoxLayout; //Allocation of layout
     vector = nullptr; //set it to null to avoid crash;
+    type = PEA_TYPE_FLOAT3;
     //pos_layout->setSpacing(10);
 
     x_field = new QLineEdit; //Allocation of text fields
@@ -92,27 +98,27 @@ Float3PropertyArea::Float3PropertyArea(){
     z_field = new QLineEdit;
 
     //Allocating separator labels
-   // x_label = new QLabel;
-    //x_label->setText(QString("X"));
-    //y_label = new QLabel;
-    //y_label->setText(QString("Y"));
-    //z_label = new QLabel;
-    //z_label->setText(QString("Z"));
+    x_label = new QLabel;
+    x_label->setText(QString("X"));
+    y_label = new QLabel;
+    y_label->setText(QString("Y"));
+    z_label = new QLabel;
+    z_label->setText(QString("Z"));
 
     pos_layout->addWidget(label_widget); //Adding label to result layout
     label_widget->setFixedWidth(100);
 
-    //pos_layout->addWidget(x_label); //Adding X label
+    pos_layout->addWidget(x_label); //Adding X label
     x_field->setFixedWidth(60);
     x_field->setValidator( new QDoubleValidator(0, 100, 6, nullptr) );
     pos_layout->addWidget(x_field); //Adding X text field
 
-    //pos_layout->addWidget(y_label);
+    pos_layout->addWidget(y_label);
     y_field->setFixedWidth(60);
     y_field->setValidator( new QDoubleValidator(0, 100, 6, nullptr) );
     pos_layout->addWidget(y_field);
 
-    //pos_layout->addWidget(z_label);
+    pos_layout->addWidget(z_label);
     z_field->setFixedWidth(60);
     z_field->setValidator( new QDoubleValidator(0, 100, 6, nullptr) );
     pos_layout->addWidget(z_field);
@@ -127,9 +133,9 @@ void Float3PropertyArea::addToInspector(InspectorWin* win){
 void Float3PropertyArea::clear(InspectorWin* win){
     pos_layout->removeWidget(label_widget); //Removes label
 
-    //pos_layout->removeWidget(x_label);
-    //pos_layout->removeWidget(y_label);
-    //pos_layout->removeWidget(z_label);
+    pos_layout->removeWidget(x_label);
+    pos_layout->removeWidget(y_label);
+    pos_layout->removeWidget(z_label);
 
     pos_layout->removeWidget(x_field);
     pos_layout->removeWidget(y_field);
@@ -169,6 +175,11 @@ Float3PropertyArea::~Float3PropertyArea(){
     delete this->x_field;
     delete this->y_field;
     delete this->z_field;
+
+    delete this->x_label;
+    delete this->y_label;
+    delete this->z_label;
+
     delete this->pos_layout;
 }
 
@@ -181,9 +192,17 @@ void InspectorWin::area_update(){
 }
 
 StringPropertyArea::StringPropertyArea(){
+    type = PEA_TYPE_STRING;
     this->str_layout = new QHBoxLayout; //Allocating layout
     this->value_ptr = nullptr;
     this->edit_field = new QLineEdit; //Allocation of QLineEdit
+
+    str_layout->addWidget(label_widget);
+    str_layout->addWidget(edit_field);
+}
+
+void StringPropertyArea::setup(){
+    this->edit_field->setText(*this->value_ptr);
 }
 
 StringPropertyArea::~StringPropertyArea(){
@@ -193,4 +212,26 @@ StringPropertyArea::~StringPropertyArea(){
 void StringPropertyArea::clear(InspectorWin* win){
     this->str_layout->removeWidget(this->edit_field);
     this->str_layout->removeWidget(this->label_widget);
+}
+
+void StringPropertyArea::addToInspector(InspectorWin* win){
+    win->getContentLayout()->addLayout(this->str_layout);
+}
+
+void StringPropertyArea::updateState(){
+    if(this->value_ptr == nullptr) //If vector hasn't been set
+        return; //Go out
+    //Get current values in textt fields
+    QString current = this->edit_field->text();
+    //Compare them
+    if(current.compare(value_ptr) != 0){ //If it updated
+        *value_ptr = current;
+
+        if(go_property != nullptr){ //If parent property has defined
+            GameObjectProperty* property_ptr = static_cast<GameObjectProperty*>(this->go_property);
+            property_ptr->onValueChanged(); //Then call changed
+        }
+    }
+
+
 }

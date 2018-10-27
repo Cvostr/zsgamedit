@@ -29,7 +29,7 @@ public:
     virtual ~PropertyEditArea();
 
 
-    virtual void setup();
+    virtual void setup(); //Uses to prepare base values
     virtual void updateState(); //Updates value
     virtual void clear(InspectorWin* win); //Clears all widget in layout
     virtual void addToInspector(InspectorWin* win); //Add edit area to inspector layout
@@ -46,8 +46,10 @@ public:
     StringPropertyArea();
     ~StringPropertyArea();
 
-    //void setup(); //Virtual
+    void setup(); //Virtual, prepares base values
     void clear(InspectorWin* win); //Virtual, clears all qt classes
+    void addToInspector(InspectorWin* win); //Add edit area to inspector layout
+    void updateState(); //Updates value
 
 };
 

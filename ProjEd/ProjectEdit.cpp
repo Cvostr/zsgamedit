@@ -103,7 +103,7 @@ void EditWindow::onSceneSave(){
 
 void EditWindow::onAddNewGameObject(){
     GameObject* obj_ptr = this->world.newObject(); //Add new object to world
-    obj_ptr->addTransformProperty(); //TO TEST!!!
+    //obj_ptr->addTransformProperty(); //TO TEST!!!
     this->column_item_go->addChild(obj_ptr->item_ptr);
 }
 
