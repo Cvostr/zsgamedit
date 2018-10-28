@@ -1,6 +1,5 @@
 #include "headers/World.h"
 #include "headers/Misc.h"
-#include <fstream>
 #include <QLineEdit>
 
 GameObjectProperty::GameObjectProperty(){
@@ -92,6 +91,50 @@ GameObjectProperty* GameObject::getPropertyPtrByType(int property){
         }
     }
     return nullptr;
+}
+
+void GameObject::saveProperties(std::ofstream* stream){
+    unsigned int props_num = static_cast<unsigned int>(this->properties.size());
+
+    for(unsigned int prop_i = 0; prop_i < props_num; prop_i ++){
+        GameObjectProperty* property_ptr = static_cast<GameObjectProperty*>(this->properties[prop_i]);
+        *stream << "\nG_PROPERTY " << property_ptr->type << " "; //Writing property header
+
+        switch(property_ptr->type){
+        case GO_PROPERTY_TYPE_TRANSFORM:{
+            TransformProperty* ptr = static_cast<TransformProperty*>(property_ptr);
+            float posX = ptr->translation.X;
+            float posY = ptr->translation.Y;
+            float posZ = ptr->translation.Z;
+
+            float scaleX = ptr->scale.X;
+            float scaleY = ptr->scale.Y;
+            float scaleZ = ptr->scale.Z;
+
+            float rotX = ptr->rotation.X;
+            float rotY = ptr->rotation.Y;
+            float rotZ = ptr->rotation.Z;
+
+            stream->write(reinterpret_cast<char*>(&posX), sizeof(float));//Writing position X
+            stream->write(reinterpret_cast<char*>(&posY), sizeof(float)); //Writing position Y
+            stream->write(reinterpret_cast<char*>(&posZ), sizeof(float)); //Writing position Z
+
+            stream->write(reinterpret_cast<char*>(&scaleX), sizeof(float));//Writing scale X
+            stream->write(reinterpret_cast<char*>(&scaleY), sizeof(float)); //Writing scale Y
+            stream->write(reinterpret_cast<char*>(&scaleZ), sizeof(float)); //Writing scale Z
+
+            stream->write(reinterpret_cast<char*>(&rotX), sizeof(float));//Writing rotation X
+            stream->write(reinterpret_cast<char*>(&rotY), sizeof(float)); //Writing rotation Y
+            stream->write(reinterpret_cast<char*>(&rotZ), sizeof(float)); //Writing rotation Z
+            break;
+        }
+        case GO_PROPERTY_TYPE_LABEL:{
+            LabelProperty* ptr = static_cast<LabelProperty*>(property_ptr);
+            *stream << ptr->label.toStdString();
+            break;
+        }
+        }
+    }
 }
 
 LabelProperty* GameObject::getLabelProperty(){
@@ -217,9 +260,17 @@ void World::saveToFile(QString file){
     world_stream.open(fpath.c_str(), std::ofstream::binary);
     int version = 1;
     int obj_num = static_cast<int>(this->objects.size());
-    world_stream << "ZSP_SCENE";
-    world_stream.write((char*)&version, 4);//Writing version
-    world_stream.write((char*)&obj_num, 4);
+    world_stream << "ZSP_SCENE ";
+    world_stream.write(reinterpret_cast<char*>(&version), sizeof(int));//Writing version
+    world_stream.write(reinterpret_cast<char*>(&obj_num), sizeof(int)); //Writing objects amount
+
+    for(unsigned int obj_i = 0; obj_i < static_cast<unsigned int>(obj_num); obj_i ++){ //Iterate over all game objects
+        GameObject* object_ptr = static_cast<GameObject*>(&this->objects[obj_i]);
+        world_stream << "\nG_OBJECT " << object_ptr->str_id; //Start object's header
+        object_ptr->saveProperties(&world_stream); //save object's properties
+        world_stream << "\nG_END"; //End writing object
+    }
+
     world_stream.close();
 
 }
@@ -228,5 +279,16 @@ void World::openFromFile(QString file){
     std::string fpath = file.toStdString();
 
     std::ifstream world_stream;
-    world_stream.open(fpath.c_str(), std::ofstream::binary);
+    world_stream.open(fpath.c_str(), std::ofstream::binary); //Opening to read binary data
+
+    std::string test_header;
+    world_stream >> test_header; //Read header
+    if(test_header.compare("ZSP_SCENE") != 0) //If it isn't zspire scene
+        return; //Go out, we have nothing to do
+    world_stream.seekg(1, std::ofstream::cur);
+    int version = 0;
+    int objs_num = 0;
+    world_stream.read(reinterpret_cast<char*>(&version), sizeof(int)); //reading version
+    world_stream.read(reinterpret_cast<char*>(&objs_num), sizeof(int)); //reading objects count
+
 }

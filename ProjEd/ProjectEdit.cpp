@@ -88,7 +88,9 @@ void EditWindow::openFile(QString file_path){
 }
 
 void EditWindow::onSceneSaveAs(){
-    QString filename = QFileDialog::getSaveFileName(this, tr("Save scene file"), project.root_path, ".scn");
+    QString filename = QFileDialog::getSaveFileName(this, tr("Save scene file"), project.root_path, "*.scn");
+    if(!filename.endsWith(".scn"))
+        filename.append(".scn");
     world.saveToFile(filename); //Save to picked file
     scene_path = filename; //Assign scene path
 }

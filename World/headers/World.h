@@ -4,6 +4,7 @@
 #include <vector>
 #include <QString>
 #include <QTreeWidget>
+#include <fstream>
 #include "../../ProjEd/headers/InspectorWin.h"
 
 #include "../../Render/headers/zs-math.h"
@@ -72,6 +73,8 @@ public:
     GameObjectProperty* getPropertyPtrByType(int property);
     LabelProperty* getLabelProperty();
     TransformProperty* getTransformProperty();
+
+    void saveProperties(std::ofstream* stream); //Writes properties content at end of stream
 
     GameObject(); //Default constructor
 };
