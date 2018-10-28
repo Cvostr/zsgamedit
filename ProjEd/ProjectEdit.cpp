@@ -164,6 +164,9 @@ void EditWindow::onFileListItemClicked(){
 void EditWindow::onObjectListItemClicked(){
     _inspector_win->clearContentLayout();
     QTreeWidgetItem* selected_item = ui->objsList->currentItem(); //Obtain pointer to clicked obj item
+    if(selected_item->text(0).compare("Objects") == 0) //If we clicked on title
+        return; //Exit function to avoid crash
+
     QString obj_name = selected_item->text(0); //Get label of clicked obj
 
     GameObject* obj_ptr = world.getObjectByLabel(obj_name); //Obtain pointer to selected object by label

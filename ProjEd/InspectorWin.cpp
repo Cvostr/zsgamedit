@@ -108,19 +108,23 @@ Float3PropertyArea::Float3PropertyArea(){
     pos_layout->addWidget(label_widget); //Adding label to result layout
     label_widget->setFixedWidth(100);
 
+    QLocale locale(QLocale::English); //Define english locale to set it to double validator later
+    QDoubleValidator* validator = new QDoubleValidator(0, 100, 6, nullptr); //Define double validator
+    validator->setLocale(locale); //English locale to accept dost instead of commas
+
     pos_layout->addWidget(x_label); //Adding X label
     x_field->setFixedWidth(60);
-    x_field->setValidator( new QDoubleValidator(0, 100, 6, nullptr) );
+    x_field->setValidator(validator); //Set double validator
     pos_layout->addWidget(x_field); //Adding X text field
 
     pos_layout->addWidget(y_label);
     y_field->setFixedWidth(60);
-    y_field->setValidator( new QDoubleValidator(0, 100, 6, nullptr) );
+    y_field->setValidator(validator);
     pos_layout->addWidget(y_field);
 
     pos_layout->addWidget(z_label);
     z_field->setFixedWidth(60);
-    z_field->setValidator( new QDoubleValidator(0, 100, 6, nullptr) );
+    z_field->setValidator(validator);
     pos_layout->addWidget(z_field);
 
 
@@ -147,7 +151,7 @@ void Float3PropertyArea::clear(InspectorWin* win){
 void Float3PropertyArea::updateState(){
     if(this->vector == nullptr) //If vector hasn't been set
         return; //Go out
-    //Get current values in textt fields
+    //Get current values in text fields
     float vX = this->x_field->text().toFloat();
     float vY = this->y_field->text().toFloat();
     float vZ = this->z_field->text().toFloat();
