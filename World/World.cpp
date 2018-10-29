@@ -378,6 +378,25 @@ void World::openFromFile(QString file, QTreeWidgetItem* root_item){
                             lptr->list_item_ptr->setText(0, lptr->label); //Set text on widget
                             break;
                         }
+                        case GO_PROPERTY_TYPE_TRANSFORM :{
+                            world_stream.seekg(1, std::ofstream::cur); //Skip space
+                            TransformProperty* lptr = static_cast<TransformProperty*>(prop_ptr);
+                            world_stream.read(reinterpret_cast<char*>(&lptr->translation.X), sizeof(float));
+                            world_stream.read(reinterpret_cast<char*>(&lptr->translation.Y), sizeof(float));
+                            world_stream.read(reinterpret_cast<char*>(&lptr->translation.Z), sizeof(float));
+
+                            world_stream.read(reinterpret_cast<char*>(&lptr->scale.X), sizeof(float));
+                            world_stream.read(reinterpret_cast<char*>(&lptr->scale.Y), sizeof(float));
+                            world_stream.read(reinterpret_cast<char*>(&lptr->scale.Z), sizeof(float));
+
+                            world_stream.read(reinterpret_cast<char*>(&lptr->rotation.X), sizeof(float));
+                            world_stream.read(reinterpret_cast<char*>(&lptr->rotation.Y), sizeof(float));
+                            world_stream.read(reinterpret_cast<char*>(&lptr->rotation.Z), sizeof(float));
+
+                            lptr->updateMat(); //After everything is loaded, update matrices
+
+                        break;
+                    }
                     }
                 }
             }
@@ -397,8 +416,11 @@ void World::openFromFile(QString file, QTreeWidgetItem* root_item){
 
     for(unsigned int obj_i = 0; obj_i < this->objects.size(); obj_i ++){
         GameObject* obj_ptr = &this->objects[obj_i];
-        if(obj_ptr->parent.isEmpty()){
+        if(obj_ptr->parent.isEmpty()){ //If object has no parent
             root_item->addChild(obj_ptr->item_ptr);
+        }else{ //It has a parent
+            GameObject* parent_ptr = obj_ptr->parent.ptr; //Get parent pointer
+            parent_ptr->item_ptr->addChild(obj_ptr->item_ptr); //Connect Qt Tree Items
         }
     }
 }
