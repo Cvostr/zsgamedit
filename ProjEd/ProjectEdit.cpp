@@ -31,11 +31,11 @@ EditWindow::EditWindow(QWidget *parent) :
     ready = false; //Firstly set it to 0
     hasSceneFile = false;
 
-    column_item_go = new QTreeWidgetItem; //Defining Objects list
-    column_item_go->setText(0, "Objects"); //Setting text to Objects
+
     setupObjectsHieList();
     //ui->objsList->setAcceptDrops(true);
     ui->objsList->setDragEnabled(true);
+    ui->fileList->setViewMode(QListView::IconMode);
 }
 
 EditWindow::~EditWindow()
@@ -82,9 +82,13 @@ void EditWindow::setViewDirectory(QString dir_path){
 }
 //Slots
 void EditWindow::openFile(QString file_path){
+
     if(file_path.endsWith(".scn")){ //If it is scene
-        ui->objsList->clear(); //Clear objects list
+        setupObjectsHieList(); //Clear everything, at first
         world.openFromFile(file_path, this->column_item_go); //Open this scene
+
+        scene_path = file_path; //Assign scene path
+        hasSceneFile = true; //Scene is saved
     }
 }
 
@@ -94,6 +98,7 @@ void EditWindow::onSceneSaveAs(){
         filename.append(".scn");
     world.saveToFile(filename); //Save to picked file
     scene_path = filename; //Assign scene path
+    hasSceneFile = true; //Scene is saved
 }
 
 void EditWindow::onSceneSave(){
@@ -112,6 +117,9 @@ void EditWindow::onAddNewGameObject(){
 void EditWindow::setupObjectsHieList(){
     QTreeWidget* w_ptr = ui->objsList; //Getting pointer to objects list widget
     w_ptr->clear(); //Clears widget
+
+    column_item_go = new QTreeWidgetItem; //Defining Objects list
+    column_item_go->setText(0, "Objects"); //Setting text to Objects
 
     w_ptr->addTopLevelItem(column_item_go);
 }

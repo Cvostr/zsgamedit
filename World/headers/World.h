@@ -22,7 +22,8 @@ public:
     std::string obj_str_id;
     GameObject* ptr;
 
-    GameObject* updLinkPtr();
+    GameObject* updLinkPtr(); //Updates pointer to object and returns it
+    bool isEmpty(); //Check, if this link doesn't link to some object
 
     GameObjectLink();
 };
@@ -74,6 +75,7 @@ public:
     std::string str_id; //String, gameobject identified by
     bool hasParent; //If object has a parent
     World* world_ptr; //pointer to world, when object placed
+    GameObjectLink parent;
 
     std::vector<GameObjectProperty*> properties; //Vector to store pointers to all properties
     std::vector<GameObjectLink> children;
@@ -108,6 +110,7 @@ public:
 
     void saveToFile(QString file);
     void openFromFile(QString file, QTreeWidgetItem* root_item);
+    void clear();
 
 };
 
