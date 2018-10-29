@@ -14,6 +14,18 @@
 #define GO_PROPERTY_TYPE_LABEL 2
 
 class GameObject;
+class World;
+
+class GameObjectLink{
+public:
+    World* world_ptr;
+    std::string obj_str_id;
+    GameObject* ptr;
+
+    GameObject* updLinkPtr();
+
+    GameObjectLink();
+};
 
 class GameObjectProperty{
 public:
@@ -61,8 +73,10 @@ public:
     QString* label;
     std::string str_id; //String, gameobject identified by
     bool hasParent; //If object has a parent
+    World* world_ptr; //pointer to world, when object placed
 
     std::vector<GameObjectProperty*> properties; //Vector to store pointers to all properties
+    std::vector<GameObjectLink> children;
 
     QTreeWidgetItem* item_ptr;
 
@@ -73,6 +87,7 @@ public:
     GameObjectProperty* getPropertyPtrByType(int property);
     LabelProperty* getLabelProperty();
     TransformProperty* getTransformProperty();
+    GameObjectLink getLinkToThisObject();
 
     void saveProperties(std::ofstream* stream); //Writes properties content at end of stream
 
@@ -89,10 +104,10 @@ public:
     GameObject* addObject(GameObject obj);
     GameObject* newObject();
     GameObject* getObjectByLabel(QString label);
-    GameObject* getObjectByStringId();
+    GameObject* getObjectByStringId(std::string id);
 
     void saveToFile(QString file);
-    void openFromFile(QString file);
+    void openFromFile(QString file, QTreeWidgetItem* root_item);
 
 };
 

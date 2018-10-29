@@ -11,6 +11,18 @@ GameObjectProperty::~GameObjectProperty(){
 
 }
 
+GameObjectLink::GameObjectLink(){
+    ptr = nullptr;
+    world_ptr = nullptr;
+}
+
+GameObject* GameObjectLink::updLinkPtr(){
+    if(world_ptr == nullptr) //If world not defined, exiting
+        return nullptr;
+
+    return world_ptr->getObjectByStringId(this->obj_str_id);
+}
+
 void GameObjectProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
      //QTextEdit* pos = new QTextEdit;
     switch(this->type){
@@ -91,6 +103,14 @@ GameObjectProperty* GameObject::getPropertyPtrByType(int property){
         }
     }
     return nullptr;
+}
+
+GameObjectLink GameObject::getLinkToThisObject(){
+    GameObjectLink link; //Definition of result link
+    link.obj_str_id = this->str_id; //Placing string id
+    link.world_ptr = this->world_ptr; //Placing world pointer
+
+    return link;
 }
 
 void GameObject::saveProperties(std::ofstream* stream){
@@ -206,12 +226,13 @@ void LabelProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
 
 void LabelProperty::onValueChanged(){
     this->list_item_ptr->setText(0, this->label);
-    //this->gobject_ptr->item_ptr->setText(0, this->label);
 }
 
 GameObject* World::addObject(GameObject obj){
     this->objects.push_back(obj);
-    return &objects[objects.size() - 1];
+    GameObject* ptr = &objects[objects.size() - 1];
+    ptr->world_ptr = this;
+    return ptr;
 }
 
 GameObject* World::newObject(){
@@ -233,6 +254,16 @@ GameObject* World::getObjectByLabel(QString label){
     for(unsigned int obj_it = 0; obj_it < objs_num; obj_it ++){ //Iterate over all objs in scene
         GameObject* obj_ptr = &this->objects[obj_it]; //Get pointer to checking object
         if(obj_ptr->label->compare(label) == 0) //if labels are same
+            return obj_ptr; //Return founded object
+    }
+    return nullptr; //if we haven't found one
+}
+
+GameObject* World::getObjectByStringId(std::string id){
+    unsigned int objs_num = static_cast<unsigned int>(this->objects.size());
+    for(unsigned int obj_it = 0; obj_it < objs_num; obj_it ++){ //Iterate over all objs in scene
+        GameObject* obj_ptr = &this->objects[obj_it]; //Get pointer to checking object
+        if(obj_ptr->str_id.compare(id) == 0) //if labels are same
             return obj_ptr; //Return founded object
     }
     return nullptr; //if we haven't found one
@@ -267,6 +298,14 @@ void World::saveToFile(QString file){
     for(unsigned int obj_i = 0; obj_i < static_cast<unsigned int>(obj_num); obj_i ++){ //Iterate over all game objects
         GameObject* object_ptr = static_cast<GameObject*>(&this->objects[obj_i]);
         world_stream << "\nG_OBJECT " << object_ptr->str_id; //Start object's header
+        if(object_ptr->children.size() > 0){ //If object has at least one child object
+            world_stream << "\nG_CHI " << object_ptr->children.size() << " "; //Start children header
+            unsigned int children_am = static_cast<unsigned int>(object_ptr->children.size());
+            for(unsigned int chi_i = 0; chi_i < children_am; chi_i ++){ //iterate over all children
+                GameObjectLink* link_ptr = &object_ptr->children[chi_i]; //Gettin pointer to child
+                world_stream << link_ptr->obj_str_id << " "; //Writing child's string id
+            }
+        }
         object_ptr->saveProperties(&world_stream); //save object's properties
         world_stream << "\nG_END"; //End writing object
     }
@@ -275,7 +314,7 @@ void World::saveToFile(QString file){
 
 }
 
-void World::openFromFile(QString file){
+void World::openFromFile(QString file, QTreeWidgetItem* root_item){
     std::string fpath = file.toStdString();
 
     std::ifstream world_stream;
@@ -291,4 +330,45 @@ void World::openFromFile(QString file){
     world_stream.read(reinterpret_cast<char*>(&version), sizeof(int)); //reading version
     world_stream.read(reinterpret_cast<char*>(&objs_num), sizeof(int)); //reading objects count
 
+    while(!world_stream.eof()){ //While file not finished reading
+        std::string prefix;
+        world_stream >> prefix; //Read prefix
+        if(prefix.compare("G_OBJECT") == 0){ //if it is game object
+            GameObject object; //firstly, define an object
+            //Then do the same sh*t, iterate until "G_END" came up
+            while(true){
+                std::string _prefix;
+                world_stream >> prefix; //Read prefix
+                if(prefix.compare("G_END") == 0){ //If end reached
+                    break; //Then end this infinity loop
+                }
+                if(prefix.compare("G_CHI") == 0) { //Ops, it is chidren header
+                    unsigned int amount;
+                    world_stream >> amount; //Reading children amount
+
+                    for(unsigned int ch_i = 0; ch_i < amount; ch_i ++){
+                        std::string child_str_id;
+                        world_stream >> child_str_id; //Reading child string id
+                    }
+                }
+                if(prefix.compare("G_PROPERTY") == 0){ //We found an property, zaeb*s'
+                    int type;
+                    world_stream >> type;
+                    object.addProperty(type);
+                    GameObjectProperty* prop_ptr = object.getPropertyPtrByType(type); //get created property
+                    //since more than 1 properties same type can't be on one gameobject
+                    switch(type){
+                        case GO_PROPERTY_TYPE_LABEL :{
+                            std::string label;
+                            world_stream >> label;
+                            LabelProperty* lptr = static_cast<LabelProperty*>(prop_ptr);
+                            lptr->label = QString::fromStdString(label); //Write loaded string
+                            lptr->list_item_ptr->setText(0, lptr->label); //Set text on widget
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
 }

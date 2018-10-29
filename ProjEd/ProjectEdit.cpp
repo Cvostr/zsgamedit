@@ -83,7 +83,8 @@ void EditWindow::setViewDirectory(QString dir_path){
 //Slots
 void EditWindow::openFile(QString file_path){
     if(file_path.endsWith(".scn")){ //If it is scene
-        world.openFromFile(file_path); //Open this scene
+        ui->objsList->clear(); //Clear objects list
+        world.openFromFile(file_path, this->column_item_go); //Open this scene
     }
 }
 
@@ -105,8 +106,7 @@ void EditWindow::onSceneSave(){
 
 void EditWindow::onAddNewGameObject(){
     GameObject* obj_ptr = this->world.newObject(); //Add new object to world
-    //obj_ptr->addTransformProperty(); //TO TEST!!!
-    this->column_item_go->addChild(obj_ptr->item_ptr);
+    this->column_item_go->addChild(obj_ptr->item_ptr); //Add object to list hierarchy
 }
 
 void EditWindow::setupObjectsHieList(){
