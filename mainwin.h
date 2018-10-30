@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "ProjEd/headers/ProjectEdit.h"
+#include "ProjEd/headers/ProjCreateWin.h"
 
 typedef struct ProjectConf{
     QString projLabel;

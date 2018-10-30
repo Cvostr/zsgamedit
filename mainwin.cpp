@@ -10,7 +10,7 @@
 #include <QPushButton>
 #include <QAction>
 
-
+static CreateProjectWindow* cr_w;
 
 MainWin::MainWin(QWidget *parent) :
     QMainWindow(parent),
@@ -30,6 +30,8 @@ MainWin::MainWin(QWidget *parent) :
                 this, SLOT(onSelectProjectToOpen()));
 
     loadProjectsConfigurations();
+    cr_w = new CreateProjectWindow;
+
 }
 
 MainWin::~MainWin()
@@ -122,7 +124,7 @@ void MainWin::onAddProjButtonClicked(){
 }
 
 void MainWin::onShowCreateNewProjectWindow(){
-
+    cr_w->show();
 }
 
 void MainWin::onSelectProjectToOpen(){
@@ -134,7 +136,7 @@ void MainWin::onSelectProjectToOpen(){
         if(proj_label.compare(conf_ptr->projLabel) == 0){ //If strings have same content
             //We found index, keep going
             this->hide(); //Close project selection window
-           this->edit_win_ptr = ZSEditor::openProject(conf_ptr->projFilePath); //Call project opening
+            this->edit_win_ptr = ZSEditor::openProject(conf_ptr->projFilePath); //Call project opening
         }
     }
 

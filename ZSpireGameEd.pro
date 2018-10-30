@@ -35,7 +35,8 @@ SOURCES += \
     Render/zs-texture.cpp \
     World/World.cpp \
     World/Misc.cpp \
-    ProjEd/InspectorWin.cpp
+    ProjEd/InspectorWin.cpp \
+    ProjEd/ProjCreateWin.cpp
 
 HEADERS += \
         mainwin.h \
@@ -47,12 +48,14 @@ HEADERS += \
     Render/headers/zs-texture.h \
     World/headers/World.h \
     World/headers/Misc.h \
-    ProjEd/headers/InspectorWin.h
+    ProjEd/headers/InspectorWin.h \
+    ProjEd/headers/ProjCreateWin.h
 
 FORMS += \
         mainwin.ui \
     ProjEd/ui/editor.ui \
-    ProjEd/ui/inspector_win.ui
+    ProjEd/ui/inspector_win.ui \
+    ProjEd/ui/proj_create_win.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
