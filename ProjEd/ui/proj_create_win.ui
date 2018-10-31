@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>New project</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QLabel" name="label">
@@ -37,7 +37,7 @@
      </rect>
     </property>
    </widget>
-   <widget class="QRadioButton" name="radioButton">
+   <widget class="QRadioButton" name="projPersp2D">
     <property name="geometry">
      <rect>
       <x>80</x>
@@ -50,7 +50,7 @@
      <string>2D</string>
     </property>
    </widget>
-   <widget class="QRadioButton" name="radioButton_2">
+   <widget class="QRadioButton" name="projPersp3D">
     <property name="geometry">
      <rect>
       <x>80</x>
@@ -112,7 +112,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>TextLabel</string>
+     <string>(none)</string>
     </property>
    </widget>
   </widget>

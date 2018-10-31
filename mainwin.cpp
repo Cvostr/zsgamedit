@@ -110,7 +110,7 @@ void MainWin::saveProjectsConfiguration(){
 
 void MainWin::onAddProjButtonClicked(){
 
-    QString path = QFileDialog::getOpenFileName(this, tr("Project Configuration Filed"), "/");
+    QString path = QFileDialog::getOpenFileName(this, tr("Project Configuration File"), "/");
     if ( path.isNull() == false ) //If user specified file path
     {
         ProjectConf conf; //Preparing struct
@@ -124,6 +124,7 @@ void MainWin::onAddProjButtonClicked(){
 }
 
 void MainWin::onShowCreateNewProjectWindow(){
+    cr_w->mainwin_ptr = static_cast<void*>(this); //Send pointer to this window
     cr_w->show();
 }
 

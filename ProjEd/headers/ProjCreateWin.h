@@ -14,7 +14,7 @@ public slots:
     void onCreateButtonPressed();
     void onBrowsePathButtonPressed();
 public:
-
+    void* mainwin_ptr;
     explicit CreateProjectWindow(QWidget *parent = nullptr);
     ~CreateProjectWindow();
 

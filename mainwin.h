@@ -37,7 +37,6 @@ public:
 
     void updateListWidgetContent();
 
-
     explicit MainWin(QWidget *parent = nullptr);
     ~MainWin();
 

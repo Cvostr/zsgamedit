@@ -210,6 +210,8 @@ void StringPropertyArea::setup(){
 }
 
 StringPropertyArea::~StringPropertyArea(){
+    delete edit_field; //Remove text field
+
     delete this->str_layout;
 }
 
