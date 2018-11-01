@@ -36,7 +36,8 @@ SOURCES += \
     World/World.cpp \
     World/Misc.cpp \
     ProjEd/InspectorWin.cpp \
-    ProjEd/ProjCreateWin.cpp
+    ProjEd/ProjCreateWin.cpp \
+    World/zs-camera.cpp
 
 HEADERS += \
         mainwin.h \
@@ -49,7 +50,8 @@ HEADERS += \
     World/headers/World.h \
     World/headers/Misc.h \
     ProjEd/headers/InspectorWin.h \
-    ProjEd/headers/ProjCreateWin.h
+    ProjEd/headers/ProjCreateWin.h \
+    World/headers/zs-camera.h
 
 FORMS += \
         mainwin.ui \

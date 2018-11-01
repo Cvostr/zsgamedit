@@ -5,6 +5,7 @@
 #include <iostream>
 #include <fstream>
 #include <QDir>
+#include <QDropEvent>
 #include <QFileDialog>
 
 static EditWindow* _editor_win;
@@ -33,8 +34,11 @@ EditWindow::EditWindow(QWidget *parent) :
 
 
     setupObjectsHieList();
-    //ui->objsList->setAcceptDrops(true);
+
+    ui->objsList->setAcceptDrops(true);
     ui->objsList->setDragEnabled(true);
+    ui->objsList->world_ptr = &world;
+
     ui->fileList->setViewMode(QListView::IconMode);
 }
 
@@ -298,4 +302,16 @@ EditWindow* ZSEditor::openEditor(){
 
 InspectorWin* EditWindow::getInspector(){
     return _inspector_win;
+}
+
+ObjTreeWgt::ObjTreeWgt(QWidget* parent) : QTreeWidget (parent){
+
+}
+
+void ObjTreeWgt::dropEvent(QDropEvent* event){
+    //User dropped object item
+    QModelIndex dropIndex = indexAt(event->pos());
+   // QTreeWidgetItem* dest_item = static_cast<QTreeWidgetItem*>(dropIndex.model();
+
+    //QTreeWidgetItem* src = static_cast<QTreeWidgetItem*>(event->source());
 }

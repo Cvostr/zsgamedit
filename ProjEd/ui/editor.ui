@@ -29,7 +29,7 @@
    <number>1</number>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QTreeWidget" name="objsList">
+   <widget class="ObjTreeWgt" name="objsList">
     <property name="geometry">
      <rect>
       <x>0</x>
@@ -138,6 +138,13 @@
    </property>
   </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ObjTreeWgt</class>
+   <extends>QTreeWidget</extends>
+   <header>ProjEd/headers/ProjectEdit.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

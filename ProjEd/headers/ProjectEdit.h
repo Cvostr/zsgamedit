@@ -87,6 +87,16 @@ private:
     Ui::EditWindow *ui;
 };
 
+class ObjTreeWgt : public QTreeWidget{
+    Q_OBJECT
+
+public:
+    ObjTreeWgt(QWidget* parent = nullptr);
+
+    void dropEvent(QDropEvent* event);
+
+    World* world_ptr;
+};
 
 namespace ZSEditor {
     EditWindow* openProject(QString conf_file_path);
