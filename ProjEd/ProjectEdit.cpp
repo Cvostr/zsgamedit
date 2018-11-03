@@ -37,6 +37,7 @@ EditWindow::EditWindow(QWidget *parent) :
 
     ui->objsList->setAcceptDrops(true);
     ui->objsList->setDragEnabled(true);
+    ui->objsList->setDragDropMode(QAbstractItemView::InternalMove);
     ui->objsList->world_ptr = &world;
 
     ui->fileList->setViewMode(QListView::IconMode);
@@ -115,7 +116,8 @@ void EditWindow::onSceneSave(){
 
 void EditWindow::onAddNewGameObject(){
     GameObject* obj_ptr = this->world.newObject(); //Add new object to world
-    this->column_item_go->addChild(obj_ptr->item_ptr); //Add object to list hierarchy
+    //this->column_item_go->addChild(obj_ptr->item_ptr); //Add object to list hierarchy
+    ui->objsList->addTopLevelItem(obj_ptr->item_ptr);
 }
 
 void EditWindow::setupObjectsHieList(){
@@ -315,13 +317,32 @@ void ObjTreeWgt::dropEvent(QDropEvent* event){
 
     unsigned int start = static_cast<unsigned int>(this->indexFromItem(kids.at(0)).row());
 
+    GameObject* obj_ptr = world_ptr->getObjectByLabel(kids.at(0)->text(0));
 
     QTreeWidgetItem* pparent = kids.at(0)->parent(); //parent of moved object
-    QString kk = pparent->text(0);
+    if(pparent == nullptr){ //If object hadn't any parent
+
+    }else{
+        GameObjectLink link = obj_ptr->getLinkToThisObject();
+        GameObject* pparent_go = world_ptr->getObjectByLabel(pparent->text(0));
+        pparent_go->removeChildObject(link); //Remove object from previous parent
+    }
 
     QTreeWidget::dropEvent(event);
-    //kids = this->selectedItems();
-    int row = this->indexFromItem(kids.at(0)).row();
+
+
+    QTreeWidgetItem* nparent = obj_ptr->item_ptr->parent(); //new parent
+    if(nparent != nullptr){ //If we moved obj to another parent
+        GameObject* nparent_go = world_ptr->getObjectByLabel(nparent->text(0));
+        nparent_go->addChildObject(obj_ptr->getLinkToThisObject());
+    }else{ //We unparented object
+        obj_ptr->hasParent = false;
+        this->addTopLevelItem(obj_ptr->item_ptr);
+    }
+    //QString kk = pparent->text(0);
+/*
+
+
 
     QTreeWidgetItem* destination = kids.at(0)->parent();
 
@@ -340,6 +361,6 @@ void ObjTreeWgt::dropEvent(QDropEvent* event){
         previous_parent->removeChildObject(dragged);
         dest->addChildObject(dragged);
     }
-
+*/
 
 }

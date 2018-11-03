@@ -172,7 +172,7 @@ TransformProperty* GameObject::getTransformProperty(){
 }
 
 void GameObject::addChildObject(GameObjectLink link){
-     link.updLinkPtr();
+    link.updLinkPtr();
     link.ptr->hasParent = true;
     this->children.push_back(link);
 }
@@ -322,12 +322,14 @@ void World::saveToFile(QString file){
         GameObject* object_ptr = static_cast<GameObject*>(&this->objects[obj_i]);
         world_stream << "\nG_OBJECT " << object_ptr->str_id; //Start object's header
         if(object_ptr->children.size() > 0){ //If object has at least one child object
-            world_stream << "\nG_CHI " << object_ptr->children.size() << " "; //Start children header
+            world_stream << "\nG_CHI " << object_ptr->getAliveChildrenAmount() << " "; //Start children header
             unsigned int children_am = static_cast<unsigned int>(object_ptr->children.size());
             for(unsigned int chi_i = 0; chi_i < children_am; chi_i ++){ //iterate over all children
                 GameObjectLink* link_ptr = &object_ptr->children[chi_i]; //Gettin pointer to child
-                world_stream << link_ptr->obj_str_id << " "; //Writing child's string id
-            }
+                if(!link_ptr->isEmpty()){
+                    world_stream << link_ptr->obj_str_id << " "; //Writing child's string id
+                }
+                }
         }
         object_ptr->saveProperties(&world_stream); //save object's properties
         world_stream << "\nG_END"; //End writing object
@@ -335,6 +337,16 @@ void World::saveToFile(QString file){
 
     world_stream.close();
 
+}
+
+int GameObject::getAliveChildrenAmount(){
+    int result = 0;
+    for(unsigned int chi_i = 0; chi_i < children.size(); chi_i ++){ //Now iterate over all children
+        GameObjectLink* child_ptr = &children[chi_i];
+        if(!child_ptr->isEmpty()) //if it points to something
+        result += 1;
+    }
+    return result;
 }
 
 void World::openFromFile(QString file, QTreeWidgetItem* root_item, QTreeWidget* w_ptr){
@@ -378,8 +390,8 @@ void World::openFromFile(QString file, QTreeWidgetItem* root_item, QTreeWidget* 
                         GameObjectLink link;
                         link.world_ptr = this; //Setting world pointer
                         link.obj_str_id = child_str_id; //Setting string ID
-                        //object.children.push_back(link); //Adding to object
-                        object.addChildObject(link);
+                        object.children.push_back(link); //Adding to object
+                        //object.addChildObject(link);
                     }
                 }
                 if(prefix.compare("G_PROPERTY") == 0){ //We found an property, zaeb*s'
@@ -432,6 +444,7 @@ void World::openFromFile(QString file, QTreeWidgetItem* root_item, QTreeWidget* 
             GameObjectLink* child_ptr = &obj_ptr->children[chi_i];
             GameObject* child_go_ptr = child_ptr->updLinkPtr();
             child_go_ptr->parent = obj_ptr->getLinkToThisObject();
+            child_go_ptr->hasParent = true;
         }
     }
 
