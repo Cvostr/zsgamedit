@@ -9,7 +9,7 @@ InspectorWin::InspectorWin(QWidget *parent) :
     ui(new Ui::InspectorWin)
 {
     ui->setupUi(this);
-    x_win_start = 411 + 480;
+    x_win_start = 400 + 640;
 }
 
 InspectorWin::~InspectorWin()
@@ -38,12 +38,16 @@ void InspectorWin::addPropertyArea(PropertyEditArea* area){
 
 PropertyEditArea::PropertyEditArea(){
     type = PEA_TYPE_NONE;
+    elem_layout = new QHBoxLayout;
     label_widget = new QLabel; //Allocating label
     go_property = nullptr; //Nullptr by default
+
+    elem_layout->addWidget(label_widget); //Adding label to result layout
 }
 
 PropertyEditArea::~PropertyEditArea(){
     delete this->label_widget;
+    delete this->elem_layout;
 }
 //Defaults
 void PropertyEditArea::setup(){
@@ -88,7 +92,6 @@ void PropertyEditArea::setLabel(QString label){
 }
 //Float3 definations
 Float3PropertyArea::Float3PropertyArea(){
-    pos_layout = new QHBoxLayout; //Allocation of layout
     vector = nullptr; //set it to null to avoid crash;
     type = PEA_TYPE_FLOAT3;
     //pos_layout->setSpacing(10);
@@ -105,45 +108,45 @@ Float3PropertyArea::Float3PropertyArea(){
     z_label = new QLabel;
     z_label->setText(QString("Z"));
 
-    pos_layout->addWidget(label_widget); //Adding label to result layout
+
     label_widget->setFixedWidth(100);
 
     QLocale locale(QLocale::English); //Define english locale to set it to double validator later
     QDoubleValidator* validator = new QDoubleValidator(0, 100, 6, nullptr); //Define double validator
     validator->setLocale(locale); //English locale to accept dost instead of commas
 
-    pos_layout->addWidget(x_label); //Adding X label
+    elem_layout->addWidget(x_label); //Adding X label
     x_field->setFixedWidth(60);
     x_field->setValidator(validator); //Set double validator
-    pos_layout->addWidget(x_field); //Adding X text field
+    elem_layout->addWidget(x_field); //Adding X text field
 
-    pos_layout->addWidget(y_label);
+    elem_layout->addWidget(y_label);
     y_field->setFixedWidth(60);
     y_field->setValidator(validator);
-    pos_layout->addWidget(y_field);
+    elem_layout->addWidget(y_field);
 
-    pos_layout->addWidget(z_label);
+    elem_layout->addWidget(z_label);
     z_field->setFixedWidth(60);
     z_field->setValidator(validator);
-    pos_layout->addWidget(z_field);
+    elem_layout->addWidget(z_field);
 
 
 }
 
 void Float3PropertyArea::addToInspector(InspectorWin* win){
-    win->getContentLayout()->addLayout(this->pos_layout);
+    win->getContentLayout()->addLayout(this->elem_layout);
 }
 
 void Float3PropertyArea::clear(InspectorWin* win){
-    pos_layout->removeWidget(label_widget); //Removes label
+    elem_layout->removeWidget(label_widget); //Removes label
 
-    pos_layout->removeWidget(x_label);
-    pos_layout->removeWidget(y_label);
-    pos_layout->removeWidget(z_label);
+    elem_layout->removeWidget(x_label);
+    elem_layout->removeWidget(y_label);
+    elem_layout->removeWidget(z_label);
 
-    pos_layout->removeWidget(x_field);
-    pos_layout->removeWidget(y_field);
-    pos_layout->removeWidget(z_field);
+    elem_layout->removeWidget(x_field);
+    elem_layout->removeWidget(y_field);
+    elem_layout->removeWidget(z_field);
 
 
 }
@@ -170,9 +173,9 @@ void Float3PropertyArea::updateState(){
 void Float3PropertyArea::setup(){
     if(this->vector == nullptr)
         return;
-    x_field->setText(QString::number(vector->X));
-    y_field->setText(QString::number(vector->Y));
-    z_field->setText(QString::number(vector->Y));
+    x_field->setText(QString::number(static_cast<double>(vector->X)));
+    y_field->setText(QString::number(static_cast<double>(vector->Y)));
+    z_field->setText(QString::number(static_cast<double>(vector->Z)));
 }
 
 Float3PropertyArea::~Float3PropertyArea(){
@@ -184,7 +187,7 @@ Float3PropertyArea::~Float3PropertyArea(){
     delete this->y_label;
     delete this->z_label;
 
-    delete this->pos_layout;
+
 }
 
 void InspectorWin::area_update(){
@@ -197,12 +200,11 @@ void InspectorWin::area_update(){
 
 StringPropertyArea::StringPropertyArea(){
     type = PEA_TYPE_STRING;
-    this->str_layout = new QHBoxLayout; //Allocating layout
+    //this->str_layout = new QHBoxLayout; //Allocating layout
     this->value_ptr = nullptr;
     this->edit_field = new QLineEdit; //Allocation of QLineEdit
 
-    str_layout->addWidget(label_widget);
-    str_layout->addWidget(edit_field);
+    elem_layout->addWidget(edit_field);
 }
 
 void StringPropertyArea::setup(){
@@ -211,17 +213,15 @@ void StringPropertyArea::setup(){
 
 StringPropertyArea::~StringPropertyArea(){
     delete edit_field; //Remove text field
-
-    delete this->str_layout;
 }
 
 void StringPropertyArea::clear(InspectorWin* win){
-    this->str_layout->removeWidget(this->edit_field);
-    this->str_layout->removeWidget(this->label_widget);
+    this->elem_layout->removeWidget(this->edit_field);
+    this->elem_layout->removeWidget(this->label_widget);
 }
 
 void StringPropertyArea::addToInspector(InspectorWin* win){
-    win->getContentLayout()->addLayout(this->str_layout);
+    win->getContentLayout()->addLayout(this->elem_layout);
 }
 
 void StringPropertyArea::updateState(){
@@ -238,6 +238,27 @@ void StringPropertyArea::updateState(){
             property_ptr->onValueChanged(); //Then call changed
         }
     }
+}
 
+FloatPropertyArea::FloatPropertyArea(){
+    this->x_field = new QLineEdit; //Allocation of text field
+
+}
+FloatPropertyArea::~FloatPropertyArea(){
+    delete x_field;
+}
+
+void FloatPropertyArea::setup(){
+    if(this->value == nullptr) //If value pointer didn't set
+        return;
+    x_field->setText(QString::number(static_cast<double>(*value)));
+}
+void FloatPropertyArea::addToInspector(InspectorWin* win){
+    win->getContentLayout()->addLayout(this->elem_layout);
+}
+void FloatPropertyArea::clear(InspectorWin* win){
+    elem_layout->removeWidget(x_field);
+}
+void FloatPropertyArea::updateState(){
 
 }

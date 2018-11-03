@@ -115,6 +115,8 @@ GameObjectLink GameObject::getLinkToThisObject(){
     link.obj_str_id = this->str_id; //Placing string id
     link.world_ptr = this->world_ptr; //Placing world pointer
 
+    link.ptr = world_ptr->getObjectByStringId(link.obj_str_id);
+    //link.updLinkPtr();
     return link;
 }
 
@@ -167,6 +169,22 @@ LabelProperty* GameObject::getLabelProperty(){
 }
 TransformProperty* GameObject::getTransformProperty(){
     return static_cast<TransformProperty*>(getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
+}
+
+void GameObject::addChildObject(GameObjectLink link){
+     link.updLinkPtr();
+    link.ptr->hasParent = true;
+    this->children.push_back(link);
+}
+void GameObject::removeChildObject(GameObjectLink link){
+    unsigned int children_am = static_cast<unsigned int>(children.size());
+    for(unsigned int i = 0; i < children_am; i++){
+        GameObject* ptr = children[i].updLinkPtr();
+        if(link.obj_str_id.compare(ptr->str_id) == 0){
+            children[i].world_ptr = nullptr;
+            children[i].ptr = nullptr;
+        }
+    }
 }
 
 TransformProperty::TransformProperty(){
@@ -319,7 +337,7 @@ void World::saveToFile(QString file){
 
 }
 
-void World::openFromFile(QString file, QTreeWidgetItem* root_item){
+void World::openFromFile(QString file, QTreeWidgetItem* root_item, QTreeWidget* w_ptr){
     clear(); //Clear all objects
     std::string fpath = file.toStdString();
 
@@ -341,6 +359,7 @@ void World::openFromFile(QString file, QTreeWidgetItem* root_item){
         world_stream >> prefix; //Read prefix
         if(prefix.compare("G_OBJECT") == 0){ //if it is game object
             GameObject object; //firstly, define an object
+            world_stream >> object.str_id;
             //Then do the same sh*t, iterate until "G_END" came up
             while(true){
                 std::string _prefix;
@@ -359,7 +378,8 @@ void World::openFromFile(QString file, QTreeWidgetItem* root_item){
                         GameObjectLink link;
                         link.world_ptr = this; //Setting world pointer
                         link.obj_str_id = child_str_id; //Setting string ID
-                        object.children.push_back(link); //Adding to object
+                        //object.children.push_back(link); //Adding to object
+                        object.addChildObject(link);
                     }
                 }
                 if(prefix.compare("G_PROPERTY") == 0){ //We found an property, zaeb*s'
@@ -400,7 +420,8 @@ void World::openFromFile(QString file, QTreeWidgetItem* root_item){
                     }
                 }
             }
-            this->objects.push_back(object);
+            //this->objects.push_back(object);
+            this->addObject(object);
         }
     }
     //We finished reading file
@@ -417,7 +438,8 @@ void World::openFromFile(QString file, QTreeWidgetItem* root_item){
     for(unsigned int obj_i = 0; obj_i < this->objects.size(); obj_i ++){
         GameObject* obj_ptr = &this->objects[obj_i];
         if(obj_ptr->parent.isEmpty()){ //If object has no parent
-            root_item->addChild(obj_ptr->item_ptr);
+            //root_item->addChild(obj_ptr->item_ptr);
+            w_ptr->addTopLevelItem(obj_ptr->item_ptr);
         }else{ //It has a parent
             GameObject* parent_ptr = obj_ptr->parent.ptr; //Get parent pointer
             parent_ptr->item_ptr->addChild(obj_ptr->item_ptr); //Connect Qt Tree Items
@@ -427,4 +449,18 @@ void World::openFromFile(QString file, QTreeWidgetItem* root_item){
 
 void World::clear(){
      objects.resize(0);
+}
+
+GameObject** World::getUnparentedObjs(){
+    GameObject** result_arr = new GameObject*[5];
+    int amount_of_uprted = 0;
+    unsigned int objs_num = static_cast<unsigned int>(this->objects.size());
+    for(unsigned int obj_it = 0; obj_it < objs_num; obj_it ++){ //Iterate over all objs in scene
+        GameObject* obj_ptr = &this->objects[obj_it]; //Get pointer to checking object
+        if(obj_ptr->hasParent == false){
+            result_arr[amount_of_uprted] = obj_ptr;
+            amount_of_uprted += 1;
+        }
+    }
+    return result_arr; //if we haven't found one
 }

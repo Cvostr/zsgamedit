@@ -65,7 +65,7 @@ void EditWindow::init(){
     SDL_DisplayMode current;
     SDL_GetCurrentDisplayMode(0, &current);
 
-    this->window = SDL_CreateWindow("Game View", 411, 0, 640, 480, SDL_WINDOW_OPENGL); //Create window
+    this->window = SDL_CreateWindow("Game View", this->width(), 0, 640, 480, SDL_WINDOW_OPENGL); //Create window
     this->glcontext = SDL_GL_CreateContext(window);
 
     glViewport(0, 0, 640, 480);
@@ -89,7 +89,7 @@ void EditWindow::openFile(QString file_path){
 
     if(file_path.endsWith(".scn")){ //If it is scene
         setupObjectsHieList(); //Clear everything, at first
-        world.openFromFile(file_path, this->column_item_go); //Open this scene
+        world.openFromFile(file_path, this->column_item_go, ui->objsList); //Open this scene
 
         scene_path = file_path; //Assign scene path
         hasSceneFile = true; //Scene is saved
@@ -125,7 +125,7 @@ void EditWindow::setupObjectsHieList(){
     column_item_go = new QTreeWidgetItem; //Defining Objects list
     column_item_go->setText(0, "Objects"); //Setting text to Objects
 
-    w_ptr->addTopLevelItem(column_item_go);
+    //w_ptr->addTopLevelItem(column_item_go);
 }
 
 void EditWindow::updateObjectsHieList(){
@@ -296,6 +296,7 @@ EditWindow* ZSEditor::openEditor(){
     _editor_win->show(); //Show editor window
 
     _inspector_win->show();
+    _inspector_win->move(_inspector_win->x_win_start, 0);
 
     return _editor_win;
 }
@@ -310,8 +311,35 @@ ObjTreeWgt::ObjTreeWgt(QWidget* parent) : QTreeWidget (parent){
 
 void ObjTreeWgt::dropEvent(QDropEvent* event){
     //User dropped object item
-    QModelIndex dropIndex = indexAt(event->pos());
-   // QTreeWidgetItem* dest_item = static_cast<QTreeWidgetItem*>(dropIndex.model();
+    QList<QTreeWidgetItem*> kids = this->selectedItems();
 
-    //QTreeWidgetItem* src = static_cast<QTreeWidgetItem*>(event->source());
+    unsigned int start = static_cast<unsigned int>(this->indexFromItem(kids.at(0)).row());
+
+
+    QTreeWidgetItem* pparent = kids.at(0)->parent(); //parent of moved object
+    QString kk = pparent->text(0);
+
+    QTreeWidget::dropEvent(event);
+    //kids = this->selectedItems();
+    int row = this->indexFromItem(kids.at(0)).row();
+
+    QTreeWidgetItem* destination = kids.at(0)->parent();
+
+    QString gg = destination->text(0);
+
+    GameObject* dest = world_ptr->getObjectByLabel(destination->text(0));
+    GameObject* previous_parent = world_ptr->getObjectByLabel(pparent->text(0));
+    if(kk == "Objects"){ //If object has no parent
+        //GameObjectLink link = previous_parent->children[start];
+        GameObject** unparented = world_ptr->getUnparentedObjs();
+        GameObject* go_ptr = unparented[start];
+        GameObjectLink link = go_ptr->getLinkToThisObject();
+        dest->addChildObject(link);
+    }else{ //if object already had a parent
+        GameObjectLink dragged = previous_parent->children[start];
+        previous_parent->removeChildObject(dragged);
+        dest->addChildObject(dragged);
+    }
+
+
 }

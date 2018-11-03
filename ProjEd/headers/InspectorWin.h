@@ -24,6 +24,9 @@ public:
     QString label; //Label, describing content
     QLabel* label_widget; //Widget for upper variable
     void* go_property; //Pointer to connected property
+
+    QHBoxLayout* elem_layout; //Layout to contain everything
+
     PropertyEditArea(); //Default construct
 
     virtual ~PropertyEditArea();
@@ -39,7 +42,7 @@ public:
 
 class StringPropertyArea : public PropertyEditArea{
 public:
-    QHBoxLayout* str_layout; //Layout to contain everything
+
     QString* value_ptr; //Modifying string
     QLineEdit* edit_field;
 
@@ -55,7 +58,7 @@ public:
 
 class Float3PropertyArea : public PropertyEditArea{
 public:
-    QHBoxLayout* pos_layout; //To store everything
+    //QHBoxLayout* pos_layout; //To store everything
 
     QLineEdit* x_field; //Text digit field for X coord
     QLineEdit* y_field; //Text digit field for Y coord
@@ -69,6 +72,23 @@ public:
 
     Float3PropertyArea();
     ~Float3PropertyArea();
+
+    void setup(); //Virtual
+    void addToInspector(InspectorWin* win);
+    void clear(InspectorWin* win); //Virtual, clears all qt classes
+    void updateState(); //Virtual, on values changed
+};
+
+class FloatPropertyArea : public PropertyEditArea{
+public:
+    QHBoxLayout* pos_layout; //To store everything
+
+    QLineEdit* x_field; //Text digit field for X coord
+
+    float* value; //Output variable
+
+    FloatPropertyArea();
+    ~FloatPropertyArea();
 
     void setup(); //Virtual
     void addToInspector(InspectorWin* win);
@@ -95,10 +115,10 @@ public:
     void clearContentLayout(); //Clears layout
     void addPropertyArea(PropertyEditArea* area); //Adds new property area
     void area_update(); //To update property areas states
-
+    int x_win_start;
 private:
     Ui::InspectorWin *ui;
-    int x_win_start;
+
 };
 
 

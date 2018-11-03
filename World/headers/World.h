@@ -24,6 +24,7 @@ public:
 
     GameObject* updLinkPtr(); //Updates pointer to object and returns it
     bool isEmpty(); //Check, if this link doesn't link to some object
+    void crack();
 
     GameObjectLink();
 };
@@ -34,7 +35,6 @@ public:
     bool active; //Is property working
     QString type_label; //Label of type
     std::string object_str_id; //String ID of connected object
-    //GameObject* gobject_ptr; //Pointer to host gameobject
 
     GameObjectProperty();
     virtual ~GameObjectProperty();
@@ -91,6 +91,9 @@ public:
     TransformProperty* getTransformProperty();
     GameObjectLink getLinkToThisObject();
 
+    void addChildObject(GameObjectLink link);
+    void removeChildObject(GameObjectLink link);
+
     void saveProperties(std::ofstream* stream); //Writes properties content at end of stream
 
     GameObject(); //Default constructor
@@ -107,9 +110,10 @@ public:
     GameObject* newObject();
     GameObject* getObjectByLabel(QString label);
     GameObject* getObjectByStringId(std::string id);
+    GameObject** getUnparentedObjs();
 
     void saveToFile(QString file);
-    void openFromFile(QString file, QTreeWidgetItem* root_item);
+    void openFromFile(QString file, QTreeWidgetItem* root_item, QTreeWidget* w_ptr);
     void clear();
 
 };
