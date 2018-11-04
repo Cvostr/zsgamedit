@@ -30,8 +30,6 @@ struct Project{
 
     std::vector<Resource> resources;
 
-    //std::vector<ZSPIRE::Mesh> meshes;
-    //std::vector<ZSPIRE::Texture> textures;
 };
 
 class EditWindow : public QMainWindow
@@ -66,7 +64,6 @@ public:
 
     void init();
     void updateFileList(); //Updates content in file list widget
-    void updateObjectsHieList(); //Updates content in objects hierarchy list
     void setupObjectsHieList();
     void setViewDirectory(QString dir_path);
 
@@ -75,7 +72,7 @@ public:
 
     void openFile(QString file_path); //Useful to open a file
 
-    void glRender();
+    void glRender(); //Invoke opengl rendering
 
     InspectorWin* getInspector();
 

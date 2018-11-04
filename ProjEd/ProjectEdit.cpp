@@ -104,6 +104,8 @@ void EditWindow::onSceneSaveAs(){
     world.saveToFile(filename); //Save to picked file
     scene_path = filename; //Assign scene path
     hasSceneFile = true; //Scene is saved
+
+    updateFileList(); //Make new scene visible in file list
 }
 
 void EditWindow::onSceneSave(){
@@ -130,10 +132,6 @@ void EditWindow::setupObjectsHieList(){
     //w_ptr->addTopLevelItem(column_item_go);
 }
 
-void EditWindow::updateObjectsHieList(){
-
-}
-
 void EditWindow::updateFileList(){
     ui->fileList->clear(); //Clear widget content
 
@@ -143,6 +141,7 @@ void EditWindow::updateFileList(){
     directory.setSorting(QDir::Name | QDir::Reversed);
 
     QFileInfoList list = directory.entryInfoList(); //Get folder content iterator
+    QListWidgetItem* backBtn_item = new QListWidgetItem("(back)", ui->fileList);
 
     for(int i = 0; i < list.size(); i ++){ //iterate all files, skip 2 last . and ..
         QFileInfo fileInfo = list.at(i);  //get iterated file info
@@ -152,6 +151,13 @@ void EditWindow::updateFileList(){
 //Signal
 void EditWindow::onFileListItemClicked(){
     QListWidgetItem* selected_file_item = ui->fileList->currentItem();
+
+    if(selected_file_item->text().compare("(back)") == 0){
+        QDir cur_folder = QDir(this->current_dir);
+        cur_folder.cdUp();
+        setViewDirectory(cur_folder.absolutePath());
+        return;
+    }
 
     QDir directory (this->current_dir);
 
@@ -165,12 +171,11 @@ void EditWindow::onFileListItemClicked(){
         if(fileInfo.fileName().compare(selected_file_item->text()) == 0){ //Find pressed item
             if(fileInfo.isDir()){ //If we pressed on directory
                 QString new_path = this->current_dir + "/" + fileInfo.fileName(); //Get directory path
-                current_dir = new_path;
-                this->updateFileList(); // Update list content
+                setViewDirectory(new_path); //go to this
                 return; // Exit function to prevent crash
             }else{
                 QString new_path = this->current_dir + "/" + fileInfo.fileName(); //Get file path
-                openFile(new_path);
+                openFile(new_path); //Do something to open this file
                 return;
             } //If it isn't directory, it is a file
         }
@@ -313,16 +318,14 @@ ObjTreeWgt::ObjTreeWgt(QWidget* parent) : QTreeWidget (parent){
 
 void ObjTreeWgt::dropEvent(QDropEvent* event){
     //User dropped object item
-    QList<QTreeWidgetItem*> kids = this->selectedItems();
+    QList<QTreeWidgetItem*> kids = this->selectedItems(); //Get list of selected object(it is moving object)
 
-    unsigned int start = static_cast<unsigned int>(this->indexFromItem(kids.at(0)).row());
-
-    GameObject* obj_ptr = world_ptr->getObjectByLabel(kids.at(0)->text(0));
+    GameObject* obj_ptr = world_ptr->getObjectByLabel(kids.at(0)->text(0)); //Receiving pointer to moving object
 
     QTreeWidgetItem* pparent = kids.at(0)->parent(); //parent of moved object
     if(pparent == nullptr){ //If object hadn't any parent
 
-    }else{
+    }else{ //If object already parented
         GameObjectLink link = obj_ptr->getLinkToThisObject();
         GameObject* pparent_go = world_ptr->getObjectByLabel(pparent->text(0));
         pparent_go->removeChildObject(link); //Remove object from previous parent
@@ -339,28 +342,4 @@ void ObjTreeWgt::dropEvent(QDropEvent* event){
         obj_ptr->hasParent = false;
         this->addTopLevelItem(obj_ptr->item_ptr);
     }
-    //QString kk = pparent->text(0);
-/*
-
-
-
-    QTreeWidgetItem* destination = kids.at(0)->parent();
-
-    QString gg = destination->text(0);
-
-    GameObject* dest = world_ptr->getObjectByLabel(destination->text(0));
-    GameObject* previous_parent = world_ptr->getObjectByLabel(pparent->text(0));
-    if(kk == "Objects"){ //If object has no parent
-        //GameObjectLink link = previous_parent->children[start];
-        GameObject** unparented = world_ptr->getUnparentedObjs();
-        GameObject* go_ptr = unparented[start];
-        GameObjectLink link = go_ptr->getLinkToThisObject();
-        dest->addChildObject(link);
-    }else{ //if object already had a parent
-        GameObjectLink dragged = previous_parent->children[start];
-        previous_parent->removeChildObject(dragged);
-        dest->addChildObject(dragged);
-    }
-*/
-
 }
