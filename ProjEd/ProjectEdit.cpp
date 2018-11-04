@@ -80,6 +80,15 @@ void EditWindow::init(){
 
 }
 
+void EditWindow::assignIconFile(QListWidgetItem* item){
+    if(item->text().endsWith(".txt") || item->text().endsWith(".inf") || item->text().endsWith(".scn")){
+        item->setIcon(QIcon::fromTheme("text-x-generic"));
+    }
+    if(item->text().endsWith(".dds") || item->text().endsWith(".DDS")){
+        item->setIcon(QIcon::fromTheme("image-x-generic"));
+    }
+}
+
 void EditWindow::setViewDirectory(QString dir_path){
 
     this->current_dir = dir_path;
@@ -141,11 +150,19 @@ void EditWindow::updateFileList(){
     directory.setSorting(QDir::Name | QDir::Reversed);
 
     QFileInfoList list = directory.entryInfoList(); //Get folder content iterator
-    QListWidgetItem* backBtn_item = new QListWidgetItem("(back)", ui->fileList);
+    if(this->current_dir.compare(project.root_path)){
+        QListWidgetItem* backBtn_item = new QListWidgetItem("(back)", ui->fileList);
+        backBtn_item->setIcon(QIcon::fromTheme("go-up"));
+    }
 
     for(int i = 0; i < list.size(); i ++){ //iterate all files, skip 2 last . and ..
         QFileInfo fileInfo = list.at(i);  //get iterated file info
         QListWidgetItem* item = new QListWidgetItem(fileInfo.fileName(), ui->fileList);
+        if(fileInfo.isDir()){
+            item->setIcon(QIcon::fromTheme("folder"));
+        }else{
+            assignIconFile(item);
+        }
     }
 }
 //Signal

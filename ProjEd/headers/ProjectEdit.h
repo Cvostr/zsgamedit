@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QTreeWidget>
+#include <QListWidget>
 #include <SDL2/SDL.h>
 #include <vector>
 #include "../../Render/headers/zs-pipeline.h"
@@ -71,6 +72,7 @@ public:
     void loadResource(Resource* resource);
 
     void openFile(QString file_path); //Useful to open a file
+    void assignIconFile(QListWidgetItem* item);
 
     void glRender(); //Invoke opengl rendering
 
