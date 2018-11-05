@@ -40,6 +40,8 @@ EditWindow::EditWindow(QWidget *parent) :
     ui->objsList->setDragDropMode(QAbstractItemView::InternalMove);
     ui->objsList->world_ptr = &world;
 
+    world.proj_ptr = static_cast<void*>(&project); //Assigning project pointer into world's variable
+
     ui->fileList->setViewMode(QListView::IconMode);
 }
 
@@ -213,6 +215,7 @@ void EditWindow::onObjectListItemClicked(){
         GameObjectProperty* property_ptr = (obj_ptr->properties[prop_it]); //Obtain pointer to object property
         property_ptr->addPropertyInterfaceToInspector(_inspector_win); //Add its interface to inspector
     }
+    _inspector_win->makeAddObjComponentBtn();
 }
 
 void EditWindow::glRender(){

@@ -7,6 +7,10 @@
 #include <SDL2/SDL.h>
 #include <vector>
 #include "../../Render/headers/zs-pipeline.h"
+
+struct Resource;
+struct Project;
+
 #include "../../World/headers/World.h"
 
 #define RESOURCE_TYPE_TEXTURE 0
@@ -22,6 +26,7 @@ struct Resource{
     int type; //Resource type
     void* class_ptr; //Pointer to resource class
 };
+
 
 struct Project{
     QString label; //Label of the project

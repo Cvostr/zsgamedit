@@ -7,11 +7,13 @@
 #include <fstream>
 #include "../../ProjEd/headers/InspectorWin.h"
 
+#include "../../Render/headers/zs-mesh.h"
 #include "../../Render/headers/zs-math.h"
 
 #define GO_PROPERTY_TYPE_NONE 0
 #define GO_PROPERTY_TYPE_TRANSFORM 1
 #define GO_PROPERTY_TYPE_LABEL 2
+#define GO_PROPERTY_TYPE_MESH 3
 
 class GameObject;
 class World;
@@ -69,6 +71,14 @@ public:
     TransformProperty();
 };
 
+class MeshProperty : public GameObjectProperty{
+public:
+    QString resource_relpath; //Relative path to resource
+    ZSPIRE::Mesh* mesh_ptr; //Pointer to mesh
+
+    void update();
+};
+
 class GameObject{
 public:
     QString* label;
@@ -105,6 +115,8 @@ protected:
     void getAvailableNumObjLabel(QString label, int* result);
 
 public:
+    void* proj_ptr;
+
     std::vector<GameObject> objects;
 
     GameObject* addObject(GameObject obj);
@@ -112,6 +124,8 @@ public:
     GameObject* getObjectByLabel(QString label);
     GameObject* getObjectByStringId(std::string id);
     GameObject** getUnparentedObjs();
+
+    ZSPIRE::Mesh* getMeshPtrByRelPath(QString label); //look through all meshes in project ptr
 
     void saveToFile(QString file);
     void openFromFile(QString file, QTreeWidgetItem* root_item, QTreeWidget* w_ptr);

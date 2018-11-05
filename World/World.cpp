@@ -1,4 +1,5 @@
 #include "headers/World.h"
+#include "../ProjEd/headers/ProjectEdit.h"
 #include "headers/Misc.h"
 #include <QLineEdit>
 
@@ -476,4 +477,18 @@ GameObject** World::getUnparentedObjs(){
         }
     }
     return result_arr; //if we haven't found one
+}
+
+ZSPIRE::Mesh* World::getMeshPtrByRelPath(QString label){
+    Project* proj_ptr = static_cast<Project*>(this->proj_ptr); //Convert void pointer to Project*
+    unsigned int resources_num = static_cast<unsigned int>(proj_ptr->resources.size()); //Receive resource amount in project
+
+    for(unsigned int r_it = 0; r_it < resources_num; r_it ++){ //Iteerate over all resources in project
+        Resource* r_ptr = &proj_ptr->resources[r_it]; //Obtain pointer to resource
+        //If resource is mesh and has same name as in argument
+        if(r_ptr->type == RESOURCE_TYPE_MESH && r_ptr->rel_path.compare(label) == 0){
+            return static_cast<ZSPIRE::Mesh*>(r_ptr->class_ptr);
+        }
+    }
+    return nullptr;
 }

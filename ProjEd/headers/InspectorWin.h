@@ -4,7 +4,9 @@
 #include <QMainWindow>
 #include <QVBoxLayout>
 #include <QLineEdit>
+#include <QPushButton>
 #include <QLabel>
+#include <QDialog>
 #include <vector>
 
 #include "../../Render/headers/zs-math.h"
@@ -15,6 +17,10 @@
 #define PEA_TYPE_FLOAT2 3
 #define PEA_TYPE_FLOAT3 4
 #define PEA_TYPE_INT 5
+#define PEA_TYPE_RESPICK 6
+
+#define PICK_RES_TYPE_MESH 0
+#define PICK_RES_TYPE_TEXTURE 1
 
 class InspectorWin;
 
@@ -58,7 +64,6 @@ public:
 
 class Float3PropertyArea : public PropertyEditArea{
 public:
-    //QHBoxLayout* pos_layout; //To store everything
 
     QLineEdit* x_field; //Text digit field for X coord
     QLineEdit* y_field; //Text digit field for Y coord
@@ -79,9 +84,21 @@ public:
     void updateState(); //Virtual, on values changed
 };
 
+class PickResourceArea : public PropertyEditArea{
+public:
+    unsigned int resource_type;
+    QString* mesh_rel_path; //Pointer to store result
+
+    QPushButton* respick_btn;
+
+    PickResourceArea();
+    ~PickResourceArea();
+
+    void addToInspector(InspectorWin* win);
+};
+
 class FloatPropertyArea : public PropertyEditArea{
 public:
-    QHBoxLayout* pos_layout; //To store everything
 
     QLineEdit* x_field; //Text digit field for X coord
 
@@ -103,9 +120,11 @@ class InspectorWin;
 class InspectorWin : public QMainWindow
 {
     Q_OBJECT
-
+private:
+    QPushButton* addObjComponentBtn;
 public slots:
-
+    void onPickResouceBtnPressed(PickResourceArea* area);
+    void onAddComponentBtnPressed();
 
 public:
     std::vector<PropertyEditArea*> property_areas; //vector for areas
@@ -115,12 +134,33 @@ public:
     void clearContentLayout(); //Clears layout
     void addPropertyArea(PropertyEditArea* area); //Adds new property area
     void area_update(); //To update property areas states
+    void makeAddObjComponentBtn(); //Adds "Create Property" Btn to content layout
     int x_win_start;
 private:
     Ui::InspectorWin *ui;
 
 };
 
+class AddGoComponentDialog : public QDialog{
+    Q_OBJECT
+private:
+
+
+    QPushButton* add_btn;
+    QPushButton* close_btn;
+
+    QGridLayout* contentLayout;
+public slots:
+    void onAddButtonPressed();
+    //void onCloseButtonPressed();
+
+public:
+    QLineEdit* comp_type;
+    void* g_object_ptr; //Pointer to object, when we'll add components
+
+    AddGoComponentDialog(QWidget* parent = nullptr);
+    ~AddGoComponentDialog();
+};
 
 
 #endif // INSPECTORWIN_H

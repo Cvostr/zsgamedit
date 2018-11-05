@@ -3,12 +3,14 @@
 
 #include "../World/headers/World.h"
 #include <QDoubleValidator>
+#include <QObject>
 
 InspectorWin::InspectorWin(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::InspectorWin)
 {
     ui->setupUi(this);
+    addObjComponentBtn = nullptr;
     x_win_start = 400 + 640;
 }
 
@@ -21,6 +23,18 @@ QVBoxLayout* InspectorWin::getContentLayout(){
     return ui->propertySpace;
 }
 
+void InspectorWin::onAddComponentBtnPressed(){
+    AddGoComponentDialog* dialog = new AddGoComponentDialog; //Creating dialog instance
+
+    dialog->exec();
+
+    delete dialog; //Free dialog
+}
+
+void InspectorWin::onPickResouceBtnPressed(PickResourceArea* area){
+
+}
+
 void InspectorWin::clearContentLayout(){
     unsigned int areas_num = static_cast<unsigned int>(this->property_areas.size());
     for(unsigned int area_i = 0; area_i < areas_num; area_i ++){
@@ -28,12 +42,21 @@ void InspectorWin::clearContentLayout(){
        delete property_areas[area_i]; //remove all
     }
     this->property_areas.resize(0); //No areas in list
+    if(addObjComponentBtn != nullptr)
+        delete addObjComponentBtn; //Remove button
 }
 
 void InspectorWin::addPropertyArea(PropertyEditArea* area){
     area->setup();
     area->addToInspector(this);
     this->property_areas.push_back(area);
+}
+
+void InspectorWin::makeAddObjComponentBtn(){
+    addObjComponentBtn = new QPushButton; //Allocation of button
+    addObjComponentBtn->setText("Add property");
+    ui->propertySpace->addWidget(addObjComponentBtn);
+    connect(addObjComponentBtn, SIGNAL(clicked()), this, SLOT(onAddComponentBtnPressed()));
 }
 
 PropertyEditArea::PropertyEditArea(){
@@ -261,4 +284,55 @@ void FloatPropertyArea::clear(InspectorWin* win){
 }
 void FloatPropertyArea::updateState(){
 
+}
+
+PickResourceArea::PickResourceArea(){
+    type = PEA_TYPE_RESPICK;
+    this->mesh_rel_path = nullptr;
+    respick_btn = new QPushButton; //Allocation of QPushButton
+
+    elem_layout->addWidget(respick_btn);
+
+}
+PickResourceArea::~PickResourceArea(){
+
+}
+
+void PickResourceArea::addToInspector(InspectorWin* win){
+    QObject::connect(respick_btn,  SIGNAL(clicked()), win, SLOT(onPickResouceBtnPressed(this)));
+
+}
+
+void AddGoComponentDialog::onAddButtonPressed(){
+    GameObject* object_ptr = static_cast<GameObject*>(this->g_object_ptr);
+    object_ptr->addProperty(comp_type->text().toInt());
+    accept(); //Close dialog with true
+}
+
+AddGoComponentDialog::AddGoComponentDialog(QWidget* parent)
+    : QDialog (parent, Qt::WindowTitleHint | Qt::WindowSystemMenuHint){
+    //Allocating buttons
+    this->add_btn = new QPushButton;
+    this->close_btn = new QPushButton;
+
+    this->comp_type = new QLineEdit;
+    //Allocation of main layout
+    contentLayout = new QGridLayout;
+
+    contentLayout->addWidget(comp_type, 0, 0);
+    contentLayout->addWidget(add_btn, 1, 0);
+    contentLayout->addWidget(close_btn, 1, 1);
+    setLayout(contentLayout);
+
+    add_btn->setText("Add");
+    close_btn->setText("Close");
+    //Connect to slot
+    connect(add_btn, SIGNAL(clicked()), this, SLOT(onAddButtonPressed()));
+    connect(close_btn, SIGNAL(clicked()), this, SLOT(reject()));
+
+}
+AddGoComponentDialog::~AddGoComponentDialog(){
+    delete this->comp_type;
+    delete this->add_btn;
+    delete this->close_btn;
 }
