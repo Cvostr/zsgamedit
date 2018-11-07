@@ -37,7 +37,8 @@ SOURCES += \
     World/Misc.cpp \
     ProjEd/InspectorWin.cpp \
     ProjEd/ProjCreateWin.cpp \
-    World/zs-camera.cpp
+    World/zs-camera.cpp \
+    World/go_properties.cpp
 
 HEADERS += \
         mainwin.h \

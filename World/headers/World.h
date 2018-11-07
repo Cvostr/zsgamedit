@@ -26,7 +26,7 @@ public:
 
     GameObject* updLinkPtr(); //Updates pointer to object and returns it
     bool isEmpty(); //Check, if this link doesn't link to some object
-    void crack();
+    void crack(); //Make this link empty
 
     GameObjectLink();
 };
@@ -78,20 +78,20 @@ public:
     ZSPIRE::Mesh* mesh_ptr; //Pointer to mesh
 
     void addPropertyInterfaceToInspector(InspectorWin* inspector);
-    void update(); //Updates pointer aaccording to resource_relpath
+    void updateMeshPtr(); //Updates pointer aaccording to resource_relpath
     MeshProperty();
 };
 
 class GameObject{
 public:
-    QString* label;
+    QString* label; //Pointer to string label in property
     std::string str_id; //String, gameobject identified by
     bool hasParent; //If object has a parent
     World* world_ptr; //pointer to world, when object placed
-    GameObjectLink parent;
+    GameObjectLink parent; //Link to object's parent
 
     std::vector<GameObjectProperty*> properties; //Vector to store pointers to all properties
-    std::vector<GameObjectLink> children;
+    std::vector<GameObjectLink> children; //Vector to store links to children of object
     int getAliveChildrenAmount(); //Gets current amount of children objects (exclude removed chidren)
 
     QTreeWidgetItem* item_ptr;

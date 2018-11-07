@@ -12,7 +12,6 @@ InspectorWin::InspectorWin(QWidget *parent) :
 {
     ui->setupUi(this);
     addObjComponentBtn = nullptr;
-    x_win_start = 400 + 640;
 }
 
 InspectorWin::~InspectorWin()
@@ -30,10 +29,6 @@ void InspectorWin::onAddComponentBtnPressed(){
     dialog->exec();
 
     delete dialog; //Free dialog
-}
-
-void InspectorWin::onPickResouceBtnPressed(PickResourceArea* area){
-
 }
 
 void InspectorWin::clearContentLayout(){
@@ -293,6 +288,7 @@ PickResourceArea::PickResourceArea(){
     respick_btn = new QPushButton; //Allocation of QPushButton
 
     elem_layout->addWidget(respick_btn);
+    respick_btn->setText("Select...");
 
     this->dialog = new ResourcePickDialog; //Allocation of dialog
     dialog->area = this;
@@ -364,6 +360,8 @@ ResourcePickDialog::ResourcePickDialog(QWidget* parent) : QDialog (parent){
     list = new QListWidget;
     this->setWindowTitle("Select Resource");
 
+    contentLayout->addWidget(list);
+    setLayout(contentLayout);
 }
 ResourcePickDialog::~ResourcePickDialog(){
     delete list;

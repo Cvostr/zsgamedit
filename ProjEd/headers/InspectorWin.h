@@ -98,6 +98,7 @@ public:
     PickResourceArea();
     ~PickResourceArea();
 
+    //void setup(); //Virtual, to prepare base values
     void addToInspector(InspectorWin* win);
 };
 
@@ -127,7 +128,6 @@ class InspectorWin : public QMainWindow
 private:
     QPushButton* addObjComponentBtn;
 public slots:
-    void onPickResouceBtnPressed(PickResourceArea* area);
     void onAddComponentBtnPressed();
 
 public:
@@ -139,7 +139,6 @@ public:
     void addPropertyArea(PropertyEditArea* area); //Adds new property area
     void area_update(); //To update property areas states
     void makeAddObjComponentBtn(); //Adds "Create Property" Btn to content layout
-    int x_win_start;
     void* gameobject_ptr;
 private:
     Ui::InspectorWin *ui;

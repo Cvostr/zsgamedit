@@ -204,8 +204,6 @@ void EditWindow::onFileListItemClicked(){
 void EditWindow::onObjectListItemClicked(){
     _inspector_win->clearContentLayout();
     QTreeWidgetItem* selected_item = ui->objsList->currentItem(); //Obtain pointer to clicked obj item
-    if(selected_item->text(0).compare("Objects") == 0) //If we clicked on title
-        return; //Exit function to avoid crash
 
     QString obj_name = selected_item->text(0); //Get label of clicked obj
 
@@ -324,7 +322,7 @@ EditWindow* ZSEditor::openEditor(){
     _editor_win->show(); //Show editor window
 
     _inspector_win->show();
-    _inspector_win->move(_inspector_win->x_win_start, 0);
+    _inspector_win->move(_editor_win->width() + 640, 0);
 
     return _editor_win;
 }
