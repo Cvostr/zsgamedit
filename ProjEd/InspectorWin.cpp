@@ -1,4 +1,5 @@
 #include "headers/InspectorWin.h"
+#include "headers/ProjectEdit.h"
 #include "ui_inspector_win.h"
 
 #include "../World/headers/World.h"
@@ -25,7 +26,7 @@ QVBoxLayout* InspectorWin::getContentLayout(){
 
 void InspectorWin::onAddComponentBtnPressed(){
     AddGoComponentDialog* dialog = new AddGoComponentDialog; //Creating dialog instance
-
+    dialog->g_object_ptr = gameobject_ptr; //Assign this pointer to make property adding work
     dialog->exec();
 
     delete dialog; //Free dialog
@@ -293,13 +294,18 @@ PickResourceArea::PickResourceArea(){
 
     elem_layout->addWidget(respick_btn);
 
+    this->dialog = new ResourcePickDialog; //Allocation of dialog
+    dialog->area = this;
+
 }
 PickResourceArea::~PickResourceArea(){
-
+    delete respick_btn;
+    delete dialog;
 }
 
 void PickResourceArea::addToInspector(InspectorWin* win){
-    QObject::connect(respick_btn,  SIGNAL(clicked()), win, SLOT(onPickResouceBtnPressed(this)));
+    QObject::connect(respick_btn,  SIGNAL(clicked()), dialog, SLOT(onNeedToShow())); //On click on this button dialog will be shown
+    win->getContentLayout()->addLayout(elem_layout);
 
 }
 
@@ -330,9 +336,35 @@ AddGoComponentDialog::AddGoComponentDialog(QWidget* parent)
     connect(add_btn, SIGNAL(clicked()), this, SLOT(onAddButtonPressed()));
     connect(close_btn, SIGNAL(clicked()), this, SLOT(reject()));
 
+    this->setWindowTitle("Add component");
 }
 AddGoComponentDialog::~AddGoComponentDialog(){
     delete this->comp_type;
     delete this->add_btn;
     delete this->close_btn;
+}
+
+
+void ResourcePickDialog::onNeedToShow(){
+
+    //Receiving pointer to project
+    Project* project_ptr = static_cast<Project*>(static_cast<GameObjectProperty*>(this->area->go_property)->world_ptr->proj_ptr);
+    unsigned int resources_num = static_cast<unsigned int>(project_ptr->resources.size());
+    //Iterate over all resources
+    for(unsigned int res_i = 0; res_i < resources_num; res_i ++){
+        Resource* resource_ptr = &project_ptr->resources[res_i];
+        if(resource_ptr->type == area->resource_type){
+            QListWidgetItem* item = new QListWidgetItem(resource_ptr->rel_path, this->list);
+        }
+    }
+    this->exec();
+}
+ResourcePickDialog::ResourcePickDialog(QWidget* parent) : QDialog (parent){
+    contentLayout = new QGridLayout(); // Alocation of layout
+    list = new QListWidget;
+    this->setWindowTitle("Select Resource");
+
+}
+ResourcePickDialog::~ResourcePickDialog(){
+    delete list;
 }

@@ -23,7 +23,7 @@ class EditWindow;
 struct Resource{
     QString file_path; //Resource file
     QString rel_path; //Resource project dir related path
-    int type; //Resource type
+    unsigned int type; //Resource type
     void* class_ptr; //Pointer to resource class
 };
 

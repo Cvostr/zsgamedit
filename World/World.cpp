@@ -74,7 +74,7 @@ bool GameObject::addProperty(int property){
             return false; //Exit function
         }
     }
-    GameObjectProperty* _ptr;
+    GameObjectProperty* _ptr = nullptr;
     switch (property) {
         case GO_PROPERTY_TYPE_TRANSFORM:{ //If type is transfrom
             _ptr = static_cast<GameObjectProperty*>(new TransformProperty); //Allocation of transform in heap
@@ -86,8 +86,14 @@ bool GameObject::addProperty(int property){
             ptr->list_item_ptr = this->item_ptr;
             break;
         }
+    case GO_PROPERTY_TYPE_MESH:{
+        MeshProperty* ptr = new MeshProperty;
+        _ptr = static_cast<GameObjectProperty*>(ptr);
+        break;
+    }
     }
     _ptr->object_str_id = this->str_id; //Connect to gameobject via string id
+    _ptr->world_ptr = this->world_ptr; //Assign pointer to world
     this->properties.push_back(_ptr); //Store poroperty in gameobject
     return true;
 }
@@ -250,6 +256,20 @@ void LabelProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
 
 void LabelProperty::onValueChanged(){
     this->list_item_ptr->setText(0, this->label);
+}
+
+void MeshProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
+    PickResourceArea* area = new PickResourceArea;
+    area->setLabel("Mesh");
+    area->go_property = static_cast<void*>(this);
+    area->resource_type = RESOURCE_TYPE_MESH; //It should load meshes only
+    inspector->addPropertyArea(area);
+}
+void MeshProperty::update(){
+
+}
+MeshProperty::MeshProperty(){
+
 }
 
 GameObject* World::addObject(GameObject obj){

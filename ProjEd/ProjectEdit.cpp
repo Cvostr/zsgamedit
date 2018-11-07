@@ -216,6 +216,7 @@ void EditWindow::onObjectListItemClicked(){
         property_ptr->addPropertyInterfaceToInspector(_inspector_win); //Add its interface to inspector
     }
     _inspector_win->makeAddObjComponentBtn();
+    _inspector_win->gameobject_ptr = static_cast<void*>(obj_ptr);
 }
 
 void EditWindow::glRender(){

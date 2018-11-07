@@ -8,6 +8,7 @@
 #include <QLabel>
 #include <QDialog>
 #include <vector>
+#include <QListWidget>
 
 #include "../../Render/headers/zs-math.h"
 
@@ -23,6 +24,7 @@
 #define PICK_RES_TYPE_TEXTURE 1
 
 class InspectorWin;
+class ResourcePickDialog;
 
 class PropertyEditArea{
 public:
@@ -86,6 +88,8 @@ public:
 
 class PickResourceArea : public PropertyEditArea{
 public:
+    ResourcePickDialog* dialog;
+
     unsigned int resource_type;
     QString* mesh_rel_path; //Pointer to store result
 
@@ -136,6 +140,7 @@ public:
     void area_update(); //To update property areas states
     void makeAddObjComponentBtn(); //Adds "Create Property" Btn to content layout
     int x_win_start;
+    void* gameobject_ptr;
 private:
     Ui::InspectorWin *ui;
 
@@ -145,14 +150,12 @@ class AddGoComponentDialog : public QDialog{
     Q_OBJECT
 private:
 
-
     QPushButton* add_btn;
     QPushButton* close_btn;
 
     QGridLayout* contentLayout;
 public slots:
     void onAddButtonPressed();
-    //void onCloseButtonPressed();
 
 public:
     QLineEdit* comp_type;
@@ -162,5 +165,18 @@ public:
     ~AddGoComponentDialog();
 };
 
+class ResourcePickDialog : public QDialog{
+    Q_OBJECT
+public slots:
+    void onNeedToShow();
+private:
+    QGridLayout* contentLayout;
+public:
+    QListWidget* list;
+    PickResourceArea* area;
+
+    ResourcePickDialog(QWidget* parent = nullptr);
+    ~ResourcePickDialog();
+};
 
 #endif // INSPECTORWIN_H
