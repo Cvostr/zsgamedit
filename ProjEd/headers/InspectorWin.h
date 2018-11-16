@@ -44,6 +44,7 @@ public:
     virtual void updateState(); //Updates value
     virtual void clear(InspectorWin* win); //Clears all widget in layout
     virtual void addToInspector(InspectorWin* win); //Add edit area to inspector layout
+    void callPropertyUpdate(); //Call property, that created this area to update
 
     void setLabel(QString label);
 };
@@ -91,15 +92,16 @@ public:
     ResourcePickDialog* dialog;
 
     unsigned int resource_type;
-    QString* mesh_rel_path; //Pointer to store result
+    QString* rel_path; //Pointer to store result
 
     QPushButton* respick_btn;
-
+    QLabel* relpath_label;
     PickResourceArea();
     ~PickResourceArea();
 
-    //void setup(); //Virtual, to prepare base values
+    void setup(); //Virtual, to prepare base values
     void addToInspector(InspectorWin* win);
+    void updateState();
 };
 
 class FloatPropertyArea : public PropertyEditArea{
@@ -139,6 +141,7 @@ public:
     void addPropertyArea(PropertyEditArea* area); //Adds new property area
     void area_update(); //To update property areas states
     void makeAddObjComponentBtn(); //Adds "Create Property" Btn to content layout
+    void ShowObjectProperties(void* object_ptr);
     void* gameobject_ptr;
 private:
     Ui::InspectorWin *ui;
@@ -156,6 +159,7 @@ private:
 public slots:
     void onAddButtonPressed();
 
+
 public:
     QLineEdit* comp_type;
     void* g_object_ptr; //Pointer to object, when we'll add components
@@ -168,6 +172,7 @@ class ResourcePickDialog : public QDialog{
     Q_OBJECT
 public slots:
     void onNeedToShow();
+    void onResourceSelected();
 private:
     QGridLayout* contentLayout;
 public:

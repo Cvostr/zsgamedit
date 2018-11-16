@@ -7,6 +7,7 @@
 #include <SDL2/SDL.h>
 #include <vector>
 #include "../../Render/headers/zs-pipeline.h"
+#include "../../World/headers/zs-camera.h"
 
 struct Resource;
 struct Project;
@@ -63,9 +64,11 @@ private:
     World world;
 
     QTreeWidgetItem* column_item_go;
+
 public:
     bool ready; //Is everything loaded?
 
+    ZSPIRE::Camera edit_camera;
     Project project;
 
     void init();

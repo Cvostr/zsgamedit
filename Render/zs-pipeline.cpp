@@ -1,4 +1,5 @@
 #include "headers/zs-pipeline.h"
+#include "../ProjEd/headers/ProjectEdit.h"
 #include <iostream>
 
 
@@ -18,13 +19,17 @@ bool RenderPipeline::InitGLEW(){
         return true;
 }
 
-void RenderPipeline::render(SDL_Window* w)
+void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr)
 {
+
+    EditWindow* editwin_ptr = static_cast<EditWindow*>(projectedit_ptr);
+    ZSPIRE::Camera* cam_ptr = &editwin_ptr->edit_camera;
+
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     diffuse_shader.Use();
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, 1);
-    ZSPIRE::getPlaneMesh2D()->Draw();
+    //ZSPIRE::getPlaneMesh2D()->Draw();
 
     SDL_GL_SwapWindow(w);
 }

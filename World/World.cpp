@@ -93,49 +93,6 @@ GameObjectLink GameObject::getLinkToThisObject(){
     return link;
 }
 
-void GameObject::saveProperties(std::ofstream* stream){
-    unsigned int props_num = static_cast<unsigned int>(this->properties.size());
-
-    for(unsigned int prop_i = 0; prop_i < props_num; prop_i ++){
-        GameObjectProperty* property_ptr = static_cast<GameObjectProperty*>(this->properties[prop_i]);
-        *stream << "\nG_PROPERTY " << property_ptr->type << " "; //Writing property header
-
-        switch(property_ptr->type){
-        case GO_PROPERTY_TYPE_TRANSFORM:{
-            TransformProperty* ptr = static_cast<TransformProperty*>(property_ptr);
-            float posX = ptr->translation.X;
-            float posY = ptr->translation.Y;
-            float posZ = ptr->translation.Z;
-
-            float scaleX = ptr->scale.X;
-            float scaleY = ptr->scale.Y;
-            float scaleZ = ptr->scale.Z;
-
-            float rotX = ptr->rotation.X;
-            float rotY = ptr->rotation.Y;
-            float rotZ = ptr->rotation.Z;
-
-            stream->write(reinterpret_cast<char*>(&posX), sizeof(float));//Writing position X
-            stream->write(reinterpret_cast<char*>(&posY), sizeof(float)); //Writing position Y
-            stream->write(reinterpret_cast<char*>(&posZ), sizeof(float)); //Writing position Z
-
-            stream->write(reinterpret_cast<char*>(&scaleX), sizeof(float));//Writing scale X
-            stream->write(reinterpret_cast<char*>(&scaleY), sizeof(float)); //Writing scale Y
-            stream->write(reinterpret_cast<char*>(&scaleZ), sizeof(float)); //Writing scale Z
-
-            stream->write(reinterpret_cast<char*>(&rotX), sizeof(float));//Writing rotation X
-            stream->write(reinterpret_cast<char*>(&rotY), sizeof(float)); //Writing rotation Y
-            stream->write(reinterpret_cast<char*>(&rotZ), sizeof(float)); //Writing rotation Z
-            break;
-        }
-        case GO_PROPERTY_TYPE_LABEL:{
-            LabelProperty* ptr = static_cast<LabelProperty*>(property_ptr);
-            *stream << ptr->label.toStdString();
-            break;
-        }
-        }
-    }
-}
 
 LabelProperty* GameObject::getLabelProperty(){
     return static_cast<LabelProperty*>(getPropertyPtrByType(GO_PROPERTY_TYPE_LABEL));
@@ -304,41 +261,7 @@ void World::openFromFile(QString file, QTreeWidgetItem* root_item, QTreeWidget* 
                     }
                 }
                 if(prefix.compare("G_PROPERTY") == 0){ //We found an property, zaeb*s'
-                    int type;
-                    world_stream >> type;
-                    object.addProperty(type);
-                    GameObjectProperty* prop_ptr = object.getPropertyPtrByType(type); //get created property
-                    //since more than 1 properties same type can't be on one gameobject
-                    switch(type){
-                        case GO_PROPERTY_TYPE_LABEL :{
-                            std::string label;
-                            world_stream >> label;
-                            LabelProperty* lptr = static_cast<LabelProperty*>(prop_ptr);
-                            object.label = &lptr->label;
-                            lptr->label = QString::fromStdString(label); //Write loaded string
-                            lptr->list_item_ptr->setText(0, lptr->label); //Set text on widget
-                            break;
-                        }
-                        case GO_PROPERTY_TYPE_TRANSFORM :{
-                            world_stream.seekg(1, std::ofstream::cur); //Skip space
-                            TransformProperty* lptr = static_cast<TransformProperty*>(prop_ptr);
-                            world_stream.read(reinterpret_cast<char*>(&lptr->translation.X), sizeof(float));
-                            world_stream.read(reinterpret_cast<char*>(&lptr->translation.Y), sizeof(float));
-                            world_stream.read(reinterpret_cast<char*>(&lptr->translation.Z), sizeof(float));
-
-                            world_stream.read(reinterpret_cast<char*>(&lptr->scale.X), sizeof(float));
-                            world_stream.read(reinterpret_cast<char*>(&lptr->scale.Y), sizeof(float));
-                            world_stream.read(reinterpret_cast<char*>(&lptr->scale.Z), sizeof(float));
-
-                            world_stream.read(reinterpret_cast<char*>(&lptr->rotation.X), sizeof(float));
-                            world_stream.read(reinterpret_cast<char*>(&lptr->rotation.Y), sizeof(float));
-                            world_stream.read(reinterpret_cast<char*>(&lptr->rotation.Z), sizeof(float));
-
-                            lptr->updateMat(); //After everything is loaded, update matrices
-
-                        break;
-                    }
-                    }
+                    object.loadProperty(&world_stream);
                 }
             }
             //this->objects.push_back(object);

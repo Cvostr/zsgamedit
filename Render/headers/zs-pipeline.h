@@ -15,7 +15,7 @@ public:
 public:
     void setup();
     bool InitGLEW();
-    void render(SDL_Window* w);
+    void render(SDL_Window* w, void* projectedit_ptr);
 };
 
 

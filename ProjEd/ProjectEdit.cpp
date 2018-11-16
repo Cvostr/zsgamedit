@@ -202,24 +202,19 @@ void EditWindow::onFileListItemClicked(){
 }
 
 void EditWindow::onObjectListItemClicked(){
-    _inspector_win->clearContentLayout();
+    //_inspector_win->clearContentLayout();
     QTreeWidgetItem* selected_item = ui->objsList->currentItem(); //Obtain pointer to clicked obj item
 
     QString obj_name = selected_item->text(0); //Get label of clicked obj
 
     GameObject* obj_ptr = world.getObjectByLabel(obj_name); //Obtain pointer to selected object by label
-    unsigned int props_num = static_cast<unsigned int>(obj_ptr->properties.size());
-    for(unsigned int prop_it = 0; prop_it < props_num; prop_it ++){ //iterate over all properties and send them to inspector
-        GameObjectProperty* property_ptr = (obj_ptr->properties[prop_it]); //Obtain pointer to object property
-        property_ptr->addPropertyInterfaceToInspector(_inspector_win); //Add its interface to inspector
-    }
-    _inspector_win->makeAddObjComponentBtn();
-    _inspector_win->gameobject_ptr = static_cast<void*>(obj_ptr);
+
+    _inspector_win->ShowObjectProperties(static_cast<void*>(obj_ptr));
 }
 
 void EditWindow::glRender(){
     if(ready == true)
-        render->render(this->window);
+        render->render(this->window, static_cast<void*>(this));
 }
 
 void EditWindow::lookForResources(QString path){

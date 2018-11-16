@@ -78,7 +78,8 @@ public:
     ZSPIRE::Mesh* mesh_ptr; //Pointer to mesh
 
     void addPropertyInterfaceToInspector(InspectorWin* inspector);
-    void updateMeshPtr(); //Updates pointer aaccording to resource_relpath
+    void updateMeshPtr(); //Updates pointer according to resource_relpath
+    void onValueChanged();
     MeshProperty();
 };
 
@@ -109,6 +110,7 @@ public:
     void removeChildObject(GameObjectLink link);
 
     void saveProperties(std::ofstream* stream); //Writes properties content at end of stream
+    void loadProperty(std::ifstream* world_stream); //Loads one property from stream
 
     GameObject(); //Default constructor
 };

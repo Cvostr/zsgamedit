@@ -1,5 +1,6 @@
 #include "headers/World.h"
 #include "../ProjEd/headers/ProjectEdit.h"
+#include "../Render/headers/zs-mesh.h"
 
 GameObjectProperty::GameObjectProperty(){
     type = GO_PROPERTY_TYPE_NONE;
@@ -114,9 +115,121 @@ void MeshProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
     PickResourceArea* area = new PickResourceArea;
     area->setLabel("Mesh");
     area->go_property = static_cast<void*>(this);
+    area->rel_path = &resource_relpath;
     area->resource_type = RESOURCE_TYPE_MESH; //It should load meshes only
     inspector->addPropertyArea(area);
 }
 void MeshProperty::updateMeshPtr(){
+    if(resource_relpath.compare("@plane") == false){
+        this->mesh_ptr = ZSPIRE::getPlaneMesh2D();
+    }else //If it isn't built in mesh
+    {
+        world_ptr->getMeshPtrByRelPath(resource_relpath);
+    }
+}
 
+void MeshProperty::onValueChanged(){
+    updateMeshPtr();
+}
+
+
+
+
+
+
+void GameObject::saveProperties(std::ofstream* stream){
+    unsigned int props_num = static_cast<unsigned int>(this->properties.size());
+
+    for(unsigned int prop_i = 0; prop_i < props_num; prop_i ++){
+        GameObjectProperty* property_ptr = static_cast<GameObjectProperty*>(this->properties[prop_i]);
+        *stream << "\nG_PROPERTY " << property_ptr->type << " "; //Writing property header
+
+        switch(property_ptr->type){
+        case GO_PROPERTY_TYPE_TRANSFORM:{
+            TransformProperty* ptr = static_cast<TransformProperty*>(property_ptr);
+            float posX = ptr->translation.X;
+            float posY = ptr->translation.Y;
+            float posZ = ptr->translation.Z;
+
+            float scaleX = ptr->scale.X;
+            float scaleY = ptr->scale.Y;
+            float scaleZ = ptr->scale.Z;
+
+            float rotX = ptr->rotation.X;
+            float rotY = ptr->rotation.Y;
+            float rotZ = ptr->rotation.Z;
+
+            stream->write(reinterpret_cast<char*>(&posX), sizeof(float));//Writing position X
+            stream->write(reinterpret_cast<char*>(&posY), sizeof(float)); //Writing position Y
+            stream->write(reinterpret_cast<char*>(&posZ), sizeof(float)); //Writing position Z
+
+            stream->write(reinterpret_cast<char*>(&scaleX), sizeof(float));//Writing scale X
+            stream->write(reinterpret_cast<char*>(&scaleY), sizeof(float)); //Writing scale Y
+            stream->write(reinterpret_cast<char*>(&scaleZ), sizeof(float)); //Writing scale Z
+
+            stream->write(reinterpret_cast<char*>(&rotX), sizeof(float));//Writing rotation X
+            stream->write(reinterpret_cast<char*>(&rotY), sizeof(float)); //Writing rotation Y
+            stream->write(reinterpret_cast<char*>(&rotZ), sizeof(float)); //Writing rotation Z
+            break;
+        }
+        case GO_PROPERTY_TYPE_LABEL:{
+            LabelProperty* ptr = static_cast<LabelProperty*>(property_ptr);
+            *stream << ptr->label.toStdString();
+            break;
+        }
+        case GO_PROPERTY_TYPE_MESH:{
+            MeshProperty* ptr = static_cast<MeshProperty*>(property_ptr);
+            *stream << ptr->resource_relpath.toStdString();
+            break;
+        }
+        }
+    }
+}
+
+void GameObject::loadProperty(std::ifstream* world_stream){
+    int type;
+    *world_stream >> type;
+    addProperty(type);
+    GameObjectProperty* prop_ptr = getPropertyPtrByType(type); //get created property
+    //since more than 1 properties same type can't be on one gameobject
+    switch(type){
+        case GO_PROPERTY_TYPE_LABEL :{
+            std::string label;
+            *world_stream >> label;
+            LabelProperty* lptr = static_cast<LabelProperty*>(prop_ptr);
+            this->label = &lptr->label; //Making GameObjects's pointer to string in label property
+            lptr->label = QString::fromStdString(label); //Write loaded string
+            lptr->list_item_ptr->setText(0, lptr->label); //Set text on widget
+            break;
+        }
+        case GO_PROPERTY_TYPE_TRANSFORM :{
+            world_stream->seekg(1, std::ofstream::cur); //Skip space
+            TransformProperty* t_ptr = static_cast<TransformProperty*>(prop_ptr);
+            world_stream->read(reinterpret_cast<char*>(&t_ptr->translation.X), sizeof(float));
+            world_stream->read(reinterpret_cast<char*>(&t_ptr->translation.Y), sizeof(float));
+            world_stream->read(reinterpret_cast<char*>(&t_ptr->translation.Z), sizeof(float));
+
+            world_stream->read(reinterpret_cast<char*>(&t_ptr->scale.X), sizeof(float));
+            world_stream->read(reinterpret_cast<char*>(&t_ptr->scale.Y), sizeof(float));
+            world_stream->read(reinterpret_cast<char*>(&t_ptr->scale.Z), sizeof(float));
+
+            world_stream->read(reinterpret_cast<char*>(&t_ptr->rotation.X), sizeof(float));
+            world_stream->read(reinterpret_cast<char*>(&t_ptr->rotation.Y), sizeof(float));
+            world_stream->read(reinterpret_cast<char*>(&t_ptr->rotation.Z), sizeof(float));
+
+            t_ptr->updateMat(); //After everything is loaded, update matrices
+
+        break;
+    }
+    case GO_PROPERTY_TYPE_MESH :{
+        std::string rel_path;
+        *world_stream >> rel_path;
+        MeshProperty* lptr = static_cast<MeshProperty*>(prop_ptr);
+        //this->label = &lptr->label; //Making GameObjects's pointer to string in label property
+        lptr->resource_relpath = QString::fromStdString(rel_path); //Write loaded mesh relative path
+        lptr->updateMeshPtr(); //Pointer will now point to mesh resource
+
+        break;
+    }
+    }
 }

@@ -28,6 +28,8 @@ void InspectorWin::onAddComponentBtnPressed(){
     dialog->g_object_ptr = gameobject_ptr; //Assign this pointer to make property adding work
     dialog->exec();
 
+    ShowObjectProperties(gameobject_ptr);
+
     delete dialog; //Free dialog
 }
 
@@ -53,6 +55,19 @@ void InspectorWin::makeAddObjComponentBtn(){
     addObjComponentBtn->setText("Add property");
     ui->propertySpace->addWidget(addObjComponentBtn);
     connect(addObjComponentBtn, SIGNAL(clicked()), this, SLOT(onAddComponentBtnPressed()));
+}
+
+void InspectorWin::ShowObjectProperties(void* object_ptr){
+    clearContentLayout(); //Clears everything in content layout
+    GameObject* obj_ptr = static_cast<GameObject*>(object_ptr);
+
+    unsigned int props_num = static_cast<unsigned int>(obj_ptr->properties.size());
+    for(unsigned int prop_it = 0; prop_it < props_num; prop_it ++){ //iterate over all properties and send them to inspector
+        GameObjectProperty* property_ptr = (obj_ptr->properties[prop_it]); //Obtain pointer to object property
+        property_ptr->addPropertyInterfaceToInspector(this); //Add its interface to inspector
+    }
+    makeAddObjComponentBtn();
+    gameobject_ptr = static_cast<void*>(obj_ptr);
 }
 
 PropertyEditArea::PropertyEditArea(){
@@ -103,6 +118,13 @@ void PropertyEditArea::updateState(){
             ptr->updateState();
             break;
         }
+    }
+}
+
+void PropertyEditArea::callPropertyUpdate(){
+    if(go_property != nullptr){ //If parent property has defined
+        GameObjectProperty* property_ptr = static_cast<GameObjectProperty*>(this->go_property);
+        property_ptr->onValueChanged(); //Then call changed
     }
 }
 
@@ -186,6 +208,8 @@ void Float3PropertyArea::updateState(){
         this->vector->X = vX;
         this->vector->Y = vY;
         this->vector->Z = vZ;
+
+        PropertyEditArea::callPropertyUpdate();
     }
 }
 
@@ -252,10 +276,7 @@ void StringPropertyArea::updateState(){
     if(current.compare(value_ptr) != 0){ //If it updated
         *value_ptr = current;
 
-        if(go_property != nullptr){ //If parent property has defined
-            GameObjectProperty* property_ptr = static_cast<GameObjectProperty*>(this->go_property);
-            property_ptr->onValueChanged(); //Then call changed
-        }
+        PropertyEditArea::callPropertyUpdate();
     }
 }
 
@@ -284,9 +305,10 @@ void FloatPropertyArea::updateState(){
 
 PickResourceArea::PickResourceArea(){
     type = PEA_TYPE_RESPICK;
-    this->mesh_rel_path = nullptr;
+    this->rel_path = nullptr;
     respick_btn = new QPushButton; //Allocation of QPushButton
-
+    relpath_label = new QLabel; //Allocation of resource relpath text
+    elem_layout->addWidget(relpath_label);
     elem_layout->addWidget(respick_btn);
     respick_btn->setText("Select...");
 
@@ -297,11 +319,21 @@ PickResourceArea::PickResourceArea(){
 PickResourceArea::~PickResourceArea(){
     delete respick_btn;
     delete dialog;
+    delete relpath_label;
 }
 
 void PickResourceArea::addToInspector(InspectorWin* win){
     QObject::connect(respick_btn,  SIGNAL(clicked()), dialog, SLOT(onNeedToShow())); //On click on this button dialog will be shown
     win->getContentLayout()->addLayout(elem_layout);
+
+}
+
+void PickResourceArea::setup(){
+    QString resource_relpath = *this->rel_path;
+    relpath_label->setText(resource_relpath);
+}
+
+void PickResourceArea::updateState(){
 
 }
 
@@ -340,12 +372,23 @@ AddGoComponentDialog::~AddGoComponentDialog(){
     delete this->close_btn;
 }
 
+void ResourcePickDialog::onResourceSelected(){
+    QListWidgetItem* selected = this->list->currentItem();
+    QString mesh_path = selected->text();
+    *area->rel_path = mesh_path;
+    //area->updateState();
+    area->PropertyEditArea::callPropertyUpdate();
+    accept(); //Close dailog with positive answer
+}
 
 void ResourcePickDialog::onNeedToShow(){
-
+    this->list->clear();
     //Receiving pointer to project
     Project* project_ptr = static_cast<Project*>(static_cast<GameObjectProperty*>(this->area->go_property)->world_ptr->proj_ptr);
     unsigned int resources_num = static_cast<unsigned int>(project_ptr->resources.size());
+    if(area->resource_type == RESOURCE_TYPE_MESH)
+        QListWidgetItem* item = new QListWidgetItem("@plane", this->list);
+
     //Iterate over all resources
     for(unsigned int res_i = 0; res_i < resources_num; res_i ++){
         Resource* resource_ptr = &project_ptr->resources[res_i];
@@ -361,6 +404,7 @@ ResourcePickDialog::ResourcePickDialog(QWidget* parent) : QDialog (parent){
     this->setWindowTitle("Select Resource");
 
     contentLayout->addWidget(list);
+    connect(this->list, SIGNAL(itemClicked(QListWidgetItem *)), this, SLOT(onResourceSelected())); //Connect to slot
     setLayout(contentLayout);
 }
 ResourcePickDialog::~ResourcePickDialog(){
