@@ -35,18 +35,25 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr)
 
     for(unsigned int obj_i = 0; obj_i < world_ptr->objects.size(); obj_i ++){
         GameObject* obj_ptr = &world_ptr->objects[obj_i];
-        obj_ptr->Draw(&diffuse_shader);
+        if(!obj_ptr->hasParent)
+            obj_ptr->Draw(&diffuse_shader, getIdentity());
     }
 
 
     SDL_GL_SwapWindow(w);
 }
 
-void GameObject::Draw(ZSPIRE::Shader* shader){
+void GameObject::Draw(ZSPIRE::Shader* shader, ZSMATRIX4x4 parent){
     TransformProperty* transform_prop = static_cast<TransformProperty*>(this->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
-    shader->setTransform(transform_prop->transform_mat);
+    shader->setTransform(parent * transform_prop->transform_mat);
 
     MeshProperty* mesh_prop = static_cast<MeshProperty*>(this->getPropertyPtrByType(GO_PROPERTY_TYPE_MESH));
     if(mesh_prop != nullptr)
         mesh_prop->mesh_ptr->Draw();
+
+    for(unsigned int obj_i = 0; obj_i < this->children.size(); obj_i ++){
+        children.at(obj_i).updLinkPtr();
+        GameObject* child_ptr = this->children.at(obj_i).ptr;
+        child_ptr->Draw(shader, transform_prop->transform_mat);
+    }
 }

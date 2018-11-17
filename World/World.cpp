@@ -13,8 +13,8 @@ GameObjectLink::GameObjectLink(){
 GameObject* GameObjectLink::updLinkPtr(){
     if(world_ptr == nullptr) //If world not defined, exiting
         return nullptr;
-
-    return world_ptr->getObjectByStringId(this->obj_str_id);
+    this->ptr = world_ptr->getObjectByStringId(this->obj_str_id);
+    return ptr;
 }
 
 bool GameObjectLink::isEmpty(){
@@ -113,6 +113,18 @@ void GameObject::removeChildObject(GameObjectLink link){
         GameObject* ptr = children[i].updLinkPtr();
         if(link.obj_str_id.compare(ptr->str_id) == 0){
             children[i].crack(); //Make link broken
+            trimChildrenArray(); //Remove broken link from vector
+        }
+    }
+}
+
+void GameObject::trimChildrenArray(){
+    for (unsigned int i = 0; i < children.size(); i ++) { //Iterating over all objects
+        if(children[i].isEmpty() == true){ //If object marked as deleted
+            for (unsigned int obj_i = i + 1; obj_i < children.size(); obj_i ++) {
+                children[obj_i - 1] = children[obj_i];
+            }
+            children.resize(children.size() - 1);
         }
     }
 }

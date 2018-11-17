@@ -106,6 +106,7 @@ public:
     LabelProperty* getLabelProperty();
     TransformProperty* getTransformProperty();
     GameObjectLink getLinkToThisObject();
+    void trimChildrenArray();
 
     void addChildObject(GameObjectLink link);
     void removeChildObject(GameObjectLink link);
@@ -113,7 +114,7 @@ public:
     void saveProperties(std::ofstream* stream); //Writes properties content at end of stream
     void loadProperty(std::ifstream* world_stream); //Loads one property from stream
 
-    void Draw(ZSPIRE::Shader* shader);
+    void Draw(ZSPIRE::Shader* shader, ZSMATRIX4x4 parent);
 
     GameObject(); //Default constructor
 };

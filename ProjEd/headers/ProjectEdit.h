@@ -40,6 +40,12 @@ struct Project{
 
 };
 
+struct EditorInputState{
+    bool isLeftBtnHold;
+    bool isRightBtnHold;
+    bool isCtrlHold;
+};
+
 class EditWindow : public QMainWindow
 {
     Q_OBJECT
@@ -71,6 +77,7 @@ public:
     World world;
     ZSPIRE::Camera edit_camera;
     Project project;
+    EditorInputState input_state;
 
     void init();
     void updateFileList(); //Updates content in file list widget
@@ -86,6 +93,10 @@ public:
     void glRender(); //Invoke opengl rendering
 
     InspectorWin* getInspector();
+    //SDL2 input events stuff
+    void onLeftBtnClicked(int X, int Y);
+    void onRightBtnClicked(int X, int Y);
+    void onMouseMotion(int relX, int relY);
 
     explicit EditWindow(QWidget *parent = nullptr);
     ~EditWindow();

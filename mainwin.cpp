@@ -72,13 +72,14 @@ void MainWin::loadProjectsConfigurations(){
             ProjectConf conf;
             char path[128];
             proj_inf_file >> path;
-            FILE* projFileD = fopen(path, "r");
-            if(projFileD)
+            FILE* projFileD = fopen(path, "r"); //Trying to open project root directory
+            if(projFileD){ //If we reached project root path
                 fclose(projFileD);
                 conf.projFilePath = QString(path);
                 addProjectToVector(conf);
 
                 updateListWidgetContent();
+            }
             }
         }
     proj_inf_file.close();

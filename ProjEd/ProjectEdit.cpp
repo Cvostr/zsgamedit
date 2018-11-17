@@ -53,6 +53,10 @@ EditWindow::~EditWindow()
 
 void EditWindow::init(){
 
+    input_state.isLeftBtnHold = false;
+    input_state.isRightBtnHold = false;
+    input_state.isCtrlHold = false;
+
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0)
     {
         printf("Error: %s\n", SDL_GetError());
@@ -83,8 +87,16 @@ void EditWindow::init(){
 
     switch(project.perspective){
     case 2:{ //2D project
+
         this->edit_camera.setProjectionType(ZSCAMERA_PROJECTION_ORTHOGONAL);
+        edit_camera.setPosition(ZSVECTOR3(0,0,0));
         edit_camera.setFront(ZSVECTOR3(0,0,1));
+
+        /*
+        this->edit_camera.setProjectionType(ZSCAMERA_PROJECTION_PERSPECTIVE);
+        edit_camera.setPosition(ZSVECTOR3(0,0,-100));
+        edit_camera.setFront(ZSVECTOR3(0,0,1));
+        */
         break;
     }
     case 3:{ //3D project
@@ -315,7 +327,6 @@ EditWindow* ZSEditor::openProject(QString conf_file_path){
         }
         if(prefix.compare("persp") == 0){ //If reched to persp
             project_conf_stream >> _editor_win->project.perspective; //Reading perspective
-
         }
     }
 
@@ -380,5 +391,18 @@ void ObjTreeWgt::dropEvent(QDropEvent* event){
     }else{ //We unparented object
         obj_ptr->hasParent = false;
         this->addTopLevelItem(obj_ptr->item_ptr);
+    }
+}
+
+void EditWindow::onLeftBtnClicked(int X, int Y){}
+void EditWindow::onRightBtnClicked(int X, int Y){}
+void EditWindow::onMouseMotion(int relX, int relY){
+    if(project.perspective == 2) //Only affective in 2D
+
+    if(input_state.isLeftBtnHold == true){
+        ZSVECTOR3 cam_pos = edit_camera.getCameraPosition();
+        cam_pos.X += relX;
+        cam_pos.Y += relY;
+        edit_camera.setPosition(cam_pos);
     }
 }
