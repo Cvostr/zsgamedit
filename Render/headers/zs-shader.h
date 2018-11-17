@@ -2,6 +2,7 @@
 #define zs_shader
 
 #include "zs-math.h"
+#include "../../World/headers/zs-camera.h"
 
 namespace ZSPIRE {
 	class Shader {
@@ -26,6 +27,7 @@ namespace ZSPIRE {
 		void setHasNormalTextureProperty(bool hasNormalMap);
 		void setTextureCountProperty(int tX, int tY);
 		void setTransform(ZSMATRIX4x4 transform);
+        void setCamera(Camera* cam);
 
 
 	};

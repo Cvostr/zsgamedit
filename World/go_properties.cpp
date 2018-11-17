@@ -134,9 +134,6 @@ void MeshProperty::onValueChanged(){
 
 
 
-
-
-
 void GameObject::saveProperties(std::ofstream* stream){
     unsigned int props_num = static_cast<unsigned int>(this->properties.size());
 

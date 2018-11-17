@@ -9,6 +9,7 @@
 
 #include "../../Render/headers/zs-mesh.h"
 #include "../../Render/headers/zs-math.h"
+#include "../../Render/headers/zs-shader.h"
 
 #define GO_PROPERTY_TYPE_NONE 0
 #define GO_PROPERTY_TYPE_TRANSFORM 1
@@ -111,6 +112,8 @@ public:
 
     void saveProperties(std::ofstream* stream); //Writes properties content at end of stream
     void loadProperty(std::ifstream* world_stream); //Loads one property from stream
+
+    void Draw(ZSPIRE::Shader* shader);
 
     GameObject(); //Default constructor
 };

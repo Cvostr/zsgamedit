@@ -34,6 +34,7 @@ struct Project{
     QString root_path; //Project root folder
 
     int version; //Project version
+    int perspective;
 
     std::vector<Resource> resources;
 
@@ -50,6 +51,7 @@ public slots:
     void onAddNewGameObject();
     void onSceneSave();
     void onSceneSaveAs();
+    void onOpenScene();
 
 private:
     QString current_dir;
@@ -61,13 +63,12 @@ private:
 
     RenderPipeline* render;
 
-    World world;
-
     QTreeWidgetItem* column_item_go;
 
 public:
     bool ready; //Is everything loaded?
 
+    World world;
     ZSPIRE::Camera edit_camera;
     Project project;
 

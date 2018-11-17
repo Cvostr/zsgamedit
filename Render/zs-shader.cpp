@@ -145,6 +145,11 @@ void ZSPIRE::Shader::setTransform(ZSMATRIX4x4 transform){
 	setGLuniformMat4x4("object_transform", transform);
 }
 
+void ZSPIRE::Shader::setCamera(Camera* cam){
+    setGLuniformMat4x4("cam_projection", cam->getProjMatrix());
+    setGLuniformMat4x4("cam_view", cam->getViewMatrix());
+}
+
 void ZSPIRE::Shader::setGLuniformColor(const char* uniform_str, ZSRGBCOLOR value) {
 
 	unsigned int uniform_id = glGetUniformLocation(this->SHADER_ID, uniform_str);

@@ -25,6 +25,7 @@ EditWindow::EditWindow(QWidget *parent) :
                 this, SLOT(onSceneSave())); //Signal comes, when user clicks on File->Save
     QObject::connect(ui->actionSave_As, SIGNAL(triggered()),
                 this, SLOT(onSceneSaveAs())); //Signal comes, when user clicks on File->Save As
+    QObject::connect(ui->actionOpen, SIGNAL(triggered()), this, SLOT(onOpenScene()));
 
     QObject::connect(ui->objsList, SIGNAL(itemClicked(QTreeWidgetItem *, int)),
                 this, SLOT(onObjectListItemClicked())); //Signal comes, when user clicks on File->Save As
@@ -80,6 +81,18 @@ void EditWindow::init(){
     render->setup();
     ready = true;//Everything is ready
 
+    switch(project.perspective){
+    case 2:{ //2D project
+        this->edit_camera.setProjectionType(ZSCAMERA_PROJECTION_ORTHOGONAL);
+        edit_camera.setFront(ZSVECTOR3(0,0,1));
+        break;
+    }
+    case 3:{ //3D project
+        this->edit_camera.setProjectionType(ZSCAMERA_PROJECTION_PERSPECTIVE);
+        break;
+    }
+    }
+
 }
 
 void EditWindow::assignIconFile(QListWidgetItem* item){
@@ -110,13 +123,21 @@ void EditWindow::openFile(QString file_path){
 
 void EditWindow::onSceneSaveAs(){
     QString filename = QFileDialog::getSaveFileName(this, tr("Save scene file"), project.root_path, "*.scn");
-    if(!filename.endsWith(".scn"))
-        filename.append(".scn");
+    if(!filename.endsWith(".scn")) //If filename doesn't end with ".scn"
+        filename.append(".scn"); //Add this extension
     world.saveToFile(filename); //Save to picked file
     scene_path = filename; //Assign scene path
     hasSceneFile = true; //Scene is saved
 
     updateFileList(); //Make new scene visible in file list
+}
+
+void EditWindow::onOpenScene(){
+    QString path = QFileDialog::getOpenFileName(this, tr("Scene File"), project.root_path);
+    if ( path.isNull() == false ) //If user specified file path
+    {
+        openFile(path);
+    }
 }
 
 void EditWindow::onSceneSave(){
@@ -291,6 +312,10 @@ EditWindow* ZSEditor::openProject(QString conf_file_path){
             int ver = 0;
             project_conf_stream >> ver; //Reading version
             _editor_win->project.version = ver; //Storing version in project struct
+        }
+        if(prefix.compare("persp") == 0){ //If reched to persp
+            project_conf_stream >> _editor_win->project.perspective; //Reading perspective
+
         }
     }
 

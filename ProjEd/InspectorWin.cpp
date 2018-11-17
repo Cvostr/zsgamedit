@@ -153,7 +153,7 @@ Float3PropertyArea::Float3PropertyArea(){
     label_widget->setFixedWidth(100);
 
     QLocale locale(QLocale::English); //Define english locale to set it to double validator later
-    QDoubleValidator* validator = new QDoubleValidator(0, 100, 6, nullptr); //Define double validator
+    QDoubleValidator* validator = new QDoubleValidator(-100, 100, 6, nullptr); //Define double validator
     validator->setLocale(locale); //English locale to accept dost instead of commas
 
     elem_layout->addWidget(x_label); //Adding X label
