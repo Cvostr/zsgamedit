@@ -77,7 +77,6 @@ void EditWindow::init(){
     this->glcontext = SDL_GL_CreateContext(window);
 
     glViewport(0, 0, 640, 480);
-    glClearColor(1,0,1,1);
 
     render = new RenderPipeline;
     render->InitGLEW();
@@ -394,7 +393,13 @@ void ObjTreeWgt::dropEvent(QDropEvent* event){
     }
 }
 
-void EditWindow::onLeftBtnClicked(int X, int Y){}
+void EditWindow::onLeftBtnClicked(int X, int Y){
+    unsigned int clicked = render->render_getpickedObj(static_cast<void*>(this), X, Y);
+
+    GameObject* obj_ptr = &world.objects[clicked]; //Obtain pointer to selected object by label
+
+    _inspector_win->ShowObjectProperties(static_cast<void*>(obj_ptr));
+}
 void EditWindow::onRightBtnClicked(int X, int Y){}
 void EditWindow::onMouseMotion(int relX, int relY){
     if(project.perspective == 2) //Only affective in 2D

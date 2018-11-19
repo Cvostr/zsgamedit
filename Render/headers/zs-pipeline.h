@@ -12,10 +12,12 @@
 class RenderPipeline{
 public:
     ZSPIRE::Shader diffuse_shader;
+    ZSPIRE::Shader pick_shader;
 public:
     void setup();
     bool InitGLEW();
     void render(SDL_Window* w, void* projectedit_ptr);
+    unsigned int render_getpickedObj(void* projectedit_ptr, int mouseX, int mouseY);
 };
 
 

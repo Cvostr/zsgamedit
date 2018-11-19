@@ -133,6 +133,7 @@ GameObject* World::addObject(GameObject obj){
     this->objects.push_back(obj);
     GameObject* ptr = &objects[objects.size() - 1];
     ptr->world_ptr = this;
+    ptr->array_index = objects.size() - 1;
     return ptr;
 }
 
@@ -276,8 +277,7 @@ void World::openFromFile(QString file, QTreeWidgetItem* root_item, QTreeWidget* 
                     object.loadProperty(&world_stream);
                 }
             }
-            //this->objects.push_back(object);
-            this->addObject(object);
+            this->addObject(object); //Add object to world
         }
     }
     //We finished reading file

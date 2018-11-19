@@ -86,6 +86,7 @@ public:
 
 class GameObject{
 public:
+    int array_index;
     QString* label; //Pointer to string label in property
     std::string str_id; //String, gameobject identified by
     bool hasParent; //If object has a parent
