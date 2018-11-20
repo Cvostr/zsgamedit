@@ -89,12 +89,28 @@ void TransformProperty::onValueChanged(){
 }
 
 void TransformProperty::updateMat(){
+
+    ZSVECTOR3 p_translation = ZSVECTOR3(0,0,0);
+    ZSVECTOR3 p_scale = ZSVECTOR3(1,1,1);
+    ZSVECTOR3 p_rotation = ZSVECTOR3(0,0,0);
+
+    GameObject* ptr = world_ptr->getObjectByStringId(this->object_str_id);
+    if(ptr != nullptr){
+    if(ptr->hasParent){
+
+        TransformProperty* property = static_cast<TransformProperty*>(ptr->parent.updLinkPtr()->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
+        p_translation = property->translation;
+        p_scale = property->scale;
+        p_rotation = property->rotation;
+    }
+    }
+
     //Calculate translation matrix
-    ZSMATRIX4x4 translation_mat = getTranslationMat(this->translation);
+    ZSMATRIX4x4 translation_mat = getTranslationMat(this->translation + p_translation);
     //Calculate scale matrix
-    ZSMATRIX4x4 scale_mat = getScaleMat(scale);
+    ZSMATRIX4x4 scale_mat = getScaleMat(scale * p_scale);
     //Calculate rotation matrix
-    ZSMATRIX4x4 rotation_mat = getRotationMat(rotation);
+    ZSMATRIX4x4 rotation_mat = getRotationMat(rotation + p_rotation);
     //S * R * T
     this->transform_mat = scale_mat * rotation_mat * translation_mat;
 }

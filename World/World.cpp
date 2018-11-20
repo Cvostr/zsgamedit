@@ -105,15 +105,51 @@ void GameObject::addChildObject(GameObjectLink link){
     link.updLinkPtr(); //Calculating object pointer
     link.ptr->hasParent = true; //Object now has a parent (if it has't before)
     link.ptr->parent = this->getLinkToThisObject(); //Assigning pointer to new parent
+
+    //Updating child's transform
+    //Now check, if it is possible
+    TransformProperty* Pobj_transform = static_cast<TransformProperty*>(getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
+    TransformProperty* Cobj_transform = static_cast<TransformProperty*>(link.ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
+
+    if(Pobj_transform != nullptr && Cobj_transform != nullptr){ //If both objects have mesh property
+        //world_ptr->e
+        Cobj_transform->translation = Cobj_transform->translation - Pobj_transform->translation;
+
+        Cobj_transform->scale.X = Cobj_transform->scale.X / Pobj_transform->scale.X;
+        Cobj_transform->scale.Y = Cobj_transform->scale.Y / Pobj_transform->scale.Y;
+        Cobj_transform->scale.Z = Cobj_transform->scale.Z / Pobj_transform->scale.Z;
+
+        Cobj_transform->rotation = Cobj_transform->rotation - Pobj_transform->rotation;
+
+        Cobj_transform->updateMat(); //Update transform matrix
+    }
+
     this->children.push_back(link);
 }
 void GameObject::removeChildObject(GameObjectLink link){
-    unsigned int children_am = static_cast<unsigned int>(children.size());
-    for(unsigned int i = 0; i < children_am; i++){
+    unsigned int children_am = static_cast<unsigned int>(children.size()); //get children amount
+    for(unsigned int i = 0; i < children_am; i++){ //Iterate over all children in object
         GameObject* ptr = children[i].updLinkPtr();
-        if(link.obj_str_id.compare(ptr->str_id) == 0){
+        if(link.obj_str_id.compare(ptr->str_id) == 0){ //if str_id in requested link compares to iteratable link
             children[i].crack(); //Make link broken
             trimChildrenArray(); //Remove broken link from vector
+
+            //Updating child's transform
+            //Now check, if it is possible
+            TransformProperty* Pobj_transform = static_cast<TransformProperty*>(getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
+            TransformProperty* Cobj_transform = static_cast<TransformProperty*>(ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
+
+            if(Pobj_transform != nullptr && Cobj_transform != nullptr){ //If both objects have mesh property
+                Cobj_transform->translation = Cobj_transform->translation + Pobj_transform->translation;
+
+                Cobj_transform->scale.X = Cobj_transform->scale.X * Pobj_transform->scale.X;
+                Cobj_transform->scale.Y = Cobj_transform->scale.Y * Pobj_transform->scale.Y;
+                Cobj_transform->scale.Z = Cobj_transform->scale.Z * Pobj_transform->scale.Z;
+
+                Cobj_transform->rotation = Cobj_transform->rotation + Pobj_transform->rotation;
+
+                Cobj_transform->updateMat(); //Update transform matrix
+            }
         }
     }
 }
@@ -250,6 +286,7 @@ void World::openFromFile(QString file, QTreeWidgetItem* root_item, QTreeWidget* 
         world_stream >> prefix; //Read prefix
         if(prefix.compare("G_OBJECT") == 0){ //if it is game object
             GameObject object; //firstly, define an object
+            object.world_ptr = this; //Writing pointer to world
             world_stream >> object.str_id;
             //Then do the same sh*t, iterate until "G_END" came up
             while(true){

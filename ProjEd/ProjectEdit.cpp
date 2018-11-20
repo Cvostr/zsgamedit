@@ -366,6 +366,7 @@ ObjTreeWgt::ObjTreeWgt(QWidget* parent) : QTreeWidget (parent){
 }
 
 void ObjTreeWgt::dropEvent(QDropEvent* event){
+    _inspector_win->clearContentLayout(); //Prevent variable conflicts
     //User dropped object item
     QList<QTreeWidgetItem*> kids = this->selectedItems(); //Get list of selected object(it is moving object)
 

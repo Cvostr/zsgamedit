@@ -73,7 +73,8 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr)
 
 void GameObject::Draw(ZSPIRE::Shader* shader, ZSMATRIX4x4 parent){
     TransformProperty* transform_prop = static_cast<TransformProperty*>(this->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
-    shader->setTransform(parent * transform_prop->transform_mat);
+    transform_prop->updateMat();
+    shader->setTransform(transform_prop->transform_mat);
     //Usefl for object picking
     float r = this->array_index;
     float g = this->array_index / 256.0f;
@@ -87,6 +88,6 @@ void GameObject::Draw(ZSPIRE::Shader* shader, ZSMATRIX4x4 parent){
     for(unsigned int obj_i = 0; obj_i < this->children.size(); obj_i ++){
         children.at(obj_i).updLinkPtr();
         GameObject* child_ptr = this->children.at(obj_i).ptr;
-        child_ptr->Draw(shader, parent * transform_prop->transform_mat);
+        child_ptr->Draw(shader, transform_prop->transform_mat);
     }
 }

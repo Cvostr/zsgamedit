@@ -40,8 +40,10 @@ void InspectorWin::clearContentLayout(){
        delete property_areas[area_i]; //remove all
     }
     this->property_areas.resize(0); //No areas in list
-    if(addObjComponentBtn != nullptr)
+    if(addObjComponentBtn != nullptr){
         delete addObjComponentBtn; //Remove button
+        addObjComponentBtn = 0x0; //Avoid crashes
+    }
 }
 
 void InspectorWin::addPropertyArea(PropertyEditArea* area){
