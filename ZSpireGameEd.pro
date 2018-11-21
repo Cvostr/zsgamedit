@@ -38,7 +38,8 @@ SOURCES += \
     ProjEd/InspectorWin.cpp \
     ProjEd/ProjCreateWin.cpp \
     World/zs-camera.cpp \
-    World/go_properties.cpp
+    World/go_properties.cpp \
+    World/tile_properties.cpp
 
 HEADERS += \
         mainwin.h \
@@ -52,7 +53,8 @@ HEADERS += \
     World/headers/Misc.h \
     ProjEd/headers/InspectorWin.h \
     ProjEd/headers/ProjCreateWin.h \
-    World/headers/zs-camera.h
+    World/headers/zs-camera.h \
+    World/headers/2dtileproperties.h
 
 FORMS += \
         mainwin.ui \

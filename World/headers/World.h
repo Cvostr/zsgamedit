@@ -8,6 +8,7 @@
 #include "../../ProjEd/headers/InspectorWin.h"
 
 #include "../../Render/headers/zs-mesh.h"
+#include "../../Render/headers/zs-texture.h"
 #include "../../Render/headers/zs-math.h"
 #include "../../Render/headers/zs-shader.h"
 
@@ -16,8 +17,10 @@
 #define GO_PROPERTY_TYPE_LABEL 2
 #define GO_PROPERTY_TYPE_MESH 3
 
+
 class GameObject;
 class World;
+class GameObjectProperty;
 
 class GameObjectLink{
 public:
@@ -46,6 +49,9 @@ public:
     virtual void addPropertyInterfaceToInspector(InspectorWin* inspector);
     virtual void onValueChanged();
 };
+
+#include "2dtileproperties.h" //Include that to define 2dTile game elements
+
 
 class LabelProperty : public GameObjectProperty {
 public:

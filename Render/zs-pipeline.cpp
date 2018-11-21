@@ -41,7 +41,7 @@ unsigned int RenderPipeline::render_getpickedObj(void* projectedit_ptr, int mous
     glReadPixels(mouseX, 480 - mouseY, 1,1, GL_RGBA, GL_UNSIGNED_BYTE, data);
     unsigned int pr_data = data[0] + data[1] * 256 + data[2] * 256 * 256; //Calc object ID
 
-    if(data[2] == 255) pr_data = 0; //If we haven't picked any object
+    if(data[2] == 255) pr_data = 256 * 256 * 256; //If we haven't picked any object
 
     return pr_data;
 }

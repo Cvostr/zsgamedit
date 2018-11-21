@@ -398,7 +398,8 @@ void EditWindow::onLeftBtnClicked(int X, int Y){
     unsigned int clicked = render->render_getpickedObj(static_cast<void*>(this), X, Y);
 
     GameObject* obj_ptr = &world.objects[clicked]; //Obtain pointer to selected object by label
-
+    if(obj_ptr == 0x0 || clicked >= 256 * 256 * 256)
+        return;
     _inspector_win->ShowObjectProperties(static_cast<void*>(obj_ptr));
 }
 void EditWindow::onRightBtnClicked(int X, int Y){}
