@@ -35,6 +35,8 @@ public:
 
     TileGeometry geometry;
 
+    void addPropertyInterfaceToInspector(InspectorWin* inspector);
+
     TileGroupProperty();
 };
 
@@ -44,6 +46,8 @@ public:
 
     ZSPIRE::Texture* texture_diffuse;
     TileAnimation anim_property;
+
+    void addPropertyInterfaceToInspector(InspectorWin* inspector);
 
     TileProperty();
 };

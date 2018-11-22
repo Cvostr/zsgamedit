@@ -39,7 +39,8 @@ SOURCES += \
     ProjEd/ProjCreateWin.cpp \
     World/zs-camera.cpp \
     World/go_properties.cpp \
-    World/tile_properties.cpp
+    World/tile_properties.cpp \
+    ProjEd/PropertyAreas.cpp
 
 HEADERS += \
         mainwin.h \

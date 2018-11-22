@@ -42,7 +42,6 @@ public:
 
     virtual void setup(); //Uses to prepare base values
     virtual void updateState(); //Updates value
-    virtual void clear(InspectorWin* win); //Clears all widget in layout
     virtual void addToInspector(InspectorWin* win); //Add edit area to inspector layout
     void callPropertyUpdate(); //Call property, that created this area to update
 
@@ -59,7 +58,6 @@ public:
     ~StringPropertyArea();
 
     void setup(); //Virtual, prepares base values
-    void clear(InspectorWin* win); //Virtual, clears all qt classes
     void addToInspector(InspectorWin* win); //Add edit area to inspector layout
     void updateState(); //Updates value
 
@@ -83,7 +81,6 @@ public:
 
     void setup(); //Virtual
     void addToInspector(InspectorWin* win);
-    void clear(InspectorWin* win); //Virtual, clears all qt classes
     void updateState(); //Virtual, on values changed
 };
 
@@ -107,7 +104,7 @@ public:
 class FloatPropertyArea : public PropertyEditArea{
 public:
 
-    QLineEdit* x_field; //Text digit field for X coord
+    QLineEdit* float_field; //Text digit field for X coord
 
     float* value; //Output variable
 
@@ -116,9 +113,24 @@ public:
 
     void setup(); //Virtual
     void addToInspector(InspectorWin* win);
-    void clear(InspectorWin* win); //Virtual, clears all qt classes
     void updateState(); //Virtual, on values changed
 };
+
+class IntPropertyArea : public PropertyEditArea{
+public:
+
+    QLineEdit* int_field; //Text digit field for X coord
+
+    int* value; //Output variable
+
+    IntPropertyArea();
+    ~IntPropertyArea();
+
+    void setup(); //Virtual
+    void addToInspector(InspectorWin* win);
+    void updateState(); //Virtual, on values changed
+};
+
 
 namespace Ui {
 class InspectorWin;
