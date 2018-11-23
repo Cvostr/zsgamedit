@@ -5,6 +5,13 @@
 #include <QDoubleValidator>
 #include <QObject>
 
+AreaButton::AreaButton(){
+    this->button = new QPushButton;
+    connect(this->button, SIGNAL(clicked()), this, SLOT(onButtonPressed()));
+}
+void AreaButton::onButtonPressed(){
+    this->onPressFuncPtr();
+}
 
 //Float3 definations
 Float3PropertyArea::Float3PropertyArea(){
@@ -91,7 +98,6 @@ Float3PropertyArea::~Float3PropertyArea(){
 //String property area stuff
 StringPropertyArea::StringPropertyArea(){
     type = PEA_TYPE_STRING;
-    //this->str_layout = new QHBoxLayout; //Allocating layout
     this->value_ptr = nullptr;
     this->edit_field = new QLineEdit; //Allocation of QLineEdit
 
@@ -209,8 +215,20 @@ void IntPropertyArea::addToInspector(InspectorWin* win){
     win->getContentLayout()->addLayout(this->elem_layout);
 }
 void IntPropertyArea::setup(){
-
+    int_field->setText(QString::number(*value));
 }
 void IntPropertyArea::updateState(){
+    if(this->value == nullptr) //If vector hasn't been set
+        return; //Go out
+    //Get current values in text fields
+    int value = this->int_field->text().toInt();
 
+    //Get current values in out vector ptr
+    int vptrX = *this->value;
+    //Compare them
+    if(value != vptrX){ //If it updated
+        *this->value = value;
+
+        PropertyEditArea::callPropertyUpdate();
+    }
 }

@@ -40,7 +40,8 @@ public:
     int type; //Describe TYPE of property
     bool active; //Is property working
     QString type_label; //Label of type
-    std::string object_str_id; //String ID of connected object
+    //std::string object_str_id; //String ID of connected object
+    GameObjectLink go_link;
     World* world_ptr; //Sometimes may be useful
 
     GameObjectProperty();

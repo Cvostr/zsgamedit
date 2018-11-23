@@ -94,7 +94,8 @@ void TransformProperty::updateMat(){
     ZSVECTOR3 p_scale = ZSVECTOR3(1,1,1);
     ZSVECTOR3 p_rotation = ZSVECTOR3(0,0,0);
 
-    GameObject* ptr = world_ptr->getObjectByStringId(this->object_str_id);
+    //GameObject* ptr = world_ptr->getObjectByStringId(this->object_str_id);
+    GameObject* ptr = go_link.updLinkPtr();
     if(ptr != nullptr){
     if(ptr->hasParent){
 

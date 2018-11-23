@@ -7,8 +7,8 @@
 #define GO_PROPERTY_TYPE_TILE 1001
 
 typedef struct TileGeometry{
-    unsigned int tileWidth;
-    unsigned int tileHeight;
+    int tileWidth;
+    int tileHeight;
 
     TileGeometry(){
         tileWidth = 128;
@@ -30,12 +30,13 @@ typedef struct TileAnimation{
 
 class TileGroupProperty : public GameObjectProperty{
 public:
-    unsigned int tiles_amount_X;
-    unsigned int tiles_amount_Y;
+    int tiles_amount_X; //Tiles to add
+    int tiles_amount_Y;
 
-    TileGeometry geometry;
+    TileGeometry geometry; //Tile to add geometry
 
     void addPropertyInterfaceToInspector(InspectorWin* inspector);
+    void process();
 
     TileGroupProperty();
 };

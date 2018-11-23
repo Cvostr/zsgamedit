@@ -12,6 +12,9 @@ InspectorWin::InspectorWin(QWidget *parent) :
 {
     ui->setupUi(this);
     addObjComponentBtn = nullptr;
+    this->ui->propertySpace->setMargin(0);
+    this->ui->propertySpace->setSpacing(0);
+    this->ui->propertySpace->setContentsMargins(0,0,0,0);
 }
 
 InspectorWin::~InspectorWin()
@@ -35,8 +38,7 @@ void InspectorWin::onAddComponentBtnPressed(){
 
 void InspectorWin::clearContentLayout(){
     unsigned int areas_num = static_cast<unsigned int>(this->property_areas.size());
-    for(unsigned int area_i = 0; area_i < areas_num; area_i ++){
-       //this->property_areas[area_i]->clear(this);
+    for(unsigned int area_i = 0; area_i < areas_num; area_i ++){ //Iterate over all added areas
        delete property_areas[area_i]; //remove all
     }
     this->property_areas.resize(0); //No areas in list

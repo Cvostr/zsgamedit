@@ -26,6 +26,17 @@
 class InspectorWin;
 class ResourcePickDialog;
 
+class AreaButton : public QObject{
+    Q_OBJECT
+public slots:
+    void onButtonPressed();
+public:
+    QPushButton* button;
+    void (*onPressFuncPtr)(); //Function pointer
+
+    AreaButton();
+};
+
 class PropertyEditArea{
 public:
     int type;
@@ -37,8 +48,7 @@ public:
 
     PropertyEditArea(); //Default construct
 
-    virtual ~PropertyEditArea();
-
+    virtual ~PropertyEditArea(); //Destruct
 
     virtual void setup(); //Uses to prepare base values
     virtual void updateState(); //Updates value
@@ -170,7 +180,6 @@ private:
     QGridLayout* contentLayout;
 public slots:
     void onAddButtonPressed();
-
 
 public:
     QLineEdit* comp_type;

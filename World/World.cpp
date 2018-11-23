@@ -57,8 +57,22 @@ bool GameObject::addProperty(int property){
         _ptr = static_cast<GameObjectProperty*>(ptr);
         break;
     }
+
+    case GO_PROPERTY_TYPE_TILE_GROUP:{
+        TileGroupProperty* ptr = new TileGroupProperty;
+        _ptr = static_cast<GameObjectProperty*>(ptr);
+        break;
     }
-    _ptr->object_str_id = this->str_id; //Connect to gameobject via string id
+
+    case GO_PROPERTY_TYPE_TILE:{
+        TileProperty* ptr = new TileProperty;
+        _ptr = static_cast<GameObjectProperty*>(ptr);
+        break;
+    }
+    }
+    //_ptr->object_str_id = this->str_id; //Connect to gameobject via string id
+    _ptr->go_link = this->getLinkToThisObject();
+    _ptr->go_link.updLinkPtr();
     _ptr->world_ptr = this->world_ptr; //Assign pointer to world
     this->properties.push_back(_ptr); //Store poroperty in gameobject
     return true;
@@ -104,7 +118,9 @@ TransformProperty* GameObject::getTransformProperty(){
 void GameObject::addChildObject(GameObjectLink link){
     link.updLinkPtr(); //Calculating object pointer
     link.ptr->hasParent = true; //Object now has a parent (if it has't before)
-    link.ptr->parent = this->getLinkToThisObject(); //Assigning pointer to new parent
+    link.ptr->parent.obj_str_id = this->getLinkToThisObject().obj_str_id; //Assigning pointer to new parent
+    link.ptr->parent.world_ptr = this->getLinkToThisObject().world_ptr;
+    link.ptr->parent.updLinkPtr();
 
     //Updating child's transform
     //Now check, if it is possible
@@ -112,7 +128,7 @@ void GameObject::addChildObject(GameObjectLink link){
     TransformProperty* Cobj_transform = static_cast<TransformProperty*>(link.ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
 
     if(Pobj_transform != nullptr && Cobj_transform != nullptr){ //If both objects have mesh property
-        //world_ptr->e
+
         Cobj_transform->translation = Cobj_transform->translation - Pobj_transform->translation;
 
         Cobj_transform->scale.X = Cobj_transform->scale.X / Pobj_transform->scale.X;
@@ -178,6 +194,7 @@ GameObject* World::newObject(){
     int add_num = 0; //Declaration of addititonal integer
     getAvailableNumObjLabel("GameObject_", &add_num);
 
+    obj.world_ptr = this;
     obj.addLabelProperty();
     obj.label = &obj.getLabelProperty()->label;
     *obj.label = "GameObject_" + QString::number(add_num); //Assigning label to object
