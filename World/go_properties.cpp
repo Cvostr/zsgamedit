@@ -196,6 +196,21 @@ void GameObject::saveProperties(std::ofstream* stream){
             *stream << ptr->resource_relpath.toStdString();
             break;
         }
+        case GO_PROPERTY_TYPE_TILE_GROUP:{
+            TileGroupProperty* ptr = static_cast<TileGroupProperty*>(property_ptr);
+            int isCreated = static_cast<int>(ptr->isCreated);
+            int geometryWidth = ptr->geometry.tileWidth;
+            int geometryHeight = ptr->geometry.tileHeight;
+            int amountX = ptr->tiles_amount_X;
+            int amountY = ptr->tiles_amount_Y;
+
+            stream->write(reinterpret_cast<char*>(&isCreated), sizeof(int));
+            stream->write(reinterpret_cast<char*>(&geometryWidth), sizeof(int));
+            stream->write(reinterpret_cast<char*>(&geometryHeight), sizeof(int));
+            stream->write(reinterpret_cast<char*>(&amountX), sizeof(int));
+            stream->write(reinterpret_cast<char*>(&amountY), sizeof(int));
+            break;
+        }
         }
     }
 }
@@ -239,11 +254,25 @@ void GameObject::loadProperty(std::ifstream* world_stream){
         std::string rel_path;
         *world_stream >> rel_path;
         MeshProperty* lptr = static_cast<MeshProperty*>(prop_ptr);
-        //this->label = &lptr->label; //Making GameObjects's pointer to string in label property
         lptr->resource_relpath = QString::fromStdString(rel_path); //Write loaded mesh relative path
         lptr->updateMeshPtr(); //Pointer will now point to mesh resource
 
         break;
+    }
+    case GO_PROPERTY_TYPE_TILE_GROUP :{
+        world_stream->seekg(1, std::ofstream::cur); //Skip space
+        TileGroupProperty* t_ptr = static_cast<TileGroupProperty*>(prop_ptr);
+        int isCreated = 0;
+        world_stream->read(reinterpret_cast<char*>(&isCreated), sizeof(int));
+        world_stream->read(reinterpret_cast<char*>(&t_ptr->geometry.tileWidth), sizeof(int));
+        world_stream->read(reinterpret_cast<char*>(&t_ptr->geometry.tileHeight), sizeof(int));
+
+        world_stream->read(reinterpret_cast<char*>(&t_ptr->tiles_amount_X), sizeof(int));
+        world_stream->read(reinterpret_cast<char*>(&t_ptr->tiles_amount_Y), sizeof(int));
+
+        t_ptr->isCreated = static_cast<bool>(isCreated  );
+
+    break;
     }
     }
 }

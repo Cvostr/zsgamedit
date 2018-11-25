@@ -33,6 +33,7 @@ public:
     int tiles_amount_X; //Tiles to add
     int tiles_amount_Y;
 
+    bool isCreated;
     TileGeometry geometry; //Tile to add geometry
 
     void addPropertyInterfaceToInspector(InspectorWin* inspector);
@@ -46,9 +47,11 @@ public:
     TileGeometry geometry;
 
     ZSPIRE::Texture* texture_diffuse;
+    QString diffuse_relpath;
     TileAnimation anim_property;
 
     void addPropertyInterfaceToInspector(InspectorWin* inspector);
+    void onValueChanged(); //Update texture pointer
 
     TileProperty();
 };

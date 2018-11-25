@@ -87,7 +87,7 @@ public:
 
     void addPropertyInterfaceToInspector(InspectorWin* inspector);
     void updateMeshPtr(); //Updates pointer according to resource_relpath
-    void onValueChanged();
+    void onValueChanged(); //Update mesh pointer
     MeshProperty();
 };
 
