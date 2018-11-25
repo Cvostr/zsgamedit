@@ -21,6 +21,7 @@ namespace ZSPIRE {
 		void setGLuniformFloat(const char* uniform_str, float value);
 		void setGLuniformInt(const char* uniform_str, int value);
 		void setGLuniformVec3(const char* uniform_str, ZSVECTOR3 value);
+        void setGLuniformVec4(const char* uniform_str, ZSVECTOR4 value);
 		void setGLuniformMat4x4(const char* uniform_str, ZSMATRIX4x4 value);
 
 		void setHasDiffuseTextureProperty(bool hasDiffuseMap);

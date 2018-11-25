@@ -170,6 +170,13 @@ void ZSPIRE::Shader::setGLuniformVec3(const char* uniform_str, ZSVECTOR3 value){
 
 }
 
+void ZSPIRE::Shader::setGLuniformVec4(const char* uniform_str, ZSVECTOR4 value){
+
+    unsigned int uniform_id = glGetUniformLocation(this->SHADER_ID, uniform_str);
+    glUniform4f(uniform_id, value.X, value.Y, value.Z, value.W);
+
+}
+
 void ZSPIRE::Shader::setGLuniformInt(const char* uniform_str, int value) {
 
 	unsigned int uniform_id = glGetUniformLocation(this->SHADER_ID, uniform_str);

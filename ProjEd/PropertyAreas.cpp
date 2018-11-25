@@ -9,6 +9,11 @@ AreaButton::AreaButton(){
     this->button = new QPushButton;
     connect(this->button, SIGNAL(clicked()), this, SLOT(onButtonPressed()));
 }
+
+AreaButton::~AreaButton(){
+    delete this->button;
+}
+
 void AreaButton::onButtonPressed(){
     this->onPressFuncPtr();
 }

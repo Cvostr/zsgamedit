@@ -35,6 +35,7 @@ public:
     void (*onPressFuncPtr)(); //Function pointer
 
     AreaButton();
+    ~AreaButton(); //Destroy button widget
 };
 
 class PropertyEditArea{
@@ -156,11 +157,13 @@ public slots:
 
 public:
     std::vector<PropertyEditArea*> property_areas; //vector for areas
+    std::vector<QObject*> additional_objects;
     explicit InspectorWin(QWidget *parent = nullptr);
     ~InspectorWin();
     QVBoxLayout* getContentLayout();
     void clearContentLayout(); //Clears layout
     void addPropertyArea(PropertyEditArea* area); //Adds new property area
+    void registerUiObject(QObject* object);
     void area_update(); //To update property areas states
     void makeAddObjComponentBtn(); //Adds "Create Property" Btn to content layout
     void ShowObjectProperties(void* object_ptr);

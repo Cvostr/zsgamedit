@@ -122,7 +122,7 @@ public:
     void saveProperties(std::ofstream* stream); //Writes properties content at end of stream
     void loadProperty(std::ifstream* world_stream); //Loads one property from stream
 
-    void Draw(ZSPIRE::Shader* shader, ZSMATRIX4x4 parent);
+    void Draw(ZSPIRE::Shader* shader);
 
     GameObject(); //Default constructor
 };

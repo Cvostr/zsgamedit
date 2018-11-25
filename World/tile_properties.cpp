@@ -1,4 +1,5 @@
 #include "headers/World.h"
+#include <unistd.h>
 TileGroupProperty* current_property; //Property, that shown
 
 void onCreateBtnPress(){
@@ -47,6 +48,7 @@ void TileGroupProperty::addPropertyInterfaceToInspector(InspectorWin* inspector)
     btn->onPressFuncPtr = &onCreateBtnPress;
     btn->button->setText("Process");
     inspector->getContentLayout()->addWidget(btn->button);
+    inspector->registerUiObject(btn);
 
     current_property = this;
 }
@@ -57,6 +59,7 @@ void TileGroupProperty::process(){
 
     for(int x_i = 0; x_i < tiles_amount_X; x_i ++){
         for(int y_i = 0; y_i < tiles_amount_Y; y_i ++){
+            usleep(1000);
             GameObject* obj = wrld->newObject(); //Invoke new object creation
 
             go_link.updLinkPtr();
@@ -65,7 +68,7 @@ void TileGroupProperty::process(){
             LabelProperty* parent_label = parent->getLabelProperty();
 
             obj->addProperty(GO_PROPERTY_TYPE_MESH); //Adding mesh
-            obj->addProperty(GO_PROPERTY_TYPE_TILE);
+            obj->addProperty(GO_PROPERTY_TYPE_TILE); //Adding tile
             //Receive properties ptrs
             TransformProperty* transform = obj->getTransformProperty();
             LabelProperty* label = obj->getLabelProperty();
@@ -76,7 +79,7 @@ void TileGroupProperty::process(){
             mesh_prop->updateMeshPtr();
             tile_prop->geometry = this->geometry; //Assign geometry property
             transform->scale = ZSVECTOR3(geometry.tileWidth, geometry.tileHeight, 1);
-            transform->translation = ZSVECTOR3(geometry.tileWidth * x_i, geometry.tileHeight * y_i, 0);
+            transform->translation = ZSVECTOR3(geometry.tileWidth * x_i * 2, geometry.tileHeight * y_i * 2, 0);
             transform->translation = transform->translation + parent_transform->translation;
             //transform->updateMat();
 

@@ -38,10 +38,15 @@ void InspectorWin::onAddComponentBtnPressed(){
 
 void InspectorWin::clearContentLayout(){
     unsigned int areas_num = static_cast<unsigned int>(this->property_areas.size());
+    unsigned int objs_num = static_cast<unsigned int>(this->additional_objects.size());
     for(unsigned int area_i = 0; area_i < areas_num; area_i ++){ //Iterate over all added areas
        delete property_areas[area_i]; //remove all
     }
+    for(unsigned int obj_i = 0; obj_i < objs_num; obj_i ++){ //Iterate over all added areas
+       delete additional_objects[obj_i]; //remove all
+    }
     this->property_areas.resize(0); //No areas in list
+    this->additional_objects.resize(0); //No objects in list
     if(addObjComponentBtn != nullptr){
         delete addObjComponentBtn; //Remove button
         addObjComponentBtn = 0x0; //Avoid crashes
@@ -49,9 +54,13 @@ void InspectorWin::clearContentLayout(){
 }
 
 void InspectorWin::addPropertyArea(PropertyEditArea* area){
-    area->setup();
+    area->setup(); //Call setup of area
     area->addToInspector(this);
-    this->property_areas.push_back(area);
+    this->property_areas.push_back(area); //Add area pointer to list of areas
+}
+
+void InspectorWin::registerUiObject(QObject* object){
+    this->additional_objects.push_back(object);
 }
 
 void InspectorWin::makeAddObjComponentBtn(){

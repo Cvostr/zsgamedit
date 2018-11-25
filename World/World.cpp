@@ -116,11 +116,12 @@ TransformProperty* GameObject::getTransformProperty(){
 }
 
 void GameObject::addChildObject(GameObjectLink link){
-    link.updLinkPtr(); //Calculating object pointer
-    link.ptr->hasParent = true; //Object now has a parent (if it has't before)
-    link.ptr->parent.obj_str_id = this->getLinkToThisObject().obj_str_id; //Assigning pointer to new parent
-    link.ptr->parent.world_ptr = this->getLinkToThisObject().world_ptr;
-    link.ptr->parent.updLinkPtr();
+    GameObjectLink _link = link;
+    _link.updLinkPtr(); //Calculating object pointer
+    _link.ptr->hasParent = true; //Object now has a parent (if it has't before)
+    _link.ptr->parent.obj_str_id = this->getLinkToThisObject().obj_str_id; //Assigning pointer to new parent
+    _link.ptr->parent.world_ptr = this->getLinkToThisObject().world_ptr;
+    _link.ptr->parent.updLinkPtr();
 
     //Updating child's transform
     //Now check, if it is possible
@@ -140,7 +141,7 @@ void GameObject::addChildObject(GameObjectLink link){
         Cobj_transform->updateMat(); //Update transform matrix
     }
 
-    this->children.push_back(link);
+    this->children.push_back(_link);
 }
 void GameObject::removeChildObject(GameObjectLink link){
     unsigned int children_am = static_cast<unsigned int>(children.size()); //get children amount
