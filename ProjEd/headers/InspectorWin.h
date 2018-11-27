@@ -198,10 +198,11 @@ public slots:
     void onNeedToShow();
     void onResourceSelected();
 private:
-    QGridLayout* contentLayout;
+    QGridLayout* contentLayout; //Layout to contain everything
 public:
     QListWidget* list;
-    PickResourceArea* area;
+    PickResourceArea* area; //Pointer to area, that invoked this object
+    QLabel* resource_text; //Pointer to label in area to write resource label
 
     ResourcePickDialog(QWidget* parent = nullptr);
     ~ResourcePickDialog();
