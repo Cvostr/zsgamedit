@@ -11,6 +11,7 @@
 #include "../../Render/headers/zs-texture.h"
 #include "../../Render/headers/zs-math.h"
 #include "../../Render/headers/zs-shader.h"
+#include "../../Render/headers/zs-pipeline.h"
 
 #define GO_PROPERTY_TYPE_NONE 0
 #define GO_PROPERTY_TYPE_TRANSFORM 1
@@ -40,7 +41,6 @@ public:
     int type; //Describe TYPE of property
     bool active; //Is property working
     QString type_label; //Label of type
-    //std::string object_str_id; //String ID of connected object
     GameObjectLink go_link;
     World* world_ptr; //Sometimes may be useful
 
@@ -93,12 +93,13 @@ public:
 
 class GameObject{
 public:
-    int array_index;
+    int array_index; //Index in objects vector
     QString* label; //Pointer to string label in property
     std::string str_id; //String, gameobject identified by
     bool hasParent; //If object has a parent
     World* world_ptr; //pointer to world, when object placed
     GameObjectLink parent; //Link to object's parent
+    int render_type;
 
     std::vector<GameObjectProperty*> properties; //Vector to store pointers to all properties
     std::vector<GameObjectLink> children; //Vector to store links to children of object
@@ -122,7 +123,7 @@ public:
     void saveProperties(std::ofstream* stream); //Writes properties content at end of stream
     void loadProperty(std::ifstream* world_stream); //Loads one property from stream
 
-    void Draw(ZSPIRE::Shader* shader);
+    void Draw(RenderPipeline* pipeline);
 
     GameObject(); //Default constructor
 };
@@ -132,9 +133,9 @@ protected:
     void getAvailableNumObjLabel(QString label, int* result);
 
 public:
-    void* proj_ptr;
+    void* proj_ptr; //Pointer to Project structure
 
-    std::vector<GameObject> objects;
+    std::vector<GameObject> objects; //Vector, containing all gameobjects
 
     GameObject* addObject(GameObject obj);
     GameObject* newObject();
@@ -143,9 +144,10 @@ public:
     GameObject** getUnparentedObjs();
 
     ZSPIRE::Mesh* getMeshPtrByRelPath(QString label); //look through all meshes in project ptr
+    ZSPIRE::Texture* getTexturePtrByRelPath(QString label); //look through all meshes in project ptr
 
     void saveToFile(QString file);
-    void openFromFile(QString file, QTreeWidgetItem* root_item, QTreeWidget* w_ptr);
+    void openFromFile(QString file, QTreeWidget* w_ptr);
     void clear();
 
 };

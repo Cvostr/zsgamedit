@@ -30,6 +30,7 @@ GameObject::GameObject(){
     this->hasParent = false; //No parent by default
     item_ptr = new QTreeWidgetItem; //Allocate tree widget item
     genRandomString(&this->str_id, 15); //Generate random string ID
+    render_type = GO_RENDER_TYPE_NONE;
 }
 
 bool GameObject::addProperty(int property){
@@ -253,7 +254,7 @@ void World::saveToFile(QString file){
 
     for(unsigned int obj_i = 0; obj_i < static_cast<unsigned int>(obj_num); obj_i ++){ //Iterate over all game objects
         GameObject* object_ptr = static_cast<GameObject*>(&this->objects[obj_i]);
-        world_stream << "\nG_OBJECT " << object_ptr->str_id; //Start object's header
+        world_stream << "\nG_OBJECT " << object_ptr->str_id << " " << object_ptr->render_type; //Start object's header
         if(object_ptr->children.size() > 0){ //If object has at least one child object
             world_stream << "\nG_CHI " << object_ptr->getAliveChildrenAmount() << " "; //Start children header
             unsigned int children_am = static_cast<unsigned int>(object_ptr->children.size());
@@ -282,7 +283,7 @@ int GameObject::getAliveChildrenAmount(){
     return result;
 }
 
-void World::openFromFile(QString file, QTreeWidgetItem* root_item, QTreeWidget* w_ptr){
+void World::openFromFile(QString file, QTreeWidget* w_ptr){
     clear(); //Clear all objects
     std::string fpath = file.toStdString();
 
@@ -305,7 +306,7 @@ void World::openFromFile(QString file, QTreeWidgetItem* root_item, QTreeWidget* 
         if(prefix.compare("G_OBJECT") == 0){ //if it is game object
             GameObject object; //firstly, define an object
             object.world_ptr = this; //Writing pointer to world
-            world_stream >> object.str_id;
+            world_stream >> object.str_id >> object.render_type;
             //Then do the same sh*t, iterate until "G_END" came up
             while(true){
                 std::string _prefix;
@@ -386,6 +387,20 @@ ZSPIRE::Mesh* World::getMeshPtrByRelPath(QString label){
         //If resource is mesh and has same name as in argument
         if(r_ptr->type == RESOURCE_TYPE_MESH && r_ptr->rel_path.compare(label) == 0){
             return static_cast<ZSPIRE::Mesh*>(r_ptr->class_ptr);
+        }
+    }
+    return nullptr;
+}
+
+ZSPIRE::Texture* World::getTexturePtrByRelPath(QString label){
+    Project* proj_ptr = static_cast<Project*>(this->proj_ptr); //Convert void pointer to Project*
+    unsigned int resources_num = static_cast<unsigned int>(proj_ptr->resources.size()); //Receive resource amount in project
+
+    for(unsigned int r_it = 0; r_it < resources_num; r_it ++){ //Iteerate over all resources in project
+        Resource* r_ptr = &proj_ptr->resources[r_it]; //Obtain pointer to resource
+        //If resource is mesh and has same name as in argument
+        if(r_ptr->type == RESOURCE_TYPE_TEXTURE && r_ptr->rel_path.compare(label) == 0){
+            return static_cast<ZSPIRE::Texture*>(r_ptr->class_ptr);
         }
     }
     return nullptr;

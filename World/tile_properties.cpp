@@ -71,6 +71,7 @@ void TileGroupProperty::process(){
             TransformProperty* parent_transform = parent->getTransformProperty();
             LabelProperty* parent_label = parent->getLabelProperty();
 
+            obj->render_type = GO_RENDER_TYPE_TILE;
             obj->addProperty(GO_PROPERTY_TYPE_MESH); //Adding mesh
             obj->addProperty(GO_PROPERTY_TYPE_TILE); //Adding tile
             //Receive properties ptrs
@@ -106,5 +107,9 @@ void TileProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
 }
 
 void TileProperty::onValueChanged(){
+    updTexturePtr();
+}
 
+void TileProperty::updTexturePtr(){
+    this->texture_diffuse = world_ptr->getTexturePtrByRelPath(diffuse_relpath);
 }

@@ -52,6 +52,7 @@ public:
 
     void addPropertyInterfaceToInspector(InspectorWin* inspector);
     void onValueChanged(); //Update texture pointer
+    void updTexturePtr();
 
     TileProperty();
 };

@@ -30,7 +30,9 @@ namespace ZSPIRE {
 		void setTransform(ZSMATRIX4x4 transform);
         void setCamera(Camera* cam);
 
+        bool isCreated;
 
+        Shader(); //Construct to set isCreated var to false
 	};
 }
 

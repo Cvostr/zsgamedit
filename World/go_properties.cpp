@@ -141,7 +141,7 @@ void MeshProperty::updateMeshPtr(){
         this->mesh_ptr = ZSPIRE::getPlaneMesh2D();
     }else //If it isn't built in mesh
     {
-        world_ptr->getMeshPtrByRelPath(resource_relpath);
+       this->mesh_ptr = world_ptr->getMeshPtrByRelPath(resource_relpath);
     }
 }
 
@@ -211,6 +211,14 @@ void GameObject::saveProperties(std::ofstream* stream){
             stream->write(reinterpret_cast<char*>(&amountY), sizeof(int));
             break;
         }
+        case GO_PROPERTY_TYPE_TILE:{
+            TileProperty* ptr = static_cast<TileProperty*>(property_ptr);
+            if(ptr->diffuse_relpath.isEmpty())
+                *stream << "@none";
+            else
+                *stream << ptr->diffuse_relpath.toStdString();
+            break;
+        }
         }
     }
 }
@@ -273,6 +281,16 @@ void GameObject::loadProperty(std::ifstream* world_stream){
         t_ptr->isCreated = static_cast<bool>(isCreated  );
 
     break;
+    }
+    case GO_PROPERTY_TYPE_TILE:{
+        std::string rel_path;
+        *world_stream >> rel_path;
+        TileProperty* lptr = static_cast<TileProperty*>(prop_ptr);
+        if(rel_path.compare("@none") != 0){
+            lptr->diffuse_relpath = QString::fromStdString(rel_path); //Write loaded mesh relative path
+            lptr->updTexturePtr(); //Pointer will now point to mesh resource
+        }
+        break;
     }
     }
 }

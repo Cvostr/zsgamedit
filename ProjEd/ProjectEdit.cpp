@@ -125,7 +125,7 @@ void EditWindow::openFile(QString file_path){
 
     if(file_path.endsWith(".scn")){ //If it is scene
         setupObjectsHieList(); //Clear everything, at first
-        world.openFromFile(file_path, this->column_item_go, ui->objsList); //Open this scene
+        world.openFromFile(file_path, ui->objsList); //Open this scene
 
         scene_path = file_path; //Assign scene path
         hasSceneFile = true; //Scene is saved

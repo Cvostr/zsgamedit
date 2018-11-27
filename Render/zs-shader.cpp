@@ -8,10 +8,14 @@
 #include <sstream>
 #include <iostream>
 
-//#include "headers/zs-math.h"
+int cur_shader_gl_id = -1;
+
+ZSPIRE::Shader::Shader(){
+    isCreated = false; //Not created by default
+}
 
 void ZSPIRE::Shader::Init() {
-	this->SHADER_ID = glCreateProgram();
+    this->SHADER_ID = glCreateProgram(); //Call OGL function to create new shader
 }
 
 void GLcheckCompileErrors(unsigned int shader, const char* type, const char* filepath = nullptr)
@@ -124,16 +128,21 @@ bool ZSPIRE::Shader::compileFromFile(const char* VSpath, const char* FSpath){
 	setGLuniformInt("shadow0", 20);
 	setGLuniformInt("shadow1", 21);
 
+    this->isCreated = true; //Shader created & compiled now
 	return true;
 
 }
 
 void ZSPIRE::Shader::Destroy() {
 	glDeleteProgram(this->SHADER_ID);
+    this->isCreated = false;
 }
 
 void ZSPIRE::Shader::Use() {
+    if(cur_shader_gl_id == this->SHADER_ID) return;
+
 	glUseProgram(this->SHADER_ID);
+    cur_shader_gl_id = this->SHADER_ID;
 }
 
 void ZSPIRE::Shader::setGLuniformMat4x4(const char* uniform_str, ZSMATRIX4x4 value) {
