@@ -38,6 +38,7 @@ public:
 
     void addPropertyInterfaceToInspector(InspectorWin* inspector);
     void process();
+    void clear();
 
     TileGroupProperty();
 };

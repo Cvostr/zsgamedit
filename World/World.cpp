@@ -30,7 +30,12 @@ GameObject::GameObject(){
     this->hasParent = false; //No parent by default
     item_ptr = new QTreeWidgetItem; //Allocate tree widget item
     genRandomString(&this->str_id, 15); //Generate random string ID
-    render_type = GO_RENDER_TYPE_NONE;
+    render_type = GO_RENDER_TYPE_NONE; //No render by default
+    alive = true; //Object exist by default
+}
+
+GameObject::~GameObject(){
+    //delete this->item_ptr;
 }
 
 bool GameObject::addProperty(int property){
@@ -147,10 +152,11 @@ void GameObject::addChildObject(GameObjectLink link){
 void GameObject::removeChildObject(GameObjectLink link){
     unsigned int children_am = static_cast<unsigned int>(children.size()); //get children amount
     for(unsigned int i = 0; i < children_am; i++){ //Iterate over all children in object
-        GameObject* ptr = children[i].updLinkPtr();
-        if(link.obj_str_id.compare(ptr->str_id) == 0){ //if str_id in requested link compares to iteratable link
+        GameObjectLink* link_ptr = &children[i];
+        if(link.obj_str_id.compare(link_ptr->obj_str_id) == 0){ //if str_id in requested link compares to iteratable link
+            GameObject* ptr = children[i].updLinkPtr();
             children[i].crack(); //Make link broken
-            trimChildrenArray(); //Remove broken link from vector
+
 
             //Updating child's transform
             //Now check, if it is possible
@@ -170,13 +176,14 @@ void GameObject::removeChildObject(GameObjectLink link){
             }
         }
     }
+    trimChildrenArray(); //Remove broken link from vector
 }
 
 void GameObject::trimChildrenArray(){
     for (unsigned int i = 0; i < children.size(); i ++) { //Iterating over all objects
         if(children[i].isEmpty() == true){ //If object marked as deleted
-            for (unsigned int obj_i = i + 1; obj_i < children.size(); obj_i ++) {
-                children[obj_i - 1] = children[obj_i];
+            for (unsigned int obj_i = i + 1; obj_i < children.size(); obj_i ++) { //Iterate over all next chidren
+                children[obj_i - 1] = children[obj_i]; //Move it to previous place
             }
             children.resize(children.size() - 1);
         }
@@ -239,6 +246,36 @@ void World::getAvailableNumObjLabel(QString label, int* result){
          *result += 1;
          getAvailableNumObjLabel(label, result);
      }
+}
+
+void World::removeObj(GameObjectLink link){
+    GameObjectLink l = link;
+    l.updLinkPtr();
+    l.ptr->alive = false; //Mark object as dead
+    //std::vector<GameObjectProperty*> obj_properties = l.ptr->properties; //Copy properties ptrs
+    //std::vector<GameObjectLink> obj_children = l.ptr->children; //Copy children pointers to destroy them later
+
+    delete l.updLinkPtr()->item_ptr;
+
+    if(l.ptr->hasParent == true){
+
+        l.ptr->parent.updLinkPtr()->children.resize(0);
+    //   l.ptr->parent.updLinkPtr()->removeChildObject(l);
+    }
+
+    trimObjectsList();
+
+}
+
+void World::trimObjectsList(){
+    for (unsigned int i = 0; i < objects.size(); i ++) { //Iterating over all objects
+        if(objects[i].alive == false){ //If object marked as deleted
+            for (unsigned int obj_i = i + 1; obj_i < objects.size(); obj_i ++) { //Iterate over all next chidren
+                objects[obj_i - 1] = objects[obj_i]; //Move it to previous place
+            }
+            objects.resize(objects.size() - 1);
+        }
+    }
 }
 
 void World::saveToFile(QString file){

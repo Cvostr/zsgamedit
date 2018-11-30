@@ -97,6 +97,7 @@ public:
     QString* label; //Pointer to string label in property
     std::string str_id; //String, gameobject identified by
     bool hasParent; //If object has a parent
+    bool alive;
     World* world_ptr; //pointer to world, when object placed
     GameObjectLink parent; //Link to object's parent
     int render_type;
@@ -126,6 +127,7 @@ public:
     void Draw(RenderPipeline* pipeline);
 
     GameObject(); //Default constructor
+    ~GameObject();
 };
 
 class World{
@@ -138,10 +140,12 @@ public:
     std::vector<GameObject> objects; //Vector, containing all gameobjects
 
     GameObject* addObject(GameObject obj);
-    GameObject* newObject();
+    GameObject* newObject(); //Add new object to world
     GameObject* getObjectByLabel(QString label);
     GameObject* getObjectByStringId(std::string id);
     GameObject** getUnparentedObjs();
+    void removeObj(GameObjectLink link); //Remove object from world
+    void trimObjectsList();
 
     ZSPIRE::Mesh* getMeshPtrByRelPath(QString label); //look through all meshes in project ptr
     ZSPIRE::Texture* getTexturePtrByRelPath(QString label); //look through all meshes in project ptr

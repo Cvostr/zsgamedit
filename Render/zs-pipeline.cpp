@@ -65,9 +65,6 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr)
 
     this->updateShadersCameraInfo(cam_ptr); //Send camera properties to all drawing shaders
 
-    //glActiveTexture(GL_TEXTURE0);
-    //glBindTexture(GL_TEXTURE_2D, 1);
-
     for(unsigned int obj_i = 0; obj_i < world_ptr->objects.size(); obj_i ++){
         GameObject* obj_ptr = &world_ptr->objects[obj_i];
         if(!obj_ptr->hasParent)
@@ -117,8 +114,11 @@ ZSPIRE::Shader* RenderPipeline::processShaderOnObject(void* _obj){
             result = &tile_shader;
             //Receive pointer to tile information
             TileProperty* tile_ptr = static_cast<TileProperty*>(obj->getPropertyPtrByType(GO_PROPERTY_TYPE_TILE));
-            if(tile_ptr->texture_diffuse != nullptr)
-                tile_ptr->texture_diffuse->Use(0);
+            if(tile_ptr->texture_diffuse != nullptr){
+                tile_ptr->texture_diffuse->Use(0); //Use this texture
+            }else{
+                tile_shader.setHasDiffuseTextureProperty(true); //Shader will not use diffuse texture
+            }
             break;
         }
     case GO_RENDER_TYPE_NONE:{

@@ -94,7 +94,7 @@
     <property name="title">
      <string>&amp;Create</string>
     </property>
-    <addaction name="actionScene"/>
+    <addaction name="actionCreateScene"/>
    </widget>
    <widget class="QMenu" name="menuObjects">
     <property name="title">
@@ -118,7 +118,7 @@
     <string>&amp;Redo</string>
    </property>
   </action>
-  <action name="actionScene">
+  <action name="actionCreateScene">
    <property name="text">
     <string>&amp;Scene</string>
    </property>
@@ -140,7 +140,7 @@
   </action>
   <action name="actionOpen">
    <property name="text">
-    <string>Open</string>
+    <string>&amp;Open</string>
    </property>
   </action>
  </widget>

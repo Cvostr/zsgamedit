@@ -58,11 +58,12 @@ public slots:
     void onSceneSave();
     void onSceneSaveAs();
     void onOpenScene();
+    void onNewScene();
 
 private:
     QString current_dir;
     QString scene_path;
-    bool hasSceneFile;
+    bool hasSceneFile; //Is scene saved or loaded
 
     SDL_Window* window; //Editor preview sdl2 window
     SDL_GLContext glcontext; //Editor preview window opengl context

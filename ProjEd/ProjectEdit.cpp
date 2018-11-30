@@ -27,6 +27,8 @@ EditWindow::EditWindow(QWidget *parent) :
                 this, SLOT(onSceneSaveAs())); //Signal comes, when user clicks on File->Save As
     QObject::connect(ui->actionOpen, SIGNAL(triggered()), this, SLOT(onOpenScene()));
 
+    QObject::connect(ui->actionCreateScene, SIGNAL(triggered()), this, SLOT(onNewScene()));
+
     QObject::connect(ui->objsList, SIGNAL(itemClicked(QTreeWidgetItem *, int)),
                 this, SLOT(onObjectListItemClicked())); //Signal comes, when user clicks on File->Save As
 
@@ -159,10 +161,15 @@ void EditWindow::onSceneSave(){
     }
 }
 
+void EditWindow::onNewScene(){
+    setupObjectsHieList();
+    world.clear();
+    hasSceneFile = false; //We have new scene
+}
+
 void EditWindow::onAddNewGameObject(){
     GameObject* obj_ptr = this->world.newObject(); //Add new object to world
-    //this->column_item_go->addChild(obj_ptr->item_ptr); //Add object to list hierarchy
-    ui->objsList->addTopLevelItem(obj_ptr->item_ptr);
+    ui->objsList->addTopLevelItem(obj_ptr->item_ptr); //New object will not have parents, so will be spawned at top
 }
 
 void EditWindow::setupObjectsHieList(){
@@ -171,8 +178,6 @@ void EditWindow::setupObjectsHieList(){
 
     column_item_go = new QTreeWidgetItem; //Defining Objects list
     column_item_go->setText(0, "Objects"); //Setting text to Objects
-
-    //w_ptr->addTopLevelItem(column_item_go);
 }
 
 void EditWindow::updateFileList(){
