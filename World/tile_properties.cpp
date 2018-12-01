@@ -13,7 +13,7 @@ void onClearBtnPress(){
 
 TileGroupProperty::TileGroupProperty(){
     type = GO_PROPERTY_TYPE_TILE_GROUP; //Set correct type
-    active = true;
+    active = true; //And it is active
 
     this->isCreated = false;
     this->tiles_amount_X = 0;
@@ -113,7 +113,7 @@ void TileGroupProperty::clear(){
     GameObject* parent = go_link.ptr;
     unsigned int children_am = parent->children.size();
     for(unsigned int ch_i = 0; ch_i < children_am; ch_i ++){
-        GameObjectLink link_toremove = parent->children[ch_i];
+        GameObjectLink link_toremove = parent->children[0];
         world_ptr->removeObj(link_toremove);
         go_link.updLinkPtr();
         parent = go_link.ptr;
