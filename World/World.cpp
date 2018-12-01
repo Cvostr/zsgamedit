@@ -252,19 +252,30 @@ void World::removeObj(GameObjectLink link){
     GameObjectLink l = link;
     l.updLinkPtr();
     l.ptr->alive = false; //Mark object as dead
-    //std::vector<GameObjectProperty*> obj_properties = l.ptr->properties; //Copy properties ptrs
-    //std::vector<GameObjectLink> obj_children = l.ptr->children; //Copy children pointers to destroy them later
 
-    delete l.updLinkPtr()->item_ptr;
+    unsigned int children_num = static_cast<unsigned int>(l.ptr->children.size());
 
-    if(l.ptr->hasParent == true){
+    for(unsigned int ch_i = 0; ch_i < children_num; ch_i ++){
+        GameObjectLink link = link.ptr->children[ch_i];
+        removeObj(link);
+    }
 
-        l.ptr->parent.updLinkPtr()->children.resize(0);
-    //   l.ptr->parent.updLinkPtr()->removeChildObject(l);
+    delete l.ptr->item_ptr;
+
+    if(l.ptr->hasParent == true){ //If object parented by other obj
+        GameObject* parent = l.ptr->parent.updLinkPtr(); //Receive pointer to object's parent
+
+        unsigned int children_am = static_cast<unsigned int>(parent->children.size()); //get children amount
+        for(unsigned int i = 0; i < children_am; i++){ //Iterate over all children in object
+            GameObjectLink* link_ptr = &parent->children[i];
+            if(link.obj_str_id.compare(link_ptr->obj_str_id) == 0){ //if str_id in requested link compares to iteratable link
+                parent->children[i].crack(); //Make link broken
+                }
+            }
+        //parent->trimChildrenArray();
     }
 
     trimObjectsList();
-
 }
 
 void World::trimObjectsList(){

@@ -82,7 +82,7 @@ void GameObject::Draw(RenderPipeline* pipeline){
     if(shader != nullptr){
 
     shader->setTransform(transform_prop->transform_mat);
-
+/*
     unsigned char* to_send = reinterpret_cast<unsigned char*>(&this->array_index);
     float r = static_cast<float>(to_send[0]);
     float g = static_cast<float>(to_send[1]);
@@ -90,15 +90,17 @@ void GameObject::Draw(RenderPipeline* pipeline){
     float a = static_cast<float>(to_send[3]);
 
     shader->setGLuniformVec4("color", ZSVECTOR4(r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f));
-
+*/
     MeshProperty* mesh_prop = static_cast<MeshProperty*>(this->getPropertyPtrByType(GO_PROPERTY_TYPE_MESH));
     if(mesh_prop != nullptr)
         mesh_prop->mesh_ptr->Draw();
     }
     for(unsigned int obj_i = 0; obj_i < this->children.size(); obj_i ++){
-        children[obj_i].updLinkPtr();
-        GameObject* child_ptr = this->children[obj_i].ptr;
-        child_ptr->Draw(pipeline);
+        if(!children[obj_i].isEmpty()){
+            children[obj_i].updLinkPtr();
+            GameObject* child_ptr = this->children[obj_i].ptr;
+            child_ptr->Draw(pipeline);
+        }
     }
 }
 
@@ -106,7 +108,18 @@ ZSPIRE::Shader* RenderPipeline::processShaderOnObject(void* _obj){
     GameObject* obj = static_cast<GameObject*>(_obj);
     ZSPIRE::Shader* result;
 
-    if(current_state == PIPELINE_STATE_PICKING) return &pick_shader;
+    if(current_state == PIPELINE_STATE_PICKING) {
+        //pick_shader.Use();
+        unsigned char* to_send = reinterpret_cast<unsigned char*>(&obj->array_index);
+        float r = static_cast<float>(to_send[0]);
+        float g = static_cast<float>(to_send[1]);
+        float b = static_cast<float>(to_send[2]);
+        float a = static_cast<float>(to_send[3]);
+
+        pick_shader.setGLuniformVec4("color", ZSVECTOR4(r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f));
+
+        return &pick_shader;
+    }
 
     switch(obj->render_type){
         case GO_RENDER_TYPE_TILE:{

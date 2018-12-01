@@ -355,6 +355,7 @@ EditWindow* ZSEditor::openEditor(){
 
     _editor_win->lookForResources(_editor_win->project.root_path); //Make a vector of all resource files
     _editor_win->show(); //Show editor window
+    _editor_win->move(0,0); //Editor base win would be in the left part of screen
 
     _inspector_win->show();
     _inspector_win->move(_editor_win->width() + 640, 0);
