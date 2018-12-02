@@ -92,16 +92,12 @@ void EditWindow::init(){
         this->edit_camera.setProjectionType(ZSCAMERA_PROJECTION_ORTHOGONAL);
         edit_camera.setPosition(ZSVECTOR3(0,0,0));
         edit_camera.setFront(ZSVECTOR3(0,0,1));
-
-        /*
-        this->edit_camera.setProjectionType(ZSCAMERA_PROJECTION_PERSPECTIVE);
-        edit_camera.setPosition(ZSVECTOR3(0,0,-100));
-        edit_camera.setFront(ZSVECTOR3(0,0,1));
-        */
         break;
     }
     case 3:{ //3D project
         this->edit_camera.setProjectionType(ZSCAMERA_PROJECTION_PERSPECTIVE);
+        edit_camera.setPosition(ZSVECTOR3(0,0,0));
+        edit_camera.setFront(ZSVECTOR3(0,0,1));
         break;
     }
     }
@@ -131,6 +127,8 @@ void EditWindow::openFile(QString file_path){
 
         scene_path = file_path; //Assign scene path
         hasSceneFile = true; //Scene is saved
+        this->edit_camera.setPosition(ZSVECTOR3(0.0f, 0.0f, 0.0f)); //Set camera to 0
+        _inspector_win->clearContentLayout(); //Clear content, if not empty
     }
 }
 
