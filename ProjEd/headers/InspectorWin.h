@@ -31,6 +31,7 @@ class AreaButton : public QObject{
 public slots:
     void onButtonPressed();
 public:
+    InspectorWin* insp_ptr;
     QPushButton* button;
     void (*onPressFuncPtr)(); //Function pointer
 
@@ -167,6 +168,7 @@ public:
     void area_update(); //To update property areas states
     void makeAddObjComponentBtn(); //Adds "Create Property" Btn to content layout
     void ShowObjectProperties(void* object_ptr);
+    void updateObjectProperties();
     void* gameobject_ptr;
 private:
     Ui::InspectorWin *ui;

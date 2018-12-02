@@ -21,12 +21,17 @@
 #define _fileno fileno
 #endif
 
-unsigned int slots[SLOTS_COUNT] = { 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff };
+unsigned int tex_slots[SLOTS_COUNT] = { 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff };
 
 
 void ZSPIRE::Texture::Init() {
 	glGenTextures(1, &this->TEXTURE_ID); //Initializing texture in GL
 	glBindTexture(GL_TEXTURE_2D, this->TEXTURE_ID); //We now working with this texture
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
 }
 
 ZSPIRE::Texture::Texture() {
@@ -35,10 +40,10 @@ ZSPIRE::Texture::Texture() {
 
 void ZSPIRE::Texture::Use(int slot) {
 
-	if ((slot < SLOTS_COUNT) && (this->TEXTURE_ID != slots[slot])) {
+    if ((slot < SLOTS_COUNT) && (this->TEXTURE_ID != tex_slots[slot])) {
 		glActiveTexture(GL_TEXTURE0 + slot); //Activating texture slot
 		glBindTexture(GL_TEXTURE_2D, this->TEXTURE_ID); //Sending texture to activated slot
-		slots[slot] = this->TEXTURE_ID;
+        tex_slots[slot] = this->TEXTURE_ID;
 	}
 }
 
@@ -48,7 +53,6 @@ bool ZSPIRE::Texture::LoadDDSTextureFromFile(const char* path) {
 #ifdef zs_log
 	std::cout << "TEXTURE: Loading texture from file : " << path << std::endl;
 #endif
-
 
 	FILE * file = fopen(path, "rb"); //Opening file stream
 	if (file == NULL) { //Opening file stream failed, no file
@@ -140,10 +144,6 @@ bool ZSPIRE::Texture::LoadDDSTextureFromBuffer(unsigned char* data, size_t data_
 		nheight /= 2;
 	}
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
 
 	return true;
 }

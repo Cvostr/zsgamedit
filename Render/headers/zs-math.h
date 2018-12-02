@@ -152,6 +152,7 @@
 	void vNormalize(ZSVECTOR3* v);
 	ZSVECTOR3 vCross(ZSVECTOR3 v1, ZSVECTOR3 v2);
 	float vDot(ZSVECTOR3 v1, ZSVECTOR3 v2);
+    bool isDistanceFits(ZSVECTOR3 pos1, ZSVECTOR3 pos2, float max_dist);
 
 	ZSMATRIX4x4 getIdentity();
 	ZSMATRIX4x4 transpose(ZSMATRIX4x4 mat);

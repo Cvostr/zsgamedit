@@ -83,6 +83,10 @@ void InspectorWin::ShowObjectProperties(void* object_ptr){
     gameobject_ptr = static_cast<void*>(obj_ptr);
 }
 
+void InspectorWin::updateObjectProperties(){
+    ShowObjectProperties(gameobject_ptr);
+}
+
 PropertyEditArea::PropertyEditArea(){
     type = PEA_TYPE_NONE;
     elem_layout = new QHBoxLayout;

@@ -92,16 +92,12 @@ void EditWindow::init(){
         this->edit_camera.setProjectionType(ZSCAMERA_PROJECTION_ORTHOGONAL);
         edit_camera.setPosition(ZSVECTOR3(0,0,0));
         edit_camera.setFront(ZSVECTOR3(0,0,1));
-
-        /*
-        this->edit_camera.setProjectionType(ZSCAMERA_PROJECTION_PERSPECTIVE);
-        edit_camera.setPosition(ZSVECTOR3(0,0,-100));
-        edit_camera.setFront(ZSVECTOR3(0,0,1));
-        */
         break;
     }
     case 3:{ //3D project
         this->edit_camera.setProjectionType(ZSCAMERA_PROJECTION_PERSPECTIVE);
+        edit_camera.setPosition(ZSVECTOR3(0,0,0));
+        edit_camera.setFront(ZSVECTOR3(0,0,1));
         break;
     }
     }
@@ -131,6 +127,8 @@ void EditWindow::openFile(QString file_path){
 
         scene_path = file_path; //Assign scene path
         hasSceneFile = true; //Scene is saved
+        this->edit_camera.setPosition(ZSVECTOR3(0.0f, 0.0f, 0.0f)); //Set camera to 0
+        _inspector_win->clearContentLayout(); //Clear content, if not empty
     }
 }
 
@@ -355,6 +353,7 @@ EditWindow* ZSEditor::openEditor(){
 
     _editor_win->lookForResources(_editor_win->project.root_path); //Make a vector of all resource files
     _editor_win->show(); //Show editor window
+    _editor_win->move(0,0); //Editor base win would be in the left part of screen
 
     _inspector_win->show();
     _inspector_win->move(_editor_win->width() + 640, 0);

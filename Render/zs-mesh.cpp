@@ -1,11 +1,9 @@
 #include "headers/zs-mesh.h"
 
-
-
-
 #include <iostream>
 #include <GL/glew.h>
 
+ZSPIRE::Mesh* picked_mesh = 0x0;
 
 ZSVERTEX plane_verts[] = {
 	// positions              // texture coords
@@ -152,14 +150,19 @@ void ZSPIRE::Mesh::setMeshData(ZSVERTEX* vertices, unsigned int vertices_num) {
 
 void ZSPIRE::Mesh::Draw(){
 
-    glBindVertexArray(this->meshVAO);
+    if(picked_mesh != this){ //if this mesh wasn't picked
+        picked_mesh = this; //Setting pointer of this obj
+        glBindVertexArray(this->meshVAO);
+        if(this->indices_num != NO_INDICES) //if object uses indices
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->meshEBO);
+    }
+
 	if (this->indices_num == NO_INDICES) {
 		//Draw without indices
         glDrawArrays(GL_TRIANGLES, 0, this->vertices_num);
 	}
 	else {
 		//Indexed draw
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->meshEBO);
         glDrawElements(GL_TRIANGLES, this->indices_num, GL_UNSIGNED_INT, 0);
 	}
 

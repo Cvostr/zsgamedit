@@ -16,6 +16,7 @@ AreaButton::~AreaButton(){
 
 void AreaButton::onButtonPressed(){
     this->onPressFuncPtr();
+    insp_ptr->updateObjectProperties();
 }
 
 //Float3 definations

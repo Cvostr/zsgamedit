@@ -59,7 +59,7 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr)
     EditWindow* editwin_ptr = static_cast<EditWindow*>(projectedit_ptr);
     World* world_ptr = &editwin_ptr->world;
     ZSPIRE::Camera* cam_ptr = &editwin_ptr->edit_camera;
-
+    this->cam = cam_ptr;
     glClearColor(1,0,1,1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -77,28 +77,23 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr)
 
 void GameObject::Draw(RenderPipeline* pipeline){
     TransformProperty* transform_prop = static_cast<TransformProperty*>(this->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
-    transform_prop->updateMat();
+
     ZSPIRE::Shader* shader = pipeline->processShaderOnObject(static_cast<void*>(this)); //Will be used next time
     if(shader != nullptr){
 
-    shader->setTransform(transform_prop->transform_mat);
+        transform_prop->updateMat();
+        shader->setTransform(transform_prop->transform_mat);
 
-    unsigned char* to_send = reinterpret_cast<unsigned char*>(&this->array_index);
-    float r = static_cast<float>(to_send[0]);
-    float g = static_cast<float>(to_send[1]);
-    float b = static_cast<float>(to_send[2]);
-    float a = static_cast<float>(to_send[3]);
-
-    shader->setGLuniformVec4("color", ZSVECTOR4(r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f));
-
-    MeshProperty* mesh_prop = static_cast<MeshProperty*>(this->getPropertyPtrByType(GO_PROPERTY_TYPE_MESH));
-    if(mesh_prop != nullptr)
-        mesh_prop->mesh_ptr->Draw();
+        MeshProperty* mesh_prop = static_cast<MeshProperty*>(this->getPropertyPtrByType(GO_PROPERTY_TYPE_MESH));
+        if(mesh_prop != nullptr)
+            mesh_prop->mesh_ptr->Draw();
     }
     for(unsigned int obj_i = 0; obj_i < this->children.size(); obj_i ++){
-        children[obj_i].updLinkPtr();
-        GameObject* child_ptr = this->children[obj_i].ptr;
-        child_ptr->Draw(pipeline);
+        if(!children[obj_i].isEmpty()){
+            children[obj_i].updLinkPtr();
+            GameObject* child_ptr = this->children[obj_i].ptr;
+            child_ptr->Draw(pipeline);
+        }
     }
 }
 
@@ -106,7 +101,18 @@ ZSPIRE::Shader* RenderPipeline::processShaderOnObject(void* _obj){
     GameObject* obj = static_cast<GameObject*>(_obj);
     ZSPIRE::Shader* result;
 
-    if(current_state == PIPELINE_STATE_PICKING) return &pick_shader;
+    if(current_state == PIPELINE_STATE_PICKING) {
+        //pick_shader.Use();
+        unsigned char* to_send = reinterpret_cast<unsigned char*>(&obj->array_index);
+        float r = static_cast<float>(to_send[0]);
+        float g = static_cast<float>(to_send[1]);
+        float b = static_cast<float>(to_send[2]);
+        float a = static_cast<float>(to_send[3]);
+
+        pick_shader.setGLuniformVec4("color", ZSVECTOR4(r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f));
+
+        return &pick_shader;
+    }
 
     switch(obj->render_type){
         case GO_RENDER_TYPE_TILE:{
@@ -116,15 +122,17 @@ ZSPIRE::Shader* RenderPipeline::processShaderOnObject(void* _obj){
             TileProperty* tile_ptr = static_cast<TileProperty*>(obj->getPropertyPtrByType(GO_PROPERTY_TYPE_TILE));
             if(tile_ptr->texture_diffuse != nullptr){
                 tile_ptr->texture_diffuse->Use(0); //Use this texture
+                tile_shader.setHasDiffuseTextureProperty(true); //Shader will use picked diffuse texture
+
             }else{
-                tile_shader.setHasDiffuseTextureProperty(true); //Shader will not use diffuse texture
-            }
+                tile_shader.setHasDiffuseTextureProperty(false); //Shader will not use diffuse texture
+                }
             break;
         }
-    case GO_RENDER_TYPE_NONE:{
-        result = nullptr;
-        break;
-    }
+        case GO_RENDER_TYPE_NONE:{
+            result = nullptr;
+            break;
+        }
     }
     return result;
 }

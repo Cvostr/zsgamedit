@@ -2,6 +2,7 @@
 #include "../ProjEd/headers/ProjectEdit.h"
 #include "headers/Misc.h"
 #include <QLineEdit>
+#include <cstdlib>
 
 
 
@@ -76,7 +77,7 @@ bool GameObject::addProperty(int property){
         break;
     }
     }
-    //_ptr->object_str_id = this->str_id; //Connect to gameobject via string id
+
     _ptr->go_link = this->getLinkToThisObject();
     _ptr->go_link.updLinkPtr();
     _ptr->world_ptr = this->world_ptr; //Assign pointer to world
@@ -191,7 +192,7 @@ void GameObject::trimChildrenArray(){
 }
 
 GameObject* World::addObject(GameObject obj){
-    this->objects.push_back(obj);
+    this->objects.push_back(obj); //Push object to vector
     GameObject* ptr = &objects[objects.size() - 1];
     ptr->world_ptr = this;
     ptr->array_index = objects.size() - 1;
@@ -252,19 +253,36 @@ void World::removeObj(GameObjectLink link){
     GameObjectLink l = link;
     l.updLinkPtr();
     l.ptr->alive = false; //Mark object as dead
-    //std::vector<GameObjectProperty*> obj_properties = l.ptr->properties; //Copy properties ptrs
-    //std::vector<GameObjectLink> obj_children = l.ptr->children; //Copy children pointers to destroy them later
 
-    delete l.updLinkPtr()->item_ptr;
+    unsigned int children_num = static_cast<unsigned int>(l.ptr->children.size());
+    unsigned int props_num = static_cast<unsigned int>(l.ptr->properties.size());
 
-    if(l.ptr->hasParent == true){
-
-        l.ptr->parent.updLinkPtr()->children.resize(0);
-    //   l.ptr->parent.updLinkPtr()->removeChildObject(l);
+    for(unsigned int ch_i = 0; ch_i < children_num; ch_i ++){ //Walk through all children an remove them
+        GameObjectLink link = link.ptr->children[ch_i];
+        removeObj(link);
     }
 
-    trimObjectsList();
+    for(unsigned int pr_i = 0; pr_i < props_num; pr_i ++){
+        GameObjectProperty* prop_ptr = l.ptr->properties[pr_i];
+        delete prop_ptr;
+    }
 
+    delete l.ptr->item_ptr; //Destroy Qt tree widget item to remove object from tree
+
+    if(l.ptr->hasParent == true){ //If object parented by other obj
+        GameObject* parent = l.ptr->parent.updLinkPtr(); //Receive pointer to object's parent
+
+        unsigned int children_am = static_cast<unsigned int>(parent->children.size()); //get children amount
+        for(unsigned int i = 0; i < children_am; i++){ //Iterate over all children in object
+            GameObjectLink* link_ptr = &parent->children[i];
+            if(link.obj_str_id.compare(link_ptr->obj_str_id) == 0){ //if str_id in requested link compares to iteratable link
+                parent->children[i].crack(); //Make link broken
+            }
+        }
+        parent->trimChildrenArray(); //Remove cracked link from vector
+    }
+
+    trimObjectsList(); //Remove cracked object from objects vector
 }
 
 void World::trimObjectsList(){

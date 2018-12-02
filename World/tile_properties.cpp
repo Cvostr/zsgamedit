@@ -13,7 +13,7 @@ void onClearBtnPress(){
 
 TileGroupProperty::TileGroupProperty(){
     type = GO_PROPERTY_TYPE_TILE_GROUP; //Set correct type
-    active = true;
+    active = true; //And it is active
 
     this->isCreated = false;
     this->tiles_amount_X = 0;
@@ -55,14 +55,16 @@ void TileGroupProperty::addPropertyInterfaceToInspector(InspectorWin* inspector)
         //Add button to add objects
         AreaButton* btn = new AreaButton;
         btn->onPressFuncPtr = &onCreateBtnPress;
-        btn->button->setText("Process");
+        btn->button->setText("Process"); //Setting text to qt button
         inspector->getContentLayout()->addWidget(btn->button);
+        btn->insp_ptr = inspector; //Setting inspector pointer
         inspector->registerUiObject(btn);
     }else{
         AreaButton* btn = new AreaButton;
         btn->onPressFuncPtr = &onClearBtnPress;
         btn->button->setText("Clear");
         inspector->getContentLayout()->addWidget(btn->button);
+        btn->insp_ptr = inspector;
         inspector->registerUiObject(btn);
     }
     current_property = this;
@@ -113,7 +115,7 @@ void TileGroupProperty::clear(){
     GameObject* parent = go_link.ptr;
     unsigned int children_am = parent->children.size();
     for(unsigned int ch_i = 0; ch_i < children_am; ch_i ++){
-        GameObjectLink link_toremove = parent->children[ch_i];
+        GameObjectLink link_toremove = parent->children[0];
         world_ptr->removeObj(link_toremove);
         go_link.updLinkPtr();
         parent = go_link.ptr;

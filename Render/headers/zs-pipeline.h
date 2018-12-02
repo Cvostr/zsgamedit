@@ -12,12 +12,13 @@
 #define GO_RENDER_TYPE_NONE 0
 #define GO_RENDER_TYPE_TILE 1
 #define GO_RENDER_TYPE_3D 2
+#define GO_RENDER_TYPE_2D 3
 
 #define PIPELINE_STATE_DEFAULT 0
 #define PIPELINE_STATE_PICKING 1
 
 class RenderPipeline{
-public:
+private:
     ZSPIRE::Shader tile_shader; //Shader to draw tiles
     ZSPIRE::Shader diffuse_shader;
     ZSPIRE::Shader pick_shader; //Shader to draw & pick objects
@@ -29,6 +30,7 @@ public:
     unsigned int render_getpickedObj(void* projectedit_ptr, int mouseX, int mouseY);
     void updateShadersCameraInfo(ZSPIRE::Camera* cam_ptr);
     ZSPIRE::Shader* processShaderOnObject(void* _obj);
+    ZSPIRE::Camera* cam;
 
     RenderPipeline();
 };
