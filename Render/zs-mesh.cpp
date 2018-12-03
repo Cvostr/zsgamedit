@@ -165,8 +165,27 @@ void ZSPIRE::Mesh::Draw(){
 		//Indexed draw
         glDrawElements(GL_TRIANGLES, this->indices_num, GL_UNSIGNED_INT, 0);
 	}
-
 }
+
+void ZSPIRE::Mesh::DrawLines(){
+
+    if(picked_mesh != this){ //if this mesh wasn't picked
+        picked_mesh = this; //Setting pointer of this obj
+        glBindVertexArray(this->meshVAO);
+        if(this->indices_num != NO_INDICES) //if object uses indices
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->meshEBO);
+    }
+
+    if (this->indices_num == NO_INDICES) {
+        //Draw without indices
+        glDrawArrays(GL_LINES, 0, this->vertices_num);
+    }
+    else {
+        //Indexed draw
+        glDrawElements(GL_LINES, this->indices_num, GL_UNSIGNED_INT, 0);
+    }
+}
+
 
 void ZSPIRE::Mesh::processMesh(aiMesh* mesh, const aiScene* scene) {
 	unsigned int vertices = mesh->mNumVertices;

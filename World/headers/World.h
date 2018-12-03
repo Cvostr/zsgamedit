@@ -66,6 +66,10 @@ public:
 };
 
 class TransformProperty : public GameObjectProperty {
+private:
+    ZSVECTOR3 _last_translation;
+    ZSVECTOR3 _last_scale;
+    ZSVECTOR3 _last_rotation;
 public:
     ZSMATRIX4x4 transform_mat;
 
@@ -97,7 +101,8 @@ public:
     QString* label; //Pointer to string label in property
     std::string str_id; //String, gameobject identified by
     bool hasParent; //If object has a parent
-    bool alive;
+    bool alive; //if object marked s removed
+    bool isPicked;
     World* world_ptr; //pointer to world, when object placed
     GameObjectLink parent; //Link to object's parent
     int render_type;

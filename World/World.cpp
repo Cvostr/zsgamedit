@@ -14,6 +14,10 @@ GameObjectLink::GameObjectLink(){
 GameObject* GameObjectLink::updLinkPtr(){
     if(world_ptr == nullptr) //If world not defined, exiting
         return nullptr;
+    if(this->ptr != nullptr) //if pointer already calculated
+        if(this->obj_str_id.compare(ptr->str_id) == 0)
+            return ptr;
+
     this->ptr = world_ptr->getObjectByStringId(this->obj_str_id);
     return ptr;
 }
@@ -33,6 +37,7 @@ GameObject::GameObject(){
     genRandomString(&this->str_id, 15); //Generate random string ID
     render_type = GO_RENDER_TYPE_NONE; //No render by default
     alive = true; //Object exist by default
+    isPicked = false;
 }
 
 GameObject::~GameObject(){
