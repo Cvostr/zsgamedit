@@ -1,1 +1,1 @@
- 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/7922968d5a6642938c121868dbdad91b)](https://www.codacy.com/app/Cvostr/zsgamedit?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Cvostr/zsgamedit&amp;utm_campaign=Badge_Grade) 
