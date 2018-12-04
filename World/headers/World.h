@@ -80,6 +80,7 @@ public:
     void updateMat();
     void addPropertyInterfaceToInspector(InspectorWin* inspector);
     void onValueChanged();
+    void getAbsoluteParentTransform(ZSVECTOR3& t, ZSVECTOR3& s, ZSVECTOR3& r);
 
     TransformProperty();
 };
