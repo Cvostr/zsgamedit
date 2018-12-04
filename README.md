@@ -3,17 +3,22 @@
 # ZS GamEdit
 
 Is an simple opensource thing to make games (in future)
+
 As UI library uses QT5, to draw graphics uses OpenGL
 
-#Dependencies
+# Dependencies
 
 Qt5, of course
+
 GLEW
+
 OpenAL
+
 SDL2
+
 Assimp
 
-#To build on linux
+# Building on linux
 ```
 sudo apt install qt5-default
 sudo apt install qtcreator (optional)
@@ -28,6 +33,7 @@ qmake
 ```
 (hope, you knew it well without me xDD)
 
-#Building on Windows
+# Building on Windows
 I hadn't tried yet to do this stuff
+
 Of course, you have to manually search and build dependencies (Windows is a "best" OS ever xDD)
