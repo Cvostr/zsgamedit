@@ -35,8 +35,6 @@ uniform int lights_amount = 0;
 uniform bool hasDiffuseMap;
 
 uniform bool processLights;
-uniform bool obj_marked;
-
 
 uniform vec3 amb_color;
 
@@ -46,7 +44,7 @@ void main(){
 
 	
 	vec3 result = vec3(1.0, 0.078, 0.574); //Default value
-	//if(hasDiffuseMap)
+	if(hasDiffuseMap)
 		result = texture(diffuse, uv).xyz ;
 		
        

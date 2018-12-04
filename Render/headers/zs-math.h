@@ -171,6 +171,7 @@
 	ZSMATRIX4x4 getRotationZMat(float thetaN);
     ZSMATRIX4x4 getRotationMat(float thetaX, float thetaY, float thetaZ);
     ZSMATRIX4x4 getRotationMat(ZSVECTOR3 rotation);
+    ZSMATRIX4x4 getRotationMat(ZSVECTOR3 rotation, ZSVECTOR3 center);
     //ZSMATRIX4x4 parent
 
 
@@ -214,6 +215,19 @@
         ZSVECTOR3 Ret(l.X * r.X, l.Y * r.Y, l.Z * r.Z);
 
         return Ret;
+    }
+    inline ZSVECTOR3 operator/(const ZSVECTOR3& l, const ZSVECTOR3& r)
+    {
+        ZSVECTOR3 Ret(l.X / r.X, l.Y / r.Y, l.Z / r.Z);
+
+        return Ret;
+    }
+    inline bool operator==(const ZSVECTOR3& l, const ZSVECTOR3& r)
+    {
+        bool result = false;
+        if(l.X == r.X && l.Y == r.Y && l.Z == r.Z) result = true;
+
+        return result;
     }
 
 #endif

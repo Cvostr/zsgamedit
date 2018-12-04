@@ -210,6 +210,13 @@ ZSMATRIX4x4 getRotationMat(ZSVECTOR3 rotation){
     return getRotationMat(rotation.X, rotation.Y, rotation.Z);
 }
 
+ZSMATRIX4x4 getRotationMat(ZSVECTOR3 rotation, ZSVECTOR3 center){
+    ZSMATRIX4x4 result = getIdentity();
+    result = getTranslationMat(center * -1);
+    result = result * getTranslationMat(rotation);
+    return result;
+}
+
 ZSMATRIX4x4 getOrthogonal(float left, float right, float bottom, float top)
 {
 	ZSMATRIX4x4 out = getIdentity();

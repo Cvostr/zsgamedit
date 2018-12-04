@@ -9,6 +9,7 @@ RenderPipeline::RenderPipeline(){
 void RenderPipeline::setup(){
     this->tile_shader.compileFromFile("shaders/2d_tile/tile2d.vs", "shaders/2d_tile/tile2d.fs");
     this->pick_shader.compileFromFile("shaders/pick/pick.vs", "shaders/pick/pick.fs");
+    this->obj_mark_shader.compileFromFile("shaders/mark/mark.vs", "shaders/mark/mark.fs");
     ZSPIRE::createPlane2D();
 }
 
@@ -85,8 +86,19 @@ void GameObject::Draw(RenderPipeline* pipeline){
         shader->setTransform(transform_prop->transform_mat);
 
         MeshProperty* mesh_prop = static_cast<MeshProperty*>(this->getPropertyPtrByType(GO_PROPERTY_TYPE_MESH));
-        if(mesh_prop != nullptr)
+        if(mesh_prop != nullptr){
             mesh_prop->mesh_ptr->Draw();
+
+            if(this->isPicked == true){
+                pipeline->current_state = PIPELINE_STATE_MARKED;
+                ZSPIRE::Shader* mark_s = pipeline->processShaderOnObject(static_cast<void*>(this));
+                mark_s->setTransform(transform_prop->transform_mat);
+                glDisable(GL_DEPTH_TEST);
+                mesh_prop->mesh_ptr->DrawLines();
+                glEnable(GL_DEPTH_TEST);
+                pipeline->current_state = PIPELINE_STATE_DEFAULT;
+            }
+        }
     }
     for(unsigned int obj_i = 0; obj_i < this->children.size(); obj_i ++){
         if(!children[obj_i].isEmpty()){
@@ -101,8 +113,12 @@ ZSPIRE::Shader* RenderPipeline::processShaderOnObject(void* _obj){
     GameObject* obj = static_cast<GameObject*>(_obj);
     ZSPIRE::Shader* result;
 
+    if(current_state == PIPELINE_STATE_MARKED) {
+        obj_mark_shader.Use();
+        return &obj_mark_shader;
+    }
+
     if(current_state == PIPELINE_STATE_PICKING) {
-        //pick_shader.Use();
         unsigned char* to_send = reinterpret_cast<unsigned char*>(&obj->array_index);
         float r = static_cast<float>(to_send[0]);
         float g = static_cast<float>(to_send[1]);
@@ -138,13 +154,17 @@ ZSPIRE::Shader* RenderPipeline::processShaderOnObject(void* _obj){
 }
 
 void RenderPipeline::updateShadersCameraInfo(ZSPIRE::Camera* cam_ptr){
-    if(diffuse_shader.isCreated == true){
-        diffuse_shader.Use();
-        diffuse_shader.setCamera(cam_ptr);
+    if(diffuse3d_shader.isCreated == true){
+        diffuse3d_shader.Use();
+        diffuse3d_shader.setCamera(cam_ptr);
     }
 
     if(tile_shader.isCreated == true){
         tile_shader.Use();
         tile_shader.setCamera(cam_ptr);
+    }
+    if(obj_mark_shader.isCreated == true){
+        obj_mark_shader.Use();
+        obj_mark_shader.setCamera(cam_ptr);
     }
 }

@@ -30,6 +30,7 @@ namespace ZSPIRE {
         void setMeshData(ZSVERTEX* vertices, unsigned int* indices, unsigned int vertices_num, unsigned int indices_num);
         void setMeshData(ZSVERTEX* vertices, unsigned int vertices_num);
         void Draw();
+        void DrawLines();
         void Destroy();
         void DestroyResource();
 

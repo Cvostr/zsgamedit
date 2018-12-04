@@ -89,32 +89,55 @@ void TransformProperty::onValueChanged(){
 }
 
 void TransformProperty::updateMat(){
-
+    //Variables to store
     ZSVECTOR3 p_translation = ZSVECTOR3(0,0,0);
     ZSVECTOR3 p_scale = ZSVECTOR3(1,1,1);
     ZSVECTOR3 p_rotation = ZSVECTOR3(0,0,0);
 
-    //GameObject* ptr = world_ptr->getObjectByStringId(this->object_str_id);
-    GameObject* ptr = go_link.updLinkPtr();
-    if(ptr != nullptr){
-    if(ptr->hasParent){
+    GameObject* ptr = go_link.updLinkPtr(); //Pointer to object with this property
+    if(ptr != nullptr){ //if object exist
+        if(ptr->hasParent){ //if object dependent
 
-        TransformProperty* property = static_cast<TransformProperty*>(ptr->parent.updLinkPtr()->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
-        p_translation = property->translation;
-        p_scale = property->scale;
-        p_rotation = property->rotation;
-    }
+            TransformProperty* property = static_cast<TransformProperty*>(ptr->parent.updLinkPtr()->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
+            property->getAbsoluteParentTransform(p_translation, p_scale, p_rotation);
+        }
     }
 
-    //Calculate translation matrix
-    ZSMATRIX4x4 translation_mat = getTranslationMat(this->translation + p_translation);
-    //Calculate scale matrix
-    ZSMATRIX4x4 scale_mat = getScaleMat(scale * p_scale);
-    //Calculate rotation matrix
-    ZSMATRIX4x4 rotation_mat = getRotationMat(rotation + p_rotation);
-    //S * R * T
-    this->transform_mat = scale_mat * rotation_mat * translation_mat;
+    if(this->translation + p_translation == this->_last_translation
+            && this->scale * p_scale == this->_last_scale
+            && this->rotation + p_rotation == this->_last_rotation) {
+        return;
+    }else{
+
+        this->_last_translation = this->translation + p_translation;
+        this->_last_scale = this->scale * p_scale;
+        this->_last_rotation = this->rotation + p_rotation;
+
+        //Calculate translation matrix
+        ZSMATRIX4x4 translation_mat = getTranslationMat(_last_translation);
+        //Calculate scale matrix
+        ZSMATRIX4x4 scale_mat = getScaleMat(_last_scale);
+        //Calculate rotation matrix
+        ZSMATRIX4x4 rotation_mat = getRotationMat(_last_rotation);
+        //S * R * T
+        this->transform_mat = scale_mat * rotation_mat * translation_mat;
+    }
 }
+
+
+void TransformProperty::getAbsoluteParentTransform(ZSVECTOR3& t, ZSVECTOR3& s, ZSVECTOR3& r){
+    GameObject* ptr = go_link.updLinkPtr(); //Pointer to object with this property
+
+    t = t + this->translation;
+    s = s * this->scale;
+    r = r + this->rotation;
+
+    if(ptr->hasParent){
+        TransformProperty* property = static_cast<TransformProperty*>(ptr->parent.updLinkPtr()->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
+        property->getAbsoluteParentTransform(t, s, r);
+    }
+}
+
 //Label property functions
 void LabelProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
     StringPropertyArea* area = new StringPropertyArea;

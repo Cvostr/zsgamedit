@@ -14,6 +14,10 @@ GameObjectLink::GameObjectLink(){
 GameObject* GameObjectLink::updLinkPtr(){
     if(world_ptr == nullptr) //If world not defined, exiting
         return nullptr;
+    if(this->ptr != nullptr) //if pointer already calculated
+        if(this->obj_str_id.compare(ptr->str_id) == 0)
+            return ptr;
+
     this->ptr = world_ptr->getObjectByStringId(this->obj_str_id);
     return ptr;
 }
@@ -33,6 +37,7 @@ GameObject::GameObject(){
     genRandomString(&this->str_id, 15); //Generate random string ID
     render_type = GO_RENDER_TYPE_NONE; //No render by default
     alive = true; //Object exist by default
+    isPicked = false;
 }
 
 GameObject::~GameObject(){
@@ -137,13 +142,14 @@ void GameObject::addChildObject(GameObjectLink link){
 
     if(Pobj_transform != nullptr && Cobj_transform != nullptr){ //If both objects have mesh property
 
-        Cobj_transform->translation = Cobj_transform->translation - Pobj_transform->translation;
+        ZSVECTOR3 p_translation = ZSVECTOR3(0,0,0);
+        ZSVECTOR3 p_scale = ZSVECTOR3(1,1,1);
+        ZSVECTOR3 p_rotation = ZSVECTOR3(0,0,0);
+        Pobj_transform->getAbsoluteParentTransform(p_translation, p_scale, p_rotation); //Collecting transforms
 
-        Cobj_transform->scale.X = Cobj_transform->scale.X / Pobj_transform->scale.X;
-        Cobj_transform->scale.Y = Cobj_transform->scale.Y / Pobj_transform->scale.Y;
-        Cobj_transform->scale.Z = Cobj_transform->scale.Z / Pobj_transform->scale.Z;
-
-        Cobj_transform->rotation = Cobj_transform->rotation - Pobj_transform->rotation;
+        Cobj_transform->translation = Cobj_transform->translation - p_translation;
+        Cobj_transform->scale = Cobj_transform->scale / p_scale;
+        Cobj_transform->rotation = Cobj_transform->rotation - p_rotation;
 
         Cobj_transform->updateMat(); //Update transform matrix
     }
@@ -158,18 +164,21 @@ void GameObject::removeChildObject(GameObjectLink link){
             GameObject* ptr = children[i].updLinkPtr();
             children[i].crack(); //Make link broken
 
-
             //Updating child's transform
             //Now check, if it is possible
             TransformProperty* Pobj_transform = static_cast<TransformProperty*>(getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
             TransformProperty* Cobj_transform = static_cast<TransformProperty*>(ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
 
             if(Pobj_transform != nullptr && Cobj_transform != nullptr){ //If both objects have mesh property
-                Cobj_transform->translation = Cobj_transform->translation + Pobj_transform->translation;
 
-                Cobj_transform->scale.X = Cobj_transform->scale.X * Pobj_transform->scale.X;
-                Cobj_transform->scale.Y = Cobj_transform->scale.Y * Pobj_transform->scale.Y;
-                Cobj_transform->scale.Z = Cobj_transform->scale.Z * Pobj_transform->scale.Z;
+                ZSVECTOR3 p_translation = ZSVECTOR3(0,0,0);
+                ZSVECTOR3 p_scale = ZSVECTOR3(1,1,1);
+                ZSVECTOR3 p_rotation = ZSVECTOR3(0,0,0);
+                Pobj_transform->getAbsoluteParentTransform(p_translation, p_scale, p_rotation);
+
+                Cobj_transform->translation = Cobj_transform->translation + p_translation;
+
+                Cobj_transform->scale = Cobj_transform->scale * p_scale;
 
                 Cobj_transform->rotation = Cobj_transform->rotation + Pobj_transform->rotation;
 

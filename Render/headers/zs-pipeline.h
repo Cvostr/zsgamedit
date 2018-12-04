@@ -16,12 +16,14 @@
 
 #define PIPELINE_STATE_DEFAULT 0
 #define PIPELINE_STATE_PICKING 1
+#define PIPELINE_STATE_MARKED 2
 
 class RenderPipeline{
 private:
     ZSPIRE::Shader tile_shader; //Shader to draw tiles
-    ZSPIRE::Shader diffuse_shader;
+    ZSPIRE::Shader diffuse3d_shader;
     ZSPIRE::Shader pick_shader; //Shader to draw & pick objects
+    ZSPIRE::Shader obj_mark_shader; //Shader to draw mark of selected objects
 public:
     int current_state;
     void setup();
