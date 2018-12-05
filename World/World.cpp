@@ -305,6 +305,15 @@ void World::trimObjectsList(){
     }
 }
 
+void World::unpickObject(){
+    for (unsigned int i = 0; i < objects.size(); i ++) { //Iterating over all objects
+        if(objects[i].isPicked == true){ //If object marked as deleted
+            objects[i].isPicked = false;
+            return;
+        }
+    }
+}
+
 void World::saveToFile(QString file){
     std::string fpath = file.toStdString();
 

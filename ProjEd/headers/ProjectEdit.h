@@ -107,6 +107,11 @@ private:
     Ui::EditWindow *ui;
 };
 
+class ObjectCtxMenu{
+
+};
+
+//Class to represent tree widget
 class ObjTreeWgt : public QTreeWidget{
     Q_OBJECT
 

@@ -152,6 +152,7 @@ public:
     GameObject** getUnparentedObjs();
     void removeObj(GameObjectLink link); //Remove object from world
     void trimObjectsList();
+    void unpickObject();
 
     ZSPIRE::Mesh* getMeshPtrByRelPath(QString label); //look through all meshes in project ptr
     ZSPIRE::Texture* getTexturePtrByRelPath(QString label); //look through all meshes in project ptr

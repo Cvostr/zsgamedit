@@ -402,16 +402,16 @@ void EditWindow::onLeftBtnClicked(int X, int Y){
     unsigned int clicked = render->render_getpickedObj(static_cast<void*>(this), X, Y);
 
     GameObject* obj_ptr = &world.objects[clicked]; //Obtain pointer to selected object by label
-    if(obj_ptr == 0x0 || clicked >= 256 * 256 * 256)
+    if(clicked > world.objects.size() || obj_ptr == 0x0 || clicked >= 256 * 256 * 256)
         return;
-    //obj_ptr->isPicked = true;
+
     _inspector_win->ShowObjectProperties(static_cast<void*>(obj_ptr));
 }
 void EditWindow::onRightBtnClicked(int X, int Y){}
 void EditWindow::onMouseMotion(int relX, int relY){
     if(project.perspective == 2) //Only affective in 2D
 
-    if(input_state.isLeftBtnHold == true){
+    if(input_state.isRightBtnHold == true){
         ZSVECTOR3 cam_pos = edit_camera.getCameraPosition();
         cam_pos.X += relX;
         cam_pos.Y += relY;

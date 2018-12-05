@@ -42,7 +42,6 @@ unsigned int RenderPipeline::render_getpickedObj(void* projectedit_ptr, int mous
 
     unsigned char data[4];
     glReadPixels(mouseX, 480 - mouseY, 1,1, GL_RGBA, GL_UNSIGNED_BYTE, data);
-    //unsigned int pr_data = data[0] + data[1] * 256 + data[2] * 256 * 256; //Calc object ID
     data[3] = 0;
     unsigned int* pr_data_ = reinterpret_cast<unsigned int*>(&data[0]);
     unsigned int pr_data = *pr_data_;
@@ -89,14 +88,15 @@ void GameObject::Draw(RenderPipeline* pipeline){
         if(mesh_prop != nullptr){
             mesh_prop->mesh_ptr->Draw();
 
-            if(this->isPicked == true){
+            if(this->isPicked == true && pipeline->current_state != PIPELINE_STATE_PICKING){
+                int cur_state = pipeline->current_state; //Storing current state
                 pipeline->current_state = PIPELINE_STATE_MARKED;
                 ZSPIRE::Shader* mark_s = pipeline->processShaderOnObject(static_cast<void*>(this));
                 mark_s->setTransform(transform_prop->transform_mat);
                 glDisable(GL_DEPTH_TEST);
                 mesh_prop->mesh_ptr->DrawLines();
                 glEnable(GL_DEPTH_TEST);
-                pipeline->current_state = PIPELINE_STATE_DEFAULT;
+                pipeline->current_state = cur_state;
             }
         }
     }

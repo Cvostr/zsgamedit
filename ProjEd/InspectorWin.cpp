@@ -73,6 +73,8 @@ void InspectorWin::makeAddObjComponentBtn(){
 void InspectorWin::ShowObjectProperties(void* object_ptr){
     clearContentLayout(); //Clears everything in content layout
     GameObject* obj_ptr = static_cast<GameObject*>(object_ptr);
+    obj_ptr->world_ptr->unpickObject();
+    obj_ptr->isPicked = true; //Object is picked now
 
     unsigned int props_num = static_cast<unsigned int>(obj_ptr->properties.size());
     for(unsigned int prop_it = 0; prop_it < props_num; prop_it ++){ //iterate over all properties and send them to inspector
