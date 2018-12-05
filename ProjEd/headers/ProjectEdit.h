@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QTreeWidget>
 #include <QListWidget>
+#include <QMenu>
 #include <SDL2/SDL.h>
 #include <vector>
 #include "../../Render/headers/zs-pipeline.h"
@@ -46,6 +47,8 @@ struct EditorInputState{
     bool isCtrlHold;
 };
 
+class ObjectCtxMenu;
+
 class EditWindow : public QMainWindow
 {
     Q_OBJECT
@@ -53,6 +56,7 @@ class EditWindow : public QMainWindow
 public slots:
     void onFileListItemClicked();
     void onObjectListItemClicked();
+    void onObjectCtxMenuShow();
 
     void onAddNewGameObject();
     void onSceneSave();
@@ -71,6 +75,7 @@ private:
     RenderPipeline* render;
 
     QTreeWidgetItem* column_item_go;
+    ObjectCtxMenu* obj_ctx_menu;
 
 public:
     bool ready; //Is everything loaded?
@@ -107,14 +112,29 @@ private:
     Ui::EditWindow *ui;
 };
 
-class ObjectCtxMenu{
+class ObjectCtxMenu : public QObject{
+    Q_OBJECT
+public:
+    EditWindow* win_ptr;
 
+    QMenu* menu; //Menu object to contain everything
+
+    QAction* action_dub; //Button to dublicate object
+    QAction* action_delete; //Button to delete object
+
+    ObjectCtxMenu(EditWindow* win, QWidget* parent = nullptr);
+    void show();
+    void close();
 };
 
 //Class to represent tree widget
 class ObjTreeWgt : public QTreeWidget{
     Q_OBJECT
-
+protected:
+    void mousePressEvent(QMouseEvent *event) override;
+signals:
+    void onRightClick(QPoint pos);
+    void onLeftClick(QPoint pos);
 public:
     ObjTreeWgt(QWidget* parent = nullptr);
 

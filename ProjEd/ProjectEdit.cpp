@@ -29,11 +29,13 @@ EditWindow::EditWindow(QWidget *parent) :
 
     QObject::connect(ui->actionCreateScene, SIGNAL(triggered()), this, SLOT(onNewScene()));
 
-    QObject::connect(ui->objsList, SIGNAL(itemClicked(QTreeWidgetItem *, int)),
+    QObject::connect(ui->objsList, SIGNAL(itemClicked(QTreeWidgetItem*,int)),
                 this, SLOT(onObjectListItemClicked())); //Signal comes, when user clicks on File->Save As
 
+    QObject::connect(ui->objsList, SIGNAL(onRightClick(QPoint)), this, SLOT(onObjectCtxMenuShow()));
+
     ready = false; //Firstly set it to 0
-    hasSceneFile = false;
+    hasSceneFile = false; //No scene loaded by default
 
 
     setupObjectsHieList();
@@ -46,11 +48,22 @@ EditWindow::EditWindow(QWidget *parent) :
     world.proj_ptr = static_cast<void*>(&project); //Assigning project pointer into world's variable
 
     ui->fileList->setViewMode(QListView::IconMode);
+
+    this->obj_ctx_menu = new ObjectCtxMenu(this); //Allocating object Context menu
+
 }
 
 EditWindow::~EditWindow()
 {
     delete ui;
+}
+
+void ObjTreeWgt::mousePressEvent(QMouseEvent *event){
+    QTreeWidget::mousePressEvent(event);
+    if(event->button() == Qt::RightButton)
+    {
+        emit onRightClick(event->pos());
+    }
 }
 
 void EditWindow::init(){
@@ -237,7 +250,6 @@ void EditWindow::onFileListItemClicked(){
 }
 
 void EditWindow::onObjectListItemClicked(){
-    //_inspector_win->clearContentLayout();
     QTreeWidgetItem* selected_item = ui->objsList->currentItem(); //Obtain pointer to clicked obj item
 
     QString obj_name = selected_item->text(0); //Get label of clicked obj
@@ -245,6 +257,10 @@ void EditWindow::onObjectListItemClicked(){
     GameObject* obj_ptr = world.getObjectByLabel(obj_name); //Obtain pointer to selected object by label
 
     _inspector_win->ShowObjectProperties(static_cast<void*>(obj_ptr));
+}
+
+void EditWindow::onObjectCtxMenuShow(){
+    this->obj_ctx_menu->show();
 }
 
 void EditWindow::glRender(){
@@ -367,6 +383,26 @@ InspectorWin* EditWindow::getInspector(){
 
 ObjTreeWgt::ObjTreeWgt(QWidget* parent) : QTreeWidget (parent){
 
+}
+
+ObjectCtxMenu::ObjectCtxMenu(EditWindow* win, QWidget* parent ) : QObject(parent){
+    this->win_ptr = win;
+    //Allocting menu container
+    this->menu = new QMenu(win);
+    //Allocating actions
+    this->action_dub = new QAction("Dublicate", win);
+    this->action_delete = new QAction("Delete", win);
+    //Adding actions to menu container
+    this->menu->addAction(action_dub);
+    this->menu->addAction(action_delete);
+}
+
+void ObjectCtxMenu::show(){
+    menu->popup(QPoint(0,0));
+}
+
+void ObjectCtxMenu::close(){
+    menu->close();
 }
 
 void ObjTreeWgt::dropEvent(QDropEvent* event){
