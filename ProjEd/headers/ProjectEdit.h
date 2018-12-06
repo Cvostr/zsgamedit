@@ -57,6 +57,7 @@ public slots:
     void onFileListItemClicked();
     void onObjectListItemClicked();
     void onObjectCtxMenuShow();
+    void onCameraToObjTeleport();
 
     void onAddNewGameObject();
     void onSceneSave();
@@ -114,15 +115,20 @@ private:
 
 class ObjectCtxMenu : public QObject{
     Q_OBJECT
-public:
-    EditWindow* win_ptr;
-
+public slots:
+    void onDeleteClicked();
+    void onDublicateClicked();
+private:
+    GameObject* obj_ptr;
     QMenu* menu; //Menu object to contain everything
 
     QAction* action_dub; //Button to dublicate object
     QAction* action_delete; //Button to delete object
+public:
+    EditWindow* win_ptr;
 
     ObjectCtxMenu(EditWindow* win, QWidget* parent = nullptr);
+    void setObjectPtr(GameObject* obj_ptr);
     void show();
     void close();
 };

@@ -267,7 +267,7 @@ void World::removeObj(GameObjectLink link){
     unsigned int props_num = static_cast<unsigned int>(l.ptr->properties.size());
 
     for(unsigned int ch_i = 0; ch_i < children_num; ch_i ++){ //Walk through all children an remove them
-        GameObjectLink link = link.ptr->children[ch_i];
+        GameObjectLink link = l.ptr->children[ch_i];
         removeObj(link);
     }
 

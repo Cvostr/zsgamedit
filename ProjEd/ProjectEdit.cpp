@@ -33,6 +33,7 @@ EditWindow::EditWindow(QWidget *parent) :
                 this, SLOT(onObjectListItemClicked())); //Signal comes, when user clicks on File->Save As
 
     QObject::connect(ui->objsList, SIGNAL(onRightClick(QPoint)), this, SLOT(onObjectCtxMenuShow()));
+    QObject::connect(ui->objsList, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(onCameraToObjTeleport()));
 
     ready = false; //Firstly set it to 0
     hasSceneFile = false; //No scene loaded by default
@@ -260,7 +261,16 @@ void EditWindow::onObjectListItemClicked(){
 }
 
 void EditWindow::onObjectCtxMenuShow(){
+    QTreeWidgetItem* selected_item = ui->objsList->currentItem(); //Obtain pointer to clicked obj item
+    QString obj_name = selected_item->text(0); //Get label of clicked obj
+    GameObject* obj_ptr = world.getObjectByLabel(obj_name); //Obtain pointer to selected object by label
+
+    this->obj_ctx_menu->setObjectPtr(obj_ptr);
     this->obj_ctx_menu->show();
+}
+
+void EditWindow::onCameraToObjTeleport(){
+
 }
 
 void EditWindow::glRender(){
@@ -395,14 +405,27 @@ ObjectCtxMenu::ObjectCtxMenu(EditWindow* win, QWidget* parent ) : QObject(parent
     //Adding actions to menu container
     this->menu->addAction(action_dub);
     this->menu->addAction(action_delete);
+
+    QObject::connect(this->action_delete, SIGNAL(triggered(bool)), this, SLOT(onDeleteClicked()));
 }
 
 void ObjectCtxMenu::show(){
     menu->popup(QPoint(0,0));
 }
 
+void ObjectCtxMenu::setObjectPtr(GameObject* obj_ptr){
+    this->obj_ptr = obj_ptr;
+}
+
 void ObjectCtxMenu::close(){
     menu->close();
+}
+//Object Ctx menu slots
+void ObjectCtxMenu::onDeleteClicked(){
+    win_ptr->world.removeObj(obj_ptr->getLinkToThisObject());
+}
+void ObjectCtxMenu::onDublicateClicked(){
+
 }
 
 void ObjTreeWgt::dropEvent(QDropEvent* event){
