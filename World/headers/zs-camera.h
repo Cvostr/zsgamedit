@@ -67,6 +67,7 @@ namespace ZSPIRE{
 
             ZSMATRIX4x4 getViewMatrix();
             ZSMATRIX4x4 getProjMatrix();
+            void updateTick();
 
             Camera();
     };

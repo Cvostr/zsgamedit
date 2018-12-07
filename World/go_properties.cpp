@@ -12,7 +12,6 @@ GameObjectProperty::~GameObjectProperty(){
 }
 //Cast inheritance calls
 void GameObjectProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
-     //QTextEdit* pos = new QTextEdit;
     switch(this->type){
         case GO_PROPERTY_TYPE_TRANSFORM:{ //If it is transform
             TransformProperty* transfrom = static_cast<TransformProperty*>(this);
@@ -45,7 +44,6 @@ void GameObjectProperty::onValueChanged(){
 TransformProperty::TransformProperty(){
     type = GO_PROPERTY_TYPE_TRANSFORM; //Type of property is transform
     active = true; //property is active
-    type_label = "Transform";
 
     this->transform_mat = getIdentity(); //Result matrix is identity by default
     this->translation = ZSVECTOR3(0.0f, 0.0f, 0.0f); //Position is zero by default
@@ -175,7 +173,7 @@ void MeshProperty::onValueChanged(){
 
 
 void GameObject::saveProperties(std::ofstream* stream){
-    unsigned int props_num = static_cast<unsigned int>(this->properties.size());
+    unsigned int props_num = static_cast<unsigned int>(this->props_num);
 
     for(unsigned int prop_i = 0; prop_i < props_num; prop_i ++){
         GameObjectProperty* property_ptr = static_cast<GameObjectProperty*>(this->properties[prop_i]);

@@ -40,7 +40,6 @@ class GameObjectProperty{
 public:
     int type; //Describe TYPE of property
     bool active; //Is property working
-    QString type_label; //Label of type
     GameObjectLink go_link;
     World* world_ptr; //Sometimes may be useful
 
@@ -108,7 +107,8 @@ public:
     GameObjectLink parent; //Link to object's parent
     int render_type;
 
-    std::vector<GameObjectProperty*> properties; //Vector to store pointers to all properties
+    int props_num;
+    GameObjectProperty* properties[10]; //Vector to store pointers to all properties
     std::vector<GameObjectLink> children; //Vector to store links to children of object
     int getAliveChildrenAmount(); //Gets current amount of children objects (exclude removed chidren)
 
@@ -160,6 +160,8 @@ public:
     void saveToFile(QString file);
     void openFromFile(QString file, QTreeWidget* w_ptr);
     void clear();
+
+    World();
 
 };
 

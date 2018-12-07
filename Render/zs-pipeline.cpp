@@ -79,7 +79,7 @@ void GameObject::Draw(RenderPipeline* pipeline){
     TransformProperty* transform_prop = static_cast<TransformProperty*>(this->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
 
     ZSPIRE::Shader* shader = pipeline->processShaderOnObject(static_cast<void*>(this)); //Will be used next time
-    if(shader != nullptr){
+    if(shader != nullptr && transform_prop != nullptr){
 
         transform_prop->updateMat();
         shader->setTransform(transform_prop->transform_mat);

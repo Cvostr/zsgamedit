@@ -38,6 +38,8 @@ GameObject::GameObject(){
     render_type = GO_RENDER_TYPE_NONE; //No render by default
     alive = true; //Object exist by default
     isPicked = false;
+    props_num = 0;
+    //properties.reserve(15);
 }
 
 GameObject::~GameObject(){
@@ -45,7 +47,7 @@ GameObject::~GameObject(){
 }
 
 bool GameObject::addProperty(int property){
-    unsigned int props = static_cast<unsigned int>(this->properties.size());
+    unsigned int props = static_cast<unsigned int>(this->props_num);
     for(unsigned int prop_i = 0; prop_i < props; prop_i ++){
         GameObjectProperty* property_ptr = this->properties[prop_i];
         if(property_ptr->type == property){ //If object already has one
@@ -86,7 +88,8 @@ bool GameObject::addProperty(int property){
     _ptr->go_link = this->getLinkToThisObject();
     _ptr->go_link.updLinkPtr();
     _ptr->world_ptr = this->world_ptr; //Assign pointer to world
-    this->properties.push_back(_ptr); //Store poroperty in gameobject
+    this->properties[props_num] = _ptr; //Store poroperty in gameobject
+    this->props_num += 1;
     return true;
 }
 
@@ -99,7 +102,7 @@ bool GameObject::addLabelProperty(){
 }
 
 GameObjectProperty* GameObject::getPropertyPtrByType(int property){
-    unsigned int props = static_cast<unsigned int>(this->properties.size());
+    unsigned int props = static_cast<unsigned int>(this->props_num);
     for(unsigned int prop_i = 0; prop_i < props; prop_i ++){
         GameObjectProperty* property_ptr = this->properties[prop_i];
         if(property_ptr->type == property){ //If object already has one
@@ -115,7 +118,6 @@ GameObjectLink GameObject::getLinkToThisObject(){
     link.world_ptr = this->world_ptr; //Placing world pointer
 
     link.ptr = world_ptr->getObjectByStringId(link.obj_str_id);
-    //link.updLinkPtr();
     return link;
 }
 
@@ -200,11 +202,34 @@ void GameObject::trimChildrenArray(){
     }
 }
 
+World::World(){
+    objects.reserve(4000);
+    proj_ptr = nullptr;
+}
+
 GameObject* World::addObject(GameObject obj){
-    this->objects.push_back(obj); //Push object to vector
-    GameObject* ptr = &objects[objects.size() - 1];
+
+    int index_to_push = -1;
+    unsigned int objects_num = static_cast<unsigned int>(this->objects.size());
+    for(unsigned int objs_i = 0; objs_i < objects_num; objs_i ++){
+        if(objects[objs_i].alive == false){
+            index_to_push = objs_i;
+        }
+    }
+
+    GameObject* ptr = nullptr;
+    if(index_to_push == -1){
+        this->objects.push_back(obj); //Push object to vector
+        ptr = &objects[objects.size() - 1];
+        ptr->array_index = objects.size() - 1;
+    }else{
+        objects[index_to_push] = obj;
+        ptr = &objects[index_to_push];
+        ptr->array_index = index_to_push;
+    }
+    //GameObject* ptr = &objects[objects.size() - 1];
     ptr->world_ptr = this;
-    ptr->array_index = objects.size() - 1;
+
     return ptr;
 }
 
@@ -264,17 +289,14 @@ void World::removeObj(GameObjectLink link){
     l.ptr->alive = false; //Mark object as dead
 
     unsigned int children_num = static_cast<unsigned int>(l.ptr->children.size());
-    unsigned int props_num = static_cast<unsigned int>(l.ptr->properties.size());
+    //unsigned int props_num = static_cast<unsigned int>(l.ptr->properties.size());
 
     for(unsigned int ch_i = 0; ch_i < children_num; ch_i ++){ //Walk through all children an remove them
         GameObjectLink link = l.ptr->children[ch_i];
         removeObj(link);
     }
 
-    for(unsigned int pr_i = 0; pr_i < props_num; pr_i ++){
-        GameObjectProperty* prop_ptr = l.ptr->properties[pr_i];
-        delete prop_ptr;
-    }
+    l.ptr->children.clear();
 
     delete l.ptr->item_ptr; //Destroy Qt tree widget item to remove object from tree
 
@@ -284,21 +306,22 @@ void World::removeObj(GameObjectLink link){
         unsigned int children_am = static_cast<unsigned int>(parent->children.size()); //get children amount
         for(unsigned int i = 0; i < children_am; i++){ //Iterate over all children in object
             GameObjectLink* link_ptr = &parent->children[i];
-            if(link.obj_str_id.compare(link_ptr->obj_str_id) == 0){ //if str_id in requested link compares to iteratable link
+            if(l.obj_str_id.compare(link_ptr->obj_str_id) == 0){ //if str_id in requested link compares to iteratable link
                 parent->children[i].crack(); //Make link broken
             }
         }
         parent->trimChildrenArray(); //Remove cracked link from vector
     }
-
-    trimObjectsList(); //Remove cracked object from objects vector
+   // trimObjectsList(); //Remove cracked object from objects vector
 }
 
 void World::trimObjectsList(){
     for (unsigned int i = 0; i < objects.size(); i ++) { //Iterating over all objects
         if(objects[i].alive == false){ //If object marked as deleted
+          //  objects.erase(objects.begin() + i);
             for (unsigned int obj_i = i + 1; obj_i < objects.size(); obj_i ++) { //Iterate over all next chidren
                 objects[obj_i - 1] = objects[obj_i]; //Move it to previous place
+
             }
             objects.resize(objects.size() - 1);
         }
@@ -327,19 +350,21 @@ void World::saveToFile(QString file){
 
     for(unsigned int obj_i = 0; obj_i < static_cast<unsigned int>(obj_num); obj_i ++){ //Iterate over all game objects
         GameObject* object_ptr = static_cast<GameObject*>(&this->objects[obj_i]);
-        world_stream << "\nG_OBJECT " << object_ptr->str_id << " " << object_ptr->render_type; //Start object's header
-        if(object_ptr->children.size() > 0){ //If object has at least one child object
-            world_stream << "\nG_CHI " << object_ptr->getAliveChildrenAmount() << " "; //Start children header
-            unsigned int children_am = static_cast<unsigned int>(object_ptr->children.size());
-            for(unsigned int chi_i = 0; chi_i < children_am; chi_i ++){ //iterate over all children
-                GameObjectLink* link_ptr = &object_ptr->children[chi_i]; //Gettin pointer to child
-                if(!link_ptr->isEmpty()){ //If this link isn't broken (after child removal)
-                    world_stream << link_ptr->obj_str_id << " "; //Writing child's string id
+        if(object_ptr->alive == true){
+            world_stream << "\nG_OBJECT " << object_ptr->str_id << " " << object_ptr->render_type; //Start object's header
+            if(object_ptr->children.size() > 0){ //If object has at least one child object
+                world_stream << "\nG_CHI " << object_ptr->getAliveChildrenAmount() << " "; //Start children header
+                unsigned int children_am = static_cast<unsigned int>(object_ptr->children.size());
+                for(unsigned int chi_i = 0; chi_i < children_am; chi_i ++){ //iterate over all children
+                    GameObjectLink* link_ptr = &object_ptr->children[chi_i]; //Gettin pointer to child
+                    if(!link_ptr->isEmpty()){ //If this link isn't broken (after child removal)
+                        world_stream << link_ptr->obj_str_id << " "; //Writing child's string id
+                    }
                 }
-                }
+            }
+            object_ptr->saveProperties(&world_stream); //save object's properties
+            world_stream << "\nG_END"; //End writing object
         }
-        object_ptr->saveProperties(&world_stream); //save object's properties
-        world_stream << "\nG_END"; //End writing object
     }
 
     world_stream.close();

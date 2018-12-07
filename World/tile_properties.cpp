@@ -76,7 +76,7 @@ void TileGroupProperty::process(){
 
     for(int x_i = 0; x_i < tiles_amount_X; x_i ++){
         for(int y_i = 0; y_i < tiles_amount_Y; y_i ++){
-            usleep(1000); //Wait some time to make random generator work properly
+            //usleep(x_i * y_i); //Wait some time to make random generator work properly
             GameObject* obj = wrld->newObject(); //Invoke new object creation
 
             go_link.updLinkPtr();

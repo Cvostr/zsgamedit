@@ -32,12 +32,11 @@ EditWindow::EditWindow(QWidget *parent) :
     QObject::connect(ui->objsList, SIGNAL(itemClicked(QTreeWidgetItem*,int)),
                 this, SLOT(onObjectListItemClicked())); //Signal comes, when user clicks on File->Save As
 
-    QObject::connect(ui->objsList, SIGNAL(onRightClick(QPoint)), this, SLOT(onObjectCtxMenuShow()));
+    QObject::connect(ui->objsList, SIGNAL(onRightClick(QPoint)), this, SLOT(onObjectCtxMenuShow(QPoint)));
     QObject::connect(ui->objsList, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(onCameraToObjTeleport()));
 
     ready = false; //Firstly set it to 0
     hasSceneFile = false; //No scene loaded by default
-
 
     setupObjectsHieList();
 
@@ -260,13 +259,13 @@ void EditWindow::onObjectListItemClicked(){
     _inspector_win->ShowObjectProperties(static_cast<void*>(obj_ptr));
 }
 
-void EditWindow::onObjectCtxMenuShow(){
+void EditWindow::onObjectCtxMenuShow(QPoint point){
     QTreeWidgetItem* selected_item = ui->objsList->currentItem(); //Obtain pointer to clicked obj item
     QString obj_name = selected_item->text(0); //Get label of clicked obj
     GameObject* obj_ptr = world.getObjectByLabel(obj_name); //Obtain pointer to selected object by label
 
     this->obj_ctx_menu->setObjectPtr(obj_ptr);
-    this->obj_ctx_menu->show();
+    this->obj_ctx_menu->show(point);
 }
 
 void EditWindow::onCameraToObjTeleport(){
@@ -409,8 +408,8 @@ ObjectCtxMenu::ObjectCtxMenu(EditWindow* win, QWidget* parent ) : QObject(parent
     QObject::connect(this->action_delete, SIGNAL(triggered(bool)), this, SLOT(onDeleteClicked()));
 }
 
-void ObjectCtxMenu::show(){
-    menu->popup(QPoint(0,0));
+void ObjectCtxMenu::show(QPoint point){
+    menu->popup(point);
 }
 
 void ObjectCtxMenu::setObjectPtr(GameObject* obj_ptr){
@@ -422,7 +421,9 @@ void ObjectCtxMenu::close(){
 }
 //Object Ctx menu slots
 void ObjectCtxMenu::onDeleteClicked(){
-    win_ptr->world.removeObj(obj_ptr->getLinkToThisObject());
+    _inspector_win->clearContentLayout(); //Prevent variable conflicts
+    GameObjectLink link = obj_ptr->getLinkToThisObject();
+    win_ptr->world.removeObj(link);
 }
 void ObjectCtxMenu::onDublicateClicked(){
 

@@ -11,9 +11,9 @@ char rstring_palette[RANDOM_VARIANTS + 1] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghi
 unsigned int current_timestamp() {
     struct timeval te;
     gettimeofday(&te, NULL); // get current time
-    long long milliseconds = te.tv_sec*1000LL + te.tv_usec; // calculate milliseconds
+    //long long milliseconds = te.tv_sec*1000LL + te.tv_usec; // calculate milliseconds
     // printf("milliseconds: %lld\n", milliseconds);
-    return te.tv_sec + te.tv_usec;
+    return te.tv_sec * 1000 + te.tv_usec;
 }
 
 void genRandomString(std::string* result, unsigned int len){

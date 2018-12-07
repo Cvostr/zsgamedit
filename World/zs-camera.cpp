@@ -84,3 +84,7 @@ ZSPIRE::Camera::Camera(){
     updateViewMat();
 
 }
+
+void ZSPIRE::Camera::updateTick(){
+
+}

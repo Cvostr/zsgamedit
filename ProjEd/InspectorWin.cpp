@@ -76,7 +76,7 @@ void InspectorWin::ShowObjectProperties(void* object_ptr){
     obj_ptr->world_ptr->unpickObject();
     obj_ptr->isPicked = true; //Object is picked now
 
-    unsigned int props_num = static_cast<unsigned int>(obj_ptr->properties.size());
+    unsigned int props_num = static_cast<unsigned int>(obj_ptr->props_num);
     for(unsigned int prop_it = 0; prop_it < props_num; prop_it ++){ //iterate over all properties and send them to inspector
         GameObjectProperty* property_ptr = (obj_ptr->properties[prop_it]); //Obtain pointer to object property
         property_ptr->addPropertyInterfaceToInspector(this); //Add its interface to inspector

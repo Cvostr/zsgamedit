@@ -56,7 +56,7 @@ class EditWindow : public QMainWindow
 public slots:
     void onFileListItemClicked();
     void onObjectListItemClicked();
-    void onObjectCtxMenuShow();
+    void onObjectCtxMenuShow(QPoint point);
     void onCameraToObjTeleport();
 
     void onAddNewGameObject();
@@ -77,7 +77,6 @@ private:
 
     QTreeWidgetItem* column_item_go;
     ObjectCtxMenu* obj_ctx_menu;
-
 public:
     bool ready; //Is everything loaded?
 
@@ -129,7 +128,7 @@ public:
 
     ObjectCtxMenu(EditWindow* win, QWidget* parent = nullptr);
     void setObjectPtr(GameObject* obj_ptr);
-    void show();
+    void show(QPoint point);
     void close();
 };
 
