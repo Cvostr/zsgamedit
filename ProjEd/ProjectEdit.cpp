@@ -413,6 +413,8 @@ ObjectCtxMenu::ObjectCtxMenu(EditWindow* win, QWidget* parent ) : QObject(parent
     this->menu->addAction(action_delete);
 
     QObject::connect(this->action_delete, SIGNAL(triggered(bool)), this, SLOT(onDeleteClicked()));
+    QObject::connect(this->action_dub, SIGNAL(triggered(bool)), this, SLOT(onDublicateClicked()));
+
 }
 
 void ObjectCtxMenu::show(QPoint point){
@@ -433,7 +435,13 @@ void ObjectCtxMenu::onDeleteClicked(){
     win_ptr->world.removeObj(link);
 }
 void ObjectCtxMenu::onDublicateClicked(){
+    _inspector_win->clearContentLayout(); //Prevent variable conflicts
+    GameObjectLink link = obj_ptr->getLinkToThisObject();
+    GameObject* result = win_ptr->world.dublicateObject(link.ptr);
 
+    if(result->hasParent){ //if object parented
+        result->parent.ptr->item_ptr->addChild(result->item_ptr);
+    }
 }
 
 void ObjTreeWgt::dropEvent(QDropEvent* event){

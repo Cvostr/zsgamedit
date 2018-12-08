@@ -42,6 +42,7 @@ public:
     bool active; //Is property working
     GameObjectLink go_link;
     World* world_ptr; //Sometimes may be useful
+    int size; //Size of object in bytes
 
     GameObjectProperty();
     virtual ~GameObjectProperty();
@@ -151,6 +152,7 @@ public:
     GameObject* getObjectByStringId(std::string id);
     GameObject** getUnparentedObjs();
     void removeObj(GameObjectLink link); //Remove object from world
+    GameObject* dublicateObject(GameObject* original);
     void trimObjectsList();
     void unpickObject();
 

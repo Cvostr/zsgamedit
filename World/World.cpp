@@ -219,19 +219,51 @@ GameObject* World::addObject(GameObject obj){
     }
 
     GameObject* ptr = nullptr;
-    if(index_to_push == -1){
-        this->objects.push_back(obj); //Push object to vector
+    if(index_to_push == -1){ //if all indeces are busy
+        this->objects.push_back(obj); //Push object to vector's end
         ptr = &objects[objects.size() - 1];
         ptr->array_index = objects.size() - 1;
-    }else{
+    }else{ //if vector has an empty space
         objects[index_to_push] = obj;
         ptr = &objects[index_to_push];
         ptr->array_index = index_to_push;
     }
-    //GameObject* ptr = &objects[objects.size() - 1];
     ptr->world_ptr = this;
 
     return ptr;
+}
+
+GameObject* World::dublicateObject(GameObject* original){
+    GameObject _new_obj;//Create an empty
+    GameObject* new_obj = addObject(_new_obj);
+    //int add_num = 0; //Declaration of addititonal integer
+    //getAvailableNumObjLabel("GameObject_", &add_num);
+    //Copying properties data
+
+    //new_obj->hasParent = original->hasParent; //Setting hasParent property
+    //new_obj->parent = original->parent;
+    new_obj->render_type = original->render_type; //Restore render type from original
+
+    for(unsigned int prop_i = 0; prop_i < original->props_num; prop_i ++){
+        GameObjectProperty* prop_ptr = original->properties[prop_i];
+        new_obj->addProperty(prop_ptr->type);
+        GameObjectProperty* new_prop = new_obj->getPropertyPtrByType(prop_ptr->type);
+        memcpy(new_prop, prop_ptr, prop_ptr->size);
+        new_prop->go_link = new_obj->getLinkToThisObject();
+    }
+
+    if(original->hasParent){
+        original->parent.ptr->addChildObject(new_obj->getLinkToThisObject());
+    }
+
+    LabelProperty* label_prop = new_obj->getLabelProperty(); //Obtain pointer to label property
+    int add_num = 0; //Declaration of addititonal integer
+    getAvailableNumObjLabel(label_prop->label, &add_num);
+    label_prop->label = label_prop->label + "_" + QString::number(add_num);
+    new_obj->label = &label_prop->label;
+    new_obj->item_ptr->setText(0, label_prop->label);
+
+    return new_obj;
 }
 
 GameObject* World::newObject(){
@@ -293,7 +325,7 @@ void World::removeObj(GameObjectLink link){
     //unsigned int props_num = static_cast<unsigned int>(l.ptr->properties.size());
 
     for(unsigned int ch_i = 0; ch_i < children_num; ch_i ++){ //Walk through all children an remove them
-        GameObjectLink link = l.ptr->children[ch_i];
+        GameObjectLink link = l.ptr->children[0]; //Remove first of children because of trim
         removeObj(link);
     }
 

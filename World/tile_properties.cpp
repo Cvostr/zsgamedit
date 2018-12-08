@@ -14,6 +14,7 @@ void onClearBtnPress(){
 TileGroupProperty::TileGroupProperty(){
     type = GO_PROPERTY_TYPE_TILE_GROUP; //Set correct type
     active = true; //And it is active
+    size = sizeof(TileGroupProperty);
 
     this->isCreated = false;
     this->tiles_amount_X = 0;
@@ -23,6 +24,7 @@ TileGroupProperty::TileGroupProperty(){
 TileProperty::TileProperty(){
     type = GO_PROPERTY_TYPE_TILE;
     active = true;
+    size = sizeof(TileProperty);
 
     this->texture_diffuse = nullptr;
 }

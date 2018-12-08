@@ -5,6 +5,7 @@
 GameObjectProperty::GameObjectProperty(){
     type = GO_PROPERTY_TYPE_NONE;
     active = false; //Inactive by default
+    size = sizeof(GameObjectProperty);
 }
 
 GameObjectProperty::~GameObjectProperty(){
@@ -44,6 +45,7 @@ void GameObjectProperty::onValueChanged(){
 TransformProperty::TransformProperty(){
     type = GO_PROPERTY_TYPE_TRANSFORM; //Type of property is transform
     active = true; //property is active
+    size = sizeof(TransformProperty);
 
     this->transform_mat = getIdentity(); //Result matrix is identity by default
     this->translation = ZSVECTOR3(0.0f, 0.0f, 0.0f); //Position is zero by default
@@ -54,11 +56,13 @@ TransformProperty::TransformProperty(){
 LabelProperty::LabelProperty(){
     type = GO_PROPERTY_TYPE_LABEL; //its an label
     active = true;
+    size = sizeof(LabelProperty);
 }
 
 MeshProperty::MeshProperty(){
     type = GO_PROPERTY_TYPE_MESH;
     active = true;
+    size = sizeof(MeshProperty);
 }
 //Transform property functions
 void TransformProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
