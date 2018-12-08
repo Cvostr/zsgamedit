@@ -33,6 +33,7 @@ void GameObjectLink::crack(){
 
 GameObject::GameObject(){
     this->hasParent = false; //No parent by default
+    this->world_ptr = nullptr;
     item_ptr = new QTreeWidgetItem; //Allocate tree widget item
     genRandomString(&this->str_id, 15); //Generate random string ID
     render_type = GO_RENDER_TYPE_NONE; //No render by default

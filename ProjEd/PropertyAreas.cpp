@@ -139,6 +139,7 @@ void StringPropertyArea::updateState(){
 FloatPropertyArea::FloatPropertyArea(){
     type = PEA_TYPE_FLOAT;
     this->float_field = new QLineEdit; //Allocation of text field
+    value = 0; //Set default value
 
     elem_layout->addWidget(float_field); //Add text filed to layout
 }
@@ -175,6 +176,8 @@ void FloatPropertyArea::updateState(){
 PickResourceArea::PickResourceArea(){
     type = PEA_TYPE_RESPICK;
     this->rel_path = nullptr;
+    this->resource_type = RESOURCE_TYPE_TEXTURE; //Default type is texture
+
     respick_btn = new QPushButton; //Allocation of QPushButton
     relpath_label = new QLabel; //Allocation of resource relpath text
     elem_layout->addWidget(relpath_label);

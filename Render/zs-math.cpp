@@ -211,8 +211,7 @@ ZSMATRIX4x4 getRotationMat(ZSVECTOR3 rotation){
 }
 
 ZSMATRIX4x4 getRotationMat(ZSVECTOR3 rotation, ZSVECTOR3 center){
-    ZSMATRIX4x4 result = getIdentity();
-    result = getTranslationMat(center * -1);
+    ZSMATRIX4x4 result = getTranslationMat(center * -1);
     result = result * getTranslationMat(rotation);
     return result;
 }

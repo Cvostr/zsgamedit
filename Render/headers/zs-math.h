@@ -10,7 +10,10 @@
 		float X;
 		float Y;
 
-		ZSVECTOR2() {}
+        ZSVECTOR2() {
+            X = 0;
+            Y = 0;
+        }
 		ZSVECTOR2(float nx, float ny) {
 				X = nx;
 				Y = ny;
@@ -23,7 +26,11 @@
 		float Y;
 		float Z;
 
-		ZSVECTOR3(){}
+        ZSVECTOR3(){
+            X = 0;
+            Y = 0;
+            Z = 0;
+        }
 
 		ZSVECTOR3(float nx, float ny, float nz) {
 			X = nx;
@@ -42,12 +49,16 @@
 
 	typedef struct ZSVECTOR4 {
 
-		float X = 0;
-		float Y = 0;
-		float Z = 0;
-		float W = 0;
+        float X;
+        float Y;
+        float Z;
+        float W;
 
 		ZSVECTOR4() {
+            X = 0;
+            Y = 0;
+            Z = 0;
+            W = 0;
 		}
 
 		ZSVECTOR4(float x, float y, float z, float w) {

@@ -398,7 +398,7 @@ InspectorWin* EditWindow::getInspector(){
 }
 
 ObjTreeWgt::ObjTreeWgt(QWidget* parent) : QTreeWidget (parent){
-
+    this->world_ptr = nullptr; //Not assigned by default
 }
 
 ObjectCtxMenu::ObjectCtxMenu(EditWindow* win, QWidget* parent ) : QObject(parent){

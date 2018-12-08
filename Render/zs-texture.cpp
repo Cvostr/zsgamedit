@@ -64,7 +64,8 @@ bool ZSPIRE::Texture::LoadDDSTextureFromFile(const char* path) {
 
 	if (header[0] != 'D' && header[1] != 'D' && header[2] != 'S') { //File found, but isn't DDS texture
 		std::cout << "TEXTURE: FATAL: Error processing file! Perhaps, file " << path << " is not DDS texture!" << std::endl;
-		return false;
+        fclose(file);
+        return false;
 	}
 	fseek(file, 0, SEEK_SET); //returning to start of file
 
@@ -72,7 +73,7 @@ bool ZSPIRE::Texture::LoadDDSTextureFromFile(const char* path) {
 
 	fstat(_fileno(file), &buff); //Getting file info
 
-	unsigned char * data = (unsigned char*)malloc(sizeof(unsigned char*) * buff.st_size); //Allocating buffer for file in heap
+    unsigned char * data = (unsigned char*)malloc(sizeof(unsigned char) * buff.st_size); //Allocating buffer for file in heap
 	fread(data, 1, buff.st_size, file); //Reading file to buffer
 	LoadDDSTextureFromBuffer(data, buff.st_size); //Read texture from buffer
 
