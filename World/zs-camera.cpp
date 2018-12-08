@@ -83,8 +83,27 @@ ZSPIRE::Camera::Camera(){
     updateProjectionMat();
     updateViewMat();
 
+    isMoving = false;
 }
 
 void ZSPIRE::Camera::updateTick(){
+    if(!isMoving) return;
 
+    if(getDistance(camera_pos, _dest_pos) < 3){
+        camera_pos = _dest_pos;
+        updateViewMat();
+        isMoving = false;
+    }else{
+        ZSVECTOR3 delta = camera_pos - _dest_pos;
+        float dist = getDistance(camera_pos, _dest_pos);
+
+        ZSVECTOR3 toMove = delta / dist;
+        camera_pos = camera_pos - toMove;
+        updateViewMat();
+    }
+
+}
+
+void ZSPIRE::Camera::startMoving(){
+    this->isMoving = true;
 }

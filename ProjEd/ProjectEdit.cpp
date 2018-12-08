@@ -269,7 +269,14 @@ void EditWindow::onObjectCtxMenuShow(QPoint point){
 }
 
 void EditWindow::onCameraToObjTeleport(){
+    QTreeWidgetItem* selected_item = ui->objsList->currentItem(); //Obtain pointer to clicked obj item
+    QString obj_name = selected_item->text(0); //Get label of clicked obj
+    GameObject* obj_ptr = world.getObjectByLabel(obj_name); //Obtain pointer to selected object by label
 
+    TransformProperty* transform = obj_ptr->getTransformProperty(); //Obtain pointer to object transform
+
+    edit_camera._dest_pos = transform->translation;
+    edit_camera.startMoving();
 }
 
 void EditWindow::glRender(){
