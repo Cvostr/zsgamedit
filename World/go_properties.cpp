@@ -135,7 +135,8 @@ void TransformProperty::getAbsoluteParentTransform(ZSVECTOR3& t, ZSVECTOR3& s, Z
     r = r + this->rotation;
 
     if(ptr->hasParent){
-        TransformProperty* property = static_cast<TransformProperty*>(ptr->parent.updLinkPtr()->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
+        GameObject* parent_p = ptr->parent.ptr;
+        TransformProperty* property = static_cast<TransformProperty*>(parent_p->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
         property->getAbsoluteParentTransform(t, s, r);
     }
 }

@@ -41,6 +41,10 @@ GameObject::GameObject(){
     isPicked = false;
     props_num = 0;
     label = nullptr;
+
+    for(int prop_i = 0; prop_i < 10; prop_i ++){
+        properties[prop_i] = nullptr;
+    }
     //properties.reserve(15);
 }
 
@@ -90,7 +94,7 @@ bool GameObject::addProperty(int property){
     _ptr->go_link = this->getLinkToThisObject();
     _ptr->go_link.updLinkPtr();
     _ptr->world_ptr = this->world_ptr; //Assign pointer to world
-    this->properties[props_num] = _ptr; //Store poroperty in gameobject
+    this->properties[props_num] = _ptr; //Store property in gameobject
     this->props_num += 1;
     return true;
 }
@@ -234,7 +238,7 @@ GameObject* World::addObject(GameObject obj){
     return ptr;
 }
 
-GameObject* World::dublicateObject(GameObject* original){
+GameObject* World::dublicateObject(GameObject* original, bool parent){
     GameObject _new_obj;//Create an empty
     GameObject* new_obj = addObject(_new_obj);
 
@@ -244,12 +248,30 @@ GameObject* World::dublicateObject(GameObject* original){
         GameObjectProperty* prop_ptr = original->properties[prop_i];
         new_obj->addProperty(prop_ptr->type);
         GameObjectProperty* new_prop = new_obj->getPropertyPtrByType(prop_ptr->type);
-        memcpy(new_prop, prop_ptr, prop_ptr->size);
-        new_prop->go_link = new_obj->getLinkToThisObject();
+
+        //memcpy(new_prop, prop_ptr, prop_ptr->size);
+        //*new_prop = *prop_ptr;
+        int header_size = sizeof(GameObjectProperty);
+        //memmove(new_prop[header_size], prop_ptr + header_size, prop_ptr->size - header_size);
+        for(int i = 0; i < prop_ptr->size - header_size; i++ )
+           ((unsigned char*)new_prop)[header_size + i] = ((unsigned char*)prop_ptr)[header_size + i];
+
+        new_prop->go_link.obj_str_id = new_obj->getLinkToThisObject().obj_str_id;
+        new_prop->go_link.updLinkPtr();
+        new_prop->world_ptr = this;
     }
 
     if(original->hasParent){ //if original has parent
-        original->parent.ptr->addChildObject(new_obj->getLinkToThisObject());
+        TransformProperty* transform = new_obj->getTransformProperty();
+        ZSVECTOR3 p_translation = ZSVECTOR3(0,0,0);
+        ZSVECTOR3 p_scale = ZSVECTOR3(1,1,1);
+        ZSVECTOR3 p_rotation = ZSVECTOR3(0,0,0);
+        original->parent.ptr->getTransformProperty()->getAbsoluteParentTransform(p_translation, p_scale, p_rotation);
+        transform->translation = transform->translation + p_translation;
+        transform->scale = transform->scale * p_scale;
+        transform->rotation = transform->rotation + p_rotation;
+        if(parent == true)
+            original->parent.ptr->addChildObject(new_obj->getLinkToThisObject());
     }
 
     LabelProperty* label_prop = new_obj->getLabelProperty(); //Obtain pointer to label property
@@ -263,7 +285,7 @@ GameObject* World::dublicateObject(GameObject* original){
     unsigned int children_amount = original->children.size();
     for(unsigned int child_i = 0; child_i < children_amount; child_i ++){
         GameObjectLink link = original->children[child_i];
-        GameObject* new_child = dublicateObject(link.ptr);
+        GameObject* new_child = dublicateObject(link.ptr, false);
         new_obj->addChildObject(new_child->getLinkToThisObject());
         new_obj->item_ptr->addChild(new_child->item_ptr);
     }

@@ -152,7 +152,7 @@ public:
     GameObject* getObjectByStringId(std::string id);
     GameObject** getUnparentedObjs();
     void removeObj(GameObjectLink link); //Remove object from world
-    GameObject* dublicateObject(GameObject* original);
+    GameObject* dublicateObject(GameObject* original, bool parent = true);
     void trimObjectsList();
     void unpickObject();
 
