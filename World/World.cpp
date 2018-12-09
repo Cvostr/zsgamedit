@@ -40,6 +40,7 @@ GameObject::GameObject(){
     alive = true; //Object exist by default
     isPicked = false;
     props_num = 0;
+    label = nullptr;
     //properties.reserve(15);
 }
 
@@ -236,14 +237,9 @@ GameObject* World::addObject(GameObject obj){
 GameObject* World::dublicateObject(GameObject* original){
     GameObject _new_obj;//Create an empty
     GameObject* new_obj = addObject(_new_obj);
-    //int add_num = 0; //Declaration of addititonal integer
-    //getAvailableNumObjLabel("GameObject_", &add_num);
-    //Copying properties data
 
-    //new_obj->hasParent = original->hasParent; //Setting hasParent property
-    //new_obj->parent = original->parent;
     new_obj->render_type = original->render_type; //Restore render type from original
-
+    //Copying properties data
     for(unsigned int prop_i = 0; prop_i < original->props_num; prop_i ++){
         GameObjectProperty* prop_ptr = original->properties[prop_i];
         new_obj->addProperty(prop_ptr->type);
@@ -252,7 +248,7 @@ GameObject* World::dublicateObject(GameObject* original){
         new_prop->go_link = new_obj->getLinkToThisObject();
     }
 
-    if(original->hasParent){
+    if(original->hasParent){ //if original has parent
         original->parent.ptr->addChildObject(new_obj->getLinkToThisObject());
     }
 
@@ -260,8 +256,17 @@ GameObject* World::dublicateObject(GameObject* original){
     int add_num = 0; //Declaration of addititonal integer
     getAvailableNumObjLabel(label_prop->label, &add_num);
     label_prop->label = label_prop->label + "_" + QString::number(add_num);
+    label_prop->list_item_ptr = new_obj->item_ptr; //Setting to label new qt item
     new_obj->label = &label_prop->label;
     new_obj->item_ptr->setText(0, label_prop->label);
+
+    unsigned int children_amount = original->children.size();
+    for(unsigned int child_i = 0; child_i < children_amount; child_i ++){
+        GameObjectLink link = original->children[child_i];
+        GameObject* new_child = dublicateObject(link.ptr);
+        new_obj->addChildObject(new_child->getLinkToThisObject());
+        new_obj->item_ptr->addChild(new_child->item_ptr);
+    }
 
     return new_obj;
 }
@@ -307,6 +312,7 @@ void World::getAvailableNumObjLabel(QString label, int* result){
      bool hasEqualName = false; //true if we already have this obj
      for(unsigned int obj_it = 0; obj_it < objs_num; obj_it ++){ //Iterate over all objs in scene
          GameObject* obj_ptr = &this->objects[obj_it]; //Get pointer to checking object
+         if(obj_ptr->label == nullptr) continue;
          if(obj_ptr->label->compare(tocheck_str) == 0) //If label on object is same
              hasEqualName = true; //Then we founded equal name
      }
