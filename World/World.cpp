@@ -45,7 +45,6 @@ GameObject::GameObject(){
     for(int prop_i = 0; prop_i < 10; prop_i ++){
         properties[prop_i] = nullptr;
     }
-    //properties.reserve(15);
 }
 
 GameObject::~GameObject(){
@@ -331,7 +330,7 @@ void World::getAvailableNumObjLabel(QString label, int* result){
      bool hasEqualName = false; //true if we already have this obj
      for(unsigned int obj_it = 0; obj_it < objs_num; obj_it ++){ //Iterate over all objs in scene
          GameObject* obj_ptr = &this->objects[obj_it]; //Get pointer to checking object
-         if(obj_ptr->label == nullptr) continue;
+         if(obj_ptr->label == nullptr || !obj_ptr->alive) continue;
          if(obj_ptr->label->compare(tocheck_str) == 0) //If label on object is same
              hasEqualName = true; //Then we founded equal name
      }
@@ -356,10 +355,10 @@ void World::removeObj(GameObjectLink link){
 
     for(unsigned int prop_i = 0; prop_i < props_num; prop_i ++){ //Walk through all children an remove them
         GameObjectProperty* prop_ptr = l.ptr->properties[prop_i];
-        //free(prop_ptr);
-        //proj_ptr = 0x0;
+        delete prop_ptr;
+        prop_ptr = 0x0;
     }
-
+    l.ptr->props_num = 0;
     l.ptr->children.clear();
     if(l.ptr->item_ptr != nullptr){
         delete l.ptr->item_ptr; //Destroy Qt tree widget item to remove object from tree
