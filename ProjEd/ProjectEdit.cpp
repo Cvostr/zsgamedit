@@ -441,6 +441,8 @@ void ObjectCtxMenu::onDublicateClicked(){
 
     if(result->hasParent){ //if object parented
         result->parent.ptr->item_ptr->addChild(result->item_ptr);
+    }else{
+        win_ptr->ui->objsList->addTopLevelItem(result->item_ptr);
     }
 }
 
@@ -482,7 +484,16 @@ void EditWindow::onLeftBtnClicked(int X, int Y){
 
     _inspector_win->ShowObjectProperties(static_cast<void*>(obj_ptr));
 }
-void EditWindow::onRightBtnClicked(int X, int Y){}
+void EditWindow::onRightBtnClicked(int X, int Y){
+    unsigned int clicked = render->render_getpickedObj(static_cast<void*>(this), X, Y);
+
+    GameObject* obj_ptr = &world.objects[clicked]; //Obtain pointer to selected object by label
+    if(clicked > world.objects.size() || obj_ptr == 0x0 || clicked >= 256 * 256 * 256)
+        return;
+
+    this->obj_ctx_menu->setObjectPtr(obj_ptr);
+    this->obj_ctx_menu->show(QPoint(this->width() + X, Y));
+}
 void EditWindow::onMouseMotion(int relX, int relY){
     if(project.perspective == 2) //Only affective in 2D
 

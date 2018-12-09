@@ -104,12 +104,13 @@ public:
     void onRightBtnClicked(int X, int Y);
     void onMouseMotion(int relX, int relY);
 
+    Ui::EditWindow *ui;
     explicit EditWindow(QWidget *parent = nullptr);
     ~EditWindow();
 
 
 private:
-    Ui::EditWindow *ui;
+
 };
 
 class ObjectCtxMenu : public QObject{

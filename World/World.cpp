@@ -249,12 +249,9 @@ GameObject* World::dublicateObject(GameObject* original, bool parent){
         new_obj->addProperty(prop_ptr->type);
         GameObjectProperty* new_prop = new_obj->getPropertyPtrByType(prop_ptr->type);
 
-        //memcpy(new_prop, prop_ptr, prop_ptr->size);
-        //*new_prop = *prop_ptr;
         int header_size = sizeof(GameObjectProperty);
-        //memmove(new_prop[header_size], prop_ptr + header_size, prop_ptr->size - header_size);
-        for(int i = 0; i < prop_ptr->size - header_size; i++ )
-           ((unsigned char*)new_prop)[header_size + i] = ((unsigned char*)prop_ptr)[header_size + i];
+        for(int i = header_size; i < prop_ptr->size; i++ )
+           ((unsigned char*)new_prop)[i] = ((unsigned char*)prop_ptr)[i];
 
         new_prop->go_link.obj_str_id = new_obj->getLinkToThisObject().obj_str_id;
         new_prop->go_link.updLinkPtr();
@@ -275,9 +272,9 @@ GameObject* World::dublicateObject(GameObject* original, bool parent){
     }
 
     LabelProperty* label_prop = new_obj->getLabelProperty(); //Obtain pointer to label property
-    int add_num = 0; //Declaration of addititonal integer
-    getAvailableNumObjLabel(label_prop->label, &add_num);
-    label_prop->label = label_prop->label + "_" + QString::number(add_num);
+    std::string to_paste;
+    genRandomString(&to_paste, 3);
+    label_prop->label = label_prop->label + "_dub" + QString::fromStdString(to_paste);
     label_prop->list_item_ptr = new_obj->item_ptr; //Setting to label new qt item
     new_obj->label = &label_prop->label;
     new_obj->item_ptr->setText(0, label_prop->label);
@@ -350,17 +347,24 @@ void World::removeObj(GameObjectLink link){
     l.ptr->alive = false; //Mark object as dead
 
     unsigned int children_num = static_cast<unsigned int>(l.ptr->children.size());
-    //unsigned int props_num = static_cast<unsigned int>(l.ptr->properties.size());
+    unsigned int props_num = static_cast<unsigned int>(l.ptr->props_num);
 
     for(unsigned int ch_i = 0; ch_i < children_num; ch_i ++){ //Walk through all children an remove them
         GameObjectLink link = l.ptr->children[0]; //Remove first of children because of trim
         removeObj(link);
     }
 
+    for(unsigned int prop_i = 0; prop_i < props_num; prop_i ++){ //Walk through all children an remove them
+        GameObjectProperty* prop_ptr = l.ptr->properties[prop_i];
+        //free(prop_ptr);
+        //proj_ptr = 0x0;
+    }
+
     l.ptr->children.clear();
-
-    delete l.ptr->item_ptr; //Destroy Qt tree widget item to remove object from tree
-
+    if(l.ptr->item_ptr != nullptr){
+        delete l.ptr->item_ptr; //Destroy Qt tree widget item to remove object from tree
+        l.ptr->item_ptr = 0x0;
+    }
     if(l.ptr->hasParent == true){ //If object parented by other obj
         GameObject* parent = l.ptr->parent.updLinkPtr(); //Receive pointer to object's parent
 

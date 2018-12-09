@@ -78,7 +78,7 @@ void TileGroupProperty::process(){
 
     for(int x_i = 0; x_i < tiles_amount_X; x_i ++){
         for(int y_i = 0; y_i < tiles_amount_Y; y_i ++){
-            //usleep(x_i * y_i); //Wait some time to make random generator work properly
+            usleep(1100); //Wait some time to make random generator work properly
             GameObject* obj = wrld->newObject(); //Invoke new object creation
 
             go_link.updLinkPtr();
@@ -102,7 +102,7 @@ void TileGroupProperty::process(){
             transform->translation = ZSVECTOR3(geometry.tileWidth * x_i * 2, geometry.tileHeight * y_i * 2, 0);
             transform->translation = transform->translation + parent_transform->translation;
 
-            label->label = parent_label->label + QString::number(x_i) + "_" + QString::number(y_i); //Get new object new name
+            label->label = parent_label->label + QString::number(x_i) + "," + QString::number(y_i); //Get new object new name
             obj->item_ptr->setText(0, label->label);
 
             parent->addChildObject(obj->getLinkToThisObject()); //Make new object dependent
