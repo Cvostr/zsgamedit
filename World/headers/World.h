@@ -130,7 +130,7 @@ public:
 
     void saveProperties(std::ofstream* stream); //Writes properties content at end of stream
     void loadProperty(std::ifstream* world_stream); //Loads one property from stream
-
+    void clearAll(bool clearQtWigt = true);
     void Draw(RenderPipeline* pipeline);
 
     GameObject(); //Default constructor

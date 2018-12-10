@@ -75,7 +75,6 @@ private:
 
     RenderPipeline* render;
 
-    QTreeWidgetItem* column_item_go;
     ObjectCtxMenu* obj_ctx_menu;
 public:
     bool ready; //Is everything loaded?

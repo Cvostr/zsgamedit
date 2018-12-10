@@ -207,6 +207,22 @@ void GameObject::trimChildrenArray(){
     }
 }
 
+void GameObject::clearAll(bool clearQtWigt){
+    unsigned int props_num = static_cast<unsigned int>(this->props_num);
+
+    for(unsigned int prop_i = 0; prop_i < props_num; prop_i ++){ //Walk through all children an remove them
+        GameObjectProperty* prop_ptr = properties[prop_i];
+        delete prop_ptr;
+        prop_ptr = 0x0;
+    }
+    this->props_num = 0; //Set property counter to zero
+    children.clear();
+    if(item_ptr != nullptr && clearQtWigt == true){ //if Qt tree widget item not cleared
+        delete item_ptr; //Destroy Qt tree widget item to remove object from tree
+        item_ptr = 0x0;
+    }
+}
+
 World::World(){
     objects.reserve(4000);
     proj_ptr = nullptr;
@@ -252,9 +268,9 @@ GameObject* World::dublicateObject(GameObject* original, bool parent){
         for(int i = header_size; i < prop_ptr->size; i++ )
            ((unsigned char*)new_prop)[i] = ((unsigned char*)prop_ptr)[i];
 
-        new_prop->go_link.obj_str_id = new_obj->getLinkToThisObject().obj_str_id;
-        new_prop->go_link.updLinkPtr();
-        new_prop->world_ptr = this;
+        //new_prop->go_link.obj_str_id = new_obj->getLinkToThisObject().obj_str_id;
+        //new_prop->go_link.updLinkPtr();
+        //new_prop->world_ptr = this;
     }
 
     if(original->hasParent){ //if original has parent
@@ -273,7 +289,7 @@ GameObject* World::dublicateObject(GameObject* original, bool parent){
     LabelProperty* label_prop = new_obj->getLabelProperty(); //Obtain pointer to label property
     std::string to_paste;
     genRandomString(&to_paste, 3);
-    label_prop->label = label_prop->label + "_dub" + QString::fromStdString(to_paste);
+    label_prop->label = label_prop->label + "_" + QString::fromStdString(to_paste);
     label_prop->list_item_ptr = new_obj->item_ptr; //Setting to label new qt item
     new_obj->label = &label_prop->label;
     new_obj->item_ptr->setText(0, label_prop->label);
@@ -346,24 +362,13 @@ void World::removeObj(GameObjectLink link){
     l.ptr->alive = false; //Mark object as dead
 
     unsigned int children_num = static_cast<unsigned int>(l.ptr->children.size());
-    unsigned int props_num = static_cast<unsigned int>(l.ptr->props_num);
 
     for(unsigned int ch_i = 0; ch_i < children_num; ch_i ++){ //Walk through all children an remove them
         GameObjectLink link = l.ptr->children[0]; //Remove first of children because of trim
         removeObj(link);
     }
 
-    for(unsigned int prop_i = 0; prop_i < props_num; prop_i ++){ //Walk through all children an remove them
-        GameObjectProperty* prop_ptr = l.ptr->properties[prop_i];
-        delete prop_ptr;
-        prop_ptr = 0x0;
-    }
-    l.ptr->props_num = 0;
-    l.ptr->children.clear();
-    if(l.ptr->item_ptr != nullptr){
-        delete l.ptr->item_ptr; //Destroy Qt tree widget item to remove object from tree
-        l.ptr->item_ptr = 0x0;
-    }
+    l.ptr->clearAll();
     if(l.ptr->hasParent == true){ //If object parented by other obj
         GameObject* parent = l.ptr->parent.updLinkPtr(); //Receive pointer to object's parent
 
@@ -376,7 +381,6 @@ void World::removeObj(GameObjectLink link){
         }
         parent->trimChildrenArray(); //Remove cracked link from vector
     }
-   // trimObjectsList(); //Remove cracked object from objects vector
 }
 
 void World::trimObjectsList(){
@@ -523,7 +527,12 @@ void World::openFromFile(QString file, QTreeWidget* w_ptr){
 }
 
 void World::clear(){
-     objects.resize(0);
+    for(unsigned int objs_i = 0; objs_i < objects.size(); objs_i ++){
+        GameObject* obj_ptr = &objects[objs_i];
+        obj_ptr->alive = false;
+        obj_ptr->clearAll(false);
+    }
+    objects.resize(0);
 }
 
 GameObject** World::getUnparentedObjs(){

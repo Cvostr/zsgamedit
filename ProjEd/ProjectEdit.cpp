@@ -187,8 +187,8 @@ void EditWindow::setupObjectsHieList(){
     QTreeWidget* w_ptr = ui->objsList; //Getting pointer to objects list widget
     w_ptr->clear(); //Clears widget
 
-    column_item_go = new QTreeWidgetItem; //Defining Objects list
-    column_item_go->setText(0, "Objects"); //Setting text to Objects
+    //column_item_go = new QTreeWidgetItem; //Defining Objects list
+//    column_item_go->setText(0, "Objects"); //Setting text to Objects
 }
 
 void EditWindow::updateFileList(){
