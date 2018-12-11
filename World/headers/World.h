@@ -43,12 +43,14 @@ public:
     GameObjectLink go_link;
     World* world_ptr; //Sometimes may be useful
     int size; //Size of object in bytes
+    void* data_start; //points to a start of property data
 
     GameObjectProperty();
     virtual ~GameObjectProperty();
 
     virtual void addPropertyInterfaceToInspector(InspectorWin* inspector);
     virtual void onValueChanged();
+    virtual void copyTo(GameObjectProperty* dest);
 };
 
 #include "2dtileproperties.h" //Include that to define 2dTile game elements
@@ -61,6 +63,7 @@ public:
 
     void addPropertyInterfaceToInspector(InspectorWin* inspector);
     void onValueChanged();
+    void copyTo(GameObjectProperty* dest);
 
     LabelProperty();
 };
@@ -81,6 +84,7 @@ public:
     void addPropertyInterfaceToInspector(InspectorWin* inspector);
     void onValueChanged();
     void getAbsoluteParentTransform(ZSVECTOR3& t, ZSVECTOR3& s, ZSVECTOR3& r);
+    void copyTo(GameObjectProperty* dest);
 
     TransformProperty();
 };
@@ -93,6 +97,7 @@ public:
     void addPropertyInterfaceToInspector(InspectorWin* inspector);
     void updateMeshPtr(); //Updates pointer according to resource_relpath
     void onValueChanged(); //Update mesh pointer
+    void copyTo(GameObjectProperty* dest);
     MeshProperty();
 };
 

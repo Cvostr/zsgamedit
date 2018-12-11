@@ -6,11 +6,17 @@ GameObjectProperty::GameObjectProperty(){
     type = GO_PROPERTY_TYPE_NONE;
     active = false; //Inactive by default
     size = sizeof(GameObjectProperty);
+    data_start = 0x0;
 }
 
 GameObjectProperty::~GameObjectProperty(){
 
 }
+
+void GameObjectProperty::copyTo(GameObjectProperty* dest){
+
+}
+
 //Cast inheritance calls
 void GameObjectProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
     switch(this->type){
@@ -46,6 +52,7 @@ TransformProperty::TransformProperty(){
     type = GO_PROPERTY_TYPE_TRANSFORM; //Type of property is transform
     active = true; //property is active
     size = sizeof(TransformProperty);
+    data_start = &_last_translation;
 
     this->transform_mat = getIdentity(); //Result matrix is identity by default
     this->translation = ZSVECTOR3(0.0f, 0.0f, 0.0f); //Position is zero by default
@@ -57,12 +64,14 @@ LabelProperty::LabelProperty(){
     type = GO_PROPERTY_TYPE_LABEL; //its an label
     active = true;
     size = sizeof(LabelProperty);
+    data_start = &label;
 }
 
 MeshProperty::MeshProperty(){
     type = GO_PROPERTY_TYPE_MESH;
     active = true;
     size = sizeof(MeshProperty);
+    data_start = &resource_relpath;
 }
 //Transform property functions
 void TransformProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
@@ -141,6 +150,16 @@ void TransformProperty::getAbsoluteParentTransform(ZSVECTOR3& t, ZSVECTOR3& s, Z
     }
 }
 
+void TransformProperty::copyTo(GameObjectProperty* dest){
+    if(dest->type != this->type) return; //if it isn't transform
+
+    TransformProperty* _dest = static_cast<TransformProperty*>(dest);
+    _dest->translation = translation;
+    _dest->scale = scale;
+    _dest->rotation = rotation;
+    _dest->transform_mat = transform_mat;
+}
+
 //Label property functions
 void LabelProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
     StringPropertyArea* area = new StringPropertyArea;
@@ -153,6 +172,14 @@ void LabelProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
 void LabelProperty::onValueChanged(){
     this->list_item_ptr->setText(0, this->label);
 }
+
+void LabelProperty::copyTo(GameObjectProperty* dest){
+    if(dest->type != this->type) return; //if it isn't transform
+
+    LabelProperty* _dest = static_cast<LabelProperty*>(dest);
+    _dest->label = label;
+}
+
 //Mesh property functions
 void MeshProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
     PickResourceArea* area = new PickResourceArea;
@@ -175,7 +202,13 @@ void MeshProperty::onValueChanged(){
     updateMeshPtr();
 }
 
+void MeshProperty::copyTo(GameObjectProperty* dest){
+    if(dest->type != this->type) return; //if it isn't transform
 
+    MeshProperty* _dest = static_cast<MeshProperty*>(dest);
+    _dest->resource_relpath = resource_relpath;
+    _dest->mesh_ptr = mesh_ptr;
+}
 
 void GameObject::saveProperties(std::ofstream* stream){
     unsigned int props_num = static_cast<unsigned int>(this->props_num);

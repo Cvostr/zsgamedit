@@ -260,17 +260,11 @@ GameObject* World::dublicateObject(GameObject* original, bool parent){
     new_obj->render_type = original->render_type; //Restore render type from original
     //Copying properties data
     for(unsigned int prop_i = 0; prop_i < original->props_num; prop_i ++){
-        GameObjectProperty* prop_ptr = original->properties[prop_i];
+        auto prop_ptr = original->properties[prop_i];
         new_obj->addProperty(prop_ptr->type);
-        GameObjectProperty* new_prop = new_obj->getPropertyPtrByType(prop_ptr->type);
+        auto new_prop = new_obj->getPropertyPtrByType(prop_ptr->type);
 
-        int header_size = sizeof(GameObjectProperty);
-        for(int i = header_size; i < prop_ptr->size; i++ )
-           ((unsigned char*)new_prop)[i] = ((unsigned char*)prop_ptr)[i];
-
-        //new_prop->go_link.obj_str_id = new_obj->getLinkToThisObject().obj_str_id;
-        //new_prop->go_link.updLinkPtr();
-        //new_prop->world_ptr = this;
+        prop_ptr->copyTo(new_prop); //start property copying
     }
 
     if(original->hasParent){ //if original has parent
@@ -324,6 +318,7 @@ GameObject* World::getObjectByLabel(QString label){
     unsigned int objs_num = static_cast<unsigned int>(this->objects.size());
     for(unsigned int obj_it = 0; obj_it < objs_num; obj_it ++){ //Iterate over all objs in scene
         GameObject* obj_ptr = &this->objects[obj_it]; //Get pointer to checking object
+        if(!obj_ptr->alive) continue;
         if(obj_ptr->label->compare(label) == 0) //if labels are same
             return obj_ptr; //Return founded object
     }
