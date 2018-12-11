@@ -1,5 +1,7 @@
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/7922968d5a6642938c121868dbdad91b)](https://www.codacy.com/app/Cvostr/zsgamedit?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Cvostr/zsgamedit&amp;utm_campaign=Badge_Grade) 
 
+[![Build status](https://ci.appveyor.com/api/projects/status/o97mf84e0he3o9yl?svg=true)](https://ci.appveyor.com/project/Cvostr/zsgamedit)
+
 # ZS GamEdit
 
 Is an simple opensource thing to make games (in future)
