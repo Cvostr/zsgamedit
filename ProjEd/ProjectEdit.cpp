@@ -186,9 +186,6 @@ void EditWindow::onAddNewGameObject(){
 void EditWindow::setupObjectsHieList(){
     QTreeWidget* w_ptr = ui->objsList; //Getting pointer to objects list widget
     w_ptr->clear(); //Clears widget
-
-    //column_item_go = new QTreeWidgetItem; //Defining Objects list
-//    column_item_go->setText(0, "Objects"); //Setting text to Objects
 }
 
 void EditWindow::updateFileList(){
@@ -274,8 +271,13 @@ void EditWindow::onCameraToObjTeleport(){
     GameObject* obj_ptr = world.getObjectByLabel(obj_name); //Obtain pointer to selected object by label
 
     TransformProperty* transform = obj_ptr->getTransformProperty(); //Obtain pointer to object transform
+    //Define to store absolute transform
+    ZSVECTOR3 _t = ZSVECTOR3(0.0f);
+    ZSVECTOR3 _s = ZSVECTOR3(1.0f);
+    ZSVECTOR3 _r = ZSVECTOR3(0.0f);
+    transform->getAbsoluteParentTransform(_t, _s, _r); //Calculate absolute transform
 
-    edit_camera._dest_pos = transform->translation;
+    edit_camera._dest_pos = _t; //Sending position
     edit_camera.startMoving();
 }
 
