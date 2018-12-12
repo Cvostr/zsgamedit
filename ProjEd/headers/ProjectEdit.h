@@ -123,7 +123,12 @@ private:
 
     QAction* action_dub; //Button to dublicate object
     QAction* action_delete; //Button to delete object
+
+    QAction* action_move;
+    QAction* action_scale;
+    QAction* action_rotate;
 public:
+    bool displayTransforms;
     EditWindow* win_ptr;
 
     ObjectCtxMenu(EditWindow* win, QWidget* parent = nullptr);

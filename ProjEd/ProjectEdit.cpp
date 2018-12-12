@@ -17,7 +17,7 @@ EditWindow::EditWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    QObject::connect(ui->fileList, SIGNAL(itemClicked(QListWidgetItem *)),
+    QObject::connect(ui->fileList, SIGNAL(doubleClicked(QModelIndex)),
                 this, SLOT(onFileListItemClicked())); //Signal comes, when user clicks on file
     QObject::connect(ui->actionNew_Object, SIGNAL(triggered()),
                 this, SLOT(onAddNewGameObject())); //Signal comes, when user clicks on Object->Create
@@ -92,6 +92,7 @@ void EditWindow::init(){
     this->glcontext = SDL_GL_CreateContext(window);
 
     glViewport(0, 0, 640, 480);
+    glLineWidth(6.0f);
 
     render = new RenderPipeline;
     render->InitGLEW();
@@ -410,6 +411,10 @@ ObjectCtxMenu::ObjectCtxMenu(EditWindow* win, QWidget* parent ) : QObject(parent
     //Allocating actions
     this->action_dub = new QAction("Dublicate", win);
     this->action_delete = new QAction("Delete", win);
+
+    action_move = new QAction("Move", win);
+    action_scale = new QAction("Scale", win);
+    action_rotate = new QAction("Rotate", win);
     //Adding actions to menu container
     this->menu->addAction(action_dub);
     this->menu->addAction(action_delete);
@@ -420,6 +425,14 @@ ObjectCtxMenu::ObjectCtxMenu(EditWindow* win, QWidget* parent ) : QObject(parent
 }
 
 void ObjectCtxMenu::show(QPoint point){
+    close();
+
+    if(this->displayTransforms){
+        this->menu->addAction(action_move);
+        this->menu->addAction(action_scale);
+        this->menu->addAction(action_rotate);
+    }
+
     menu->popup(point);
 }
 
@@ -428,7 +441,9 @@ void ObjectCtxMenu::setObjectPtr(GameObject* obj_ptr){
 }
 
 void ObjectCtxMenu::close(){
-    menu->close();
+    menu->removeAction(action_move);
+    menu->removeAction(action_scale);
+    menu->removeAction(action_rotate);
 }
 //Object Ctx menu slots
 void ObjectCtxMenu::onDeleteClicked(){
@@ -492,9 +507,12 @@ void EditWindow::onRightBtnClicked(int X, int Y){
     GameObject* obj_ptr = &world.objects[clicked]; //Obtain pointer to selected object by label
     if(clicked > world.objects.size() || obj_ptr == 0x0 || clicked >= 256 * 256 * 256)
         return;
-
+    world.unpickObject(); //Clear isPicked property from all objects
+    obj_ptr->pick(); //mark object picked
     this->obj_ctx_menu->setObjectPtr(obj_ptr);
+    this->obj_ctx_menu->displayTransforms = true;
     this->obj_ctx_menu->show(QPoint(this->width() + X, Y));
+    this->obj_ctx_menu->displayTransforms = false;
 }
 void EditWindow::onMouseMotion(int relX, int relY){
     if(project.perspective == 2) //Only affective in 2D

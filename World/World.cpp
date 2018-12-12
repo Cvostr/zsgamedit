@@ -381,7 +381,6 @@ void World::removeObj(GameObjectLink link){
 void World::trimObjectsList(){
     for (unsigned int i = 0; i < objects.size(); i ++) { //Iterating over all objects
         if(objects[i].alive == false){ //If object marked as deleted
-          //  objects.erase(objects.begin() + i);
             for (unsigned int obj_i = i + 1; obj_i < objects.size(); obj_i ++) { //Iterate over all next chidren
                 objects[obj_i - 1] = objects[obj_i]; //Move it to previous place
 
@@ -394,8 +393,7 @@ void World::trimObjectsList(){
 void World::unpickObject(){
     for (unsigned int i = 0; i < objects.size(); i ++) { //Iterating over all objects
         if(objects[i].isPicked == true){ //If object marked as deleted
-            objects[i].isPicked = false;
-            return;
+            objects[i].isPicked = false; //Mark object as unpicked
         }
     }
 }
@@ -442,6 +440,14 @@ int GameObject::getAliveChildrenAmount(){
         result += 1;
     }
     return result;
+}
+
+void GameObject::pick(){
+    this->isPicked = true;
+    unsigned int children_am = static_cast<unsigned int>(this->children.size());
+    for(unsigned int chil_i = 0; chil_i < children_am; chil_i++){
+        children[chil_i].ptr->pick(); //child and his children are picked now
+    }
 }
 
 void World::openFromFile(QString file, QTreeWidget* w_ptr){

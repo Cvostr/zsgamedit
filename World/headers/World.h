@@ -117,7 +117,7 @@ public:
     GameObjectProperty* properties[10]; //Vector to store pointers to all properties
     std::vector<GameObjectLink> children; //Vector to store links to children of object
     int getAliveChildrenAmount(); //Gets current amount of children objects (exclude removed chidren)
-
+    void pick(); //Mark object and its children picked
     QTreeWidgetItem* item_ptr;
 
     bool addProperty(int property); //Adds property with property ID
