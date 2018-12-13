@@ -18,17 +18,21 @@ struct Project;
 #define RESOURCE_TYPE_TEXTURE 0
 #define RESOURCE_TYPE_MESH 1
 
+#define GO_TRANSFORM_MODE_NONE 0
+#define GO_TRANSFORM_MODE_TRANSLATE 1
+#define GO_TRANSFORM_MODE_SCALE 2
+#define GO_TRANSFORM_MODE_ROTATE 3
+
 namespace Ui {
 class EditWindow;
 }
 
-struct Resource{
+typedef struct Resource{
     QString file_path; //Resource file
     QString rel_path; //Resource project dir related path
     unsigned int type; //Resource type
     void* class_ptr; //Pointer to resource class
-};
-
+}Resource;
 
 struct Project{
     QString label; //Label of the project
@@ -45,6 +49,18 @@ struct EditorInputState{
     bool isLeftBtnHold;
     bool isRightBtnHold;
     bool isCtrlHold;
+};
+
+struct ObjectTransformState{
+    bool isTransforming;
+    GameObject* obj_ptr;
+    int transformMode;
+
+    ObjectTransformState(){ //Default construct
+        isTransforming = false;
+        obj_ptr = nullptr;
+        transformMode = GO_TRANSFORM_MODE_NONE;
+    }
 };
 
 class ObjectCtxMenu;
@@ -80,9 +96,10 @@ public:
     bool ready; //Is everything loaded?
 
     World world;
-    ZSPIRE::Camera edit_camera;
+    ZSPIRE::Camera edit_camera; //Camera to show editing scene
     Project project;
     EditorInputState input_state;
+    ObjectTransformState obj_trstate; //Describes object transform
 
     void init();
     void updateFileList(); //Updates content in file list widget
@@ -117,6 +134,10 @@ class ObjectCtxMenu : public QObject{
 public slots:
     void onDeleteClicked();
     void onDublicateClicked();
+
+    void onMoveClicked();
+    void onScaleClicked();
+    void onRotateClicked();
 private:
     GameObject* obj_ptr;
     QMenu* menu; //Menu object to contain everything

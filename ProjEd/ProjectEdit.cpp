@@ -92,10 +92,12 @@ void EditWindow::init(){
     this->glcontext = SDL_GL_CreateContext(window);
 
     glViewport(0, 0, 640, 480);
-    glLineWidth(6.0f);
 
     render = new RenderPipeline;
     render->InitGLEW();
+
+    glEnable(GL_LINE_SMOOTH);
+    glLineWidth(16.0f);
 
     render->setup();
     ready = true;//Everything is ready
@@ -387,8 +389,8 @@ EditWindow* ZSEditor::openEditor(){
     _editor_win->init();
 
     _editor_win->lookForResources(_editor_win->project.root_path); //Make a vector of all resource files
-    _editor_win->show(); //Show editor window
     _editor_win->move(0,0); //Editor base win would be in the left part of screen
+    _editor_win->show(); //Show editor window
 
     _inspector_win->show();
     _inspector_win->move(_editor_win->width() + 640, 0);
@@ -418,7 +420,7 @@ ObjectCtxMenu::ObjectCtxMenu(EditWindow* win, QWidget* parent ) : QObject(parent
     //Adding actions to menu container
     this->menu->addAction(action_dub);
     this->menu->addAction(action_delete);
-
+    //Connect actions to slots
     QObject::connect(this->action_delete, SIGNAL(triggered(bool)), this, SLOT(onDeleteClicked()));
     QObject::connect(this->action_dub, SIGNAL(triggered(bool)), this, SLOT(onDublicateClicked()));
 
@@ -431,6 +433,10 @@ void ObjectCtxMenu::show(QPoint point){
         this->menu->addAction(action_move);
         this->menu->addAction(action_scale);
         this->menu->addAction(action_rotate);
+
+        QObject::connect(this->action_move, SIGNAL(triggered(bool)), this, SLOT(onMoveClicked()));
+        QObject::connect(this->action_scale, SIGNAL(triggered(bool)), this, SLOT(onScaleClicked()));
+        QObject::connect(this->action_rotate, SIGNAL(triggered(bool)), this, SLOT(onRotateClicked()));
     }
 
     menu->popup(point);
@@ -461,6 +467,22 @@ void ObjectCtxMenu::onDublicateClicked(){
     }else{
         win_ptr->ui->objsList->addTopLevelItem(result->item_ptr);
     }
+}
+
+void ObjectCtxMenu::onMoveClicked(){
+    win_ptr->obj_trstate.isTransforming = true; //Transform operation
+    win_ptr->obj_trstate.obj_ptr = obj_ptr; //Sending object ptr
+    win_ptr->obj_trstate.transformMode = GO_TRANSFORM_MODE_TRANSLATE;
+}
+void ObjectCtxMenu::onScaleClicked(){
+    win_ptr->obj_trstate.isTransforming = true; //Transform operation
+    win_ptr->obj_trstate.obj_ptr = obj_ptr; //Sending object ptr
+    win_ptr->obj_trstate.transformMode = GO_TRANSFORM_MODE_SCALE;
+}
+void ObjectCtxMenu::onRotateClicked(){
+    win_ptr->obj_trstate.isTransforming = true; //Transform operation
+    win_ptr->obj_trstate.obj_ptr = obj_ptr; //Sending object ptr
+    win_ptr->obj_trstate.transformMode = GO_TRANSFORM_MODE_ROTATE;
 }
 
 void ObjTreeWgt::dropEvent(QDropEvent* event){
@@ -517,10 +539,10 @@ void EditWindow::onRightBtnClicked(int X, int Y){
 void EditWindow::onMouseMotion(int relX, int relY){
     if(project.perspective == 2) //Only affective in 2D
 
-    if(input_state.isRightBtnHold == true){
-        ZSVECTOR3 cam_pos = edit_camera.getCameraPosition();
-        cam_pos.X += relX;
-        cam_pos.Y += relY;
-        edit_camera.setPosition(cam_pos);
-    }
+        if(input_state.isRightBtnHold == true){
+            ZSVECTOR3 cam_pos = edit_camera.getCameraPosition();
+            cam_pos.X += relX;
+            cam_pos.Y += relY;
+            edit_camera.setPosition(cam_pos);
+        }
 }
