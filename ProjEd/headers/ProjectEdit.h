@@ -54,11 +54,13 @@ struct EditorInputState{
 struct ObjectTransformState{
     bool isTransforming;
     GameObject* obj_ptr;
+    TransformProperty* tprop_ptr; //Pointer to transform property of obj_ptr
     int transformMode;
 
     ObjectTransformState(){ //Default construct
         isTransforming = false;
         obj_ptr = nullptr;
+        tprop_ptr = nullptr;
         transformMode = GO_TRANSFORM_MODE_NONE;
     }
 };
@@ -119,6 +121,7 @@ public:
     void onLeftBtnClicked(int X, int Y);
     void onRightBtnClicked(int X, int Y);
     void onMouseMotion(int relX, int relY);
+    void onKeyDown(SDL_Keysym sym);
 
     Ui::EditWindow *ui;
     explicit EditWindow(QWidget *parent = nullptr);

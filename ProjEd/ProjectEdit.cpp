@@ -256,6 +256,8 @@ void EditWindow::onObjectListItemClicked(){
 
     GameObject* obj_ptr = world.getObjectByLabel(obj_name); //Obtain pointer to selected object by label
 
+    obj_trstate.obj_ptr = obj_ptr;
+    obj_trstate.tprop_ptr = static_cast<TransformProperty*>(obj_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
     _inspector_win->ShowObjectProperties(static_cast<void*>(obj_ptr));
 }
 
@@ -424,6 +426,10 @@ ObjectCtxMenu::ObjectCtxMenu(EditWindow* win, QWidget* parent ) : QObject(parent
     QObject::connect(this->action_delete, SIGNAL(triggered(bool)), this, SLOT(onDeleteClicked()));
     QObject::connect(this->action_dub, SIGNAL(triggered(bool)), this, SLOT(onDublicateClicked()));
 
+    QObject::connect(this->action_move, SIGNAL(triggered(bool)), this, SLOT(onMoveClicked()));
+    QObject::connect(this->action_scale, SIGNAL(triggered(bool)), this, SLOT(onScaleClicked()));
+    QObject::connect(this->action_rotate, SIGNAL(triggered(bool)), this, SLOT(onRotateClicked()));
+
 }
 
 void ObjectCtxMenu::show(QPoint point){
@@ -434,10 +440,7 @@ void ObjectCtxMenu::show(QPoint point){
         this->menu->addAction(action_scale);
         this->menu->addAction(action_rotate);
 
-        QObject::connect(this->action_move, SIGNAL(triggered(bool)), this, SLOT(onMoveClicked()));
-        QObject::connect(this->action_scale, SIGNAL(triggered(bool)), this, SLOT(onScaleClicked()));
-        QObject::connect(this->action_rotate, SIGNAL(triggered(bool)), this, SLOT(onRotateClicked()));
-    }
+         }
 
     menu->popup(point);
 }
@@ -470,19 +473,31 @@ void ObjectCtxMenu::onDublicateClicked(){
 }
 
 void ObjectCtxMenu::onMoveClicked(){
+    win_ptr->getInspector()->clearContentLayout(); //Detach object from inspector
+
     win_ptr->obj_trstate.isTransforming = true; //Transform operation
     win_ptr->obj_trstate.obj_ptr = obj_ptr; //Sending object ptr
-    win_ptr->obj_trstate.transformMode = GO_TRANSFORM_MODE_TRANSLATE;
+    //Setting pointer to transform property
+    win_ptr->obj_trstate.tprop_ptr = static_cast<TransformProperty*>(obj_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
+    win_ptr->obj_trstate.transformMode = GO_TRANSFORM_MODE_TRANSLATE; //Setting transform type
 }
 void ObjectCtxMenu::onScaleClicked(){
+    win_ptr->getInspector()->clearContentLayout(); //Detach object from inspector
+
     win_ptr->obj_trstate.isTransforming = true; //Transform operation
     win_ptr->obj_trstate.obj_ptr = obj_ptr; //Sending object ptr
-    win_ptr->obj_trstate.transformMode = GO_TRANSFORM_MODE_SCALE;
+    //Setting pointer to transform property
+    win_ptr->obj_trstate.tprop_ptr = static_cast<TransformProperty*>(obj_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
+    win_ptr->obj_trstate.transformMode = GO_TRANSFORM_MODE_SCALE;//Setting transform type
 }
 void ObjectCtxMenu::onRotateClicked(){
+    win_ptr->getInspector()->clearContentLayout(); //Detach object from inspector
+
     win_ptr->obj_trstate.isTransforming = true; //Transform operation
     win_ptr->obj_trstate.obj_ptr = obj_ptr; //Sending object ptr
-    win_ptr->obj_trstate.transformMode = GO_TRANSFORM_MODE_ROTATE;
+    //Setting pointer to transform property
+    win_ptr->obj_trstate.tprop_ptr = static_cast<TransformProperty*>(obj_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
+    win_ptr->obj_trstate.transformMode = GO_TRANSFORM_MODE_ROTATE;//Setting transform type
 }
 
 void ObjTreeWgt::dropEvent(QDropEvent* event){
@@ -503,7 +518,6 @@ void ObjTreeWgt::dropEvent(QDropEvent* event){
 
     QTreeWidget::dropEvent(event);
 
-
     QTreeWidgetItem* nparent = obj_ptr->item_ptr->parent(); //new parent
     if(nparent != nullptr){ //If we moved obj to another parent
         GameObject* nparent_go = world_ptr->getObjectByLabel(nparent->text(0));
@@ -521,6 +535,7 @@ void EditWindow::onLeftBtnClicked(int X, int Y){
     if(clicked > world.objects.size() || obj_ptr == 0x0 || clicked >= 256 * 256 * 256)
         return;
 
+    obj_trstate.tprop_ptr = static_cast<TransformProperty*>(obj_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
     _inspector_win->ShowObjectProperties(static_cast<void*>(obj_ptr));
 }
 void EditWindow::onRightBtnClicked(int X, int Y){
@@ -537,12 +552,39 @@ void EditWindow::onRightBtnClicked(int X, int Y){
     this->obj_ctx_menu->displayTransforms = false;
 }
 void EditWindow::onMouseMotion(int relX, int relY){
-    if(project.perspective == 2) //Only affective in 2D
+    if(project.perspective == 2){ //Only affective in 2D
 
-        if(input_state.isRightBtnHold == true){
+        if(input_state.isRightBtnHold == true){ //we just move on map
             ZSVECTOR3 cam_pos = edit_camera.getCameraPosition();
             cam_pos.X += relX;
             cam_pos.Y += relY;
             edit_camera.setPosition(cam_pos);
         }
+
+        if(obj_trstate.isTransforming == true){ //Only affective if object is transforming
+
+            if(input_state.isLeftBtnHold == true){
+                ZSVECTOR3 dir = ZSVECTOR3(0.0f);
+
+                dir = (abs(relX) > abs(relY)) ? ZSVECTOR3(-relX, 0, 0) : ZSVECTOR3(0, -relY, 0);
+                if(abs(relX) == abs(relY)) ZSVECTOR3(-relX, -relY, 0);
+                obj_trstate.tprop_ptr->translation = obj_trstate.tprop_ptr->translation + dir;
+                obj_trstate.tprop_ptr->updateMat();
+            }
+        }
+    }
+    if(project.perspective == 3){//Only affective in 3D
+
+        if(input_state.isRightBtnHold == true){
+
+        }
+    }
+
+}
+
+void EditWindow::onKeyDown(SDL_Keysym sym){
+    if(sym.sym == SDLK_t){
+        getInspector()->clearContentLayout(); //Detach object from inspector
+        this->obj_trstate.isTransforming = true;
+    }
 }
