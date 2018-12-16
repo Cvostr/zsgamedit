@@ -48,7 +48,8 @@ struct Project{
 struct EditorInputState{
     bool isLeftBtnHold;
     bool isRightBtnHold;
-    bool isCtrlHold;
+    bool isLCtrlHold;
+    bool isRCtrlHold;
 };
 
 struct ObjectTransformState{

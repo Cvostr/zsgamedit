@@ -70,7 +70,8 @@ void EditWindow::init(){
 
     input_state.isLeftBtnHold = false;
     input_state.isRightBtnHold = false;
-    input_state.isCtrlHold = false;
+    input_state.isLCtrlHold = false;
+    input_state.isRCtrlHold = false;
 
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0)
     {
@@ -252,6 +253,7 @@ void EditWindow::onFileListItemClicked(){
 }
 
 void EditWindow::onObjectListItemClicked(){
+    this->obj_trstate.isTransforming = false; //disabling object transform
     QTreeWidgetItem* selected_item = ui->objsList->currentItem(); //Obtain pointer to clicked obj item
 
     QString obj_name = selected_item->text(0); //Get label of clicked obj
@@ -459,6 +461,7 @@ void ObjectCtxMenu::close(){
 void ObjectCtxMenu::onDeleteClicked(){
     _inspector_win->clearContentLayout(); //Prevent variable conflicts
     GameObjectLink link = obj_ptr->getLinkToThisObject();
+    win_ptr->obj_trstate.isTransforming = false; //disabling object transform
     win_ptr->world.removeObj(link);
 }
 void ObjectCtxMenu::onDublicateClicked(){
@@ -542,7 +545,7 @@ void EditWindow::onLeftBtnClicked(int X, int Y){
     _inspector_win->ShowObjectProperties(static_cast<void*>(obj_ptr));
 }
 void EditWindow::onRightBtnClicked(int X, int Y){
-    this->obj_trstate.isTransforming = false; //disabling object
+    this->obj_trstate.isTransforming = false; //disabling object transform
     unsigned int clicked = render->render_getpickedObj(static_cast<void*>(this), X, Y);
 
     GameObject* obj_ptr = &world.objects[clicked]; //Obtain pointer to selected object by label
@@ -601,9 +604,15 @@ void EditWindow::onKeyDown(SDL_Keysym sym){
         this->obj_trstate.transformMode = GO_TRANSFORM_MODE_TRANSLATE;
         this->obj_trstate.isTransforming = true;
     }
+    if(sym.sym == SDLK_e){
+        getInspector()->clearContentLayout(); //Detach object from
+        this->obj_trstate.transformMode = GO_TRANSFORM_MODE_SCALE;
+        this->obj_trstate.isTransforming = true;
+    }
     if(sym.sym == SDLK_DELETE){
         GameObjectLink link = this->obj_trstate.obj_ptr->getLinkToThisObject();
         world.removeObj(link); //delete object
+        this->obj_trstate.isTransforming = false; //disabling object transform
         getInspector()->clearContentLayout(); //Detach object from inspector
     }
 }
