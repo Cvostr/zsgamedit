@@ -89,6 +89,7 @@ ZSPIRE::Camera::Camera(){
 void ZSPIRE::Camera::updateTick(){
     if(!isMoving) return;
 
+
     if(getDistance(camera_pos, _dest_pos) < 3){
         camera_pos = _dest_pos;
         updateViewMat();
@@ -98,6 +99,7 @@ void ZSPIRE::Camera::updateTick(){
         float dist = getDistance(camera_pos, _dest_pos);
 
         ZSVECTOR3 toMove = delta / dist;
+        toMove = toMove * 6.0f;
         camera_pos = camera_pos - toMove;
         updateViewMat();
     }
@@ -105,5 +107,13 @@ void ZSPIRE::Camera::updateTick(){
 }
 
 void ZSPIRE::Camera::startMoving(){
+    if(proj_type == ZSCAMERA_PROJECTION_ORTHOGONAL){
+        int viewport_size_x = static_cast<int>(viewport.endX) - viewport.startX;
+        int viewport_size_y = static_cast<int>(viewport.endY) - viewport.startY;
+        viewport_size_y *= -1;
+        ZSVECTOR3 to_add = ZSVECTOR3(viewport_size_x / 2, viewport_size_y / 2, 0);
+        _dest_pos = _dest_pos + to_add;
+    }
+
     this->isMoving = true;
 }

@@ -39,6 +39,7 @@ public:
     void addPropertyInterfaceToInspector(InspectorWin* inspector);
     void process();
     void clear();
+    void copyTo(GameObjectProperty* dest);
 
     TileGroupProperty();
 };
@@ -54,6 +55,7 @@ public:
     void addPropertyInterfaceToInspector(InspectorWin* inspector);
     void onValueChanged(); //Update texture pointer
     void updTexturePtr();
+    void copyTo(GameObjectProperty* dest);
 
     TileProperty();
 };

@@ -33,6 +33,7 @@ public:
     void updateShadersCameraInfo(ZSPIRE::Camera* cam_ptr);
     ZSPIRE::Shader* processShaderOnObject(void* _obj);
     ZSPIRE::Camera* cam;
+    void* win_ptr;
 
     RenderPipeline();
 };

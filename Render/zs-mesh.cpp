@@ -178,11 +178,11 @@ void ZSPIRE::Mesh::DrawLines(){
 
     if (this->indices_num == NO_INDICES) {
         //Draw without indices
-        glDrawArrays(GL_LINES, 0, this->vertices_num);
+        glDrawArrays(GL_LINE_LOOP, 0, this->vertices_num);
     }
     else {
         //Indexed draw
-        glDrawElements(GL_LINES, this->indices_num, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_LINE_LOOP, this->indices_num, GL_UNSIGNED_INT, 0);
     }
 }
 

@@ -17,7 +17,7 @@ EditWindow::EditWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    QObject::connect(ui->fileList, SIGNAL(itemClicked(QListWidgetItem *)),
+    QObject::connect(ui->fileList, SIGNAL(doubleClicked(QModelIndex)),
                 this, SLOT(onFileListItemClicked())); //Signal comes, when user clicks on file
     QObject::connect(ui->actionNew_Object, SIGNAL(triggered()),
                 this, SLOT(onAddNewGameObject())); //Signal comes, when user clicks on Object->Create
@@ -70,7 +70,8 @@ void EditWindow::init(){
 
     input_state.isLeftBtnHold = false;
     input_state.isRightBtnHold = false;
-    input_state.isCtrlHold = false;
+    input_state.isLCtrlHold = false;
+    input_state.isRCtrlHold = false;
 
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0)
     {
@@ -95,6 +96,9 @@ void EditWindow::init(){
 
     render = new RenderPipeline;
     render->InitGLEW();
+
+    glEnable(GL_LINE_SMOOTH);
+    glLineWidth(16.0f);
 
     render->setup();
     ready = true;//Everything is ready
@@ -135,6 +139,7 @@ void EditWindow::setViewDirectory(QString dir_path){
 void EditWindow::openFile(QString file_path){
 
     if(file_path.endsWith(".scn")){ //If it is scene
+        obj_trstate.isTransforming = false;
         setupObjectsHieList(); //Clear everything, at first
         world.openFromFile(file_path, ui->objsList); //Open this scene
 
@@ -175,6 +180,7 @@ void EditWindow::onSceneSave(){
 void EditWindow::onNewScene(){
     setupObjectsHieList();
     world.clear();
+    obj_trstate.isTransforming = false;
     hasSceneFile = false; //We have new scene
 }
 
@@ -186,9 +192,6 @@ void EditWindow::onAddNewGameObject(){
 void EditWindow::setupObjectsHieList(){
     QTreeWidget* w_ptr = ui->objsList; //Getting pointer to objects list widget
     w_ptr->clear(); //Clears widget
-
-    //column_item_go = new QTreeWidgetItem; //Defining Objects list
-//    column_item_go->setText(0, "Objects"); //Setting text to Objects
 }
 
 void EditWindow::updateFileList(){
@@ -250,12 +253,15 @@ void EditWindow::onFileListItemClicked(){
 }
 
 void EditWindow::onObjectListItemClicked(){
+    this->obj_trstate.isTransforming = false; //disabling object transform
     QTreeWidgetItem* selected_item = ui->objsList->currentItem(); //Obtain pointer to clicked obj item
 
     QString obj_name = selected_item->text(0); //Get label of clicked obj
 
     GameObject* obj_ptr = world.getObjectByLabel(obj_name); //Obtain pointer to selected object by label
 
+    obj_trstate.obj_ptr = obj_ptr;
+    obj_trstate.tprop_ptr = static_cast<TransformProperty*>(obj_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
     _inspector_win->ShowObjectProperties(static_cast<void*>(obj_ptr));
 }
 
@@ -274,8 +280,13 @@ void EditWindow::onCameraToObjTeleport(){
     GameObject* obj_ptr = world.getObjectByLabel(obj_name); //Obtain pointer to selected object by label
 
     TransformProperty* transform = obj_ptr->getTransformProperty(); //Obtain pointer to object transform
+    //Define to store absolute transform
+    ZSVECTOR3 _t = ZSVECTOR3(0.0f);
+    ZSVECTOR3 _s = ZSVECTOR3(1.0f);
+    ZSVECTOR3 _r = ZSVECTOR3(0.0f);
+    transform->getAbsoluteParentTransform(_t, _s, _r); //Calculate absolute transform
 
-    edit_camera._dest_pos = transform->translation;
+    edit_camera._dest_pos = _t; //Sending position
     edit_camera.startMoving();
 }
 
@@ -384,8 +395,8 @@ EditWindow* ZSEditor::openEditor(){
     _editor_win->init();
 
     _editor_win->lookForResources(_editor_win->project.root_path); //Make a vector of all resource files
-    _editor_win->show(); //Show editor window
     _editor_win->move(0,0); //Editor base win would be in the left part of screen
+    _editor_win->show(); //Show editor window
 
     _inspector_win->show();
     _inspector_win->move(_editor_win->width() + 640, 0);
@@ -408,16 +419,32 @@ ObjectCtxMenu::ObjectCtxMenu(EditWindow* win, QWidget* parent ) : QObject(parent
     //Allocating actions
     this->action_dub = new QAction("Dublicate", win);
     this->action_delete = new QAction("Delete", win);
+
+    action_move = new QAction("Move", win);
+    action_scale = new QAction("Scale", win);
+    action_rotate = new QAction("Rotate", win);
     //Adding actions to menu container
     this->menu->addAction(action_dub);
     this->menu->addAction(action_delete);
-
+    //Connect actions to slots
     QObject::connect(this->action_delete, SIGNAL(triggered(bool)), this, SLOT(onDeleteClicked()));
     QObject::connect(this->action_dub, SIGNAL(triggered(bool)), this, SLOT(onDublicateClicked()));
+
+    QObject::connect(this->action_move, SIGNAL(triggered(bool)), this, SLOT(onMoveClicked()));
+    QObject::connect(this->action_scale, SIGNAL(triggered(bool)), this, SLOT(onScaleClicked()));
+    QObject::connect(this->action_rotate, SIGNAL(triggered(bool)), this, SLOT(onRotateClicked()));
 
 }
 
 void ObjectCtxMenu::show(QPoint point){
+    close();
+
+    if(this->displayTransforms){
+        this->menu->addAction(action_move);
+        this->menu->addAction(action_scale);
+        this->menu->addAction(action_rotate);
+    }
+
     menu->popup(point);
 }
 
@@ -426,12 +453,15 @@ void ObjectCtxMenu::setObjectPtr(GameObject* obj_ptr){
 }
 
 void ObjectCtxMenu::close(){
-    menu->close();
+    menu->removeAction(action_move);
+    menu->removeAction(action_scale);
+    menu->removeAction(action_rotate);
 }
 //Object Ctx menu slots
 void ObjectCtxMenu::onDeleteClicked(){
     _inspector_win->clearContentLayout(); //Prevent variable conflicts
     GameObjectLink link = obj_ptr->getLinkToThisObject();
+    win_ptr->obj_trstate.isTransforming = false; //disabling object transform
     win_ptr->world.removeObj(link);
 }
 void ObjectCtxMenu::onDublicateClicked(){
@@ -444,6 +474,34 @@ void ObjectCtxMenu::onDublicateClicked(){
     }else{
         win_ptr->ui->objsList->addTopLevelItem(result->item_ptr);
     }
+}
+
+void ObjectCtxMenu::onMoveClicked(){
+    win_ptr->getInspector()->clearContentLayout(); //Detach object from inspector
+
+    win_ptr->obj_trstate.isTransforming = true; //Transform operation
+    win_ptr->obj_trstate.obj_ptr = obj_ptr; //Sending object ptr
+    //Setting pointer to transform property
+    win_ptr->obj_trstate.tprop_ptr = static_cast<TransformProperty*>(obj_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
+    win_ptr->obj_trstate.transformMode = GO_TRANSFORM_MODE_TRANSLATE; //Setting transform type
+}
+void ObjectCtxMenu::onScaleClicked(){
+    win_ptr->getInspector()->clearContentLayout(); //Detach object from inspector
+
+    win_ptr->obj_trstate.isTransforming = true; //Transform operation
+    win_ptr->obj_trstate.obj_ptr = obj_ptr; //Sending object ptr
+    //Setting pointer to transform property
+    win_ptr->obj_trstate.tprop_ptr = static_cast<TransformProperty*>(obj_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
+    win_ptr->obj_trstate.transformMode = GO_TRANSFORM_MODE_SCALE;//Setting transform type
+}
+void ObjectCtxMenu::onRotateClicked(){
+    win_ptr->getInspector()->clearContentLayout(); //Detach object from inspector
+
+    win_ptr->obj_trstate.isTransforming = true; //Transform operation
+    win_ptr->obj_trstate.obj_ptr = obj_ptr; //Sending object ptr
+    //Setting pointer to transform property
+    win_ptr->obj_trstate.tprop_ptr = static_cast<TransformProperty*>(obj_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
+    win_ptr->obj_trstate.transformMode = GO_TRANSFORM_MODE_ROTATE;//Setting transform type
 }
 
 void ObjTreeWgt::dropEvent(QDropEvent* event){
@@ -464,7 +522,6 @@ void ObjTreeWgt::dropEvent(QDropEvent* event){
 
     QTreeWidget::dropEvent(event);
 
-
     QTreeWidgetItem* nparent = obj_ptr->item_ptr->parent(); //new parent
     if(nparent != nullptr){ //If we moved obj to another parent
         GameObject* nparent_go = world_ptr->getObjectByLabel(nparent->text(0));
@@ -476,31 +533,86 @@ void ObjTreeWgt::dropEvent(QDropEvent* event){
 }
 
 void EditWindow::onLeftBtnClicked(int X, int Y){
+    if(obj_trstate.isTransforming) return;
     unsigned int clicked = render->render_getpickedObj(static_cast<void*>(this), X, Y);
 
     GameObject* obj_ptr = &world.objects[clicked]; //Obtain pointer to selected object by label
     if(clicked > world.objects.size() || obj_ptr == 0x0 || clicked >= 256 * 256 * 256)
         return;
 
+    obj_trstate.obj_ptr = obj_ptr;
+    obj_trstate.tprop_ptr = static_cast<TransformProperty*>(obj_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
     _inspector_win->ShowObjectProperties(static_cast<void*>(obj_ptr));
 }
 void EditWindow::onRightBtnClicked(int X, int Y){
+    this->obj_trstate.isTransforming = false; //disabling object transform
     unsigned int clicked = render->render_getpickedObj(static_cast<void*>(this), X, Y);
 
     GameObject* obj_ptr = &world.objects[clicked]; //Obtain pointer to selected object by label
     if(clicked > world.objects.size() || obj_ptr == 0x0 || clicked >= 256 * 256 * 256)
         return;
-
+    world.unpickObject(); //Clear isPicked property from all objects
+    obj_ptr->pick(); //mark object picked
     this->obj_ctx_menu->setObjectPtr(obj_ptr);
+    this->obj_ctx_menu->displayTransforms = true;
     this->obj_ctx_menu->show(QPoint(this->width() + X, Y));
+    this->obj_ctx_menu->displayTransforms = false;
 }
 void EditWindow::onMouseMotion(int relX, int relY){
-    if(project.perspective == 2) //Only affective in 2D
+    if(project.perspective == 2){ //Only affective in 2D
 
-    if(input_state.isRightBtnHold == true){
-        ZSVECTOR3 cam_pos = edit_camera.getCameraPosition();
-        cam_pos.X += relX;
-        cam_pos.Y += relY;
-        edit_camera.setPosition(cam_pos);
+        if(input_state.isRightBtnHold == true){ //we just move on map
+            ZSVECTOR3 cam_pos = edit_camera.getCameraPosition();
+            cam_pos.X += relX;
+            cam_pos.Y += relY;
+            edit_camera.setPosition(cam_pos);
+        }
+
+        if(obj_trstate.isTransforming == true && input_state.isLeftBtnHold == true){ //Only affective if object is transforming
+
+            ZSVECTOR3 dir = ZSVECTOR3(0.0f);
+
+            dir = ZSVECTOR3(-relX, -relY, 0);
+
+            if ((abs(relX) > abs(relY)) && abs(relX - relY) > 3)
+                dir = ZSVECTOR3(-relX, 0, 0);
+            if ((abs(relX) < abs(relY)) && abs(relX - relY) > 3)
+                dir = ZSVECTOR3(0, -relY, 0);
+
+            if(obj_trstate.transformMode == GO_TRANSFORM_MODE_TRANSLATE){
+                obj_trstate.tprop_ptr->translation = obj_trstate.tprop_ptr->translation + dir;
+            }
+
+            if(obj_trstate.transformMode == GO_TRANSFORM_MODE_SCALE){
+                obj_trstate.tprop_ptr->scale = obj_trstate.tprop_ptr->scale + dir / 3;
+            }
+            obj_trstate.tprop_ptr->updateMat();
+        }
+    }
+    if(project.perspective == 3){//Only affective in 3D
+
+        if(input_state.isRightBtnHold == true){
+
+        }
+    }
+
+}
+
+void EditWindow::onKeyDown(SDL_Keysym sym){
+    if(sym.sym == SDLK_t){
+        getInspector()->clearContentLayout(); //Detach object from
+        this->obj_trstate.transformMode = GO_TRANSFORM_MODE_TRANSLATE;
+        this->obj_trstate.isTransforming = true;
+    }
+    if(sym.sym == SDLK_e){
+        getInspector()->clearContentLayout(); //Detach object from
+        this->obj_trstate.transformMode = GO_TRANSFORM_MODE_SCALE;
+        this->obj_trstate.isTransforming = true;
+    }
+    if(sym.sym == SDLK_DELETE){
+        GameObjectLink link = this->obj_trstate.obj_ptr->getLinkToThisObject();
+        world.removeObj(link); //delete object
+        this->obj_trstate.isTransforming = false; //disabling object transform
+        getInspector()->clearContentLayout(); //Detach object from inspector
     }
 }

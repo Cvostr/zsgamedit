@@ -128,6 +128,17 @@ void TileGroupProperty::clear(){
     isCreated = false;
 }
 
+void TileGroupProperty::copyTo(GameObjectProperty* dest){
+    if(dest->type != this->type) return; //if it isn't transform
+
+    TileGroupProperty* _dest = static_cast<TileGroupProperty*>(dest);
+    //Transfer all variables
+    _dest->geometry = geometry;
+    _dest->tiles_amount_X = tiles_amount_X;
+    _dest->tiles_amount_Y = tiles_amount_Y;
+    _dest->isCreated = isCreated;
+}
+
 void TileProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
     PickResourceArea* area = new PickResourceArea;
     area->setLabel("Texture");
@@ -143,4 +154,14 @@ void TileProperty::onValueChanged(){
 
 void TileProperty::updTexturePtr(){
     this->texture_diffuse = world_ptr->getTexturePtrByRelPath(diffuse_relpath);
+}
+
+void TileProperty::copyTo(GameObjectProperty* dest){
+    if(dest->type != this->type) return; //if it isn't transform
+
+    TileProperty* _dest = static_cast<TileProperty*>(dest);
+    _dest->diffuse_relpath = diffuse_relpath;
+    _dest->texture_diffuse = texture_diffuse;
+    _dest->anim_property = anim_property;
+    _dest->geometry = geometry;
 }

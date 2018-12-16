@@ -18,17 +18,21 @@ struct Project;
 #define RESOURCE_TYPE_TEXTURE 0
 #define RESOURCE_TYPE_MESH 1
 
+#define GO_TRANSFORM_MODE_NONE 0
+#define GO_TRANSFORM_MODE_TRANSLATE 1
+#define GO_TRANSFORM_MODE_SCALE 2
+#define GO_TRANSFORM_MODE_ROTATE 3
+
 namespace Ui {
 class EditWindow;
 }
 
-struct Resource{
+typedef struct Resource{
     QString file_path; //Resource file
     QString rel_path; //Resource project dir related path
     unsigned int type; //Resource type
     void* class_ptr; //Pointer to resource class
-};
-
+}Resource;
 
 struct Project{
     QString label; //Label of the project
@@ -44,7 +48,22 @@ struct Project{
 struct EditorInputState{
     bool isLeftBtnHold;
     bool isRightBtnHold;
-    bool isCtrlHold;
+    bool isLCtrlHold;
+    bool isRCtrlHold;
+};
+
+struct ObjectTransformState{
+    bool isTransforming;
+    GameObject* obj_ptr;
+    TransformProperty* tprop_ptr; //Pointer to transform property of obj_ptr
+    int transformMode;
+
+    ObjectTransformState(){ //Default construct
+        isTransforming = false;
+        obj_ptr = nullptr;
+        tprop_ptr = nullptr;
+        transformMode = GO_TRANSFORM_MODE_NONE;
+    }
 };
 
 class ObjectCtxMenu;
@@ -80,9 +99,10 @@ public:
     bool ready; //Is everything loaded?
 
     World world;
-    ZSPIRE::Camera edit_camera;
+    ZSPIRE::Camera edit_camera; //Camera to show editing scene
     Project project;
     EditorInputState input_state;
+    ObjectTransformState obj_trstate; //Describes object transform
 
     void init();
     void updateFileList(); //Updates content in file list widget
@@ -102,6 +122,7 @@ public:
     void onLeftBtnClicked(int X, int Y);
     void onRightBtnClicked(int X, int Y);
     void onMouseMotion(int relX, int relY);
+    void onKeyDown(SDL_Keysym sym);
 
     Ui::EditWindow *ui;
     explicit EditWindow(QWidget *parent = nullptr);
@@ -117,13 +138,22 @@ class ObjectCtxMenu : public QObject{
 public slots:
     void onDeleteClicked();
     void onDublicateClicked();
+
+    void onMoveClicked();
+    void onScaleClicked();
+    void onRotateClicked();
 private:
     GameObject* obj_ptr;
     QMenu* menu; //Menu object to contain everything
 
     QAction* action_dub; //Button to dublicate object
     QAction* action_delete; //Button to delete object
+
+    QAction* action_move;
+    QAction* action_scale;
+    QAction* action_rotate;
 public:
+    bool displayTransforms;
     EditWindow* win_ptr;
 
     ObjectCtxMenu(EditWindow* win, QWidget* parent = nullptr);

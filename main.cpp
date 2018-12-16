@@ -33,6 +33,11 @@ int main(int argc, char *argv[])
                             w.edit_win_ptr->input_state.isRightBtnHold = false;
                         }
                     }
+                    if (event.type == SDL_KEYDOWN) { //if user pressed a key on keyboard
+                        w.edit_win_ptr->onKeyDown(event.key.keysym);
+                        if(event.key.keysym.sym == SDLK_LCTRL) //if it is ctrl
+                            w.edit_win_ptr->input_state.isLCtrlHold = true;
+                    }
                     if (event.type == SDL_MOUSEBUTTONDOWN) { //If user pressed mouse btn
 
                         if (event.button.button == SDL_BUTTON_LEFT) {
