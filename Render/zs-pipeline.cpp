@@ -7,9 +7,9 @@ RenderPipeline::RenderPipeline(){
 }
 
 void RenderPipeline::setup(){
-    this->tile_shader.compileFromFile("shaders/2d_tile/tile2d.vs", "shaders/2d_tile/tile2d.fs");
-    this->pick_shader.compileFromFile("shaders/pick/pick.vs", "shaders/pick/pick.fs");
-    this->obj_mark_shader.compileFromFile("shaders/mark/mark.vs", "shaders/mark/mark.fs");
+    this->tile_shader.compileFromFile("Shaders/2d_tile/tile2d.vs", "Shaders/2d_tile/tile2d.fs");
+    this->pick_shader.compileFromFile("Shaders/pick/pick.vs", "Shaders/pick/pick.fs");
+    this->obj_mark_shader.compileFromFile("Shaders/mark/mark.vs", "Shaders/mark/mark.fs");
     ZSPIRE::createPlane2D();
 }
 
@@ -60,6 +60,7 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr)
     World* world_ptr = &editwin_ptr->world;
     ZSPIRE::Camera* cam_ptr = &editwin_ptr->edit_camera;
     this->cam = cam_ptr;
+    this->win_ptr = editwin_ptr;
     glClearColor(1,0,1,1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -87,16 +88,20 @@ void GameObject::Draw(RenderPipeline* pipeline){
         MeshProperty* mesh_prop = static_cast<MeshProperty*>(this->getPropertyPtrByType(GO_PROPERTY_TYPE_MESH));
         if(mesh_prop != nullptr){
             mesh_prop->mesh_ptr->Draw();
-
+            //if object is picked
             if(this->isPicked == true && pipeline->current_state != PIPELINE_STATE_PICKING){
                 int cur_state = pipeline->current_state; //Storing current state
                 pipeline->current_state = PIPELINE_STATE_MARKED;
                 ZSPIRE::Shader* mark_s = pipeline->processShaderOnObject(static_cast<void*>(this));
                 mark_s->setTransform(transform_prop->transform_mat);
+                EditWindow* w = static_cast<EditWindow*>(pipeline->win_ptr);
+                if(w->obj_trstate.isTransforming == true)
+                     mark_s->setGLuniformInt("isTransformMark", 1);
                 glDisable(GL_DEPTH_TEST);
                 mesh_prop->mesh_ptr->DrawLines();
                 glEnable(GL_DEPTH_TEST);
                 pipeline->current_state = cur_state;
+                mark_s->setGLuniformInt("isTransformMark", 0);
             }
         }
     }

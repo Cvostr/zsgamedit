@@ -99,7 +99,7 @@ void ZSPIRE::Camera::updateTick(){
         float dist = getDistance(camera_pos, _dest_pos);
 
         ZSVECTOR3 toMove = delta / dist;
-        toMove = toMove * 2.0f;
+        toMove = toMove * 6.0f;
         camera_pos = camera_pos - toMove;
         updateViewMat();
     }
