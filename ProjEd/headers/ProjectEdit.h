@@ -84,6 +84,9 @@ public slots:
     void onOpenScene();
     void onNewScene();
 
+    void onUndoPressed();
+    void onRedoPressed();
+
 private:
     QString current_dir;
     QString scene_path;

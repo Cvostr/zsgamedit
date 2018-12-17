@@ -7,6 +7,7 @@
 #include <QDir>
 #include <QDropEvent>
 #include <QFileDialog>
+#include <QShortcut>
 
 static EditWindow* _editor_win;
 static InspectorWin* _inspector_win;
@@ -35,6 +36,10 @@ EditWindow::EditWindow(QWidget *parent) :
     QObject::connect(ui->objsList, SIGNAL(onRightClick(QPoint)), this, SLOT(onObjectCtxMenuShow(QPoint)));
     QObject::connect(ui->objsList, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(onCameraToObjTeleport()));
 
+    QObject::connect(ui->actionUndo, SIGNAL(triggered()), this, SLOT(onUndoPressed()));
+    QObject::connect(ui->actionRedo, SIGNAL(triggered()), this, SLOT(onRedoPressed()));
+
+
     ready = false; //Firstly set it to 0
     hasSceneFile = false; //No scene loaded by default
 
@@ -51,6 +56,12 @@ EditWindow::EditWindow(QWidget *parent) :
 
     this->obj_ctx_menu = new ObjectCtxMenu(this); //Allocating object Context menu
 
+    ui->actionOpen->setShortcut(Qt::Key_O | Qt::CTRL);
+    ui->actionSave->setShortcut(Qt::Key_S | Qt::CTRL);
+    ui->actionUndo->setShortcut(Qt::Key_Z | Qt::CTRL);
+    ui->actionRedo->setShortcut(Qt::Key_Y | Qt::CTRL);
+
+    //new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_O), this, SLOT(onOpenScene()));
 }
 
 EditWindow::~EditWindow()
@@ -288,6 +299,13 @@ void EditWindow::onCameraToObjTeleport(){
 
     edit_camera._dest_pos = _t; //Sending position
     edit_camera.startMoving();
+}
+
+void EditWindow::onUndoPressed(){
+
+}
+void EditWindow::onRedoPressed(){
+
 }
 
 void EditWindow::glRender(){
