@@ -11,6 +11,7 @@
 
 static EditWindow* _editor_win;
 static InspectorWin* _inspector_win;
+WorldSnapshot test_snap; //TO TEST, REMOVE LATER
 
 EditWindow::EditWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -627,6 +628,14 @@ void EditWindow::onKeyDown(SDL_Keysym sym){
         this->obj_trstate.transformMode = GO_TRANSFORM_MODE_SCALE;
         this->obj_trstate.isTransforming = true;
     }
+
+    if(sym.sym == SDLK_i){
+        this->world.putToShapshot(&test_snap);
+    }
+    if(sym.sym == SDLK_o){
+        this->world.recoverFromSnapshot(&test_snap);
+    }
+
     if(sym.sym == SDLK_DELETE){
         GameObjectLink link = this->obj_trstate.obj_ptr->getLinkToThisObject();
         world.removeObj(link); //delete object

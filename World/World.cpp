@@ -427,10 +427,12 @@ void GameObject::pick(){
 
 void GameObject::copyTo(GameObject* dest){
     dest->array_index = this->array_index;
-    dest->props_num = this->props_num;
+    //dest->props_num = this->props_num;
     dest->hasParent = this->hasParent;
     dest->parent = this->parent;
-    //dest->item_ptr = this->item_ptr;
+    dest->str_id = this->str_id;
+    dest->render_type = this->render_type;
+    dest->item_ptr = this->item_ptr;
 }
 
 void World::openFromFile(QString file, QTreeWidget* w_ptr){
@@ -540,7 +542,7 @@ void World::putToShapshot(WorldSnapshot* snapshot){
 void World::recoverFromSnapshot(WorldSnapshot* snapshot){
     this->clear();
 
-    for(unsigned int objs_num = 0; objs_num < this->objects.size(); objs_num ++){
+    for(unsigned int objs_num = 0; objs_num < snapshot->objects.size(); objs_num ++){
         GameObject* obj_ptr = &snapshot->objects[objs_num];
 
         GameObject newobj;
@@ -548,7 +550,7 @@ void World::recoverFromSnapshot(WorldSnapshot* snapshot){
         this->addObject(newobj);
     }
 
-    for(unsigned int prop_i = 0; prop_i < obj_ptr->props_num; prop_i ++){
+    for(unsigned int prop_i = 0; prop_i < snapshot->props.size(); prop_i ++){
         auto prop_ptr = snapshot->props[prop_i];
         GameObjectLink link = prop_ptr->go_link;
         link.world_ptr = this;
@@ -556,6 +558,9 @@ void World::recoverFromSnapshot(WorldSnapshot* snapshot){
         obj_ptr->addProperty(prop_ptr->type);
         auto new_prop = obj_ptr->getPropertyPtrByType(prop_ptr->type);
         prop_ptr->copyTo(new_prop);
+        if(prop_ptr->type == 4){
+
+        }
     }
 }
 
