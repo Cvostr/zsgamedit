@@ -113,12 +113,13 @@ public:
     GameObjectLink parent; //Link to object's parent
     int render_type;
 
-    int props_num;
+    int props_num; //Count of created props
+    QTreeWidgetItem* item_ptr;
     GameObjectProperty* properties[10]; //Vector to store pointers to all properties
     std::vector<GameObjectLink> children; //Vector to store links to children of object
     int getAliveChildrenAmount(); //Gets current amount of children objects (exclude removed chidren)
     void pick(); //Mark object and its children picked
-    QTreeWidgetItem* item_ptr;
+
 
     bool addProperty(int property); //Adds property with property ID
     bool addTransformProperty();
@@ -136,10 +137,17 @@ public:
     void saveProperties(std::ofstream* stream); //Writes properties content at end of stream
     void loadProperty(std::ifstream* world_stream); //Loads one property from stream
     void clearAll(bool clearQtWigt = true);
+    void copyTo(GameObject* dest);
     void Draw(RenderPipeline* pipeline);
 
     GameObject(); //Default constructor
     ~GameObject();
+};
+
+class WorldSnapshot{
+public:
+    std::vector<GameObject> objects;
+    std::vector<GameObjectProperty*> props;
 };
 
 class World{
@@ -168,9 +176,11 @@ public:
     void openFromFile(QString file, QTreeWidget* w_ptr);
     void clear();
 
+    void putToShapshot(WorldSnapshot* snapshot);
+    void recoverFromSnapshot(WorldSnapshot* snapshot);
     World();
 
 };
-
+GameObjectProperty* allocProperty(int type);
 
 #endif

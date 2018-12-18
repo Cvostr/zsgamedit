@@ -38,6 +38,10 @@ int main(int argc, char *argv[])
                         if(event.key.keysym.sym == SDLK_LCTRL) //if it is ctrl
                             w.edit_win_ptr->input_state.isLCtrlHold = true;
                     }
+                    if (event.type == SDL_KEYUP) { //if user pressed a key on keyboard
+                        if(event.key.keysym.sym == SDLK_LCTRL) //if it is ctrl
+                            w.edit_win_ptr->input_state.isLCtrlHold = false;
+                    }
                     if (event.type == SDL_MOUSEBUTTONDOWN) { //If user pressed mouse btn
 
                         if (event.button.button == SDL_BUTTON_LEFT) {
