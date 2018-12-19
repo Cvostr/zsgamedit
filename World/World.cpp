@@ -558,9 +558,17 @@ void World::recoverFromSnapshot(WorldSnapshot* snapshot){
         obj_ptr->addProperty(prop_ptr->type);
         auto new_prop = obj_ptr->getPropertyPtrByType(prop_ptr->type);
         prop_ptr->copyTo(new_prop);
-        if(prop_ptr->type == 4){
-
+        if(prop_ptr->type == GO_PROPERTY_TYPE_LABEL){
+            LabelProperty* label_p = static_cast<LabelProperty*>(new_prop);
+            obj_ptr->label = &label_p->label;
+            label_p->list_item_ptr = obj_ptr->item_ptr;
         }
+    }
+    for(unsigned int objs_num = 0; objs_num < snapshot->objects.size(); objs_num ++){
+        GameObject* obj_ptr = &objects[objs_num];
+        if(!obj_ptr->hasParent) continue;
+        GameObject* parent_p = obj_ptr->parent.updLinkPtr();
+        parent_p->children.push_back(obj_ptr->getLinkToThisObject());
     }
 }
 
