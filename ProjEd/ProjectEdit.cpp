@@ -462,13 +462,13 @@ ObjectCtxMenu::ObjectCtxMenu(EditWindow* win, QWidget* parent ) : QObject(parent
 }
 
 void ObjectCtxMenu::show(QPoint point){
-    close();
+    //close();
 
-    if(this->displayTransforms){
+    //if(this->displayTransforms){
         this->menu->addAction(action_move);
         this->menu->addAction(action_scale);
         this->menu->addAction(action_rotate);
-    }
+    //}
 
     menu->popup(point);
 }
@@ -649,8 +649,9 @@ void EditWindow::onKeyDown(SDL_Keysym sym){
 }
 
 void EditWindow::callObjectDeletion(GameObjectLink link){
+    _ed_actions_container->newSnapshotAction(&this->world);
     world.removeObj(link); //delete object
     this->obj_trstate.isTransforming = false; //disabling object transform
     getInspector()->clearContentLayout(); //Detach object from inspector
-    _ed_actions_container->newSnapshotAction(&this->world);
+
 }

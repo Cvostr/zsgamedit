@@ -45,3 +45,7 @@ void EdActions::undo(){
 void EdActions::redo(){
 
 }
+
+void EdActions::clear(){
+
+}

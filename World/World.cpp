@@ -525,6 +525,7 @@ void World::putToShapshot(WorldSnapshot* snapshot){
     snapshot->objects.resize(this->objects.size());
     for(unsigned int objs_num = 0; objs_num < this->objects.size(); objs_num ++){
         GameObject* obj_ptr = &this->objects[objs_num];
+        if(obj_ptr->alive == false) continue;
         for(unsigned int prop_i = 0; prop_i < obj_ptr->props_num; prop_i ++){
             auto prop_ptr = obj_ptr->properties[prop_i];
             auto new_prop = allocProperty(prop_ptr->type);
@@ -540,8 +541,8 @@ void World::putToShapshot(WorldSnapshot* snapshot){
 }
 
 void World::recoverFromSnapshot(WorldSnapshot* snapshot){
-    this->clear();
-    obj_widget_ptr->clear();
+    this->clear(); //clear world container first
+    obj_widget_ptr->clear(); //clear objects tree
 
     for(unsigned int objs_num = 0; objs_num < snapshot->objects.size(); objs_num ++){
         GameObject* obj_ptr = &snapshot->objects[objs_num];

@@ -10,7 +10,6 @@
 
 class EdAction{
 public:
-    bool created;
     int type; //type of activity to do
 
     EdAction();
@@ -32,6 +31,7 @@ public:
     int end_pos;
 
     void newSnapshotAction(World* world_ptr);
+    void clear();
 
     void undo();
     void redo();
