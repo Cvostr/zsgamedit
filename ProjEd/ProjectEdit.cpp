@@ -1,5 +1,6 @@
 #include "headers/ProjectEdit.h"
 #include "headers/InspectorWin.h"
+#include "headers/EdActions.h"
 #include "ui_editor.h"
 #include "stdio.h"
 #include <iostream>
@@ -11,6 +12,7 @@
 
 static EditWindow* _editor_win;
 static InspectorWin* _inspector_win;
+static EdActions* _ed_actions_container;
 WorldSnapshot test_snap; //TO TEST, REMOVE LATER
 
 EditWindow::EditWindow(QWidget *parent) :
@@ -52,6 +54,7 @@ EditWindow::EditWindow(QWidget *parent) :
     ui->objsList->world_ptr = &world;
 
     world.proj_ptr = static_cast<void*>(&project); //Assigning project pointer into world's variable
+    world.obj_widget_ptr = ui->objsList;
 
     ui->fileList->setViewMode(QListView::IconMode);
 
@@ -303,10 +306,10 @@ void EditWindow::onCameraToObjTeleport(){
 }
 
 void EditWindow::onUndoPressed(){
-
+    _ed_actions_container->undo();
 }
 void EditWindow::onRedoPressed(){
-
+    _ed_actions_container->redo();
 }
 
 void EditWindow::glRender(){
@@ -419,6 +422,9 @@ EditWindow* ZSEditor::openEditor(){
 
     _inspector_win->show();
     _inspector_win->move(_editor_win->width() + 640, 0);
+
+    _ed_actions_container = new EdActions;
+    _ed_actions_container->world_ptr = &_editor_win->world;
 
     return _editor_win;
 }
@@ -638,8 +644,13 @@ void EditWindow::onKeyDown(SDL_Keysym sym){
 
     if(sym.sym == SDLK_DELETE){
         GameObjectLink link = this->obj_trstate.obj_ptr->getLinkToThisObject();
-        world.removeObj(link); //delete object
-        this->obj_trstate.isTransforming = false; //disabling object transform
-        getInspector()->clearContentLayout(); //Detach object from inspector
+        callObjectDeletion(link);
     }
+}
+
+void EditWindow::callObjectDeletion(GameObjectLink link){
+    world.removeObj(link); //delete object
+    this->obj_trstate.isTransforming = false; //disabling object transform
+    getInspector()->clearContentLayout(); //Detach object from inspector
+    _ed_actions_container->newSnapshotAction(&this->world);
 }

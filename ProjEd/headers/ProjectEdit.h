@@ -131,7 +131,7 @@ public:
     explicit EditWindow(QWidget *parent = nullptr);
     ~EditWindow();
 
-
+    void callObjectDeletion(GameObjectLink link);
 private:
 
 };

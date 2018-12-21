@@ -4,23 +4,37 @@
 #include <vector>
 #include "../../World/headers/World.h"
 
+#define ACT_TYPE_NONE 0
 #define ACT_TYPE_SNAPSHOT 1
 #define ACT_TYPE_DWORD 2
 
 class EdAction{
+public:
     bool created;
     int type; //type of activity to do
+
+    EdAction();
 };
 
 class EdSnapshotAction : public EdAction{
+public:
     WorldSnapshot snapshot;
+
+    EdSnapshotAction();
 };
 
 class EdActions{
 public:
     std::vector<EdAction*> action_list;
+    World* world_ptr;
 
     int current_pos;
+    int end_pos;
+
+    void newSnapshotAction(World* world_ptr);
+
+    void undo();
+    void redo();
 
     EdActions();
 };

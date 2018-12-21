@@ -432,7 +432,7 @@ void GameObject::copyTo(GameObject* dest){
     dest->parent = this->parent;
     dest->str_id = this->str_id;
     dest->render_type = this->render_type;
-    dest->item_ptr = this->item_ptr;
+    //dest->item_ptr = this->item_ptr;
 }
 
 void World::openFromFile(QString file, QTreeWidget* w_ptr){
@@ -541,6 +541,7 @@ void World::putToShapshot(WorldSnapshot* snapshot){
 
 void World::recoverFromSnapshot(WorldSnapshot* snapshot){
     this->clear();
+    obj_widget_ptr->clear();
 
     for(unsigned int objs_num = 0; objs_num < snapshot->objects.size(); objs_num ++){
         GameObject* obj_ptr = &snapshot->objects[objs_num];
@@ -561,14 +562,19 @@ void World::recoverFromSnapshot(WorldSnapshot* snapshot){
         if(prop_ptr->type == GO_PROPERTY_TYPE_LABEL){
             LabelProperty* label_p = static_cast<LabelProperty*>(new_prop);
             obj_ptr->label = &label_p->label;
+            obj_ptr->item_ptr->setText(0, *obj_ptr->label);
             label_p->list_item_ptr = obj_ptr->item_ptr;
         }
     }
     for(unsigned int objs_num = 0; objs_num < snapshot->objects.size(); objs_num ++){
         GameObject* obj_ptr = &objects[objs_num];
-        if(!obj_ptr->hasParent) continue;
+        if(!obj_ptr->hasParent) {
+            obj_widget_ptr->addTopLevelItem(obj_ptr->item_ptr);
+            continue;
+        }
         GameObject* parent_p = obj_ptr->parent.updLinkPtr();
         parent_p->children.push_back(obj_ptr->getLinkToThisObject());
+        parent_p->item_ptr->addChild(obj_ptr->item_ptr);
     }
 }
 
