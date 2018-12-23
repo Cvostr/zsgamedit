@@ -59,13 +59,13 @@ EditWindow::EditWindow(QWidget *parent) :
     ui->fileList->setViewMode(QListView::IconMode);
 
     this->obj_ctx_menu = new ObjectCtxMenu(this); //Allocating object Context menu
+    this->ui->objsList->win_ptr = this; //putting pointer to window to custom tree view
 
     ui->actionOpen->setShortcut(Qt::Key_O | Qt::CTRL);
     ui->actionSave->setShortcut(Qt::Key_S | Qt::CTRL);
     ui->actionUndo->setShortcut(Qt::Key_Z | Qt::CTRL);
     ui->actionRedo->setShortcut(Qt::Key_Y | Qt::CTRL);
 
-    //new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_O), this, SLOT(onOpenScene()));
 }
 
 EditWindow::~EditWindow()
@@ -155,6 +155,7 @@ void EditWindow::openFile(QString file_path){
 
     if(file_path.endsWith(".scn")){ //If it is scene
         obj_trstate.isTransforming = false;
+        _ed_actions_container->clear();
         setupObjectsHieList(); //Clear everything, at first
         world.openFromFile(file_path, ui->objsList); //Open this scene
 
@@ -487,7 +488,8 @@ void ObjectCtxMenu::onDeleteClicked(){
     _inspector_win->clearContentLayout(); //Prevent variable conflicts
     GameObjectLink link = obj_ptr->getLinkToThisObject();
     win_ptr->obj_trstate.isTransforming = false; //disabling object transform
-    win_ptr->world.removeObj(link);
+    //win_ptr->world.removeObj(link);
+    win_ptr->callObjectDeletion(link);
 }
 void ObjectCtxMenu::onDublicateClicked(){
     _inspector_win->clearContentLayout(); //Prevent variable conflicts
@@ -530,6 +532,7 @@ void ObjectCtxMenu::onRotateClicked(){
 }
 
 void ObjTreeWgt::dropEvent(QDropEvent* event){
+    _ed_actions_container->newSnapshotAction(&win_ptr->world); //Add new snapshot action
     _inspector_win->clearContentLayout(); //Prevent variable conflicts
     //User dropped object item
     QList<QTreeWidgetItem*> kids = this->selectedItems(); //Get list of selected object(it is moving object)

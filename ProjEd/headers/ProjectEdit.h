@@ -174,6 +174,7 @@ signals:
     void onRightClick(QPoint pos);
     void onLeftClick(QPoint pos);
 public:
+    EditWindow* win_ptr;
     ObjTreeWgt(QWidget* parent = nullptr);
 
     void dropEvent(QDropEvent* event);

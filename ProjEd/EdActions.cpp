@@ -30,7 +30,6 @@ void EdActions::newSnapshotAction(World* world_ptr){
         this->action_list[current_pos] = new_action;
 
         current_pos += 1;
-        //end_pos += 1;
     }else{
         this->action_list.push_back(new_action);
         current_pos += 1;
@@ -39,9 +38,10 @@ void EdActions::newSnapshotAction(World* world_ptr){
 }
 
 void EdActions::undo(){
-    int act_type = this->action_list[current_pos - 1]->type;
+    if(current_pos == 0) return; //if no actions done
+    int act_type = this->action_list[current_pos - 1]->type; //getting action type
 
-    if(act_type == ACT_TYPE_SNAPSHOT){
+    if(act_type == ACT_TYPE_SNAPSHOT){ //if this action is snapshot
         EdSnapshotAction* snapshot = static_cast<EdSnapshotAction*>(this->action_list[current_pos - 1]);
 
         world_ptr->recoverFromSnapshot(&snapshot->snapshot);
@@ -58,4 +58,7 @@ void EdActions::clear(){
     for(unsigned int action_it = 0; action_it < this->action_list.size(); action_it ++){
         this->action_list[action_it]->clear();
     }
+    current_pos = 0;
+    end_pos = 0;
+    action_list.clear();
 }
