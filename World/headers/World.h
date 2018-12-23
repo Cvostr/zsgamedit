@@ -148,6 +148,9 @@ class WorldSnapshot{
 public:
     std::vector<GameObject> objects;
     std::vector<GameObjectProperty*> props;
+
+    WorldSnapshot();
+    void clear();
 };
 
 class World{
@@ -164,7 +167,6 @@ public:
     GameObject* newObject(); //Add new object to world
     GameObject* getObjectByLabel(QString label);
     GameObject* getObjectByStringId(std::string id);
-    GameObject** getUnparentedObjs();
     void removeObj(GameObjectLink link); //Remove object from world
     GameObject* dublicateObject(GameObject* original, bool parent = true);
     void trimObjectsList();

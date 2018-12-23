@@ -12,6 +12,7 @@ class EdAction{
 public:
     int type; //type of activity to do
 
+    virtual void clear();
     EdAction();
 };
 
@@ -19,6 +20,7 @@ class EdSnapshotAction : public EdAction{
 public:
     WorldSnapshot snapshot;
 
+    void clear();
     EdSnapshotAction();
 };
 

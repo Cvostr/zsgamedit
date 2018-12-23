@@ -579,20 +579,6 @@ void World::recoverFromSnapshot(WorldSnapshot* snapshot){
     }
 }
 
-GameObject** World::getUnparentedObjs(){
-    GameObject** result_arr = new GameObject*[5];
-    int amount_of_uprted = 0;
-    unsigned int objs_num = static_cast<unsigned int>(this->objects.size());
-    for(unsigned int obj_it = 0; obj_it < objs_num; obj_it ++){ //Iterate over all objs in scene
-        GameObject* obj_ptr = &this->objects[obj_it]; //Get pointer to checking object
-        if(obj_ptr->hasParent == false){
-            result_arr[amount_of_uprted] = obj_ptr;
-            amount_of_uprted += 1;
-        }
-    }
-    return result_arr; //if we haven't found one
-}
-
 ZSPIRE::Mesh* World::getMeshPtrByRelPath(QString label){
     Project* proj_ptr = static_cast<Project*>(this->proj_ptr); //Convert void pointer to Project*
     unsigned int resources_num = static_cast<unsigned int>(proj_ptr->resources.size()); //Receive resource amount in project
@@ -619,4 +605,15 @@ ZSPIRE::Texture* World::getTexturePtrByRelPath(QString label){
         }
     }
     return nullptr;
+}
+
+WorldSnapshot::WorldSnapshot(){
+
+}
+void WorldSnapshot::clear(){
+    this->objects.clear();
+
+    for(unsigned int prop_it = 0; prop_it < props.size(); prop_it ++){
+        delete props[prop_it];
+    }
 }

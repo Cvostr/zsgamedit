@@ -10,8 +10,16 @@ EdAction::EdAction(){
     type = ACT_TYPE_NONE;
 }
 
+void EdAction::clear(){
+
+}
+
 EdSnapshotAction::EdSnapshotAction(){
     this->type = ACT_TYPE_SNAPSHOT;
+}
+
+void EdSnapshotAction::clear(){
+    this->snapshot.clear();
 }
 
 void EdActions::newSnapshotAction(World* world_ptr){
@@ -47,5 +55,7 @@ void EdActions::redo(){
 }
 
 void EdActions::clear(){
-
+    for(unsigned int action_it = 0; action_it < this->action_list.size(); action_it ++){
+        this->action_list[action_it]->clear();
+    }
 }
