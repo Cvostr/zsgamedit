@@ -18,13 +18,39 @@ EdSnapshotAction::EdSnapshotAction(){
     this->type = ACT_TYPE_SNAPSHOT;
 }
 
+EdPropertyAction::EdPropertyAction(){
+    this->type = ACT_TYPE_PROPERTY;
+    this->container_ptr = nullptr;
+}
+
 void EdSnapshotAction::clear(){
     this->snapshot.clear();
+}
+
+void EdPropertyAction::clear(){
+
 }
 
 void EdActions::newSnapshotAction(World* world_ptr){
     EdSnapshotAction* new_action = new EdSnapshotAction;
     world_ptr->putToShapshot(&new_action->snapshot);
+
+    if(this->current_pos < this->end_pos){
+        this->action_list[current_pos] = new_action;
+
+        current_pos += 1;
+    }else{
+        this->action_list.push_back(new_action);
+        current_pos += 1;
+        end_pos += 1;
+    }
+}
+
+void EdActions::newPropertyAction(GameObjectLink link, int property_type){
+    EdPropertyAction* new_action = new EdPropertyAction; //Allocate memory for action class
+    new_action->linkToObj = link; //Store link to object
+    new_action->prop_type = property_type; //Sore property type
+    new_action->container_ptr = allocProperty(property_type); //Allocate property
 
     if(this->current_pos < this->end_pos){
         this->action_list[current_pos] = new_action;

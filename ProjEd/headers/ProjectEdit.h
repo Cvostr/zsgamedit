@@ -7,6 +7,7 @@
 #include <QMenu>
 #include <SDL2/SDL.h>
 #include <vector>
+#include "EdActions.h"
 #include "../../Render/headers/zs-pipeline.h"
 #include "../../World/headers/zs-camera.h"
 
@@ -186,5 +187,7 @@ namespace ZSEditor {
     EditWindow* openProject(QString conf_file_path);
     EditWindow* openEditor();
 }
+
+EdActions* getActionManager();
 
 #endif

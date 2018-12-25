@@ -1,6 +1,5 @@
 #include "headers/InspectorWin.h"
 #include "headers/ProjectEdit.h"
-
 #include "../World/headers/World.h"
 #include <QDoubleValidator>
 #include <QObject>
@@ -80,6 +79,8 @@ void Float3PropertyArea::updateState(){
         this->vector->Z = vZ;
 
         PropertyEditArea::callPropertyUpdate();
+        GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(this->go_property);
+        getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
     }
 }
 

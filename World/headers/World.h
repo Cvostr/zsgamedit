@@ -113,7 +113,7 @@ public:
     GameObjectLink parent; //Link to object's parent
     int render_type;
 
-    int props_num; //Count of created props
+    unsigned int props_num; //Count of created props
     QTreeWidgetItem* item_ptr;
     GameObjectProperty* properties[10]; //Vector to store pointers to all properties
     std::vector<GameObjectLink> children; //Vector to store links to children of object

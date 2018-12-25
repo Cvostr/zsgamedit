@@ -6,7 +6,7 @@
 
 #define ACT_TYPE_NONE 0
 #define ACT_TYPE_SNAPSHOT 1
-#define ACT_TYPE_DWORD 2
+#define ACT_TYPE_PROPERTY 2
 
 class EdAction{
 public:
@@ -18,10 +18,21 @@ public:
 
 class EdSnapshotAction : public EdAction{
 public:
-    WorldSnapshot snapshot;
+    WorldSnapshot snapshot; //Class object to store snapshot
 
     void clear();
     EdSnapshotAction();
+};
+
+class EdPropertyAction : public EdAction{
+public:
+    GameObjectProperty* container_ptr;
+
+    GameObjectLink linkToObj;
+    int prop_type;
+
+    void clear();
+    EdPropertyAction();
 };
 
 class EdActions{
@@ -33,6 +44,7 @@ public:
     int end_pos;
 
     void newSnapshotAction(World* world_ptr);
+    void newPropertyAction(GameObjectLink link, int property_type);
     void clear();
 
     void undo();

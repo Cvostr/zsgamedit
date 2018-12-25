@@ -1,6 +1,5 @@
 #include "headers/ProjectEdit.h"
 #include "headers/InspectorWin.h"
-#include "headers/EdActions.h"
 #include "ui_editor.h"
 #include "stdio.h"
 #include <iostream>
@@ -488,7 +487,6 @@ void ObjectCtxMenu::onDeleteClicked(){
     _inspector_win->clearContentLayout(); //Prevent variable conflicts
     GameObjectLink link = obj_ptr->getLinkToThisObject();
     win_ptr->obj_trstate.isTransforming = false; //disabling object transform
-    //win_ptr->world.removeObj(link);
     win_ptr->callObjectDeletion(link);
 }
 void ObjectCtxMenu::onDublicateClicked(){
@@ -606,14 +604,18 @@ void EditWindow::onMouseMotion(int relX, int relY){
                 dir = ZSVECTOR3(-relX, 0, 0);
             if ((abs(relX) < abs(relY)) && abs(relX - relY) > 3)
                 dir = ZSVECTOR3(0, -relY, 0);
-
+            //if we translating
             if(obj_trstate.transformMode == GO_TRANSFORM_MODE_TRANSLATE){
                 obj_trstate.tprop_ptr->translation = obj_trstate.tprop_ptr->translation + dir;
             }
-
+            //if we scaling
             if(obj_trstate.transformMode == GO_TRANSFORM_MODE_SCALE){
                 obj_trstate.tprop_ptr->scale = obj_trstate.tprop_ptr->scale + dir / 3;
             }
+            if(obj_trstate.transformMode == GO_TRANSFORM_MODE_ROTATE){
+                obj_trstate.tprop_ptr->rotation = obj_trstate.tprop_ptr->rotation + dir / 3;
+            }
+
             obj_trstate.tprop_ptr->updateMat();
         }
     }
@@ -637,6 +639,11 @@ void EditWindow::onKeyDown(SDL_Keysym sym){
         this->obj_trstate.transformMode = GO_TRANSFORM_MODE_SCALE;
         this->obj_trstate.isTransforming = true;
     }
+    if(sym.sym == SDLK_r){
+        getInspector()->clearContentLayout(); //Detach object from
+        this->obj_trstate.transformMode = GO_TRANSFORM_MODE_ROTATE;
+        this->obj_trstate.isTransforming = true;
+    }
 
     if(sym.sym == SDLK_i){
         this->world.putToShapshot(&test_snap);
@@ -657,4 +664,8 @@ void EditWindow::callObjectDeletion(GameObjectLink link){
     this->obj_trstate.isTransforming = false; //disabling object transform
     getInspector()->clearContentLayout(); //Detach object from inspector
 
+}
+
+EdActions* getActionManager(){
+    return _ed_actions_container;
 }
