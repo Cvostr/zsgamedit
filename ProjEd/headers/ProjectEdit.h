@@ -7,6 +7,7 @@
 #include <QMenu>
 #include <SDL2/SDL.h>
 #include <vector>
+#include "EdActions.h"
 #include "../../Render/headers/zs-pipeline.h"
 #include "../../World/headers/zs-camera.h"
 
@@ -84,6 +85,9 @@ public slots:
     void onOpenScene();
     void onNewScene();
 
+    void onUndoPressed();
+    void onRedoPressed();
+
 private:
     QString current_dir;
     QString scene_path;
@@ -128,7 +132,7 @@ public:
     explicit EditWindow(QWidget *parent = nullptr);
     ~EditWindow();
 
-
+    void callObjectDeletion(GameObjectLink link);
 private:
 
 };
@@ -171,6 +175,7 @@ signals:
     void onRightClick(QPoint pos);
     void onLeftClick(QPoint pos);
 public:
+    EditWindow* win_ptr;
     ObjTreeWgt(QWidget* parent = nullptr);
 
     void dropEvent(QDropEvent* event);
@@ -182,5 +187,7 @@ namespace ZSEditor {
     EditWindow* openProject(QString conf_file_path);
     EditWindow* openEditor();
 }
+
+EdActions* getActionManager();
 
 #endif

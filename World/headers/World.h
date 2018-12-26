@@ -113,12 +113,13 @@ public:
     GameObjectLink parent; //Link to object's parent
     int render_type;
 
-    int props_num;
+    unsigned int props_num; //Count of created props
+    QTreeWidgetItem* item_ptr;
     GameObjectProperty* properties[10]; //Vector to store pointers to all properties
     std::vector<GameObjectLink> children; //Vector to store links to children of object
     int getAliveChildrenAmount(); //Gets current amount of children objects (exclude removed chidren)
     void pick(); //Mark object and its children picked
-    QTreeWidgetItem* item_ptr;
+
 
     bool addProperty(int property); //Adds property with property ID
     bool addTransformProperty();
@@ -136,10 +137,20 @@ public:
     void saveProperties(std::ofstream* stream); //Writes properties content at end of stream
     void loadProperty(std::ifstream* world_stream); //Loads one property from stream
     void clearAll(bool clearQtWigt = true);
+    void copyTo(GameObject* dest);
     void Draw(RenderPipeline* pipeline);
 
     GameObject(); //Default constructor
     ~GameObject();
+};
+
+class WorldSnapshot{
+public:
+    std::vector<GameObject> objects;
+    std::vector<GameObjectProperty*> props;
+
+    WorldSnapshot();
+    void clear();
 };
 
 class World{
@@ -147,6 +158,7 @@ protected:
     void getAvailableNumObjLabel(QString label, int* result);
 
 public:
+    QTreeWidget* obj_widget_ptr;
     void* proj_ptr; //Pointer to Project structure
 
     std::vector<GameObject> objects; //Vector, containing all gameobjects
@@ -155,7 +167,6 @@ public:
     GameObject* newObject(); //Add new object to world
     GameObject* getObjectByLabel(QString label);
     GameObject* getObjectByStringId(std::string id);
-    GameObject** getUnparentedObjs();
     void removeObj(GameObjectLink link); //Remove object from world
     GameObject* dublicateObject(GameObject* original, bool parent = true);
     void trimObjectsList();
@@ -168,9 +179,11 @@ public:
     void openFromFile(QString file, QTreeWidget* w_ptr);
     void clear();
 
+    void putToShapshot(WorldSnapshot* snapshot);
+    void recoverFromSnapshot(WorldSnapshot* snapshot);
     World();
 
 };
-
+GameObjectProperty* allocProperty(int type);
 
 #endif

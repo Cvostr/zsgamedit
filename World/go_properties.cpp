@@ -17,6 +17,37 @@ void GameObjectProperty::copyTo(GameObjectProperty* dest){
 
 }
 
+GameObjectProperty* allocProperty(int type){
+    GameObjectProperty* _ptr = nullptr;
+    switch (type) {
+        case GO_PROPERTY_TYPE_TRANSFORM:{ //If type is transfrom
+            _ptr = static_cast<GameObjectProperty*>(new TransformProperty); //Allocation of transform in heap
+            break;
+        }
+        case GO_PROPERTY_TYPE_LABEL:{
+            LabelProperty* ptr = new LabelProperty;
+            _ptr = static_cast<GameObjectProperty*>(ptr);
+            break;
+        }
+        case GO_PROPERTY_TYPE_MESH:{
+            MeshProperty* ptr = new MeshProperty;
+            _ptr = static_cast<GameObjectProperty*>(ptr);
+            break;
+        }
+        case GO_PROPERTY_TYPE_TILE_GROUP:{
+            TileGroupProperty* ptr = new TileGroupProperty;
+            _ptr = static_cast<GameObjectProperty*>(ptr);
+            break;
+        }
+        case GO_PROPERTY_TYPE_TILE:{
+            TileProperty* ptr = new TileProperty;
+            _ptr = static_cast<GameObjectProperty*>(ptr);
+            break;
+        }
+    }
+    return _ptr;
+}
+
 //Cast inheritance calls
 void GameObjectProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
     switch(this->type){

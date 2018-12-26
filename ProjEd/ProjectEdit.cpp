@@ -7,9 +7,12 @@
 #include <QDir>
 #include <QDropEvent>
 #include <QFileDialog>
+#include <QShortcut>
 
 static EditWindow* _editor_win;
 static InspectorWin* _inspector_win;
+static EdActions* _ed_actions_container;
+WorldSnapshot test_snap; //TO TEST, REMOVE LATER
 
 EditWindow::EditWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -35,6 +38,10 @@ EditWindow::EditWindow(QWidget *parent) :
     QObject::connect(ui->objsList, SIGNAL(onRightClick(QPoint)), this, SLOT(onObjectCtxMenuShow(QPoint)));
     QObject::connect(ui->objsList, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(onCameraToObjTeleport()));
 
+    QObject::connect(ui->actionUndo, SIGNAL(triggered()), this, SLOT(onUndoPressed()));
+    QObject::connect(ui->actionRedo, SIGNAL(triggered()), this, SLOT(onRedoPressed()));
+
+
     ready = false; //Firstly set it to 0
     hasSceneFile = false; //No scene loaded by default
 
@@ -46,10 +53,17 @@ EditWindow::EditWindow(QWidget *parent) :
     ui->objsList->world_ptr = &world;
 
     world.proj_ptr = static_cast<void*>(&project); //Assigning project pointer into world's variable
+    world.obj_widget_ptr = ui->objsList;
 
     ui->fileList->setViewMode(QListView::IconMode);
 
     this->obj_ctx_menu = new ObjectCtxMenu(this); //Allocating object Context menu
+    this->ui->objsList->win_ptr = this; //putting pointer to window to custom tree view
+
+    ui->actionOpen->setShortcut(Qt::Key_O | Qt::CTRL);
+    ui->actionSave->setShortcut(Qt::Key_S | Qt::CTRL);
+    ui->actionUndo->setShortcut(Qt::Key_Z | Qt::CTRL);
+    ui->actionRedo->setShortcut(Qt::Key_Y | Qt::CTRL);
 
 }
 
@@ -140,6 +154,7 @@ void EditWindow::openFile(QString file_path){
 
     if(file_path.endsWith(".scn")){ //If it is scene
         obj_trstate.isTransforming = false;
+        _ed_actions_container->clear();
         setupObjectsHieList(); //Clear everything, at first
         world.openFromFile(file_path, ui->objsList); //Open this scene
 
@@ -290,6 +305,13 @@ void EditWindow::onCameraToObjTeleport(){
     edit_camera.startMoving();
 }
 
+void EditWindow::onUndoPressed(){
+    _ed_actions_container->undo();
+}
+void EditWindow::onRedoPressed(){
+    _ed_actions_container->redo();
+}
+
 void EditWindow::glRender(){
     if(ready == true)
         render->render(this->window, static_cast<void*>(this));
@@ -401,6 +423,9 @@ EditWindow* ZSEditor::openEditor(){
     _inspector_win->show();
     _inspector_win->move(_editor_win->width() + 640, 0);
 
+    _ed_actions_container = new EdActions;
+    _ed_actions_container->world_ptr = &_editor_win->world;
+
     return _editor_win;
 }
 
@@ -437,13 +462,13 @@ ObjectCtxMenu::ObjectCtxMenu(EditWindow* win, QWidget* parent ) : QObject(parent
 }
 
 void ObjectCtxMenu::show(QPoint point){
-    close();
+    //close();
 
-    if(this->displayTransforms){
+    //if(this->displayTransforms){
         this->menu->addAction(action_move);
         this->menu->addAction(action_scale);
         this->menu->addAction(action_rotate);
-    }
+    //}
 
     menu->popup(point);
 }
@@ -462,7 +487,7 @@ void ObjectCtxMenu::onDeleteClicked(){
     _inspector_win->clearContentLayout(); //Prevent variable conflicts
     GameObjectLink link = obj_ptr->getLinkToThisObject();
     win_ptr->obj_trstate.isTransforming = false; //disabling object transform
-    win_ptr->world.removeObj(link);
+    win_ptr->callObjectDeletion(link);
 }
 void ObjectCtxMenu::onDublicateClicked(){
     _inspector_win->clearContentLayout(); //Prevent variable conflicts
@@ -505,6 +530,7 @@ void ObjectCtxMenu::onRotateClicked(){
 }
 
 void ObjTreeWgt::dropEvent(QDropEvent* event){
+    _ed_actions_container->newSnapshotAction(&win_ptr->world); //Add new snapshot action
     _inspector_win->clearContentLayout(); //Prevent variable conflicts
     //User dropped object item
     QList<QTreeWidgetItem*> kids = this->selectedItems(); //Get list of selected object(it is moving object)
@@ -578,14 +604,18 @@ void EditWindow::onMouseMotion(int relX, int relY){
                 dir = ZSVECTOR3(-relX, 0, 0);
             if ((abs(relX) < abs(relY)) && abs(relX - relY) > 3)
                 dir = ZSVECTOR3(0, -relY, 0);
-
+            //if we translating
             if(obj_trstate.transformMode == GO_TRANSFORM_MODE_TRANSLATE){
                 obj_trstate.tprop_ptr->translation = obj_trstate.tprop_ptr->translation + dir;
             }
-
+            //if we scaling
             if(obj_trstate.transformMode == GO_TRANSFORM_MODE_SCALE){
                 obj_trstate.tprop_ptr->scale = obj_trstate.tprop_ptr->scale + dir / 3;
             }
+            if(obj_trstate.transformMode == GO_TRANSFORM_MODE_ROTATE){
+                obj_trstate.tprop_ptr->rotation = obj_trstate.tprop_ptr->rotation + dir / 3;
+            }
+
             obj_trstate.tprop_ptr->updateMat();
         }
     }
@@ -609,10 +639,33 @@ void EditWindow::onKeyDown(SDL_Keysym sym){
         this->obj_trstate.transformMode = GO_TRANSFORM_MODE_SCALE;
         this->obj_trstate.isTransforming = true;
     }
+    if(sym.sym == SDLK_r){
+        getInspector()->clearContentLayout(); //Detach object from
+        this->obj_trstate.transformMode = GO_TRANSFORM_MODE_ROTATE;
+        this->obj_trstate.isTransforming = true;
+    }
+
+    if(sym.sym == SDLK_i){
+        this->world.putToShapshot(&test_snap);
+    }
+    if(sym.sym == SDLK_o){
+        this->world.recoverFromSnapshot(&test_snap);
+    }
+
     if(sym.sym == SDLK_DELETE){
         GameObjectLink link = this->obj_trstate.obj_ptr->getLinkToThisObject();
-        world.removeObj(link); //delete object
-        this->obj_trstate.isTransforming = false; //disabling object transform
-        getInspector()->clearContentLayout(); //Detach object from inspector
+        callObjectDeletion(link);
     }
+}
+
+void EditWindow::callObjectDeletion(GameObjectLink link){
+    _ed_actions_container->newSnapshotAction(&this->world);
+    world.removeObj(link); //delete object
+    this->obj_trstate.isTransforming = false; //disabling object transform
+    getInspector()->clearContentLayout(); //Detach object from inspector
+
+}
+
+EdActions* getActionManager(){
+    return _ed_actions_container;
 }

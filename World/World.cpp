@@ -42,7 +42,7 @@ GameObject::GameObject(){
     props_num = 0;
     label = nullptr;
 
-    for(int prop_i = 0; prop_i < 10; prop_i ++){
+    for(int prop_i = 0; prop_i < 10; prop_i ++){ //iterate over all property pointers and clear them
         properties[prop_i] = nullptr;
     }
 }
@@ -59,35 +59,10 @@ bool GameObject::addProperty(int property){
             return false; //Exit function
         }
     }
-    GameObjectProperty* _ptr = nullptr;
-    switch (property) {
-        case GO_PROPERTY_TYPE_TRANSFORM:{ //If type is transfrom
-            _ptr = static_cast<GameObjectProperty*>(new TransformProperty); //Allocation of transform in heap
-            break;
-        }
-        case GO_PROPERTY_TYPE_LABEL:{
-            LabelProperty* ptr = new LabelProperty;
-            _ptr = static_cast<GameObjectProperty*>(ptr);
-            ptr->list_item_ptr = this->item_ptr;
-            break;
-        }
-    case GO_PROPERTY_TYPE_MESH:{
-        MeshProperty* ptr = new MeshProperty;
-        _ptr = static_cast<GameObjectProperty*>(ptr);
-        break;
-    }
-
-    case GO_PROPERTY_TYPE_TILE_GROUP:{
-        TileGroupProperty* ptr = new TileGroupProperty;
-        _ptr = static_cast<GameObjectProperty*>(ptr);
-        break;
-    }
-
-    case GO_PROPERTY_TYPE_TILE:{
-        TileProperty* ptr = new TileProperty;
-        _ptr = static_cast<GameObjectProperty*>(ptr);
-        break;
-    }
+    GameObjectProperty* _ptr = allocProperty(property);
+    if(property == GO_PROPERTY_TYPE_LABEL){
+        LabelProperty* ptr = static_cast<LabelProperty*>(_ptr);
+        ptr->list_item_ptr = this->item_ptr;
     }
 
     _ptr->go_link = this->getLinkToThisObject();
@@ -450,6 +425,16 @@ void GameObject::pick(){
     }
 }
 
+void GameObject::copyTo(GameObject* dest){
+    dest->array_index = this->array_index;
+    //dest->props_num = this->props_num;
+    dest->hasParent = this->hasParent;
+    dest->parent = this->parent;
+    dest->str_id = this->str_id;
+    dest->render_type = this->render_type;
+    //dest->item_ptr = this->item_ptr;
+}
+
 void World::openFromFile(QString file, QTreeWidget* w_ptr){
     clear(); //Clear all objects
     std::string fpath = file.toStdString();
@@ -536,18 +521,62 @@ void World::clear(){
     objects.resize(0);
 }
 
-GameObject** World::getUnparentedObjs(){
-    GameObject** result_arr = new GameObject*[5];
-    int amount_of_uprted = 0;
-    unsigned int objs_num = static_cast<unsigned int>(this->objects.size());
-    for(unsigned int obj_it = 0; obj_it < objs_num; obj_it ++){ //Iterate over all objs in scene
-        GameObject* obj_ptr = &this->objects[obj_it]; //Get pointer to checking object
-        if(obj_ptr->hasParent == false){
-            result_arr[amount_of_uprted] = obj_ptr;
-            amount_of_uprted += 1;
+void World::putToShapshot(WorldSnapshot* snapshot){
+    snapshot->objects.resize(this->objects.size());
+    for(unsigned int objs_num = 0; objs_num < this->objects.size(); objs_num ++){
+        GameObject* obj_ptr = &this->objects[objs_num];
+        if(obj_ptr->alive == false) continue;
+        for(unsigned int prop_i = 0; prop_i < obj_ptr->props_num; prop_i ++){
+            auto prop_ptr = obj_ptr->properties[prop_i];
+            auto new_prop = allocProperty(prop_ptr->type);
+            new_prop->go_link = prop_ptr->go_link;
+            prop_ptr->copyTo(new_prop);
+            snapshot->props.push_back(new_prop);
+
+        }
+        GameObject newobj;
+        obj_ptr->copyTo(&newobj);
+        snapshot->objects[objs_num] = newobj;
+    }
+}
+
+void World::recoverFromSnapshot(WorldSnapshot* snapshot){
+    this->clear(); //clear world container first
+    obj_widget_ptr->clear(); //clear objects tree
+
+    for(unsigned int objs_num = 0; objs_num < snapshot->objects.size(); objs_num ++){
+        GameObject* obj_ptr = &snapshot->objects[objs_num];
+
+        GameObject newobj;
+        obj_ptr->copyTo(&newobj);
+        this->addObject(newobj);
+    }
+
+    for(unsigned int prop_i = 0; prop_i < snapshot->props.size(); prop_i ++){
+        auto prop_ptr = snapshot->props[prop_i];
+        GameObjectLink link = prop_ptr->go_link;
+        link.world_ptr = this;
+        GameObject* obj_ptr = link.updLinkPtr();
+        obj_ptr->addProperty(prop_ptr->type);
+        auto new_prop = obj_ptr->getPropertyPtrByType(prop_ptr->type);
+        prop_ptr->copyTo(new_prop);
+        if(prop_ptr->type == GO_PROPERTY_TYPE_LABEL){
+            LabelProperty* label_p = static_cast<LabelProperty*>(new_prop);
+            obj_ptr->label = &label_p->label;
+            obj_ptr->item_ptr->setText(0, *obj_ptr->label);
+            label_p->list_item_ptr = obj_ptr->item_ptr;
         }
     }
-    return result_arr; //if we haven't found one
+    for(unsigned int objs_num = 0; objs_num < snapshot->objects.size(); objs_num ++){
+        GameObject* obj_ptr = &objects[objs_num];
+        if(!obj_ptr->hasParent) {
+            obj_widget_ptr->addTopLevelItem(obj_ptr->item_ptr);
+            continue;
+        }
+        GameObject* parent_p = obj_ptr->parent.updLinkPtr();
+        parent_p->children.push_back(obj_ptr->getLinkToThisObject());
+        parent_p->item_ptr->addChild(obj_ptr->item_ptr);
+    }
 }
 
 ZSPIRE::Mesh* World::getMeshPtrByRelPath(QString label){
@@ -576,4 +605,15 @@ ZSPIRE::Texture* World::getTexturePtrByRelPath(QString label){
         }
     }
     return nullptr;
+}
+
+WorldSnapshot::WorldSnapshot(){
+
+}
+void WorldSnapshot::clear(){
+    this->objects.clear();
+
+    for(unsigned int prop_it = 0; prop_it < props.size(); prop_it ++){
+        delete props[prop_it];
+    }
 }
