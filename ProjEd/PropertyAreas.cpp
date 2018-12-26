@@ -74,13 +74,15 @@ void Float3PropertyArea::updateState(){
     float vptrZ = this->vector->Z;
     //Compare them
     if(vX != vptrX || vY != vptrY || vZ != vptrZ){ //If it updated
+        //Store old values
+        GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(this->go_property);
+        getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
+        //Write new values
         this->vector->X = vX;
         this->vector->Y = vY;
         this->vector->Z = vZ;
 
         PropertyEditArea::callPropertyUpdate();
-        GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(this->go_property);
-        getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
     }
 }
 

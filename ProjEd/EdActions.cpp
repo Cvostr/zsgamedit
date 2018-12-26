@@ -51,6 +51,8 @@ void EdActions::newPropertyAction(GameObjectLink link, int property_type){
     new_action->linkToObj = link; //Store link to object
     new_action->prop_type = property_type; //Sore property type
     new_action->container_ptr = allocProperty(property_type); //Allocate property
+    GameObjectProperty* origin_prop = link.ptr->getPropertyPtrByType(property_type);
+    origin_prop->copyTo(new_action->container_ptr);
 
     if(this->current_pos < this->end_pos){
         this->action_list[current_pos] = new_action;
@@ -71,6 +73,15 @@ void EdActions::undo(){
         EdSnapshotAction* snapshot = static_cast<EdSnapshotAction*>(this->action_list[current_pos - 1]);
 
         world_ptr->recoverFromSnapshot(&snapshot->snapshot);
+
+        current_pos -= 1;
+    }
+
+    if(act_type == ACT_TYPE_PROPERTY){ //if this action is property
+        EdPropertyAction* snapshot = static_cast<EdPropertyAction*>(this->action_list[current_pos - 1]);
+
+        GameObjectProperty* dest = snapshot->linkToObj.updLinkPtr()->getPropertyPtrByType(snapshot->prop_type);
+        snapshot->container_ptr->copyTo(dest);
 
         current_pos -= 1;
     }
