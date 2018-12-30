@@ -49,9 +49,10 @@ void EdActions::newSnapshotAction(World* world_ptr){
 void EdActions::newPropertyAction(GameObjectLink link, int property_type){
     EdPropertyAction* new_action = new EdPropertyAction; //Allocate memory for action class
     new_action->linkToObj = link; //Store link to object
+    new_action->linkToObj.updLinkPtr();
     new_action->prop_type = property_type; //Sore property type
     new_action->container_ptr = allocProperty(property_type); //Allocate property
-    GameObjectProperty* origin_prop = link.ptr->getPropertyPtrByType(property_type);
+    GameObjectProperty* origin_prop = link.updLinkPtr()->getPropertyPtrByType(property_type);
     origin_prop->copyTo(new_action->container_ptr);
 
     if(this->current_pos < this->end_pos){
@@ -83,9 +84,18 @@ void EdActions::undo(){
 
     if(act_type == ACT_TYPE_PROPERTY){ //if this action is property
         EdPropertyAction* snapshot = static_cast<EdPropertyAction*>(this->action_list[current_pos - 1]);
-
+        //Declare pointer to destination
         GameObjectProperty* dest = snapshot->linkToObj.updLinkPtr()->getPropertyPtrByType(snapshot->prop_type);
+        //Backup current property data
+        GameObjectProperty* cur_state_prop = allocProperty(snapshot->prop_type); //Allocate property for current state
+        dest->copyTo(cur_state_prop); //Copy current property data to buffer
+        //Make undo
+
         snapshot->container_ptr->copyTo(dest);
+        this->insp_win->updateObjectProperties();
+
+        snapshot->clear();
+        snapshot->container_ptr = cur_state_prop;
     }
     current_pos -= 1; //Move to back
 }
@@ -103,6 +113,22 @@ void EdActions::redo(){
         world_ptr->recoverFromSnapshot(&snapshot->snapshot);
 
         snapshot->snapshot = cur_state_snap;
+    }
+
+    if(act_type == ACT_TYPE_PROPERTY){ //if this action is property
+        EdPropertyAction* snapshot = static_cast<EdPropertyAction*>(this->action_list[current_pos]);
+        //Declare pointer to destination
+        GameObjectProperty* dest = snapshot->linkToObj.updLinkPtr()->getPropertyPtrByType(snapshot->prop_type);
+        //Backup current property data
+        GameObjectProperty* cur_state_prop = allocProperty(snapshot->prop_type); //Allocate property for current state
+        dest->copyTo(cur_state_prop); //Copy current property data to buffer
+        //Make undo
+
+        snapshot->container_ptr->copyTo(dest);
+        this->insp_win->updateObjectProperties();
+
+        snapshot->clear();
+        snapshot->container_ptr = cur_state_prop;
     }
     current_pos += 1; //Move forward
 }

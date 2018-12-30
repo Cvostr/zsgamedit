@@ -24,23 +24,20 @@ EditWindow::EditWindow(QWidget *parent) :
                 this, SLOT(onFileListItemClicked())); //Signal comes, when user clicks on file
     QObject::connect(ui->actionNew_Object, SIGNAL(triggered()),
                 this, SLOT(onAddNewGameObject())); //Signal comes, when user clicks on Object->Create
-    QObject::connect(ui->actionSave, SIGNAL(triggered()),
-                this, SLOT(onSceneSave())); //Signal comes, when user clicks on File->Save
-    QObject::connect(ui->actionSave_As, SIGNAL(triggered()),
-                this, SLOT(onSceneSaveAs())); //Signal comes, when user clicks on File->Save As
+    QObject::connect(ui->actionSave, SIGNAL(triggered()), this, SLOT(onSceneSave())); //Signal comes, when user clicks on File->Save
+    QObject::connect(ui->actionSave_As, SIGNAL(triggered()), this, SLOT(onSceneSaveAs())); //Signal comes, when user clicks on File->Save As
     QObject::connect(ui->actionOpen, SIGNAL(triggered()), this, SLOT(onOpenScene()));
 
     QObject::connect(ui->actionCreateScene, SIGNAL(triggered()), this, SLOT(onNewScene()));
+
+    QObject::connect(ui->actionUndo, SIGNAL(triggered()), this, SLOT(onUndoPressed()));
+    QObject::connect(ui->actionRedo, SIGNAL(triggered()), this, SLOT(onRedoPressed()));
 
     QObject::connect(ui->objsList, SIGNAL(itemClicked(QTreeWidgetItem*,int)),
                 this, SLOT(onObjectListItemClicked())); //Signal comes, when user clicks on File->Save As
 
     QObject::connect(ui->objsList, SIGNAL(onRightClick(QPoint)), this, SLOT(onObjectCtxMenuShow(QPoint)));
     QObject::connect(ui->objsList, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(onCameraToObjTeleport()));
-
-    QObject::connect(ui->actionUndo, SIGNAL(triggered()), this, SLOT(onUndoPressed()));
-    QObject::connect(ui->actionRedo, SIGNAL(triggered()), this, SLOT(onRedoPressed()));
-
 
     ready = false; //Firstly set it to 0
     hasSceneFile = false; //No scene loaded by default
@@ -423,8 +420,9 @@ EditWindow* ZSEditor::openEditor(){
     _inspector_win->show();
     _inspector_win->move(_editor_win->width() + 640, 0);
 
-    _ed_actions_container = new EdActions;
-    _ed_actions_container->world_ptr = &_editor_win->world;
+    _ed_actions_container = new EdActions; //Allocating EdActions
+    _ed_actions_container->world_ptr = &_editor_win->world; //Put world pointer
+    _ed_actions_container->insp_win = _inspector_win; //Put inspector win pointer
 
     return _editor_win;
 }
@@ -617,6 +615,7 @@ void EditWindow::onMouseMotion(int relX, int relY){
             }
 
             obj_trstate.tprop_ptr->updateMat();
+            //getInspector()->updateObjectProperties();
         }
     }
     if(project.perspective == 3){//Only affective in 3D
@@ -655,6 +654,19 @@ void EditWindow::onKeyDown(SDL_Keysym sym){
     if(sym.sym == SDLK_DELETE){
         GameObjectLink link = this->obj_trstate.obj_ptr->getLinkToThisObject();
         callObjectDeletion(link);
+    }
+
+    if(input_state.isLCtrlHold && sym.sym == SDLK_o){
+        emit onOpenScene();
+    }
+    if(input_state.isLCtrlHold && sym.sym == SDLK_s){
+        emit onSceneSave();
+    }
+    if(input_state.isLCtrlHold && sym.sym == SDLK_z){
+        emit onUndoPressed();
+    }
+    if(input_state.isLCtrlHold && sym.sym == SDLK_y){
+        emit onRedoPressed();
     }
 }
 

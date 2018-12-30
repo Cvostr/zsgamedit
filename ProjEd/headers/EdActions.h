@@ -3,6 +3,7 @@
 
 #include <vector>
 #include "../../World/headers/World.h"
+#include "InspectorWin.h"
 
 #define ACT_TYPE_NONE 0
 #define ACT_TYPE_SNAPSHOT 1
@@ -38,7 +39,8 @@ public:
 class EdActions{
 public:
     std::vector<EdAction*> action_list;
-    World* world_ptr;
+    World* world_ptr; //Pointer to world
+    InspectorWin* insp_win; //Pointer to inspector window
 
     int current_pos;
     int end_pos;

@@ -18,6 +18,84 @@ void AreaButton::onButtonPressed(){
     insp_ptr->updateObjectProperties();
 }
 
+
+PropertyEditArea::PropertyEditArea(){
+    type = PEA_TYPE_NONE;
+    elem_layout = new QHBoxLayout;
+    label_widget = new QLabel; //Allocating label
+    go_property = nullptr; //Nullptr by default
+
+    elem_layout->addWidget(label_widget); //Adding label to result layout
+}
+
+void PropertyEditArea::destroyLayout(){
+    delete this->label_widget;
+    delete this->elem_layout;
+}
+
+void PropertyEditArea::destroyContent(){
+
+}
+
+PropertyEditArea::~PropertyEditArea(){
+   //destroyLayout();
+}
+//Defaults
+void PropertyEditArea::setup(){
+    switch(this->type){
+        case PEA_TYPE_FLOAT3:{
+            Float3PropertyArea* ptr = static_cast<Float3PropertyArea*>(this);
+            ptr->setup();
+            break;
+        }
+        case PEA_TYPE_STRING:{
+            StringPropertyArea* ptr = static_cast<StringPropertyArea*>(this);
+            ptr->setup();
+            break;
+        }
+    }
+}
+
+void PropertyEditArea::addToInspector(InspectorWin* win){
+
+}
+void PropertyEditArea::updateState(){
+
+    switch(this->type){
+        case PEA_TYPE_FLOAT3:{
+            Float3PropertyArea* ptr = static_cast<Float3PropertyArea*>(this);
+            ptr->updateState();
+            break;
+        }
+        case PEA_TYPE_STRING:{
+            StringPropertyArea* ptr = static_cast<StringPropertyArea*>(this);
+            ptr->updateState();
+            break;
+        }
+    }
+}
+
+void PropertyEditArea::callPropertyUpdate(){
+    if(go_property != nullptr){ //If parent property has defined
+        GameObjectProperty* property_ptr = static_cast<GameObjectProperty*>(this->go_property);
+        property_ptr->onValueChanged(); //Then call changed
+    }
+}
+
+void PropertyEditArea::setLabel(QString label){
+    this->label_widget->setText(label);
+}
+
+void Float3PropertyArea::destroyContent(){
+    delete this->x_field;
+    delete this->y_field;
+    delete this->z_field;
+
+    delete this->x_label;
+    delete this->y_label;
+    delete this->z_label;
+}
+
 //Float3 definations
 Float3PropertyArea::Float3PropertyArea(){
     vector = nullptr; //set it to null to avoid crash;
@@ -95,14 +173,7 @@ void Float3PropertyArea::setup(){
 }
 
 Float3PropertyArea::~Float3PropertyArea(){
-    delete this->x_field;
-    delete this->y_field;
-    delete this->z_field;
-
-    delete this->x_label;
-    delete this->y_label;
-    delete this->z_label;
-
+    //destroyContent();
 }
 //String property area stuff
 StringPropertyArea::StringPropertyArea(){
@@ -117,8 +188,12 @@ void StringPropertyArea::setup(){
     this->edit_field->setText(*this->value_ptr);
 }
 
-StringPropertyArea::~StringPropertyArea(){
+void StringPropertyArea::destroyContent(){
     delete edit_field; //Remove text field
+}
+
+StringPropertyArea::~StringPropertyArea(){
+   //destroyContent();
 }
 
 void StringPropertyArea::addToInspector(InspectorWin* win){
@@ -132,6 +207,9 @@ void StringPropertyArea::updateState(){
     QString current = this->edit_field->text();
     //Compare them
     if(current.compare(value_ptr) != 0){ //If it updated
+        GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(this->go_property);
+        getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
+
         *value_ptr = current;
 
         PropertyEditArea::callPropertyUpdate();
@@ -193,6 +271,10 @@ PickResourceArea::PickResourceArea(){
 
 }
 PickResourceArea::~PickResourceArea(){
+
+}
+
+void PickResourceArea::destroyContent(){
     delete respick_btn;
     delete dialog;
     delete relpath_label;
@@ -246,10 +328,13 @@ void IntPropertyArea::updateState(){
     }
 }
 
-
 void ResourcePickDialog::onResourceSelected(){
     QListWidgetItem* selected = this->list->currentItem();
     QString mesh_path = selected->text();
+
+    GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(area->go_property);
+    getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
+
     *area->rel_path = mesh_path;
     area->PropertyEditArea::callPropertyUpdate();
     this->resource_text->setText(mesh_path);

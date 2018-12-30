@@ -10,6 +10,7 @@ InspectorWin::InspectorWin(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::InspectorWin)
 {
+    updateAreas = true; //update areas
     ui->setupUi(this);
     addObjComponentBtn = nullptr;
     this->ui->propertySpace->setMargin(0);
@@ -40,7 +41,9 @@ void InspectorWin::clearContentLayout(){
     unsigned int areas_num = static_cast<unsigned int>(this->property_areas.size());
     unsigned int objs_num = static_cast<unsigned int>(this->additional_objects.size());
     for(unsigned int area_i = 0; area_i < areas_num; area_i ++){ //Iterate over all added areas
-       delete property_areas[area_i]; //remove all
+        property_areas[area_i]->destroyContent();
+        property_areas[area_i]->destroyLayout(); //remove all
+        delete property_areas[area_i];
     }
     for(unsigned int obj_i = 0; obj_i < objs_num; obj_i ++){ //Iterate over all added areas
        delete additional_objects[obj_i]; //remove all
@@ -89,66 +92,9 @@ void InspectorWin::updateObjectProperties(){
     ShowObjectProperties(gameobject_ptr);
 }
 
-PropertyEditArea::PropertyEditArea(){
-    type = PEA_TYPE_NONE;
-    elem_layout = new QHBoxLayout;
-    label_widget = new QLabel; //Allocating label
-    go_property = nullptr; //Nullptr by default
-
-    elem_layout->addWidget(label_widget); //Adding label to result layout
-}
-
-PropertyEditArea::~PropertyEditArea(){
-    delete this->label_widget;
-    delete this->elem_layout;
-}
-//Defaults
-void PropertyEditArea::setup(){
-    switch(this->type){
-        case PEA_TYPE_FLOAT3:{
-            Float3PropertyArea* ptr = static_cast<Float3PropertyArea*>(this);
-            ptr->setup();
-            break;
-        }
-        case PEA_TYPE_STRING:{
-            StringPropertyArea* ptr = static_cast<StringPropertyArea*>(this);
-            ptr->setup();
-            break;
-        }
-    }
-}
-
-void PropertyEditArea::addToInspector(InspectorWin* win){
-
-}
-void PropertyEditArea::updateState(){
-
-    switch(this->type){
-        case PEA_TYPE_FLOAT3:{
-            Float3PropertyArea* ptr = static_cast<Float3PropertyArea*>(this);
-            ptr->updateState();
-            break;
-        }
-        case PEA_TYPE_STRING:{
-            StringPropertyArea* ptr = static_cast<StringPropertyArea*>(this);
-            ptr->updateState();
-            break;
-        }
-    }
-}
-
-void PropertyEditArea::callPropertyUpdate(){
-    if(go_property != nullptr){ //If parent property has defined
-        GameObjectProperty* property_ptr = static_cast<GameObjectProperty*>(this->go_property);
-        property_ptr->onValueChanged(); //Then call changed
-    }
-}
-
-void PropertyEditArea::setLabel(QString label){
-    this->label_widget->setText(label);
-}
 
 void InspectorWin::area_update(){
+    if(updateAreas == false) return; //if trigger is false, then exit
     unsigned int areas_num = static_cast<unsigned int>(this->property_areas.size());
     for(unsigned int area_i = 0; area_i < areas_num; area_i ++){
         PropertyEditArea* pea_ptr = this->property_areas[area_i]; //Obtain pointer to area
