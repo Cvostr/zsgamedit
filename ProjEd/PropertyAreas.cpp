@@ -9,8 +9,23 @@ AreaButton::AreaButton(){
     connect(this->button, SIGNAL(clicked()), this, SLOT(onButtonPressed()));
 }
 
+void AreaRadioGroup::onRadioClicked(){
+    for(unsigned int rbutton_it = 0; rbutton_it < this->rad_buttons.size(); rbutton_it ++){
+        if(this->rad_buttons[rbutton_it]->isChecked()){
+            *this->value_ptr = rbutton_it + 1;
+        }
+    }
+}
+
+void AreaRadioGroup::addRadioButton(QRadioButton* btn){
+    this->rad_buttons.push_back(btn); //add pointer to vector
+    this->btn_layout->addWidget(btn); //add pointer to layout
+    connect(btn, SIGNAL(clicked()), this, SLOT(onRadioClicked()));
+}
+
 AreaRadioGroup::AreaRadioGroup(){
-    btn_layout = new QHBoxLayout; //allocate layout object
+    btn_layout = new QVBoxLayout; //allocate layout object
+    this->value_ptr = nullptr;
 }
 
 AreaRadioGroup::~AreaRadioGroup(){

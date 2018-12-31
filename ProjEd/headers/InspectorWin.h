@@ -42,10 +42,14 @@ public:
 
 class AreaRadioGroup : public QObject{
     Q_OBJECT
+public slots:
+    void onRadioClicked();
 public:
-    QHBoxLayout* btn_layout;
+    QVBoxLayout* btn_layout; //layout to contain everything
     std::vector<QRadioButton*> rad_buttons;
+    uint8_t* value_ptr; //pointer to changing value
 
+    void addRadioButton(QRadioButton* btn);
     AreaRadioGroup();
     ~AreaRadioGroup();
 };

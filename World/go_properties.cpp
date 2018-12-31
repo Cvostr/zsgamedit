@@ -34,6 +34,11 @@ GameObjectProperty* allocProperty(int type){
             _ptr = static_cast<GameObjectProperty*>(ptr);
             break;
         }
+        case GO_PROPERTY_TYPE_LIGHTSOURCE:{
+            LightsourceProperty* ptr = new LightsourceProperty;
+            _ptr = static_cast<GameObjectProperty*>(ptr);
+            break;
+        }
         case GO_PROPERTY_TYPE_TILE_GROUP:{
             TileGroupProperty* ptr = new TileGroupProperty;
             _ptr = static_cast<GameObjectProperty*>(ptr);
@@ -242,10 +247,25 @@ void MeshProperty::copyTo(GameObjectProperty* dest){
 }
 
 void LightsourceProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
-    AreaRadioGroup* group = new AreaRadioGroup;
+    AreaRadioGroup* group = new AreaRadioGroup; //allocate button layout
+    group->value_ptr = &this->light_type;
 
-    QRadioButton* directional_radio;
-    QRadioButton* point_radio;
+    QRadioButton* directional_radio = new QRadioButton; //allocate first radio
+    directional_radio->setText("Directional");
+    QRadioButton* point_radio = new QRadioButton;
+    point_radio->setText("Point");
+
+    //add created radio buttons
+    group->addRadioButton(directional_radio);
+    group->addRadioButton(point_radio);
+    inspector->registerUiObject(group);
+    inspector->getContentLayout()->addLayout(group->btn_layout);
+
+    FloatPropertyArea* intensity_area = new FloatPropertyArea;
+    intensity_area->setLabel("Intensity"); //Its label
+    intensity_area->value = &this->intensity;
+    intensity_area->go_property = static_cast<void*>(this);
+    inspector->addPropertyArea(intensity_area);
 }
 void LightsourceProperty::onValueChanged(){
 
