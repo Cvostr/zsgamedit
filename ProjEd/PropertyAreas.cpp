@@ -9,6 +9,20 @@ AreaButton::AreaButton(){
     connect(this->button, SIGNAL(clicked()), this, SLOT(onButtonPressed()));
 }
 
+AreaRadioGroup::AreaRadioGroup(){
+    btn_layout = new QHBoxLayout; //allocate layout object
+}
+
+AreaRadioGroup::~AreaRadioGroup(){
+    delete this->btn_layout; //release layout object
+
+    for(unsigned int rbutton_it = 0; rbutton_it < this->rad_buttons.size(); rbutton_it ++){
+        delete this->rad_buttons[rbutton_it];
+    }
+
+    this->rad_buttons.clear();
+}
+
 AreaButton::~AreaButton(){
     delete this->button;
 }

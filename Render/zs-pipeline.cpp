@@ -136,7 +136,7 @@ ZSPIRE::Shader* RenderPipeline::processShaderOnObject(void* _obj){
     }
 
     switch(obj->render_type){
-        case GO_RENDER_TYPE_TILE:{
+        case GO_RENDER_TYPE_TILE:{ //if object is 2D tile
             tile_shader.Use();
             result = &tile_shader;
             //Receive pointer to tile information

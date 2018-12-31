@@ -488,6 +488,8 @@ void ObjectCtxMenu::onDeleteClicked(){
     win_ptr->callObjectDeletion(link);
 }
 void ObjectCtxMenu::onDublicateClicked(){
+    //Make snapshot actions
+    _ed_actions_container->newSnapshotAction(&win_ptr->world);
     _inspector_win->clearContentLayout(); //Prevent variable conflicts
     GameObjectLink link = obj_ptr->getLinkToThisObject();
     GameObject* result = win_ptr->world.dublicateObject(link.ptr);

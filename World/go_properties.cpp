@@ -5,8 +5,8 @@
 GameObjectProperty::GameObjectProperty(){
     type = GO_PROPERTY_TYPE_NONE;
     active = false; //Inactive by default
-    size = sizeof(GameObjectProperty);
-    data_start = 0x0;
+    //size = sizeof(GameObjectProperty);
+    //data_start = 0x0;
 }
 
 GameObjectProperty::~GameObjectProperty(){
@@ -82,8 +82,8 @@ void GameObjectProperty::onValueChanged(){
 TransformProperty::TransformProperty(){
     type = GO_PROPERTY_TYPE_TRANSFORM; //Type of property is transform
     active = true; //property is active
-    size = sizeof(TransformProperty);
-    data_start = &_last_translation;
+    //size = sizeof(TransformProperty);
+    //data_start = &_last_translation;
 
     this->transform_mat = getIdentity(); //Result matrix is identity by default
     this->translation = ZSVECTOR3(0.0f, 0.0f, 0.0f); //Position is zero by default
@@ -94,15 +94,15 @@ TransformProperty::TransformProperty(){
 LabelProperty::LabelProperty(){
     type = GO_PROPERTY_TYPE_LABEL; //its an label
     active = true;
-    size = sizeof(LabelProperty);
-    data_start = &label;
+    //size = sizeof(LabelProperty);
+    //data_start = &label;
 }
 
 MeshProperty::MeshProperty(){
     type = GO_PROPERTY_TYPE_MESH;
     active = true;
-    size = sizeof(MeshProperty);
-    data_start = &resource_relpath;
+    //size = sizeof(MeshProperty);
+    //data_start = &resource_relpath;
 }
 //Transform property functions
 void TransformProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
@@ -239,6 +239,26 @@ void MeshProperty::copyTo(GameObjectProperty* dest){
     MeshProperty* _dest = static_cast<MeshProperty*>(dest);
     _dest->resource_relpath = resource_relpath;
     _dest->mesh_ptr = mesh_ptr;
+}
+
+void LightsourceProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
+    AreaRadioGroup* group = new AreaRadioGroup;
+
+    QRadioButton* directional_radio;
+    QRadioButton* point_radio;
+}
+void LightsourceProperty::onValueChanged(){
+
+}
+void LightsourceProperty::copyTo(GameObjectProperty* dest){
+
+}
+LightsourceProperty::LightsourceProperty(){
+    type = GO_PROPERTY_TYPE_LIGHTSOURCE;
+    active = true;
+    light_type = LIGHTSOURCE_TYPE_DIRECTIONAL; //base type is directional
+
+    intensity = 1.0f; //base light instensity is 1
 }
 
 void GameObject::saveProperties(std::ofstream* stream){

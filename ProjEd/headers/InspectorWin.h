@@ -9,6 +9,7 @@
 #include <QDialog>
 #include <vector>
 #include <QListWidget>
+#include <QRadioButton>
 
 #include "../../Render/headers/zs-math.h"
 
@@ -37,6 +38,16 @@ public:
 
     AreaButton();
     ~AreaButton(); //Destroy button widget
+};
+
+class AreaRadioGroup : public QObject{
+    Q_OBJECT
+public:
+    QHBoxLayout* btn_layout;
+    std::vector<QRadioButton*> rad_buttons;
+
+    AreaRadioGroup();
+    ~AreaRadioGroup();
 };
 
 class PropertyEditArea{

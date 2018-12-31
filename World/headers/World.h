@@ -17,7 +17,12 @@
 #define GO_PROPERTY_TYPE_TRANSFORM 1
 #define GO_PROPERTY_TYPE_LABEL 2
 #define GO_PROPERTY_TYPE_MESH 3
+#define GO_PROPERTY_TYPE_LIGHTSOURCE 4
 
+#define LIGHTSOURCE_TYPE_DIRECTIONAL 1
+#define LIGHTSOURCE_TYPE_POINT 2
+
+typedef uint8_t ZSLIGHTSOURCE_TYPE; //type to store lightsource type
 
 class GameObject;
 class World;
@@ -42,8 +47,8 @@ public:
     bool active; //Is property working
     GameObjectLink go_link;
     World* world_ptr; //Sometimes may be useful
-    int size; //Size of object in bytes
-    void* data_start; //points to a start of property data
+    //int size; //Size of object in bytes
+    //void* data_start; //points to a start of property data
 
     GameObjectProperty();
     virtual ~GameObjectProperty();
@@ -99,6 +104,21 @@ public:
     void onValueChanged(); //Update mesh pointer
     void copyTo(GameObjectProperty* dest);
     MeshProperty();
+};
+
+class LightsourceProperty : public GameObjectProperty{
+public:
+    ZSLIGHTSOURCE_TYPE light_type; //type of lightsource
+
+    ZSVECTOR3 direction; //direction for directional & spotlight
+    ZSRGBCOLOR color;
+    float intensity;
+
+    void addPropertyInterfaceToInspector(InspectorWin* inspector);
+    void onValueChanged(); //Update mesh pointer
+    void copyTo(GameObjectProperty* dest);
+
+    LightsourceProperty();
 };
 
 class GameObject{
