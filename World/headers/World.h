@@ -111,8 +111,9 @@ public:
     ZSLIGHTSOURCE_TYPE light_type; //type of lightsource
 
     ZSVECTOR3 direction; //direction for directional & spotlight
-    ZSRGBCOLOR color;
-    float intensity;
+    ZSRGBCOLOR color; //Color of light
+    float intensity; //Light's intensity
+    float range; //Light's range
 
     void addPropertyInterfaceToInspector(InspectorWin* inspector);
     void onValueChanged(); //Update mesh pointer

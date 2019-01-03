@@ -326,6 +326,16 @@ void GameObject::saveProperties(std::ofstream* stream){
             *stream << ptr->resource_relpath.toStdString();
             break;
         }
+        case GO_PROPERTY_TYPE_LIGHTSOURCE:{
+            LightsourceProperty* ptr = static_cast<LightsourceProperty*>(property_ptr);
+            ZSLIGHTSOURCE_TYPE type = ptr->light_type;
+            float intensity = ptr->intensity;
+            float range = ptr->range;
+
+            //stream->write(reinterpret_cast<char*>(&isCreated), sizeof(int));
+            //stream->write(reinterpret_cast<char*>(&isCreated), sizeof(int));
+
+        }
         case GO_PROPERTY_TYPE_TILE_GROUP:{
             TileGroupProperty* ptr = static_cast<TileGroupProperty*>(property_ptr);
             int isCreated = static_cast<int>(ptr->isCreated);

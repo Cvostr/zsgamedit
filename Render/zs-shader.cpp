@@ -121,9 +121,9 @@ bool ZSPIRE::Shader::compileFromFile(const char* VSpath, const char* FSpath){
 	setGLuniformInt("sprite_map", 0);
 	setGLuniformInt("glyph_map", 1);
 
-	setGLuniformInt("t_diffuse_0", 0);
-	setGLuniformInt("t_diffuse_1", 1);
-	setGLuniformInt("t_diffuse_2", 2);
+    setGLuniformInt("tDiffuse", 10);
+    setGLuniformInt("tNormal", 11);
+    setGLuniformInt("tPos", 12);
 
 	setGLuniformInt("shadow0", 20);
 	setGLuniformInt("shadow1", 21);

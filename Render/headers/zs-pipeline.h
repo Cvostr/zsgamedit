@@ -18,12 +18,30 @@
 #define PIPELINE_STATE_PICKING 1
 #define PIPELINE_STATE_MARKED 2
 
+class G_BUFFER_GL{
+protected:
+    unsigned int depthBuffer;
+    unsigned int gBuffer; //framebuffer
+    unsigned int tDiffuse;
+    unsigned int tNormal;
+    unsigned int tPos;
+public:
+    G_BUFFER_GL();
+    void create(int width, int height);
+    void bindFramebuffer();
+    void bindTextures();
+};
+
 class RenderPipeline{
 private:
+    G_BUFFER_GL gbuffer;
+
     ZSPIRE::Shader tile_shader; //Shader to draw tiles
     ZSPIRE::Shader diffuse3d_shader;
     ZSPIRE::Shader pick_shader; //Shader to draw & pick objects
     ZSPIRE::Shader obj_mark_shader; //Shader to draw mark of selected objects
+
+    ZSPIRE::Shader deffered_light;
 public:
     int current_state;
     void setup();

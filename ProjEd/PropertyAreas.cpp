@@ -21,6 +21,10 @@ void AreaRadioGroup::addRadioButton(QRadioButton* btn){
     this->rad_buttons.push_back(btn); //add pointer to vector
     this->btn_layout->addWidget(btn); //add pointer to layout
     connect(btn, SIGNAL(clicked()), this, SLOT(onRadioClicked()));
+
+    if(rad_buttons.size() == *value_ptr){
+        btn->setChecked(true);
+    }
 }
 
 AreaRadioGroup::AreaRadioGroup(){
