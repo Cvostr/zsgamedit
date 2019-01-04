@@ -1,5 +1,5 @@
 #include "headers/zs-shader.h"
-
+#include "../World/headers/World.h"
 #include <GL/glew.h>
 
 #include <cstring>
@@ -204,4 +204,42 @@ void ZSPIRE::Shader::setHasNormalTextureProperty(bool hasNormalMap){
 void ZSPIRE::Shader::setTextureCountProperty(int tX, int tY) {
 	this->setGLuniformInt("textures_x", tX);
 	this->setGLuniformInt("textures_y", tY);
+}
+
+void ZSPIRE::Shader::sendLight(unsigned int index, void* _light){
+    LightsourceProperty* light = static_cast<LightsourceProperty*>(_light);
+    if (light->type > 0) {
+        std::string type;
+        type = "lights[" + std::to_string(index) + "].type";
+
+        //std::string pos;
+        //pos = "lights[" + std::to_string(index) + "].pos";
+
+        std::string color;
+        color = "lights[" + std::to_string(index) + "].color";
+
+        //std::string dir;
+        //dir = "lights[" + std::to_string(index) + "].dir";
+
+        std::string range;
+        range = "lights[" + std::to_string(index) + "].range";
+
+        std::string intensity;
+        intensity = "lights[" + std::to_string(index) + "].intensity";
+
+        //std::string spot_angle;
+        //spot_angle = "lights[" + std::to_string(index) + "].spot_angle";
+
+        //std::string spot_oangle;
+        //spot_oangle = "lights[" + std::to_string(index) + "].spot_out_angle";
+
+        setGLuniformInt(type.c_str(), light->type);
+        //setGLuniformVec3(pos.c_str(), light->pos);
+        //setGLuniformVec3(dir.c_str(), light->direction);
+        setGLuniformFloat(range.c_str(), light->range);
+        setGLuniformFloat(intensity.c_str(), light->intensity);
+        //setGLuniformFloat(spot_angle.c_str(), light->spot_angle_rad);
+        //setGLuniformFloat(spot_oangle.c_str(), light->outrad);
+        setGLuniformColor(color.c_str(), light->color);
+    }
 }

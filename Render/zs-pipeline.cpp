@@ -65,7 +65,8 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr)
     this->cam = cam_ptr;
     this->win_ptr = editwin_ptr;
     gbuffer.bindFramebuffer();
-    glClearColor(1,0,1,1);
+    //glClearColor(1,0,1,1);
+    glClearColor(0,0,0,1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     this->updateShadersCameraInfo(cam_ptr); //Send camera properties to all drawing shaders

@@ -271,7 +271,13 @@ void LightsourceProperty::onValueChanged(){
 
 }
 void LightsourceProperty::copyTo(GameObjectProperty* dest){
+    if(dest->type != this->type) return; //if it isn't transform
 
+    LightsourceProperty* _dest = static_cast<LightsourceProperty*>(dest);
+    _dest->color = color;
+    _dest->intensity = intensity;
+    _dest->range = range;
+    _dest->light_type = light_type;
 }
 LightsourceProperty::LightsourceProperty(){
     type = GO_PROPERTY_TYPE_LIGHTSOURCE;
@@ -279,6 +285,7 @@ LightsourceProperty::LightsourceProperty(){
     light_type = LIGHTSOURCE_TYPE_DIRECTIONAL; //base type is directional
 
     intensity = 1.0f; //base light instensity is 1
+    transform = nullptr;
 }
 
 void GameObject::saveProperties(std::ofstream* stream){

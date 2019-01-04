@@ -3,11 +3,11 @@
 
 #include "zs-math.h"
 #include "../../World/headers/zs-camera.h"
+//#include "../../World/headers/props/lightsource.h"
 
 namespace ZSPIRE {
 	class Shader {
 	protected:
-
 		unsigned int SHADER_ID;
 
 	public:
@@ -29,6 +29,7 @@ namespace ZSPIRE {
 		void setTextureCountProperty(int tX, int tY);
 		void setTransform(ZSMATRIX4x4 transform);
         void setCamera(Camera* cam);
+        void sendLight(unsigned int index, void* _light);
 
         bool isCreated;
 

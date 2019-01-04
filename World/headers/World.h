@@ -47,8 +47,6 @@ public:
     bool active; //Is property working
     GameObjectLink go_link;
     World* world_ptr; //Sometimes may be useful
-    //int size; //Size of object in bytes
-    //void* data_start; //points to a start of property data
 
     GameObjectProperty();
     virtual ~GameObjectProperty();
@@ -109,7 +107,7 @@ public:
 class LightsourceProperty : public GameObjectProperty{
 public:
     ZSLIGHTSOURCE_TYPE light_type; //type of lightsource
-
+    TransformProperty* transform; //pointer to object's transform
     ZSVECTOR3 direction; //direction for directional & spotlight
     ZSRGBCOLOR color; //Color of light
     float intensity; //Light's intensity
