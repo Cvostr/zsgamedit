@@ -212,8 +212,8 @@ void ZSPIRE::Shader::sendLight(unsigned int index, void* _light){
         std::string type;
         type = "lights[" + std::to_string(index) + "].type";
 
-        //std::string pos;
-        //pos = "lights[" + std::to_string(index) + "].pos";
+        std::string pos;
+        pos = "lights[" + std::to_string(index) + "].pos";
 
         std::string color;
         color = "lights[" + std::to_string(index) + "].color";
@@ -234,7 +234,7 @@ void ZSPIRE::Shader::sendLight(unsigned int index, void* _light){
         //spot_oangle = "lights[" + std::to_string(index) + "].spot_out_angle";
 
         setGLuniformInt(type.c_str(), light->type);
-        //setGLuniformVec3(pos.c_str(), light->pos);
+        setGLuniformVec3(pos.c_str(), light->transform->translation);
         //setGLuniformVec3(dir.c_str(), light->direction);
         setGLuniformFloat(range.c_str(), light->range);
         setGLuniformFloat(intensity.c_str(), light->intensity);

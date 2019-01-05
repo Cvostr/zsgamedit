@@ -279,6 +279,13 @@ void LightsourceProperty::copyTo(GameObjectProperty* dest){
     _dest->range = range;
     _dest->light_type = light_type;
 }
+
+void LightsourceProperty::updTransformPtr(){
+    if(transform == nullptr){
+        transform = this->go_link.ptr->getTransformProperty();
+    }
+}
+
 LightsourceProperty::LightsourceProperty(){
     type = GO_PROPERTY_TYPE_LIGHTSOURCE;
     active = true;

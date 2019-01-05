@@ -116,6 +116,7 @@ public:
     void addPropertyInterfaceToInspector(InspectorWin* inspector);
     void onValueChanged(); //Update mesh pointer
     void copyTo(GameObjectProperty* dest);
+    void updTransformPtr();
 
     LightsourceProperty();
 };
