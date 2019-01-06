@@ -39,6 +39,7 @@ GameObject::GameObject(){
     render_type = GO_RENDER_TYPE_NONE; //No render by default
     alive = true; //Object exist by default
     isPicked = false;
+    active = true;
     props_num = 0;
     label = nullptr;
 

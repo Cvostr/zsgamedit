@@ -23,6 +23,7 @@
 #define LIGHTSOURCE_TYPE_POINT 2
 
 typedef uint8_t ZSLIGHTSOURCE_TYPE; //type to store lightsource type
+typedef uint8_t ZSLIGHTSOURCE_GL_ID;
 
 class GameObject;
 class World;
@@ -112,6 +113,7 @@ public:
     ZSRGBCOLOR color; //Color of light
     float intensity; //Light's intensity
     float range; //Light's range
+    ZSLIGHTSOURCE_GL_ID id;
 
     void addPropertyInterfaceToInspector(InspectorWin* inspector);
     void onValueChanged(); //Update mesh pointer
@@ -129,6 +131,7 @@ public:
     bool hasParent; //If object has a parent
     bool alive; //if object marked s removed
     bool isPicked;
+    bool active;
     World* world_ptr; //pointer to world, when object placed
     GameObjectLink parent; //Link to object's parent
     int render_type;

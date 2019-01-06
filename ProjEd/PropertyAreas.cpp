@@ -379,14 +379,16 @@ void ResourcePickDialog::onNeedToShow(){
     //Receiving pointer to project
     Project* project_ptr = static_cast<Project*>(static_cast<GameObjectProperty*>(this->area->go_property)->world_ptr->proj_ptr);
     unsigned int resources_num = static_cast<unsigned int>(project_ptr->resources.size());
-    if(area->resource_type == RESOURCE_TYPE_MESH)
-        QListWidgetItem* item = new QListWidgetItem("@plane", this->list);
+    if(area->resource_type == RESOURCE_TYPE_MESH){
+        new QListWidgetItem("@plane", this->list);
+        new QListWidgetItem("@isotile", this->list);
+    }
 
     //Iterate over all resources
     for(unsigned int res_i = 0; res_i < resources_num; res_i ++){
         Resource* resource_ptr = &project_ptr->resources[res_i];
-        if(resource_ptr->type == area->resource_type){
-            QListWidgetItem* item = new QListWidgetItem(resource_ptr->rel_path, this->list);
+        if(resource_ptr->type == area->resource_type){ //if type is the same
+            new QListWidgetItem(resource_ptr->rel_path, this->list); //add resource to list
         }
     }
     this->exec();

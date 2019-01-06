@@ -42,6 +42,7 @@ private:
     ZSPIRE::Shader obj_mark_shader; //Shader to draw mark of selected objects
 
     ZSPIRE::Shader deffered_light;
+    std::vector<void*> lights_ptr;
 public:
     int current_state;
     void setup();
@@ -49,6 +50,7 @@ public:
     void render(SDL_Window* w, void* projectedit_ptr);
     unsigned int render_getpickedObj(void* projectedit_ptr, int mouseX, int mouseY);
     void updateShadersCameraInfo(ZSPIRE::Camera* cam_ptr);
+    void addLight(void* light_ptr);
     ZSPIRE::Shader* processShaderOnObject(void* _obj);
     ZSPIRE::Camera* cam;
     void* win_ptr;

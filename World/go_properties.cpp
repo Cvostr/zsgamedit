@@ -5,8 +5,6 @@
 GameObjectProperty::GameObjectProperty(){
     type = GO_PROPERTY_TYPE_NONE;
     active = false; //Inactive by default
-    //size = sizeof(GameObjectProperty);
-    //data_start = 0x0;
 }
 
 GameObjectProperty::~GameObjectProperty(){
@@ -228,7 +226,11 @@ void MeshProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
 void MeshProperty::updateMeshPtr(){
     if(resource_relpath.compare("@plane") == false){
         this->mesh_ptr = ZSPIRE::getPlaneMesh2D();
-    }else //If it isn't built in mesh
+    }
+    else if(resource_relpath.compare("@isotile") == false){
+        this->mesh_ptr = ZSPIRE::getIsoTileMesh2D();
+    }
+    else //If it isn't built in mesh
     {
        this->mesh_ptr = world_ptr->getMeshPtrByRelPath(resource_relpath);
     }
@@ -266,6 +268,12 @@ void LightsourceProperty::addPropertyInterfaceToInspector(InspectorWin* inspecto
     intensity_area->value = &this->intensity;
     intensity_area->go_property = static_cast<void*>(this);
     inspector->addPropertyArea(intensity_area);
+
+    FloatPropertyArea* range_area = new FloatPropertyArea;
+    range_area->setLabel("Range"); //Its label
+    range_area->value = &this->range;
+    range_area->go_property = static_cast<void*>(this);
+    inspector->addPropertyArea(range_area);
 }
 void LightsourceProperty::onValueChanged(){
 
@@ -346,9 +354,10 @@ void GameObject::saveProperties(std::ofstream* stream){
             float intensity = ptr->intensity;
             float range = ptr->range;
 
-            //stream->write(reinterpret_cast<char*>(&isCreated), sizeof(int));
-            //stream->write(reinterpret_cast<char*>(&isCreated), sizeof(int));
-
+            stream->write(reinterpret_cast<char*>(&type), sizeof(ZSLIGHTSOURCE_TYPE));
+            stream->write(reinterpret_cast<char*>(&intensity), sizeof(float));
+            stream->write(reinterpret_cast<char*>(&range), sizeof(float));
+            break;
         }
         case GO_PROPERTY_TYPE_TILE_GROUP:{
             TileGroupProperty* ptr = static_cast<TileGroupProperty*>(property_ptr);
@@ -419,6 +428,15 @@ void GameObject::loadProperty(std::ifstream* world_stream){
         lptr->resource_relpath = QString::fromStdString(rel_path); //Write loaded mesh relative path
         lptr->updateMeshPtr(); //Pointer will now point to mesh resource
 
+        break;
+    }
+    case GO_PROPERTY_TYPE_LIGHTSOURCE:{
+        LightsourceProperty* ptr = static_cast<LightsourceProperty*>(prop_ptr);
+        world_stream->seekg(1, std::ofstream::cur);
+
+        world_stream->read(reinterpret_cast<char*>(&ptr->light_type), sizeof(ZSLIGHTSOURCE_TYPE));
+        world_stream->read(reinterpret_cast<char*>(&ptr->intensity), sizeof(float));
+        world_stream->read(reinterpret_cast<char*>(&ptr->range), sizeof(float));
         break;
     }
     case GO_PROPERTY_TYPE_TILE_GROUP :{

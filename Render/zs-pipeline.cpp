@@ -87,7 +87,13 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr)
 }
 
 void GameObject::Draw(RenderPipeline* pipeline){
+    if(active == false) return; //if object is inactive, not to render it
     TransformProperty* transform_prop = static_cast<TransformProperty*>(this->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
+
+    LightsourceProperty* light = static_cast<LightsourceProperty*>(this->getPropertyPtrByType(GO_PROPERTY_TYPE_LIGHTSOURCE));
+    if(light != nullptr){ //if object has lightsource
+        pipeline->addLight(static_cast<void*>(light)); //put light pointer to vector
+    }
 
     ZSPIRE::Shader* shader = pipeline->processShaderOnObject(static_cast<void*>(this)); //Will be used next time
     if(shader != nullptr && transform_prop != nullptr){
@@ -107,9 +113,7 @@ void GameObject::Draw(RenderPipeline* pipeline){
                 EditWindow* w = static_cast<EditWindow*>(pipeline->win_ptr);
                 if(w->obj_trstate.isTransforming == true)
                      mark_s->setGLuniformInt("isTransformMark", 1);
-                //glDisable(GL_DEPTH_TEST);
                 mesh_prop->mesh_ptr->DrawLines();
-                //glEnable(GL_DEPTH_TEST);
                 pipeline->current_state = cur_state;
                 mark_s->setGLuniformInt("isTransformMark", 0);
             }
@@ -182,6 +186,10 @@ void RenderPipeline::updateShadersCameraInfo(ZSPIRE::Camera* cam_ptr){
         obj_mark_shader.Use();
         obj_mark_shader.setCamera(cam_ptr);
     }
+}
+
+void RenderPipeline::addLight(void* light_ptr){
+    this->lights_ptr.push_back(light_ptr);
 }
 
 G_BUFFER_GL::G_BUFFER_GL(){
