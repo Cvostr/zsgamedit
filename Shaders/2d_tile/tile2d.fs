@@ -5,11 +5,6 @@
 layout (location = 0) out vec3 tDiffuse;
 layout (location = 2) out vec3 tPos;
 
-#define LIGHTSOURCE_NONE 0
-#define LIGHTSOURCE_DIR 1
-#define LIGHTSOURCE_POINT 2
-#define LIGHTSOURCE_SPOT 3
-
 out vec4 FragColor;
 
 in vec3 FragPos;
@@ -20,8 +15,6 @@ uniform sampler2D diffuse;
 
 uniform bool hasDiffuseMap;
 
-uniform vec3 amb_color;
-
 void main(){
 
 	vec2 uv = UVCoord;
@@ -31,6 +24,6 @@ void main(){
 		result = texture(diffuse, uv).xyz ;
 		
 	FragColor = vec4(result, 1);
-	tDiffuse = FragColor.rgb;
+	tDiffuse = result;
 	tPos = FragPos;
 }

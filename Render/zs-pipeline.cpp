@@ -65,7 +65,6 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr)
     this->cam = cam_ptr;
     this->win_ptr = editwin_ptr;
     gbuffer.bindFramebuffer();
-    //glClearColor(1,0,1,1);
     glClearColor(0,0,0,1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -91,7 +90,7 @@ void GameObject::Draw(RenderPipeline* pipeline){
     TransformProperty* transform_prop = static_cast<TransformProperty*>(this->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
 
     LightsourceProperty* light = static_cast<LightsourceProperty*>(this->getPropertyPtrByType(GO_PROPERTY_TYPE_LIGHTSOURCE));
-    if(light != nullptr){ //if object has lightsource
+    if(light != nullptr && !light->isSent){ //if object has lightsource
         pipeline->addLight(static_cast<void*>(light)); //put light pointer to vector
     }
 
@@ -189,7 +188,14 @@ void RenderPipeline::updateShadersCameraInfo(ZSPIRE::Camera* cam_ptr){
 }
 
 void RenderPipeline::addLight(void* light_ptr){
-    this->lights_ptr.push_back(light_ptr);
+    LightsourceProperty* _light_ptr = static_cast<LightsourceProperty*>(light_ptr);
+    _light_ptr->isSent = true;
+    _light_ptr->updTransformPtr();
+    _light_ptr->id = lights_ptr.size(); //setting id of uniform
+    this->lights_ptr.push_back(light_ptr); //pushing pointer
+    this->deffered_light.Use(); //correctly put uniforms
+    this->deffered_light.sendLight(_light_ptr->id, light_ptr);
+    this->deffered_light.setGLuniformInt("lights_amount", lights_ptr.size());
 }
 
 G_BUFFER_GL::G_BUFFER_GL(){

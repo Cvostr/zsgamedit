@@ -226,9 +226,10 @@ void MeshProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
 void MeshProperty::updateMeshPtr(){
     if(resource_relpath.compare("@plane") == false){
         this->mesh_ptr = ZSPIRE::getPlaneMesh2D();
-    }
-    else if(resource_relpath.compare("@isotile") == false){
+    }else if(resource_relpath.compare("@isotile") == false){
         this->mesh_ptr = ZSPIRE::getIsoTileMesh2D();
+    }else if(resource_relpath.compare("@cube") == false){
+        this->mesh_ptr = ZSPIRE::getCubeMesh3D();
     }
     else //If it isn't built in mesh
     {
@@ -290,7 +291,7 @@ void LightsourceProperty::copyTo(GameObjectProperty* dest){
 
 void LightsourceProperty::updTransformPtr(){
     if(transform == nullptr){
-        transform = this->go_link.ptr->getTransformProperty();
+        transform = this->go_link.updLinkPtr()->getTransformProperty();
     }
 }
 
@@ -301,6 +302,7 @@ LightsourceProperty::LightsourceProperty(){
 
     intensity = 1.0f; //base light instensity is 1
     transform = nullptr;
+    isSent = false; //isn't sent by default
 }
 
 void GameObject::saveProperties(std::ofstream* stream){

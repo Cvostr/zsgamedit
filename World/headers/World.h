@@ -113,7 +113,9 @@ public:
     ZSRGBCOLOR color; //Color of light
     float intensity; //Light's intensity
     float range; //Light's range
-    ZSLIGHTSOURCE_GL_ID id;
+
+    ZSLIGHTSOURCE_GL_ID id; //glsl uniform index
+    bool isSent; //is glsl uniform sent to deffered shader
 
     void addPropertyInterfaceToInspector(InspectorWin* inspector);
     void onValueChanged(); //Update mesh pointer

@@ -31,12 +31,58 @@ ZSVERTEX iso_tile_vertices[] = {
 	ZSVERTEX(ZSVECTOR3(-1.0f,  0.1f, 0.0f),	ZSVECTOR2(0.0f, 0.55f))   // top left 
 };
 
+ZSVERTEX cube_vertices[] = {
+        // positions          // normals           // texture coords
+        ZSVERTEX(ZSVECTOR3(-0.5f, -0.5f, -0.5f), ZSVECTOR2(0.0f, 0.0f), ZSVECTOR3(-1.0f,  0.0f,  0.0f)),
+        ZSVERTEX(ZSVECTOR3(0.5f, -0.5f, -0.5f), ZSVECTOR2(0.0f, 0.0f), ZSVECTOR3(-1.0f,  1.0f,  0.0f)),
+        ZSVERTEX(ZSVECTOR3(0.5f,  0.5f, -0.5f), ZSVECTOR2(0.0f, 0.0f), ZSVECTOR3(-1.0f,  1.0f,  1.0f)),
+        ZSVERTEX(ZSVECTOR3(0.5f,  0.5f, -0.5f), ZSVECTOR2(0.0f, 0.0f), ZSVECTOR3(-1.0f,  1.0f,  1.0f)),
+        ZSVERTEX(ZSVECTOR3(-0.5f,  0.5f, -0.5f), ZSVECTOR2(0.0f, 0.0f), ZSVECTOR3(-1.0f,  0.0f,  1.0f)),
+        ZSVERTEX(ZSVECTOR3(-0.5f, -0.5f, -0.5f), ZSVECTOR2(0.0f, 0.0f), ZSVECTOR3(-1.0f,  0.0f,  0.0f)),
+
+        ZSVERTEX(ZSVECTOR3(-0.5f, -0.5f,  0.5f), ZSVECTOR2(0.0f, 0.0f), ZSVECTOR3(1.0f,  0.0f,  0.0f)),
+        ZSVERTEX(ZSVECTOR3(0.5f, -0.5f,  0.5f), ZSVECTOR2(0.0f, 0.0f), ZSVECTOR3(1.0f,  1.0f,  0.0f)),
+        ZSVERTEX(ZSVECTOR3(0.5f,  0.5f,  0.5f), ZSVECTOR2(0.0f, 0.0f), ZSVECTOR3(1.0f,  1.0f,  1.0f)),
+        ZSVERTEX(ZSVECTOR3(0.5f,  0.5f,  0.5f), ZSVECTOR2(0.0f, 0.0f), ZSVECTOR3(1.0f,  1.0f,  1.0f)),
+        ZSVERTEX(ZSVECTOR3(-0.5f,  0.5f,  0.5f), ZSVECTOR2(0.0f, 0.0f), ZSVECTOR3(1.0f,  0.0f,  1.0f)),
+        ZSVERTEX(ZSVECTOR3(-0.5f, -0.5f,  0.5f), ZSVECTOR2(0.0f, 0.0f), ZSVECTOR3(1.0f,  0.0f,  0.0f)),
+
+        ZSVERTEX(ZSVECTOR3(-0.5f,  0.5f,  0.5f), ZSVECTOR2(-1.0f, 0.0f), ZSVECTOR3(0.0f,  1.0f,  0.0f)),
+        ZSVERTEX(ZSVECTOR3(-0.5f,  0.5f, -0.5f), ZSVECTOR2(-1.0f, 0.0f), ZSVECTOR3(0.0f,  1.0f,  1.0f)),
+        ZSVERTEX(ZSVECTOR3(-0.5f, -0.5f, -0.5f), ZSVECTOR2(-1.0f, 0.0f), ZSVECTOR3(0.0f,  0.0f,  1.0f)),
+        ZSVERTEX(ZSVECTOR3(-0.5f, -0.5f, -0.5f), ZSVECTOR2(-1.0f, 0.0f), ZSVECTOR3(0.0f,  0.0f,  1.0f)),
+        ZSVERTEX(ZSVECTOR3(-0.5f, -0.5f,  0.5f), ZSVECTOR2(-1.0f, 0.0f), ZSVECTOR3(0.0f,  0.0f,  0.0f)),
+        ZSVERTEX(ZSVECTOR3(-0.5f,  0.5f,  0.5f), ZSVECTOR2(-1.0f, 0.0f), ZSVECTOR3(0.0f,  1.0f,  0.0f)),
+
+        ZSVERTEX(ZSVECTOR3(0.5f,  0.5f,  0.5f), ZSVECTOR2(1.0f,  0.0f), ZSVECTOR3(0.0f,  1.0f,  0.0f)),
+        ZSVERTEX(ZSVECTOR3(0.5f,  0.5f, -0.5f), ZSVECTOR2(1.0f,  0.0f), ZSVECTOR3(0.0f,  1.0f,  1.0f)),
+        ZSVERTEX(ZSVECTOR3(0.5f, -0.5f, -0.5f), ZSVECTOR2(1.0f,  0.0f), ZSVECTOR3(0.0f,  0.0f,  1.0f)),
+        ZSVERTEX(ZSVECTOR3(0.5f, -0.5f, -0.5f), ZSVECTOR2(1.0f,  0.0f), ZSVECTOR3(0.0f,  0.0f,  1.0f)),
+        ZSVERTEX(ZSVECTOR3(0.5f, -0.5f,  0.5f), ZSVECTOR2(1.0f,  0.0f), ZSVECTOR3(0.0f,  0.0f,  0.0f)),
+        ZSVERTEX(ZSVECTOR3(0.5f,  0.5f,  0.5f), ZSVECTOR2(1.0f,  0.0f), ZSVECTOR3(0.0f,  1.0f,  0.0f)),
+
+        ZSVERTEX(ZSVECTOR3(-0.5f, -0.5f, -0.5f), ZSVECTOR2(0.0f, -1.0f), ZSVECTOR3(0.0f,  0.0f,  1.0f)),
+        ZSVERTEX(ZSVECTOR3(0.5f, -0.5f, -0.5f), ZSVECTOR2(0.0f, -1.0f), ZSVECTOR3(0.0f,  1.0f,  1.0f)),
+        ZSVERTEX(ZSVECTOR3(0.5f, -0.5f,  0.5f), ZSVECTOR2(0.0f, -1.0f), ZSVECTOR3(0.0f,  1.0f,  0.0f)),
+        ZSVERTEX(ZSVECTOR3(0.5f, -0.5f,  0.5f), ZSVECTOR2(0.0f, -1.0f), ZSVECTOR3(0.0f,  1.0f,  0.0f)),
+        ZSVERTEX(ZSVECTOR3(-0.5f, -0.5f,  0.5f), ZSVECTOR2(0.0f, -1.0f), ZSVECTOR3(0.0f,  0.0f,  0.0f)),
+        ZSVERTEX(ZSVECTOR3(-0.5f, -0.5f, -0.5f), ZSVECTOR2(0.0f, -1.0f), ZSVECTOR3(0.0f,  0.0f,  1.0f)),
+
+        ZSVERTEX(ZSVECTOR3(-0.5f,  0.5f, -0.5f), ZSVECTOR2(0.0f,  1.0f), ZSVECTOR3(0.0f,  0.0f,  1.0f)),
+        ZSVERTEX(ZSVECTOR3(0.5f,  0.5f, -0.5f), ZSVECTOR2(0.0f,  1.0f), ZSVECTOR3(0.0f,  1.0f,  1.0f)),
+        ZSVERTEX(ZSVECTOR3(0.5f,  0.5f,  0.5f), ZSVECTOR2(0.0f,  1.0f), ZSVECTOR3(0.0f,  1.0f,  0.0f)),
+        ZSVERTEX(ZSVECTOR3(0.5f,  0.5f,  0.5f), ZSVECTOR2(0.0f,  1.0f), ZSVECTOR3(0.0f,  1.0f,  0.0f)),
+        ZSVERTEX(ZSVECTOR3(-0.5f,  0.5f,  0.5f), ZSVECTOR2(0.0f,  1.0f), ZSVECTOR3(0.0f,  0.0f,  0.0f)),
+        ZSVERTEX(ZSVECTOR3(-0.5f,  0.5f, -0.5f), ZSVECTOR2(0.0f,  1.0f), ZSVECTOR3(0.0f,  0.0f,  1.0f))
+};
+
 unsigned int plane_inds[] = { 0,1,2, 0,2,3 };
 unsigned int isotile_ind[] = { 0,1,2, 2,3,4, 2,4,5, 2,5,0 };
 
 ZSPIRE::Mesh plane2Dmesh;
 ZSPIRE::Mesh uiSprite2Dmesh;
 ZSPIRE::Mesh iso_tile2Dmesh;
+ZSPIRE::Mesh cube3Dmesh;
 
 unsigned int vert_size = sizeof(ZSVERTEX);
 unsigned int offset = 0;
@@ -68,6 +114,9 @@ void ZSPIRE::createPlane2D() {
 
     iso_tile2Dmesh.Init();
     iso_tile2Dmesh.setMeshData(iso_tile_vertices, isotile_ind, 6, 12);
+
+    cube3Dmesh.Init();
+    cube3Dmesh.setMeshData(cube_vertices, 36);
 }
 
 ZSPIRE::Mesh* ZSPIRE::getPlaneMesh2D() {
@@ -81,7 +130,9 @@ ZSPIRE::Mesh* ZSPIRE::getUiSpriteMesh2D() {
 ZSPIRE::Mesh* ZSPIRE::getIsoTileMesh2D(){
 	return &iso_tile2Dmesh;
 }
-
+ZSPIRE::Mesh* ZSPIRE::getCubeMesh3D(){
+    return &cube3Dmesh;
+}
 void ZSPIRE::Mesh::Destroy() {
 	this->alive = false;
 
