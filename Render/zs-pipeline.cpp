@@ -90,8 +90,13 @@ void GameObject::Draw(RenderPipeline* pipeline){
     TransformProperty* transform_prop = static_cast<TransformProperty*>(this->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
 
     LightsourceProperty* light = static_cast<LightsourceProperty*>(this->getPropertyPtrByType(GO_PROPERTY_TYPE_LIGHTSOURCE));
+
     if(light != nullptr && !light->isSent){ //if object has lightsource
         pipeline->addLight(static_cast<void*>(light)); //put light pointer to vector
+    }
+    if(light != nullptr && light->last_pos != transform_prop->translation){
+        light->onValueChanged();
+        light->last_pos = transform_prop->translation;
     }
 
     ZSPIRE::Shader* shader = pipeline->processShaderOnObject(static_cast<void*>(this)); //Will be used next time
@@ -167,6 +172,10 @@ ZSPIRE::Shader* RenderPipeline::processShaderOnObject(void* _obj){
             result = nullptr;
             break;
         }
+        case GO_RENDER_TYPE_3D:{
+            result = nullptr;
+            break;
+        }
     }
     return result;
 }
@@ -192,6 +201,7 @@ void RenderPipeline::addLight(void* light_ptr){
     _light_ptr->isSent = true;
     _light_ptr->updTransformPtr();
     _light_ptr->id = lights_ptr.size(); //setting id of uniform
+    _light_ptr->deffered_shader_ptr = &this->deffered_light; //putting ptr to deffered shader
     this->lights_ptr.push_back(light_ptr); //pushing pointer
     this->deffered_light.Use(); //correctly put uniforms
     this->deffered_light.sendLight(_light_ptr->id, light_ptr);

@@ -109,6 +109,7 @@ class LightsourceProperty : public GameObjectProperty{
 public:
     ZSLIGHTSOURCE_TYPE light_type; //type of lightsource
     TransformProperty* transform; //pointer to object's transform
+    ZSVECTOR3 last_pos;
     ZSVECTOR3 direction; //direction for directional & spotlight
     ZSRGBCOLOR color; //Color of light
     float intensity; //Light's intensity
@@ -116,6 +117,8 @@ public:
 
     ZSLIGHTSOURCE_GL_ID id; //glsl uniform index
     bool isSent; //is glsl uniform sent to deffered shader
+
+    ZSPIRE::Shader* deffered_shader_ptr;
 
     void addPropertyInterfaceToInspector(InspectorWin* inspector);
     void onValueChanged(); //Update mesh pointer

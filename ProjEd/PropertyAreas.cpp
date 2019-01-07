@@ -382,6 +382,7 @@ void ResourcePickDialog::onNeedToShow(){
     if(area->resource_type == RESOURCE_TYPE_MESH){
         new QListWidgetItem("@plane", this->list);
         new QListWidgetItem("@isotile", this->list);
+        new QListWidgetItem("@cube", this->list);
     }
 
     //Iterate over all resources

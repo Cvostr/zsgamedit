@@ -116,12 +116,12 @@ public:
 
 class PickResourceArea : public PropertyEditArea{
 public:
-    ResourcePickDialog* dialog;
+    ResourcePickDialog* dialog; //dialog shown after button press
 
-    unsigned int resource_type;
+    unsigned int resource_type; //flag of resource type
     QString* rel_path; //Pointer to store result
 
-    QPushButton* respick_btn;
+    QPushButton* respick_btn; //button to press
     QLabel* relpath_label;
     PickResourceArea();
     ~PickResourceArea();

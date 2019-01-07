@@ -277,7 +277,11 @@ void LightsourceProperty::addPropertyInterfaceToInspector(InspectorWin* inspecto
     inspector->addPropertyArea(range_area);
 }
 void LightsourceProperty::onValueChanged(){
-
+    if(deffered_shader_ptr != nullptr && isSent){
+        deffered_shader_ptr->Use(); //use shader to make uniforms work
+        //Send light uniforms
+        deffered_shader_ptr->sendLight(this->id, static_cast<void*>(this));
+    }
 }
 void LightsourceProperty::copyTo(GameObjectProperty* dest){
     if(dest->type != this->type) return; //if it isn't transform
@@ -292,6 +296,7 @@ void LightsourceProperty::copyTo(GameObjectProperty* dest){
 void LightsourceProperty::updTransformPtr(){
     if(transform == nullptr){
         transform = this->go_link.updLinkPtr()->getTransformProperty();
+        this->last_pos = transform->translation; //Store old value
     }
 }
 
