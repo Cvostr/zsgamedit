@@ -9,6 +9,7 @@
 #include <QDialog>
 #include <vector>
 #include <QListWidget>
+#include <QRadioButton>
 
 #include "../../Render/headers/zs-math.h"
 
@@ -39,6 +40,20 @@ public:
     ~AreaButton(); //Destroy button widget
 };
 
+class AreaRadioGroup : public QObject{
+    Q_OBJECT
+public slots:
+    void onRadioClicked();
+public:
+    QVBoxLayout* btn_layout; //layout to contain everything
+    std::vector<QRadioButton*> rad_buttons;
+    uint8_t* value_ptr; //pointer to changing value
+
+    void addRadioButton(QRadioButton* btn);
+    AreaRadioGroup();
+    ~AreaRadioGroup();
+};
+
 class PropertyEditArea{
 public:
     int type;
@@ -49,9 +64,10 @@ public:
     QHBoxLayout* elem_layout; //Layout to contain everything
 
     PropertyEditArea(); //Default construct
-
     virtual ~PropertyEditArea(); //Destruct
 
+    void destroyLayout(); //Destoroy base layout
+    virtual void destroyContent(); //Destroy content, placed by inherited class
     virtual void setup(); //Uses to prepare base values
     virtual void updateState(); //Updates value
     virtual void addToInspector(InspectorWin* win); //Add edit area to inspector layout
@@ -69,6 +85,7 @@ public:
     StringPropertyArea();
     ~StringPropertyArea();
 
+    void destroyContent(); //destroy content, created by this class
     void setup(); //Virtual, prepares base values
     void addToInspector(InspectorWin* win); //Add edit area to inspector layout
     void updateState(); //Updates value
@@ -91,6 +108,7 @@ public:
     Float3PropertyArea();
     ~Float3PropertyArea();
 
+    void destroyContent();
     void setup(); //Virtual
     void addToInspector(InspectorWin* win);
     void updateState(); //Virtual, on values changed
@@ -98,16 +116,17 @@ public:
 
 class PickResourceArea : public PropertyEditArea{
 public:
-    ResourcePickDialog* dialog;
+    ResourcePickDialog* dialog; //dialog shown after button press
 
-    unsigned int resource_type;
+    unsigned int resource_type; //flag of resource type
     QString* rel_path; //Pointer to store result
 
-    QPushButton* respick_btn;
+    QPushButton* respick_btn; //button to press
     QLabel* relpath_label;
     PickResourceArea();
     ~PickResourceArea();
 
+    void destroyContent(); //destroy content, created by this class
     void setup(); //Virtual, to prepare base values
     void addToInspector(InspectorWin* win);
     void updateState();
@@ -157,6 +176,7 @@ public slots:
     void onAddComponentBtnPressed();
 
 public:
+    bool updateAreas; //if TRUE, all areas will update
     std::vector<PropertyEditArea*> property_areas; //vector for areas
     std::vector<QObject*> additional_objects;
     explicit InspectorWin(QWidget *parent = nullptr);

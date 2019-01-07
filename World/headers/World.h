@@ -17,7 +17,13 @@
 #define GO_PROPERTY_TYPE_TRANSFORM 1
 #define GO_PROPERTY_TYPE_LABEL 2
 #define GO_PROPERTY_TYPE_MESH 3
+#define GO_PROPERTY_TYPE_LIGHTSOURCE 4
 
+#define LIGHTSOURCE_TYPE_DIRECTIONAL 1
+#define LIGHTSOURCE_TYPE_POINT 2
+
+typedef uint8_t ZSLIGHTSOURCE_TYPE; //type to store lightsource type
+typedef uint8_t ZSLIGHTSOURCE_GL_ID;
 
 class GameObject;
 class World;
@@ -42,8 +48,6 @@ public:
     bool active; //Is property working
     GameObjectLink go_link;
     World* world_ptr; //Sometimes may be useful
-    int size; //Size of object in bytes
-    void* data_start; //points to a start of property data
 
     GameObjectProperty();
     virtual ~GameObjectProperty();
@@ -101,6 +105,29 @@ public:
     MeshProperty();
 };
 
+class LightsourceProperty : public GameObjectProperty{
+public:
+    ZSLIGHTSOURCE_TYPE light_type; //type of lightsource
+    TransformProperty* transform; //pointer to object's transform
+    ZSVECTOR3 last_pos;
+    ZSVECTOR3 direction; //direction for directional & spotlight
+    ZSRGBCOLOR color; //Color of light
+    float intensity; //Light's intensity
+    float range; //Light's range
+
+    ZSLIGHTSOURCE_GL_ID id; //glsl uniform index
+    bool isSent; //is glsl uniform sent to deffered shader
+
+    ZSPIRE::Shader* deffered_shader_ptr;
+
+    void addPropertyInterfaceToInspector(InspectorWin* inspector);
+    void onValueChanged(); //Update mesh pointer
+    void copyTo(GameObjectProperty* dest);
+    void updTransformPtr();
+
+    LightsourceProperty();
+};
+
 class GameObject{
 public:
     int array_index; //Index in objects vector
@@ -109,6 +136,7 @@ public:
     bool hasParent; //If object has a parent
     bool alive; //if object marked s removed
     bool isPicked;
+    bool active;
     World* world_ptr; //pointer to world, when object placed
     GameObjectLink parent; //Link to object's parent
     int render_type;

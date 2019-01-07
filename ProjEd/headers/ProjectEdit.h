@@ -40,10 +40,9 @@ struct Project{
     QString root_path; //Project root folder
 
     int version; //Project version
-    int perspective;
+    int perspective; //3D or 2D
 
     std::vector<Resource> resources;
-
 };
 
 struct EditorInputState{

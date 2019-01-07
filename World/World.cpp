@@ -39,6 +39,7 @@ GameObject::GameObject(){
     render_type = GO_RENDER_TYPE_NONE; //No render by default
     alive = true; //Object exist by default
     isPicked = false;
+    active = true;
     props_num = 0;
     label = nullptr;
 
@@ -284,6 +285,10 @@ GameObject* World::newObject(){
     obj.label = &obj.getLabelProperty()->label;
     *obj.label = "GameObject_" + QString::number(add_num); //Assigning label to object
     obj.item_ptr->setText(0, *obj.label);
+
+    Project* p_ptr = static_cast<Project*>(this->proj_ptr);
+    if(p_ptr->perspective == 3)
+        obj.render_type = GO_RENDER_TYPE_3D;
 
     obj.addProperty(GO_PROPERTY_TYPE_TRANSFORM);
     return this->addObject(obj); //Return pointer to new object

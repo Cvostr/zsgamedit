@@ -1,5 +1,5 @@
 #include "headers/zs-shader.h"
-
+#include "../World/headers/World.h"
 #include <GL/glew.h>
 
 #include <cstring>
@@ -121,9 +121,9 @@ bool ZSPIRE::Shader::compileFromFile(const char* VSpath, const char* FSpath){
 	setGLuniformInt("sprite_map", 0);
 	setGLuniformInt("glyph_map", 1);
 
-	setGLuniformInt("t_diffuse_0", 0);
-	setGLuniformInt("t_diffuse_1", 1);
-	setGLuniformInt("t_diffuse_2", 2);
+    setGLuniformInt("tDiffuse", 10);
+    setGLuniformInt("tNormal", 11);
+    setGLuniformInt("tPos", 12);
 
 	setGLuniformInt("shadow0", 20);
 	setGLuniformInt("shadow1", 21);
@@ -204,4 +204,44 @@ void ZSPIRE::Shader::setHasNormalTextureProperty(bool hasNormalMap){
 void ZSPIRE::Shader::setTextureCountProperty(int tX, int tY) {
 	this->setGLuniformInt("textures_x", tX);
 	this->setGLuniformInt("textures_y", tY);
+}
+
+void ZSPIRE::Shader::sendLight(unsigned int index, void* _light){
+    LightsourceProperty* light = static_cast<LightsourceProperty*>(_light);
+    if (light->light_type > 0) {
+        std::string id_s = std::to_string(index);
+
+        std::string type;
+        type = "lights[" + id_s + "].type";
+
+        std::string pos;
+        pos = "lights[" + id_s + "].pos";
+
+        std::string color;
+        color = "lights[" + id_s + "].color";
+
+        std::string dir;
+        dir = "lights[" + id_s + "].dir";
+
+        std::string range;
+        range = "lights[" + id_s + "].range";
+
+        std::string intensity;
+        intensity = "lights[" + id_s + "].intensity";
+
+        //std::string spot_angle;
+        //spot_angle = "lights[" + std::to_string(index) + "].spot_angle";
+
+        //std::string spot_oangle;
+        //spot_oangle = "lights[" + std::to_string(index) + "].spot_out_angle";
+
+        setGLuniformInt(type.c_str(), (int)light->light_type);
+        setGLuniformVec3(pos.c_str(), light->transform->translation);
+        //setGLuniformVec3(dir.c_str(), light->direction);
+        setGLuniformFloat(range.c_str(), light->range);
+        setGLuniformFloat(intensity.c_str(), light->intensity);
+        //setGLuniformFloat(spot_angle.c_str(), light->spot_angle_rad);
+        //setGLuniformFloat(spot_oangle.c_str(), light->outrad);
+        setGLuniformColor(color.c_str(), light->color);
+    }
 }

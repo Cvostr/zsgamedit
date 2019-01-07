@@ -10,7 +10,10 @@ void RenderPipeline::setup(){
     this->tile_shader.compileFromFile("Shaders/2d_tile/tile2d.vs", "Shaders/2d_tile/tile2d.fs");
     this->pick_shader.compileFromFile("Shaders/pick/pick.vs", "Shaders/pick/pick.fs");
     this->obj_mark_shader.compileFromFile("Shaders/mark/mark.vs", "Shaders/mark/mark.fs");
+    this->deffered_light.compileFromFile("Shaders/postprocess/deffered_light/deffered.vs", "Shaders/postprocess/deffered_light/deffered.fs");
     ZSPIRE::createPlane2D();
+
+    this->gbuffer.create(640, 480);
 }
 
 bool RenderPipeline::InitGLEW(){
@@ -61,7 +64,8 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr)
     ZSPIRE::Camera* cam_ptr = &editwin_ptr->edit_camera;
     this->cam = cam_ptr;
     this->win_ptr = editwin_ptr;
-    glClearColor(1,0,1,1);
+    gbuffer.bindFramebuffer();
+    glClearColor(0,0,0,1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     this->updateShadersCameraInfo(cam_ptr); //Send camera properties to all drawing shaders
@@ -72,12 +76,28 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr)
             obj_ptr->Draw(this);
     }
 
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glClear(GL_COLOR_BUFFER_BIT);
+    gbuffer.bindTextures();
+    deffered_light.Use();
+    ZSPIRE::getPlaneMesh2D()->Draw();
 
     SDL_GL_SwapWindow(w);
 }
 
 void GameObject::Draw(RenderPipeline* pipeline){
+    if(active == false) return; //if object is inactive, not to render it
     TransformProperty* transform_prop = static_cast<TransformProperty*>(this->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
+
+    LightsourceProperty* light = static_cast<LightsourceProperty*>(this->getPropertyPtrByType(GO_PROPERTY_TYPE_LIGHTSOURCE));
+
+    if(light != nullptr && !light->isSent){ //if object has lightsource
+        pipeline->addLight(static_cast<void*>(light)); //put light pointer to vector
+    }
+    if(light != nullptr && light->last_pos != transform_prop->translation){
+        light->onValueChanged();
+        light->last_pos = transform_prop->translation;
+    }
 
     ZSPIRE::Shader* shader = pipeline->processShaderOnObject(static_cast<void*>(this)); //Will be used next time
     if(shader != nullptr && transform_prop != nullptr){
@@ -97,9 +117,7 @@ void GameObject::Draw(RenderPipeline* pipeline){
                 EditWindow* w = static_cast<EditWindow*>(pipeline->win_ptr);
                 if(w->obj_trstate.isTransforming == true)
                      mark_s->setGLuniformInt("isTransformMark", 1);
-                glDisable(GL_DEPTH_TEST);
                 mesh_prop->mesh_ptr->DrawLines();
-                glEnable(GL_DEPTH_TEST);
                 pipeline->current_state = cur_state;
                 mark_s->setGLuniformInt("isTransformMark", 0);
             }
@@ -136,7 +154,7 @@ ZSPIRE::Shader* RenderPipeline::processShaderOnObject(void* _obj){
     }
 
     switch(obj->render_type){
-        case GO_RENDER_TYPE_TILE:{
+        case GO_RENDER_TYPE_TILE:{ //if object is 2D tile
             tile_shader.Use();
             result = &tile_shader;
             //Receive pointer to tile information
@@ -151,6 +169,10 @@ ZSPIRE::Shader* RenderPipeline::processShaderOnObject(void* _obj){
             break;
         }
         case GO_RENDER_TYPE_NONE:{
+            result = nullptr;
+            break;
+        }
+        case GO_RENDER_TYPE_3D:{
             result = nullptr;
             break;
         }
@@ -172,4 +194,70 @@ void RenderPipeline::updateShadersCameraInfo(ZSPIRE::Camera* cam_ptr){
         obj_mark_shader.Use();
         obj_mark_shader.setCamera(cam_ptr);
     }
+}
+
+void RenderPipeline::addLight(void* light_ptr){
+    LightsourceProperty* _light_ptr = static_cast<LightsourceProperty*>(light_ptr);
+    _light_ptr->isSent = true;
+    _light_ptr->updTransformPtr();
+    _light_ptr->id = lights_ptr.size(); //setting id of uniform
+    _light_ptr->deffered_shader_ptr = &this->deffered_light; //putting ptr to deffered shader
+    this->lights_ptr.push_back(light_ptr); //pushing pointer
+    this->deffered_light.Use(); //correctly put uniforms
+    this->deffered_light.sendLight(_light_ptr->id, light_ptr);
+    this->deffered_light.setGLuniformInt("lights_amount", lights_ptr.size());
+}
+
+G_BUFFER_GL::G_BUFFER_GL(){
+
+}
+
+void G_BUFFER_GL::create(int width, int height){
+    glCreateFramebuffers(1, &gBuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
+
+    glGenTextures(1, &tDiffuse);
+    glBindTexture(GL_TEXTURE_2D, tDiffuse);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tDiffuse, 0);
+
+    glGenTextures(1, &tNormal);
+    glBindTexture(GL_TEXTURE_2D, tNormal);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width, height, 0, GL_RGB, GL_FLOAT, 0);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, tNormal, 0);
+
+    glGenTextures(1, &tPos);
+    glBindTexture(GL_TEXTURE_2D, tPos);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width, height, 0, GL_RGB, GL_FLOAT, 0);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, tPos, 0);
+
+    unsigned int attachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
+    glDrawBuffers(3, attachments);
+
+    glGenRenderbuffers(1, &depthBuffer);
+    glBindRenderbuffer(GL_RENDERBUFFER, depthBuffer);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuffer);
+
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0); //return back to default
+}
+void G_BUFFER_GL::bindFramebuffer(){
+    glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
+}
+void G_BUFFER_GL::bindTextures(){
+    glActiveTexture(GL_TEXTURE10);
+    glBindTexture(GL_TEXTURE_2D, tDiffuse);
+
+    glActiveTexture(GL_TEXTURE11);
+    glBindTexture(GL_TEXTURE_2D, tNormal);
+
+    glActiveTexture(GL_TEXTURE12);
+    glBindTexture(GL_TEXTURE_2D, tPos);
 }

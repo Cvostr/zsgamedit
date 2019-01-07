@@ -5,8 +5,6 @@
 GameObjectProperty::GameObjectProperty(){
     type = GO_PROPERTY_TYPE_NONE;
     active = false; //Inactive by default
-    size = sizeof(GameObjectProperty);
-    data_start = 0x0;
 }
 
 GameObjectProperty::~GameObjectProperty(){
@@ -31,6 +29,11 @@ GameObjectProperty* allocProperty(int type){
         }
         case GO_PROPERTY_TYPE_MESH:{
             MeshProperty* ptr = new MeshProperty;
+            _ptr = static_cast<GameObjectProperty*>(ptr);
+            break;
+        }
+        case GO_PROPERTY_TYPE_LIGHTSOURCE:{
+            LightsourceProperty* ptr = new LightsourceProperty;
             _ptr = static_cast<GameObjectProperty*>(ptr);
             break;
         }
@@ -82,8 +85,8 @@ void GameObjectProperty::onValueChanged(){
 TransformProperty::TransformProperty(){
     type = GO_PROPERTY_TYPE_TRANSFORM; //Type of property is transform
     active = true; //property is active
-    size = sizeof(TransformProperty);
-    data_start = &_last_translation;
+    //size = sizeof(TransformProperty);
+    //data_start = &_last_translation;
 
     this->transform_mat = getIdentity(); //Result matrix is identity by default
     this->translation = ZSVECTOR3(0.0f, 0.0f, 0.0f); //Position is zero by default
@@ -94,15 +97,15 @@ TransformProperty::TransformProperty(){
 LabelProperty::LabelProperty(){
     type = GO_PROPERTY_TYPE_LABEL; //its an label
     active = true;
-    size = sizeof(LabelProperty);
-    data_start = &label;
+    //size = sizeof(LabelProperty);
+    //data_start = &label;
 }
 
 MeshProperty::MeshProperty(){
     type = GO_PROPERTY_TYPE_MESH;
     active = true;
-    size = sizeof(MeshProperty);
-    data_start = &resource_relpath;
+    //size = sizeof(MeshProperty);
+    //data_start = &resource_relpath;
 }
 //Transform property functions
 void TransformProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
@@ -223,7 +226,12 @@ void MeshProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
 void MeshProperty::updateMeshPtr(){
     if(resource_relpath.compare("@plane") == false){
         this->mesh_ptr = ZSPIRE::getPlaneMesh2D();
-    }else //If it isn't built in mesh
+    }else if(resource_relpath.compare("@isotile") == false){
+        this->mesh_ptr = ZSPIRE::getIsoTileMesh2D();
+    }else if(resource_relpath.compare("@cube") == false){
+        this->mesh_ptr = ZSPIRE::getCubeMesh3D();
+    }
+    else //If it isn't built in mesh
     {
        this->mesh_ptr = world_ptr->getMeshPtrByRelPath(resource_relpath);
     }
@@ -239,6 +247,67 @@ void MeshProperty::copyTo(GameObjectProperty* dest){
     MeshProperty* _dest = static_cast<MeshProperty*>(dest);
     _dest->resource_relpath = resource_relpath;
     _dest->mesh_ptr = mesh_ptr;
+}
+
+void LightsourceProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
+    AreaRadioGroup* group = new AreaRadioGroup; //allocate button layout
+    group->value_ptr = &this->light_type;
+
+    QRadioButton* directional_radio = new QRadioButton; //allocate first radio
+    directional_radio->setText("Directional");
+    QRadioButton* point_radio = new QRadioButton;
+    point_radio->setText("Point");
+
+    //add created radio buttons
+    group->addRadioButton(directional_radio);
+    group->addRadioButton(point_radio);
+    inspector->registerUiObject(group);
+    inspector->getContentLayout()->addLayout(group->btn_layout);
+
+    FloatPropertyArea* intensity_area = new FloatPropertyArea;
+    intensity_area->setLabel("Intensity"); //Its label
+    intensity_area->value = &this->intensity;
+    intensity_area->go_property = static_cast<void*>(this);
+    inspector->addPropertyArea(intensity_area);
+
+    FloatPropertyArea* range_area = new FloatPropertyArea;
+    range_area->setLabel("Range"); //Its label
+    range_area->value = &this->range;
+    range_area->go_property = static_cast<void*>(this);
+    inspector->addPropertyArea(range_area);
+}
+void LightsourceProperty::onValueChanged(){
+    if(deffered_shader_ptr != nullptr && isSent){
+        deffered_shader_ptr->Use(); //use shader to make uniforms work
+        //Send light uniforms
+        deffered_shader_ptr->sendLight(this->id, static_cast<void*>(this));
+    }
+}
+void LightsourceProperty::copyTo(GameObjectProperty* dest){
+    if(dest->type != this->type) return; //if it isn't transform
+
+    LightsourceProperty* _dest = static_cast<LightsourceProperty*>(dest);
+    _dest->color = color;
+    _dest->intensity = intensity;
+    _dest->range = range;
+    _dest->light_type = light_type;
+}
+
+void LightsourceProperty::updTransformPtr(){
+    if(transform == nullptr){
+        transform = this->go_link.updLinkPtr()->getTransformProperty();
+        this->last_pos = transform->translation; //Store old value
+    }
+}
+
+LightsourceProperty::LightsourceProperty(){
+    type = GO_PROPERTY_TYPE_LIGHTSOURCE;
+    active = true;
+    light_type = LIGHTSOURCE_TYPE_DIRECTIONAL; //base type is directional
+
+    intensity = 1.0f; //base light instensity is 1
+    transform = nullptr;
+    isSent = false; //isn't sent by default
 }
 
 void GameObject::saveProperties(std::ofstream* stream){
@@ -284,6 +353,17 @@ void GameObject::saveProperties(std::ofstream* stream){
         case GO_PROPERTY_TYPE_MESH:{
             MeshProperty* ptr = static_cast<MeshProperty*>(property_ptr);
             *stream << ptr->resource_relpath.toStdString();
+            break;
+        }
+        case GO_PROPERTY_TYPE_LIGHTSOURCE:{
+            LightsourceProperty* ptr = static_cast<LightsourceProperty*>(property_ptr);
+            ZSLIGHTSOURCE_TYPE type = ptr->light_type;
+            float intensity = ptr->intensity;
+            float range = ptr->range;
+
+            stream->write(reinterpret_cast<char*>(&type), sizeof(ZSLIGHTSOURCE_TYPE));
+            stream->write(reinterpret_cast<char*>(&intensity), sizeof(float));
+            stream->write(reinterpret_cast<char*>(&range), sizeof(float));
             break;
         }
         case GO_PROPERTY_TYPE_TILE_GROUP:{
@@ -355,6 +435,15 @@ void GameObject::loadProperty(std::ifstream* world_stream){
         lptr->resource_relpath = QString::fromStdString(rel_path); //Write loaded mesh relative path
         lptr->updateMeshPtr(); //Pointer will now point to mesh resource
 
+        break;
+    }
+    case GO_PROPERTY_TYPE_LIGHTSOURCE:{
+        LightsourceProperty* ptr = static_cast<LightsourceProperty*>(prop_ptr);
+        world_stream->seekg(1, std::ofstream::cur);
+
+        world_stream->read(reinterpret_cast<char*>(&ptr->light_type), sizeof(ZSLIGHTSOURCE_TYPE));
+        world_stream->read(reinterpret_cast<char*>(&ptr->intensity), sizeof(float));
+        world_stream->read(reinterpret_cast<char*>(&ptr->range), sizeof(float));
         break;
     }
     case GO_PROPERTY_TYPE_TILE_GROUP :{

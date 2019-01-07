@@ -240,5 +240,12 @@
 
         return result;
     }
+    inline bool operator!=(const ZSVECTOR3& l, const ZSVECTOR3& r)
+    {
+        bool result = false;
+        if(l.X != r.X || l.Y != r.Y|| l.Z != r.Z) result = true;
+
+        return result;
+    }
 
 #endif

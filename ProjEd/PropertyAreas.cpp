@@ -9,6 +9,39 @@ AreaButton::AreaButton(){
     connect(this->button, SIGNAL(clicked()), this, SLOT(onButtonPressed()));
 }
 
+void AreaRadioGroup::onRadioClicked(){
+    for(unsigned int rbutton_it = 0; rbutton_it < this->rad_buttons.size(); rbutton_it ++){
+        if(this->rad_buttons[rbutton_it]->isChecked()){
+            *this->value_ptr = rbutton_it + 1;
+        }
+    }
+}
+
+void AreaRadioGroup::addRadioButton(QRadioButton* btn){
+    this->rad_buttons.push_back(btn); //add pointer to vector
+    this->btn_layout->addWidget(btn); //add pointer to layout
+    connect(btn, SIGNAL(clicked()), this, SLOT(onRadioClicked()));
+
+    if(rad_buttons.size() == *value_ptr){
+        btn->setChecked(true);
+    }
+}
+
+AreaRadioGroup::AreaRadioGroup(){
+    btn_layout = new QVBoxLayout; //allocate layout object
+    this->value_ptr = nullptr;
+}
+
+AreaRadioGroup::~AreaRadioGroup(){
+    delete this->btn_layout; //release layout object
+
+    for(unsigned int rbutton_it = 0; rbutton_it < this->rad_buttons.size(); rbutton_it ++){
+        delete this->rad_buttons[rbutton_it];
+    }
+
+    this->rad_buttons.clear();
+}
+
 AreaButton::~AreaButton(){
     delete this->button;
 }
@@ -16,6 +49,84 @@ AreaButton::~AreaButton(){
 void AreaButton::onButtonPressed(){
     this->onPressFuncPtr();
     insp_ptr->updateObjectProperties();
+}
+
+
+PropertyEditArea::PropertyEditArea(){
+    type = PEA_TYPE_NONE;
+    elem_layout = new QHBoxLayout;
+    label_widget = new QLabel; //Allocating label
+    go_property = nullptr; //Nullptr by default
+
+    elem_layout->addWidget(label_widget); //Adding label to result layout
+}
+
+void PropertyEditArea::destroyLayout(){
+    delete this->label_widget;
+    delete this->elem_layout;
+}
+
+void PropertyEditArea::destroyContent(){
+
+}
+
+PropertyEditArea::~PropertyEditArea(){
+   //destroyLayout();
+}
+//Defaults
+void PropertyEditArea::setup(){
+    switch(this->type){
+        case PEA_TYPE_FLOAT3:{
+            Float3PropertyArea* ptr = static_cast<Float3PropertyArea*>(this);
+            ptr->setup();
+            break;
+        }
+        case PEA_TYPE_STRING:{
+            StringPropertyArea* ptr = static_cast<StringPropertyArea*>(this);
+            ptr->setup();
+            break;
+        }
+    }
+}
+
+void PropertyEditArea::addToInspector(InspectorWin* win){
+
+}
+void PropertyEditArea::updateState(){
+
+    switch(this->type){
+        case PEA_TYPE_FLOAT3:{
+            Float3PropertyArea* ptr = static_cast<Float3PropertyArea*>(this);
+            ptr->updateState();
+            break;
+        }
+        case PEA_TYPE_STRING:{
+            StringPropertyArea* ptr = static_cast<StringPropertyArea*>(this);
+            ptr->updateState();
+            break;
+        }
+    }
+}
+
+void PropertyEditArea::callPropertyUpdate(){
+    if(go_property != nullptr){ //If parent property has defined
+        GameObjectProperty* property_ptr = static_cast<GameObjectProperty*>(this->go_property);
+        property_ptr->onValueChanged(); //Then call changed
+    }
+}
+
+void PropertyEditArea::setLabel(QString label){
+    this->label_widget->setText(label);
+}
+
+void Float3PropertyArea::destroyContent(){
+    delete this->x_field;
+    delete this->y_field;
+    delete this->z_field;
+
+    delete this->x_label;
+    delete this->y_label;
+    delete this->z_label;
 }
 
 //Float3 definations
@@ -95,14 +206,7 @@ void Float3PropertyArea::setup(){
 }
 
 Float3PropertyArea::~Float3PropertyArea(){
-    delete this->x_field;
-    delete this->y_field;
-    delete this->z_field;
-
-    delete this->x_label;
-    delete this->y_label;
-    delete this->z_label;
-
+    //destroyContent();
 }
 //String property area stuff
 StringPropertyArea::StringPropertyArea(){
@@ -117,8 +221,12 @@ void StringPropertyArea::setup(){
     this->edit_field->setText(*this->value_ptr);
 }
 
-StringPropertyArea::~StringPropertyArea(){
+void StringPropertyArea::destroyContent(){
     delete edit_field; //Remove text field
+}
+
+StringPropertyArea::~StringPropertyArea(){
+   //destroyContent();
 }
 
 void StringPropertyArea::addToInspector(InspectorWin* win){
@@ -132,6 +240,9 @@ void StringPropertyArea::updateState(){
     QString current = this->edit_field->text();
     //Compare them
     if(current.compare(value_ptr) != 0){ //If it updated
+        GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(this->go_property);
+        getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
+
         *value_ptr = current;
 
         PropertyEditArea::callPropertyUpdate();
@@ -193,6 +304,10 @@ PickResourceArea::PickResourceArea(){
 
 }
 PickResourceArea::~PickResourceArea(){
+
+}
+
+void PickResourceArea::destroyContent(){
     delete respick_btn;
     delete dialog;
     delete relpath_label;
@@ -246,10 +361,13 @@ void IntPropertyArea::updateState(){
     }
 }
 
-
 void ResourcePickDialog::onResourceSelected(){
     QListWidgetItem* selected = this->list->currentItem();
     QString mesh_path = selected->text();
+
+    GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(area->go_property);
+    getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
+
     *area->rel_path = mesh_path;
     area->PropertyEditArea::callPropertyUpdate();
     this->resource_text->setText(mesh_path);
@@ -261,14 +379,17 @@ void ResourcePickDialog::onNeedToShow(){
     //Receiving pointer to project
     Project* project_ptr = static_cast<Project*>(static_cast<GameObjectProperty*>(this->area->go_property)->world_ptr->proj_ptr);
     unsigned int resources_num = static_cast<unsigned int>(project_ptr->resources.size());
-    if(area->resource_type == RESOURCE_TYPE_MESH)
-        QListWidgetItem* item = new QListWidgetItem("@plane", this->list);
+    if(area->resource_type == RESOURCE_TYPE_MESH){
+        new QListWidgetItem("@plane", this->list);
+        new QListWidgetItem("@isotile", this->list);
+        new QListWidgetItem("@cube", this->list);
+    }
 
     //Iterate over all resources
     for(unsigned int res_i = 0; res_i < resources_num; res_i ++){
         Resource* resource_ptr = &project_ptr->resources[res_i];
-        if(resource_ptr->type == area->resource_type){
-            QListWidgetItem* item = new QListWidgetItem(resource_ptr->rel_path, this->list);
+        if(resource_ptr->type == area->resource_type){ //if type is the same
+            new QListWidgetItem(resource_ptr->rel_path, this->list); //add resource to list
         }
     }
     this->exec();
