@@ -275,6 +275,11 @@ void LightsourceProperty::addPropertyInterfaceToInspector(InspectorWin* inspecto
     range_area->value = &this->range;
     range_area->go_property = static_cast<void*>(this);
     inspector->addPropertyArea(range_area);
+
+    ColorDialogArea* lcolor = new ColorDialogArea;
+    lcolor->color = &this->color;
+    lcolor->go_property = static_cast<void*>(this);
+    inspector->addPropertyArea(lcolor);
 }
 void LightsourceProperty::onValueChanged(){
     if(deffered_shader_ptr != nullptr && isSent){
