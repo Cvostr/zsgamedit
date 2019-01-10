@@ -85,8 +85,6 @@ void GameObjectProperty::onValueChanged(){
 TransformProperty::TransformProperty(){
     type = GO_PROPERTY_TYPE_TRANSFORM; //Type of property is transform
     active = true; //property is active
-    //size = sizeof(TransformProperty);
-    //data_start = &_last_translation;
 
     this->transform_mat = getIdentity(); //Result matrix is identity by default
     this->translation = ZSVECTOR3(0.0f, 0.0f, 0.0f); //Position is zero by default
@@ -97,15 +95,11 @@ TransformProperty::TransformProperty(){
 LabelProperty::LabelProperty(){
     type = GO_PROPERTY_TYPE_LABEL; //its an label
     active = true;
-    //size = sizeof(LabelProperty);
-    //data_start = &label;
 }
 
 MeshProperty::MeshProperty(){
     type = GO_PROPERTY_TYPE_MESH;
     active = true;
-    //size = sizeof(MeshProperty);
-    //data_start = &resource_relpath;
 }
 //Transform property functions
 void TransformProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
@@ -277,6 +271,7 @@ void LightsourceProperty::addPropertyInterfaceToInspector(InspectorWin* inspecto
     inspector->addPropertyArea(range_area);
 
     ColorDialogArea* lcolor = new ColorDialogArea;
+    lcolor->setLabel("Light color");
     lcolor->color = &this->color;
     lcolor->go_property = static_cast<void*>(this);
     inspector->addPropertyArea(lcolor);

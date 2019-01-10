@@ -3,6 +3,7 @@
 #extension GL_ARB_explicit_uniform_location : require
 
 layout (location = 0) out vec3 tDiffuse;
+layout (location = 1) out vec3 tNormal;
 layout (location = 2) out vec3 tPos;
 
 out vec4 FragColor;
@@ -29,4 +30,5 @@ void main(){
 	FragColor = vec4(result, 1);
 	tDiffuse = result;
 	tPos = FragPos;
+	tNormal = InNormal;
 }

@@ -369,7 +369,6 @@ void EditWindow::loadResource(Resource* resource){
             mesh_ptr->LoadMeshesFromFileASSIMP(str.c_str());
             break;
         }
-
     }
 }
 
@@ -584,6 +583,14 @@ void EditWindow::onRightBtnClicked(int X, int Y){
     this->obj_ctx_menu->show(QPoint(this->width() + X, Y));
     this->obj_ctx_menu->displayTransforms = false;
 }
+void EditWindow::onMouseWheel(int x, int y){
+    if(project.perspective == 3){
+        ZSVECTOR3 front = edit_camera.getCameraFrontVec(); //obtain front vector
+        ZSVECTOR3 pos = edit_camera.getCameraPosition(); //obtain position
+
+        edit_camera.setPosition(pos + front * y);
+    }
+}
 void EditWindow::onMouseMotion(int relX, int relY){
     if(project.perspective == 2){ //Only affective in 2D
 
@@ -623,10 +630,22 @@ void EditWindow::onMouseMotion(int relX, int relY){
     if(project.perspective == 3){//Only affective in 3D
 
         if(input_state.isRightBtnHold == true){
+            this->cam_yaw += relX * 0.16f;
+            cam_pitch += relY * 0.16f;
 
+                if (cam_pitch > 89.0f)
+                    cam_pitch = 89.0f;
+                if (cam_pitch < -89.0f)
+                    cam_pitch = -89.0f;
+
+            ZSVECTOR3 front;
+            front.X = (float)(cos(DegToRad(cam_yaw)) * cos(DegToRad(cam_pitch)));
+            front.Y = -sin(DegToRad(cam_pitch));
+            front.Z = sin(DegToRad(cam_yaw)) * cos(DegToRad(cam_pitch));
+            vNormalize(&front);
+            edit_camera.setFront(front);
         }
     }
-
 }
 
 void EditWindow::onKeyDown(SDL_Keysym sym){

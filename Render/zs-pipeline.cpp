@@ -174,7 +174,9 @@ ZSPIRE::Shader* RenderPipeline::processShaderOnObject(void* _obj){
             break;
         }
         case GO_RENDER_TYPE_3D:{
-            result = nullptr;
+            diffuse3d_shader.Use();
+            diffuse3d_shader.setGLuniformInt("hasDiffuseMap", 0);
+            result = &diffuse3d_shader;
             break;
         }
     }

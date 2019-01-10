@@ -71,7 +71,7 @@ void PropertyEditArea::destroyContent(){
 }
 
 PropertyEditArea::~PropertyEditArea(){
-   //destroyLayout();
+
 }
 //Defaults
 void PropertyEditArea::setup(){
@@ -120,14 +120,7 @@ void PropertyEditArea::setLabel(QString label){
 }
 
 void Float3PropertyArea::destroyContent(){
-    //TO DELETE
-    //delete this->x_field;
-   //delete this->y_field;
-    //delete this->z_field;
 
-    //delete this->x_label;
-    //delete this->y_label;
-    //delete this->z_label;
 }
 
 //Float3 definations
@@ -135,16 +128,9 @@ Float3PropertyArea::Float3PropertyArea(){
     vector = nullptr; //set it to null to avoid crash;
     type = PEA_TYPE_FLOAT3;
 
-    //x_field = new QLineEdit; //Allocation of text fields
-    //y_field = new QLineEdit;
-    //z_field = new QLineEdit;
-
     //Allocating separator labels
-    //x_label = new QLabel;
     x_label.setText(QString("X"));
-    //y_label = new QLabel;
     y_label.setText(QString("Y"));
-   //z_label = new QLabel;
     z_label.setText(QString("Z"));
 
     label_widget->setFixedWidth(100);
@@ -207,13 +193,12 @@ void Float3PropertyArea::setup(){
 }
 
 Float3PropertyArea::~Float3PropertyArea(){
-    //destroyContent();
+
 }
 //String property area stuff
 StringPropertyArea::StringPropertyArea(){
     type = PEA_TYPE_STRING;
     this->value_ptr = nullptr;
-    //this->edit_field = new QLineEdit; //Allocation of QLineEdit
 
     elem_layout->addWidget(&edit_field);
 }
@@ -223,11 +208,11 @@ void StringPropertyArea::setup(){
 }
 
 void StringPropertyArea::destroyContent(){
-    //delete edit_field; //Remove text field
+
 }
 
 StringPropertyArea::~StringPropertyArea(){
-   //destroyContent();
+
 }
 
 void StringPropertyArea::addToInspector(InspectorWin* win){
@@ -253,13 +238,12 @@ void StringPropertyArea::updateState(){
 //Float property area stuff
 FloatPropertyArea::FloatPropertyArea(){
     type = PEA_TYPE_FLOAT;
-    //this->float_field = new QLineEdit; //Allocation of text field
     value = 0; //Set default value
 
     elem_layout->addWidget(&float_field); //Add text filed to layout
 }
 FloatPropertyArea::~FloatPropertyArea(){
-    //delete float_field;
+
 }
 
 void FloatPropertyArea::setup(){
