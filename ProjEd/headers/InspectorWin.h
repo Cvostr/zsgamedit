@@ -172,7 +172,8 @@ public slots:
     void onNeedToShow();
 
 public:
-    ZSRGBCOLOR* color_ptr;
+    ZSRGBCOLOR* color_ptr; //Pointer to write color
+    ColorDialogArea* area_ptr;
     ZSColorPickDialog(QWidget* parent = nullptr);
 };
 

@@ -411,6 +411,7 @@ ColorDialogArea::ColorDialogArea(){
     dialog = new ZSColorPickDialog;
     pick_button.setText("Pick color");
     elem_layout->addWidget(&pick_button);
+    dialog->area_ptr = this; //setting area pointer
     this->color = nullptr;
 }
 void ColorDialogArea::addToInspector(InspectorWin* win){
@@ -424,8 +425,9 @@ ZSColorPickDialog::ZSColorPickDialog(QWidget* parent) : QColorDialog(parent){
 }
 
 void ZSColorPickDialog::onNeedToShow(){
-    QColor color = this->getColor();
+    QColor color = this->getColor(QColor(color_ptr->r, color_ptr->g, color_ptr->b)); //invoke dialog
     ZSRGBCOLOR _color = ZSRGBCOLOR(color.red(), color.green(), color.blue());
     _color.updateGL();
     *color_ptr = _color;
+    area_ptr->PropertyEditArea::callPropertyUpdate();
 }

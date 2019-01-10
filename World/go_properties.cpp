@@ -366,9 +366,18 @@ void GameObject::saveProperties(std::ofstream* stream){
             float intensity = ptr->intensity;
             float range = ptr->range;
 
+            float color_r = ptr->color.r;
+            float color_g = ptr->color.g;
+            float color_b = ptr->color.b;
+
             stream->write(reinterpret_cast<char*>(&type), sizeof(ZSLIGHTSOURCE_TYPE));
             stream->write(reinterpret_cast<char*>(&intensity), sizeof(float));
             stream->write(reinterpret_cast<char*>(&range), sizeof(float));
+
+            stream->write(reinterpret_cast<char*>(&color_r), sizeof(float));
+            stream->write(reinterpret_cast<char*>(&color_g), sizeof(float));
+            stream->write(reinterpret_cast<char*>(&color_b), sizeof(float));
+
             break;
         }
         case GO_PROPERTY_TYPE_TILE_GROUP:{
@@ -449,6 +458,16 @@ void GameObject::loadProperty(std::ifstream* world_stream){
         world_stream->read(reinterpret_cast<char*>(&ptr->light_type), sizeof(ZSLIGHTSOURCE_TYPE));
         world_stream->read(reinterpret_cast<char*>(&ptr->intensity), sizeof(float));
         world_stream->read(reinterpret_cast<char*>(&ptr->range), sizeof(float));
+
+        float cl_r;
+        float cl_g;
+        float cl_b;
+
+        world_stream->read(reinterpret_cast<char*>(&cl_r), sizeof(float));
+        world_stream->read(reinterpret_cast<char*>(&cl_g), sizeof(float));
+        world_stream->read(reinterpret_cast<char*>(&cl_b), sizeof(float));
+        ptr->color = ZSRGBCOLOR(cl_r, cl_g, cl_b);
+
         break;
     }
     case GO_PROPERTY_TYPE_TILE_GROUP :{
