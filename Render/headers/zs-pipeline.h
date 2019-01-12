@@ -44,6 +44,7 @@ private:
     ZSPIRE::Shader deffered_light;
     std::vector<void*> lights_ptr;
 public:
+    bool depthTest;
     int current_state;
     void setup();
     bool InitGLEW();

@@ -110,6 +110,11 @@ void EditWindow::init(){
 
     glEnable(GL_LINE_SMOOTH);
     glLineWidth(16.0f);
+    //If our proj is 3D, then enable depth test by default
+    if(project.perspective == 3){
+        glEnable(GL_DEPTH_TEST);
+        render->depthTest = true;
+    }
 
     render->setup();
     ready = true;//Everything is ready
@@ -589,6 +594,12 @@ void EditWindow::onMouseWheel(int x, int y){
         ZSVECTOR3 pos = edit_camera.getCameraPosition(); //obtain position
 
         edit_camera.setPosition(pos + front * y);
+    }
+    if(project.perspective == 2){
+        ZSVECTOR3 pos = edit_camera.getCameraPosition(); //obtain position
+        pos.Y += y * 4;
+
+        edit_camera.setPosition(pos);
     }
 }
 void EditWindow::onMouseMotion(int relX, int relY){

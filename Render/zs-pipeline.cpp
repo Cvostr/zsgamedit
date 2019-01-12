@@ -71,11 +71,17 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr)
 
     this->updateShadersCameraInfo(cam_ptr); //Send camera properties to all drawing shaders
 
+    if(depthTest == true) //if depth is enabled
+        glEnable(GL_DEPTH_TEST);
+
     for(unsigned int obj_i = 0; obj_i < world_ptr->objects.size(); obj_i ++){
         GameObject* obj_ptr = &world_ptr->objects[obj_i];
         if(!obj_ptr->hasParent)
             obj_ptr->Draw(this);
     }
+
+    if(depthTest == true) //if depth is enabled
+        glDisable(GL_DEPTH_TEST);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glClear(GL_COLOR_BUFFER_BIT);
@@ -87,23 +93,25 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr)
 }
 
 void GameObject::Draw(RenderPipeline* pipeline){
-    if(active == false) return; //if object is inactive, not to render it
+    if(active == false || alive == false) return; //if object is inactive, not to render it
     TransformProperty* transform_prop = static_cast<TransformProperty*>(this->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
+    transform_prop->updateMat(); //update transform matrix
 
     LightsourceProperty* light = static_cast<LightsourceProperty*>(this->getPropertyPtrByType(GO_PROPERTY_TYPE_LIGHTSOURCE));
 
     if(light != nullptr && !light->isSent){ //if object has lightsource
         pipeline->addLight(static_cast<void*>(light)); //put light pointer to vector
     }
-    if(light != nullptr && light->last_pos != transform_prop->translation){
+    if(light != nullptr && (light->last_pos != transform_prop->_last_translation || light->last_rot != transform_prop->rotation)){
         light->onValueChanged();
-        light->last_pos = transform_prop->translation;
+        //store new transform values
+        light->last_pos = transform_prop->_last_translation;
+        light->last_rot = transform_prop->rotation;
     }
 
     ZSPIRE::Shader* shader = pipeline->processShaderOnObject(static_cast<void*>(this)); //Will be used next time
     if(shader != nullptr && transform_prop != nullptr){
 
-        transform_prop->updateMat();
         shader->setTransform(transform_prop->transform_mat);
 
         MeshProperty* mesh_prop = static_cast<MeshProperty*>(this->getPropertyPtrByType(GO_PROPERTY_TYPE_MESH));
@@ -125,7 +133,7 @@ void GameObject::Draw(RenderPipeline* pipeline){
         }
     }
     for(unsigned int obj_i = 0; obj_i < this->children.size(); obj_i ++){
-        if(!children[obj_i].isEmpty()){
+        if(!children[obj_i].isEmpty()){ //if link isn't broken
             children[obj_i].updLinkPtr();
             GameObject* child_ptr = this->children[obj_i].ptr;
             child_ptr->Draw(pipeline);
@@ -247,7 +255,6 @@ void G_BUFFER_GL::create(int width, int height){
     glBindRenderbuffer(GL_RENDERBUFFER, depthBuffer);
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuffer);
-
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0); //return back to default
 }

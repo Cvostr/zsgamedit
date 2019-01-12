@@ -277,6 +277,8 @@ void LightsourceProperty::addPropertyInterfaceToInspector(InspectorWin* inspecto
     inspector->addPropertyArea(lcolor);
 }
 void LightsourceProperty::onValueChanged(){
+    ZSVECTOR3* rot_vec_ptr = &transform->rotation;
+    this->direction = _getDirection(rot_vec_ptr->X, rot_vec_ptr->Y, rot_vec_ptr->Z);
     if(deffered_shader_ptr != nullptr && isSent){
         deffered_shader_ptr->Use(); //use shader to make uniforms work
         //Send light uniforms
@@ -296,7 +298,7 @@ void LightsourceProperty::copyTo(GameObjectProperty* dest){
 void LightsourceProperty::updTransformPtr(){
     if(transform == nullptr){
         transform = this->go_link.updLinkPtr()->getTransformProperty();
-        this->last_pos = transform->translation; //Store old value
+        this->last_pos = transform->_last_translation; //Store old value
     }
 }
 

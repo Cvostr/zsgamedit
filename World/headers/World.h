@@ -73,16 +73,16 @@ public:
 };
 
 class TransformProperty : public GameObjectProperty {
-private:
-    ZSVECTOR3 _last_translation;
-    ZSVECTOR3 _last_scale;
-    ZSVECTOR3 _last_rotation;
 public:
     ZSMATRIX4x4 transform_mat;
 
     ZSVECTOR3 translation;
     ZSVECTOR3 scale;
     ZSVECTOR3 rotation;
+    //Absolute values
+    ZSVECTOR3 _last_translation;
+    ZSVECTOR3 _last_scale;
+    ZSVECTOR3 _last_rotation;
 
     void updateMat();
     void addPropertyInterfaceToInspector(InspectorWin* inspector);
@@ -109,8 +109,12 @@ class LightsourceProperty : public GameObjectProperty{
 public:
     ZSLIGHTSOURCE_TYPE light_type; //type of lightsource
     TransformProperty* transform; //pointer to object's transform
-    ZSVECTOR3 last_pos;
-    ZSVECTOR3 direction; //direction for directional & spotlight
+
+    ZSVECTOR3 direction; //direction for directional & spotlight in quats
+    //To compare differences
+    ZSVECTOR3 last_pos; //transform* last position
+    ZSVECTOR3 last_rot; //transform* last rotation
+
     ZSRGBCOLOR color; //Color of light
     float intensity; //Light's intensity
     float range; //Light's range
