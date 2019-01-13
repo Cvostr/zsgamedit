@@ -44,6 +44,7 @@ private:
     ZSPIRE::Shader deffered_light;
     std::vector<void*> lights_ptr;
 public:
+    bool depthTest;
     int current_state;
     void setup();
     bool InitGLEW();
@@ -51,6 +52,7 @@ public:
     unsigned int render_getpickedObj(void* projectedit_ptr, int mouseX, int mouseY);
     void updateShadersCameraInfo(ZSPIRE::Camera* cam_ptr);
     void addLight(void* light_ptr);
+    void removeLights();
     ZSPIRE::Shader* processShaderOnObject(void* _obj);
     ZSPIRE::Camera* cam;
     void* win_ptr;

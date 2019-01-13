@@ -48,8 +48,8 @@ void InspectorWin::clearContentLayout(){
     for(unsigned int obj_i = 0; obj_i < objs_num; obj_i ++){ //Iterate over all added areas
        delete additional_objects[obj_i]; //remove all
     }
-    this->property_areas.resize(0); //No areas in list
-    this->additional_objects.resize(0); //No objects in list
+    this->property_areas.clear(); //No areas in list
+    this->additional_objects.clear(); //No objects in list
     if(addObjComponentBtn != nullptr){
         delete addObjComponentBtn; //Remove button
         addObjComponentBtn = 0x0; //Avoid crashes

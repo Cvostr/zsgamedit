@@ -15,6 +15,10 @@ void GameObjectProperty::copyTo(GameObjectProperty* dest){
 
 }
 
+void GameObjectProperty::onObjectDeleted(){
+
+}
+
 GameObjectProperty* allocProperty(int type){
     GameObjectProperty* _ptr = nullptr;
     switch (type) {
@@ -85,8 +89,6 @@ void GameObjectProperty::onValueChanged(){
 TransformProperty::TransformProperty(){
     type = GO_PROPERTY_TYPE_TRANSFORM; //Type of property is transform
     active = true; //property is active
-    //size = sizeof(TransformProperty);
-    //data_start = &_last_translation;
 
     this->transform_mat = getIdentity(); //Result matrix is identity by default
     this->translation = ZSVECTOR3(0.0f, 0.0f, 0.0f); //Position is zero by default
@@ -97,15 +99,11 @@ TransformProperty::TransformProperty(){
 LabelProperty::LabelProperty(){
     type = GO_PROPERTY_TYPE_LABEL; //its an label
     active = true;
-    //size = sizeof(LabelProperty);
-    //data_start = &label;
 }
 
 MeshProperty::MeshProperty(){
     type = GO_PROPERTY_TYPE_MESH;
     active = true;
-    //size = sizeof(MeshProperty);
-    //data_start = &resource_relpath;
 }
 //Transform property functions
 void TransformProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
@@ -163,6 +161,7 @@ void TransformProperty::updateMat(){
         //Calculate scale matrix
         ZSMATRIX4x4 scale_mat = getScaleMat(_last_scale);
         //Calculate rotation matrix
+        //ZSMATRIX4x4 rotation_mat = getRotationMat(_last_rotation, _last_translation);
         ZSMATRIX4x4 rotation_mat = getRotationMat(_last_rotation);
         //S * R * T
         this->transform_mat = scale_mat * rotation_mat * translation_mat;
@@ -275,8 +274,16 @@ void LightsourceProperty::addPropertyInterfaceToInspector(InspectorWin* inspecto
     range_area->value = &this->range;
     range_area->go_property = static_cast<void*>(this);
     inspector->addPropertyArea(range_area);
+
+    ColorDialogArea* lcolor = new ColorDialogArea;
+    lcolor->setLabel("Light color");
+    lcolor->color = &this->color;
+    lcolor->go_property = static_cast<void*>(this);
+    inspector->addPropertyArea(lcolor);
 }
 void LightsourceProperty::onValueChanged(){
+    ZSVECTOR3* rot_vec_ptr = &transform->rotation;
+    this->direction = _getDirection(rot_vec_ptr->X, rot_vec_ptr->Y, rot_vec_ptr->Z);
     if(deffered_shader_ptr != nullptr && isSent){
         deffered_shader_ptr->Use(); //use shader to make uniforms work
         //Send light uniforms
@@ -296,8 +303,12 @@ void LightsourceProperty::copyTo(GameObjectProperty* dest){
 void LightsourceProperty::updTransformPtr(){
     if(transform == nullptr){
         transform = this->go_link.updLinkPtr()->getTransformProperty();
-        this->last_pos = transform->translation; //Store old value
+        this->last_pos = transform->_last_translation; //Store old value
     }
+}
+
+void LightsourceProperty::onObjectDeleted(){
+    deffered_shader_ptr->unsetLight(this->id);
 }
 
 LightsourceProperty::LightsourceProperty(){
@@ -306,6 +317,7 @@ LightsourceProperty::LightsourceProperty(){
     light_type = LIGHTSOURCE_TYPE_DIRECTIONAL; //base type is directional
 
     intensity = 1.0f; //base light instensity is 1
+    range = 10.0f;
     transform = nullptr;
     isSent = false; //isn't sent by default
 }
@@ -361,9 +373,18 @@ void GameObject::saveProperties(std::ofstream* stream){
             float intensity = ptr->intensity;
             float range = ptr->range;
 
+            float color_r = ptr->color.r;
+            float color_g = ptr->color.g;
+            float color_b = ptr->color.b;
+
             stream->write(reinterpret_cast<char*>(&type), sizeof(ZSLIGHTSOURCE_TYPE));
             stream->write(reinterpret_cast<char*>(&intensity), sizeof(float));
             stream->write(reinterpret_cast<char*>(&range), sizeof(float));
+
+            stream->write(reinterpret_cast<char*>(&color_r), sizeof(float));
+            stream->write(reinterpret_cast<char*>(&color_g), sizeof(float));
+            stream->write(reinterpret_cast<char*>(&color_b), sizeof(float));
+
             break;
         }
         case GO_PROPERTY_TYPE_TILE_GROUP:{
@@ -444,6 +465,16 @@ void GameObject::loadProperty(std::ifstream* world_stream){
         world_stream->read(reinterpret_cast<char*>(&ptr->light_type), sizeof(ZSLIGHTSOURCE_TYPE));
         world_stream->read(reinterpret_cast<char*>(&ptr->intensity), sizeof(float));
         world_stream->read(reinterpret_cast<char*>(&ptr->range), sizeof(float));
+
+        float cl_r;
+        float cl_g;
+        float cl_b;
+
+        world_stream->read(reinterpret_cast<char*>(&cl_r), sizeof(float));
+        world_stream->read(reinterpret_cast<char*>(&cl_g), sizeof(float));
+        world_stream->read(reinterpret_cast<char*>(&cl_b), sizeof(float));
+        ptr->color = ZSRGBCOLOR(cl_r, cl_g, cl_b);
+
         break;
     }
     case GO_PROPERTY_TYPE_TILE_GROUP :{

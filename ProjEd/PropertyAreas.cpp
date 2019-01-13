@@ -71,7 +71,7 @@ void PropertyEditArea::destroyContent(){
 }
 
 PropertyEditArea::~PropertyEditArea(){
-   //destroyLayout();
+
 }
 //Defaults
 void PropertyEditArea::setup(){
@@ -120,13 +120,7 @@ void PropertyEditArea::setLabel(QString label){
 }
 
 void Float3PropertyArea::destroyContent(){
-    delete this->x_field;
-    delete this->y_field;
-    delete this->z_field;
 
-    delete this->x_label;
-    delete this->y_label;
-    delete this->z_label;
 }
 
 //Float3 definations
@@ -134,17 +128,10 @@ Float3PropertyArea::Float3PropertyArea(){
     vector = nullptr; //set it to null to avoid crash;
     type = PEA_TYPE_FLOAT3;
 
-    x_field = new QLineEdit; //Allocation of text fields
-    y_field = new QLineEdit;
-    z_field = new QLineEdit;
-
     //Allocating separator labels
-    x_label = new QLabel;
-    x_label->setText(QString("X"));
-    y_label = new QLabel;
-    y_label->setText(QString("Y"));
-    z_label = new QLabel;
-    z_label->setText(QString("Z"));
+    x_label.setText(QString("X"));
+    y_label.setText(QString("Y"));
+    z_label.setText(QString("Z"));
 
     label_widget->setFixedWidth(100);
 
@@ -152,20 +139,20 @@ Float3PropertyArea::Float3PropertyArea(){
     QDoubleValidator* validator = new QDoubleValidator(-100, 100, 6, nullptr); //Define double validator
     validator->setLocale(locale); //English locale to accept dost instead of commas
 
-    elem_layout->addWidget(x_label); //Adding X label
-    x_field->setFixedWidth(60);
-    x_field->setValidator(validator); //Set double validator
-    elem_layout->addWidget(x_field); //Adding X text field
+    elem_layout->addWidget(&x_label); //Adding X label
+    x_field.setFixedWidth(60);
+    x_field.setValidator(validator); //Set double validator
+    elem_layout->addWidget(&x_field); //Adding X text field
 
-    elem_layout->addWidget(y_label);
-    y_field->setFixedWidth(60);
-    y_field->setValidator(validator);
-    elem_layout->addWidget(y_field);
+    elem_layout->addWidget(&y_label);
+    y_field.setFixedWidth(60);
+    y_field.setValidator(validator);
+    elem_layout->addWidget(&y_field);
 
-    elem_layout->addWidget(z_label);
-    z_field->setFixedWidth(60);
-    z_field->setValidator(validator);
-    elem_layout->addWidget(z_field);
+    elem_layout->addWidget(&z_label);
+    z_field.setFixedWidth(60);
+    z_field.setValidator(validator);
+    elem_layout->addWidget(&z_field);
 }
 
 void Float3PropertyArea::addToInspector(InspectorWin* win){
@@ -176,9 +163,9 @@ void Float3PropertyArea::updateState(){
     if(this->vector == nullptr) //If vector hasn't been set
         return; //Go out
     //Get current values in text fields
-    float vX = this->x_field->text().toFloat();
-    float vY = this->y_field->text().toFloat();
-    float vZ = this->z_field->text().toFloat();
+    float vX = this->x_field.text().toFloat();
+    float vY = this->y_field.text().toFloat();
+    float vZ = this->z_field.text().toFloat();
     //Get current values in out vector ptr
     float vptrX = this->vector->X;
     float vptrY = this->vector->Y;
@@ -200,33 +187,32 @@ void Float3PropertyArea::updateState(){
 void Float3PropertyArea::setup(){
     if(this->vector == nullptr)
         return;
-    x_field->setText(QString::number(static_cast<double>(vector->X)));
-    y_field->setText(QString::number(static_cast<double>(vector->Y)));
-    z_field->setText(QString::number(static_cast<double>(vector->Z)));
+    x_field.setText(QString::number(static_cast<double>(vector->X)));
+    y_field.setText(QString::number(static_cast<double>(vector->Y)));
+    z_field.setText(QString::number(static_cast<double>(vector->Z)));
 }
 
 Float3PropertyArea::~Float3PropertyArea(){
-    //destroyContent();
+
 }
 //String property area stuff
 StringPropertyArea::StringPropertyArea(){
     type = PEA_TYPE_STRING;
     this->value_ptr = nullptr;
-    this->edit_field = new QLineEdit; //Allocation of QLineEdit
 
-    elem_layout->addWidget(edit_field);
+    elem_layout->addWidget(&edit_field);
 }
 
 void StringPropertyArea::setup(){
-    this->edit_field->setText(*this->value_ptr);
+    this->edit_field.setText(*this->value_ptr);
 }
 
 void StringPropertyArea::destroyContent(){
-    delete edit_field; //Remove text field
+
 }
 
 StringPropertyArea::~StringPropertyArea(){
-   //destroyContent();
+
 }
 
 void StringPropertyArea::addToInspector(InspectorWin* win){
@@ -237,7 +223,7 @@ void StringPropertyArea::updateState(){
     if(this->value_ptr == nullptr) //If vector hasn't been set
         return; //Go out
     //Get current values in textt fields
-    QString current = this->edit_field->text();
+    QString current = this->edit_field.text();
     //Compare them
     if(current.compare(value_ptr) != 0){ //If it updated
         GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(this->go_property);
@@ -252,19 +238,18 @@ void StringPropertyArea::updateState(){
 //Float property area stuff
 FloatPropertyArea::FloatPropertyArea(){
     type = PEA_TYPE_FLOAT;
-    this->float_field = new QLineEdit; //Allocation of text field
     value = 0; //Set default value
 
-    elem_layout->addWidget(float_field); //Add text filed to layout
+    elem_layout->addWidget(&float_field); //Add text filed to layout
 }
 FloatPropertyArea::~FloatPropertyArea(){
-    delete float_field;
+
 }
 
 void FloatPropertyArea::setup(){
     if(this->value == nullptr) //If value pointer didn't set
         return;
-    float_field->setText(QString::number(static_cast<double>(*value)));
+    float_field.setText(QString::number(static_cast<double>(*value)));
 }
 void FloatPropertyArea::addToInspector(InspectorWin* win){
     win->getContentLayout()->addLayout(this->elem_layout);
@@ -274,7 +259,7 @@ void FloatPropertyArea::updateState(){
     if(this->value == nullptr) //If vector hasn't been set
         return; //Go out
     //Get current values in text fields
-    float value = this->float_field->text().toFloat();
+    float value = this->float_field.text().toFloat();
 
     //Get current values in out vector ptr
     float vptrX = *this->value;
@@ -405,4 +390,28 @@ ResourcePickDialog::ResourcePickDialog(QWidget* parent) : QDialog (parent){
 }
 ResourcePickDialog::~ResourcePickDialog(){
     delete list;
+}
+ColorDialogArea::ColorDialogArea(){
+    dialog = new ZSColorPickDialog;
+    pick_button.setText("Pick color");
+    elem_layout->addWidget(&pick_button);
+    dialog->area_ptr = this; //setting area pointer
+    this->color = nullptr;
+}
+void ColorDialogArea::addToInspector(InspectorWin* win){
+    win->getContentLayout()->addLayout(this->elem_layout);
+    QObject::connect(&this->pick_button, SIGNAL(clicked()), dialog, SLOT(onNeedToShow()));
+    dialog->color_ptr = this->color;
+}
+
+ZSColorPickDialog::ZSColorPickDialog(QWidget* parent) : QColorDialog(parent){
+
+}
+
+void ZSColorPickDialog::onNeedToShow(){
+    QColor color = this->getColor(QColor(color_ptr->r, color_ptr->g, color_ptr->b)); //invoke dialog
+    ZSRGBCOLOR _color = ZSRGBCOLOR(color.red(), color.green(), color.blue());
+    _color.updateGL();
+    *color_ptr = _color;
+    area_ptr->PropertyEditArea::callPropertyUpdate();
 }

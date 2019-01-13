@@ -10,6 +10,7 @@
 #include <vector>
 #include <QListWidget>
 #include <QRadioButton>
+#include <QColorDialog>
 
 #include "../../Render/headers/zs-math.h"
 
@@ -54,7 +55,8 @@ public:
     ~AreaRadioGroup();
 };
 
-class PropertyEditArea{
+class PropertyEditArea {
+//Q_OBJECT
 public:
     int type;
     QString label; //Label, describing content
@@ -80,7 +82,7 @@ class StringPropertyArea : public PropertyEditArea{
 public:
 
     QString* value_ptr; //Modifying string
-    QLineEdit* edit_field;
+    QLineEdit edit_field;
 
     StringPropertyArea();
     ~StringPropertyArea();
@@ -95,15 +97,15 @@ public:
 class Float3PropertyArea : public PropertyEditArea{
 public:
 
-    QLineEdit* x_field; //Text digit field for X coord
-    QLineEdit* y_field; //Text digit field for Y coord
-    QLineEdit* z_field; //Text digit field for Z coord
+    QLineEdit x_field; //Text digit field for X coord
+    QLineEdit y_field; //Text digit field for Y coord
+    QLineEdit z_field; //Text digit field for Z coord
 
     ZSVECTOR3* vector; //Output variable
 
-    QLabel* x_label; //To write X separator
-    QLabel* y_label; //To write Y separator
-    QLabel* z_label; //To write Z separator
+    QLabel x_label; //To write X separator
+    QLabel y_label; //To write Y separator
+    QLabel z_label; //To write Z separator
 
     Float3PropertyArea();
     ~Float3PropertyArea();
@@ -135,7 +137,7 @@ public:
 class FloatPropertyArea : public PropertyEditArea{
 public:
 
-    QLineEdit* float_field; //Text digit field for X coord
+    QLineEdit float_field; //Text digit field for X coord
 
     float* value; //Output variable
 
@@ -162,6 +164,29 @@ public:
     void updateState(); //Virtual, on values changed
 };
 
+class ColorDialogArea;
+
+class ZSColorPickDialog : public QColorDialog{
+    Q_OBJECT
+public slots:
+    void onNeedToShow();
+
+public:
+    ZSRGBCOLOR* color_ptr; //Pointer to write color
+    ColorDialogArea* area_ptr;
+    ZSColorPickDialog(QWidget* parent = nullptr);
+};
+
+class ColorDialogArea : public PropertyEditArea{
+
+public:
+    ZSRGBCOLOR* color; //output value
+    ZSColorPickDialog* dialog; //Dialog pointer
+    QPushButton pick_button; //button to show color pick dialog
+    ColorDialogArea();
+
+    void addToInspector(InspectorWin* win);
+};
 
 namespace Ui {
 class InspectorWin;

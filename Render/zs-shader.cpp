@@ -236,12 +236,19 @@ void ZSPIRE::Shader::sendLight(unsigned int index, void* _light){
         //spot_oangle = "lights[" + std::to_string(index) + "].spot_out_angle";
 
         setGLuniformInt(type.c_str(), (int)light->light_type);
-        setGLuniformVec3(pos.c_str(), light->transform->translation);
-        //setGLuniformVec3(dir.c_str(), light->direction);
+        setGLuniformVec3(pos.c_str(), light->transform->_last_translation);
+        setGLuniformVec3(dir.c_str(), light->direction);
         setGLuniformFloat(range.c_str(), light->range);
         setGLuniformFloat(intensity.c_str(), light->intensity);
         //setGLuniformFloat(spot_angle.c_str(), light->spot_angle_rad);
         //setGLuniformFloat(spot_oangle.c_str(), light->outrad);
         setGLuniformColor(color.c_str(), light->color);
     }
+}
+
+void ZSPIRE::Shader::unsetLight(unsigned int index){
+    std::string type;
+    type = "lights[" + std::to_string(index) + "].type";
+
+    setGLuniformInt(type.c_str(), 0);
 }

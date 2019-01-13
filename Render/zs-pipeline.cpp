@@ -11,9 +11,11 @@ void RenderPipeline::setup(){
     this->pick_shader.compileFromFile("Shaders/pick/pick.vs", "Shaders/pick/pick.fs");
     this->obj_mark_shader.compileFromFile("Shaders/mark/mark.vs", "Shaders/mark/mark.fs");
     this->deffered_light.compileFromFile("Shaders/postprocess/deffered_light/deffered.vs", "Shaders/postprocess/deffered_light/deffered.fs");
+    this->diffuse3d_shader.compileFromFile("Shaders/3d/3d.vs", "Shaders/3d/3d.fs");
     ZSPIRE::createPlane2D();
 
     this->gbuffer.create(640, 480);
+    removeLights();
 }
 
 bool RenderPipeline::InitGLEW(){
@@ -58,7 +60,6 @@ unsigned int RenderPipeline::render_getpickedObj(void* projectedit_ptr, int mous
 
 void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr)
 {
-
     EditWindow* editwin_ptr = static_cast<EditWindow*>(projectedit_ptr);
     World* world_ptr = &editwin_ptr->world;
     ZSPIRE::Camera* cam_ptr = &editwin_ptr->edit_camera;
@@ -70,39 +71,47 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr)
 
     this->updateShadersCameraInfo(cam_ptr); //Send camera properties to all drawing shaders
 
+    if(depthTest == true) //if depth is enabled
+        glEnable(GL_DEPTH_TEST);
+
     for(unsigned int obj_i = 0; obj_i < world_ptr->objects.size(); obj_i ++){
         GameObject* obj_ptr = &world_ptr->objects[obj_i];
         if(!obj_ptr->hasParent)
             obj_ptr->Draw(this);
     }
 
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glClear(GL_COLOR_BUFFER_BIT);
-    gbuffer.bindTextures();
+    if(depthTest == true) //if depth is enabled
+        glDisable(GL_DEPTH_TEST);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0); //Back to default framebuffer
+    glClear(GL_COLOR_BUFFER_BIT); //Clear screen
+    gbuffer.bindTextures(); //Bind gBuffer textures
     deffered_light.Use();
-    ZSPIRE::getPlaneMesh2D()->Draw();
+    ZSPIRE::getPlaneMesh2D()->Draw(); //Draw screen
 
     SDL_GL_SwapWindow(w);
 }
 
 void GameObject::Draw(RenderPipeline* pipeline){
-    if(active == false) return; //if object is inactive, not to render it
+    if(active == false || alive == false) return; //if object is inactive, not to render it
     TransformProperty* transform_prop = static_cast<TransformProperty*>(this->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
+    transform_prop->updateMat(); //update transform matrix
 
     LightsourceProperty* light = static_cast<LightsourceProperty*>(this->getPropertyPtrByType(GO_PROPERTY_TYPE_LIGHTSOURCE));
 
     if(light != nullptr && !light->isSent){ //if object has lightsource
         pipeline->addLight(static_cast<void*>(light)); //put light pointer to vector
     }
-    if(light != nullptr && light->last_pos != transform_prop->translation){
+    if(light != nullptr && (light->last_pos != transform_prop->_last_translation || light->last_rot != transform_prop->rotation)){
         light->onValueChanged();
-        light->last_pos = transform_prop->translation;
+        //store new transform values
+        light->last_pos = transform_prop->_last_translation;
+        light->last_rot = transform_prop->rotation;
     }
 
     ZSPIRE::Shader* shader = pipeline->processShaderOnObject(static_cast<void*>(this)); //Will be used next time
     if(shader != nullptr && transform_prop != nullptr){
 
-        transform_prop->updateMat();
         shader->setTransform(transform_prop->transform_mat);
 
         MeshProperty* mesh_prop = static_cast<MeshProperty*>(this->getPropertyPtrByType(GO_PROPERTY_TYPE_MESH));
@@ -124,7 +133,7 @@ void GameObject::Draw(RenderPipeline* pipeline){
         }
     }
     for(unsigned int obj_i = 0; obj_i < this->children.size(); obj_i ++){
-        if(!children[obj_i].isEmpty()){
+        if(!children[obj_i].isEmpty()){ //if link isn't broken
             children[obj_i].updLinkPtr();
             GameObject* child_ptr = this->children[obj_i].ptr;
             child_ptr->Draw(pipeline);
@@ -173,7 +182,9 @@ ZSPIRE::Shader* RenderPipeline::processShaderOnObject(void* _obj){
             break;
         }
         case GO_RENDER_TYPE_3D:{
-            result = nullptr;
+            diffuse3d_shader.Use();
+            diffuse3d_shader.setGLuniformInt("hasDiffuseMap", 0);
+            result = &diffuse3d_shader;
             break;
         }
     }
@@ -206,6 +217,11 @@ void RenderPipeline::addLight(void* light_ptr){
     this->deffered_light.Use(); //correctly put uniforms
     this->deffered_light.sendLight(_light_ptr->id, light_ptr);
     this->deffered_light.setGLuniformInt("lights_amount", lights_ptr.size());
+}
+
+void RenderPipeline::removeLights(){
+    this->lights_ptr.clear(); //clear ptr vector
+    this->deffered_light.setGLuniformInt("lights_amount", 0); //set null lights in shader
 }
 
 G_BUFFER_GL::G_BUFFER_GL(){
@@ -244,7 +260,6 @@ void G_BUFFER_GL::create(int width, int height){
     glBindRenderbuffer(GL_RENDERBUFFER, depthBuffer);
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuffer);
-
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0); //return back to default
 }

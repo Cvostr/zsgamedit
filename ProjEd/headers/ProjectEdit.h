@@ -98,6 +98,9 @@ private:
     RenderPipeline* render;
 
     ObjectCtxMenu* obj_ctx_menu;
+
+    float cam_pitch = 0;
+    float cam_yaw = 0;
 public:
     bool ready; //Is everything loaded?
 
@@ -125,6 +128,7 @@ public:
     void onLeftBtnClicked(int X, int Y);
     void onRightBtnClicked(int X, int Y);
     void onMouseMotion(int relX, int relY);
+    void onMouseWheel(int x, int y);
     void onKeyDown(SDL_Keysym sym);
 
     Ui::EditWindow *ui;

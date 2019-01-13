@@ -68,6 +68,10 @@ ZSVECTOR3 ZSPIRE::Camera::getCameraFrontVec(){
     return this->camera_front;
 }
 
+ZSVECTOR3 ZSPIRE::Camera::getCameraRightVec(){
+    return vCross(camera_front, camera_up);
+}
+
 ZSPIRE::Camera::Camera(){
 
     camera_pos = ZSVECTOR3(0,0,0);

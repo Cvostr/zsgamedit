@@ -110,6 +110,11 @@ void EditWindow::init(){
 
     glEnable(GL_LINE_SMOOTH);
     glLineWidth(16.0f);
+    //If our proj is 3D, then enable depth test by default
+    if(project.perspective == 3){
+        glEnable(GL_DEPTH_TEST);
+        render->depthTest = true;
+    }
 
     render->setup();
     ready = true;//Everything is ready
@@ -369,7 +374,6 @@ void EditWindow::loadResource(Resource* resource){
             mesh_ptr->LoadMeshesFromFileASSIMP(str.c_str());
             break;
         }
-
     }
 }
 
@@ -462,11 +466,9 @@ ObjectCtxMenu::ObjectCtxMenu(EditWindow* win, QWidget* parent ) : QObject(parent
 void ObjectCtxMenu::show(QPoint point){
     //close();
 
-    //if(this->displayTransforms){
         this->menu->addAction(action_move);
         this->menu->addAction(action_scale);
         this->menu->addAction(action_rotate);
-    //}
 
     menu->popup(point);
 }
@@ -584,6 +586,20 @@ void EditWindow::onRightBtnClicked(int X, int Y){
     this->obj_ctx_menu->show(QPoint(this->width() + X, Y));
     this->obj_ctx_menu->displayTransforms = false;
 }
+void EditWindow::onMouseWheel(int x, int y){
+    if(project.perspective == 3){
+        ZSVECTOR3 front = edit_camera.getCameraFrontVec(); //obtain front vector
+        ZSVECTOR3 pos = edit_camera.getCameraPosition(); //obtain position
+
+        edit_camera.setPosition(pos + front * y);
+    }
+    if(project.perspective == 2){
+        ZSVECTOR3 pos = edit_camera.getCameraPosition(); //obtain position
+        pos.Y += y * 4;
+
+        edit_camera.setPosition(pos);
+    }
+}
 void EditWindow::onMouseMotion(int relX, int relY){
     if(project.perspective == 2){ //Only affective in 2D
 
@@ -623,13 +639,46 @@ void EditWindow::onMouseMotion(int relX, int relY){
     if(project.perspective == 3){//Only affective in 3D
 
         if(input_state.isRightBtnHold == true){
+            this->cam_yaw += relX * 0.16f;
+            cam_pitch += relY * 0.16f;
 
+                if (cam_pitch > 89.0f)
+                    cam_pitch = 89.0f;
+                if (cam_pitch < -89.0f)
+                    cam_pitch = -89.0f;
+
+            ZSVECTOR3 front;
+            front.X = (float)(cos(DegToRad(cam_yaw)) * cos(DegToRad(cam_pitch)));
+            front.Y = -sin(DegToRad(cam_pitch));
+            front.Z = sin(DegToRad(cam_yaw)) * cos(DegToRad(cam_pitch));
+            vNormalize(&front);
+            edit_camera.setFront(front);
         }
     }
-
 }
 
 void EditWindow::onKeyDown(SDL_Keysym sym){
+    if(sym.sym == SDLK_a){
+        ZSVECTOR3 pos = edit_camera.getCameraPosition(); //obtain position
+        pos = pos + edit_camera.getCameraRightVec() * -0.2f;
+        edit_camera.setPosition(pos);
+    }
+    if(sym.sym == SDLK_d){
+        ZSVECTOR3 pos = edit_camera.getCameraPosition(); //obtain position
+        pos = pos + edit_camera.getCameraRightVec() * 0.2f;
+        edit_camera.setPosition(pos);
+    }
+    if(sym.sym == SDLK_w){
+        ZSVECTOR3 pos = edit_camera.getCameraPosition(); //obtain position
+        pos.Y += 0.2f;
+        edit_camera.setPosition(pos);
+    }
+    if(sym.sym == SDLK_s){
+        ZSVECTOR3 pos = edit_camera.getCameraPosition(); //obtain position
+        pos.Y -= 0.2f;
+        edit_camera.setPosition(pos);
+    }
+
     if(sym.sym == SDLK_t){
         getInspector()->clearContentLayout(); //Detach object from
         this->obj_trstate.transformMode = GO_TRANSFORM_MODE_TRANSLATE;
@@ -677,7 +726,6 @@ void EditWindow::callObjectDeletion(GameObjectLink link){
     world.removeObj(link); //delete object
     this->obj_trstate.isTransforming = false; //disabling object transform
     getInspector()->clearContentLayout(); //Detach object from inspector
-
 }
 
 EdActions* getActionManager(){
