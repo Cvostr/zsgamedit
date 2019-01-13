@@ -15,6 +15,10 @@ void GameObjectProperty::copyTo(GameObjectProperty* dest){
 
 }
 
+void GameObjectProperty::onObjectDeleted(){
+
+}
+
 GameObjectProperty* allocProperty(int type){
     GameObjectProperty* _ptr = nullptr;
     switch (type) {
@@ -157,6 +161,7 @@ void TransformProperty::updateMat(){
         //Calculate scale matrix
         ZSMATRIX4x4 scale_mat = getScaleMat(_last_scale);
         //Calculate rotation matrix
+        //ZSMATRIX4x4 rotation_mat = getRotationMat(_last_rotation, _last_translation);
         ZSMATRIX4x4 rotation_mat = getRotationMat(_last_rotation);
         //S * R * T
         this->transform_mat = scale_mat * rotation_mat * translation_mat;
@@ -302,12 +307,17 @@ void LightsourceProperty::updTransformPtr(){
     }
 }
 
+void LightsourceProperty::onObjectDeleted(){
+    deffered_shader_ptr->unsetLight(this->id);
+}
+
 LightsourceProperty::LightsourceProperty(){
     type = GO_PROPERTY_TYPE_LIGHTSOURCE;
     active = true;
     light_type = LIGHTSOURCE_TYPE_DIRECTIONAL; //base type is directional
 
     intensity = 1.0f; //base light instensity is 1
+    range = 10.0f;
     transform = nullptr;
     isSent = false; //isn't sent by default
 }

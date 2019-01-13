@@ -55,6 +55,7 @@ public:
     virtual void addPropertyInterfaceToInspector(InspectorWin* inspector);
     virtual void onValueChanged();
     virtual void copyTo(GameObjectProperty* dest);
+    virtual void onObjectDeleted();
 };
 
 #include "2dtileproperties.h" //Include that to define 2dTile game elements
@@ -128,6 +129,7 @@ public:
     void onValueChanged(); //Update mesh pointer
     void copyTo(GameObjectProperty* dest);
     void updTransformPtr();
+    void onObjectDeleted();
 
     LightsourceProperty();
 };

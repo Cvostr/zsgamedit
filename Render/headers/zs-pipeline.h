@@ -52,6 +52,7 @@ public:
     unsigned int render_getpickedObj(void* projectedit_ptr, int mouseX, int mouseY);
     void updateShadersCameraInfo(ZSPIRE::Camera* cam_ptr);
     void addLight(void* light_ptr);
+    void removeLights();
     ZSPIRE::Shader* processShaderOnObject(void* _obj);
     ZSPIRE::Camera* cam;
     void* win_ptr;

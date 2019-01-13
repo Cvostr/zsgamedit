@@ -4,8 +4,6 @@
 #include <QLineEdit>
 #include <cstdlib>
 
-
-
 GameObjectLink::GameObjectLink(){
     ptr = nullptr;
     world_ptr = nullptr;
@@ -187,8 +185,10 @@ void GameObject::clearAll(bool clearQtWigt){
     unsigned int props_num = static_cast<unsigned int>(this->props_num);
 
     for(unsigned int prop_i = 0; prop_i < props_num; prop_i ++){ //Walk through all children an remove them
+        //Obtain pointer to property
         GameObjectProperty* prop_ptr = properties[prop_i];
-        delete prop_ptr;
+        prop_ptr->onObjectDeleted(); //Call on object deletion
+        delete prop_ptr; //Destroy property
         prop_ptr = 0x0;
     }
     this->props_num = 0; //Set property counter to zero
@@ -200,7 +200,7 @@ void GameObject::clearAll(bool clearQtWigt){
 }
 
 World::World(){
-    objects.reserve(4000);
+    objects.reserve(6000);
     proj_ptr = nullptr;
 }
 
@@ -432,12 +432,10 @@ void GameObject::pick(){
 
 void GameObject::copyTo(GameObject* dest){
     dest->array_index = this->array_index;
-    //dest->props_num = this->props_num;
     dest->hasParent = this->hasParent;
     dest->parent = this->parent;
     dest->str_id = this->str_id;
     dest->render_type = this->render_type;
-    //dest->item_ptr = this->item_ptr;
 }
 
 void World::openFromFile(QString file, QTreeWidget* w_ptr){
@@ -508,7 +506,6 @@ void World::openFromFile(QString file, QTreeWidget* w_ptr){
     for(unsigned int obj_i = 0; obj_i < this->objects.size(); obj_i ++){
         GameObject* obj_ptr = &this->objects[obj_i];
         if(obj_ptr->parent.isEmpty()){ //If object has no parent
-            //root_item->addChild(obj_ptr->item_ptr);
             w_ptr->addTopLevelItem(obj_ptr->item_ptr);
         }else{ //It has a parent
             GameObject* parent_ptr = obj_ptr->parent.ptr; //Get parent pointer
@@ -523,7 +520,7 @@ void World::clear(){
         obj_ptr->alive = false;
         obj_ptr->clearAll(false);
     }
-    objects.resize(0);
+    objects.clear();
 }
 
 void World::putToShapshot(WorldSnapshot* snapshot){
@@ -548,7 +545,7 @@ void World::putToShapshot(WorldSnapshot* snapshot){
 void World::recoverFromSnapshot(WorldSnapshot* snapshot){
     this->clear(); //clear world container first
     obj_widget_ptr->clear(); //clear objects tree
-
+    //iterate over all objects in snapshot
     for(unsigned int objs_num = 0; objs_num < snapshot->objects.size(); objs_num ++){
         GameObject* obj_ptr = &snapshot->objects[objs_num];
 
@@ -616,8 +613,8 @@ WorldSnapshot::WorldSnapshot(){
 
 }
 void WorldSnapshot::clear(){
-    this->objects.clear();
-
+    this->objects.clear(); //clear all object
+    //iterate over all properties
     for(unsigned int prop_it = 0; prop_it < props.size(); prop_it ++){
         delete props[prop_it];
     }

@@ -466,11 +466,9 @@ ObjectCtxMenu::ObjectCtxMenu(EditWindow* win, QWidget* parent ) : QObject(parent
 void ObjectCtxMenu::show(QPoint point){
     //close();
 
-    //if(this->displayTransforms){
         this->menu->addAction(action_move);
         this->menu->addAction(action_scale);
         this->menu->addAction(action_rotate);
-    //}
 
     menu->popup(point);
 }
@@ -660,6 +658,27 @@ void EditWindow::onMouseMotion(int relX, int relY){
 }
 
 void EditWindow::onKeyDown(SDL_Keysym sym){
+    if(sym.sym == SDLK_a){
+        ZSVECTOR3 pos = edit_camera.getCameraPosition(); //obtain position
+        pos = pos + edit_camera.getCameraRightVec() * -0.2f;
+        edit_camera.setPosition(pos);
+    }
+    if(sym.sym == SDLK_d){
+        ZSVECTOR3 pos = edit_camera.getCameraPosition(); //obtain position
+        pos = pos + edit_camera.getCameraRightVec() * 0.2f;
+        edit_camera.setPosition(pos);
+    }
+    if(sym.sym == SDLK_w){
+        ZSVECTOR3 pos = edit_camera.getCameraPosition(); //obtain position
+        pos.Y += 0.2f;
+        edit_camera.setPosition(pos);
+    }
+    if(sym.sym == SDLK_s){
+        ZSVECTOR3 pos = edit_camera.getCameraPosition(); //obtain position
+        pos.Y -= 0.2f;
+        edit_camera.setPosition(pos);
+    }
+
     if(sym.sym == SDLK_t){
         getInspector()->clearContentLayout(); //Detach object from
         this->obj_trstate.transformMode = GO_TRANSFORM_MODE_TRANSLATE;
@@ -707,7 +726,6 @@ void EditWindow::callObjectDeletion(GameObjectLink link){
     world.removeObj(link); //delete object
     this->obj_trstate.isTransforming = false; //disabling object transform
     getInspector()->clearContentLayout(); //Detach object from inspector
-
 }
 
 EdActions* getActionManager(){

@@ -292,8 +292,6 @@ void processNode(aiNode* node, const aiScene* scene) {
 
 
 void ZSPIRE::Mesh::LoadMeshesFromFileASSIMP(const char* file_path) {
-
-
 	std::cout << "ASSIMP: Loading mesh from file : " << file_path << std::endl;
 
 	const aiScene* scene = importer.ReadFile(file_path, loadflags);

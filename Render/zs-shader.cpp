@@ -245,3 +245,10 @@ void ZSPIRE::Shader::sendLight(unsigned int index, void* _light){
         setGLuniformColor(color.c_str(), light->color);
     }
 }
+
+void ZSPIRE::Shader::unsetLight(unsigned int index){
+    std::string type;
+    type = "lights[" + std::to_string(index) + "].type";
+
+    setGLuniformInt(type.c_str(), 0);
+}

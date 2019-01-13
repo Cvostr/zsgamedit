@@ -15,6 +15,7 @@ void RenderPipeline::setup(){
     ZSPIRE::createPlane2D();
 
     this->gbuffer.create(640, 480);
+    removeLights();
 }
 
 bool RenderPipeline::InitGLEW(){
@@ -59,7 +60,6 @@ unsigned int RenderPipeline::render_getpickedObj(void* projectedit_ptr, int mous
 
 void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr)
 {
-
     EditWindow* editwin_ptr = static_cast<EditWindow*>(projectedit_ptr);
     World* world_ptr = &editwin_ptr->world;
     ZSPIRE::Camera* cam_ptr = &editwin_ptr->edit_camera;
@@ -83,11 +83,11 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr)
     if(depthTest == true) //if depth is enabled
         glDisable(GL_DEPTH_TEST);
 
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glClear(GL_COLOR_BUFFER_BIT);
-    gbuffer.bindTextures();
+    glBindFramebuffer(GL_FRAMEBUFFER, 0); //Back to default framebuffer
+    glClear(GL_COLOR_BUFFER_BIT); //Clear screen
+    gbuffer.bindTextures(); //Bind gBuffer textures
     deffered_light.Use();
-    ZSPIRE::getPlaneMesh2D()->Draw();
+    ZSPIRE::getPlaneMesh2D()->Draw(); //Draw screen
 
     SDL_GL_SwapWindow(w);
 }
@@ -217,6 +217,11 @@ void RenderPipeline::addLight(void* light_ptr){
     this->deffered_light.Use(); //correctly put uniforms
     this->deffered_light.sendLight(_light_ptr->id, light_ptr);
     this->deffered_light.setGLuniformInt("lights_amount", lights_ptr.size());
+}
+
+void RenderPipeline::removeLights(){
+    this->lights_ptr.clear(); //clear ptr vector
+    this->deffered_light.setGLuniformInt("lights_amount", 0); //set null lights in shader
 }
 
 G_BUFFER_GL::G_BUFFER_GL(){
