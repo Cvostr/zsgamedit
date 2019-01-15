@@ -136,6 +136,26 @@ void TileGroupProperty::copyTo(GameObjectProperty* dest){
 }
 
 void TileProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
+    BoolCheckboxArea* isAnim = new BoolCheckboxArea;
+    isAnim->setLabel("Animated ");
+    isAnim->go_property = static_cast<void*>(this);
+    isAnim->bool_ptr = &this->anim_property.isAnimated;
+    inspector->addPropertyArea(isAnim);
+
+    if(this->anim_property.isAnimated){ //if animation turned on
+        IntPropertyArea* rowsAmount = new IntPropertyArea;
+        rowsAmount->setLabel("Atlas rows");
+        rowsAmount->go_property = static_cast<void*>(this);
+        rowsAmount->value = &this->anim_property.framesX;
+        inspector->addPropertyArea(rowsAmount);
+
+        IntPropertyArea* colsAmount = new IntPropertyArea;
+        colsAmount->setLabel("Atlas cols");
+        colsAmount->go_property = static_cast<void*>(this);
+        colsAmount->value = &this->anim_property.framesY;
+        inspector->addPropertyArea(colsAmount);
+    }
+
     PickResourceArea* area = new PickResourceArea;
     area->setLabel("Texture");
     area->go_property = static_cast<void*>(this);

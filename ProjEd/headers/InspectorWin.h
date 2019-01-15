@@ -11,6 +11,7 @@
 #include <QListWidget>
 #include <QRadioButton>
 #include <QColorDialog>
+#include <QCheckBox>
 
 #include "../../Render/headers/zs-math.h"
 
@@ -21,6 +22,8 @@
 #define PEA_TYPE_FLOAT3 4
 #define PEA_TYPE_INT 5
 #define PEA_TYPE_RESPICK 6
+#define PEA_TYPE_COLOR 7
+#define PEA_TYPE_BOOL 8
 
 #define PICK_RES_TYPE_MESH 0
 #define PICK_RES_TYPE_TEXTURE 1
@@ -181,11 +184,22 @@ class ColorDialogArea : public PropertyEditArea{
 
 public:
     ZSRGBCOLOR* color; //output value
-    ZSColorPickDialog* dialog; //Dialog pointer
+    ZSColorPickDialog dialog; //Dialog pointer
     QPushButton pick_button; //button to show color pick dialog
     ColorDialogArea();
 
     void addToInspector(InspectorWin* win);
+};
+
+class BoolCheckboxArea : public PropertyEditArea{
+public:
+    bool* bool_ptr; //pointer to modifying bool
+    QCheckBox checkbox; //pressing checkbox
+
+    BoolCheckboxArea();
+    void setup(); //Virtual
+    void addToInspector(InspectorWin* win);
+    void updateState(); //Virtual, to check widget state
 };
 
 namespace Ui {

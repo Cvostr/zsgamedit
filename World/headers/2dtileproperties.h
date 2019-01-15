@@ -24,6 +24,9 @@ typedef struct TileAnimation{
 
     TileAnimation(){
         isAnimated = false;
+
+        framesX = 1;
+        framesY = 1;
     }
 
 }TileAnimation;

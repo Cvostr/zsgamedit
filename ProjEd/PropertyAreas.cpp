@@ -51,7 +51,6 @@ void AreaButton::onButtonPressed(){
     insp_ptr->updateObjectProperties();
 }
 
-
 PropertyEditArea::PropertyEditArea(){
     type = PEA_TYPE_NONE;
     elem_layout = new QHBoxLayout;
@@ -392,16 +391,17 @@ ResourcePickDialog::~ResourcePickDialog(){
     delete list;
 }
 ColorDialogArea::ColorDialogArea(){
-    dialog = new ZSColorPickDialog;
+    type = PEA_TYPE_COLOR;
+    //dialog = new ZSColorPickDialog;
     pick_button.setText("Pick color");
     elem_layout->addWidget(&pick_button);
-    dialog->area_ptr = this; //setting area pointer
+    dialog.area_ptr = this; //setting area pointer
     this->color = nullptr;
 }
 void ColorDialogArea::addToInspector(InspectorWin* win){
     win->getContentLayout()->addLayout(this->elem_layout);
-    QObject::connect(&this->pick_button, SIGNAL(clicked()), dialog, SLOT(onNeedToShow()));
-    dialog->color_ptr = this->color;
+    QObject::connect(&this->pick_button, SIGNAL(clicked()), &dialog, SLOT(onNeedToShow()));
+    dialog.color_ptr = this->color;
 }
 
 ZSColorPickDialog::ZSColorPickDialog(QWidget* parent) : QColorDialog(parent){
@@ -414,4 +414,25 @@ void ZSColorPickDialog::onNeedToShow(){
     _color.updateGL();
     *color_ptr = _color;
     area_ptr->PropertyEditArea::callPropertyUpdate();
+}
+
+BoolCheckboxArea::BoolCheckboxArea(){
+    type = PEA_TYPE_BOOL;
+    bool_ptr = nullptr;
+
+    elem_layout->addWidget(&this->checkbox);
+}
+void BoolCheckboxArea::addToInspector(InspectorWin* win){
+    win->getContentLayout()->addLayout(this->elem_layout);
+}
+void BoolCheckboxArea::updateState(){
+    if(bool_ptr == nullptr) return; //pointer not set, exiting
+    if(this->checkbox.isChecked()){ //if user checked it
+        *bool_ptr = true;
+    }else{ //unchecked
+        *bool_ptr = false;
+    }
+}
+void BoolCheckboxArea::setup(){
+    checkbox.setChecked(*bool_ptr);
 }
