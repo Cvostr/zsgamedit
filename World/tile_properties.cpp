@@ -181,3 +181,6 @@ void TileProperty::copyTo(GameObjectProperty* dest){
     _dest->anim_property = anim_property;
     _dest->geometry = geometry;
 }
+void TileProperty::onUpdate(float deltaTime){
+
+}

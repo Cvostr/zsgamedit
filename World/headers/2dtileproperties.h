@@ -19,14 +19,23 @@ typedef struct TileGeometry{
 
 typedef struct TileAnimation{
     bool isAnimated;
-    int framesX;
-    int framesY;
+    int framesX; //columns in atlas
+    int framesY; //rows in atlas
+    float frame_time; //time to change the frame
+
+    int current_frame;
+    bool playing = false;
 
     TileAnimation(){
         isAnimated = false;
 
-        framesX = 1;
+        framesX = 1; //defaultly we have 1 frame
         framesY = 1;
+
+        frame_time = 1000;
+
+        current_frame = 0; //we start from 0 frame
+        playing = false;
     }
 
 }TileAnimation;
@@ -59,6 +68,7 @@ public:
     void onValueChanged(); //Update texture pointer
     void updTexturePtr();
     void copyTo(GameObjectProperty* dest);
+    void onUpdate(float deltaTime);
 
     TileProperty();
 };

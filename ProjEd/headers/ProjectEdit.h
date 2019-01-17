@@ -24,6 +24,10 @@ struct Project;
 #define GO_TRANSFORM_MODE_SCALE 2
 #define GO_TRANSFORM_MODE_ROTATE 3
 
+#define EW_CLOSE_REASON_UNCLOSED 0
+#define EW_CLOSE_REASON_PROJLIST 1
+#define EW_CLOSE_REASON_BUILD 2
+
 namespace Ui {
 class EditWindow;
 }
@@ -84,6 +88,8 @@ public slots:
     void onOpenScene();
     void onNewScene();
 
+    void onCloseProject();
+
     void onUndoPressed();
     void onRedoPressed();
 
@@ -103,6 +109,7 @@ private:
     float cam_yaw = 0;
 public:
     bool ready; //Is everything loaded?
+    int close_reason;
 
     World world;
     ZSPIRE::Camera edit_camera; //Camera to show editing scene

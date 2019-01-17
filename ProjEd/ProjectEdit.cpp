@@ -30,6 +30,8 @@ EditWindow::EditWindow(QWidget *parent) :
 
     QObject::connect(ui->actionCreateScene, SIGNAL(triggered()), this, SLOT(onNewScene()));
 
+    QObject::connect(ui->actionClose_project, SIGNAL(triggered()), this, SLOT(onCloseProject()));
+
     QObject::connect(ui->actionUndo, SIGNAL(triggered()), this, SLOT(onUndoPressed()));
     QObject::connect(ui->actionRedo, SIGNAL(triggered()), this, SLOT(onRedoPressed()));
 
@@ -209,6 +211,20 @@ void EditWindow::onAddNewGameObject(){
 void EditWindow::setupObjectsHieList(){
     QTreeWidget* w_ptr = ui->objsList; //Getting pointer to objects list widget
     w_ptr->clear(); //Clears widget
+}
+
+void EditWindow::onCloseProject(){
+    world.clear(); //clear world
+    SDL_DestroyWindow(window); //Destroy SDL and opengl
+
+    //Close Qt windows
+    _editor_win->close();
+    _inspector_win->close();
+
+    delete render;
+
+    this->ready = false; //won't render anymore
+    this->close_reason = EW_CLOSE_REASON_PROJLIST;
 }
 
 void EditWindow::updateFileList(){
@@ -417,6 +433,7 @@ EditWindow* ZSEditor::openProject(QString conf_file_path){
 EditWindow* ZSEditor::openEditor(){
     _editor_win->init();
 
+    _editor_win->close_reason = EW_CLOSE_REASON_UNCLOSED;
     _editor_win->lookForResources(_editor_win->project.root_path); //Make a vector of all resource files
     _editor_win->move(0,0); //Editor base win would be in the left part of screen
     _editor_win->show(); //Show editor window

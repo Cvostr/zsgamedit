@@ -18,6 +18,18 @@ void RenderPipeline::setup(){
     removeLights();
 }
 
+RenderPipeline::~RenderPipeline(){
+    this->tile_shader.Destroy();
+    this->pick_shader.Destroy();
+    this->obj_mark_shader.Destroy();
+    this->deffered_light.Destroy();
+    this->diffuse3d_shader.Destroy();
+    //ZSPIRE::createPlane2D();
+
+    this->gbuffer.Destroy();
+    removeLights();
+}
+
 bool RenderPipeline::InitGLEW(){
     glewExperimental = GL_TRUE;
         if (glewInit() != GLEW_OK)
@@ -196,7 +208,6 @@ void RenderPipeline::updateShadersCameraInfo(ZSPIRE::Camera* cam_ptr){
         diffuse3d_shader.Use();
         diffuse3d_shader.setCamera(cam_ptr);
     }
-
     if(tile_shader.isCreated == true){
         tile_shader.Use();
         tile_shader.setCamera(cam_ptr);
@@ -275,4 +286,15 @@ void G_BUFFER_GL::bindTextures(){
 
     glActiveTexture(GL_TEXTURE12);
     glBindTexture(GL_TEXTURE_2D, tPos);
+}
+
+void G_BUFFER_GL::Destroy(){
+    //Remove textures
+    glDeleteTextures(1, &tDiffuse);
+    glDeleteTextures(1, &tNormal);
+    glDeleteTextures(1, &tPos);
+
+    //delete framebuffer & renderbuffer
+    glDeleteRenderbuffers(1, &this->depthBuffer);
+    glDeleteFramebuffers(1, &this->gBuffer);
 }

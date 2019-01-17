@@ -30,6 +30,7 @@ public:
     void create(int width, int height);
     void bindFramebuffer();
     void bindTextures();
+    void Destroy();
 };
 
 class RenderPipeline{
@@ -58,6 +59,7 @@ public:
     void* win_ptr;
 
     RenderPipeline();
+    ~RenderPipeline();
 };
 
 
