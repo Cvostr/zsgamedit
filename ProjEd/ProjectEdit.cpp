@@ -20,8 +20,9 @@ EditWindow::EditWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    QObject::connect(ui->fileList, SIGNAL(doubleClicked(QModelIndex)),
-                this, SLOT(onFileListItemClicked())); //Signal comes, when user clicks on file
+    QObject::connect(ui->fileList, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(onFileListItemClicked())); //Signal comes, when user clicks on file
+    QObject::connect(ui->fileList, SIGNAL(onRightClick(QPoint)), this, SLOT(onFileCtxMenuShow(QPoint)));
+
     QObject::connect(ui->actionNew_Object, SIGNAL(triggered()),
                 this, SLOT(onAddNewGameObject())); //Signal comes, when user clicks on Object->Create
     QObject::connect(ui->actionSave, SIGNAL(triggered()), this, SLOT(onSceneSave())); //Signal comes, when user clicks on File->Save
@@ -57,6 +58,8 @@ EditWindow::EditWindow(QWidget *parent) :
     ui->fileList->setViewMode(QListView::IconMode);
 
     this->obj_ctx_menu = new ObjectCtxMenu(this); //Allocating object Context menu
+    //Allocate file ctx menu
+    this->file_ctx_menu = new FileCtxMenu(this);
     this->ui->objsList->win_ptr = this; //putting pointer to window to custom tree view
 
     ui->actionOpen->setShortcut(Qt::Key_O | Qt::CTRL);
@@ -222,6 +225,7 @@ void EditWindow::onCloseProject(){
     _inspector_win->close();
 
     delete render;
+    _ed_actions_container->clear();
 
     this->ready = false; //won't render anymore
     this->close_reason = EW_CLOSE_REASON_PROJLIST;
@@ -297,14 +301,20 @@ void EditWindow::onObjectListItemClicked(){
     obj_trstate.tprop_ptr = static_cast<TransformProperty*>(obj_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
     _inspector_win->ShowObjectProperties(static_cast<void*>(obj_ptr));
 }
-
+//Objects list right pressed
 void EditWindow::onObjectCtxMenuShow(QPoint point){
     QTreeWidgetItem* selected_item = ui->objsList->currentItem(); //Obtain pointer to clicked obj item
+    //We selected empty space
+    if(selected_item == 0x0) return;
     QString obj_name = selected_item->text(0); //Get label of clicked obj
     GameObject* obj_ptr = world.getObjectByLabel(obj_name); //Obtain pointer to selected object by label
 
     this->obj_ctx_menu->setObjectPtr(obj_ptr);
     this->obj_ctx_menu->show(point);
+}
+
+void EditWindow::onFileCtxMenuShow(QPoint point){
+    this->file_ctx_menu->show(point);
 }
 
 void EditWindow::onCameraToObjTeleport(){
@@ -456,6 +466,18 @@ ObjTreeWgt::ObjTreeWgt(QWidget* parent) : QTreeWidget (parent){
     this->world_ptr = nullptr; //Not assigned by default
 }
 
+FileListWgt::FileListWgt(QWidget* parent) : QListWidget (parent){
+    this->world_ptr = nullptr; //Not assigned by default
+}
+
+void FileListWgt::mousePressEvent(QMouseEvent *event){
+    QListWidget::mousePressEvent(event);
+    if(event->button() == Qt::RightButton)
+    {
+        emit onRightClick(event->pos());
+    }
+}
+
 ObjectCtxMenu::ObjectCtxMenu(EditWindow* win, QWidget* parent ) : QObject(parent){
     this->win_ptr = win;
     //Allocting menu container
@@ -470,6 +492,10 @@ ObjectCtxMenu::ObjectCtxMenu(EditWindow* win, QWidget* parent ) : QObject(parent
     //Adding actions to menu container
     this->menu->addAction(action_dub);
     this->menu->addAction(action_delete);
+
+    this->menu->addAction(action_move);
+    this->menu->addAction(action_scale);
+    this->menu->addAction(action_rotate);
     //Connect actions to slots
     QObject::connect(this->action_delete, SIGNAL(triggered(bool)), this, SLOT(onDeleteClicked()));
     QObject::connect(this->action_dub, SIGNAL(triggered(bool)), this, SLOT(onDublicateClicked()));
@@ -481,12 +507,6 @@ ObjectCtxMenu::ObjectCtxMenu(EditWindow* win, QWidget* parent ) : QObject(parent
 }
 
 void ObjectCtxMenu::show(QPoint point){
-    //close();
-
-        this->menu->addAction(action_move);
-        this->menu->addAction(action_scale);
-        this->menu->addAction(action_rotate);
-
     menu->popup(point);
 }
 
@@ -548,6 +568,28 @@ void ObjectCtxMenu::onRotateClicked(){
     win_ptr->obj_trstate.transformMode = GO_TRANSFORM_MODE_ROTATE;//Setting transform type
 }
 
+void FileCtxMenu::show(QPoint point){
+    this->menu->popup(point);
+}
+void FileCtxMenu::onDeleteClicked(){
+
+}
+void FileCtxMenu::onRename(){
+
+}
+FileCtxMenu::FileCtxMenu(EditWindow* win, QWidget* parent) : QObject(parent){
+    //Store win pointer
+    this->win_ptr = win;
+    //Allocate Qt stuff
+    this->menu = new QMenu(win);
+
+    this->action_delete = new QAction("Delete", win);
+    this->action_rename = new QAction("Rename", win);
+
+    menu->addAction(action_rename);
+    menu->addAction(action_delete);
+}
+
 void ObjTreeWgt::dropEvent(QDropEvent* event){
     _ed_actions_container->newSnapshotAction(&win_ptr->world); //Add new snapshot action
     _inspector_win->clearContentLayout(); //Prevent variable conflicts
@@ -588,6 +630,7 @@ void EditWindow::onLeftBtnClicked(int X, int Y){
     obj_trstate.obj_ptr = obj_ptr;
     obj_trstate.tprop_ptr = static_cast<TransformProperty*>(obj_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
     _inspector_win->ShowObjectProperties(static_cast<void*>(obj_ptr));
+    this->ui->objsList->setCurrentItem(obj_ptr->item_ptr); //item selected in tree
 }
 void EditWindow::onRightBtnClicked(int X, int Y){
     this->obj_trstate.isTransforming = false; //disabling object transform

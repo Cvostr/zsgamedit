@@ -71,6 +71,7 @@ struct ObjectTransformState{
 };
 
 class ObjectCtxMenu;
+class FileCtxMenu;
 
 class EditWindow : public QMainWindow
 {
@@ -80,6 +81,7 @@ public slots:
     void onFileListItemClicked();
     void onObjectListItemClicked();
     void onObjectCtxMenuShow(QPoint point);
+    void onFileCtxMenuShow(QPoint point);
     void onCameraToObjTeleport();
 
     void onAddNewGameObject();
@@ -103,7 +105,8 @@ private:
 
     RenderPipeline* render;
 
-    ObjectCtxMenu* obj_ctx_menu;
+    ObjectCtxMenu* obj_ctx_menu; //Context menu on object right click
+    FileCtxMenu* file_ctx_menu;
 
     float cam_pitch = 0;
     float cam_yaw = 0;
@@ -176,6 +179,24 @@ public:
     void close();
 };
 
+class FileCtxMenu : public QObject{
+    Q_OBJECT
+public slots:
+    void onDeleteClicked();
+    void onRename();
+private:
+    QMenu* menu; //Menu object to contain everything
+
+    QAction* action_rename; //Button to dublicate object
+    QAction* action_delete; //Button to delete object
+public:
+    EditWindow* win_ptr;
+
+    FileCtxMenu(EditWindow* win, QWidget* parent = nullptr);
+    void show(QPoint point);
+    void close();
+};
+
 //Class to represent tree widget
 class ObjTreeWgt : public QTreeWidget{
     Q_OBJECT
@@ -189,6 +210,20 @@ public:
     ObjTreeWgt(QWidget* parent = nullptr);
 
     void dropEvent(QDropEvent* event);
+
+    World* world_ptr;
+};
+
+class FileListWgt : public QListWidget{
+    Q_OBJECT
+protected:
+    void mousePressEvent(QMouseEvent *event) override;
+signals:
+    void onRightClick(QPoint pos);
+    void onLeftClick(QPoint pos);
+public:
+    EditWindow* win_ptr;
+    FileListWgt(QWidget* parent = nullptr);
 
     World* world_ptr;
 };

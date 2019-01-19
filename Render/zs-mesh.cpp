@@ -296,7 +296,6 @@ void ZSPIRE::Mesh::LoadMeshesFromFileASSIMP(const char* file_path) {
 
 	const aiScene* scene = importer.ReadFile(file_path, loadflags);
 
-	//if(scene == nullptr) return false;
     processMesh(scene->mMeshes[0], scene);
 
 }

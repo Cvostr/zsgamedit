@@ -55,7 +55,7 @@
     </property>
     <layout class="QVBoxLayout" name="verticalLayout"/>
    </widget>
-   <widget class="QListWidget" name="fileList">
+   <widget class="FileListWgt" name="fileList">
     <property name="geometry">
      <rect>
       <x>0</x>
@@ -154,6 +154,11 @@
   <customwidget>
    <class>ObjTreeWgt</class>
    <extends>QTreeWidget</extends>
+   <header>ProjEd/headers/ProjectEdit.h</header>
+  </customwidget>
+  <customwidget>
+   <class>FileListWgt</class>
+   <extends>QListWidget</extends>
    <header>ProjEd/headers/ProjectEdit.h</header>
   </customwidget>
  </customwidgets>
