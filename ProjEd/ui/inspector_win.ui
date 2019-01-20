@@ -26,12 +26,12 @@
       <x>0</x>
       <y>0</y>
       <width>351</width>
-      <height>631</height>
+      <height>671</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="propertySpace">
      <property name="spacing">
-      <number>1</number>
+      <number>0</number>
      </property>
      <property name="sizeConstraint">
       <enum>QLayout::SetNoConstraint</enum>

@@ -23,6 +23,36 @@ void GameObjectProperty::onUpdate(float deltaTime){
 
 }
 
+QString getPropertyString(int type){
+    switch (type) {
+        case GO_PROPERTY_TYPE_TRANSFORM:{ //If type is transfrom
+            return QString("Transform");
+            break;
+        }
+        case GO_PROPERTY_TYPE_LABEL:{
+            return QString("Label");
+            break;
+        }
+        case GO_PROPERTY_TYPE_MESH:{
+            return QString("Mesh");
+            break;
+        }
+        case GO_PROPERTY_TYPE_LIGHTSOURCE:{
+            return QString("Light");
+            break;
+        }
+        case GO_PROPERTY_TYPE_TILE_GROUP:{
+            return QString("Tile Group");
+            break;
+        }
+        case GO_PROPERTY_TYPE_TILE:{
+            return QString("Tile");
+            break;
+        }
+    }
+    return QString("NONE");
+}
+
 GameObjectProperty* allocProperty(int type){
     GameObjectProperty* _ptr = nullptr;
     switch (type) {

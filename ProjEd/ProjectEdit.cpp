@@ -588,6 +588,10 @@ FileCtxMenu::FileCtxMenu(EditWindow* win, QWidget* parent) : QObject(parent){
 
     menu->addAction(action_rename);
     menu->addAction(action_delete);
+
+    QObject::connect(this->action_delete, SIGNAL(triggered(bool)), this, SLOT(onDeleteClicked()));
+    QObject::connect(this->action_rename, SIGNAL(triggered(bool)), this, SLOT(onRename()));
+
 }
 
 void ObjTreeWgt::dropEvent(QDropEvent* event){

@@ -31,6 +31,17 @@
 class InspectorWin;
 class ResourcePickDialog;
 
+class AreaPropertyTitle : public QObject{
+    Q_OBJECT
+public:
+    QVBoxLayout layout;
+
+    QFrame line;
+    QLabel prop_title;
+
+    AreaPropertyTitle();
+};
+
 class AreaButton : public QObject{
     Q_OBJECT
 public slots:

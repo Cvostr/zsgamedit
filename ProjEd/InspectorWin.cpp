@@ -14,8 +14,8 @@ InspectorWin::InspectorWin(QWidget *parent) :
     ui->setupUi(this);
     addObjComponentBtn = nullptr;
     this->ui->propertySpace->setMargin(0);
-    this->ui->propertySpace->setSpacing(0);
-    this->ui->propertySpace->setContentsMargins(0,0,0,0);
+    this->ui->propertySpace->setSpacing(1);
+    this->ui->propertySpace->setContentsMargins(5,1,2,0);
 }
 
 InspectorWin::~InspectorWin()
@@ -82,6 +82,12 @@ void InspectorWin::ShowObjectProperties(void* object_ptr){
     unsigned int props_num = static_cast<unsigned int>(obj_ptr->props_num);
     for(unsigned int prop_it = 0; prop_it < props_num; prop_it ++){ //iterate over all properties and send them to inspector
         GameObjectProperty* property_ptr = (obj_ptr->properties[prop_it]); //Obtain pointer to object property
+
+        AreaPropertyTitle* prop_title = new AreaPropertyTitle;
+        prop_title->prop_title.setText(getPropertyString(property_ptr->type));
+        getContentLayout()->addLayout(&prop_title->layout);
+        this->registerUiObject(prop_title);
+
         property_ptr->addPropertyInterfaceToInspector(this); //Add its interface to inspector
     }
     makeAddObjComponentBtn();

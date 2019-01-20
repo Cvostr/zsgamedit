@@ -4,6 +4,22 @@
 #include <QDoubleValidator>
 #include <QObject>
 
+AreaPropertyTitle::AreaPropertyTitle(){
+    this->layout.addWidget(&this->line);
+    //layout.setSpacing(0);
+    this->layout.addWidget(&this->prop_title);
+    prop_title.setFixedHeight(25);
+    prop_title.setMargin(0);
+
+    QFont font = prop_title.font();
+    font.setPointSize(13);
+    font.setItalic(true);
+    prop_title.setFont(font);
+
+    line.setFrameShape(QFrame::HLine);
+    line.setFrameShadow(QFrame::Sunken);
+}
+
 AreaButton::AreaButton(){
     this->button = new QPushButton;
     connect(this->button, SIGNAL(clicked()), this, SLOT(onButtonPressed()));
@@ -58,6 +74,8 @@ PropertyEditArea::PropertyEditArea(){
     go_property = nullptr; //Nullptr by default
 
     elem_layout->addWidget(label_widget); //Adding label to result layout
+    elem_layout->setContentsMargins(8,0,0,0); //move layout to right
+    elem_layout->setSpacing(0);
 }
 
 void PropertyEditArea::destroyLayout(){

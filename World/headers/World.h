@@ -220,5 +220,6 @@ public:
 
 };
 GameObjectProperty* allocProperty(int type);
+QString getPropertyString(int type);
 
 #endif
