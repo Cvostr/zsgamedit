@@ -219,6 +219,7 @@ void EditWindow::setupObjectsHieList(){
 void EditWindow::onCloseProject(){
     world.clear(); //clear world
     SDL_DestroyWindow(window); //Destroy SDL and opengl
+    SDL_GL_DeleteContext(glcontext);
 
     //Close Qt windows
     _editor_win->close();

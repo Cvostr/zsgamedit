@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui opengl
+QT       += core gui
 LIBS += -lGLEW -lassimp -lSDL2 -lopenal
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 

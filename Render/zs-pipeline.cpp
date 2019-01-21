@@ -12,7 +12,7 @@ void RenderPipeline::setup(){
     this->obj_mark_shader.compileFromFile("Shaders/mark/mark.vs", "Shaders/mark/mark.fs");
     this->deffered_light.compileFromFile("Shaders/postprocess/deffered_light/deffered.vs", "Shaders/postprocess/deffered_light/deffered.fs");
     this->diffuse3d_shader.compileFromFile("Shaders/3d/3d.vs", "Shaders/3d/3d.fs");
-    ZSPIRE::createPlane2D();
+    ZSPIRE::setupDefaultMeshes();
 
     this->gbuffer.create(640, 480);
     removeLights();
@@ -24,7 +24,7 @@ RenderPipeline::~RenderPipeline(){
     this->obj_mark_shader.Destroy();
     this->deffered_light.Destroy();
     this->diffuse3d_shader.Destroy();
-    //ZSPIRE::createPlane2D();
+    ZSPIRE::freeDefaultMeshes();
 
     this->gbuffer.Destroy();
     removeLights();
