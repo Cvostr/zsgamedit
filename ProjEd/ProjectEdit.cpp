@@ -124,6 +124,8 @@ void EditWindow::init(){
     render->setup();
     ready = true;//Everything is ready
 
+    ZSPIRE::SFX::initAL();
+
     switch(project.perspective){
     case 2:{ //2D project
 

@@ -82,6 +82,8 @@
     <addaction name="actionOpen"/>
     <addaction name="actionSave"/>
     <addaction name="actionSave_As"/>
+    <addaction name="actionRun"/>
+    <addaction name="actionBuild"/>
     <addaction name="actionClose_project"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
@@ -147,6 +149,16 @@
   <action name="actionClose_project">
    <property name="text">
     <string>Close project</string>
+   </property>
+  </action>
+  <action name="actionRun">
+   <property name="text">
+    <string>Run</string>
+   </property>
+  </action>
+  <action name="actionBuild">
+   <property name="text">
+    <string>Build</string>
    </property>
   </action>
  </widget>

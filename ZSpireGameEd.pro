@@ -41,7 +41,8 @@ SOURCES += \
     World/go_properties.cpp \
     World/tile_properties.cpp \
     ProjEd/PropertyAreas.cpp \
-    ProjEd/EdActions.cpp
+    ProjEd/EdActions.cpp \
+    Misc/oal_manager.cpp \
 
 HEADERS += \
         mainwin.h \
@@ -57,7 +58,9 @@ HEADERS += \
     ProjEd/headers/ProjCreateWin.h \
     World/headers/zs-camera.h \
     World/headers/2dtileproperties.h \
-    ProjEd/headers/EdActions.h
+    ProjEd/headers/EdActions.h \
+    Misc/headers/oal_manager.h \
+
 
 FORMS += \
         mainwin.ui \

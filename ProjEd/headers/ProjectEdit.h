@@ -11,6 +11,8 @@
 #include "../../Render/headers/zs-pipeline.h"
 #include "../../World/headers/zs-camera.h"
 
+#include "../../Misc/headers/oal_manager.h"
+
 struct Resource;
 struct Project;
 

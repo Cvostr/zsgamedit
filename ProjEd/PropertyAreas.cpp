@@ -257,6 +257,11 @@ FloatPropertyArea::FloatPropertyArea(){
     type = PEA_TYPE_FLOAT;
     value = 0; //Set default value
 
+    QLocale locale(QLocale::English); //Define english locale to set it to double validator later
+    QDoubleValidator* validator = new QDoubleValidator(-100, 100, 6, nullptr); //Define double validator
+    validator->setLocale(locale); //English locale to accept dost instead of commas
+
+    float_field.setValidator(validator);
     elem_layout->addWidget(&float_field); //Add text filed to layout
 }
 FloatPropertyArea::~FloatPropertyArea(){
@@ -333,7 +338,12 @@ IntPropertyArea::IntPropertyArea(){
     type = PEA_TYPE_INT;
     this->value = nullptr;
 
+    QLocale locale(QLocale::English); //Define english locale to set it to double validator later
+    QDoubleValidator* validator = new QDoubleValidator(-100, 100, 6, nullptr); //Define double validator
+    validator->setLocale(locale); //English locale to accept dost instead of commas
+
     this->int_field = new QLineEdit;
+    int_field->setValidator(validator);
     elem_layout->addWidget(int_field); //Add text filed to layout
 }
 
