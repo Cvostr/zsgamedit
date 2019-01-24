@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWin</string>
+   <string>Projects window</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <widget class="QListWidget" name="projList">
@@ -48,7 +48,7 @@
    </property>
    <widget class="QMenu" name="menuFile">
     <property name="title">
-     <string>File</string>
+     <string>&amp;File</string>
     </property>
     <addaction name="actionNew_project"/>
     <addaction name="actionAdd_project"/>
@@ -58,12 +58,12 @@
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionNew_project">
    <property name="text">
-    <string>New project</string>
+    <string>&amp;New project</string>
    </property>
   </action>
   <action name="actionAdd_project">
    <property name="text">
-    <string>Add project</string>
+    <string>&amp;Add project</string>
    </property>
   </action>
  </widget>

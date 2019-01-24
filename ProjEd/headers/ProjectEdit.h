@@ -199,6 +199,21 @@ public:
     void close();
 };
 
+class FileDeleteDialog : public QDialog{
+    Q_OBJECT
+private:
+    QPushButton del_btn;
+    QPushButton close_btn;
+public slots:
+    //void onDelButtonPressed();
+
+public:
+    QString file_path;
+
+    FileDeleteDialog(QWidget* parent = nullptr);
+};
+
+
 //Class to represent tree widget
 class ObjTreeWgt : public QTreeWidget{
     Q_OBJECT

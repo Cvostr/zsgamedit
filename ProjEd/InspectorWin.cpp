@@ -19,6 +19,9 @@ InspectorWin::InspectorWin(QWidget *parent) :
 
      addObjComponentBtn.setText("Add property");
      managePropButton.setText("Manage");
+
+     line.setFrameShape(QFrame::HLine);
+     line.setFrameShadow(QFrame::Sunken);
 }
 
 InspectorWin::~InspectorWin()
@@ -59,6 +62,9 @@ void InspectorWin::clearContentLayout(){
     }
     this->property_areas.clear(); //No areas in list
     this->additional_objects.clear(); //No objects in list
+    //remove divider
+    getContentLayout()->removeWidget(&line);
+    //remove buttons
     getContentLayout()->removeWidget(&addObjComponentBtn);
     getContentLayout()->removeWidget(&managePropButton);
 
@@ -75,6 +81,9 @@ void InspectorWin::registerUiObject(QObject* object){
 }
 
 void InspectorWin::addPropButtons(){
+    //add divider
+    ui->propertySpace->addWidget(&line);
+    //add buttons
     ui->propertySpace->addWidget(&addObjComponentBtn);
     ui->propertySpace->addWidget(&managePropButton);
 

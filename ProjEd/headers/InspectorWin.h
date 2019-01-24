@@ -225,6 +225,8 @@ class InspectorWin : public QMainWindow
 private:
     QPushButton addObjComponentBtn;
     QPushButton managePropButton;
+
+    QFrame line; //line to divide props and control buttons
 public slots:
     void onAddComponentBtnPressed();
     void onManagePropButtonPressed();

@@ -47,7 +47,7 @@ typedef struct TileAnimationState{
         current_time = 0;
         playing = false; //we not playing that
     }
-};
+}TileAnimationState;
 
 class TileGroupProperty : public GameObjectProperty{
 public:

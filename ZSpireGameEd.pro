@@ -43,6 +43,7 @@ SOURCES += \
     ProjEd/PropertyAreas.cpp \
     ProjEd/EdActions.cpp \
     Misc/oal_manager.cpp \
+    ProjEd/EditorUI.cpp
 
 HEADERS += \
         mainwin.h \
