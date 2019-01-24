@@ -544,7 +544,7 @@ void ObjectCtxMenu::onDublicateClicked(){
 }
 
 void ObjectCtxMenu::onMoveClicked(){
-    win_ptr->getInspector()->clearContentLayout(); //Detach object from inspector
+    //win_ptr->getInspector()->clearContentLayout(); //Detach object from inspector
 
     win_ptr->obj_trstate.isTransforming = true; //Transform operation
     win_ptr->obj_trstate.obj_ptr = obj_ptr; //Sending object ptr
@@ -553,7 +553,7 @@ void ObjectCtxMenu::onMoveClicked(){
     win_ptr->obj_trstate.transformMode = GO_TRANSFORM_MODE_TRANSLATE; //Setting transform type
 }
 void ObjectCtxMenu::onScaleClicked(){
-    win_ptr->getInspector()->clearContentLayout(); //Detach object from inspector
+    //win_ptr->getInspector()->clearContentLayout(); //Detach object from inspector
 
     win_ptr->obj_trstate.isTransforming = true; //Transform operation
     win_ptr->obj_trstate.obj_ptr = obj_ptr; //Sending object ptr
@@ -562,7 +562,7 @@ void ObjectCtxMenu::onScaleClicked(){
     win_ptr->obj_trstate.transformMode = GO_TRANSFORM_MODE_SCALE;//Setting transform type
 }
 void ObjectCtxMenu::onRotateClicked(){
-    win_ptr->getInspector()->clearContentLayout(); //Detach object from inspector
+    //win_ptr->getInspector()->clearContentLayout(); //Detach object from inspector
 
     win_ptr->obj_trstate.isTransforming = true; //Transform operation
     win_ptr->obj_trstate.obj_ptr = obj_ptr; //Sending object ptr
@@ -700,7 +700,7 @@ void EditWindow::onMouseMotion(int relX, int relY){
             }
 
             obj_trstate.tprop_ptr->updateMat();
-            //getInspector()->updateObjectProperties();
+            getInspector()->updateObjectProperties();
         }
     }
     if(project.perspective == 3){//Only affective in 3D

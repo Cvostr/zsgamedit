@@ -194,11 +194,13 @@ public:
 class ColorDialogArea : public PropertyEditArea{
 
 public:
+    QLabel digit_str;
     ZSRGBCOLOR* color; //output value
     ZSColorPickDialog dialog; //Dialog pointer
     QPushButton pick_button; //button to show color pick dialog
     ColorDialogArea();
 
+    void updText(); //updates text value
     void addToInspector(InspectorWin* win);
 };
 
@@ -221,9 +223,11 @@ class InspectorWin : public QMainWindow
 {
     Q_OBJECT
 private:
-    QPushButton* addObjComponentBtn;
+    QPushButton addObjComponentBtn;
+    QPushButton managePropButton;
 public slots:
     void onAddComponentBtnPressed();
+    void onManagePropButtonPressed();
 
 public:
     bool updateAreas; //if TRUE, all areas will update
@@ -236,7 +240,7 @@ public:
     void addPropertyArea(PropertyEditArea* area); //Adds new property area
     void registerUiObject(QObject* object);
     void area_update(); //To update property areas states
-    void makeAddObjComponentBtn(); //Adds "Create Property" Btn to content layout
+    void addPropButtons(); //Adds "Create Property" Btn to content layout
     void ShowObjectProperties(void* object_ptr);
     void updateObjectProperties();
     void* gameobject_ptr;
@@ -262,6 +266,22 @@ public:
 
     AddGoComponentDialog(QWidget* parent = nullptr);
     ~AddGoComponentDialog();
+};
+
+class ManageComponentDialog : public QDialog{
+    Q_OBJECT
+private:
+    QPushButton* close_btn;
+
+    QListWidget property_list; //list to store wgt list of props
+public slots:
+    //void onAddButtonPressed();
+
+public:
+    void* g_object_ptr; //Pointer to object, when we'll add components
+
+    ManageComponentDialog(QWidget* parent = nullptr);
+    ~ManageComponentDialog();
 };
 
 class ResourcePickDialog : public QDialog{
