@@ -88,7 +88,7 @@ void InspectorWin::addPropButtons(){
     ui->propertySpace->addWidget(&managePropButton);
 
     connect(&addObjComponentBtn, SIGNAL(clicked()), this, SLOT(onAddComponentBtnPressed()));
-    connect(&addObjComponentBtn, SIGNAL(clicked()), this, SLOT(onManagePropButtonPressed()));
+    connect(&managePropButton, SIGNAL(clicked()), this, SLOT(onManagePropButtonPressed()));
 
 }
 

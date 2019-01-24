@@ -128,19 +128,21 @@ void GameObject::Draw(RenderPipeline* pipeline){
 
         MeshProperty* mesh_prop = static_cast<MeshProperty*>(this->getPropertyPtrByType(GO_PROPERTY_TYPE_MESH));
         if(mesh_prop != nullptr){
-            mesh_prop->mesh_ptr->Draw();
-            //if object is picked
-            if(this->isPicked == true && pipeline->current_state != PIPELINE_STATE_PICKING){
-                int cur_state = pipeline->current_state; //Storing current state
-                pipeline->current_state = PIPELINE_STATE_MARKED;
-                ZSPIRE::Shader* mark_s = pipeline->processShaderOnObject(static_cast<void*>(this));
-                mark_s->setTransform(transform_prop->transform_mat);
-                EditWindow* w = static_cast<EditWindow*>(pipeline->win_ptr);
-                if(w->obj_trstate.isTransforming == true)
-                     mark_s->setGLuniformInt("isTransformMark", 1);
-                mesh_prop->mesh_ptr->DrawLines();
-                pipeline->current_state = cur_state;
-                mark_s->setGLuniformInt("isTransformMark", 0);
+            if(mesh_prop->mesh_ptr != nullptr){
+                mesh_prop->mesh_ptr->Draw();
+                //if object is picked
+                if(this->isPicked == true && pipeline->current_state != PIPELINE_STATE_PICKING){
+                    int cur_state = pipeline->current_state; //Storing current state
+                    pipeline->current_state = PIPELINE_STATE_MARKED;
+                    ZSPIRE::Shader* mark_s = pipeline->processShaderOnObject(static_cast<void*>(this));
+                    mark_s->setTransform(transform_prop->transform_mat);
+                    EditWindow* w = static_cast<EditWindow*>(pipeline->win_ptr);
+                    if(w->obj_trstate.isTransforming == true)
+                         mark_s->setGLuniformInt("isTransformMark", 1);
+                    mesh_prop->mesh_ptr->DrawLines();
+                    pipeline->current_state = cur_state;
+                    mark_s->setGLuniformInt("isTransformMark", 0);
+                }
             }
         }
     }

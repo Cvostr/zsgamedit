@@ -138,6 +138,8 @@ LabelProperty::LabelProperty(){
 MeshProperty::MeshProperty(){
     type = GO_PROPERTY_TYPE_MESH;
     active = true;
+
+    mesh_ptr = nullptr; //set it to 0x0 to check later
 }
 //Transform property functions
 void TransformProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
@@ -257,6 +259,8 @@ void MeshProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
     inspector->addPropertyArea(area);
 }
 void MeshProperty::updateMeshPtr(){
+    if(resource_relpath.length() < 1) return;
+
     if(resource_relpath.compare("@plane") == false){
         this->mesh_ptr = ZSPIRE::getPlaneMesh2D();
     }else if(resource_relpath.compare("@isotile") == false){
