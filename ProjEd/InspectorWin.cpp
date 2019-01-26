@@ -12,10 +12,16 @@ InspectorWin::InspectorWin(QWidget *parent) :
 {
     updateAreas = true; //update areas
     ui->setupUi(this);
-    addObjComponentBtn = nullptr;
+    //addObjComponentBtn = nullptr;
     this->ui->propertySpace->setMargin(0);
-    this->ui->propertySpace->setSpacing(0);
-    this->ui->propertySpace->setContentsMargins(0,0,0,0);
+    this->ui->propertySpace->setSpacing(1);
+    this->ui->propertySpace->setContentsMargins(5,1,2,0);
+
+     addObjComponentBtn.setText("Add property");
+     managePropButton.setText("Manage");
+
+     line.setFrameShape(QFrame::HLine);
+     line.setFrameShadow(QFrame::Sunken);
 }
 
 InspectorWin::~InspectorWin()
@@ -30,11 +36,17 @@ QVBoxLayout* InspectorWin::getContentLayout(){
 void InspectorWin::onAddComponentBtnPressed(){
     AddGoComponentDialog* dialog = new AddGoComponentDialog; //Creating dialog instance
     dialog->g_object_ptr = gameobject_ptr; //Assign this pointer to make property adding work
-    dialog->exec();
-
-    ShowObjectProperties(gameobject_ptr);
-
+    dialog->exec(); //show dialog
+    updateObjectProperties(); //update prop interface
     delete dialog; //Free dialog
+}
+
+void InspectorWin::onManagePropButtonPressed(){
+    ManageComponentDialog* dialog = new ManageComponentDialog;
+    dialog->g_object_ptr = gameobject_ptr;
+    dialog->exec();
+    updateObjectProperties();
+    delete dialog;
 }
 
 void InspectorWin::clearContentLayout(){
@@ -50,10 +62,12 @@ void InspectorWin::clearContentLayout(){
     }
     this->property_areas.clear(); //No areas in list
     this->additional_objects.clear(); //No objects in list
-    if(addObjComponentBtn != nullptr){
-        delete addObjComponentBtn; //Remove button
-        addObjComponentBtn = 0x0; //Avoid crashes
-    }
+    //remove divider
+    getContentLayout()->removeWidget(&line);
+    //remove buttons
+    getContentLayout()->removeWidget(&addObjComponentBtn);
+    getContentLayout()->removeWidget(&managePropButton);
+
 }
 
 void InspectorWin::addPropertyArea(PropertyEditArea* area){
@@ -66,11 +80,16 @@ void InspectorWin::registerUiObject(QObject* object){
     this->additional_objects.push_back(object);
 }
 
-void InspectorWin::makeAddObjComponentBtn(){
-    addObjComponentBtn = new QPushButton; //Allocation of button
-    addObjComponentBtn->setText("Add property");
-    ui->propertySpace->addWidget(addObjComponentBtn);
-    connect(addObjComponentBtn, SIGNAL(clicked()), this, SLOT(onAddComponentBtnPressed()));
+void InspectorWin::addPropButtons(){
+    //add divider
+    ui->propertySpace->addWidget(&line);
+    //add buttons
+    ui->propertySpace->addWidget(&addObjComponentBtn);
+    ui->propertySpace->addWidget(&managePropButton);
+
+    connect(&addObjComponentBtn, SIGNAL(clicked()), this, SLOT(onAddComponentBtnPressed()));
+    connect(&managePropButton, SIGNAL(clicked()), this, SLOT(onManagePropButtonPressed()));
+
 }
 
 void InspectorWin::ShowObjectProperties(void* object_ptr){
@@ -82,9 +101,15 @@ void InspectorWin::ShowObjectProperties(void* object_ptr){
     unsigned int props_num = static_cast<unsigned int>(obj_ptr->props_num);
     for(unsigned int prop_it = 0; prop_it < props_num; prop_it ++){ //iterate over all properties and send them to inspector
         GameObjectProperty* property_ptr = (obj_ptr->properties[prop_it]); //Obtain pointer to object property
+
+        AreaPropertyTitle* prop_title = new AreaPropertyTitle;
+        prop_title->prop_title.setText(getPropertyString(property_ptr->type));
+        getContentLayout()->addLayout(&prop_title->layout);
+        this->registerUiObject(prop_title);
+
         property_ptr->addPropertyInterfaceToInspector(this); //Add its interface to inspector
     }
-    makeAddObjComponentBtn();
+    addPropButtons(); //add buttons
     gameobject_ptr = static_cast<void*>(obj_ptr);
 }
 
@@ -107,6 +132,15 @@ void AddGoComponentDialog::onAddButtonPressed(){
     GameObject* object_ptr = static_cast<GameObject*>(this->g_object_ptr);
     object_ptr->addProperty(comp_type->text().toInt());
     accept(); //Close dialog with true
+}
+
+ManageComponentDialog::ManageComponentDialog(QWidget* parent) :
+    QDialog (parent, Qt::WindowTitleHint | Qt::WindowSystemMenuHint) {
+
+}
+
+ManageComponentDialog::~ManageComponentDialog(){
+
 }
 
 AddGoComponentDialog::AddGoComponentDialog(QWidget* parent)

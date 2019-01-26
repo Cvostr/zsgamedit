@@ -105,7 +105,7 @@ void ZSPIRE::Mesh::Init() {
     glGenBuffers(1, &this->meshEBO);
 }
 
-void ZSPIRE::createPlane2D() {
+void ZSPIRE::setupDefaultMeshes() {
     plane2Dmesh.Init(); //Initialize mesh for GL
     plane2Dmesh.setMeshData(plane_verts, plane_inds, 4, 6); //Send plane data
 
@@ -117,6 +117,13 @@ void ZSPIRE::createPlane2D() {
 
     cube3Dmesh.Init();
     cube3Dmesh.setMeshData(cube_vertices, 36);
+}
+
+void ZSPIRE::freeDefaultMeshes(){
+    plane2Dmesh.Destroy();
+    uiSprite2Dmesh.Destroy();
+    iso_tile2Dmesh.Destroy();
+    cube3Dmesh.Destroy();
 }
 
 ZSPIRE::Mesh* ZSPIRE::getPlaneMesh2D() {
@@ -296,7 +303,6 @@ void ZSPIRE::Mesh::LoadMeshesFromFileASSIMP(const char* file_path) {
 
 	const aiScene* scene = importer.ReadFile(file_path, loadflags);
 
-	//if(scene == nullptr) return false;
     processMesh(scene->mMeshes[0], scene);
 
 }

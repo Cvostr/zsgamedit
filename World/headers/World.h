@@ -56,6 +56,7 @@ public:
     virtual void onValueChanged();
     virtual void copyTo(GameObjectProperty* dest);
     virtual void onObjectDeleted();
+    virtual void onUpdate(float deltaTime);
 };
 
 #include "2dtileproperties.h" //Include that to define 2dTile game elements
@@ -219,5 +220,6 @@ public:
 
 };
 GameObjectProperty* allocProperty(int type);
+QString getPropertyString(int type);
 
 #endif

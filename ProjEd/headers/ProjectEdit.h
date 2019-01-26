@@ -11,6 +11,8 @@
 #include "../../Render/headers/zs-pipeline.h"
 #include "../../World/headers/zs-camera.h"
 
+#include "../../Misc/headers/oal_manager.h"
+
 struct Resource;
 struct Project;
 
@@ -23,6 +25,10 @@ struct Project;
 #define GO_TRANSFORM_MODE_TRANSLATE 1
 #define GO_TRANSFORM_MODE_SCALE 2
 #define GO_TRANSFORM_MODE_ROTATE 3
+
+#define EW_CLOSE_REASON_UNCLOSED 0
+#define EW_CLOSE_REASON_PROJLIST 1
+#define EW_CLOSE_REASON_BUILD 2
 
 namespace Ui {
 class EditWindow;
@@ -67,6 +73,7 @@ struct ObjectTransformState{
 };
 
 class ObjectCtxMenu;
+class FileCtxMenu;
 
 class EditWindow : public QMainWindow
 {
@@ -76,6 +83,7 @@ public slots:
     void onFileListItemClicked();
     void onObjectListItemClicked();
     void onObjectCtxMenuShow(QPoint point);
+    void onFileCtxMenuShow(QPoint point);
     void onCameraToObjTeleport();
 
     void onAddNewGameObject();
@@ -84,11 +92,13 @@ public slots:
     void onOpenScene();
     void onNewScene();
 
+    void onCloseProject();
+
     void onUndoPressed();
     void onRedoPressed();
 
 private:
-    QString current_dir;
+    QString current_dir; //current directory path string
     QString scene_path;
     bool hasSceneFile; //Is scene saved or loaded
 
@@ -97,12 +107,14 @@ private:
 
     RenderPipeline* render;
 
-    ObjectCtxMenu* obj_ctx_menu;
+    ObjectCtxMenu* obj_ctx_menu; //Context menu on object right click
+    FileCtxMenu* file_ctx_menu;
 
     float cam_pitch = 0;
     float cam_yaw = 0;
 public:
     bool ready; //Is everything loaded?
+    int close_reason;
 
     World world;
     ZSPIRE::Camera edit_camera; //Camera to show editing scene
@@ -169,6 +181,42 @@ public:
     void close();
 };
 
+class FileCtxMenu : public QObject{
+    Q_OBJECT
+public slots:
+    void onDeleteClicked();
+    void onRename();
+private:
+    QMenu* menu; //Menu object to contain everything
+
+    QAction* action_rename; //Button to dublicate object
+    QAction* action_delete; //Button to delete object
+public:
+    EditWindow* win_ptr;
+    QString file_path; //path to selected file
+
+    FileCtxMenu(EditWindow* win, QWidget* parent = nullptr);
+    void show(QPoint point);
+    void close();
+};
+
+class FileDeleteDialog : public QDialog{
+    Q_OBJECT
+private:
+    QPushButton del_btn;
+    QPushButton close_btn;
+
+    QGridLayout contentLayout;
+    QLabel del_message;
+public slots:
+    void onDelButtonPressed();
+
+public:
+    QString file_path;
+
+    FileDeleteDialog(QString file_path, QWidget* parent = nullptr);
+};
+
 //Class to represent tree widget
 class ObjTreeWgt : public QTreeWidget{
     Q_OBJECT
@@ -182,6 +230,20 @@ public:
     ObjTreeWgt(QWidget* parent = nullptr);
 
     void dropEvent(QDropEvent* event);
+
+    World* world_ptr;
+};
+
+class FileListWgt : public QListWidget{
+    Q_OBJECT
+protected:
+    void mousePressEvent(QMouseEvent *event) override;
+signals:
+    void onRightClick(QPoint pos);
+    void onLeftClick(QPoint pos);
+public:
+    EditWindow* win_ptr;
+    FileListWgt(QWidget* parent = nullptr);
 
     World* world_ptr;
 };

@@ -12,9 +12,21 @@ void RenderPipeline::setup(){
     this->obj_mark_shader.compileFromFile("Shaders/mark/mark.vs", "Shaders/mark/mark.fs");
     this->deffered_light.compileFromFile("Shaders/postprocess/deffered_light/deffered.vs", "Shaders/postprocess/deffered_light/deffered.fs");
     this->diffuse3d_shader.compileFromFile("Shaders/3d/3d.vs", "Shaders/3d/3d.fs");
-    ZSPIRE::createPlane2D();
+    ZSPIRE::setupDefaultMeshes();
 
     this->gbuffer.create(640, 480);
+    removeLights();
+}
+
+RenderPipeline::~RenderPipeline(){
+    this->tile_shader.Destroy();
+    this->pick_shader.Destroy();
+    this->obj_mark_shader.Destroy();
+    this->deffered_light.Destroy();
+    this->diffuse3d_shader.Destroy();
+    ZSPIRE::freeDefaultMeshes();
+
+    this->gbuffer.Destroy();
     removeLights();
 }
 
@@ -116,19 +128,21 @@ void GameObject::Draw(RenderPipeline* pipeline){
 
         MeshProperty* mesh_prop = static_cast<MeshProperty*>(this->getPropertyPtrByType(GO_PROPERTY_TYPE_MESH));
         if(mesh_prop != nullptr){
-            mesh_prop->mesh_ptr->Draw();
-            //if object is picked
-            if(this->isPicked == true && pipeline->current_state != PIPELINE_STATE_PICKING){
-                int cur_state = pipeline->current_state; //Storing current state
-                pipeline->current_state = PIPELINE_STATE_MARKED;
-                ZSPIRE::Shader* mark_s = pipeline->processShaderOnObject(static_cast<void*>(this));
-                mark_s->setTransform(transform_prop->transform_mat);
-                EditWindow* w = static_cast<EditWindow*>(pipeline->win_ptr);
-                if(w->obj_trstate.isTransforming == true)
-                     mark_s->setGLuniformInt("isTransformMark", 1);
-                mesh_prop->mesh_ptr->DrawLines();
-                pipeline->current_state = cur_state;
-                mark_s->setGLuniformInt("isTransformMark", 0);
+            if(mesh_prop->mesh_ptr != nullptr){
+                mesh_prop->mesh_ptr->Draw();
+                //if object is picked
+                if(this->isPicked == true && pipeline->current_state != PIPELINE_STATE_PICKING){
+                    int cur_state = pipeline->current_state; //Storing current state
+                    pipeline->current_state = PIPELINE_STATE_MARKED;
+                    ZSPIRE::Shader* mark_s = pipeline->processShaderOnObject(static_cast<void*>(this));
+                    mark_s->setTransform(transform_prop->transform_mat);
+                    EditWindow* w = static_cast<EditWindow*>(pipeline->win_ptr);
+                    if(w->obj_trstate.isTransforming == true)
+                         mark_s->setGLuniformInt("isTransformMark", 1);
+                    mesh_prop->mesh_ptr->DrawLines();
+                    pipeline->current_state = cur_state;
+                    mark_s->setGLuniformInt("isTransformMark", 0);
+                }
             }
         }
     }
@@ -196,7 +210,6 @@ void RenderPipeline::updateShadersCameraInfo(ZSPIRE::Camera* cam_ptr){
         diffuse3d_shader.Use();
         diffuse3d_shader.setCamera(cam_ptr);
     }
-
     if(tile_shader.isCreated == true){
         tile_shader.Use();
         tile_shader.setCamera(cam_ptr);
@@ -275,4 +288,15 @@ void G_BUFFER_GL::bindTextures(){
 
     glActiveTexture(GL_TEXTURE12);
     glBindTexture(GL_TEXTURE_2D, tPos);
+}
+
+void G_BUFFER_GL::Destroy(){
+    //Remove textures
+    glDeleteTextures(1, &tDiffuse);
+    glDeleteTextures(1, &tNormal);
+    glDeleteTextures(1, &tPos);
+
+    //delete framebuffer & renderbuffer
+    glDeleteRenderbuffers(1, &this->depthBuffer);
+    glDeleteFramebuffers(1, &this->gBuffer);
 }

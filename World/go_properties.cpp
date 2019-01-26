@@ -19,6 +19,40 @@ void GameObjectProperty::onObjectDeleted(){
 
 }
 
+void GameObjectProperty::onUpdate(float deltaTime){
+
+}
+
+QString getPropertyString(int type){
+    switch (type) {
+        case GO_PROPERTY_TYPE_TRANSFORM:{ //If type is transfrom
+            return QString("Transform");
+            break;
+        }
+        case GO_PROPERTY_TYPE_LABEL:{
+            return QString("Label");
+            break;
+        }
+        case GO_PROPERTY_TYPE_MESH:{
+            return QString("Mesh");
+            break;
+        }
+        case GO_PROPERTY_TYPE_LIGHTSOURCE:{
+            return QString("Light");
+            break;
+        }
+        case GO_PROPERTY_TYPE_TILE_GROUP:{
+            return QString("Tile Group");
+            break;
+        }
+        case GO_PROPERTY_TYPE_TILE:{
+            return QString("Tile");
+            break;
+        }
+    }
+    return QString("NONE");
+}
+
 GameObjectProperty* allocProperty(int type){
     GameObjectProperty* _ptr = nullptr;
     switch (type) {
@@ -104,6 +138,9 @@ LabelProperty::LabelProperty(){
 MeshProperty::MeshProperty(){
     type = GO_PROPERTY_TYPE_MESH;
     active = true;
+
+    mesh_ptr = nullptr; //set it to 0x0 to check later
+    this->resource_relpath = "@none";
 }
 //Transform property functions
 void TransformProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
@@ -223,6 +260,8 @@ void MeshProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
     inspector->addPropertyArea(area);
 }
 void MeshProperty::updateMeshPtr(){
+    if(resource_relpath.length() < 1) return;
+
     if(resource_relpath.compare("@plane") == false){
         this->mesh_ptr = ZSPIRE::getPlaneMesh2D();
     }else if(resource_relpath.compare("@isotile") == false){
@@ -404,10 +443,17 @@ void GameObject::saveProperties(std::ofstream* stream){
         }
         case GO_PROPERTY_TYPE_TILE:{
             TileProperty* ptr = static_cast<TileProperty*>(property_ptr);
-            if(ptr->diffuse_relpath.isEmpty())
+            if(ptr->diffuse_relpath.isEmpty()) //check if object has no texture
                 *stream << "@none";
             else
-                *stream << ptr->diffuse_relpath.toStdString();
+                *stream << ptr->diffuse_relpath.toStdString() << "\n";
+
+            //Animation stuff
+            stream->write(reinterpret_cast<char*>(&ptr->anim_property.isAnimated), sizeof(bool));
+            if(ptr->anim_property.isAnimated){ //if animated, then write animation properties
+                stream->write(reinterpret_cast<char*>(&ptr->anim_property.framesX), sizeof(int));
+                stream->write(reinterpret_cast<char*>(&ptr->anim_property.framesY), sizeof(int));
+            }
             break;
         }
         }
@@ -500,6 +546,13 @@ void GameObject::loadProperty(std::ifstream* world_stream){
             lptr->diffuse_relpath = QString::fromStdString(rel_path); //Write loaded mesh relative path
             lptr->updTexturePtr(); //Pointer will now point to mesh resource
         }
+        world_stream->seekg(1, std::ofstream::cur);
+        world_stream->read(reinterpret_cast<char*>(&lptr->anim_property.isAnimated), sizeof(bool));
+        if(lptr->anim_property.isAnimated){ //if animated, then write animation properties
+            world_stream->read(reinterpret_cast<char*>(&lptr->anim_property.framesX), sizeof(int));
+            world_stream->read(reinterpret_cast<char*>(&lptr->anim_property.framesY), sizeof(int));
+        }
+
         break;
     }
     }

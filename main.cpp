@@ -11,7 +11,14 @@ int main(int argc, char *argv[])
     while (working) {
        // if (a.hasPendingEvents())
             a.processEvents();
+
             if(w.edit_win_ptr != nullptr){ //Check if project editor window is created
+                //Close checks
+                if(w.edit_win_ptr->close_reason == EW_CLOSE_REASON_PROJLIST){
+                    w.edit_win_ptr->close_reason = EW_CLOSE_REASON_UNCLOSED;
+                    w.show();
+                }
+
                 w.edit_win_ptr->getInspector()->area_update();
                 w.edit_win_ptr->edit_camera.updateTick(); //Update camera, if it is moving
                 if(w.edit_win_ptr->ready == true) //If GL is ready to draw

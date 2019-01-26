@@ -40,7 +40,9 @@ namespace ZSPIRE {
 		Mesh();
 	};
 
-    void createPlane2D();
+    void setupDefaultMeshes();
+    void freeDefaultMeshes();
+
 	Mesh* getPlaneMesh2D();
 	Mesh* getUiSpriteMesh2D();
 	Mesh* getIsoTileMesh2D();

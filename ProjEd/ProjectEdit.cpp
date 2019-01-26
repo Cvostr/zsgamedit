@@ -20,8 +20,9 @@ EditWindow::EditWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    QObject::connect(ui->fileList, SIGNAL(doubleClicked(QModelIndex)),
-                this, SLOT(onFileListItemClicked())); //Signal comes, when user clicks on file
+    QObject::connect(ui->fileList, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(onFileListItemClicked())); //Signal comes, when user clicks on file
+    QObject::connect(ui->fileList, SIGNAL(onRightClick(QPoint)), this, SLOT(onFileCtxMenuShow(QPoint)));
+
     QObject::connect(ui->actionNew_Object, SIGNAL(triggered()),
                 this, SLOT(onAddNewGameObject())); //Signal comes, when user clicks on Object->Create
     QObject::connect(ui->actionSave, SIGNAL(triggered()), this, SLOT(onSceneSave())); //Signal comes, when user clicks on File->Save
@@ -29,6 +30,8 @@ EditWindow::EditWindow(QWidget *parent) :
     QObject::connect(ui->actionOpen, SIGNAL(triggered()), this, SLOT(onOpenScene()));
 
     QObject::connect(ui->actionCreateScene, SIGNAL(triggered()), this, SLOT(onNewScene()));
+
+    QObject::connect(ui->actionClose_project, SIGNAL(triggered()), this, SLOT(onCloseProject()));
 
     QObject::connect(ui->actionUndo, SIGNAL(triggered()), this, SLOT(onUndoPressed()));
     QObject::connect(ui->actionRedo, SIGNAL(triggered()), this, SLOT(onRedoPressed()));
@@ -55,6 +58,8 @@ EditWindow::EditWindow(QWidget *parent) :
     ui->fileList->setViewMode(QListView::IconMode);
 
     this->obj_ctx_menu = new ObjectCtxMenu(this); //Allocating object Context menu
+    //Allocate file ctx menu
+    this->file_ctx_menu = new FileCtxMenu(this);
     this->ui->objsList->win_ptr = this; //putting pointer to window to custom tree view
 
     ui->actionOpen->setShortcut(Qt::Key_O | Qt::CTRL);
@@ -67,14 +72,6 @@ EditWindow::EditWindow(QWidget *parent) :
 EditWindow::~EditWindow()
 {
     delete ui;
-}
-
-void ObjTreeWgt::mousePressEvent(QMouseEvent *event){
-    QTreeWidget::mousePressEvent(event);
-    if(event->button() == Qt::RightButton)
-    {
-        emit onRightClick(event->pos());
-    }
 }
 
 void EditWindow::init(){
@@ -119,6 +116,8 @@ void EditWindow::init(){
     render->setup();
     ready = true;//Everything is ready
 
+    ZSPIRE::SFX::initAL();
+
     switch(project.perspective){
     case 2:{ //2D project
 
@@ -143,6 +142,9 @@ void EditWindow::assignIconFile(QListWidgetItem* item){
     }
     if(item->text().endsWith(".dds") || item->text().endsWith(".DDS")){
         item->setIcon(QIcon::fromTheme("image-x-generic"));
+    }
+    if(item->text().endsWith(".fbx") || item->text().endsWith(".FBX")){
+        item->setIcon(QIcon::fromTheme("applications-graphics"));
     }
 }
 
@@ -209,6 +211,22 @@ void EditWindow::onAddNewGameObject(){
 void EditWindow::setupObjectsHieList(){
     QTreeWidget* w_ptr = ui->objsList; //Getting pointer to objects list widget
     w_ptr->clear(); //Clears widget
+}
+
+void EditWindow::onCloseProject(){
+    world.clear(); //clear world
+    SDL_DestroyWindow(window); //Destroy SDL and opengl
+    SDL_GL_DeleteContext(glcontext);
+
+    //Close Qt windows
+    _editor_win->close();
+    _inspector_win->close();
+
+    delete render;
+    _ed_actions_container->clear();
+
+    this->ready = false; //won't render anymore
+    this->close_reason = EW_CLOSE_REASON_PROJLIST;
 }
 
 void EditWindow::updateFileList(){
@@ -281,14 +299,24 @@ void EditWindow::onObjectListItemClicked(){
     obj_trstate.tprop_ptr = static_cast<TransformProperty*>(obj_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
     _inspector_win->ShowObjectProperties(static_cast<void*>(obj_ptr));
 }
-
+//Objects list right pressed
 void EditWindow::onObjectCtxMenuShow(QPoint point){
     QTreeWidgetItem* selected_item = ui->objsList->currentItem(); //Obtain pointer to clicked obj item
+    //We selected empty space
+    if(selected_item == 0x0) return;
     QString obj_name = selected_item->text(0); //Get label of clicked obj
     GameObject* obj_ptr = world.getObjectByLabel(obj_name); //Obtain pointer to selected object by label
 
     this->obj_ctx_menu->setObjectPtr(obj_ptr);
     this->obj_ctx_menu->show(point);
+}
+
+void EditWindow::onFileCtxMenuShow(QPoint point){
+    QListWidgetItem* selected_item = ui->fileList->currentItem(); //get selected item
+    QString file_name = selected_item->text();
+
+    this->file_ctx_menu->file_path = current_dir + "/" + file_name; //set file path
+    this->file_ctx_menu->show(point);
 }
 
 void EditWindow::onCameraToObjTeleport(){
@@ -304,6 +332,10 @@ void EditWindow::onCameraToObjTeleport(){
     transform->getAbsoluteParentTransform(_t, _s, _r); //Calculate absolute transform
 
     edit_camera._dest_pos = _t; //Sending position
+    if(project.perspective == 3){ //if we're in 3D
+        ZSVECTOR3 camFront = edit_camera.getCameraFrontVec();
+        edit_camera._dest_pos = edit_camera._dest_pos - camFront * 6; //move back a little
+    }
     edit_camera.startMoving();
 }
 
@@ -335,7 +367,7 @@ void EditWindow::lookForResources(QString path){
                 Resource resource;
                 resource.file_path = fileInfo.absoluteFilePath(); //Writing full path
                 resource.rel_path = resource.file_path; //Preparing to get relative path
-                resource.rel_path.remove(0, project.root_path.size()); //Get relative path by removing length of project root from start
+                resource.rel_path.remove(0, project.root_path.size() + 1); //Get relative path by removing length of project root from start
                 resource.type = RESOURCE_TYPE_TEXTURE; //Type is texture
                 loadResource(&resource); //Perform texture loading to OpenGL
                 this->project.resources.push_back(resource);
@@ -344,7 +376,7 @@ void EditWindow::lookForResources(QString path){
                 Resource resource;
                 resource.file_path = fileInfo.absoluteFilePath();
                 resource.rel_path = resource.file_path; //Preparing to get relative path
-                resource.rel_path.remove(0, project.root_path.size()); //Get relative path by removing length of project root from start
+                resource.rel_path.remove(0, project.root_path.size() + 1); //Get relative path by removing length of project root from start
                 resource.type = RESOURCE_TYPE_MESH; //Type of resource is mesh
                 loadResource(&resource); //Perform mesh processing & loading to OpenGL
                 this->project.resources.push_back(resource);
@@ -417,6 +449,7 @@ EditWindow* ZSEditor::openProject(QString conf_file_path){
 EditWindow* ZSEditor::openEditor(){
     _editor_win->init();
 
+    _editor_win->close_reason = EW_CLOSE_REASON_UNCLOSED;
     _editor_win->lookForResources(_editor_win->project.root_path); //Make a vector of all resource files
     _editor_win->move(0,0); //Editor base win would be in the left part of screen
     _editor_win->show(); //Show editor window
@@ -433,44 +466,6 @@ EditWindow* ZSEditor::openEditor(){
 
 InspectorWin* EditWindow::getInspector(){
     return _inspector_win;
-}
-
-ObjTreeWgt::ObjTreeWgt(QWidget* parent) : QTreeWidget (parent){
-    this->world_ptr = nullptr; //Not assigned by default
-}
-
-ObjectCtxMenu::ObjectCtxMenu(EditWindow* win, QWidget* parent ) : QObject(parent){
-    this->win_ptr = win;
-    //Allocting menu container
-    this->menu = new QMenu(win);
-    //Allocating actions
-    this->action_dub = new QAction("Dublicate", win);
-    this->action_delete = new QAction("Delete", win);
-
-    action_move = new QAction("Move", win);
-    action_scale = new QAction("Scale", win);
-    action_rotate = new QAction("Rotate", win);
-    //Adding actions to menu container
-    this->menu->addAction(action_dub);
-    this->menu->addAction(action_delete);
-    //Connect actions to slots
-    QObject::connect(this->action_delete, SIGNAL(triggered(bool)), this, SLOT(onDeleteClicked()));
-    QObject::connect(this->action_dub, SIGNAL(triggered(bool)), this, SLOT(onDublicateClicked()));
-
-    QObject::connect(this->action_move, SIGNAL(triggered(bool)), this, SLOT(onMoveClicked()));
-    QObject::connect(this->action_scale, SIGNAL(triggered(bool)), this, SLOT(onScaleClicked()));
-    QObject::connect(this->action_rotate, SIGNAL(triggered(bool)), this, SLOT(onRotateClicked()));
-
-}
-
-void ObjectCtxMenu::show(QPoint point){
-    //close();
-
-        this->menu->addAction(action_move);
-        this->menu->addAction(action_scale);
-        this->menu->addAction(action_rotate);
-
-    menu->popup(point);
 }
 
 void ObjectCtxMenu::setObjectPtr(GameObject* obj_ptr){
@@ -504,7 +499,7 @@ void ObjectCtxMenu::onDublicateClicked(){
 }
 
 void ObjectCtxMenu::onMoveClicked(){
-    win_ptr->getInspector()->clearContentLayout(); //Detach object from inspector
+    //win_ptr->getInspector()->clearContentLayout(); //Detach object from inspector
 
     win_ptr->obj_trstate.isTransforming = true; //Transform operation
     win_ptr->obj_trstate.obj_ptr = obj_ptr; //Sending object ptr
@@ -513,7 +508,7 @@ void ObjectCtxMenu::onMoveClicked(){
     win_ptr->obj_trstate.transformMode = GO_TRANSFORM_MODE_TRANSLATE; //Setting transform type
 }
 void ObjectCtxMenu::onScaleClicked(){
-    win_ptr->getInspector()->clearContentLayout(); //Detach object from inspector
+    //win_ptr->getInspector()->clearContentLayout(); //Detach object from inspector
 
     win_ptr->obj_trstate.isTransforming = true; //Transform operation
     win_ptr->obj_trstate.obj_ptr = obj_ptr; //Sending object ptr
@@ -522,7 +517,7 @@ void ObjectCtxMenu::onScaleClicked(){
     win_ptr->obj_trstate.transformMode = GO_TRANSFORM_MODE_SCALE;//Setting transform type
 }
 void ObjectCtxMenu::onRotateClicked(){
-    win_ptr->getInspector()->clearContentLayout(); //Detach object from inspector
+    //win_ptr->getInspector()->clearContentLayout(); //Detach object from inspector
 
     win_ptr->obj_trstate.isTransforming = true; //Transform operation
     win_ptr->obj_trstate.obj_ptr = obj_ptr; //Sending object ptr
@@ -571,6 +566,7 @@ void EditWindow::onLeftBtnClicked(int X, int Y){
     obj_trstate.obj_ptr = obj_ptr;
     obj_trstate.tprop_ptr = static_cast<TransformProperty*>(obj_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
     _inspector_win->ShowObjectProperties(static_cast<void*>(obj_ptr));
+    this->ui->objsList->setCurrentItem(obj_ptr->item_ptr); //item selected in tree
 }
 void EditWindow::onRightBtnClicked(int X, int Y){
     this->obj_trstate.isTransforming = false; //disabling object transform
@@ -633,7 +629,7 @@ void EditWindow::onMouseMotion(int relX, int relY){
             }
 
             obj_trstate.tprop_ptr->updateMat();
-            //getInspector()->updateObjectProperties();
+            getInspector()->updateObjectProperties();
         }
     }
     if(project.perspective == 3){//Only affective in 3D

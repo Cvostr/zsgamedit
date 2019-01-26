@@ -4,6 +4,22 @@
 #include <QDoubleValidator>
 #include <QObject>
 
+AreaPropertyTitle::AreaPropertyTitle(){
+    this->layout.addWidget(&this->line);
+    //layout.setSpacing(0);
+    this->layout.addWidget(&this->prop_title);
+    prop_title.setFixedHeight(25);
+    prop_title.setMargin(0);
+
+    QFont font = prop_title.font();
+    font.setPointSize(13);
+    font.setItalic(true);
+    prop_title.setFont(font);
+
+    line.setFrameShape(QFrame::HLine);
+    line.setFrameShadow(QFrame::Sunken);
+}
+
 AreaButton::AreaButton(){
     this->button = new QPushButton;
     connect(this->button, SIGNAL(clicked()), this, SLOT(onButtonPressed()));
@@ -51,7 +67,6 @@ void AreaButton::onButtonPressed(){
     insp_ptr->updateObjectProperties();
 }
 
-
 PropertyEditArea::PropertyEditArea(){
     type = PEA_TYPE_NONE;
     elem_layout = new QHBoxLayout;
@@ -59,6 +74,8 @@ PropertyEditArea::PropertyEditArea(){
     go_property = nullptr; //Nullptr by default
 
     elem_layout->addWidget(label_widget); //Adding label to result layout
+    elem_layout->setContentsMargins(8,0,0,0); //move layout to right
+    elem_layout->setSpacing(0);
 }
 
 void PropertyEditArea::destroyLayout(){
@@ -240,6 +257,11 @@ FloatPropertyArea::FloatPropertyArea(){
     type = PEA_TYPE_FLOAT;
     value = 0; //Set default value
 
+    QLocale locale(QLocale::English); //Define english locale to set it to double validator later
+    QDoubleValidator* validator = new QDoubleValidator(-100, 100, 6, nullptr); //Define double validator
+    validator->setLocale(locale); //English locale to accept dost instead of commas
+
+    float_field.setValidator(validator);
     elem_layout->addWidget(&float_field); //Add text filed to layout
 }
 FloatPropertyArea::~FloatPropertyArea(){
@@ -316,7 +338,12 @@ IntPropertyArea::IntPropertyArea(){
     type = PEA_TYPE_INT;
     this->value = nullptr;
 
+    QLocale locale(QLocale::English); //Define english locale to set it to double validator later
+    QDoubleValidator* validator = new QDoubleValidator(-100, 100, 6, nullptr); //Define double validator
+    validator->setLocale(locale); //English locale to accept dost instead of commas
+
     this->int_field = new QLineEdit;
+    int_field->setValidator(validator);
     elem_layout->addWidget(int_field); //Add text filed to layout
 }
 
@@ -392,16 +419,28 @@ ResourcePickDialog::~ResourcePickDialog(){
     delete list;
 }
 ColorDialogArea::ColorDialogArea(){
-    dialog = new ZSColorPickDialog;
+    type = PEA_TYPE_COLOR;
     pick_button.setText("Pick color");
+    elem_layout->addWidget(&digit_str);
     elem_layout->addWidget(&pick_button);
-    dialog->area_ptr = this; //setting area pointer
+    dialog.area_ptr = this; //setting area pointer
     this->color = nullptr;
 }
 void ColorDialogArea::addToInspector(InspectorWin* win){
     win->getContentLayout()->addLayout(this->elem_layout);
-    QObject::connect(&this->pick_button, SIGNAL(clicked()), dialog, SLOT(onNeedToShow()));
-    dialog->color_ptr = this->color;
+    QObject::connect(&this->pick_button, SIGNAL(clicked()), &dialog, SLOT(onNeedToShow()));
+    dialog.color_ptr = this->color;
+    updText();
+}
+
+void ColorDialogArea::updText(){
+    int red = color->r;
+    int green = color->g;
+    int blue = color->b;
+
+    QString _text = QString::number(red) + ", " + QString::number(green) + ", " + QString::number(blue);
+
+    digit_str.setText(_text);
 }
 
 ZSColorPickDialog::ZSColorPickDialog(QWidget* parent) : QColorDialog(parent){
@@ -413,5 +452,27 @@ void ZSColorPickDialog::onNeedToShow(){
     ZSRGBCOLOR _color = ZSRGBCOLOR(color.red(), color.green(), color.blue());
     _color.updateGL();
     *color_ptr = _color;
+    area_ptr->updText();
     area_ptr->PropertyEditArea::callPropertyUpdate();
+}
+
+BoolCheckboxArea::BoolCheckboxArea(){
+    type = PEA_TYPE_BOOL;
+    bool_ptr = nullptr;
+
+    elem_layout->addWidget(&this->checkbox);
+}
+void BoolCheckboxArea::addToInspector(InspectorWin* win){
+    win->getContentLayout()->addLayout(this->elem_layout);
+}
+void BoolCheckboxArea::updateState(){
+    if(bool_ptr == nullptr) return; //pointer not set, exiting
+    if(this->checkbox.isChecked()){ //if user checked it
+        *bool_ptr = true;
+    }else{ //unchecked
+        *bool_ptr = false;
+    }
+}
+void BoolCheckboxArea::setup(){
+    checkbox.setChecked(*bool_ptr);
 }

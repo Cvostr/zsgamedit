@@ -55,7 +55,7 @@
     </property>
     <layout class="QVBoxLayout" name="verticalLayout"/>
    </widget>
-   <widget class="QListWidget" name="fileList">
+   <widget class="FileListWgt" name="fileList">
     <property name="geometry">
      <rect>
       <x>0</x>
@@ -82,6 +82,9 @@
     <addaction name="actionOpen"/>
     <addaction name="actionSave"/>
     <addaction name="actionSave_As"/>
+    <addaction name="actionRun"/>
+    <addaction name="actionBuild"/>
+    <addaction name="actionClose_project"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
@@ -143,11 +146,31 @@
     <string>&amp;Open</string>
    </property>
   </action>
+  <action name="actionClose_project">
+   <property name="text">
+    <string>Close project</string>
+   </property>
+  </action>
+  <action name="actionRun">
+   <property name="text">
+    <string>Run</string>
+   </property>
+  </action>
+  <action name="actionBuild">
+   <property name="text">
+    <string>Build</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
    <class>ObjTreeWgt</class>
    <extends>QTreeWidget</extends>
+   <header>ProjEd/headers/ProjectEdit.h</header>
+  </customwidget>
+  <customwidget>
+   <class>FileListWgt</class>
+   <extends>QListWidget</extends>
    <header>ProjEd/headers/ProjectEdit.h</header>
   </customwidget>
  </customwidgets>

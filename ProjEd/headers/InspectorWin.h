@@ -11,6 +11,7 @@
 #include <QListWidget>
 #include <QRadioButton>
 #include <QColorDialog>
+#include <QCheckBox>
 
 #include "../../Render/headers/zs-math.h"
 
@@ -21,12 +22,25 @@
 #define PEA_TYPE_FLOAT3 4
 #define PEA_TYPE_INT 5
 #define PEA_TYPE_RESPICK 6
+#define PEA_TYPE_COLOR 7
+#define PEA_TYPE_BOOL 8
 
 #define PICK_RES_TYPE_MESH 0
 #define PICK_RES_TYPE_TEXTURE 1
 
 class InspectorWin;
 class ResourcePickDialog;
+
+class AreaPropertyTitle : public QObject{
+    Q_OBJECT
+public:
+    QVBoxLayout layout;
+
+    QFrame line;
+    QLabel prop_title;
+
+    AreaPropertyTitle();
+};
 
 class AreaButton : public QObject{
     Q_OBJECT
@@ -180,12 +194,25 @@ public:
 class ColorDialogArea : public PropertyEditArea{
 
 public:
+    QLabel digit_str;
     ZSRGBCOLOR* color; //output value
-    ZSColorPickDialog* dialog; //Dialog pointer
+    ZSColorPickDialog dialog; //Dialog pointer
     QPushButton pick_button; //button to show color pick dialog
     ColorDialogArea();
 
+    void updText(); //updates text value
     void addToInspector(InspectorWin* win);
+};
+
+class BoolCheckboxArea : public PropertyEditArea{
+public:
+    bool* bool_ptr; //pointer to modifying bool
+    QCheckBox checkbox; //pressing checkbox
+
+    BoolCheckboxArea();
+    void setup(); //Virtual
+    void addToInspector(InspectorWin* win);
+    void updateState(); //Virtual, to check widget state
 };
 
 namespace Ui {
@@ -196,9 +223,13 @@ class InspectorWin : public QMainWindow
 {
     Q_OBJECT
 private:
-    QPushButton* addObjComponentBtn;
+    QPushButton addObjComponentBtn;
+    QPushButton managePropButton;
+
+    QFrame line; //line to divide props and control buttons
 public slots:
     void onAddComponentBtnPressed();
+    void onManagePropButtonPressed();
 
 public:
     bool updateAreas; //if TRUE, all areas will update
@@ -211,7 +242,7 @@ public:
     void addPropertyArea(PropertyEditArea* area); //Adds new property area
     void registerUiObject(QObject* object);
     void area_update(); //To update property areas states
-    void makeAddObjComponentBtn(); //Adds "Create Property" Btn to content layout
+    void addPropButtons(); //Adds "Create Property" Btn to content layout
     void ShowObjectProperties(void* object_ptr);
     void updateObjectProperties();
     void* gameobject_ptr;
@@ -237,6 +268,22 @@ public:
 
     AddGoComponentDialog(QWidget* parent = nullptr);
     ~AddGoComponentDialog();
+};
+
+class ManageComponentDialog : public QDialog{
+    Q_OBJECT
+private:
+    QPushButton* close_btn;
+
+    QListWidget property_list; //list to store wgt list of props
+public slots:
+    //void onAddButtonPressed();
+
+public:
+    void* g_object_ptr; //Pointer to object, when we'll add components
+
+    ManageComponentDialog(QWidget* parent = nullptr);
+    ~ManageComponentDialog();
 };
 
 class ResourcePickDialog : public QDialog{
