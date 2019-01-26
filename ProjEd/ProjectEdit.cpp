@@ -143,6 +143,9 @@ void EditWindow::assignIconFile(QListWidgetItem* item){
     if(item->text().endsWith(".dds") || item->text().endsWith(".DDS")){
         item->setIcon(QIcon::fromTheme("image-x-generic"));
     }
+    if(item->text().endsWith(".fbx") || item->text().endsWith(".FBX")){
+        item->setIcon(QIcon::fromTheme("applications-graphics"));
+    }
 }
 
 void EditWindow::setViewDirectory(QString dir_path){
@@ -309,6 +312,10 @@ void EditWindow::onObjectCtxMenuShow(QPoint point){
 }
 
 void EditWindow::onFileCtxMenuShow(QPoint point){
+    QListWidgetItem* selected_item = ui->fileList->currentItem(); //get selected item
+    QString file_name = selected_item->text();
+
+    this->file_ctx_menu->file_path = current_dir + "/" + file_name; //set file path
     this->file_ctx_menu->show(point);
 }
 
@@ -325,6 +332,10 @@ void EditWindow::onCameraToObjTeleport(){
     transform->getAbsoluteParentTransform(_t, _s, _r); //Calculate absolute transform
 
     edit_camera._dest_pos = _t; //Sending position
+    if(project.perspective == 3){ //if we're in 3D
+        ZSVECTOR3 camFront = edit_camera.getCameraFrontVec();
+        edit_camera._dest_pos = edit_camera._dest_pos - camFront * 6; //move back a little
+    }
     edit_camera.startMoving();
 }
 
@@ -356,7 +367,7 @@ void EditWindow::lookForResources(QString path){
                 Resource resource;
                 resource.file_path = fileInfo.absoluteFilePath(); //Writing full path
                 resource.rel_path = resource.file_path; //Preparing to get relative path
-                resource.rel_path.remove(0, project.root_path.size()); //Get relative path by removing length of project root from start
+                resource.rel_path.remove(0, project.root_path.size() + 1); //Get relative path by removing length of project root from start
                 resource.type = RESOURCE_TYPE_TEXTURE; //Type is texture
                 loadResource(&resource); //Perform texture loading to OpenGL
                 this->project.resources.push_back(resource);
@@ -365,7 +376,7 @@ void EditWindow::lookForResources(QString path){
                 Resource resource;
                 resource.file_path = fileInfo.absoluteFilePath();
                 resource.rel_path = resource.file_path; //Preparing to get relative path
-                resource.rel_path.remove(0, project.root_path.size()); //Get relative path by removing length of project root from start
+                resource.rel_path.remove(0, project.root_path.size() + 1); //Get relative path by removing length of project root from start
                 resource.type = RESOURCE_TYPE_MESH; //Type of resource is mesh
                 loadResource(&resource); //Perform mesh processing & loading to OpenGL
                 this->project.resources.push_back(resource);
@@ -514,8 +525,6 @@ void ObjectCtxMenu::onRotateClicked(){
     win_ptr->obj_trstate.tprop_ptr = static_cast<TransformProperty*>(obj_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
     win_ptr->obj_trstate.transformMode = GO_TRANSFORM_MODE_ROTATE;//Setting transform type
 }
-
-
 
 void ObjTreeWgt::dropEvent(QDropEvent* event){
     _ed_actions_container->newSnapshotAction(&win_ptr->world); //Add new snapshot action

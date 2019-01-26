@@ -98,7 +98,7 @@ public slots:
     void onRedoPressed();
 
 private:
-    QString current_dir;
+    QString current_dir; //current directory path string
     QString scene_path;
     bool hasSceneFile; //Is scene saved or loaded
 
@@ -193,6 +193,7 @@ private:
     QAction* action_delete; //Button to delete object
 public:
     EditWindow* win_ptr;
+    QString file_path; //path to selected file
 
     FileCtxMenu(EditWindow* win, QWidget* parent = nullptr);
     void show(QPoint point);
@@ -204,15 +205,17 @@ class FileDeleteDialog : public QDialog{
 private:
     QPushButton del_btn;
     QPushButton close_btn;
+
+    QGridLayout contentLayout;
+    QLabel del_message;
 public slots:
-    //void onDelButtonPressed();
+    void onDelButtonPressed();
 
 public:
     QString file_path;
 
-    FileDeleteDialog(QWidget* parent = nullptr);
+    FileDeleteDialog(QString file_path, QWidget* parent = nullptr);
 };
-
 
 //Class to represent tree widget
 class ObjTreeWgt : public QTreeWidget{

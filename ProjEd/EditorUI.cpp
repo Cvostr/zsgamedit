@@ -78,8 +78,35 @@ void FileCtxMenu::show(QPoint point){
     this->menu->popup(point);
 }
 void FileCtxMenu::onDeleteClicked(){
-
+    FileDeleteDialog* dialog = new FileDeleteDialog(file_path);
+    dialog->exec();
+    delete dialog;
 }
 void FileCtxMenu::onRename(){
 
+}
+
+
+FileDeleteDialog::FileDeleteDialog(QString file_path, QWidget* parent) : QDialog(parent){
+    del_message.setText("Are you sure to delete " + file_path);
+    this->file_path = file_path;
+
+    del_btn.setText("Delete");
+    close_btn.setText("Close");
+
+    contentLayout.addWidget(&del_message, 0, 0);
+    contentLayout.addWidget(&del_btn, 1, 0);
+    contentLayout.addWidget(&close_btn, 1, 1);
+    setLayout(&contentLayout);
+
+    this->setWindowTitle("File deletion");
+
+    QObject::connect(&this->del_btn, SIGNAL(clicked()), this, SLOT(onDelButtonPressed()));
+    QObject::connect(&this->close_btn, SIGNAL(clicked()), this, SLOT(accept()));
+}
+
+void FileDeleteDialog::onDelButtonPressed(){
+    QFile file(file_path);
+    file.remove(); //remove it!
+    accept();
 }

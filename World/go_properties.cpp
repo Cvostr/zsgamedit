@@ -140,6 +140,7 @@ MeshProperty::MeshProperty(){
     active = true;
 
     mesh_ptr = nullptr; //set it to 0x0 to check later
+    this->resource_relpath = "@none";
 }
 //Transform property functions
 void TransformProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
