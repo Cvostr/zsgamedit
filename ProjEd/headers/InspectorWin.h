@@ -273,7 +273,9 @@ public:
 class ManageComponentDialog : public QDialog{
     Q_OBJECT
 private:
-    QPushButton* close_btn;
+    QGridLayout contentLayout; //Layout to contain everything
+
+    QPushButton close_btn;
 
     QListWidget property_list; //list to store wgt list of props
 public slots:
@@ -282,7 +284,7 @@ public slots:
 public:
     void* g_object_ptr; //Pointer to object, when we'll add components
 
-    ManageComponentDialog(QWidget* parent = nullptr);
+    ManageComponentDialog(void* g_object_ptr, QWidget* parent = nullptr);
     ~ManageComponentDialog();
 };
 

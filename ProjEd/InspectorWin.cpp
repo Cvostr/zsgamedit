@@ -22,6 +22,10 @@ InspectorWin::InspectorWin(QWidget *parent) :
 
      line.setFrameShape(QFrame::HLine);
      line.setFrameShadow(QFrame::Sunken);
+
+     connect(&addObjComponentBtn, SIGNAL(clicked()), this, SLOT(onAddComponentBtnPressed()));
+     connect(&managePropButton, SIGNAL(clicked()), this, SLOT(onManagePropButtonPressed()));
+
 }
 
 InspectorWin::~InspectorWin()
@@ -42,8 +46,7 @@ void InspectorWin::onAddComponentBtnPressed(){
 }
 
 void InspectorWin::onManagePropButtonPressed(){
-    ManageComponentDialog* dialog = new ManageComponentDialog;
-    dialog->g_object_ptr = gameobject_ptr;
+    ManageComponentDialog* dialog = new ManageComponentDialog(gameobject_ptr);
     dialog->exec();
     updateObjectProperties();
     delete dialog;
@@ -87,8 +90,6 @@ void InspectorWin::addPropButtons(){
     ui->propertySpace->addWidget(&addObjComponentBtn);
     ui->propertySpace->addWidget(&managePropButton);
 
-    connect(&addObjComponentBtn, SIGNAL(clicked()), this, SLOT(onAddComponentBtnPressed()));
-    connect(&managePropButton, SIGNAL(clicked()), this, SLOT(onManagePropButtonPressed()));
 
 }
 
@@ -134,9 +135,20 @@ void AddGoComponentDialog::onAddButtonPressed(){
     accept(); //Close dialog with true
 }
 
-ManageComponentDialog::ManageComponentDialog(QWidget* parent) :
+ManageComponentDialog::ManageComponentDialog(void* g_object_ptr, QWidget* parent) :
     QDialog (parent, Qt::WindowTitleHint | Qt::WindowSystemMenuHint) {
 
+    this->g_object_ptr = g_object_ptr;
+
+    this->close_btn.setText("Close");
+
+    contentLayout.addWidget(&property_list, 0, 0);
+    contentLayout.addWidget(&close_btn, 1, 1);
+
+    connect(&close_btn, SIGNAL(clicked()), this, SLOT(reject()));
+
+    setLayout(&contentLayout);
+    this->setWindowTitle("Manage properties");
 }
 
 ManageComponentDialog::~ManageComponentDialog(){
