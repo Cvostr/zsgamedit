@@ -12,7 +12,6 @@
 static EditWindow* _editor_win;
 static InspectorWin* _inspector_win;
 static EdActions* _ed_actions_container;
-WorldSnapshot test_snap; //TO TEST, REMOVE LATER
 
 EditWindow::EditWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -591,7 +590,8 @@ void EditWindow::onMouseWheel(int x, int y){
     }
     if(project.perspective == 2){
         ZSVECTOR3 pos = edit_camera.getCameraPosition(); //obtain position
-        pos.Y += y * 4;
+        pos.Y += y * 5;
+        pos.X += x * 5;
 
         edit_camera.setPosition(pos);
     }
@@ -689,13 +689,6 @@ void EditWindow::onKeyDown(SDL_Keysym sym){
         getInspector()->clearContentLayout(); //Detach object from
         this->obj_trstate.transformMode = GO_TRANSFORM_MODE_ROTATE;
         this->obj_trstate.isTransforming = true;
-    }
-
-    if(sym.sym == SDLK_i){
-        this->world.putToShapshot(&test_snap);
-    }
-    if(sym.sym == SDLK_o){
-        this->world.recoverFromSnapshot(&test_snap);
     }
 
     if(sym.sym == SDLK_DELETE){

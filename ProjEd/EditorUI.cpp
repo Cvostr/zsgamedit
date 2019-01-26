@@ -102,7 +102,7 @@ FileDeleteDialog::FileDeleteDialog(QString file_path, QWidget* parent) : QDialog
     this->setWindowTitle("File deletion");
 
     QObject::connect(&this->del_btn, SIGNAL(clicked()), this, SLOT(onDelButtonPressed()));
-    QObject::connect(&this->close_btn, SIGNAL(clicked()), this, SLOT(accept()));
+    QObject::connect(&this->close_btn, SIGNAL(clicked()), this, SLOT(reject()));
 }
 
 void FileDeleteDialog::onDelButtonPressed(){
