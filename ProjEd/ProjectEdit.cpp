@@ -31,6 +31,8 @@ EditWindow::EditWindow(QWidget *parent) :
     QObject::connect(ui->actionCreateScene, SIGNAL(triggered()), this, SLOT(onNewScene()));
 
     QObject::connect(ui->actionClose_project, SIGNAL(triggered()), this, SLOT(onCloseProject()));
+    QObject::connect(ui->actionBuild, SIGNAL(triggered(bool)), this, SLOT(onBuildProject()));
+    QObject::connect(ui->actionRun, SIGNAL(triggered(bool)), this, SLOT(onRunProject()));
 
     QObject::connect(ui->actionUndo, SIGNAL(triggered()), this, SLOT(onUndoPressed()));
     QObject::connect(ui->actionRedo, SIGNAL(triggered()), this, SLOT(onRedoPressed()));
@@ -65,6 +67,9 @@ EditWindow::EditWindow(QWidget *parent) :
     ui->actionSave->setShortcut(Qt::Key_S | Qt::CTRL);
     ui->actionUndo->setShortcut(Qt::Key_Z | Qt::CTRL);
     ui->actionRedo->setShortcut(Qt::Key_Y | Qt::CTRL);
+
+    ui->actionBuild->setShortcut(Qt::Key_B | Qt::CTRL);
+    ui->actionRun->setShortcut(Qt::Key_R | Qt::CTRL);
 
 }
 
@@ -144,6 +149,9 @@ void EditWindow::assignIconFile(QListWidgetItem* item){
     }
     if(item->text().endsWith(".fbx") || item->text().endsWith(".FBX")){
         item->setIcon(QIcon::fromTheme("applications-graphics"));
+    }
+    if(item->text().endsWith(".wav") || item->text().endsWith(".WAV")){
+        item->setIcon(QIcon::fromTheme("audio-x-generic"));
     }
 }
 
@@ -226,6 +234,14 @@ void EditWindow::onCloseProject(){
 
     this->ready = false; //won't render anymore
     this->close_reason = EW_CLOSE_REASON_PROJLIST;
+}
+
+void EditWindow::onBuildProject(){
+
+}
+
+void EditWindow::onRunProject(){
+
 }
 
 void EditWindow::updateFileList(){
@@ -378,6 +394,15 @@ void EditWindow::lookForResources(QString path){
                 resource.rel_path.remove(0, project.root_path.size() + 1); //Get relative path by removing length of project root from start
                 resource.type = RESOURCE_TYPE_MESH; //Type of resource is mesh
                 loadResource(&resource); //Perform mesh processing & loading to OpenGL
+                this->project.resources.push_back(resource);
+            }
+            if(name.endsWith(".WAV") || name.endsWith(".wav")){ //If its an mesh
+                Resource resource;
+                resource.file_path = fileInfo.absoluteFilePath();
+                resource.rel_path = resource.file_path; //Preparing to get relative path
+                resource.rel_path.remove(0, project.root_path.size() + 1); //Get relative path by removing length of project root from start
+                resource.type = RESOURCE_TYPE_AUDIO; //Type of resource is mesh
+                //loadResource(&resource); //Perform mesh processing & loading to OpenGL
                 this->project.resources.push_back(resource);
             }
         }

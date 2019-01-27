@@ -139,6 +139,11 @@ ManageComponentDialog::ManageComponentDialog(void* g_object_ptr, QWidget* parent
     QDialog (parent, Qt::WindowTitleHint | Qt::WindowSystemMenuHint) {
 
     this->g_object_ptr = g_object_ptr;
+    GameObject* obj_ptr = static_cast<GameObject*>(g_object_ptr); //cast pointer
+    for(int prop_i = 0; prop_i < obj_ptr->props_num; prop_i ++){
+        GameObjectProperty* prop_ptr = obj_ptr->properties[prop_i]; //obtain property pointer
+        new QListWidgetItem(getPropertyString(prop_ptr->type), &this->property_list);
+    }
 
     this->close_btn.setText("Close");
 
@@ -146,6 +151,7 @@ ManageComponentDialog::ManageComponentDialog(void* g_object_ptr, QWidget* parent
     contentLayout.addWidget(&close_btn, 1, 1);
 
     connect(&close_btn, SIGNAL(clicked()), this, SLOT(reject()));
+    connect(&property_list, SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(onPropertyDoubleClick()));
 
     setLayout(&contentLayout);
     this->setWindowTitle("Manage properties");
@@ -153,6 +159,23 @@ ManageComponentDialog::ManageComponentDialog(void* g_object_ptr, QWidget* parent
 
 ManageComponentDialog::~ManageComponentDialog(){
 
+}
+
+void ManageComponentDialog::onPropertyDoubleClick(){
+    GameObject* obj_ptr = static_cast<GameObject*>(g_object_ptr); //cast pointer
+
+    QListWidgetItem* item = property_list.currentItem();
+    QString text = item->text();
+    int item_ind = 0;
+    for(int i = 0; i < obj_ptr->props_num; i ++){
+        GameObjectProperty* prop_ptr = obj_ptr->properties[i];
+        if(getPropertyString(prop_ptr->type).compare(text) == 0){
+            item_ind = i;
+        }
+    }
+
+    obj_ptr->removeProperty(item_ind);
+    accept();
 }
 
 AddGoComponentDialog::AddGoComponentDialog(QWidget* parent)

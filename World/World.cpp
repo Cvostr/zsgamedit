@@ -199,6 +199,18 @@ void GameObject::clearAll(bool clearQtWigt){
     }
 }
 
+void GameObject::removeProperty(int index){
+    GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(this->properties[index]);
+    prop_ptr->onObjectDeleted();
+    this->properties[index] = nullptr; //set as deleted
+
+    for(unsigned int i = index; i < props_num - 1; i ++){
+        properties[i] = properties[i + 1];
+    }
+
+    props_num -= 1;
+}
+
 World::World(){
     objects.reserve(6000);
     proj_ptr = nullptr;

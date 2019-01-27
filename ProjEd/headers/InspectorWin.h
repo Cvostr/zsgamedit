@@ -279,7 +279,7 @@ private:
 
     QListWidget property_list; //list to store wgt list of props
 public slots:
-    //void onAddButtonPressed();
+    void onPropertyDoubleClick();
 
 public:
     void* g_object_ptr; //Pointer to object, when we'll add components
