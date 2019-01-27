@@ -287,6 +287,10 @@ void FloatPropertyArea::updateState(){
     float vptrX = *this->value;
     //Compare them
     if(value != vptrX){ //If it updated
+        //Store old values
+        GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(this->go_property);
+        getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
+
         *this->value = value;
 
         PropertyEditArea::callPropertyUpdate();
@@ -367,6 +371,11 @@ void IntPropertyArea::updateState(){
     int vptrX = *this->value;
     //Compare them
     if(value != vptrX){ //If it updated
+        //Store old values
+        GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(this->go_property);
+        getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
+
+
         *this->value = value;
 
         PropertyEditArea::callPropertyUpdate();
@@ -451,6 +460,11 @@ void ZSColorPickDialog::onNeedToShow(){
     QColor color = this->getColor(QColor(color_ptr->r, color_ptr->g, color_ptr->b)); //invoke dialog
     ZSRGBCOLOR _color = ZSRGBCOLOR(color.red(), color.green(), color.blue());
     _color.updateGL();
+
+    //Store old values
+    GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(this->area_ptr->go_property);
+    getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
+
     *color_ptr = _color;
     area_ptr->updText();
     area_ptr->PropertyEditArea::callPropertyUpdate();

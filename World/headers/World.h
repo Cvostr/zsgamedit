@@ -18,6 +18,7 @@
 #define GO_PROPERTY_TYPE_LABEL 2
 #define GO_PROPERTY_TYPE_MESH 3
 #define GO_PROPERTY_TYPE_LIGHTSOURCE 4
+#define GO_PROPERTY_TYPE_AUDSOURCE 5
 
 #define LIGHTSOURCE_TYPE_DIRECTIONAL 1
 #define LIGHTSOURCE_TYPE_POINT 2
@@ -168,6 +169,8 @@ public:
 
     void addChildObject(GameObjectLink link);
     void removeChildObject(GameObjectLink link);
+
+    void removeProperty(int index);
 
     void saveProperties(std::ofstream* stream); //Writes properties content at end of stream
     void loadProperty(std::ifstream* world_stream); //Loads one property from stream
