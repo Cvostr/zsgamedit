@@ -20,6 +20,7 @@ struct Project;
 
 #define RESOURCE_TYPE_TEXTURE 0
 #define RESOURCE_TYPE_MESH 1
+#define RESOURCE_TYPE_AUDIO 2
 
 #define GO_TRANSFORM_MODE_NONE 0
 #define GO_TRANSFORM_MODE_TRANSLATE 1
@@ -93,6 +94,8 @@ public slots:
     void onNewScene();
 
     void onCloseProject();
+    void onBuildProject();
+    void onRunProject();
 
     void onUndoPressed();
     void onRedoPressed();
