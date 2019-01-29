@@ -231,13 +231,17 @@ void EditWindow::onCloseProject(){
 
     delete render;
     _ed_actions_container->clear();
+    ZSPIRE::SFX::destroyAL();
 
     this->ready = false; //won't render anymore
     this->close_reason = EW_CLOSE_REASON_PROJLIST;
 }
 
 void EditWindow::onBuildProject(){
+    ProjBuilder builder(&this->project);
 
+    builder.showWindow();
+    builder.start();
 }
 
 void EditWindow::onRunProject(){

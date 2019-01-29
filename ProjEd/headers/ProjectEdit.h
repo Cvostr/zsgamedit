@@ -1,12 +1,15 @@
 #ifndef project_edit_h
 #define project_edit_h
 
+
+#ifndef INCLUDE_PRJ_ONLY
+
 #include <QMainWindow>
 #include <QTreeWidget>
 #include <QListWidget>
 #include <QMenu>
 #include <SDL2/SDL.h>
-#include <vector>
+
 #include "EdActions.h"
 #include "../../Render/headers/zs-pipeline.h"
 #include "../../World/headers/zs-camera.h"
@@ -18,9 +21,7 @@ struct Project;
 
 #include "../../World/headers/World.h"
 
-#define RESOURCE_TYPE_TEXTURE 0
-#define RESOURCE_TYPE_MESH 1
-#define RESOURCE_TYPE_AUDIO 2
+#include "../../Misc/headers/ProjBuilder.h"
 
 #define GO_TRANSFORM_MODE_NONE 0
 #define GO_TRANSFORM_MODE_TRANSLATE 1
@@ -31,9 +32,20 @@ struct Project;
 #define EW_CLOSE_REASON_PROJLIST 1
 #define EW_CLOSE_REASON_BUILD 2
 
+#endif
+
+#define RESOURCE_TYPE_TEXTURE 0
+#define RESOURCE_TYPE_MESH 1
+#define RESOURCE_TYPE_AUDIO 2
+
+#include <vector>
+#include <QString>
+
+#ifndef INCLUDE_PRJ_ONLY
 namespace Ui {
 class EditWindow;
 }
+#endif
 
 typedef struct Resource{
     QString file_path; //Resource file
@@ -51,7 +63,7 @@ struct Project{
 
     std::vector<Resource> resources;
 };
-
+#ifndef INCLUDE_PRJ_ONLY
 struct EditorInputState{
     bool isLeftBtnHold;
     bool isRightBtnHold;
@@ -257,5 +269,6 @@ namespace ZSEditor {
 }
 
 EdActions* getActionManager();
+#endif
 
 #endif
