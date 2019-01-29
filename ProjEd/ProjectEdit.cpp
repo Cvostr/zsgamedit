@@ -9,9 +9,12 @@
 #include <QFileDialog>
 #include <QShortcut>
 
+#include "../include_engine.h" //include engine headers
+
 static EditWindow* _editor_win;
 static InspectorWin* _inspector_win;
 static EdActions* _ed_actions_container;
+static ZSpireEngine* engine;
 
 EditWindow::EditWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -245,7 +248,12 @@ void EditWindow::onBuildProject(){
 }
 
 void EditWindow::onRunProject(){
+    ZSENGINE_CREATE_INFO engine_create_info;
+    engine_create_info.appName = "GameEditorRun";
+    engine_create_info.createWindow = false; //window already created, we don't need one
+    engine_create_info.graphicsApi = OGL32; //use opengl
 
+    engine = new ZSpireEngine(&engine_create_info, nullptr);
 }
 
 void EditWindow::updateFileList(){

@@ -78,6 +78,7 @@ public:
     void onValueChanged(); //Update texture pointer
     void updTexturePtr();
     void copyTo(GameObjectProperty* dest);
+    void onAddToObject();
     void onUpdate(float deltaTime);
 
     TileProperty();

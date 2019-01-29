@@ -19,6 +19,7 @@
 #define GO_PROPERTY_TYPE_MESH 3
 #define GO_PROPERTY_TYPE_LIGHTSOURCE 4
 #define GO_PROPERTY_TYPE_AUDSOURCE 5
+#define GO_PROPERTY_TYPE_MATERIAL 6
 
 #define LIGHTSOURCE_TYPE_DIRECTIONAL 1
 #define LIGHTSOURCE_TYPE_POINT 2
@@ -56,6 +57,7 @@ public:
     virtual void addPropertyInterfaceToInspector(InspectorWin* inspector);
     virtual void onValueChanged();
     virtual void copyTo(GameObjectProperty* dest);
+    virtual void onAddToObject();
     virtual void onObjectDeleted();
     virtual void onUpdate(float deltaTime);
 };

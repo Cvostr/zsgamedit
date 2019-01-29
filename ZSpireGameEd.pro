@@ -5,7 +5,7 @@
 #-------------------------------------------------
 
 QT       += core gui
-LIBS += -lGLEW -lassimp -lSDL2 -lopenal
+LIBS += -lGLEW -lassimp -lSDL2 -lopenal -lzsengine
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = ZSpireGameEd
@@ -62,7 +62,8 @@ HEADERS += \
     World/headers/2dtileproperties.h \
     ProjEd/headers/EdActions.h \
     Misc/headers/oal_manager.h \
-    Misc/headers/ProjBuilder.h
+    Misc/headers/ProjBuilder.h \
+    include_engine.h
 
 
 FORMS += \

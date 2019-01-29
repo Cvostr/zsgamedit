@@ -182,6 +182,10 @@ ZSPIRE::Shader* RenderPipeline::processShaderOnObject(void* _obj){
             result = &tile_shader;
             //Receive pointer to tile information
             TileProperty* tile_ptr = static_cast<TileProperty*>(obj->getPropertyPtrByType(GO_PROPERTY_TYPE_TILE));
+            if(tile_ptr == nullptr){ //if no tile property anymore
+                obj->render_type = GO_RENDER_TYPE_NONE;
+                return result;
+            }
             if(tile_ptr->texture_diffuse != nullptr){
                 tile_ptr->texture_diffuse->Use(0); //Use this texture
                 tile_shader.setHasDiffuseTextureProperty(true); //Shader will use picked diffuse texture

@@ -19,6 +19,10 @@ void GameObjectProperty::onObjectDeleted(){
 
 }
 
+void GameObjectProperty::onAddToObject(){
+
+}
+
 void GameObjectProperty::onUpdate(float deltaTime){
 
 }

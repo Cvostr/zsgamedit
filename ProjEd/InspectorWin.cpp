@@ -132,6 +132,10 @@ void InspectorWin::area_update(){
 void AddGoComponentDialog::onAddButtonPressed(){
     GameObject* object_ptr = static_cast<GameObject*>(this->g_object_ptr);
     object_ptr->addProperty(comp_type->text().toInt());
+
+    auto prop_ptr = object_ptr->getPropertyPtrByType(comp_type->text().toInt());
+    prop_ptr->onAddToObject();
+
     accept(); //Close dialog with true
 }
 
