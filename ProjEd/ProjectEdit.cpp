@@ -442,6 +442,13 @@ void EditWindow::loadResource(Resource* resource){
             mesh_ptr->LoadMeshesFromFileASSIMP(str.c_str());
             break;
         }
+        case RESOURCE_TYPE_AUDIO:{
+            resource->class_ptr = static_cast<void*>(new SoundBuffer); //Initialize pointer to sound buffer
+            SoundBuffer* sound_ptr = static_cast<SoundBuffer*>(resource->class_ptr); //Aquire casted pointer
+            std::string str = resource->file_path.toStdString();
+            sound_ptr->loadFileWAV(str.c_str()); //Load music file
+            break;
+        }
     }
 }
 

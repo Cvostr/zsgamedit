@@ -5,7 +5,7 @@
 #-------------------------------------------------
 
 QT       += core gui
-LIBS += -lGLEW -lassimp -lSDL2 -lopenal -lzsengine
+LIBS += -lGLEW -lassimp -lSDL2 -lopenal -lzsengine -llua5.2
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = ZSpireGameEd
@@ -44,7 +44,8 @@ SOURCES += \
     ProjEd/EdActions.cpp \
     Misc/oal_manager.cpp \
     ProjEd/EditorUI.cpp \
-    Misc/ProjBuilder.cpp
+    Misc/ProjBuilder.cpp \
+    Scripting/LuaScript.cpp
 
 HEADERS += \
         mainwin.h \
@@ -63,7 +64,8 @@ HEADERS += \
     ProjEd/headers/EdActions.h \
     Misc/headers/oal_manager.h \
     Misc/headers/ProjBuilder.h \
-    include_engine.h
+    include_engine.h \
+    Scripting/headers/LuaScript.h
 
 
 FORMS += \
