@@ -27,6 +27,8 @@
 
 #define PICK_RES_TYPE_MESH 0
 #define PICK_RES_TYPE_TEXTURE 1
+#define PICK_RES_TYPE_AUDIO 2
+#define PICK_RES_TYPE_FILE 1000
 
 class InspectorWin;
 class ResourcePickDialog;
@@ -134,6 +136,7 @@ class PickResourceArea : public PropertyEditArea{
 public:
     ResourcePickDialog* dialog; //dialog shown after button press
 
+    QString extension_mask; //Extension mask to show needed files
     unsigned int resource_type; //flag of resource type
     QString* rel_path; //Pointer to store result
 
@@ -296,6 +299,7 @@ public slots:
 private:
     QGridLayout* contentLayout; //Layout to contain everything
 public:
+    QString extension_mask; //Extension mask to show needed files
     QListWidget* list;
     PickResourceArea* area; //Pointer to area, that invoked this object
     QLabel* resource_text; //Pointer to label in area to write resource label

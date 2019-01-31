@@ -2,7 +2,7 @@
 
 void ObjectScript::_InitScript() {
     L = luaL_newstate();
-    luaL_dofile(L, fpath.c_str());
+    luaL_dofile(L, fpath.toStdString().c_str());
     luaL_openlibs(L);
     lua_pcall(L, 0, 0, 0);
 

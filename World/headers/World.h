@@ -69,6 +69,13 @@ public:
 
 class ScriptGroupProperty : public GameObjectProperty {
 public:
+    int scr_num; //to update amount via IntPropertyArea
+
+    std::vector<ObjectScript> scripts_attached;
+
+    void onValueChanged();
+    void addPropertyInterfaceToInspector(InspectorWin* inspector);
+    void onUpdate(float deltaTime); //calls update in scripts
 
     ScriptGroupProperty();
 };

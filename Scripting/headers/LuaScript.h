@@ -1,7 +1,7 @@
 #ifndef zs_luascript
 #define zs_luascript
 
-#include <string>
+#include <QString>
 extern "C" {
 #include <lua5.2/lua.h>
 #include <lua5.2/lualib.h>
@@ -12,9 +12,9 @@ extern "C" {
 class ObjectScript {
 
 protected:
-    std::string fpath; //path to file
     lua_State* L;
 public:
+    QString fpath; //path to file
 
     void _InitScript();
 
