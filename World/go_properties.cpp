@@ -569,9 +569,13 @@ void GameObject::loadProperty(std::ifstream* world_stream){
 
 void ScriptGroupProperty::onValueChanged(){
     this->scripts_attached.resize(this->scr_num);
+
+    insp_win->updateObjectProperties();
 }
 
 void ScriptGroupProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
+    this->insp_win = inspector; //store inspector window
+
     IntPropertyArea* scriptnum_area = new IntPropertyArea;
     scriptnum_area->setLabel("Scripts"); //Its label
     scriptnum_area->value = &this->scr_num;

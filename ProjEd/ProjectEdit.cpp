@@ -262,7 +262,7 @@ void EditWindow::updateFileList(){
     QDir directory (this->current_dir);
 
     directory.setFilter(QDir::Files | QDir::Dirs | QDir::NoSymLinks | QDir::NoDot | QDir::NoDotDot);
-    directory.setSorting(QDir::Name | QDir::Reversed);
+    directory.setSorting(QDir::DirsFirst | QDir::Name | QDir::Reversed);
 
     QFileInfoList list = directory.entryInfoList(); //Get folder content iterator
     if(this->current_dir.compare(project.root_path)){

@@ -298,6 +298,7 @@ public slots:
     void onResourceSelected();
 private:
     QGridLayout* contentLayout; //Layout to contain everything
+    void findFiles(QString directory);
 public:
     QString extension_mask; //Extension mask to show needed files
     QListWidget* list;

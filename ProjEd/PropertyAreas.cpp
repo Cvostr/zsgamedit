@@ -3,6 +3,7 @@
 #include "../World/headers/World.h"
 #include <QDoubleValidator>
 #include <QObject>
+#include <QDir>
 
 AreaPropertyTitle::AreaPropertyTitle(){
     this->layout.addWidget(&this->line);
@@ -396,6 +397,7 @@ void ResourcePickDialog::onResourceSelected(){
 }
 
 void ResourcePickDialog::onNeedToShow(){
+    this->extension_mask = area->extension_mask; //send extension mask
     this->list->clear();
     //Receiving pointer to project
     Project* project_ptr = static_cast<Project*>(static_cast<GameObjectProperty*>(this->area->go_property)->world_ptr->proj_ptr);
@@ -406,22 +408,50 @@ void ResourcePickDialog::onNeedToShow(){
         new QListWidgetItem("@cube", this->list);
     }
 
-    //Iterate over all resources
-    for(unsigned int res_i = 0; res_i < resources_num; res_i ++){
-        Resource* resource_ptr = &project_ptr->resources[res_i];
-        if(resource_ptr->type == area->resource_type){ //if type is the same
-            new QListWidgetItem(resource_ptr->rel_path, this->list); //add resource to list
+    if(area->resource_type < PICK_RES_TYPE_FILE){ // if it is an resource
+        //Iterate over all resources
+        for(unsigned int res_i = 0; res_i < resources_num; res_i ++){
+            Resource* resource_ptr = &project_ptr->resources[res_i];
+            if(resource_ptr->type == area->resource_type){ //if type is the same
+                new QListWidgetItem(resource_ptr->rel_path, this->list); //add resource to list
+            }
         }
+    }else{ //we want to pick common file
+        findFiles(project_ptr->root_path);
     }
     this->exec();
 }
+
+void ResourcePickDialog::findFiles(QString directory){
+    QDir _directory (directory); //Creating QDir object
+    _directory.setFilter(QDir::Files | QDir::Dirs | QDir::NoSymLinks | QDir::NoDot | QDir::NoDotDot);
+    _directory.setSorting(QDir::DirsLast); //I want to recursive call this function after all files
+
+    QFileInfoList list = _directory.entryInfoList(); //Get folder content iterator
+
+    for(int i = 0; i < list.size(); i ++){ //iterate all files, skip 2 last . and ..
+        QFileInfo fileInfo = list.at(i);  //get iterated file info
+
+        if(fileInfo.isFile() == true){ //we found a file
+            QString name = fileInfo.fileName();
+            if(name.endsWith(extension_mask)) //if extension matches
+                new QListWidgetItem(name, this->list);
+        }
+
+        if(fileInfo.isDir() == true){ //If it is directory
+            QString newdir_str = directory + "/"+ fileInfo.fileName();
+            findFiles(newdir_str);  //Call this function inside next dir
+        }
+    }
+}
+
 ResourcePickDialog::ResourcePickDialog(QWidget* parent) : QDialog (parent){
     contentLayout = new QGridLayout(); // Alocation of layout
     list = new QListWidget;
     this->setWindowTitle("Select Resource");
 
     contentLayout->addWidget(list);
-    connect(this->list, SIGNAL(itemClicked(QListWidgetItem *)), this, SLOT(onResourceSelected())); //Connect to slot
+    connect(this->list, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(onResourceSelected())); //Connect to slot
     setLayout(contentLayout);
 }
 ResourcePickDialog::~ResourcePickDialog(){
