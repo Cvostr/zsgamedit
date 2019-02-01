@@ -118,7 +118,6 @@ void InspectorWin::updateObjectProperties(){
     ShowObjectProperties(gameobject_ptr);
 }
 
-
 void InspectorWin::area_update(){
     if(updateAreas == false) return; //if trigger is false, then exit
     unsigned int areas_num = static_cast<unsigned int>(this->property_areas.size());
@@ -132,6 +131,10 @@ void InspectorWin::area_update(){
 void AddGoComponentDialog::onAddButtonPressed(){
     GameObject* object_ptr = static_cast<GameObject*>(this->g_object_ptr);
     object_ptr->addProperty(comp_type->text().toInt());
+
+    auto prop_ptr = object_ptr->getPropertyPtrByType(comp_type->text().toInt());
+    prop_ptr->onAddToObject();
+
     accept(); //Close dialog with true
 }
 

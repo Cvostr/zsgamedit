@@ -9,9 +9,12 @@
 #include <QFileDialog>
 #include <QShortcut>
 
+#include "../include_engine.h" //include engine headers
+
 static EditWindow* _editor_win;
 static InspectorWin* _inspector_win;
 static EdActions* _ed_actions_container;
+static ZSpireEngine* engine;
 
 EditWindow::EditWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -231,17 +234,26 @@ void EditWindow::onCloseProject(){
 
     delete render;
     _ed_actions_container->clear();
+    ZSPIRE::SFX::destroyAL();
 
     this->ready = false; //won't render anymore
     this->close_reason = EW_CLOSE_REASON_PROJLIST;
 }
 
 void EditWindow::onBuildProject(){
+    ProjBuilder builder(&this->project);
 
+    builder.showWindow();
+    builder.start();
 }
 
 void EditWindow::onRunProject(){
+    ZSENGINE_CREATE_INFO engine_create_info;
+    engine_create_info.appName = "GameEditorRun";
+    engine_create_info.createWindow = false; //window already created, we don't need one
+    engine_create_info.graphicsApi = OGL32; //use opengl
 
+    engine = new ZSpireEngine(&engine_create_info, nullptr);
 }
 
 void EditWindow::updateFileList(){
@@ -250,7 +262,7 @@ void EditWindow::updateFileList(){
     QDir directory (this->current_dir);
 
     directory.setFilter(QDir::Files | QDir::Dirs | QDir::NoSymLinks | QDir::NoDot | QDir::NoDotDot);
-    directory.setSorting(QDir::Name | QDir::Reversed);
+    directory.setSorting(QDir::DirsFirst | QDir::Name | QDir::Reversed);
 
     QFileInfoList list = directory.entryInfoList(); //Get folder content iterator
     if(this->current_dir.compare(project.root_path)){
@@ -428,6 +440,13 @@ void EditWindow::loadResource(Resource* resource){
             ZSPIRE::Mesh* mesh_ptr = static_cast<ZSPIRE::Mesh*>(resource->class_ptr); //Aquire casted pointer
             std::string str = resource->file_path.toStdString();
             mesh_ptr->LoadMeshesFromFileASSIMP(str.c_str());
+            break;
+        }
+        case RESOURCE_TYPE_AUDIO:{
+            resource->class_ptr = static_cast<void*>(new SoundBuffer); //Initialize pointer to sound buffer
+            SoundBuffer* sound_ptr = static_cast<SoundBuffer*>(resource->class_ptr); //Aquire casted pointer
+            std::string str = resource->file_path.toStdString();
+            sound_ptr->loadFileWAV(str.c_str()); //Load music file
             break;
         }
     }

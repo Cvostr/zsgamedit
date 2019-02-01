@@ -19,6 +19,10 @@ void GameObjectProperty::onObjectDeleted(){
 
 }
 
+void GameObjectProperty::onAddToObject(){
+
+}
+
 void GameObjectProperty::onUpdate(float deltaTime){
 
 }
@@ -72,6 +76,11 @@ GameObjectProperty* allocProperty(int type){
         }
         case GO_PROPERTY_TYPE_LIGHTSOURCE:{
             LightsourceProperty* ptr = new LightsourceProperty;
+            _ptr = static_cast<GameObjectProperty*>(ptr);
+            break;
+        }
+        case GO_PROPERTY_TYPE_SCRIPTGROUP:{
+            ScriptGroupProperty* ptr = new ScriptGroupProperty;
             _ptr = static_cast<GameObjectProperty*>(ptr);
             break;
         }
@@ -554,6 +563,41 @@ void GameObject::loadProperty(std::ifstream* world_stream){
         }
 
         break;
+        }
     }
+}
+
+void ScriptGroupProperty::onValueChanged(){
+    this->scripts_attached.resize(this->scr_num);
+
+    insp_win->updateObjectProperties();
+}
+
+void ScriptGroupProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
+    this->insp_win = inspector; //store inspector window
+
+    IntPropertyArea* scriptnum_area = new IntPropertyArea;
+    scriptnum_area->setLabel("Scripts"); //Its label
+    scriptnum_area->value = &this->scr_num;
+    scriptnum_area->go_property = static_cast<void*>(this);
+    inspector->addPropertyArea(scriptnum_area);
+
+    for(unsigned int script_i = 0; script_i < scr_num; script_i ++){
+        PickResourceArea* area = new PickResourceArea;
+        area->setLabel("Lua Script");
+        area->go_property = static_cast<void*>(this);
+        area->rel_path = &scripts_attached[script_i].fpath;
+        area->extension_mask = ".lua";
+        area->resource_type = PICK_RES_TYPE_FILE; //It should load meshes only
+        inspector->addPropertyArea(area);
     }
+}
+void ScriptGroupProperty::onUpdate(float deltaTime){
+
+}
+ScriptGroupProperty::ScriptGroupProperty(){
+    type = GO_PROPERTY_TYPE_SCRIPTGROUP;
+
+    scr_num = 0;
+    this->scripts_attached.resize(this->scr_num);
 }

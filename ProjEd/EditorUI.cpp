@@ -81,6 +81,7 @@ void FileCtxMenu::onDeleteClicked(){
     FileDeleteDialog* dialog = new FileDeleteDialog(file_path);
     dialog->exec();
     delete dialog;
+    this->win_ptr->updateFileList();
 }
 void FileCtxMenu::onRename(){
 

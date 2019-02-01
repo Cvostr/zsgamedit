@@ -5,7 +5,7 @@
 #-------------------------------------------------
 
 QT       += core gui
-LIBS += -lGLEW -lassimp -lSDL2 -lopenal
+LIBS += -lGLEW -lassimp -lSDL2 -lopenal -lzsengine -llua5.2
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = ZSpireGameEd
@@ -43,7 +43,9 @@ SOURCES += \
     ProjEd/PropertyAreas.cpp \
     ProjEd/EdActions.cpp \
     Misc/oal_manager.cpp \
-    ProjEd/EditorUI.cpp
+    ProjEd/EditorUI.cpp \
+    Misc/ProjBuilder.cpp \
+    Scripting/LuaScript.cpp
 
 HEADERS += \
         mainwin.h \
@@ -61,13 +63,17 @@ HEADERS += \
     World/headers/2dtileproperties.h \
     ProjEd/headers/EdActions.h \
     Misc/headers/oal_manager.h \
+    Misc/headers/ProjBuilder.h \
+    include_engine.h \
+    Scripting/headers/LuaScript.h
 
 
 FORMS += \
         mainwin.ui \
     ProjEd/ui/editor.ui \
     ProjEd/ui/inspector_win.ui \
-    ProjEd/ui/proj_create_win.ui
+    ProjEd/ui/proj_create_win.ui \
+    ProjEd/ui/buildconsole.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

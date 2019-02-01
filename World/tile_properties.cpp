@@ -172,6 +172,10 @@ void TileProperty::updTexturePtr(){
     this->texture_diffuse = world_ptr->getTexturePtrByRelPath(diffuse_relpath);
 }
 
+void TileProperty::onAddToObject(){
+    go_link.updLinkPtr()->render_type = GO_RENDER_TYPE_TILE;
+}
+
 void TileProperty::copyTo(GameObjectProperty* dest){
     if(dest->type != this->type) return; //if it isn't transform
 

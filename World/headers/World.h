@@ -13,12 +13,16 @@
 #include "../../Render/headers/zs-shader.h"
 #include "../../Render/headers/zs-pipeline.h"
 
+#include "../../Scripting/headers/LuaScript.h"
+
 #define GO_PROPERTY_TYPE_NONE 0
 #define GO_PROPERTY_TYPE_TRANSFORM 1
 #define GO_PROPERTY_TYPE_LABEL 2
 #define GO_PROPERTY_TYPE_MESH 3
 #define GO_PROPERTY_TYPE_LIGHTSOURCE 4
 #define GO_PROPERTY_TYPE_AUDSOURCE 5
+#define GO_PROPERTY_TYPE_MATERIAL 6
+#define GO_PROPERTY_TYPE_SCRIPTGROUP 7
 
 #define LIGHTSOURCE_TYPE_DIRECTIONAL 1
 #define LIGHTSOURCE_TYPE_POINT 2
@@ -56,12 +60,26 @@ public:
     virtual void addPropertyInterfaceToInspector(InspectorWin* inspector);
     virtual void onValueChanged();
     virtual void copyTo(GameObjectProperty* dest);
+    virtual void onAddToObject();
     virtual void onObjectDeleted();
     virtual void onUpdate(float deltaTime);
 };
 
 #include "2dtileproperties.h" //Include that to define 2dTile game elements
 
+class ScriptGroupProperty : public GameObjectProperty {
+public:
+    int scr_num; //to update amount via IntPropertyArea
+
+    InspectorWin* insp_win;
+    std::vector<ObjectScript> scripts_attached;
+
+    void onValueChanged();
+    void addPropertyInterfaceToInspector(InspectorWin* inspector);
+    void onUpdate(float deltaTime); //calls update in scripts
+
+    ScriptGroupProperty();
+};
 
 class LabelProperty : public GameObjectProperty {
 public:
@@ -155,7 +173,6 @@ public:
     std::vector<GameObjectLink> children; //Vector to store links to children of object
     int getAliveChildrenAmount(); //Gets current amount of children objects (exclude removed chidren)
     void pick(); //Mark object and its children picked
-
 
     bool addProperty(int property); //Adds property with property ID
     bool addTransformProperty();
