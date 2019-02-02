@@ -72,7 +72,9 @@ public:
     int scr_num; //to update amount via IntPropertyArea
 
     InspectorWin* insp_win;
+
     std::vector<ObjectScript> scripts_attached;
+    std::vector<QString> path_names;
 
     void onValueChanged();
     void addPropertyInterfaceToInspector(InspectorWin* inspector);

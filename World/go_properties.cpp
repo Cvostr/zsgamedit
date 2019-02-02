@@ -435,6 +435,18 @@ void GameObject::saveProperties(std::ofstream* stream){
 
             break;
         }
+        case GO_PROPERTY_TYPE_SCRIPTGROUP:{
+            ScriptGroupProperty* ptr = static_cast<ScriptGroupProperty*>(property_ptr);
+            int script_num = static_cast<int>(ptr->scr_num);
+            //write amount of scripts
+            stream->write(reinterpret_cast<char*>(&script_num), sizeof(int));
+            *stream << "\n"; //write divider
+            for(unsigned int script_w_i = 0; script_w_i < script_num; script_w_i ++){
+                 *stream << ptr->path_names[script_w_i].toStdString() << "\n";
+            }
+
+            break;
+        }
         case GO_PROPERTY_TYPE_TILE_GROUP:{
             TileGroupProperty* ptr = static_cast<TileGroupProperty*>(property_ptr);
             int isCreated = static_cast<int>(ptr->isCreated);
@@ -532,6 +544,28 @@ void GameObject::loadProperty(std::ifstream* world_stream){
 
         break;
     }
+    case GO_PROPERTY_TYPE_SCRIPTGROUP:{
+        ScriptGroupProperty* ptr = static_cast<ScriptGroupProperty*>(prop_ptr);
+        world_stream->seekg(1, std::ofstream::cur);
+        //Read scripts number
+        world_stream->read(reinterpret_cast<char*>(&ptr->scr_num), sizeof(int));
+        world_stream->seekg(1, std::ofstream::cur);
+        //resize arrays
+        ptr->path_names.resize(ptr->scr_num);
+        //ptr->scripts_attached.resize(ptr->scr_num);
+        //iterate over all scripts and read their path
+        for(unsigned int script_w_i = 0; script_w_i < ptr->scr_num; script_w_i ++){
+            std::string scr_path;
+            *world_stream >> scr_path;
+            ptr->path_names[script_w_i] = QString::fromStdString(scr_path);
+
+            //ptr->scripts_attached[script_w_i] =
+        }
+
+        //ptr->onValueChanged();
+
+        break;
+    }
     case GO_PROPERTY_TYPE_TILE_GROUP :{
         world_stream->seekg(1, std::ofstream::cur); //Skip space
         TileGroupProperty* t_ptr = static_cast<TileGroupProperty*>(prop_ptr);
@@ -568,9 +602,22 @@ void GameObject::loadProperty(std::ifstream* world_stream){
 }
 
 void ScriptGroupProperty::onValueChanged(){
-    this->scripts_attached.resize(this->scr_num);
+    Project* project_ptr = static_cast<Project*>(this->world_ptr->proj_ptr);
 
-    insp_win->updateObjectProperties();
+    if(path_names.size() != this->scr_num){
+        path_names.resize(scr_num);
+    }
+
+    if(scripts_attached.size() != this->scr_num){ //if size changed
+        this->scripts_attached.resize(this->scr_num);
+        //Iterate over all scripts and use absolute path
+        for(unsigned int script_i = 0; script_i < scr_num; script_i ++){
+            //Set absolute path to script object
+            scripts_attached[script_i].fpath = project_ptr->root_path + "/" + path_names[script_i];
+        }
+        //Update inspector interface
+        insp_win->updateObjectProperties();
+    }
 }
 
 void ScriptGroupProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
@@ -586,7 +633,7 @@ void ScriptGroupProperty::addPropertyInterfaceToInspector(InspectorWin* inspecto
         PickResourceArea* area = new PickResourceArea;
         area->setLabel("Lua Script");
         area->go_property = static_cast<void*>(this);
-        area->rel_path = &scripts_attached[script_i].fpath;
+        area->rel_path = &path_names[script_i];
         area->extension_mask = ".lua";
         area->resource_type = PICK_RES_TYPE_FILE; //It should load meshes only
         inspector->addPropertyArea(area);

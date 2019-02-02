@@ -89,8 +89,6 @@ void InspectorWin::addPropButtons(){
     //add buttons
     ui->propertySpace->addWidget(&addObjComponentBtn);
     ui->propertySpace->addWidget(&managePropButton);
-
-
 }
 
 void InspectorWin::ShowObjectProperties(void* object_ptr){

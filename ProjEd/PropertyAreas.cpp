@@ -385,14 +385,14 @@ void IntPropertyArea::updateState(){
 
 void ResourcePickDialog::onResourceSelected(){
     QListWidgetItem* selected = this->list->currentItem();
-    QString mesh_path = selected->text();
+    QString resource_path = selected->text(); //Get selected text
 
     GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(area->go_property);
     getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
 
-    *area->rel_path = mesh_path;
+    *area->rel_path = resource_path;
     area->PropertyEditArea::callPropertyUpdate();
-    this->resource_text->setText(mesh_path);
+    this->resource_text->setText(resource_path);
     accept(); //Close dailog with positive answer
 }
 
@@ -423,6 +423,8 @@ void ResourcePickDialog::onNeedToShow(){
 }
 
 void ResourcePickDialog::findFiles(QString directory){
+    //Obtain pointer to project
+    Project* project_ptr = static_cast<Project*>(static_cast<GameObjectProperty*>(this->area->go_property)->world_ptr->proj_ptr);
     QDir _directory (directory); //Creating QDir object
     _directory.setFilter(QDir::Files | QDir::Dirs | QDir::NoSymLinks | QDir::NoDot | QDir::NoDotDot);
     _directory.setSorting(QDir::DirsLast); //I want to recursive call this function after all files
@@ -434,8 +436,11 @@ void ResourcePickDialog::findFiles(QString directory){
 
         if(fileInfo.isFile() == true){ //we found a file
             QString name = fileInfo.fileName();
-            if(name.endsWith(extension_mask)) //if extension matches
-                new QListWidgetItem(name, this->list);
+            if(name.endsWith(extension_mask)){ //if extension matches
+                QString wlabel = directory + "/" + name;
+                wlabel.remove(0, project_ptr->root_path.size() + 1); //Remove path to project
+                new QListWidgetItem(wlabel, this->list);
+            }
         }
 
         if(fileInfo.isDir() == true){ //If it is directory
