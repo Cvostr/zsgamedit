@@ -1,4 +1,6 @@
 #include "headers/LuaScript.h"
+#include "headers/zsensdk.h"
+#include <iostream>
 
 void ObjectScript::_InitScript() {
     L = luaL_newstate();
@@ -19,7 +21,7 @@ void ObjectScript::_callStart() {
             int result = start();
         }
         catch (luabridge::LuaException e) {
-
+           std::cout << "SCRIPT" << "Error occured in script (onStart) " << fpath.toStdString() << e.what();
            // dlogger::Log(TYPE_SCRIPTERROR, "%s %s %m %i %k %s", "Error occured in script (onStart) ", script_path, obj_pos, e.what());
         }
     }

@@ -65,7 +65,8 @@ HEADERS += \
     Misc/headers/oal_manager.h \
     Misc/headers/ProjBuilder.h \
     include_engine.h \
-    Scripting/headers/LuaScript.h
+    Scripting/headers/LuaScript.h \
+    Scripting/headers/zsensdk.h
 
 
 FORMS += \

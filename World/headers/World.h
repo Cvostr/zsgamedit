@@ -11,6 +11,7 @@
 #include "../../Render/headers/zs-texture.h"
 #include "../../Render/headers/zs-math.h"
 #include "../../Render/headers/zs-shader.h"
+#include "../../Misc/headers/oal_manager.h"
 #include "../../Render/headers/zs-pipeline.h"
 
 #include "../../Scripting/headers/LuaScript.h"
@@ -81,6 +82,11 @@ public:
     void onUpdate(float deltaTime); //calls update in scripts
 
     ScriptGroupProperty();
+};
+
+class AudioSourceProperty : public GameObjectProperty{
+    SoundBuffer* buffer_ptr;
+    AudioSourceProperty();
 };
 
 class LabelProperty : public GameObjectProperty {
@@ -231,6 +237,7 @@ public:
 
     ZSPIRE::Mesh* getMeshPtrByRelPath(QString label); //look through all meshes in project ptr
     ZSPIRE::Texture* getTexturePtrByRelPath(QString label); //look through all meshes in project ptr
+    SoundBuffer* getSoundPtrByName(QString label);
 
     void saveToFile(QString file);
     void openFromFile(QString file, QTreeWidget* w_ptr);

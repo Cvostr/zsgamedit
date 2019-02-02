@@ -45,6 +45,10 @@ QString getPropertyString(int type){
             return QString("Light");
             break;
         }
+        case GO_PROPERTY_TYPE_SCRIPTGROUP:{
+            return QString("Script Group");
+            break;
+        }
         case GO_PROPERTY_TYPE_TILE_GROUP:{
             return QString("Tile Group");
             break;
