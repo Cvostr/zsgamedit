@@ -1,4 +1,6 @@
 #include "headers/zs-pipeline.h"
+#include "../World/headers/obj_properties.h"
+#include "../World/headers/2dtileproperties.h"
 #include "../ProjEd/headers/ProjectEdit.h"
 #include <iostream>
 

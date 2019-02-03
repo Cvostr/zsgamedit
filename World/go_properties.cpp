@@ -1,4 +1,6 @@
 #include "headers/World.h"
+#include "headers/obj_properties.h"
+#include "headers/2dtileproperties.h"
 #include "../ProjEd/headers/ProjectEdit.h"
 #include "../Render/headers/zs-mesh.h"
 
@@ -670,6 +672,13 @@ void ScriptGroupProperty::copyTo(GameObjectProperty* dest){
     for(unsigned int script_i = 0; script_i < scr_num; script_i ++){
         _dest->scripts_attached[script_i] = this->scripts_attached[script_i];
         _dest->path_names[script_i] = this->path_names[script_i];
+    }
+}
+
+void ScriptGroupProperty::wakeUp(){
+    for(unsigned int script_i = 0; script_i < scr_num; script_i ++){
+         this->scripts_attached[script_i]._InitScript();
+         this->scripts_attached[script_i]._callStart();
     }
 }
 

@@ -66,7 +66,8 @@ HEADERS += \
     Misc/headers/ProjBuilder.h \
     include_engine.h \
     Scripting/headers/LuaScript.h \
-    Scripting/headers/zsensdk.h
+    Scripting/headers/zsensdk.h \
+    World/headers/obj_properties.h
 
 
 FORMS += \

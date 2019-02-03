@@ -4,6 +4,9 @@
 #include <QLineEdit>
 #include <cstdlib>
 
+#define GO_PROPERTY_TYPE_TRANSFORM 1
+#define GO_PROPERTY_TYPE_LABEL 2
+
 GameObjectLink::GameObjectLink(){
     ptr = nullptr;
     world_ptr = nullptr;

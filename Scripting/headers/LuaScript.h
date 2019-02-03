@@ -9,11 +9,14 @@ extern "C" {
 }
 #include <LuaBridge/LuaBridge.h>
 
+#include "../../World/headers/World.h"
+
 class ObjectScript {
 
 protected:
     lua_State* L;
 public:
+
     QString fpath; //path to file
 
     void _InitScript();
