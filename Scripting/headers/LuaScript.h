@@ -17,6 +17,7 @@ public:
     QString fpath; //path to file
 
     void _InitScript();
+    void _DestroyScript();
 
 
     void _callStart();

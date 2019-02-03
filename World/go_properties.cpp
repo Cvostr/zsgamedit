@@ -374,6 +374,12 @@ LightsourceProperty::LightsourceProperty(){
     isSent = false; //isn't sent by default
 }
 
+AudioSourceProperty::AudioSourceProperty(){
+    type = GO_PROPERTY_TYPE_AUDSOURCE;
+
+    buffer_ptr = nullptr;
+}
+
 void GameObject::saveProperties(std::ofstream* stream){
     unsigned int props_num = static_cast<unsigned int>(this->props_num);
 
@@ -556,14 +562,15 @@ void GameObject::loadProperty(std::ifstream* world_stream){
         world_stream->seekg(1, std::ofstream::cur);
         //resize arrays
         ptr->path_names.resize(ptr->scr_num);
-        //ptr->scripts_attached.resize(ptr->scr_num);
+        ptr->scripts_attached.resize(ptr->scr_num);
         //iterate over all scripts and read their path
+        Project* project_ptr = static_cast<Project*>(this->world_ptr->proj_ptr);
         for(unsigned int script_w_i = 0; script_w_i < ptr->scr_num; script_w_i ++){
             std::string scr_path;
             *world_stream >> scr_path;
             ptr->path_names[script_w_i] = QString::fromStdString(scr_path);
 
-            //ptr->scripts_attached[script_w_i] =
+            ptr->scripts_attached[script_w_i].fpath = project_ptr->root_path + "/" + ptr->path_names[script_w_i];
         }
 
         //ptr->onValueChanged();
@@ -644,8 +651,28 @@ void ScriptGroupProperty::addPropertyInterfaceToInspector(InspectorWin* inspecto
     }
 }
 void ScriptGroupProperty::onUpdate(float deltaTime){
-
+    for(unsigned int script_i = 0; script_i < this->scripts_attached.size(); script_i ++){
+        ObjectScript* script_ptr = &this->scripts_attached[script_i]; //Obtain pointer to script
+        script_ptr->_callDraw(); //Run onDraw() function in script
+    }
 }
+
+void ScriptGroupProperty::copyTo(GameObjectProperty* dest){
+    if(dest->type != this->type) return; //if it isn't transform
+
+    ScriptGroupProperty* _dest = static_cast<ScriptGroupProperty*>(dest);
+    _dest->scr_num = this->scr_num;
+
+    //resize data vectors
+    _dest->scripts_attached.resize(scr_num);
+    _dest->path_names.resize(scr_num);
+    //Copy data
+    for(unsigned int script_i = 0; script_i < scr_num; script_i ++){
+        _dest->scripts_attached[script_i] = this->scripts_attached[script_i];
+        _dest->path_names[script_i] = this->path_names[script_i];
+    }
+}
+
 ScriptGroupProperty::ScriptGroupProperty(){
     type = GO_PROPERTY_TYPE_SCRIPTGROUP;
 

@@ -80,13 +80,21 @@ public:
     void onValueChanged();
     void addPropertyInterfaceToInspector(InspectorWin* inspector);
     void onUpdate(float deltaTime); //calls update in scripts
+    void copyTo(GameObjectProperty* dest);
 
     ScriptGroupProperty();
 };
 
 class AudioSourceProperty : public GameObjectProperty{
+public:
+    QString resource_relpath; //Relative path to resource
     SoundBuffer* buffer_ptr;
+
     AudioSourceProperty();
+};
+
+class MaterialProperty : public GameObjectProperty{
+    MaterialProperty();
 };
 
 class LabelProperty : public GameObjectProperty {

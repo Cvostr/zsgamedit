@@ -13,6 +13,11 @@ void ObjectScript::_InitScript() {
     //bindSDK(L);
 }
 
+void ObjectScript::_DestroyScript(){
+    delete L; //Release this
+    L = 0x0; //Mark as deleted
+}
+
 void ObjectScript::_callStart() {
 
     luabridge::LuaRef start = luabridge::getGlobal(L, "onStart");
