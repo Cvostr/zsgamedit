@@ -45,7 +45,8 @@ SOURCES += \
     Misc/oal_manager.cpp \
     ProjEd/EditorUI.cpp \
     Misc/ProjBuilder.cpp \
-    Scripting/LuaScript.cpp
+    Scripting/LuaScript.cpp \
+    Scripting/zsensdk.cpp
 
 HEADERS += \
         mainwin.h \

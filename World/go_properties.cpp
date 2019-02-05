@@ -677,8 +677,10 @@ void ScriptGroupProperty::copyTo(GameObjectProperty* dest){
 
 void ScriptGroupProperty::wakeUp(){
     for(unsigned int script_i = 0; script_i < scr_num; script_i ++){
-         this->scripts_attached[script_i]._InitScript();
-         this->scripts_attached[script_i]._callStart();
+        this->scripts_attached[script_i].link = this->go_link;
+
+        this->scripts_attached[script_i]._InitScript();
+        this->scripts_attached[script_i]._callStart();
     }
 }
 

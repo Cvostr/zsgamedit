@@ -1,5 +1,5 @@
+
 #include "headers/LuaScript.h"
-#include "headers/zsensdk.h"
 #include <iostream>
 
 void ObjectScript::_InitScript() {
@@ -9,8 +9,15 @@ void ObjectScript::_InitScript() {
     lua_pcall(L, 0, 0, 0);
 
     //Bind DSDK to script
-    //bindStructures(L);
-    //bindSDK(L);
+    //z(L);
+    ZSENSDK::bindSDK(L);
+}
+
+ZSENSDK::ZSENGmObject* ObjectScript::getGameObjectSDK(){
+    ZSENSDK::ZSENGmObject* result;
+    result->str_id = this->link.ptr->str_id;
+    result->updPtr();
+    return result;
 }
 
 void ObjectScript::_DestroyScript(){
@@ -23,7 +30,7 @@ void ObjectScript::_callStart() {
     luabridge::LuaRef start = luabridge::getGlobal(L, "onStart");
     if (start.isFunction() == true) { //If function found
         try {
-            int result = start();
+            int result = start(getGameObjectSDK());
         }
         catch (luabridge::LuaException e) {
            std::cout << "SCRIPT" << "Error occured in script (onStart) " << fpath.toStdString() << e.what();

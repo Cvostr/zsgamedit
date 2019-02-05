@@ -261,7 +261,8 @@ void EditWindow::onRunProject(){
         GameObject* object_ptr = &world.objects[object_i];
         //Obtain script
         ScriptGroupProperty* script_ptr = static_cast<ScriptGroupProperty*>(object_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_SCRIPTGROUP));
-        script_ptr->wakeUp(); //start all scripts
+        if(script_ptr != nullptr)
+            script_ptr->wakeUp(); //start all scripts
     }
 }
 

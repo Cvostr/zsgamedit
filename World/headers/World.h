@@ -49,9 +49,6 @@ public:
     virtual void onUpdate(float deltaTime);
 };
 
-//#include "2dtileproperties.h" //Include that to define 2dTile game elements
-//#include "obj_properties.h"
-
 class LabelProperty : public GameObjectProperty {
 public:
     QString label; //Label of gameobject
@@ -119,11 +116,11 @@ public:
     void addChildObject(GameObjectLink link);
     void removeChildObject(GameObjectLink link);
 
-    void removeProperty(int index);
+    void removeProperty(int index); //Remove property with type
 
     void saveProperties(std::ofstream* stream); //Writes properties content at end of stream
     void loadProperty(std::ifstream* world_stream); //Loads one property from stream
-    void clearAll(bool clearQtWigt = true);
+    void clearAll(bool clearQtWigt = true); //Release all associated memory with this object
     void copyTo(GameObject* dest);
     void Draw(RenderPipeline* pipeline);
 
