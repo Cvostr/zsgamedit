@@ -13,16 +13,28 @@ extern "C" {
 
 namespace ZSENSDK {
 
+class ZSENTransformProperty{
+public:
+    TransformProperty* prop_ptr;
 
+    ZSVECTOR3 getPosition();
+    ZSVECTOR3 getScale();
+    ZSVECTOR3 getRotation();
+
+    void setPosition(ZSVECTOR3 pos);
+    void setRotation(ZSVECTOR3 rot);
+    void setScale(ZSVECTOR3 scale);
+};
 
 class ZSENGmObject{
-private:
-    GameObject* object_ptr;
 public:
     std::string str_id;
     World* world_ptr;
+    GameObject* object_ptr;
 
     GameObject* updPtr();
+
+    ZSENTransformProperty transform();
 };
 
 class ZSEN_World{
@@ -30,7 +42,11 @@ public:
     World* world_ptr;
 
     ZSENGmObject getObjectSDK(std::string name);
+    void removeObject(ZSENGmObject obj);
 };
+namespace Debug{
+    void Log(std::string text);
+}
 
 void bindSDK(lua_State* state);
 

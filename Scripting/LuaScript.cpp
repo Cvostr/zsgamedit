@@ -9,14 +9,14 @@ void ObjectScript::_InitScript() {
     lua_pcall(L, 0, 0, 0);
 
     //Bind DSDK to script
-    //z(L);
     ZSENSDK::bindSDK(L);
 }
 
-ZSENSDK::ZSENGmObject* ObjectScript::getGameObjectSDK(){
-    ZSENSDK::ZSENGmObject* result;
-    result->str_id = this->link.ptr->str_id;
-    result->updPtr();
+ZSENSDK::ZSENGmObject ObjectScript::getGameObjectSDK(){
+    ZSENSDK::ZSENGmObject result;
+    result.str_id = this->link.updLinkPtr()->str_id;
+    result.world_ptr = this->link.world_ptr;
+    result.updPtr();
     return result;
 }
 
@@ -33,11 +33,9 @@ void ObjectScript::_callStart() {
             int result = start(getGameObjectSDK());
         }
         catch (luabridge::LuaException e) {
-           std::cout << "SCRIPT" << "Error occured in script (onStart) " << fpath.toStdString() << e.what();
-           // dlogger::Log(TYPE_SCRIPTERROR, "%s %s %m %i %k %s", "Error occured in script (onStart) ", script_path, obj_pos, e.what());
+           std::cout << "SCRIPT" << "Error occured in script (onStart) " << fpath.toStdString() << e.what() << std::endl;
         }
     }
-
 }
 
 

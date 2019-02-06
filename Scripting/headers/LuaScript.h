@@ -16,7 +16,7 @@ class ObjectScript {
 
 private:
     lua_State* L;
-    ZSENSDK::ZSENGmObject* getGameObjectSDK();
+    ZSENSDK::ZSENGmObject getGameObjectSDK();
 public:
     GameObjectLink link;
     QString fpath; //path to file
