@@ -1,5 +1,6 @@
 #include "headers/zs-shader.h"
 #include "../World/headers/World.h"
+#include "../World/headers/obj_properties.h"
 #include <GL/glew.h>
 
 #include <cstring>

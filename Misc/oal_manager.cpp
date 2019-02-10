@@ -138,8 +138,8 @@ bool SoundBuffer::loadFileWAV(const char* file_path){
         size |= data_buffer[1] << 8;
         size |= data_buffer[0];
 
-        int ret = (int)fread(data_buffer, 1, size, fstream);
-        alBufferData(this->al_buffer_id, format, (void*)data_buffer, ret, freq);
+        int ret = static_cast<int>(fread(data_buffer, 1, size, fstream));
+        alBufferData(this->al_buffer_id, format, static_cast<void*>(data_buffer), ret, freq);
 
         if (alGetError() != AL_NO_ERROR)
         {
@@ -159,4 +159,13 @@ unsigned int SoundBuffer::getBufferIdAL(){
 }
 SoundBuffer::SoundBuffer(){
 
+}
+
+void SoundSource::Init(){
+    alGenSources(1, &this->al_source_id);
+}
+void SoundSource::apply_settings(){
+    alSource3f(al_source_id, AL_POSITION, this->source_pos.X, this->source_pos.Y, this->source_pos.Z);
+    alSourcef(al_source_id, AL_GAIN, this->source_gain);
+    alSourcef(al_source_id, AL_PITCH, this->source_pitch);
 }

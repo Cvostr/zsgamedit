@@ -1,5 +1,6 @@
 #include "headers/ProjectEdit.h"
 #include "headers/InspectorWin.h"
+#include "../World/headers/obj_properties.h"
 #include "ui_editor.h"
 #include "stdio.h"
 #include <iostream>
@@ -48,6 +49,7 @@ EditWindow::EditWindow(QWidget *parent) :
 
     ready = false; //Firstly set it to 0
     hasSceneFile = false; //No scene loaded by default
+    isSceneRun = false; //Not running by default
 
     setupObjectsHieList();
 
@@ -248,12 +250,23 @@ void EditWindow::onBuildProject(){
 }
 
 void EditWindow::onRunProject(){
-    ZSENGINE_CREATE_INFO engine_create_info;
+    /*ZSENGINE_CREATE_INFO engine_create_info;
     engine_create_info.appName = "GameEditorRun";
     engine_create_info.createWindow = false; //window already created, we don't need one
     engine_create_info.graphicsApi = OGL32; //use opengl
 
-    engine = new ZSpireEngine(&engine_create_info, nullptr);
+    engine = new ZSpireEngine(&engine_create_info, nullptr);*/
+
+    //Prepare world for running
+    for(unsigned int object_i = 0; object_i < world.objects.size(); object_i ++){
+        GameObject* object_ptr = &world.objects[object_i];
+        //Obtain script
+        ScriptGroupProperty* script_ptr = static_cast<ScriptGroupProperty*>(object_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_SCRIPTGROUP));
+        if(script_ptr != nullptr)
+            script_ptr->wakeUp(); //start all scripts
+    }
+
+    isSceneRun = true;
 }
 
 void EditWindow::updateFileList(){

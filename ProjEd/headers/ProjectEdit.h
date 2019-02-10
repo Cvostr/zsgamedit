@@ -130,6 +130,7 @@ private:
 public:
     bool ready; //Is everything loaded?
     int close_reason;
+    bool isSceneRun; //Is scene running right now
 
     World world;
     ZSPIRE::Camera edit_camera; //Camera to show editing scene

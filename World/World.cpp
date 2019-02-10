@@ -4,6 +4,9 @@
 #include <QLineEdit>
 #include <cstdlib>
 
+#define GO_PROPERTY_TYPE_TRANSFORM 1
+#define GO_PROPERTY_TYPE_LABEL 2
+
 GameObjectLink::GameObjectLink(){
     ptr = nullptr;
     world_ptr = nullptr;
@@ -209,6 +212,12 @@ void GameObject::removeProperty(int index){
     }
 
     props_num -= 1;
+}
+
+void GameObject::onUpdate(){
+    for(unsigned int i = 0; i < props_num; i ++){ //iterate over all properties
+        properties[i]->onUpdate(1); //and call onUpdate on each property
+    }
 }
 
 World::World(){
@@ -616,6 +625,20 @@ ZSPIRE::Texture* World::getTexturePtrByRelPath(QString label){
         //If resource is mesh and has same name as in argument
         if(r_ptr->type == RESOURCE_TYPE_TEXTURE && r_ptr->rel_path.compare(label) == 0){
             return static_cast<ZSPIRE::Texture*>(r_ptr->class_ptr);
+        }
+    }
+    return nullptr;
+}
+
+SoundBuffer* World::getSoundPtrByName(QString label){
+    Project* proj_ptr = static_cast<Project*>(this->proj_ptr); //Convert void pointer to Project*
+    unsigned int resources_num = static_cast<unsigned int>(proj_ptr->resources.size()); //Receive resource amount in project
+
+    for(unsigned int r_it = 0; r_it < resources_num; r_it ++){ //Iteerate over all resources in project
+        Resource* r_ptr = &proj_ptr->resources[r_it]; //Obtain pointer to resource
+        //If resource is mesh and has same name as in argument
+        if(r_ptr->type == RESOURCE_TYPE_AUDIO && r_ptr->rel_path.compare(label) == 0){
+            return static_cast<SoundBuffer*>(r_ptr->class_ptr);
         }
     }
     return nullptr;

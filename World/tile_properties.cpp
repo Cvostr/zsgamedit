@@ -1,6 +1,10 @@
 #include "../ProjEd/headers/ProjectEdit.h"
 #include "headers/World.h"
 #include <unistd.h>
+
+#include "headers/2dtileproperties.h"
+#include "headers/obj_properties.h"
+
 TileGroupProperty* current_property; //Property, that shown
 
 void onCreateBtnPress(){

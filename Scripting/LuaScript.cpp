@@ -1,4 +1,6 @@
+
 #include "headers/LuaScript.h"
+#include <iostream>
 
 void ObjectScript::_InitScript() {
     L = luaL_newstate();
@@ -7,8 +9,20 @@ void ObjectScript::_InitScript() {
     lua_pcall(L, 0, 0, 0);
 
     //Bind DSDK to script
-    //bindStructures(L);
-    //bindSDK(L);
+    ZSENSDK::bindSDK(L);
+}
+
+ZSENSDK::ZSENGmObject ObjectScript::getGameObjectSDK(){
+    ZSENSDK::ZSENGmObject result;
+    result.str_id = this->link.updLinkPtr()->str_id;
+    result.world_ptr = this->link.world_ptr;
+    result.updPtr();
+    return result;
+}
+
+void ObjectScript::_DestroyScript(){
+    delete L; //Release this
+    L = 0x0; //Mark as deleted
 }
 
 void ObjectScript::_callStart() {
@@ -16,14 +30,12 @@ void ObjectScript::_callStart() {
     luabridge::LuaRef start = luabridge::getGlobal(L, "onStart");
     if (start.isFunction() == true) { //If function found
         try {
-            int result = start();
+            int result = start(getGameObjectSDK());
         }
         catch (luabridge::LuaException e) {
-
-           // dlogger::Log(TYPE_SCRIPTERROR, "%s %s %m %i %k %s", "Error occured in script (onStart) ", script_path, obj_pos, e.what());
+           std::cout << "SCRIPT" << "Error occured in script (onStart) " << fpath.toStdString() << e.what() << std::endl;
         }
     }
-
 }
 
 
@@ -35,12 +47,9 @@ void ObjectScript::_callDraw() {
             int result = frame();
         }
         catch (luabridge::LuaException e) {
-
-         //   dlogger::Log(TYPE_SCRIPTERROR, "%s %s %m %i %k %s", "Error occured in script (onFrame) ", script_path, obj_pos, e.what());
-        }
-
+            std::cout << "SCRIPT" << "Error occured in script (onFrame) " << fpath.toStdString() << e.what() << std::endl;
+      }
     }
-
 }
 void ObjectScript::callDrawUI() {
 

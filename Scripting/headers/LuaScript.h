@@ -9,15 +9,20 @@ extern "C" {
 }
 #include <LuaBridge/LuaBridge.h>
 
+#include "zsensdk.h"
+#include "../../World/headers/World.h"
+
 class ObjectScript {
 
-protected:
+private:
     lua_State* L;
+    ZSENSDK::ZSENGmObject getGameObjectSDK();
 public:
+    GameObjectLink link;
     QString fpath; //path to file
 
     void _InitScript();
-
+    void _DestroyScript();
 
     void _callStart();
     void _callDraw();
