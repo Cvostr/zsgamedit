@@ -9,6 +9,7 @@
 #include <QFileDialog>
 #include <QPushButton>
 #include <QAction>
+#include <QMouseEvent>
 
 static CreateProjectWindow* cr_w;
 
@@ -152,5 +153,16 @@ void MainWin::updateListWidgetContent(){
         //Add project entry to list
         new QListWidgetItem(conf_ptr->projLabel, ui->projList);
 
+    }
+}
+
+ProjectListWgt::ProjectListWgt(QWidget* parent) : QListWidget (parent){
+}
+
+void ProjectListWgt::mousePressEvent(QMouseEvent *event){
+    QListWidget::mousePressEvent(event);
+    if(event->button() == Qt::RightButton)
+    {
+        emit onRightClick(event->pos());
     }
 }

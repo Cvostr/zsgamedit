@@ -16,6 +16,17 @@ namespace Ui {
 class MainWin;
 }
 
+class ProjectListWgt : public QListWidget{
+    Q_OBJECT
+protected:
+    void mousePressEvent(QMouseEvent *event) override;
+signals:
+    void onRightClick(QPoint pos);
+    void onLeftClick(QPoint pos);
+public:
+    ProjectListWgt(QWidget* parent = nullptr);
+};
+
 class MainWin : public QMainWindow
 {
     Q_OBJECT

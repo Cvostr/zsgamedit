@@ -257,16 +257,28 @@ void EditWindow::onRunProject(){
 
     engine = new ZSpireEngine(&engine_create_info, nullptr);*/
 
-    //Prepare world for running
-    for(unsigned int object_i = 0; object_i < world.objects.size(); object_i ++){
-        GameObject* object_ptr = &world.objects[object_i];
-        //Obtain script
-        ScriptGroupProperty* script_ptr = static_cast<ScriptGroupProperty*>(object_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_SCRIPTGROUP));
-        if(script_ptr != nullptr)
-            script_ptr->wakeUp(); //start all scripts
-    }
+    if(isSceneRun == false){ //if we are Not running scene
+        this->world.putToShapshot(&run_world_snapshot); //create snapshot of current state to recover it later
+        //Prepare world for running
+        for(unsigned int object_i = 0; object_i < world.objects.size(); object_i ++){
+            GameObject* object_ptr = &world.objects[object_i];
+            //Obtain script
+            ScriptGroupProperty* script_ptr = static_cast<ScriptGroupProperty*>(object_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_SCRIPTGROUP));
+            if(script_ptr != nullptr)
+                script_ptr->wakeUp(); //start all scripts
+        }
 
-    isSceneRun = true;
+        isSceneRun = true; //set toggle to true
+
+        this->ui->actionRun->setText("Stop");
+
+    }else{ //lets stop scene run
+        isSceneRun = false; //set toggle to true
+
+        this->ui->actionRun->setText("Run");
+
+        this->world.recoverFromSnapshot(&run_world_snapshot); //create snapshot of current state to recover it later
+    }
 }
 
 void EditWindow::updateFileList(){

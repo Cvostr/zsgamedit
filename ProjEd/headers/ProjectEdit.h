@@ -139,6 +139,7 @@ public:
     Project project;
     EditorInputState input_state;
     ObjectTransformState obj_trstate; //Describes object transform
+    WorldSnapshot run_world_snapshot; //useful to recover world state after running
 
     void init();
     void updateFileList(); //Updates content in file list widget
