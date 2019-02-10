@@ -77,6 +77,8 @@ struct ObjectTransformState{
     TransformProperty* tprop_ptr; //Pointer to transform property of obj_ptr
     int transformMode;
 
+    void setTransformOnObject(GameObject* obj_ptr, int transformMode);
+
     ObjectTransformState(){ //Default construct
         isTransforming = false;
         obj_ptr = nullptr;

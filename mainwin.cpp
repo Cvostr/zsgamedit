@@ -149,8 +149,8 @@ void MainWin::updateListWidgetContent(){
     for(unsigned int i = 0; i < this->projects.size(); i ++){
 
         ProjectConf* conf_ptr = &this->projects[i];
-
-        QListWidgetItem* item = new QListWidgetItem(conf_ptr->projLabel, ui->projList);
+        //Add project entry to list
+        new QListWidgetItem(conf_ptr->projLabel, ui->projList);
 
     }
 }

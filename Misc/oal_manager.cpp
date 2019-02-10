@@ -76,7 +76,7 @@ bool SoundBuffer::loadFileWAV(const char* file_path){
         fstat(fileno(fstream), &buff); //Getting file info
     #endif
 
-        data_buffer = (unsigned char*)malloc(buff.st_size - 44);
+        data_buffer = static_cast<unsigned char*>(malloc(buff.st_size - 44));
 
         fread(data_buffer, 1, 12, fstream);
 
@@ -144,11 +144,15 @@ bool SoundBuffer::loadFileWAV(const char* file_path){
         if (alGetError() != AL_NO_ERROR)
         {
             fprintf(stderr, "Error loading :(\n");
+            //Free heap
+            free(data_buffer);
+            fclose(fstream);
             return false;
         }
 
         free(data_buffer);
 
+        fclose(fstream);
         return true;
 }
 void SoundBuffer::Destroy(){

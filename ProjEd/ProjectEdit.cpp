@@ -555,31 +555,14 @@ void ObjectCtxMenu::onDublicateClicked(){
 }
 
 void ObjectCtxMenu::onMoveClicked(){
-    //win_ptr->getInspector()->clearContentLayout(); //Detach object from inspector
-
-    win_ptr->obj_trstate.isTransforming = true; //Transform operation
-    win_ptr->obj_trstate.obj_ptr = obj_ptr; //Sending object ptr
-    //Setting pointer to transform property
-    win_ptr->obj_trstate.tprop_ptr = static_cast<TransformProperty*>(obj_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
-    win_ptr->obj_trstate.transformMode = GO_TRANSFORM_MODE_TRANSLATE; //Setting transform type
+    win_ptr->obj_trstate.setTransformOnObject(win_ptr->obj_trstate.obj_ptr, GO_TRANSFORM_MODE_TRANSLATE);
 }
 void ObjectCtxMenu::onScaleClicked(){
-    //win_ptr->getInspector()->clearContentLayout(); //Detach object from inspector
-
-    win_ptr->obj_trstate.isTransforming = true; //Transform operation
-    win_ptr->obj_trstate.obj_ptr = obj_ptr; //Sending object ptr
-    //Setting pointer to transform property
-    win_ptr->obj_trstate.tprop_ptr = static_cast<TransformProperty*>(obj_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
-    win_ptr->obj_trstate.transformMode = GO_TRANSFORM_MODE_SCALE;//Setting transform type
+    win_ptr->obj_trstate.setTransformOnObject(win_ptr->obj_trstate.obj_ptr, GO_TRANSFORM_MODE_SCALE);
 }
 void ObjectCtxMenu::onRotateClicked(){
-    //win_ptr->getInspector()->clearContentLayout(); //Detach object from inspector
-
-    win_ptr->obj_trstate.isTransforming = true; //Transform operation
-    win_ptr->obj_trstate.obj_ptr = obj_ptr; //Sending object ptr
-    //Setting pointer to transform property
-    win_ptr->obj_trstate.tprop_ptr = static_cast<TransformProperty*>(obj_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
-    win_ptr->obj_trstate.transformMode = GO_TRANSFORM_MODE_ROTATE;//Setting transform type
+    //Set state to rotate object
+    win_ptr->obj_trstate.setTransformOnObject(win_ptr->obj_trstate.obj_ptr, GO_TRANSFORM_MODE_ROTATE);
 }
 
 void ObjTreeWgt::dropEvent(QDropEvent* event){
@@ -733,19 +716,13 @@ void EditWindow::onKeyDown(SDL_Keysym sym){
     }
 
     if(sym.sym == SDLK_t){
-        getInspector()->clearContentLayout(); //Detach object from
-        this->obj_trstate.transformMode = GO_TRANSFORM_MODE_TRANSLATE;
-        this->obj_trstate.isTransforming = true;
+        obj_trstate.setTransformOnObject(this->obj_trstate.obj_ptr, GO_TRANSFORM_MODE_TRANSLATE);
     }
     if(sym.sym == SDLK_e){
-        getInspector()->clearContentLayout(); //Detach object from
-        this->obj_trstate.transformMode = GO_TRANSFORM_MODE_SCALE;
-        this->obj_trstate.isTransforming = true;
+        obj_trstate.setTransformOnObject(this->obj_trstate.obj_ptr, GO_TRANSFORM_MODE_SCALE);
     }
     if(sym.sym == SDLK_r){
-        getInspector()->clearContentLayout(); //Detach object from
-        this->obj_trstate.transformMode = GO_TRANSFORM_MODE_ROTATE;
-        this->obj_trstate.isTransforming = true;
+        obj_trstate.setTransformOnObject(this->obj_trstate.obj_ptr, GO_TRANSFORM_MODE_ROTATE);
     }
 
     if(sym.sym == SDLK_DELETE){
@@ -776,4 +753,16 @@ void EditWindow::callObjectDeletion(GameObjectLink link){
 
 EdActions* getActionManager(){
     return _ed_actions_container;
+}
+
+void ObjectTransformState::setTransformOnObject(GameObject* obj_ptr, int transformMode){
+    this->obj_ptr = obj_ptr; //Set pointer to object
+    //Calculate pointer to transform property
+    this->tprop_ptr = static_cast<TransformProperty*>(obj_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
+
+    this->transformMode = transformMode;
+    this->isTransforming = true;
+    //Add property action
+    GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(obj_ptr->getTransformProperty());
+    getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
 }

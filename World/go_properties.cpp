@@ -90,6 +90,11 @@ GameObjectProperty* allocProperty(int type){
             _ptr = static_cast<GameObjectProperty*>(ptr);
             break;
         }
+        case GO_PROPERTY_TYPE_AUDSOURCE:{
+            AudioSourceProperty* ptr = new AudioSourceProperty;
+            _ptr = static_cast<AudioSourceProperty*>(ptr);
+            break;
+        }
         case GO_PROPERTY_TYPE_TILE_GROUP:{
             TileGroupProperty* ptr = new TileGroupProperty;
             _ptr = static_cast<GameObjectProperty*>(ptr);
