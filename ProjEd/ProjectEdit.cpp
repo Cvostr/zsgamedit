@@ -49,6 +49,7 @@ EditWindow::EditWindow(QWidget *parent) :
 
     ready = false; //Firstly set it to 0
     hasSceneFile = false; //No scene loaded by default
+    isSceneRun = false; //Not running by default
 
     setupObjectsHieList();
 
@@ -264,6 +265,8 @@ void EditWindow::onRunProject(){
         if(script_ptr != nullptr)
             script_ptr->wakeUp(); //start all scripts
     }
+
+    isSceneRun = true;
 }
 
 void EditWindow::updateFileList(){

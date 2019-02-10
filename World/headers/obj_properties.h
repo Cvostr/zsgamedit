@@ -42,6 +42,11 @@ public:
     QString resource_relpath; //Relative path to resource
     SoundBuffer* buffer_ptr;
 
+
+
+    void audio_start();
+    void audio_stop();
+
     AudioSourceProperty();
 };
 
@@ -49,7 +54,6 @@ public:
 class MaterialProperty : public GameObjectProperty{
     MaterialProperty();
 };
-
 
 
 class MeshProperty : public GameObjectProperty{
@@ -63,7 +67,6 @@ public:
     void copyTo(GameObjectProperty* dest);
     MeshProperty();
 };
-
 
 
 class LightsourceProperty : public GameObjectProperty{

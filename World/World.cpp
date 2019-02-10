@@ -214,6 +214,12 @@ void GameObject::removeProperty(int index){
     props_num -= 1;
 }
 
+void GameObject::onUpdate(){
+    for(unsigned int i = 0; i < props_num; i ++){ //iterate over all properties
+        properties[i]->onUpdate(1); //and call onUpdate on each property
+    }
+}
+
 World::World(){
     objects.reserve(6000);
     proj_ptr = nullptr;

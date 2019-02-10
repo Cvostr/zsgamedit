@@ -1,4 +1,4 @@
-#include "headers/LuaScript.h"
+﻿#include "headers/LuaScript.h"
 #include "headers/zsensdk.h"
 #include "../World/headers/obj_properties.h"
 #include "../Render/headers/zs-math.h"
@@ -89,6 +89,25 @@ luabridge::getGlobalNamespace(state)
         .addFunction("removeObject", &ZSENSDK::ZSEN_World::removeObject)
 
         .endClass()
+        .endNamespace();
+
+luabridge::getGlobalNamespace(state)
+        .beginNamespace("engine")
+
+        .beginClass <ZSENObjectProperty>("ObjectProperty")
+        .endClass()
+
+
+        .deriveClass <ZSENTransformProperty, ZSENObjectProperty>("Transform")
+        .addFunction("getPosition", &ZSENSDK::ZSENTransformProperty::getPosition)
+        .addFunction("getScale", &ZSENSDK::ZSENTransformProperty::getScale)
+        .addFunction("getRotation", &ZSENSDK::ZSENTransformProperty::getRotation)
+        .addFunction("setPosition", &ZSENSDK::ZSENTransformProperty::setPosition)
+        .addFunction("setScale", &ZSENSDK::ZSENTransformProperty::setScale)
+        .addFunction("setRotation", &ZSENSDK::ZSENTransformProperty::setRotation)
+        .endClass()
+
+
         .endNamespace();
 
 

@@ -19,7 +19,7 @@ namespace ZSPIRE {
 }
 
 class SoundBuffer {
-protected:
+private:
      unsigned int al_buffer_id;
 public:
      void Init();
@@ -27,6 +27,19 @@ public:
      void Destroy();
      unsigned int getBufferIdAL();
      SoundBuffer();
+};
+
+class SoundSource{
+private:
+    unsigned int al_source_id;
+public:
+
+    ZSVECTOR3 source_pos; //Position of audio source
+    float source_gain;
+    float source_pitch;
+
+    void Init();
+    void apply_settings();
 };
 
 #endif

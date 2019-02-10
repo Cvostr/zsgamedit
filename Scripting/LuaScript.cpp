@@ -47,12 +47,9 @@ void ObjectScript::_callDraw() {
             int result = frame();
         }
         catch (luabridge::LuaException e) {
-
-         //   dlogger::Log(TYPE_SCRIPTERROR, "%s %s %m %i %k %s", "Error occured in script (onFrame) ", script_path, obj_pos, e.what());
-        }
-
+            std::cout << "SCRIPT" << "Error occured in script (onFrame) " << fpath.toStdString() << e.what() << std::endl;
+      }
     }
-
 }
 void ObjectScript::callDrawUI() {
 

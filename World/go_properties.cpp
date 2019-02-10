@@ -617,11 +617,11 @@ void GameObject::loadProperty(std::ifstream* world_stream){
 void ScriptGroupProperty::onValueChanged(){
     Project* project_ptr = static_cast<Project*>(this->world_ptr->proj_ptr);
 
-    if(path_names.size() != this->scr_num){
+    if(static_cast<int>(path_names.size()) != this->scr_num){
         path_names.resize(scr_num);
     }
 
-    if(scripts_attached.size() != this->scr_num){ //if size changed
+    if(static_cast<int>(scripts_attached.size()) != this->scr_num){ //if size changed
         this->scripts_attached.resize(this->scr_num);
         //Iterate over all scripts and use absolute path
         for(unsigned int script_i = 0; script_i < scr_num; script_i ++){

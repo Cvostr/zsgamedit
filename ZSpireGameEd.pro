@@ -4,9 +4,9 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
-LIBS += -lGLEW -lassimp -lSDL2 -lopenal -lzsengine -llua5.2
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+QT       += core gui widgets
+LIBS += -lGLEW -lassimp -lSDL2 -lopenal -llua5.2
+#greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = ZSpireGameEd
 TEMPLATE = app

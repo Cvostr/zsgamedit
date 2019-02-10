@@ -13,7 +13,12 @@ extern "C" {
 
 namespace ZSENSDK {
 
-class ZSENTransformProperty{
+class ZSENObjectProperty{
+public:
+    int type;
+};
+
+class ZSENTransformProperty : public ZSENObjectProperty{
 public:
     TransformProperty* prop_ptr;
 
