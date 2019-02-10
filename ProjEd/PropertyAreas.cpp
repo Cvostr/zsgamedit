@@ -88,6 +88,10 @@ void PropertyEditArea::destroyContent(){
 
 }
 
+void PropertyEditArea::updateValue(){
+
+}
+
 PropertyEditArea::~PropertyEditArea(){
 
 }
@@ -174,7 +178,12 @@ Float3PropertyArea::Float3PropertyArea(){
 }
 
 void Float3PropertyArea::addToInspector(InspectorWin* win){
+    win->connect(&this->y_field, SIGNAL(textEdited(QString)), win, SLOT(onPropertyChange()));
+    win->connect(&this->x_field, SIGNAL(textEdited(QString)), win, SLOT(onPropertyChange()));
+    win->connect(&this->z_field, SIGNAL(textEdited(QString)), win, SLOT(onPropertyChange()));
+
     win->getContentLayout()->addLayout(this->elem_layout);
+
 }
 
 void Float3PropertyArea::updateState(){
@@ -234,6 +243,8 @@ StringPropertyArea::~StringPropertyArea(){
 }
 
 void StringPropertyArea::addToInspector(InspectorWin* win){
+    win->connect(&this->edit_field, SIGNAL(textEdited(QString)), win, SLOT(onPropertyChange()));
+
     win->getContentLayout()->addLayout(this->elem_layout);
 }
 
@@ -275,6 +286,8 @@ void FloatPropertyArea::setup(){
     float_field.setText(QString::number(static_cast<double>(*value)));
 }
 void FloatPropertyArea::addToInspector(InspectorWin* win){
+    win->connect(&this->float_field, SIGNAL(textEdited(QString)), win, SLOT(onPropertyChange()));
+
     win->getContentLayout()->addLayout(this->elem_layout);
 }
 

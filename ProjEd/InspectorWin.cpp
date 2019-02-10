@@ -125,6 +125,9 @@ void InspectorWin::area_update(){
     }
 }
 
+void InspectorWin::onPropertyChange(){
+    this->area_update();
+}
 
 void AddGoComponentDialog::onAddButtonPressed(){
     GameObject* object_ptr = static_cast<GameObject*>(this->g_object_ptr);

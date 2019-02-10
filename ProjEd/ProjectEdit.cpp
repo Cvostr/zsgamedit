@@ -701,7 +701,7 @@ void EditWindow::onMouseMotion(int relX, int relY){
                     cam_pitch = -89.0f;
 
             ZSVECTOR3 front;
-            front.X = (float)(cos(DegToRad(cam_yaw)) * cos(DegToRad(cam_pitch)));
+            front.X = static_cast<float>((cos(DegToRad(cam_yaw)) * cos(DegToRad(cam_pitch))));
             front.Y = -sin(DegToRad(cam_pitch));
             front.Z = sin(DegToRad(cam_yaw)) * cos(DegToRad(cam_pitch));
             vNormalize(&front);
