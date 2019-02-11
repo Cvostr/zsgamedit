@@ -14,7 +14,7 @@ InspectorWin::InspectorWin(QWidget *parent) :
     ui->setupUi(this);
     //addObjComponentBtn = nullptr;
     this->ui->propertySpace->setMargin(0);
-    this->ui->propertySpace->setSpacing(1);
+    this->ui->propertySpace->setSpacing(5);
     this->ui->propertySpace->setContentsMargins(5,1,2,0);
 
      addObjComponentBtn.setText("Add property");
@@ -26,6 +26,10 @@ InspectorWin::InspectorWin(QWidget *parent) :
      connect(&addObjComponentBtn, SIGNAL(clicked()), this, SLOT(onAddComponentBtnPressed()));
      connect(&managePropButton, SIGNAL(clicked()), this, SLOT(onManagePropButtonPressed()));
 
+     QWidget* widget = new QWidget;
+     widget->setLayout(getContentLayout());
+     delete this->ui->scrollAreaWidgetContents;
+     ui->scrollArea->setWidget(widget);
 }
 
 InspectorWin::~InspectorWin()

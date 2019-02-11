@@ -387,6 +387,20 @@ AudioSourceProperty::AudioSourceProperty(){
     buffer_ptr = nullptr;
 }
 
+void AudioSourceProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
+    FloatPropertyArea* gain_area = new FloatPropertyArea;
+    gain_area->setLabel("Gain"); //Its label
+    gain_area->value = &this->source.source_gain;
+    gain_area->go_property = static_cast<void*>(this);
+    inspector->addPropertyArea(gain_area);
+
+    FloatPropertyArea* pitch_area = new FloatPropertyArea;
+    pitch_area->setLabel("Gain"); //Its label
+    pitch_area->value = &this->source.source_gain;
+    pitch_area->go_property = static_cast<void*>(this);
+    inspector->addPropertyArea(pitch_area);
+}
+
 void GameObject::saveProperties(std::ofstream* stream){
     unsigned int props_num = static_cast<unsigned int>(this->props_num);
 

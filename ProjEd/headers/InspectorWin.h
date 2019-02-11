@@ -12,6 +12,7 @@
 #include <QRadioButton>
 #include <QColorDialog>
 #include <QCheckBox>
+#include <QScrollArea>
 
 #include "../../Render/headers/zs-math.h"
 

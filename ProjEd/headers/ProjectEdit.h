@@ -115,6 +115,8 @@ public slots:
     void onRedoPressed();
 
 private:
+   // QScrollArea* scroll;
+
     QString current_dir; //current directory path string
     QString scene_path;
     bool hasSceneFile; //Is scene saved or loaded

@@ -41,8 +41,9 @@ class AudioSourceProperty : public GameObjectProperty{
 public:
     QString resource_relpath; //Relative path to resource
     SoundBuffer* buffer_ptr;
+    SoundSource source;
 
-
+    void addPropertyInterfaceToInspector(InspectorWin* inspector);
 
     void audio_start();
     void audio_stop();

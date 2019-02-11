@@ -20,23 +20,39 @@
    <string>Inspector</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QWidget" name="verticalLayoutWidget">
+   <widget class="QScrollArea" name="scrollArea">
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>0</y>
-      <width>351</width>
-      <height>671</height>
+      <y>10</y>
+      <width>341</width>
+      <height>641</height>
      </rect>
     </property>
-    <layout class="QVBoxLayout" name="propertySpace">
-     <property name="spacing">
-      <number>0</number>
+    <property name="widgetResizable">
+     <bool>true</bool>
+    </property>
+    <widget class="QWidget" name="scrollAreaWidgetContents">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>0</y>
+       <width>339</width>
+       <height>639</height>
+      </rect>
      </property>
-     <property name="sizeConstraint">
-      <enum>QLayout::SetNoConstraint</enum>
-     </property>
-    </layout>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="verticalLayoutWidget">
+    <property name="geometry">
+     <rect>
+      <x>19</x>
+      <y>29</y>
+      <width>281</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <layout class="QVBoxLayout" name="propertySpace"/>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -45,7 +61,7 @@
      <x>0</x>
      <y>0</y>
      <width>350</width>
-     <height>23</height>
+     <height>22</height>
     </rect>
    </property>
   </widget>
