@@ -250,13 +250,6 @@ void EditWindow::onBuildProject(){
 }
 
 void EditWindow::onRunProject(){
-    /*ZSENGINE_CREATE_INFO engine_create_info;
-    engine_create_info.appName = "GameEditorRun";
-    engine_create_info.createWindow = false; //window already created, we don't need one
-    engine_create_info.graphicsApi = OGL32; //use opengl
-
-    engine = new ZSpireEngine(&engine_create_info, nullptr);*/
-
     if(isSceneRun == false){ //if we are Not running scene
         this->world.putToShapshot(&run_world_snapshot); //create snapshot of current state to recover it later
         //Prepare world for running
@@ -439,7 +432,7 @@ void EditWindow::lookForResources(QString path){
                 resource.rel_path = resource.file_path; //Preparing to get relative path
                 resource.rel_path.remove(0, project.root_path.size() + 1); //Get relative path by removing length of project root from start
                 resource.type = RESOURCE_TYPE_AUDIO; //Type of resource is mesh
-                //loadResource(&resource); //Perform mesh processing & loading to OpenGL
+                loadResource(&resource); //Perform mesh processing & loading to OpenGL
                 this->project.resources.push_back(resource);
             }
         }

@@ -44,7 +44,9 @@ public:
     SoundSource source;
 
     void addPropertyInterfaceToInspector(InspectorWin* inspector);
+    void onValueChanged(); //Update soud buffer pointer and send source props
 
+    void updateAudioPtr();
     void audio_start();
     void audio_stop();
 

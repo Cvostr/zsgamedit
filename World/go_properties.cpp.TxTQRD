@@ -403,16 +403,12 @@ void AudioSourceProperty::addPropertyInterfaceToInspector(InspectorWin* inspecto
 
     FloatPropertyArea* pitch_area = new FloatPropertyArea;
     pitch_area->setLabel("Pitch"); //Its label
-    pitch_area->value = &this->source.source_pitch;
+    pitch_area->value = &this->source.source_gain;
     pitch_area->go_property = static_cast<void*>(this);
     inspector->addPropertyArea(pitch_area);
 }
 
 void AudioSourceProperty::onValueChanged(){
-    this->buffer_ptr = world_ptr->getSoundPtrByName(resource_relpath);
-}
-
-void AudioSourceProperty::updateAudioPtr(){
     this->buffer_ptr = world_ptr->getSoundPtrByName(resource_relpath);
 }
 
@@ -478,18 +474,6 @@ void GameObject::saveProperties(std::ofstream* stream){
             stream->write(reinterpret_cast<char*>(&color_r), sizeof(float));
             stream->write(reinterpret_cast<char*>(&color_g), sizeof(float));
             stream->write(reinterpret_cast<char*>(&color_b), sizeof(float));
-
-            break;
-        }
-        case GO_PROPERTY_TYPE_AUDSOURCE:{
-            AudioSourceProperty* ptr = static_cast<AudioSourceProperty*>(property_ptr);
-            if(ptr->resource_relpath.isEmpty()) //check if object has no texture
-                *stream << "@none";
-            else
-                *stream << ptr->resource_relpath.toStdString() << "\n";
-
-            stream->write(reinterpret_cast<char*>(&ptr->source.source_gain), sizeof(float));
-            stream->write(reinterpret_cast<char*>(&ptr->source.source_pitch), sizeof(float));
 
             break;
         }
@@ -625,21 +609,6 @@ void GameObject::loadProperty(std::ifstream* world_stream){
 
         break;
     }
-    case GO_PROPERTY_TYPE_AUDSOURCE:{
-        std::string rel_path;
-        *world_stream >> rel_path;
-        AudioSourceProperty* lptr = static_cast<AudioSourceProperty*>(prop_ptr);
-        if(rel_path.compare("@none") != 0){
-            lptr->resource_relpath = QString::fromStdString(rel_path); //Write loaded mesh relative path
-            lptr->updateAudioPtr(); //Pointer will now point to mesh resource
-        }
-        world_stream->seekg(1, std::ofstream::cur);
-        world_stream->read(reinterpret_cast<char*>(&lptr->source.source_gain), sizeof(float));
-        world_stream->read(reinterpret_cast<char*>(&lptr->source.source_pitch), sizeof(float));
-
-
-        break;
-        }
     case GO_PROPERTY_TYPE_TILE_GROUP :{
         world_stream->seekg(1, std::ofstream::cur); //Skip space
         TileGroupProperty* t_ptr = static_cast<TileGroupProperty*>(prop_ptr);

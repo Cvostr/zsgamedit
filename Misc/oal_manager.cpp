@@ -7,8 +7,8 @@
 
 #include "headers/oal_manager.h"
 
-ALCdevice* al_device;
-ALCcontext* al_context;
+static ALCdevice* al_device;
+static ALCcontext* al_context;
 
 bool ZSPIRE::SFX::initAL() {
 	al_device = alcOpenDevice(NULL);
@@ -25,6 +25,11 @@ bool ZSPIRE::SFX::initAL() {
 	}
 
 	alcMakeContextCurrent(al_context);
+
+    if (alGetError() != AL_NO_ERROR)
+    {
+        fprintf(stderr, "Can't initialize");
+    }
 
 	std::cout << "AL: OpenAL successfully initialized!" << std::endl;
 	//Set default parameters
@@ -56,6 +61,8 @@ void SoundBuffer::Init(){
     alGenBuffers(1, &this->al_buffer_id);
 }
 bool SoundBuffer::loadFileWAV(const char* file_path){
+    std::cout << "Loading WAVE sound file " << file_path << std::endl;
+
     Init();
         unsigned int freq;
         ALenum format;
@@ -76,7 +83,7 @@ bool SoundBuffer::loadFileWAV(const char* file_path){
         fstat(fileno(fstream), &buff); //Getting file info
     #endif
 
-        data_buffer = static_cast<unsigned char*>(malloc(buff.st_size - 44));
+        data_buffer = static_cast<unsigned char*>(malloc(buff.st_size));
 
         fread(data_buffer, 1, 12, fstream);
 
@@ -138,12 +145,13 @@ bool SoundBuffer::loadFileWAV(const char* file_path){
         size |= data_buffer[1] << 8;
         size |= data_buffer[0];
 
-        int ret = static_cast<int>(fread(data_buffer, 1, size, fstream));
-        alBufferData(this->al_buffer_id, format, static_cast<void*>(data_buffer), ret, freq);
-
-        if (alGetError() != AL_NO_ERROR)
+        int ret = (int)fread(data_buffer, 1, size, fstream);
+        alBufferData(this->al_buffer_id, format, (void*)(data_buffer), size, static_cast<int>(freq));
+        std::cout << data_buffer[4678] << std::endl;
+        int err = alGetError();
+        if (err != AL_NO_ERROR)
         {
-            fprintf(stderr, "Error loading :(\n");
+            std::cout <<  "Error loading " << err << std::endl;
             //Free heap
             free(data_buffer);
             fclose(fstream);
