@@ -10,12 +10,11 @@
 #include <QFileDialog>
 #include <QShortcut>
 
-#include "../include_engine.h" //include engine headers
+
 
 static EditWindow* _editor_win;
 static InspectorWin* _inspector_win;
 static EdActions* _ed_actions_container;
-static ZSpireEngine* engine;
 
 EditWindow::EditWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -271,6 +270,7 @@ void EditWindow::onRunProject(){
         this->ui->actionRun->setText("Run");
 
         this->world.recoverFromSnapshot(&run_world_snapshot); //create snapshot of current state to recover it later
+        run_world_snapshot.clear(); //Clear snapshot to free up memory
     }
 }
 

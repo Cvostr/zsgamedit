@@ -33,31 +33,35 @@ QString getPropertyString(int type){
     switch (type) {
         case GO_PROPERTY_TYPE_TRANSFORM:{ //If type is transfrom
             return QString("Transform");
-            break;
+            //break;
         }
         case GO_PROPERTY_TYPE_LABEL:{
             return QString("Label");
-            break;
+            //break;
         }
         case GO_PROPERTY_TYPE_MESH:{
             return QString("Mesh");
-            break;
+            //break;
         }
         case GO_PROPERTY_TYPE_LIGHTSOURCE:{
             return QString("Light");
-            break;
+            //break;
         }
         case GO_PROPERTY_TYPE_SCRIPTGROUP:{
             return QString("Script Group");
-            break;
+            //break;
+        }
+        case GO_PROPERTY_TYPE_AUDSOURCE:{
+            return QString("Audio Source");
+            //break;
         }
         case GO_PROPERTY_TYPE_TILE_GROUP:{
             return QString("Tile Group");
-            break;
+            //break;
         }
         case GO_PROPERTY_TYPE_TILE:{
             return QString("Tile");
-            break;
+            //break;
         }
     }
     return QString("NONE");
@@ -385,6 +389,8 @@ AudioSourceProperty::AudioSourceProperty(){
     type = GO_PROPERTY_TYPE_AUDSOURCE;
 
     buffer_ptr = nullptr;
+
+    source.Init();
 }
 
 void AudioSourceProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
@@ -409,11 +415,51 @@ void AudioSourceProperty::addPropertyInterfaceToInspector(InspectorWin* inspecto
 }
 
 void AudioSourceProperty::onValueChanged(){
-    this->buffer_ptr = world_ptr->getSoundPtrByName(resource_relpath);
+    updateAudioPtr();
+
+    this->source.apply_settings();
 }
 
 void AudioSourceProperty::updateAudioPtr(){
     this->buffer_ptr = world_ptr->getSoundPtrByName(resource_relpath);
+
+    this->source.setAlBuffer(this->buffer_ptr);
+}
+
+void AudioSourceProperty::onUpdate(float deltaTime){
+    TransformProperty* transform = go_link.updLinkPtr()->getTransformProperty();
+
+    if(transform->_last_translation != this->last_pos){
+        this->source.setPosition(transform->translation);
+        this->last_pos = transform->translation;
+    }
+}
+
+void AudioSourceProperty::copyTo(GameObjectProperty* dest){
+    if(dest->type != this->type) return; //if it isn't transform
+
+    AudioSourceProperty* _dest = static_cast<AudioSourceProperty*>(dest);
+
+    _dest->source.Init();
+    _dest->resource_relpath = this->resource_relpath;
+    _dest->source.source_gain = this->source.source_gain;
+    _dest->source.source_pitch = this->source.source_pitch;
+    _dest->source.setPosition(this->source.source_pos);
+    _dest->buffer_ptr = this->buffer_ptr;
+    _dest->source.setAlBuffer(this->buffer_ptr);
+}
+
+void AudioSourceProperty::audio_start(){
+    this->source.play();
+}
+
+void AudioSourceProperty::audio_stop(){
+    this->source.stop();
+}
+
+void AudioSourceProperty::onObjectDeleted(){
+    this->source.stop(); //Stop at first
+    this->source.Destroy();
 }
 
 void GameObject::saveProperties(std::ofstream* stream){

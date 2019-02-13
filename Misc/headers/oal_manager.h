@@ -39,7 +39,12 @@ public:
     float source_pitch;
 
     void Init();
+    void Destroy();
+    void setPosition(ZSVECTOR3 pos);
     void apply_settings();
+    void play();
+    void stop();
+    void setAlBuffer(SoundBuffer* buffer);
 };
 
 #endif

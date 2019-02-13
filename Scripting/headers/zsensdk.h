@@ -40,6 +40,8 @@ public:
     GameObject* updPtr();
 
     ZSENTransformProperty transform();
+
+    void prikol();
 };
 
 class ZSEN_World{

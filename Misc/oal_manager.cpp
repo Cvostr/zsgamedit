@@ -145,8 +145,8 @@ bool SoundBuffer::loadFileWAV(const char* file_path){
         size |= data_buffer[1] << 8;
         size |= data_buffer[0];
 
-        int ret = (int)fread(data_buffer, 1, size, fstream);
-        alBufferData(this->al_buffer_id, format, (void*)(data_buffer), size, static_cast<int>(freq));
+        fread(data_buffer, 1, static_cast<size_t>(size), fstream);
+        alBufferData(this->al_buffer_id, format, static_cast<void*>((data_buffer)), size, static_cast<int>(freq));
         std::cout << data_buffer[4678] << std::endl;
         int err = alGetError();
         if (err != AL_NO_ERROR)
@@ -175,9 +175,32 @@ SoundBuffer::SoundBuffer(){
 
 void SoundSource::Init(){
     alGenSources(1, &this->al_source_id);
+
+    int err = alGetError();
+    if (err != AL_NO_ERROR)
+    {
+        std::cout <<  "Error creating source " << err << std::endl;
+
+    }
+}
+void SoundSource::Destroy(){
+    alDeleteSources(1, &this->al_source_id);
 }
 void SoundSource::apply_settings(){
     alSource3f(al_source_id, AL_POSITION, this->source_pos.X, this->source_pos.Y, this->source_pos.Z);
     alSourcef(al_source_id, AL_GAIN, this->source_gain);
     alSourcef(al_source_id, AL_PITCH, this->source_pitch);
+}
+void SoundSource::setPosition(ZSVECTOR3 pos){
+    this->source_pos = pos;
+    alSource3f(al_source_id, AL_POSITION, pos.X, pos.Y, pos.Z);
+}
+void SoundSource::play(){
+    alSourcePlay(this->al_source_id);
+}
+void SoundSource::stop(){
+    alSourceStop(this->al_source_id);
+}
+void SoundSource::setAlBuffer(SoundBuffer* buffer){
+    alSourcei(al_source_id, AL_BUFFER, static_cast<ALint>(buffer->getBufferIdAL()));
 }

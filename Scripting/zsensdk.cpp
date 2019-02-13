@@ -20,6 +20,10 @@ ZSENSDK::ZSENTransformProperty ZSENSDK::ZSENGmObject::transform(){
     return result;
 }
 
+void ZSENSDK::ZSENGmObject::prikol(){
+    static_cast<AudioSourceProperty*>(this->object_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_AUDSOURCE))->audio_start();
+}
+
 ZSENSDK::ZSENGmObject ZSENSDK::ZSEN_World::getObjectSDK(std::string name){
     ZSENGmObject result;
 
@@ -77,6 +81,7 @@ luabridge::getGlobalNamespace(state)
         .beginClass <ZSENGmObject>("GameObject")
 
         .addFunction("transform", &ZSENSDK::ZSENGmObject::transform)
+        .addFunction("prikol", &ZSENSDK::ZSENGmObject::prikol)
 
         .endClass()
         .endNamespace();

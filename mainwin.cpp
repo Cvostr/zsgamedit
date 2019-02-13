@@ -208,11 +208,11 @@ void ProjectCtxMenu::onDeleteClicked(){
 }
 
 void ProjectCtxMenu::runEngineClicked(){
-    /*ZSENGINE_CREATE_INFO engine_create_info;
+    ZSENGINE_CREATE_INFO engine_create_info;
     engine_create_info.appName = "GameEditorRun";
     engine_create_info.createWindow = false; //window already created, we don't need one
     engine_create_info.graphicsApi = OGL32; //use opengl
-
+/*
     engine = new ZSpireEngine(&engine_create_info, nullptr);*/
 
 }

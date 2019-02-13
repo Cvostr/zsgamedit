@@ -7,6 +7,8 @@
 #include "ProjEd/headers/ProjectEdit.h"
 #include "ProjEd/headers/ProjCreateWin.h"
 
+#include "include_engine.h" //include engine headers
+
 typedef struct ProjectConf{
     QString projLabel;
     QString projFilePath;
@@ -55,6 +57,7 @@ class MainWin : public QMainWindow
     Q_OBJECT
 private:
     ProjectCtxMenu* project_menu;
+    ZSpireEngine* engine;
 public slots:
     //Executes on add project in file
     void onAddProjButtonClicked();

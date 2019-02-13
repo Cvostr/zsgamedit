@@ -43,8 +43,13 @@ public:
     SoundBuffer* buffer_ptr;
     SoundSource source;
 
+    ZSVECTOR3 last_pos;
+
     void addPropertyInterfaceToInspector(InspectorWin* inspector);
     void onValueChanged(); //Update soud buffer pointer and send source props
+    void onUpdate(float deltaTime);
+    void onObjectDeleted();
+    void copyTo(GameObjectProperty* dest);
 
     void updateAudioPtr();
     void audio_start();
