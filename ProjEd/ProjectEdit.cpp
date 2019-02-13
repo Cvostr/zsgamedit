@@ -10,12 +10,11 @@
 #include <QFileDialog>
 #include <QShortcut>
 
-#include "../include_engine.h" //include engine headers
+
 
 static EditWindow* _editor_win;
 static InspectorWin* _inspector_win;
 static EdActions* _ed_actions_container;
-static ZSpireEngine* engine;
 
 EditWindow::EditWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -250,23 +249,29 @@ void EditWindow::onBuildProject(){
 }
 
 void EditWindow::onRunProject(){
-    /*ZSENGINE_CREATE_INFO engine_create_info;
-    engine_create_info.appName = "GameEditorRun";
-    engine_create_info.createWindow = false; //window already created, we don't need one
-    engine_create_info.graphicsApi = OGL32; //use opengl
+    if(isSceneRun == false){ //if we are Not running scene
+        this->world.putToShapshot(&run_world_snapshot); //create snapshot of current state to recover it later
+        //Prepare world for running
+        for(unsigned int object_i = 0; object_i < world.objects.size(); object_i ++){
+            GameObject* object_ptr = &world.objects[object_i];
+            //Obtain script
+            ScriptGroupProperty* script_ptr = static_cast<ScriptGroupProperty*>(object_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_SCRIPTGROUP));
+            if(script_ptr != nullptr)
+                script_ptr->wakeUp(); //start all scripts
+        }
 
-    engine = new ZSpireEngine(&engine_create_info, nullptr);*/
+        isSceneRun = true; //set toggle to true
 
-    //Prepare world for running
-    for(unsigned int object_i = 0; object_i < world.objects.size(); object_i ++){
-        GameObject* object_ptr = &world.objects[object_i];
-        //Obtain script
-        ScriptGroupProperty* script_ptr = static_cast<ScriptGroupProperty*>(object_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_SCRIPTGROUP));
-        if(script_ptr != nullptr)
-            script_ptr->wakeUp(); //start all scripts
+        this->ui->actionRun->setText("Stop");
+
+    }else{ //lets stop scene run
+        isSceneRun = false; //set toggle to true
+
+        this->ui->actionRun->setText("Run");
+
+        this->world.recoverFromSnapshot(&run_world_snapshot); //create snapshot of current state to recover it later
+        run_world_snapshot.clear(); //Clear snapshot to free up memory
     }
-
-    isSceneRun = true;
 }
 
 void EditWindow::updateFileList(){
@@ -427,7 +432,7 @@ void EditWindow::lookForResources(QString path){
                 resource.rel_path = resource.file_path; //Preparing to get relative path
                 resource.rel_path.remove(0, project.root_path.size() + 1); //Get relative path by removing length of project root from start
                 resource.type = RESOURCE_TYPE_AUDIO; //Type of resource is mesh
-                //loadResource(&resource); //Perform mesh processing & loading to OpenGL
+                loadResource(&resource); //Perform mesh processing & loading to OpenGL
                 this->project.resources.push_back(resource);
             }
         }
@@ -555,31 +560,14 @@ void ObjectCtxMenu::onDublicateClicked(){
 }
 
 void ObjectCtxMenu::onMoveClicked(){
-    //win_ptr->getInspector()->clearContentLayout(); //Detach object from inspector
-
-    win_ptr->obj_trstate.isTransforming = true; //Transform operation
-    win_ptr->obj_trstate.obj_ptr = obj_ptr; //Sending object ptr
-    //Setting pointer to transform property
-    win_ptr->obj_trstate.tprop_ptr = static_cast<TransformProperty*>(obj_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
-    win_ptr->obj_trstate.transformMode = GO_TRANSFORM_MODE_TRANSLATE; //Setting transform type
+    win_ptr->obj_trstate.setTransformOnObject(win_ptr->obj_trstate.obj_ptr, GO_TRANSFORM_MODE_TRANSLATE);
 }
 void ObjectCtxMenu::onScaleClicked(){
-    //win_ptr->getInspector()->clearContentLayout(); //Detach object from inspector
-
-    win_ptr->obj_trstate.isTransforming = true; //Transform operation
-    win_ptr->obj_trstate.obj_ptr = obj_ptr; //Sending object ptr
-    //Setting pointer to transform property
-    win_ptr->obj_trstate.tprop_ptr = static_cast<TransformProperty*>(obj_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
-    win_ptr->obj_trstate.transformMode = GO_TRANSFORM_MODE_SCALE;//Setting transform type
+    win_ptr->obj_trstate.setTransformOnObject(win_ptr->obj_trstate.obj_ptr, GO_TRANSFORM_MODE_SCALE);
 }
 void ObjectCtxMenu::onRotateClicked(){
-    //win_ptr->getInspector()->clearContentLayout(); //Detach object from inspector
-
-    win_ptr->obj_trstate.isTransforming = true; //Transform operation
-    win_ptr->obj_trstate.obj_ptr = obj_ptr; //Sending object ptr
-    //Setting pointer to transform property
-    win_ptr->obj_trstate.tprop_ptr = static_cast<TransformProperty*>(obj_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
-    win_ptr->obj_trstate.transformMode = GO_TRANSFORM_MODE_ROTATE;//Setting transform type
+    //Set state to rotate object
+    win_ptr->obj_trstate.setTransformOnObject(win_ptr->obj_trstate.obj_ptr, GO_TRANSFORM_MODE_ROTATE);
 }
 
 void ObjTreeWgt::dropEvent(QDropEvent* event){
@@ -701,7 +689,7 @@ void EditWindow::onMouseMotion(int relX, int relY){
                     cam_pitch = -89.0f;
 
             ZSVECTOR3 front;
-            front.X = (float)(cos(DegToRad(cam_yaw)) * cos(DegToRad(cam_pitch)));
+            front.X = static_cast<float>((cos(DegToRad(cam_yaw)) * cos(DegToRad(cam_pitch))));
             front.Y = -sin(DegToRad(cam_pitch));
             front.Z = sin(DegToRad(cam_yaw)) * cos(DegToRad(cam_pitch));
             vNormalize(&front);
@@ -733,19 +721,13 @@ void EditWindow::onKeyDown(SDL_Keysym sym){
     }
 
     if(sym.sym == SDLK_t){
-        getInspector()->clearContentLayout(); //Detach object from
-        this->obj_trstate.transformMode = GO_TRANSFORM_MODE_TRANSLATE;
-        this->obj_trstate.isTransforming = true;
+        obj_trstate.setTransformOnObject(this->obj_trstate.obj_ptr, GO_TRANSFORM_MODE_TRANSLATE);
     }
     if(sym.sym == SDLK_e){
-        getInspector()->clearContentLayout(); //Detach object from
-        this->obj_trstate.transformMode = GO_TRANSFORM_MODE_SCALE;
-        this->obj_trstate.isTransforming = true;
+        obj_trstate.setTransformOnObject(this->obj_trstate.obj_ptr, GO_TRANSFORM_MODE_SCALE);
     }
     if(sym.sym == SDLK_r){
-        getInspector()->clearContentLayout(); //Detach object from
-        this->obj_trstate.transformMode = GO_TRANSFORM_MODE_ROTATE;
-        this->obj_trstate.isTransforming = true;
+        obj_trstate.setTransformOnObject(this->obj_trstate.obj_ptr, GO_TRANSFORM_MODE_ROTATE);
     }
 
     if(sym.sym == SDLK_DELETE){
@@ -776,4 +758,16 @@ void EditWindow::callObjectDeletion(GameObjectLink link){
 
 EdActions* getActionManager(){
     return _ed_actions_container;
+}
+
+void ObjectTransformState::setTransformOnObject(GameObject* obj_ptr, int transformMode){
+    this->obj_ptr = obj_ptr; //Set pointer to object
+    //Calculate pointer to transform property
+    this->tprop_ptr = static_cast<TransformProperty*>(obj_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
+
+    this->transformMode = transformMode;
+    this->isTransforming = true;
+    //Add property action
+    GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(obj_ptr->getTransformProperty());
+    getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
 }

@@ -33,31 +33,35 @@ QString getPropertyString(int type){
     switch (type) {
         case GO_PROPERTY_TYPE_TRANSFORM:{ //If type is transfrom
             return QString("Transform");
-            break;
+            //break;
         }
         case GO_PROPERTY_TYPE_LABEL:{
             return QString("Label");
-            break;
+            //break;
         }
         case GO_PROPERTY_TYPE_MESH:{
             return QString("Mesh");
-            break;
+            //break;
         }
         case GO_PROPERTY_TYPE_LIGHTSOURCE:{
             return QString("Light");
-            break;
+            //break;
         }
         case GO_PROPERTY_TYPE_SCRIPTGROUP:{
             return QString("Script Group");
-            break;
+            //break;
+        }
+        case GO_PROPERTY_TYPE_AUDSOURCE:{
+            return QString("Audio Source");
+            //break;
         }
         case GO_PROPERTY_TYPE_TILE_GROUP:{
             return QString("Tile Group");
-            break;
+            //break;
         }
         case GO_PROPERTY_TYPE_TILE:{
             return QString("Tile");
-            break;
+            //break;
         }
     }
     return QString("NONE");
@@ -88,6 +92,11 @@ GameObjectProperty* allocProperty(int type){
         case GO_PROPERTY_TYPE_SCRIPTGROUP:{
             ScriptGroupProperty* ptr = new ScriptGroupProperty;
             _ptr = static_cast<GameObjectProperty*>(ptr);
+            break;
+        }
+        case GO_PROPERTY_TYPE_AUDSOURCE:{
+            AudioSourceProperty* ptr = new AudioSourceProperty;
+            _ptr = static_cast<AudioSourceProperty*>(ptr);
             break;
         }
         case GO_PROPERTY_TYPE_TILE_GROUP:{
@@ -380,6 +389,77 @@ AudioSourceProperty::AudioSourceProperty(){
     type = GO_PROPERTY_TYPE_AUDSOURCE;
 
     buffer_ptr = nullptr;
+
+    source.Init();
+}
+
+void AudioSourceProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
+    PickResourceArea* area = new PickResourceArea;
+    area->setLabel("Sound");
+    area->go_property = static_cast<void*>(this);
+    area->rel_path = &resource_relpath;
+    area->resource_type = RESOURCE_TYPE_AUDIO; //It should load meshes only
+    inspector->addPropertyArea(area);
+
+    FloatPropertyArea* gain_area = new FloatPropertyArea;
+    gain_area->setLabel("Gain"); //Its label
+    gain_area->value = &this->source.source_gain;
+    gain_area->go_property = static_cast<void*>(this);
+    inspector->addPropertyArea(gain_area);
+
+    FloatPropertyArea* pitch_area = new FloatPropertyArea;
+    pitch_area->setLabel("Pitch"); //Its label
+    pitch_area->value = &this->source.source_pitch;
+    pitch_area->go_property = static_cast<void*>(this);
+    inspector->addPropertyArea(pitch_area);
+}
+
+void AudioSourceProperty::onValueChanged(){
+    updateAudioPtr();
+
+    this->source.apply_settings();
+}
+
+void AudioSourceProperty::updateAudioPtr(){
+    this->buffer_ptr = world_ptr->getSoundPtrByName(resource_relpath);
+
+    this->source.setAlBuffer(this->buffer_ptr);
+}
+
+void AudioSourceProperty::onUpdate(float deltaTime){
+    TransformProperty* transform = go_link.updLinkPtr()->getTransformProperty();
+
+    if(transform->_last_translation != this->last_pos){
+        this->source.setPosition(transform->translation);
+        this->last_pos = transform->translation;
+    }
+}
+
+void AudioSourceProperty::copyTo(GameObjectProperty* dest){
+    if(dest->type != this->type) return; //if it isn't transform
+
+    AudioSourceProperty* _dest = static_cast<AudioSourceProperty*>(dest);
+
+    _dest->source.Init();
+    _dest->resource_relpath = this->resource_relpath;
+    _dest->source.source_gain = this->source.source_gain;
+    _dest->source.source_pitch = this->source.source_pitch;
+    _dest->source.setPosition(this->source.source_pos);
+    _dest->buffer_ptr = this->buffer_ptr;
+    _dest->source.setAlBuffer(this->buffer_ptr);
+}
+
+void AudioSourceProperty::audio_start(){
+    this->source.play();
+}
+
+void AudioSourceProperty::audio_stop(){
+    this->source.stop();
+}
+
+void AudioSourceProperty::onObjectDeleted(){
+    this->source.stop(); //Stop at first
+    this->source.Destroy();
 }
 
 void GameObject::saveProperties(std::ofstream* stream){
@@ -444,6 +524,18 @@ void GameObject::saveProperties(std::ofstream* stream){
             stream->write(reinterpret_cast<char*>(&color_r), sizeof(float));
             stream->write(reinterpret_cast<char*>(&color_g), sizeof(float));
             stream->write(reinterpret_cast<char*>(&color_b), sizeof(float));
+
+            break;
+        }
+        case GO_PROPERTY_TYPE_AUDSOURCE:{
+            AudioSourceProperty* ptr = static_cast<AudioSourceProperty*>(property_ptr);
+            if(ptr->resource_relpath.isEmpty()) //check if object has no texture
+                *stream << "@none";
+            else
+                *stream << ptr->resource_relpath.toStdString() << "\n";
+
+            stream->write(reinterpret_cast<char*>(&ptr->source.source_gain), sizeof(float));
+            stream->write(reinterpret_cast<char*>(&ptr->source.source_pitch), sizeof(float));
 
             break;
         }
@@ -579,6 +671,22 @@ void GameObject::loadProperty(std::ifstream* world_stream){
 
         break;
     }
+    case GO_PROPERTY_TYPE_AUDSOURCE:{
+        std::string rel_path;
+        *world_stream >> rel_path;
+        AudioSourceProperty* lptr = static_cast<AudioSourceProperty*>(prop_ptr);
+        if(rel_path.compare("@none") != 0){
+            lptr->resource_relpath = QString::fromStdString(rel_path); //Write loaded mesh relative path
+            lptr->updateAudioPtr(); //Pointer will now point to mesh resource
+        }
+        world_stream->seekg(1, std::ofstream::cur);
+        //Load settings
+        world_stream->read(reinterpret_cast<char*>(&lptr->source.source_gain), sizeof(float));
+        world_stream->read(reinterpret_cast<char*>(&lptr->source.source_pitch), sizeof(float));
+        lptr->source.apply_settings(); //Apply settings to openal
+
+        break;
+        }
     case GO_PROPERTY_TYPE_TILE_GROUP :{
         world_stream->seekg(1, std::ofstream::cur); //Skip space
         TileGroupProperty* t_ptr = static_cast<TileGroupProperty*>(prop_ptr);
@@ -590,7 +698,7 @@ void GameObject::loadProperty(std::ifstream* world_stream){
         world_stream->read(reinterpret_cast<char*>(&t_ptr->tiles_amount_X), sizeof(int));
         world_stream->read(reinterpret_cast<char*>(&t_ptr->tiles_amount_Y), sizeof(int));
 
-        t_ptr->isCreated = static_cast<bool>(isCreated  );
+        t_ptr->isCreated = static_cast<bool>(isCreated);
 
     break;
     }

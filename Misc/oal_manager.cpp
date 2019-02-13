@@ -7,8 +7,8 @@
 
 #include "headers/oal_manager.h"
 
-ALCdevice* al_device;
-ALCcontext* al_context;
+static ALCdevice* al_device;
+static ALCcontext* al_context;
 
 bool ZSPIRE::SFX::initAL() {
 	al_device = alcOpenDevice(NULL);
@@ -26,10 +26,15 @@ bool ZSPIRE::SFX::initAL() {
 
 	alcMakeContextCurrent(al_context);
 
+    if (alGetError() != AL_NO_ERROR)
+    {
+        fprintf(stderr, "Can't initialize");
+    }
+
 	std::cout << "AL: OpenAL successfully initialized!" << std::endl;
 	//Set default parameters
 	setListenerPos(ZSVECTOR3(0.0f, 0.0f, 0.0f));
-	setListenerOri(ZSVECTOR3(0.0f, 1.0f, 0.0f));
+    setListenerOri(ZSVECTOR3(0.0f, 1.0f, 0.0f));
 
 	return true;
 }
@@ -56,6 +61,8 @@ void SoundBuffer::Init(){
     alGenBuffers(1, &this->al_buffer_id);
 }
 bool SoundBuffer::loadFileWAV(const char* file_path){
+    std::cout << "Loading WAVE sound file " << file_path << std::endl;
+
     Init();
         unsigned int freq;
         ALenum format;
@@ -76,7 +83,7 @@ bool SoundBuffer::loadFileWAV(const char* file_path){
         fstat(fileno(fstream), &buff); //Getting file info
     #endif
 
-        data_buffer = (unsigned char*)malloc(buff.st_size - 44);
+        data_buffer = static_cast<unsigned char*>(malloc(buff.st_size));
 
         fread(data_buffer, 1, 12, fstream);
 
@@ -138,17 +145,22 @@ bool SoundBuffer::loadFileWAV(const char* file_path){
         size |= data_buffer[1] << 8;
         size |= data_buffer[0];
 
-        int ret = static_cast<int>(fread(data_buffer, 1, size, fstream));
-        alBufferData(this->al_buffer_id, format, static_cast<void*>(data_buffer), ret, freq);
-
-        if (alGetError() != AL_NO_ERROR)
+        fread(data_buffer, 1, static_cast<size_t>(size), fstream);
+        alBufferData(this->al_buffer_id, format, static_cast<void*>((data_buffer)), size, static_cast<int>(freq));
+        std::cout << data_buffer[4678] << std::endl;
+        int err = alGetError();
+        if (err != AL_NO_ERROR)
         {
-            fprintf(stderr, "Error loading :(\n");
+            std::cout <<  "Error loading " << err << std::endl;
+            //Free heap
+            free(data_buffer);
+            fclose(fstream);
             return false;
         }
 
         free(data_buffer);
 
+        fclose(fstream);
         return true;
 }
 void SoundBuffer::Destroy(){
@@ -163,9 +175,32 @@ SoundBuffer::SoundBuffer(){
 
 void SoundSource::Init(){
     alGenSources(1, &this->al_source_id);
+
+    int err = alGetError();
+    if (err != AL_NO_ERROR)
+    {
+        std::cout <<  "Error creating source " << err << std::endl;
+
+    }
+}
+void SoundSource::Destroy(){
+    alDeleteSources(1, &this->al_source_id);
 }
 void SoundSource::apply_settings(){
     alSource3f(al_source_id, AL_POSITION, this->source_pos.X, this->source_pos.Y, this->source_pos.Z);
     alSourcef(al_source_id, AL_GAIN, this->source_gain);
     alSourcef(al_source_id, AL_PITCH, this->source_pitch);
+}
+void SoundSource::setPosition(ZSVECTOR3 pos){
+    this->source_pos = pos;
+    alSource3f(al_source_id, AL_POSITION, pos.X, pos.Y, pos.Z);
+}
+void SoundSource::play(){
+    alSourcePlay(this->al_source_id);
+}
+void SoundSource::stop(){
+    alSourceStop(this->al_source_id);
+}
+void SoundSource::setAlBuffer(SoundBuffer* buffer){
+    alSourcei(al_source_id, AL_BUFFER, static_cast<ALint>(buffer->getBufferIdAL()));
 }

@@ -77,6 +77,8 @@ struct ObjectTransformState{
     TransformProperty* tprop_ptr; //Pointer to transform property of obj_ptr
     int transformMode;
 
+    void setTransformOnObject(GameObject* obj_ptr, int transformMode);
+
     ObjectTransformState(){ //Default construct
         isTransforming = false;
         obj_ptr = nullptr;
@@ -113,6 +115,8 @@ public slots:
     void onRedoPressed();
 
 private:
+   // QScrollArea* scroll;
+
     QString current_dir; //current directory path string
     QString scene_path;
     bool hasSceneFile; //Is scene saved or loaded
@@ -137,6 +141,7 @@ public:
     Project project;
     EditorInputState input_state;
     ObjectTransformState obj_trstate; //Describes object transform
+    WorldSnapshot run_world_snapshot; //useful to recover world state after running
 
     void init();
     void updateFileList(); //Updates content in file list widget

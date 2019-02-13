@@ -12,6 +12,7 @@
 #include <QRadioButton>
 #include <QColorDialog>
 #include <QCheckBox>
+#include <QScrollArea>
 
 #include "../../Render/headers/zs-math.h"
 
@@ -72,7 +73,6 @@ public:
 };
 
 class PropertyEditArea {
-//Q_OBJECT
 public:
     int type;
     QString label; //Label, describing content
@@ -88,6 +88,7 @@ public:
     virtual void destroyContent(); //Destroy content, placed by inherited class
     virtual void setup(); //Uses to prepare base values
     virtual void updateState(); //Updates value
+    virtual void updateValue(); //if some text edited
     virtual void addToInspector(InspectorWin* win); //Add edit area to inspector layout
     void callPropertyUpdate(); //Call property, that created this area to update
 
@@ -128,6 +129,7 @@ public:
 
     void destroyContent();
     void setup(); //Virtual
+    //void onEdited(); //on text fields or other edited
     void addToInspector(InspectorWin* win);
     void updateState(); //Virtual, on values changed
 };
@@ -233,6 +235,7 @@ private:
 public slots:
     void onAddComponentBtnPressed();
     void onManagePropButtonPressed();
+    void onPropertyChange();
 
 public:
     bool updateAreas; //if TRUE, all areas will update

@@ -9,6 +9,7 @@
 #include <QFileDialog>
 #include <QPushButton>
 #include <QAction>
+#include <QMouseEvent>
 
 static CreateProjectWindow* cr_w;
 
@@ -29,9 +30,12 @@ MainWin::MainWin(QWidget *parent) :
     QObject::connect(ui->projList, SIGNAL(itemClicked(QListWidgetItem *)),
                 this, SLOT(onSelectProjectToOpen()));
 
+    QObject::connect(ui->projList, SIGNAL(onRightClick(QPoint)), this, SLOT(showCtxMenu()));
+
     loadProjectsConfigurations();
     cr_w = new CreateProjectWindow;
 
+    project_menu = new ProjectCtxMenu(this); //Allocate projectCtxMenu
 }
 
 MainWin::~MainWin()
@@ -149,8 +153,66 @@ void MainWin::updateListWidgetContent(){
     for(unsigned int i = 0; i < this->projects.size(); i ++){
 
         ProjectConf* conf_ptr = &this->projects[i];
-
-        QListWidgetItem* item = new QListWidgetItem(conf_ptr->projLabel, ui->projList);
+        //Add project entry to list
+        new QListWidgetItem(conf_ptr->projLabel, ui->projList);
 
     }
+}
+
+void MainWin::showCtxMenu(){
+    project_menu->show(QPoint(0,0));
+}
+
+ProjectListWgt::ProjectListWgt(QWidget* parent) : QListWidget (parent){
+}
+
+void ProjectListWgt::mousePressEvent(QMouseEvent *event){
+    QListWidget::mousePressEvent(event);
+    if(event->button() == Qt::RightButton)
+    {
+        emit onRightClick(event->pos());
+    }
+}
+
+ProjectCtxMenu::ProjectCtxMenu(MainWin* win, QWidget* parent) : QObject(parent){
+    this->win = win;
+    //Allocate Qt stuff
+    this->menu = new QMenu(win);
+
+    this->action_delete = new QAction("Delete", win);
+    this->action_rename = new QAction("Run in engine instance", win);
+
+    menu->addAction(action_rename);
+    menu->addAction(action_delete);
+
+    QObject::connect(this->action_delete, SIGNAL(triggered(bool)), this, SLOT(onDeleteClicked()));
+    QObject::connect(this->action_rename, SIGNAL(triggered(bool)), this, SLOT(runEngineClicked()));
+
+}
+
+void ProjectCtxMenu::show(QPoint point){
+    this->menu->popup(point);
+}
+void ProjectCtxMenu::onDeleteClicked(){
+    for (unsigned int i = 0; i < win->projects.size(); i ++) { //Iterating over all objects
+
+            for (unsigned int obj_i = i + 1; obj_i < win->projects.size(); obj_i ++) { //Iterate over all next chidren
+                win->projects[obj_i - 1] = win->projects[obj_i]; //Move it to previous place
+
+            }
+            win->projects.resize(win->projects.size() - 1);
+
+    }
+    win->updateListWidgetContent();
+    win->saveProjectsConfiguration();
+}
+
+void ProjectCtxMenu::runEngineClicked(){
+    ZSENGINE_CREATE_INFO engine_create_info;
+    engine_create_info.appName = "GameEditorRun";
+    engine_create_info.createWindow = false; //window already created, we don't need one
+    engine_create_info.graphicsApi = OGL32; //use opengl
+/*
+    engine = new ZSpireEngine(&engine_create_info, nullptr);*/
+
 }

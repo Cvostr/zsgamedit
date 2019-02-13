@@ -19,7 +19,7 @@ int main(int argc, char *argv[])
                 }
 
                 if(w.edit_win_ptr->ready == true) //If GL is ready to draw
-                    w.edit_win_ptr->getInspector()->area_update();
+                    //w.edit_win_ptr->getInspector()->area_update();
                     w.edit_win_ptr->edit_camera.updateTick(); //Update camera, if it is moving
 
                     w.edit_win_ptr->glRender(); //Draw OpenGL window

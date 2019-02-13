@@ -19,6 +19,15 @@ ZSENSDK::ZSENTransformProperty ZSENSDK::ZSENGmObject::transform(){
     result.prop_ptr = static_cast<TransformProperty*>(this->updPtr()->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
     return result;
 }
+ZSENSDK::ZSENAudSourceProperty ZSENSDK::ZSENGmObject::audio(){
+    ZSENAudSourceProperty result;
+    result.prop_ptr = this->updPtr()->getPropertyPtrByType(GO_PROPERTY_TYPE_AUDSOURCE);
+    return result;
+}
+
+void ZSENSDK::ZSENGmObject::prikol(){
+    static_cast<AudioSourceProperty*>(this->object_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_AUDSOURCE))->audio_start();
+}
 
 ZSENSDK::ZSENGmObject ZSENSDK::ZSEN_World::getObjectSDK(std::string name){
     ZSENGmObject result;
@@ -34,7 +43,7 @@ ZSENSDK::ZSENGmObject ZSENSDK::ZSEN_World::getObjectSDK(std::string name){
 void ZSENSDK::ZSEN_World::removeObject(ZSENGmObject obj){
     world_ptr->removeObj(obj.updPtr()->getLinkToThisObject());
 }
-
+//Property functions
 ZSVECTOR3 ZSENSDK::ZSENTransformProperty::getPosition(){
     return this->prop_ptr->translation;
 }
@@ -44,13 +53,46 @@ ZSVECTOR3 ZSENSDK::ZSENTransformProperty::getScale(){
 ZSVECTOR3 ZSENSDK::ZSENTransformProperty::getRotation(){
     return this->prop_ptr->rotation;
 }
-
 void ZSENSDK::ZSENTransformProperty::setPosition(ZSVECTOR3 pos){
     this->prop_ptr->translation = pos;
     this->prop_ptr->updateMat();
 }
-void ZSENSDK::ZSENTransformProperty::setRotation(ZSVECTOR3 rot){}
-void ZSENSDK::ZSENTransformProperty::setScale(ZSVECTOR3 scale){}
+void ZSENSDK::ZSENTransformProperty::setRotation(ZSVECTOR3 rot){
+    this->prop_ptr->rotation = rot;
+    this->prop_ptr->updateMat();
+}
+void ZSENSDK::ZSENTransformProperty::setScale(ZSVECTOR3 scale){
+    this->prop_ptr->scale = scale;
+    this->prop_ptr->updateMat();
+}
+//AudioSource functions
+void ZSENSDK::ZSENAudSourceProperty::Play(){
+    AudioSourceProperty* prop_ptr = static_cast<AudioSourceProperty*>(this->prop_ptr);
+    prop_ptr->audio_start();
+}
+void ZSENSDK::ZSENAudSourceProperty::Stop(){
+    AudioSourceProperty* prop_ptr = static_cast<AudioSourceProperty*>(this->prop_ptr);
+    prop_ptr->audio_stop();
+}
+float ZSENSDK::ZSENAudSourceProperty::getGain(){
+    AudioSourceProperty* prop_ptr = static_cast<AudioSourceProperty*>(this->prop_ptr);
+    return prop_ptr->source.source_gain;
+}
+float ZSENSDK::ZSENAudSourceProperty::getPitch(){
+    AudioSourceProperty* prop_ptr = static_cast<AudioSourceProperty*>(this->prop_ptr);
+    return prop_ptr->source.source_pitch;
+}
+void ZSENSDK::ZSENAudSourceProperty::setGain(float gain){
+    AudioSourceProperty* prop_ptr = static_cast<AudioSourceProperty*>(this->prop_ptr);
+    prop_ptr->source.source_gain = gain; //Set new gain value
+    prop_ptr->source.apply_settings(); //Apply sound settings
+}
+void ZSENSDK::ZSENAudSourceProperty::setPitch(float pitch){
+    AudioSourceProperty* prop_ptr = static_cast<AudioSourceProperty*>(this->prop_ptr);
+    prop_ptr->source.source_pitch = pitch; //Set new gain value
+    prop_ptr->source.apply_settings(); //Apply sound settings
+}
+
 
 void ZSENSDK::bindSDK(lua_State* state){
     luabridge::getGlobalNamespace(state)
@@ -77,6 +119,8 @@ luabridge::getGlobalNamespace(state)
         .beginClass <ZSENGmObject>("GameObject")
 
         .addFunction("transform", &ZSENSDK::ZSENGmObject::transform)
+        .addFunction("audio", &ZSENSDK::ZSENGmObject::audio)
+        .addFunction("prikol", &ZSENSDK::ZSENGmObject::prikol)
 
         .endClass()
         .endNamespace();
@@ -107,6 +151,15 @@ luabridge::getGlobalNamespace(state)
         .addFunction("setRotation", &ZSENSDK::ZSENTransformProperty::setRotation)
         .endClass()
 
+
+        .deriveClass <ZSENAudSourceProperty, ZSENObjectProperty>("AudioSource")
+        .addFunction("Play", &ZSENSDK::ZSENAudSourceProperty::Play)
+        .addFunction("Stop", &ZSENSDK::ZSENAudSourceProperty::Stop)
+        .addFunction("getGain", &ZSENSDK::ZSENAudSourceProperty::getGain)
+        .addFunction("getPitch", &ZSENSDK::ZSENAudSourceProperty::getPitch)
+        .addFunction("setGain", &ZSENSDK::ZSENAudSourceProperty::setGain)
+        .addFunction("setPitch", &ZSENSDK::ZSENAudSourceProperty::setPitch)
+        .endClass()
 
         .endNamespace();
 

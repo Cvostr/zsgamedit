@@ -14,7 +14,7 @@
    <string>Projects window</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <widget class="QListWidget" name="projList">
+   <widget class="ProjectListWgt" name="projList">
     <property name="geometry">
      <rect>
       <x>0</x>
@@ -68,6 +68,13 @@
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>ProjectListWgt</class>
+   <extends>QListWidget</extends>
+   <header>mainwin.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

@@ -4,12 +4,14 @@
 #include <string>
 #include "../../World/headers/World.h"
 
+
 extern "C" {
 #include <lua5.2/lua.h>
 #include <lua5.2/lualib.h>
 #include <lua5.2/lauxlib.h>
 }
 #include <LuaBridge/LuaBridge.h>
+
 
 namespace ZSENSDK {
 
@@ -31,6 +33,21 @@ public:
     void setScale(ZSVECTOR3 scale);
 };
 
+class ZSENAudSourceProperty : public ZSENObjectProperty{
+public:
+    void* prop_ptr;
+
+    float getGain();
+    float getPitch();
+
+    void setGain(float gain);
+    void setPitch(float pitch);
+
+    void Play();
+    void Stop();
+
+};
+
 class ZSENGmObject{
 public:
     std::string str_id;
@@ -40,6 +57,9 @@ public:
     GameObject* updPtr();
 
     ZSENTransformProperty transform();
+    ZSENAudSourceProperty audio();
+
+    void prikol();
 };
 
 class ZSEN_World{

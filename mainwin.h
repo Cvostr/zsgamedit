@@ -7,6 +7,8 @@
 #include "ProjEd/headers/ProjectEdit.h"
 #include "ProjEd/headers/ProjCreateWin.h"
 
+#include "include_engine.h" //include engine headers
+
 typedef struct ProjectConf{
     QString projLabel;
     QString projFilePath;
@@ -16,15 +18,53 @@ namespace Ui {
 class MainWin;
 }
 
+class MainWin;
+
+class ProjectListWgt : public QListWidget{
+    Q_OBJECT
+protected:
+    void mousePressEvent(QMouseEvent *event) override;
+signals:
+    void onRightClick(QPoint pos);
+    void onLeftClick(QPoint pos);
+public:
+    ProjectListWgt(QWidget* parent = nullptr);
+};
+
+class ProjectCtxMenu : public QObject{
+    Q_OBJECT
+public slots:
+    void onDeleteClicked();
+    void runEngineClicked();
+
+private:
+    MainWin* win;
+
+    QMenu* menu; //Menu object to contain everything
+
+    QAction* action_rename; //Button to dublicate object
+    QAction* action_delete; //Button to delete object
+public:
+
+
+    ProjectCtxMenu(MainWin* win, QWidget* parent = nullptr);
+    void show(QPoint point);
+    void close();
+};
+
 class MainWin : public QMainWindow
 {
     Q_OBJECT
-
+private:
+    ProjectCtxMenu* project_menu;
+    ZSpireEngine* engine;
 public slots:
     //Executes on add project in file
     void onAddProjButtonClicked();
     void onShowCreateNewProjectWindow();
     void onSelectProjectToOpen();
+
+    void showCtxMenu();
 
 public:
     EditWindow* edit_win_ptr;
