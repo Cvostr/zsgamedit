@@ -680,9 +680,10 @@ void GameObject::loadProperty(std::ifstream* world_stream){
             lptr->updateAudioPtr(); //Pointer will now point to mesh resource
         }
         world_stream->seekg(1, std::ofstream::cur);
+        //Load settings
         world_stream->read(reinterpret_cast<char*>(&lptr->source.source_gain), sizeof(float));
         world_stream->read(reinterpret_cast<char*>(&lptr->source.source_pitch), sizeof(float));
-
+        lptr->source.apply_settings(); //Apply settings to openal
 
         break;
         }
@@ -697,7 +698,7 @@ void GameObject::loadProperty(std::ifstream* world_stream){
         world_stream->read(reinterpret_cast<char*>(&t_ptr->tiles_amount_X), sizeof(int));
         world_stream->read(reinterpret_cast<char*>(&t_ptr->tiles_amount_Y), sizeof(int));
 
-        t_ptr->isCreated = static_cast<bool>(isCreated  );
+        t_ptr->isCreated = static_cast<bool>(isCreated);
 
     break;
     }

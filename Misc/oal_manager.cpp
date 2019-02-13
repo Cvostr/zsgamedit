@@ -34,7 +34,7 @@ bool ZSPIRE::SFX::initAL() {
 	std::cout << "AL: OpenAL successfully initialized!" << std::endl;
 	//Set default parameters
 	setListenerPos(ZSVECTOR3(0.0f, 0.0f, 0.0f));
-	setListenerOri(ZSVECTOR3(0.0f, 1.0f, 0.0f));
+    setListenerOri(ZSVECTOR3(0.0f, 1.0f, 0.0f));
 
 	return true;
 }
