@@ -1,5 +1,4 @@
 #include "headers/InspectorWin.h"
-#include "headers/InspEditAreas.h"
 #include "headers/ProjectEdit.h"
 #include "../World/headers/World.h"
 #include <QDoubleValidator>
@@ -8,6 +7,7 @@
 
 AreaPropertyTitle::AreaPropertyTitle(){
     this->layout.addWidget(&this->line);
+    //layout.setSpacing(0);
     this->layout.addWidget(&this->prop_title);
     prop_title.setFixedHeight(25);
     prop_title.setMargin(0);
@@ -97,14 +97,37 @@ PropertyEditArea::~PropertyEditArea(){
 }
 //Defaults
 void PropertyEditArea::setup(){
-
+    switch(this->type){
+        case PEA_TYPE_FLOAT3:{
+            Float3PropertyArea* ptr = static_cast<Float3PropertyArea*>(this);
+            ptr->setup();
+            break;
+        }
+        case PEA_TYPE_STRING:{
+            StringPropertyArea* ptr = static_cast<StringPropertyArea*>(this);
+            ptr->setup();
+            break;
+        }
+    }
 }
 
 void PropertyEditArea::addToInspector(InspectorWin* win){
 
 }
-void PropertyEditArea::writeNewValues(){
+void PropertyEditArea::updateState(){
 
+    switch(this->type){
+        case PEA_TYPE_FLOAT3:{
+            Float3PropertyArea* ptr = static_cast<Float3PropertyArea*>(this);
+            ptr->updateState();
+            break;
+        }
+        case PEA_TYPE_STRING:{
+            StringPropertyArea* ptr = static_cast<StringPropertyArea*>(this);
+            ptr->updateState();
+            break;
+        }
+    }
 }
 
 void PropertyEditArea::callPropertyUpdate(){
@@ -163,23 +186,29 @@ void Float3PropertyArea::addToInspector(InspectorWin* win){
 
 }
 
-void Float3PropertyArea::writeNewValues(){
+void Float3PropertyArea::updateState(){
     if(this->vector == nullptr) //If vector hasn't been set
         return; //Go out
     //Get current values in text fields
     float vX = this->x_field.text().toFloat();
     float vY = this->y_field.text().toFloat();
     float vZ = this->z_field.text().toFloat();
+    //Get current values in out vector ptr
+    float vptrX = this->vector->X;
+    float vptrY = this->vector->Y;
+    float vptrZ = this->vector->Z;
+    //Compare them
+    //if(vX != vptrX || vY != vptrY || vZ != vptrZ){ //If it updated
+        //Store old values
+        GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(this->go_property);
+        getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
+        //Write new values
+        this->vector->X = vX;
+        this->vector->Y = vY;
+        this->vector->Z = vZ;
 
-    //Store old values
-    GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(this->go_property);
-    getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
-    //Write new values
-    this->vector->X = vX;
-    this->vector->Y = vY;
-    this->vector->Z = vZ;
-
-    PropertyEditArea::callPropertyUpdate();
+        PropertyEditArea::callPropertyUpdate();
+    //}
 }
 
 void Float3PropertyArea::setup(){
@@ -219,18 +248,20 @@ void StringPropertyArea::addToInspector(InspectorWin* win){
     win->getContentLayout()->addLayout(this->elem_layout);
 }
 
-void StringPropertyArea::writeNewValues(){
+void StringPropertyArea::updateState(){
     if(this->value_ptr == nullptr) //If vector hasn't been set
         return; //Go out
     //Get current values in textt fields
     QString current = this->edit_field.text();
+    //Compare them
+    if(current.compare(value_ptr) != 0){ //If it updated
+        GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(this->go_property);
+        getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
 
-    GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(this->go_property);
-    getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
+        *value_ptr = current;
 
-    *value_ptr = current;
-
-    PropertyEditArea::callPropertyUpdate();
+        PropertyEditArea::callPropertyUpdate();
+    }
 }
 
 //Float property area stuff
@@ -260,19 +291,24 @@ void FloatPropertyArea::addToInspector(InspectorWin* win){
     win->getContentLayout()->addLayout(this->elem_layout);
 }
 
-void FloatPropertyArea::writeNewValues(){
+void FloatPropertyArea::updateState(){
     if(this->value == nullptr) //If vector hasn't been set
         return; //Go out
     //Get current values in text fields
     float value = this->float_field.text().toFloat();
 
-    //Store old values
-    GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(this->go_property);
-    getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
+    //Get current values in out vector ptr
+    float vptrX = *this->value;
+    //Compare them
+    if(value != vptrX){ //If it updated
+        //Store old values
+        GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(this->go_property);
+        getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
 
-    *this->value = value;
+        *this->value = value;
 
-    PropertyEditArea::callPropertyUpdate();
+        PropertyEditArea::callPropertyUpdate();
+    }
 }
 
 //Pick resoource area stuff
@@ -330,27 +366,25 @@ IntPropertyArea::IntPropertyArea(){
 }
 
 IntPropertyArea::~IntPropertyArea(){
-    //delete int_field;
+    delete int_field;
 }
 
 void IntPropertyArea::addToInspector(InspectorWin* win){
-    win->connect(this->int_field, SIGNAL(textEdited(QString)), win, SLOT(onPropertyChange()));
-
     win->getContentLayout()->addLayout(this->elem_layout);
 }
 void IntPropertyArea::setup(){
     int_field->setText(QString::number(*value));
 }
-void IntPropertyArea::writeNewValues(){
+void IntPropertyArea::updateState(){
     if(this->value == nullptr) //If vector hasn't been set
         return; //Go out
     //Get current values in text fields
     int value = this->int_field->text().toInt();
 
     //Get current values in out vector ptr
-    //int vptrX = *this->value;
+    int vptrX = *this->value;
     //Compare them
-    //if(value != vptrX){ //If it updated
+    if(value != vptrX){ //If it updated
         //Store old values
         GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(this->go_property);
         getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
@@ -359,7 +393,7 @@ void IntPropertyArea::writeNewValues(){
         *this->value = value;
 
         PropertyEditArea::callPropertyUpdate();
-    //}
+    }
 }
 
 void ResourcePickDialog::onResourceSelected(){
@@ -493,7 +527,7 @@ BoolCheckboxArea::BoolCheckboxArea(){
 void BoolCheckboxArea::addToInspector(InspectorWin* win){
     win->getContentLayout()->addLayout(this->elem_layout);
 }
-void BoolCheckboxArea::writeNewValues(){
+void BoolCheckboxArea::updateState(){
     if(bool_ptr == nullptr) return; //pointer not set, exiting
     if(this->checkbox.isChecked()){ //if user checked it
         *bool_ptr = true;

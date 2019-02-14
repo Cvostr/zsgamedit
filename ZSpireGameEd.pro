@@ -68,7 +68,8 @@ HEADERS += \
     include_engine.h \
     Scripting/headers/LuaScript.h \
     Scripting/headers/zsensdk.h \
-    World/headers/obj_properties.h
+    World/headers/obj_properties.h \
+    ProjEd/headers/InspEditAreas.h
 
 
 FORMS += \

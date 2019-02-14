@@ -4,8 +4,9 @@
 
 #include "headers/2dtileproperties.h"
 #include "headers/obj_properties.h"
+#include "../ProjEd/headers/InspEditAreas.h"
 
-TileGroupProperty* current_property; //Property, that shown
+static TileGroupProperty* current_property; //Property, that shown
 
 void onCreateBtnPress(){
     current_property->process();

@@ -3,6 +3,7 @@
 #include "headers/2dtileproperties.h"
 #include "../ProjEd/headers/ProjectEdit.h"
 #include "../Render/headers/zs-mesh.h"
+#include "../ProjEd/headers/InspEditAreas.h"
 
 GameObjectProperty::GameObjectProperty(){
     type = GO_PROPERTY_TYPE_NONE;
@@ -115,33 +116,11 @@ GameObjectProperty* allocProperty(int type){
 
 //Cast inheritance calls
 void GameObjectProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
-    switch(this->type){
-        case GO_PROPERTY_TYPE_TRANSFORM:{ //If it is transform
-            TransformProperty* transfrom = static_cast<TransformProperty*>(this);
-            transfrom->addPropertyInterfaceToInspector(inspector);
-            break;
-        }
-        case GO_PROPERTY_TYPE_LABEL:{ //If it is label
-            LabelProperty* label = static_cast<LabelProperty*>(this);
-            label->addPropertyInterfaceToInspector(inspector);
-            break;
-        }
-    }
+
 }
 
 void GameObjectProperty::onValueChanged(){
-    switch(this->type){
-        case GO_PROPERTY_TYPE_TRANSFORM:{ //If it is transform
-            TransformProperty* transfrom = static_cast<TransformProperty*>(this);
-            transfrom->onValueChanged();
-            break;
-        }
-        case GO_PROPERTY_TYPE_LABEL:{ //If it is label
-            LabelProperty* label = static_cast<LabelProperty*>(this);
-            label->onValueChanged();
-            break;
-        }
-    }
+
 }
 //Inherited constructors
 TransformProperty::TransformProperty(){

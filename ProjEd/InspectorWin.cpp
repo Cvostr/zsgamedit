@@ -125,7 +125,8 @@ void InspectorWin::area_update(){
     unsigned int areas_num = static_cast<unsigned int>(this->property_areas.size());
     for(unsigned int area_i = 0; area_i < areas_num; area_i ++){
         PropertyEditArea* pea_ptr = this->property_areas[area_i]; //Obtain pointer to area
-        pea_ptr->updateState(); //Update state on it.
+        pea_ptr->writeNewValues(); //Update state on it.
+        areas_num = static_cast<unsigned int>(this->property_areas.size()); //recount amount
     }
 }
 
