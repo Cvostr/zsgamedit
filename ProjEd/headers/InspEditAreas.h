@@ -38,7 +38,7 @@ public:
 
     void destroyContent();
     void setup(); //Virtual
-    //void onEdited(); //on text fields or other edited
+    void updateValues(); //on text fields or other edited
     void addToInspector(InspectorWin* win);
     void writeNewValues(); //Virtual, on values changed
 };
@@ -56,6 +56,7 @@ public:
     void setup(); //Virtual
     void addToInspector(InspectorWin* win);
     void writeNewValues(); //Virtual, on values changed
+    void updateValues(); //on text fields or other edited
 };
 
 class IntPropertyArea : public PropertyEditArea{

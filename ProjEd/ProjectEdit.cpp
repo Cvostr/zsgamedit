@@ -271,6 +271,8 @@ void EditWindow::onRunProject(){
 
         this->world.recoverFromSnapshot(&run_world_snapshot); //create snapshot of current state to recover it later
         run_world_snapshot.clear(); //Clear snapshot to free up memory
+
+        _inspector_win->clearContentLayout();
     }
 }
 
@@ -674,7 +676,6 @@ void EditWindow::onMouseMotion(int relX, int relY){
             }
 
             obj_trstate.tprop_ptr->updateMat();
-            getInspector()->updateObjectProperties();
         }
     }
     if(project.perspective == 3){//Only affective in 3D

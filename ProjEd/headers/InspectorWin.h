@@ -88,7 +88,7 @@ public:
     virtual void destroyContent(); //Destroy content, placed by inherited class
     virtual void setup(); //Uses to prepare base values
     virtual void writeNewValues(); //Updates value
-    virtual void updateValue(); //if some text edited
+    virtual void updateValues(); //if some text edited
     virtual void addToInspector(InspectorWin* win); //Add edit area to inspector layout
     void callPropertyUpdate(); //Call property, that created this area to update
 
@@ -167,8 +167,9 @@ public:
     void clearContentLayout(); //Clears layout
     void addPropertyArea(PropertyEditArea* area); //Adds new property area
     void registerUiObject(QObject* object);
-    void area_update(); //To update property areas states
+    void onPropertyEdited(); //To update property areas states on area edited
     void addPropButtons(); //Adds "Create Property" Btn to content layout
+    void updateAreasChanges();
     void ShowObjectProperties(void* object_ptr);
     void updateObjectProperties();
     void* gameobject_ptr;

@@ -105,7 +105,9 @@ void ZSENSDK::bindSDK(lua_State* state){
             .addData("y", &ZSVECTOR3::Y)
             .addData("z", &ZSVECTOR3::Z)
             .addConstructor <void(*) (float, float, float)>()
-            .endClass();
+            .endClass()
+            .addFunction("length", &length);
+
 
     luabridge::getGlobalNamespace(state).beginClass <ZSRGBCOLOR>("RGBColor")
             .addData("r", &ZSRGBCOLOR::r)

@@ -88,7 +88,7 @@ void PropertyEditArea::destroyContent(){
 
 }
 
-void PropertyEditArea::updateValue(){
+void PropertyEditArea::updateValues(){
 
 }
 
@@ -182,6 +182,21 @@ void Float3PropertyArea::writeNewValues(){
     PropertyEditArea::callPropertyUpdate();
 }
 
+void Float3PropertyArea::updateValues(){
+    if(this->vector == nullptr) //If vector hasn't been set
+        return; //Go out
+    //Get current values in textt fields
+    float vX = this->x_field.text().toFloat();
+    float vY = this->y_field.text().toFloat();
+    float vZ = this->z_field.text().toFloat();
+
+    if(vector->X != vX || vector->Y != vY || vector->Z != vZ){
+        this->x_field.setText(QString::number(static_cast<double>(vector->X)));
+        this->y_field.setText(QString::number(static_cast<double>(vector->Y)));
+        this->z_field.setText(QString::number(static_cast<double>(vector->Z)));
+    }
+}
+
 void Float3PropertyArea::setup(){
     if(this->vector == nullptr)
         return;
@@ -236,7 +251,7 @@ void StringPropertyArea::writeNewValues(){
 //Float property area stuff
 FloatPropertyArea::FloatPropertyArea(){
     type = PEA_TYPE_FLOAT;
-    value = 0; //Set default value
+    value = nullptr; //Set default value
 
     QLocale locale(QLocale::English); //Define english locale to set it to double validator later
     QDoubleValidator* validator = new QDoubleValidator(-100, 100, 6, nullptr); //Define double validator
@@ -273,6 +288,17 @@ void FloatPropertyArea::writeNewValues(){
     *this->value = value;
 
     PropertyEditArea::callPropertyUpdate();
+}
+
+void FloatPropertyArea::updateValues(){
+    if(this->value == nullptr) //If vector hasn't been set
+        return; //Go out
+    //Get current values in textt fields
+    float vX = this->float_field.text().toFloat();
+
+    if(*value != vX){
+        this->float_field.setText(QString::number(static_cast<double>(*value)));
+    }
 }
 
 //Pick resoource area stuff
@@ -347,19 +373,12 @@ void IntPropertyArea::writeNewValues(){
     //Get current values in text fields
     int value = this->int_field->text().toInt();
 
-    //Get current values in out vector ptr
-    //int vptrX = *this->value;
-    //Compare them
-    //if(value != vptrX){ //If it updated
-        //Store old values
-        GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(this->go_property);
-        getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
+    GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(this->go_property);
+    getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
 
+    *this->value = value;
 
-        *this->value = value;
-
-        PropertyEditArea::callPropertyUpdate();
-    //}
+    PropertyEditArea::callPropertyUpdate();
 }
 
 void ResourcePickDialog::onResourceSelected(){

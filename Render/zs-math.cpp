@@ -278,5 +278,9 @@ float getDistance(ZSVECTOR3 p1, ZSVECTOR3 p2) {
 	float dy = p1.Y - p2.Y;
 	float dz = p1.Z - p2.Z;
 
-	return (float)sqrt(dx * dx + dy * dy + dz * dz);
+    return static_cast<float>(sqrt(dx * dx + dy * dy + dz * dz));
+}
+
+float length(ZSVECTOR3 vec){
+    return static_cast<float>(sqrt(vec.X * vec.X + vec.Y * vec.Y + vec.Z * vec.Z));
 }
