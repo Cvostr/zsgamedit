@@ -4,7 +4,6 @@
 #include <string>
 #include "../../World/headers/World.h"
 
-
 extern "C" {
 #include <lua5.2/lua.h>
 #include <lua5.2/lualib.h>
@@ -83,6 +82,13 @@ namespace Debug{
 
 namespace Math{
     ZSVECTOR3 vnormalize(ZSVECTOR3 vec);
+}
+
+namespace Input {
+    void addPressedKeyToQueue(int keycode);
+    void clearPressedKeys();
+    bool isKeyPressed(int keycode);
+    bool isKeyHold(int keycode);
 }
 
 void bindSDK(lua_State* state);

@@ -10,8 +10,6 @@
 #include <QFileDialog>
 #include <QShortcut>
 
-
-
 static EditWindow* _editor_win;
 static InspectorWin* _inspector_win;
 static EdActions* _ed_actions_container;
@@ -88,6 +86,7 @@ void EditWindow::init(){
     input_state.isRightBtnHold = false;
     input_state.isLCtrlHold = false;
     input_state.isRCtrlHold = false;
+    input_state.isLAltHold = false;
 
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0)
     {
@@ -145,6 +144,7 @@ void EditWindow::init(){
 }
 
 void EditWindow::assignIconFile(QListWidgetItem* item){
+    item->setIcon(QIcon::fromTheme("application-x-executable"));
     if(item->text().endsWith(".txt") || item->text().endsWith(".inf") || item->text().endsWith(".scn")){
         item->setIcon(QIcon::fromTheme("text-x-generic"));
     }
@@ -156,6 +156,9 @@ void EditWindow::assignIconFile(QListWidgetItem* item){
     }
     if(item->text().endsWith(".wav") || item->text().endsWith(".WAV")){
         item->setIcon(QIcon::fromTheme("audio-x-generic"));
+    }
+    if(item->text().endsWith(".lua")){
+        item->setIcon(QIcon::fromTheme("text-x-script"));
     }
 }
 
@@ -659,9 +662,9 @@ void EditWindow::onMouseMotion(int relX, int relY){
 
             dir = ZSVECTOR3(-relX, -relY, 0);
 
-            if ((abs(relX) > abs(relY)) && abs(relX - relY) > 3)
+            if ((abs(relX) > abs(relY)) && abs(relX - relY) > 5)
                 dir = ZSVECTOR3(-relX, 0, 0);
-            if ((abs(relX) < abs(relY)) && abs(relX - relY) > 3)
+            if ((abs(relX) < abs(relY)) && abs(relX - relY) > 5)
                 dir = ZSVECTOR3(0, -relY, 0);
             //if we translating
             if(obj_trstate.transformMode == GO_TRANSFORM_MODE_TRANSLATE){

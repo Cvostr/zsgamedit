@@ -198,7 +198,7 @@ void TransformProperty::updateMat(){
 
         ZSMATRIX4x4 rotation_mat = getRotationMat(this->rotation);
         //S * R * T
-        this->transform_mat = scale_mat * rotation_mat1 * rotation_mat * translation_mat;
+        this->transform_mat = scale_mat * rotation_mat * rotation_mat1 * translation_mat;
     }
 }
 
@@ -212,7 +212,7 @@ void TransformProperty::getAbsoluteRotationMatrix(ZSMATRIX4x4& m){
         TransformProperty* property = static_cast<TransformProperty*>(parent_p->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
 
         ZSMATRIX4x4 rotation_mat1 = getRotationMat(property->rotation, ptr->getTransformProperty()->translation);
-        m = m * rotation_mat1;
+        m = rotation_mat1 * m;
         property->getAbsoluteRotationMatrix(m);
     }
 }

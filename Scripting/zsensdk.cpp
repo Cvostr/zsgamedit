@@ -6,8 +6,30 @@
 #include <QString>
 #include <iostream>
 
+#define KEYS_QUEUE_SIZE 10
+
+static int pressed_keys_queue[KEYS_QUEUE_SIZE];
+static int pressed_keys_q_size = 0;
+int hold_keys_queue[KEYS_QUEUE_SIZE];
+static int hold_keys_q_size = 0;
+
 void ZSENSDK::Debug::Log(std::string text){
     std::cout << "SCRIPT: " << text << std::endl;
+}
+
+void ZSENSDK::Input::addPressedKeyToQueue(int keycode){
+    if(pressed_keys_q_size > KEYS_QUEUE_SIZE) return;
+    pressed_keys_queue[pressed_keys_q_size] = keycode;
+}
+void ZSENSDK::Input::clearPressedKeys(){
+    pressed_keys_q_size = 0;
+}
+bool ZSENSDK::Input::isKeyPressed(int keycode){
+    for(int i = 0; i < KEYS_QUEUE_SIZE; i ++){
+        if(pressed_keys_queue[i] == keycode)
+            return true;
+    }
+    return false;
 }
 
 ZSVECTOR3 ZSENSDK::Math::vnormalize(ZSVECTOR3 vec){
@@ -108,12 +130,18 @@ void ZSENSDK::ZSENAudSourceProperty::setPitch(float pitch){
 //TileProperty functions
 void ZSENSDK::ZSENTileProperty::playAnim(){
     TileProperty* prop_ptr = static_cast<TileProperty*>(this->prop_ptr);
+    prop_ptr->anim_state.playing = true; //Set boolean to playing
 }
 
 void ZSENSDK::bindSDK(lua_State* state){
     luabridge::getGlobalNamespace(state)
             .beginNamespace("debug")
             .addFunction("Log", &ZSENSDK::Debug::Log)
+            .endNamespace();
+
+    luabridge::getGlobalNamespace(state)
+            .beginNamespace("input")
+            .addFunction("isKeyPressed", &ZSENSDK::Input::isKeyPressed)
             .endNamespace();
 
     luabridge::getGlobalNamespace(state).beginClass <ZSVECTOR3>("Vec3")
