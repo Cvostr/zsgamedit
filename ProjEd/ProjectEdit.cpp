@@ -721,13 +721,13 @@ void EditWindow::onKeyDown(SDL_Keysym sym){
         edit_camera.setPosition(pos);
     }
 
-    if(sym.sym == SDLK_t){
+    if(input_state.isLAltHold && sym.sym == SDLK_t){
         obj_trstate.setTransformOnObject(this->obj_trstate.obj_ptr, GO_TRANSFORM_MODE_TRANSLATE);
     }
-    if(sym.sym == SDLK_e){
+    if(input_state.isLAltHold && sym.sym == SDLK_e){
         obj_trstate.setTransformOnObject(this->obj_trstate.obj_ptr, GO_TRANSFORM_MODE_SCALE);
     }
-    if(sym.sym == SDLK_r){
+    if(input_state.isLAltHold && sym.sym == SDLK_r){
         obj_trstate.setTransformOnObject(this->obj_trstate.obj_ptr, GO_TRANSFORM_MODE_ROTATE);
     }
 
@@ -747,6 +747,9 @@ void EditWindow::onKeyDown(SDL_Keysym sym){
     }
     if(input_state.isLCtrlHold && sym.sym == SDLK_y){
         emit onRedoPressed();
+    }
+    if(input_state.isLCtrlHold && sym.sym == SDLK_r){
+        emit onRunProject();
     }
 }
 

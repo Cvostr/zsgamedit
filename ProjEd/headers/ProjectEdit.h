@@ -65,10 +65,11 @@ struct Project{
 };
 #ifndef INCLUDE_PRJ_ONLY
 struct EditorInputState{
-    bool isLeftBtnHold;
-    bool isRightBtnHold;
+    bool isLeftBtnHold; //Left mouse button
+    bool isRightBtnHold; //Right mouse button
     bool isLCtrlHold;
     bool isRCtrlHold;
+    bool isLAltHold;
 };
 
 struct ObjectTransformState{

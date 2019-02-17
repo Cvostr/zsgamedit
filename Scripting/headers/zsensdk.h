@@ -33,6 +33,13 @@ public:
     void setScale(ZSVECTOR3 scale);
 };
 
+class ZSENTileProperty : public ZSENObjectProperty{
+public:
+    void* prop_ptr;
+
+    void playAnim();
+};
+
 class ZSENAudSourceProperty : public ZSENObjectProperty{
 public:
     void* prop_ptr;
@@ -58,6 +65,7 @@ public:
 
     ZSENTransformProperty transform();
     ZSENAudSourceProperty audio();
+    ZSENTileProperty tile();
 
     void prikol();
 };
@@ -71,6 +79,10 @@ public:
 };
 namespace Debug{
     void Log(std::string text);
+}
+
+namespace Math{
+    ZSVECTOR3 vnormalize(ZSVECTOR3 vec);
 }
 
 void bindSDK(lua_State* state);

@@ -47,10 +47,18 @@ int main(int argc, char *argv[])
                         w.edit_win_ptr->onKeyDown(event.key.keysym);
                         if(event.key.keysym.sym == SDLK_LCTRL) //if it is ctrl
                             w.edit_win_ptr->input_state.isLCtrlHold = true;
+                        if(event.key.keysym.sym == SDLK_RCTRL) //if it is ctrl
+                            w.edit_win_ptr->input_state.isRCtrlHold = true;
+                        if(event.key.keysym.sym == SDLK_LALT) //if it is ctrl
+                            w.edit_win_ptr->input_state.isLAltHold = true;
                     }
                     if (event.type == SDL_KEYUP) { //if user pressed a key on keyboard
                         if(event.key.keysym.sym == SDLK_LCTRL) //if it is ctrl
                             w.edit_win_ptr->input_state.isLCtrlHold = false;
+                        if(event.key.keysym.sym == SDLK_RCTRL) //if it is ctrl
+                            w.edit_win_ptr->input_state.isRCtrlHold = false;
+                        if(event.key.keysym.sym == SDLK_LALT) //if it is ctrl
+                            w.edit_win_ptr->input_state.isLAltHold = false;
                     }
                     if (event.type == SDL_MOUSEBUTTONDOWN) { //If user pressed mouse btn
 

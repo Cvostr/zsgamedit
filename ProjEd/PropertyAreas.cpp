@@ -356,7 +356,7 @@ IntPropertyArea::IntPropertyArea(){
 }
 
 IntPropertyArea::~IntPropertyArea(){
-    //delete int_field;
+    delete int_field;
 }
 
 void IntPropertyArea::addToInspector(InspectorWin* win){
