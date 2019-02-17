@@ -87,51 +87,12 @@ public:
     void destroyLayout(); //Destoroy base layout
     virtual void destroyContent(); //Destroy content, placed by inherited class
     virtual void setup(); //Uses to prepare base values
-    virtual void updateState(); //Updates value
-    virtual void updateValue(); //if some text edited
+    virtual void writeNewValues(); //Updates value
+    virtual void updateValues(); //if some text edited
     virtual void addToInspector(InspectorWin* win); //Add edit area to inspector layout
     void callPropertyUpdate(); //Call property, that created this area to update
 
     void setLabel(QString label);
-};
-
-class StringPropertyArea : public PropertyEditArea{
-public:
-
-    QString* value_ptr; //Modifying string
-    QLineEdit edit_field;
-
-    StringPropertyArea();
-    ~StringPropertyArea();
-
-    void destroyContent(); //destroy content, created by this class
-    void setup(); //Virtual, prepares base values
-    void addToInspector(InspectorWin* win); //Add edit area to inspector layout
-    void updateState(); //Updates value
-
-};
-
-class Float3PropertyArea : public PropertyEditArea{
-public:
-
-    QLineEdit x_field; //Text digit field for X coord
-    QLineEdit y_field; //Text digit field for Y coord
-    QLineEdit z_field; //Text digit field for Z coord
-
-    ZSVECTOR3* vector; //Output variable
-
-    QLabel x_label; //To write X separator
-    QLabel y_label; //To write Y separator
-    QLabel z_label; //To write Z separator
-
-    Float3PropertyArea();
-    ~Float3PropertyArea();
-
-    void destroyContent();
-    void setup(); //Virtual
-    //void onEdited(); //on text fields or other edited
-    void addToInspector(InspectorWin* win);
-    void updateState(); //Virtual, on values changed
 };
 
 class PickResourceArea : public PropertyEditArea{
@@ -151,36 +112,6 @@ public:
     void setup(); //Virtual, to prepare base values
     void addToInspector(InspectorWin* win);
     void updateState();
-};
-
-class FloatPropertyArea : public PropertyEditArea{
-public:
-
-    QLineEdit float_field; //Text digit field for X coord
-
-    float* value; //Output variable
-
-    FloatPropertyArea();
-    ~FloatPropertyArea();
-
-    void setup(); //Virtual
-    void addToInspector(InspectorWin* win);
-    void updateState(); //Virtual, on values changed
-};
-
-class IntPropertyArea : public PropertyEditArea{
-public:
-
-    QLineEdit* int_field; //Text digit field for X coord
-
-    int* value; //Output variable
-
-    IntPropertyArea();
-    ~IntPropertyArea();
-
-    void setup(); //Virtual
-    void addToInspector(InspectorWin* win);
-    void updateState(); //Virtual, on values changed
 };
 
 class ColorDialogArea;
@@ -207,17 +138,6 @@ public:
 
     void updText(); //updates text value
     void addToInspector(InspectorWin* win);
-};
-
-class BoolCheckboxArea : public PropertyEditArea{
-public:
-    bool* bool_ptr; //pointer to modifying bool
-    QCheckBox checkbox; //pressing checkbox
-
-    BoolCheckboxArea();
-    void setup(); //Virtual
-    void addToInspector(InspectorWin* win);
-    void updateState(); //Virtual, to check widget state
 };
 
 namespace Ui {
@@ -247,8 +167,9 @@ public:
     void clearContentLayout(); //Clears layout
     void addPropertyArea(PropertyEditArea* area); //Adds new property area
     void registerUiObject(QObject* object);
-    void area_update(); //To update property areas states
+    void onPropertyEdited(); //To update property areas states on area edited
     void addPropButtons(); //Adds "Create Property" Btn to content layout
+    void updateAreasChanges();
     void ShowObjectProperties(void* object_ptr);
     void updateObjectProperties();
     void* gameobject_ptr;

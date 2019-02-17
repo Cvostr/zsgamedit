@@ -3,6 +3,7 @@
 #include "headers/2dtileproperties.h"
 #include "../ProjEd/headers/ProjectEdit.h"
 #include "../Render/headers/zs-mesh.h"
+#include "../ProjEd/headers/InspEditAreas.h"
 
 GameObjectProperty::GameObjectProperty(){
     type = GO_PROPERTY_TYPE_NONE;
@@ -33,35 +34,27 @@ QString getPropertyString(int type){
     switch (type) {
         case GO_PROPERTY_TYPE_TRANSFORM:{ //If type is transfrom
             return QString("Transform");
-            //break;
         }
         case GO_PROPERTY_TYPE_LABEL:{
             return QString("Label");
-            //break;
         }
         case GO_PROPERTY_TYPE_MESH:{
             return QString("Mesh");
-            //break;
         }
         case GO_PROPERTY_TYPE_LIGHTSOURCE:{
             return QString("Light");
-            //break;
         }
         case GO_PROPERTY_TYPE_SCRIPTGROUP:{
             return QString("Script Group");
-            //break;
         }
         case GO_PROPERTY_TYPE_AUDSOURCE:{
             return QString("Audio Source");
-            //break;
         }
         case GO_PROPERTY_TYPE_TILE_GROUP:{
             return QString("Tile Group");
-            //break;
         }
         case GO_PROPERTY_TYPE_TILE:{
             return QString("Tile");
-            //break;
         }
     }
     return QString("NONE");
@@ -115,33 +108,11 @@ GameObjectProperty* allocProperty(int type){
 
 //Cast inheritance calls
 void GameObjectProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
-    switch(this->type){
-        case GO_PROPERTY_TYPE_TRANSFORM:{ //If it is transform
-            TransformProperty* transfrom = static_cast<TransformProperty*>(this);
-            transfrom->addPropertyInterfaceToInspector(inspector);
-            break;
-        }
-        case GO_PROPERTY_TYPE_LABEL:{ //If it is label
-            LabelProperty* label = static_cast<LabelProperty*>(this);
-            label->addPropertyInterfaceToInspector(inspector);
-            break;
-        }
-    }
+
 }
 
 void GameObjectProperty::onValueChanged(){
-    switch(this->type){
-        case GO_PROPERTY_TYPE_TRANSFORM:{ //If it is transform
-            TransformProperty* transfrom = static_cast<TransformProperty*>(this);
-            transfrom->onValueChanged();
-            break;
-        }
-        case GO_PROPERTY_TYPE_LABEL:{ //If it is label
-            LabelProperty* label = static_cast<LabelProperty*>(this);
-            label->onValueChanged();
-            break;
-        }
-    }
+
 }
 //Inherited constructors
 TransformProperty::TransformProperty(){
@@ -206,7 +177,7 @@ void TransformProperty::updateMat(){
             property->getAbsoluteParentTransform(p_translation, p_scale, p_rotation);
         }
     }
-
+    //If at least one coordinate changed
     if(this->translation + p_translation == this->_last_translation
             && this->scale * p_scale == this->_last_scale
             && this->rotation + p_rotation == this->_last_rotation) {
@@ -222,13 +193,29 @@ void TransformProperty::updateMat(){
         //Calculate scale matrix
         ZSMATRIX4x4 scale_mat = getScaleMat(_last_scale);
         //Calculate rotation matrix
-        //ZSMATRIX4x4 rotation_mat = getRotationMat(_last_rotation, _last_translation);
-        ZSMATRIX4x4 rotation_mat = getRotationMat(_last_rotation);
+        ZSMATRIX4x4 rotation_mat1 = getIdentity();
+        getAbsoluteRotationMatrix(rotation_mat1);
+
+        ZSMATRIX4x4 rotation_mat = getRotationMat(this->rotation);
         //S * R * T
-        this->transform_mat = scale_mat * rotation_mat * translation_mat;
+        this->transform_mat = scale_mat * rotation_mat * rotation_mat1 * translation_mat;
     }
 }
 
+void TransformProperty::getAbsoluteRotationMatrix(ZSMATRIX4x4& m){
+    GameObject* ptr = go_link.updLinkPtr(); //Pointer to object with this property
+
+    if(ptr == nullptr) return;
+
+    if(ptr->hasParent == true){
+        GameObject* parent_p = ptr->parent.ptr;
+        TransformProperty* property = static_cast<TransformProperty*>(parent_p->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
+
+        ZSMATRIX4x4 rotation_mat1 = getRotationMat(property->rotation, ptr->getTransformProperty()->translation);
+        m = rotation_mat1 * m;
+        property->getAbsoluteRotationMatrix(m);
+    }
+}
 
 void TransformProperty::getAbsoluteParentTransform(ZSVECTOR3& t, ZSVECTOR3& s, ZSVECTOR3& r){
     GameObject* ptr = go_link.updLinkPtr(); //Pointer to object with this property

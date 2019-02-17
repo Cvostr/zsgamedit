@@ -4,7 +4,6 @@
 #include <string>
 #include "../../World/headers/World.h"
 
-
 extern "C" {
 #include <lua5.2/lua.h>
 #include <lua5.2/lualib.h>
@@ -33,6 +32,13 @@ public:
     void setScale(ZSVECTOR3 scale);
 };
 
+class ZSENTileProperty : public ZSENObjectProperty{
+public:
+    void* prop_ptr;
+
+    void playAnim();
+};
+
 class ZSENAudSourceProperty : public ZSENObjectProperty{
 public:
     void* prop_ptr;
@@ -58,6 +64,7 @@ public:
 
     ZSENTransformProperty transform();
     ZSENAudSourceProperty audio();
+    ZSENTileProperty tile();
 
     void prikol();
 };
@@ -71,6 +78,17 @@ public:
 };
 namespace Debug{
     void Log(std::string text);
+}
+
+namespace Math{
+    ZSVECTOR3 vnormalize(ZSVECTOR3 vec);
+}
+
+namespace Input {
+    void addPressedKeyToQueue(int keycode);
+    void clearPressedKeys();
+    bool isKeyPressed(int keycode);
+    bool isKeyHold(int keycode);
 }
 
 void bindSDK(lua_State* state);

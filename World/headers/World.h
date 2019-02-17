@@ -78,6 +78,7 @@ public:
     void onValueChanged();
     void getAbsoluteParentTransform(ZSVECTOR3& t, ZSVECTOR3& s, ZSVECTOR3& r);
     void copyTo(GameObjectProperty* dest);
+    void getAbsoluteRotationMatrix(ZSMATRIX4x4& m);
 
     TransformProperty();
 };

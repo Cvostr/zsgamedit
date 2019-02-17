@@ -14,7 +14,7 @@ void vNormalize(ZSVECTOR3* v)
 	if (REAL_NUM_EQ(sqr, 1) || REAL_NUM_EQ(sqr, 0))
 		return;
 
-	float invrt = (1.0f / (float)sqrt(sqr));
+    float invrt = (1.0f / static_cast<float>(sqrt(sqr)));
 	v->X *= invrt;
 	v->Y *= invrt;
 	v->Z *= invrt;
@@ -158,33 +158,33 @@ ZSMATRIX4x4 getTranslationMat(ZSVECTOR3 translation){
 }
 
 ZSMATRIX4x4 getRotationXMat(float thetaN) {
-	double theta = DegToRad(thetaN);
+    float theta = DegToRad(thetaN);
 	ZSMATRIX4x4 mat;
 
 	mat.m[0][0] = 1; mat.m[0][1] = 0;               mat.m[0][2] = 0;                mat.m[0][3] = 0;
-	mat.m[1][0] = 0; mat.m[1][1] = (float)cos(theta);      mat.m[1][2] = (float)sin(theta) * -1;  mat.m[1][3] = 0;
-	mat.m[2][0] = 0; mat.m[2][1] = (float)sin(theta);      mat.m[2][2] = (float)cos(theta);       mat.m[2][3] = 0;
+    mat.m[1][0] = 0; mat.m[1][1] = static_cast<float>(cos(theta));      mat.m[1][2] = static_cast<float>(sin(theta)) * -1;  mat.m[1][3] = 0;
+    mat.m[2][0] = 0; mat.m[2][1] = static_cast<float>(sin(theta));      mat.m[2][2] = static_cast<float>(cos(theta));       mat.m[2][3] = 0;
 	mat.m[3][0] = 0; mat.m[3][1] = 0;               mat.m[3][2] = 0;                mat.m[3][3] = 1;
 
 	return mat;
 }
 ZSMATRIX4x4 getRotationYMat(float thetaN) {
-	double theta = DegToRad(thetaN);
+    float theta = DegToRad(thetaN);
 	ZSMATRIX4x4 mat;
 
-	mat.m[0][0] = (float)cos(theta);       mat.m[0][1] = 0;            mat.m[0][2] = (float)sin(theta);   mat.m[0][3] = 0;
+    mat.m[0][0] = static_cast<float>(cos(theta));       mat.m[0][1] = 0;            mat.m[0][2] = static_cast<float>(sin(theta));   mat.m[0][3] = 0;
 	mat.m[1][0] = 0;                mat.m[1][1] = 1;            mat.m[1][2] = 0;            mat.m[1][3] = 0;
-	mat.m[2][0] = (float)sin(theta) * -1;  mat.m[2][1] = 0;            mat.m[2][2] = (float)cos(theta);   mat.m[2][3] = 0;
+    mat.m[2][0] = static_cast<float>(sin(theta)) * -1;  mat.m[2][1] = 0;            mat.m[2][2] = static_cast<float>(cos(theta));   mat.m[2][3] = 0;
 	mat.m[3][0] = 0;                mat.m[3][1] = 0;            mat.m[3][2] = 0;            mat.m[3][3] = 1;
 
 	return mat;
 }
 ZSMATRIX4x4 getRotationZMat(float thetaN) {
-	double theta = DegToRad(thetaN);
+    float theta = DegToRad(thetaN);
 	ZSMATRIX4x4 mat;
 
-	mat.m[0][0] = (float)cos(theta);       mat.m[0][1] = (float)sin(theta) * -1;  mat.m[0][2] = 0;   mat.m[0][3] = 0;
-	mat.m[1][0] = (float)sin(theta);       mat.m[1][1] = (float)cos(theta);       mat.m[1][2] = 0;   mat.m[1][3] = 0;
+    mat.m[0][0] = static_cast<float>(cos(theta));       mat.m[0][1] = static_cast<float>(sin(theta)) * -1;  mat.m[0][2] = 0;   mat.m[0][3] = 0;
+    mat.m[1][0] = static_cast<float>(sin(theta));       mat.m[1][1] = static_cast<float>(cos(theta));       mat.m[1][2] = 0;   mat.m[1][3] = 0;
 	mat.m[2][0] = 0;                mat.m[2][1] = 0;                mat.m[2][2] = 1;   mat.m[2][3] = 0;
 	mat.m[3][0] = 0;                mat.m[3][1] = 0;                mat.m[3][2] = 0;   mat.m[3][3] = 1;
 
@@ -248,10 +248,10 @@ ZSMATRIX4x4 getOrthogonal(float left, float right, float bottom, float top, floa
 
 
 void ZSRGBCOLOR::updateGL() {
-	this->gl_r = (float)r / 255;
-	this->gl_g = (float)g / 255;
-	this->gl_b = (float)b / 255;
-	this->gl_a = (float)a / 255;
+    this->gl_r = static_cast<float>(r) / 255;
+    this->gl_g = static_cast<float>(g) / 255;
+    this->gl_b = static_cast<float>(b) / 255;
+    this->gl_a = static_cast<float>(a) / 255;
 }
 
 ZSVECTOR3 _getDirection(float pitch, float yaw, float roll) {
@@ -278,5 +278,9 @@ float getDistance(ZSVECTOR3 p1, ZSVECTOR3 p2) {
 	float dy = p1.Y - p2.Y;
 	float dz = p1.Z - p2.Z;
 
-	return (float)sqrt(dx * dx + dy * dy + dz * dz);
+    return static_cast<float>(sqrt(dx * dx + dy * dy + dz * dz));
+}
+
+float length(ZSVECTOR3 vec){
+    return static_cast<float>(sqrt(vec.X * vec.X + vec.Y * vec.Y + vec.Z * vec.Z));
 }
