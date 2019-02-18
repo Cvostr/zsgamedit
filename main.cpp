@@ -20,8 +20,6 @@ int main(int argc, char *argv[])
                     w.show();
                 }
 
-
-
             SDL_Event event;
                 while (SDL_PollEvent(&event))
                 {

@@ -30,7 +30,7 @@ MainWin::MainWin(QWidget *parent) :
     QObject::connect(ui->projList, SIGNAL(itemClicked(QListWidgetItem *)),
                 this, SLOT(onSelectProjectToOpen()));
 
-    QObject::connect(ui->projList, SIGNAL(onRightClick(QPoint)), this, SLOT(showCtxMenu()));
+    QObject::connect(ui->projList, SIGNAL(onRightClick(QPoint)), this, SLOT(showCtxMenu(QPoint)));
 
     loadProjectsConfigurations();
     cr_w = new CreateProjectWindow;
@@ -159,8 +159,8 @@ void MainWin::updateListWidgetContent(){
     }
 }
 
-void MainWin::showCtxMenu(){
-    project_menu->show(QPoint(0,0));
+void MainWin::showCtxMenu(QPoint point){
+    project_menu->show(point);
 }
 
 ProjectListWgt::ProjectListWgt(QWidget* parent) : QListWidget (parent){
@@ -180,13 +180,16 @@ ProjectCtxMenu::ProjectCtxMenu(MainWin* win, QWidget* parent) : QObject(parent){
     this->menu = new QMenu(win);
 
     this->action_delete = new QAction("Delete", win);
-    this->action_rename = new QAction("Run in engine instance", win);
+    this->action_run_engine = new QAction("Run in engine instance", win);
+    this->action_run_engine_vk = new QAction("Run in engine instance (Vulkan)", win);
 
-    menu->addAction(action_rename);
     menu->addAction(action_delete);
+    menu->addAction(action_run_engine);
+    menu->addAction(action_run_engine_vk);
 
     QObject::connect(this->action_delete, SIGNAL(triggered(bool)), this, SLOT(onDeleteClicked()));
-    QObject::connect(this->action_rename, SIGNAL(triggered(bool)), this, SLOT(runEngineClicked()));
+    QObject::connect(this->action_run_engine, SIGNAL(triggered(bool)), this, SLOT(runEngineClicked()));
+    QObject::connect(this->action_run_engine_vk, SIGNAL(triggered(bool)), this, SLOT(runEngineClicked()));
 
 }
 
@@ -210,9 +213,12 @@ void ProjectCtxMenu::onDeleteClicked(){
 void ProjectCtxMenu::runEngineClicked(){
     ZSENGINE_CREATE_INFO engine_create_info;
     engine_create_info.appName = "GameEditorRun";
-    engine_create_info.createWindow = false; //window already created, we don't need one
+    engine_create_info.createWindow = true; //window already created, we don't need one
     engine_create_info.graphicsApi = OGL32; //use opengl
-/*
-    engine = new ZSpireEngine(&engine_create_info, nullptr);*/
+
+    ZSWINDOW_CREATE_INFO window_create_info;
+    window_create_info.title = "Preview";
+
+    win->engine = new ZSpireEngine(&engine_create_info, &window_create_info);
 
 }
