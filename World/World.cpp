@@ -221,7 +221,7 @@ void GameObject::onUpdate(int deltaTime){
 }
 
 World::World(){
-    objects.reserve(6000);
+    objects.reserve(11000);
     proj_ptr = nullptr;
 }
 
