@@ -20,12 +20,13 @@ void ZSENSDK::Debug::Log(std::string text){
 void ZSENSDK::Input::addPressedKeyToQueue(int keycode){
     if(pressed_keys_q_size > KEYS_QUEUE_SIZE) return;
     pressed_keys_queue[pressed_keys_q_size] = keycode;
+    pressed_keys_q_size += 1;
 }
 void ZSENSDK::Input::clearPressedKeys(){
     pressed_keys_q_size = 0;
 }
 bool ZSENSDK::Input::isKeyPressed(int keycode){
-    for(int i = 0; i < KEYS_QUEUE_SIZE; i ++){
+    for(int i = 0; i < pressed_keys_q_size; i ++){
         if(pressed_keys_queue[i] == keycode)
             return true;
     }
@@ -211,6 +212,7 @@ luabridge::getGlobalNamespace(state)
         .endClass()
 
         .deriveClass <ZSENTileProperty, ZSENObjectProperty>("Tile2D")
+        .addFunction("playAnim", &ZSENSDK::ZSENTileProperty::playAnim)
         .endClass()
 
         .endNamespace();

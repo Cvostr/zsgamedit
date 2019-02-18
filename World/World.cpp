@@ -214,9 +214,9 @@ void GameObject::removeProperty(int index){
     props_num -= 1;
 }
 
-void GameObject::onUpdate(){
+void GameObject::onUpdate(int deltaTime){
     for(unsigned int i = 0; i < props_num; i ++){ //iterate over all properties
-        properties[i]->onUpdate(1); //and call onUpdate on each property
+        properties[i]->onUpdate(deltaTime); //and call onUpdate on each property
     }
 }
 

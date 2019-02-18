@@ -164,7 +164,7 @@ void GameObject::Draw(RenderPipeline* pipeline){
 
 ZSPIRE::Shader* RenderPipeline::processShaderOnObject(void* _obj){
     GameObject* obj = static_cast<GameObject*>(_obj);
-    ZSPIRE::Shader* result = nullptr;
+    ZSPIRE::Shader* result;
 
     if(current_state == PIPELINE_STATE_MARKED) {
         obj_mark_shader.Use();
@@ -201,16 +201,12 @@ ZSPIRE::Shader* RenderPipeline::processShaderOnObject(void* _obj){
                 tile_shader.setHasDiffuseTextureProperty(false); //Shader will not use diffuse texture
             }
 
-            if(tile_ptr->anim_property.isAnimated && tile_ptr->anim_state.playing == true){ //If tile animated, then send anim state to shader
-                tile_shader.setGLuniformInt("animated", 1);
-
+            if(tile_ptr->anim_property.isAnimated){ //If tile animated, then send anim state to shader
                 tile_shader.setGLuniformInt("total_rows", tile_ptr->anim_property.framesX);
                 tile_shader.setGLuniformInt("total_cols", tile_ptr->anim_property.framesY);
 
                 tile_shader.setGLuniformInt("selected_row", tile_ptr->anim_state.cur_frameX);
                 tile_shader.setGLuniformInt("selected_col", tile_ptr->anim_state.cur_frameY);
-            }else{ //No animation or unplayed
-                 tile_shader.setGLuniformInt("animated", 0);
             }
             break;
         }

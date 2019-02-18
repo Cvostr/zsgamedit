@@ -510,6 +510,8 @@ BoolCheckboxArea::BoolCheckboxArea(){
     elem_layout->addWidget(&this->checkbox);
 }
 void BoolCheckboxArea::addToInspector(InspectorWin* win){
+    win->connect(&this->checkbox, SIGNAL(stateChanged(int)), win, SLOT(onPropertyChange()));
+
     win->getContentLayout()->addLayout(this->elem_layout);
 }
 void BoolCheckboxArea::writeNewValues(){
