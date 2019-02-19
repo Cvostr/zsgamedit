@@ -37,6 +37,7 @@ public:
     void* prop_ptr;
 
     void playAnim();
+    void stopAnim();
 };
 
 class ZSENAudSourceProperty : public ZSENObjectProperty{

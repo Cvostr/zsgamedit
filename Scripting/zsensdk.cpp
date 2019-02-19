@@ -133,6 +133,10 @@ void ZSENSDK::ZSENTileProperty::playAnim(){
     TileProperty* prop_ptr = static_cast<TileProperty*>(this->prop_ptr);
     prop_ptr->anim_state.playing = true; //Set boolean to playing
 }
+void ZSENSDK::ZSENTileProperty::stopAnim(){
+    TileProperty* prop_ptr = static_cast<TileProperty*>(this->prop_ptr);
+    prop_ptr->anim_state.playing = false; //Set boolean to playing
+}
 
 void ZSENSDK::bindSDK(lua_State* state){
     luabridge::getGlobalNamespace(state)
@@ -213,6 +217,7 @@ luabridge::getGlobalNamespace(state)
 
         .deriveClass <ZSENTileProperty, ZSENObjectProperty>("Tile2D")
         .addFunction("playAnim", &ZSENSDK::ZSENTileProperty::playAnim)
+        .addFunction("stopAnim", &ZSENSDK::ZSENTileProperty::stopAnim)
         .endClass()
 
         .endNamespace();

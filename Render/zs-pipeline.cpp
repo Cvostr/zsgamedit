@@ -129,8 +129,10 @@ void GameObject::Draw(RenderPipeline* pipeline){
     }
 
     ZSPIRE::Shader* shader = pipeline->processShaderOnObject(static_cast<void*>(this)); //Will be used next time
-    //bool difts = isDistanceFits(pipeline->cam->getCameraPosition(), transform_prop->_last_translation, 400);
-    if(shader != nullptr && transform_prop != nullptr){
+    ZSVIEWPORT cam_viewport = pipeline->cam->getViewport();
+    int max_dist = cam_viewport.endX - cam_viewport.startX;
+    bool difts = isDistanceFits(pipeline->cam->getCameraViewCenterPos(), transform_prop->_last_translation, max_dist);
+    if(shader != nullptr && transform_prop != nullptr && difts){
 
         shader->setTransform(transform_prop->transform_mat);
 

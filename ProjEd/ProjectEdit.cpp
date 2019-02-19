@@ -9,6 +9,7 @@
 #include <QDropEvent>
 #include <QFileDialog>
 #include <QShortcut>
+#include <QDesktopServices>
 
 static EditWindow* _editor_win;
 static InspectorWin* _inspector_win;
@@ -171,6 +172,10 @@ void EditWindow::setViewDirectory(QString dir_path){
 void EditWindow::openFile(QString file_path){
 
     if(file_path.endsWith(".scn")){ //If it is scene
+
+        if(isSceneRun == true)
+            emit onRunProject();
+
         obj_trstate.isTransforming = false;
         _ed_actions_container->clear();
         setupObjectsHieList(); //Clear everything, at first
@@ -180,7 +185,10 @@ void EditWindow::openFile(QString file_path){
         hasSceneFile = true; //Scene is saved
         this->edit_camera.setPosition(ZSVECTOR3(0.0f, 0.0f, 0.0f)); //Set camera to 0
         _inspector_win->clearContentLayout(); //Clear content, if not empty
+    }else{
+        QDesktopServices::openUrl(QUrl::fromLocalFile("file://" + file_path));
     }
+
 }
 
 void EditWindow::onSceneSaveAs(){

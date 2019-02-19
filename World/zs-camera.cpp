@@ -23,7 +23,7 @@ void ZSPIRE::Camera::setViewport(ZSVIEWPORT viewport){
 
 void ZSPIRE::Camera::updateProjectionMat(){
     if(proj_type == ZSCAMERA_PROJECTION_PERSPECTIVE){
-        float aspect = (float) (viewport.endX - viewport.startX) / (float)(viewport.endY - viewport.startY);
+        float aspect = static_cast<float>((viewport.endX - viewport.startX)) / (float)(viewport.endY - viewport.startY);
         proj = getPerspective(FOV, aspect, nearZ, farZ);
     }else{
 		proj = getOrthogonal(0, (float)(viewport.endX - viewport.startX), 0, (float)(viewport.endY - viewport.startY), nearZ, farZ);
@@ -70,6 +70,18 @@ ZSVECTOR3 ZSPIRE::Camera::getCameraFrontVec(){
 
 ZSVECTOR3 ZSPIRE::Camera::getCameraRightVec(){
     return vCross(camera_front, camera_up);
+}
+
+ZSVECTOR3 ZSPIRE::Camera::getCameraViewCenterPos(){
+    if(this->proj_type == ZSCAMERA_PROJECTION_ORTHOGONAL){
+
+        int viewport_y = static_cast<int>(viewport.endY - viewport.startY) / 2;
+        int viewport_x = (viewport.endX - viewport.startX) / 2;
+        viewport_x *= -1;
+        ZSVECTOR3 result = camera_pos + ZSVECTOR3(viewport_x, (viewport_y), 0);
+        return result;
+    }
+    return this->camera_pos;
 }
 
 ZSPIRE::Camera::Camera(){

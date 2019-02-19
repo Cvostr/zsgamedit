@@ -219,6 +219,9 @@ void ProjectCtxMenu::runEngineClicked(){
     ZSWINDOW_CREATE_INFO window_create_info;
     window_create_info.title = "Preview";
 
+    ZSGAME_DESC game_info;
+    //game_info.
+
     win->engine = new ZSpireEngine(&engine_create_info, &window_create_info);
 
 }
