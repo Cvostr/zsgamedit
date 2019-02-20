@@ -64,7 +64,9 @@ EditWindow::EditWindow(QWidget *parent) :
     this->obj_ctx_menu = new ObjectCtxMenu(this); //Allocating object Context menu
     //Allocate file ctx menu
     this->file_ctx_menu = new FileCtxMenu(this);
+
     this->ui->objsList->win_ptr = this; //putting pointer to window to custom tree view
+    this->ui->fileList->win_ptr = this;
 
     ui->actionOpen->setShortcut(Qt::Key_O | Qt::CTRL);
     ui->actionSave->setShortcut(Qt::Key_S | Qt::CTRL);
@@ -374,6 +376,7 @@ void EditWindow::onFileCtxMenuShow(QPoint point){
     QString file_name = selected_item->text();
 
     this->file_ctx_menu->file_path = current_dir + "/" + file_name; //set file path
+    this->file_ctx_menu->file_name = file_name;
     this->file_ctx_menu->show(point);
 }
 

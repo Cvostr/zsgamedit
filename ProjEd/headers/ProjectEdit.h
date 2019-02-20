@@ -214,6 +214,7 @@ private:
 public:
     EditWindow* win_ptr;
     QString file_path; //path to selected file
+    QString file_name;
 
     FileCtxMenu(EditWindow* win, QWidget* parent = nullptr);
     void show(QPoint point);
@@ -236,6 +237,26 @@ public:
 
     FileDeleteDialog(QString file_path, QWidget* parent = nullptr);
 };
+
+class FileRenameDialog : public QDialog{
+    Q_OBJECT
+private:
+    QPushButton del_btn;
+    QPushButton close_btn;
+
+    QGridLayout contentLayout;
+    QLabel rename_message;
+    QLineEdit edit_field;
+public slots:
+    void onRenameButtonPressed();
+
+public:
+    QString file_path;
+    QString file_name;
+
+    FileRenameDialog(QString file_path, QString file_name, QWidget* parent = nullptr);
+};
+
 
 //Class to represent tree widget
 class ObjTreeWgt : public QTreeWidget{

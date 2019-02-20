@@ -51,6 +51,7 @@ void InspectorWin::onAddComponentBtnPressed(){
 
 void InspectorWin::onManagePropButtonPressed(){
     ManageComponentDialog* dialog = new ManageComponentDialog(gameobject_ptr);
+    dialog->win = this;
     dialog->exec();
     updateObjectProperties();
     delete dialog;
@@ -156,6 +157,7 @@ void AddGoComponentDialog::onAddButtonPressed(){
 ManageComponentDialog::ManageComponentDialog(void* g_object_ptr, QWidget* parent) :
     QDialog (parent, Qt::WindowTitleHint | Qt::WindowSystemMenuHint) {
 
+    ctx_menu = new PropertyCtxMenu(win, this);
     this->g_object_ptr = g_object_ptr;
     GameObject* obj_ptr = static_cast<GameObject*>(g_object_ptr); //cast pointer
     for(int prop_i = 0; prop_i < obj_ptr->props_num; prop_i ++){
@@ -180,20 +182,49 @@ ManageComponentDialog::~ManageComponentDialog(){
 }
 
 void ManageComponentDialog::onPropertyDoubleClick(){
+    this->ctx_menu->show(QPoint(0,0));
+}
+
+void ManageComponentDialog::deleteProperty(){
     GameObject* obj_ptr = static_cast<GameObject*>(g_object_ptr); //cast pointer
 
-    QListWidgetItem* item = property_list.currentItem();
-    QString text = item->text();
-    int item_ind = 0;
-    for(int i = 0; i < obj_ptr->props_num; i ++){
-        GameObjectProperty* prop_ptr = obj_ptr->properties[i];
-        if(getPropertyString(prop_ptr->type).compare(text) == 0){
-            item_ind = i;
+        QListWidgetItem* item = property_list.currentItem();
+        QString text = item->text();
+        int item_ind = 0;
+        for(int i = 0; i < obj_ptr->props_num; i ++){
+            GameObjectProperty* prop_ptr = obj_ptr->properties[i];
+            if(getPropertyString(prop_ptr->type).compare(text) == 0){
+                item_ind = i;
+            }
         }
-    }
 
-    obj_ptr->removeProperty(item_ind);
-    accept();
+        obj_ptr->removeProperty(item_ind);
+        accept();
+}
+
+PropertyCtxMenu::PropertyCtxMenu(InspectorWin* win, ManageComponentDialog* dialog, QWidget* parent) : QObject(parent){
+    //Allocate Qt stuff
+    this->menu = new QMenu(win);
+    this->win = win;
+    this->dialog = dialog;
+
+    this->action_delete = new QAction("Delete", win);
+    this->action_paint_prop = new QAction("Paint", win);
+
+    menu->addAction(action_delete);
+    menu->addAction(action_paint_prop);
+
+    QObject::connect(this->action_delete, SIGNAL(triggered(bool)), this, SLOT(onDeleteClicked()));
+    QObject::connect(this->action_paint_prop, SIGNAL(triggered(bool)), this, SLOT(onPainClicked()));
+}
+void PropertyCtxMenu::show(QPoint point){
+    this->menu->popup(point);
+}
+void PropertyCtxMenu::onDeleteClicked(){
+    dialog->deleteProperty();
+}
+void PropertyCtxMenu::onPainClicked(){
+
 }
 
 AddGoComponentDialog::AddGoComponentDialog(QWidget* parent)

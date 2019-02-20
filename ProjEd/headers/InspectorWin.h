@@ -197,6 +197,29 @@ public:
     ~AddGoComponentDialog();
 };
 
+class ManageComponentDialog;
+
+class PropertyCtxMenu : public QObject{
+    Q_OBJECT
+public slots:
+    void onDeleteClicked();
+    void onPainClicked();
+
+private:
+    QMenu* menu; //Menu object to contain everything
+
+    QAction* action_delete;
+    QAction* action_paint_prop;
+
+    InspectorWin* win;
+    ManageComponentDialog* dialog;
+public:
+
+    PropertyCtxMenu(InspectorWin* win, ManageComponentDialog* dialog, QWidget* parent = nullptr);
+    void show(QPoint point);
+    void close();
+};
+
 class ManageComponentDialog : public QDialog{
     Q_OBJECT
 private:
@@ -205,10 +228,14 @@ private:
     QPushButton close_btn;
 
     QListWidget property_list; //list to store wgt list of props
+
+    PropertyCtxMenu* ctx_menu;
 public slots:
     void onPropertyDoubleClick();
+    void deleteProperty();
 
 public:
+    InspectorWin* win;
     void* g_object_ptr; //Pointer to object, when we'll add components
 
     ManageComponentDialog(void* g_object_ptr, QWidget* parent = nullptr);
