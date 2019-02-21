@@ -71,6 +71,9 @@ int main(int argc, char *argv[])
                         int newX = event.motion.xrel;
                         int newY = event.motion.yrel;
                         w.edit_win_ptr->onMouseMotion(newX, newY);
+
+                        w.edit_win_ptr->input_state.mouseX = event.motion.x;
+                        w.edit_win_ptr->input_state.mouseY = event.motion.y;
                     }
 
                 }

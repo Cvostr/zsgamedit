@@ -70,6 +70,9 @@ struct EditorInputState{
     bool isLCtrlHold;
     bool isRCtrlHold;
     bool isLAltHold;
+
+    int mouseX;
+    int mouseY;
 };
 
 struct ObjectTransformState{
@@ -85,6 +88,16 @@ struct ObjectTransformState{
         obj_ptr = nullptr;
         tprop_ptr = nullptr;
         transformMode = GO_TRANSFORM_MODE_NONE;
+    }
+};
+
+struct PropertyPaintState{
+    bool enabled;
+    GameObjectProperty* prop_ptr;
+
+    PropertyPaintState(){
+        enabled = true;
+        prop_ptr = nullptr;
     }
 };
 
@@ -140,6 +153,7 @@ public:
     Project project;
     EditorInputState input_state;
     ObjectTransformState obj_trstate; //Describes object transform
+    PropertyPaintState ppaint_state; //Describes property painting feature state
     WorldSnapshot run_world_snapshot; //useful to recover world state after running
 
     void init();

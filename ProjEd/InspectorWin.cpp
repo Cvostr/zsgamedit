@@ -6,6 +6,7 @@
 #include <QDoubleValidator>
 #include <QObject>
 
+
 InspectorWin::InspectorWin(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::InspectorWin)
@@ -154,7 +155,7 @@ void AddGoComponentDialog::onAddButtonPressed(){
     accept(); //Close dialog with true
 }
 
-ManageComponentDialog::ManageComponentDialog(void* g_object_ptr, QWidget* parent) :
+ManageComponentDialog::ManageComponentDialog(InspectorWin* win, void* g_object_ptr, QWidget* parent) :
     QDialog (parent, Qt::WindowTitleHint | Qt::WindowSystemMenuHint) {
 
     ctx_menu = new PropertyCtxMenu(win, this);
@@ -171,7 +172,7 @@ ManageComponentDialog::ManageComponentDialog(void* g_object_ptr, QWidget* parent
     contentLayout.addWidget(&close_btn, 1, 1);
 
     connect(&close_btn, SIGNAL(clicked()), this, SLOT(reject()));
-    connect(&property_list, SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(onPropertyDoubleClick()));
+    connect(&property_list, SIGNAL(itemClicked(QListWidgetItem *)), this, SLOT(onPropertyDoubleClick()));
 
     setLayout(&contentLayout);
     this->setWindowTitle("Manage properties");
@@ -182,24 +183,24 @@ ManageComponentDialog::~ManageComponentDialog(){
 }
 
 void ManageComponentDialog::onPropertyDoubleClick(){
-    this->ctx_menu->show(QPoint(0,0));
+    this->ctx_menu->show(QCursor::pos());
 }
 
 void ManageComponentDialog::deleteProperty(){
     GameObject* obj_ptr = static_cast<GameObject*>(g_object_ptr); //cast pointer
 
-        QListWidgetItem* item = property_list.currentItem();
-        QString text = item->text();
-        int item_ind = 0;
-        for(int i = 0; i < obj_ptr->props_num; i ++){
-            GameObjectProperty* prop_ptr = obj_ptr->properties[i];
-            if(getPropertyString(prop_ptr->type).compare(text) == 0){
-                item_ind = i;
-            }
+    QListWidgetItem* item = property_list.currentItem(); //Get pressed item
+    QString text = item->text(); //get text of pressed item
+    int item_ind = 0; //iterator
+    for(int i = 0; i < obj_ptr->props_num; i ++){ //Iterate over all properties in object
+        GameObjectProperty* prop_ptr = obj_ptr->properties[i];
+        if(getPropertyString(prop_ptr->type).compare(text) == 0){
+            item_ind = i;
         }
+    }
 
-        obj_ptr->removeProperty(item_ind);
-        accept();
+    obj_ptr->removeProperty(item_ind);
+    accept();
 }
 
 PropertyCtxMenu::PropertyCtxMenu(InspectorWin* win, ManageComponentDialog* dialog, QWidget* parent) : QObject(parent){
@@ -224,7 +225,20 @@ void PropertyCtxMenu::onDeleteClicked(){
     dialog->deleteProperty();
 }
 void PropertyCtxMenu::onPainClicked(){
+    EditWindow* editwin = static_cast<EditWindow*>(win->editwindow_ptr);
 
+    editwin->ppaint_state.enabled = true;
+
+    GameObject* obj_ptr = static_cast<GameObject*>(this->dialog->g_object_ptr); //cast pointer
+
+    QListWidgetItem* item = dialog->property_list.currentItem(); //Get pressed item
+    QString text = item->text(); //get text of pressed item
+    for(int i = 0; i < obj_ptr->props_num; i ++){ //Iterate over all properties in object
+        GameObjectProperty* prop_ptr = obj_ptr->properties[i];
+        if(getPropertyString(prop_ptr->type).compare(text) == 0){
+            editwin->ppaint_state.prop_ptr = obj_ptr->properties[i];
+        }
+    }
 }
 
 AddGoComponentDialog::AddGoComponentDialog(QWidget* parent)

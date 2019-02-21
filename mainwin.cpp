@@ -194,7 +194,7 @@ ProjectCtxMenu::ProjectCtxMenu(MainWin* win, QWidget* parent) : QObject(parent){
 }
 
 void ProjectCtxMenu::show(QPoint point){
-    this->menu->popup(point);
+    this->menu->popup(QCursor::pos());
 }
 void ProjectCtxMenu::onDeleteClicked(){
     for (unsigned int i = 0; i < win->projects.size(); i ++) { //Iterating over all objects
