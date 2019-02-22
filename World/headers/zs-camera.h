@@ -54,6 +54,7 @@ namespace ZSPIRE{
             ZSVECTOR3 getCameraRightVec();
             ZSVECTOR3 getCameraFrontVec();
 
+            ZSVECTOR3 getCameraViewCenterPos();
             ZSVIEWPORT getViewport();
 
             void updateProjectionMat();

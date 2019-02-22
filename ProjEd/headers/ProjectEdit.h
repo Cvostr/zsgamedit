@@ -70,6 +70,9 @@ struct EditorInputState{
     bool isLCtrlHold;
     bool isRCtrlHold;
     bool isLAltHold;
+
+    int mouseX;
+    int mouseY;
 };
 
 struct ObjectTransformState{
@@ -85,6 +88,16 @@ struct ObjectTransformState{
         obj_ptr = nullptr;
         tprop_ptr = nullptr;
         transformMode = GO_TRANSFORM_MODE_NONE;
+    }
+};
+
+struct PropertyPaintState{
+    bool enabled;
+    GameObjectProperty* prop_ptr;
+
+    PropertyPaintState(){
+        enabled = false;
+        prop_ptr = nullptr;
     }
 };
 
@@ -140,6 +153,7 @@ public:
     Project project;
     EditorInputState input_state;
     ObjectTransformState obj_trstate; //Describes object transform
+    PropertyPaintState ppaint_state; //Describes property painting feature state
     WorldSnapshot run_world_snapshot; //useful to recover world state after running
 
     void init();
@@ -214,6 +228,7 @@ private:
 public:
     EditWindow* win_ptr;
     QString file_path; //path to selected file
+    QString file_name;
 
     FileCtxMenu(EditWindow* win, QWidget* parent = nullptr);
     void show(QPoint point);
@@ -236,6 +251,26 @@ public:
 
     FileDeleteDialog(QString file_path, QWidget* parent = nullptr);
 };
+
+class FileRenameDialog : public QDialog{
+    Q_OBJECT
+private:
+    QPushButton del_btn;
+    QPushButton close_btn;
+
+    QGridLayout contentLayout;
+    QLabel rename_message;
+    QLineEdit edit_field;
+public slots:
+    void onRenameButtonPressed();
+
+public:
+    QString file_path;
+    QString file_name;
+
+    FileRenameDialog(QString file_path, QString file_name, QWidget* parent = nullptr);
+};
+
 
 //Class to represent tree widget
 class ObjTreeWgt : public QTreeWidget{

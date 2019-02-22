@@ -9,6 +9,7 @@
 #include <QDropEvent>
 #include <QFileDialog>
 #include <QShortcut>
+#include <QDesktopServices>
 
 static EditWindow* _editor_win;
 static InspectorWin* _inspector_win;
@@ -63,7 +64,9 @@ EditWindow::EditWindow(QWidget *parent) :
     this->obj_ctx_menu = new ObjectCtxMenu(this); //Allocating object Context menu
     //Allocate file ctx menu
     this->file_ctx_menu = new FileCtxMenu(this);
+
     this->ui->objsList->win_ptr = this; //putting pointer to window to custom tree view
+    this->ui->fileList->win_ptr = this;
 
     ui->actionOpen->setShortcut(Qt::Key_O | Qt::CTRL);
     ui->actionSave->setShortcut(Qt::Key_S | Qt::CTRL);
@@ -72,7 +75,6 @@ EditWindow::EditWindow(QWidget *parent) :
 
     ui->actionBuild->setShortcut(Qt::Key_B | Qt::CTRL);
     ui->actionRun->setShortcut(Qt::Key_R | Qt::CTRL);
-
 }
 
 EditWindow::~EditWindow()
@@ -171,6 +173,10 @@ void EditWindow::setViewDirectory(QString dir_path){
 void EditWindow::openFile(QString file_path){
 
     if(file_path.endsWith(".scn")){ //If it is scene
+
+        if(isSceneRun == true)
+            emit onRunProject();
+
         obj_trstate.isTransforming = false;
         _ed_actions_container->clear();
         setupObjectsHieList(); //Clear everything, at first
@@ -180,7 +186,10 @@ void EditWindow::openFile(QString file_path){
         hasSceneFile = true; //Scene is saved
         this->edit_camera.setPosition(ZSVECTOR3(0.0f, 0.0f, 0.0f)); //Set camera to 0
         _inspector_win->clearContentLayout(); //Clear content, if not empty
+    }else{
+        QDesktopServices::openUrl(QUrl::fromLocalFile("file://" + file_path));
     }
+
 }
 
 void EditWindow::onSceneSaveAs(){
@@ -366,6 +375,7 @@ void EditWindow::onFileCtxMenuShow(QPoint point){
     QString file_name = selected_item->text();
 
     this->file_ctx_menu->file_path = current_dir + "/" + file_name; //set file path
+    this->file_ctx_menu->file_name = file_name;
     this->file_ctx_menu->show(point);
 }
 
@@ -523,6 +533,8 @@ EditWindow* ZSEditor::openEditor(){
     _inspector_win->show();
     _inspector_win->move(_editor_win->width() + 640, 0);
 
+     _inspector_win->editwindow_ptr = static_cast<void*>(_editor_win);
+
     _ed_actions_container = new EdActions; //Allocating EdActions
     _ed_actions_container->world_ptr = &_editor_win->world; //Put world pointer
     _ed_actions_container->insp_win = _inspector_win; //Put inspector win pointer
@@ -647,6 +659,17 @@ void EditWindow::onMouseWheel(int x, int y){
     }
 }
 void EditWindow::onMouseMotion(int relX, int relY){
+    if(this->ppaint_state.enabled && input_state.isLeftBtnHold == true){ //we just move on map
+        unsigned int clicked = render->render_getpickedObj(static_cast<void*>(this), input_state.mouseX, input_state.mouseY);
+
+        GameObject* obj_ptr = &world.objects[clicked]; //Obtain pointer to selected object by label
+        if(clicked > world.objects.size() || obj_ptr == 0x0 || clicked >= 256 * 256 * 256)
+            return;
+
+        GameObjectProperty* prop_ptr = obj_ptr->getPropertyPtrByType(this->ppaint_state.prop_ptr->type);
+        ppaint_state.prop_ptr->copyTo(prop_ptr);
+    }
+
     if(project.perspective == 2){ //Only affective in 2D
 
         if(input_state.isRightBtnHold == true){ //we just move on map

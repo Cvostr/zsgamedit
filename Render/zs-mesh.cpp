@@ -106,6 +106,8 @@ void ZSPIRE::Mesh::Init() {
 }
 
 void ZSPIRE::setupDefaultMeshes() {
+    picked_mesh = 0x0;
+
     plane2Dmesh.Init(); //Initialize mesh for GL
     plane2Dmesh.setMeshData(plane_verts, plane_inds, 4, 6); //Send plane data
 

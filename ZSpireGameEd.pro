@@ -5,7 +5,7 @@
 #-------------------------------------------------
 
 QT       += core gui widgets
-LIBS += -lGLEW -lassimp -lSDL2 -lopenal -llua5.2
+LIBS += -lGLEW -lassimp -lSDL2 -lopenal -llua5.2 -lzsengine
 #greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = ZSpireGameEd

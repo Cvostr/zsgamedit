@@ -11,6 +11,7 @@
 #include <QListWidget>
 #include <QRadioButton>
 #include <QColorDialog>
+#include <QDialog>
 #include <QCheckBox>
 #include <QScrollArea>
 
@@ -114,31 +115,6 @@ public:
     void updateState();
 };
 
-class ColorDialogArea;
-
-class ZSColorPickDialog : public QColorDialog{
-    Q_OBJECT
-public slots:
-    void onNeedToShow();
-
-public:
-    ZSRGBCOLOR* color_ptr; //Pointer to write color
-    ColorDialogArea* area_ptr;
-    ZSColorPickDialog(QWidget* parent = nullptr);
-};
-
-class ColorDialogArea : public PropertyEditArea{
-
-public:
-    QLabel digit_str;
-    ZSRGBCOLOR* color; //output value
-    ZSColorPickDialog dialog; //Dialog pointer
-    QPushButton pick_button; //button to show color pick dialog
-    ColorDialogArea();
-
-    void updText(); //updates text value
-    void addToInspector(InspectorWin* win);
-};
 
 namespace Ui {
 class InspectorWin;
@@ -173,6 +149,7 @@ public:
     void ShowObjectProperties(void* object_ptr);
     void updateObjectProperties();
     void* gameobject_ptr;
+    void* editwindow_ptr;
 private:
     Ui::InspectorWin *ui;
 
@@ -197,21 +174,46 @@ public:
     ~AddGoComponentDialog();
 };
 
+class ManageComponentDialog;
+
+class PropertyCtxMenu : public QObject{
+    Q_OBJECT
+public slots:
+    void onDeleteClicked();
+    void onPainClicked();
+
+private:
+    QMenu* menu; //Menu object to contain everything
+
+    QAction* action_delete;
+    QAction* action_paint_prop;
+
+    InspectorWin* win;
+    ManageComponentDialog* dialog;
+public:
+
+    PropertyCtxMenu(InspectorWin* win, ManageComponentDialog* dialog, QWidget* parent = nullptr);
+    void show(QPoint point);
+    void close();
+};
+
 class ManageComponentDialog : public QDialog{
     Q_OBJECT
 private:
     QGridLayout contentLayout; //Layout to contain everything
-
     QPushButton close_btn;
-
-    QListWidget property_list; //list to store wgt list of props
+    PropertyCtxMenu* ctx_menu; //Ctx menu, that shown on list item press
 public slots:
     void onPropertyDoubleClick();
+    void deleteProperty();
 
 public:
+    QListWidget property_list; //list to store wgt list of props
+
+    InspectorWin* win;
     void* g_object_ptr; //Pointer to object, when we'll add components
 
-    ManageComponentDialog(void* g_object_ptr, QWidget* parent = nullptr);
+    ManageComponentDialog(InspectorWin* win, void* g_object_ptr, QWidget* parent = nullptr);
     ~ManageComponentDialog();
 };
 
@@ -232,5 +234,32 @@ public:
     ResourcePickDialog(QWidget* parent = nullptr);
     ~ResourcePickDialog();
 };
+
+class ColorDialogArea;
+
+class ZSColorPickDialog : public QColorDialog{
+    Q_OBJECT
+public slots:
+    void onNeedToShow();
+
+public:
+    ZSRGBCOLOR* color_ptr; //Pointer to write color
+    ColorDialogArea* area_ptr;
+    ZSColorPickDialog(QWidget* parent = nullptr);
+};
+
+class ColorDialogArea : public PropertyEditArea{
+
+public:
+    QLabel digit_str;
+    ZSRGBCOLOR* color; //output value
+    ZSColorPickDialog dialog; //Dialog pointer
+    QPushButton pick_button; //button to show color pick dialog
+    ColorDialogArea();
+
+    void updText(); //updates text value
+    void addToInspector(InspectorWin* win);
+};
+
 
 #endif // INSPECTORWIN_H

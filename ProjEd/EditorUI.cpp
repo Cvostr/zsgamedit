@@ -22,7 +22,9 @@ void FileListWgt::mousePressEvent(QMouseEvent *event){
     QListWidget::mousePressEvent(event);
     if(event->button() == Qt::RightButton)
     {
-        emit onRightClick(event->pos());
+        QPoint point = event->pos();
+        point = QPoint(point.x(), point.y() + this->y());
+        emit onRightClick(point);
     }
 }
 
@@ -84,9 +86,12 @@ void FileCtxMenu::onDeleteClicked(){
     this->win_ptr->updateFileList();
 }
 void FileCtxMenu::onRename(){
-
+    FileRenameDialog* dialog = new FileRenameDialog(file_path, file_name);
+    //dialog->file_name = file_name;
+    dialog->exec();
+    delete dialog;
+    this->win_ptr->updateFileList();
 }
-
 
 FileDeleteDialog::FileDeleteDialog(QString file_path, QWidget* parent) : QDialog(parent){
     del_message.setText("Are you sure to delete " + file_path);
@@ -109,5 +114,32 @@ FileDeleteDialog::FileDeleteDialog(QString file_path, QWidget* parent) : QDialog
 void FileDeleteDialog::onDelButtonPressed(){
     QFile file(file_path);
     file.remove(); //remove it!
+    accept();
+}
+
+FileRenameDialog::FileRenameDialog(QString file_path, QString file_name, QWidget* parent) : QDialog(parent){
+    QFile file(file_path);
+    rename_message.setText("Rename file  " + file_name + " to ");
+    this->file_path = file_path;
+
+    del_btn.setText("Rename");
+    close_btn.setText("Close");
+    edit_field.setText(file_name);
+
+    contentLayout.addWidget(&rename_message, 0, 0);
+    contentLayout.addWidget(&edit_field, 1, 0);
+    contentLayout.addWidget(&del_btn, 2, 0);
+    contentLayout.addWidget(&close_btn, 2, 1);
+    setLayout(&contentLayout);
+
+    this->setWindowTitle("File rename");
+
+    QObject::connect(&this->del_btn, SIGNAL(clicked()), this, SLOT(onRenameButtonPressed()));
+    QObject::connect(&this->close_btn, SIGNAL(clicked()), this, SLOT(reject()));
+}
+
+void FileRenameDialog::onRenameButtonPressed(){
+    QFile file(file_path);
+    file.rename(edit_field.text()); //remove it!
     accept();
 }

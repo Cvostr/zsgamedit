@@ -20,12 +20,13 @@ void ZSENSDK::Debug::Log(std::string text){
 void ZSENSDK::Input::addPressedKeyToQueue(int keycode){
     if(pressed_keys_q_size > KEYS_QUEUE_SIZE) return;
     pressed_keys_queue[pressed_keys_q_size] = keycode;
+    pressed_keys_q_size += 1;
 }
 void ZSENSDK::Input::clearPressedKeys(){
     pressed_keys_q_size = 0;
 }
 bool ZSENSDK::Input::isKeyPressed(int keycode){
-    for(int i = 0; i < KEYS_QUEUE_SIZE; i ++){
+    for(int i = 0; i < pressed_keys_q_size; i ++){
         if(pressed_keys_queue[i] == keycode)
             return true;
     }
@@ -132,6 +133,10 @@ void ZSENSDK::ZSENTileProperty::playAnim(){
     TileProperty* prop_ptr = static_cast<TileProperty*>(this->prop_ptr);
     prop_ptr->anim_state.playing = true; //Set boolean to playing
 }
+void ZSENSDK::ZSENTileProperty::stopAnim(){
+    TileProperty* prop_ptr = static_cast<TileProperty*>(this->prop_ptr);
+    prop_ptr->anim_state.playing = false; //Set boolean to playing
+}
 
 void ZSENSDK::bindSDK(lua_State* state){
     luabridge::getGlobalNamespace(state)
@@ -211,6 +216,8 @@ luabridge::getGlobalNamespace(state)
         .endClass()
 
         .deriveClass <ZSENTileProperty, ZSENObjectProperty>("Tile2D")
+        .addFunction("playAnim", &ZSENSDK::ZSENTileProperty::playAnim)
+        .addFunction("stopAnim", &ZSENSDK::ZSENTileProperty::stopAnim)
         .endClass()
 
         .endNamespace();

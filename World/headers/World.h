@@ -124,7 +124,7 @@ public:
     void clearAll(bool clearQtWigt = true); //Release all associated memory with this object
     void copyTo(GameObject* dest);
     void Draw(RenderPipeline* pipeline); //On render pipeline wish to draw the object
-    void onUpdate(); //calls onUpdate on all properties
+    void onUpdate(int deltaTime); //calls onUpdate on all properties
 
     GameObject(); //Default constructor
     ~GameObject();

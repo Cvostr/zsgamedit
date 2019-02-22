@@ -214,14 +214,14 @@ void GameObject::removeProperty(int index){
     props_num -= 1;
 }
 
-void GameObject::onUpdate(){
+void GameObject::onUpdate(int deltaTime){
     for(unsigned int i = 0; i < props_num; i ++){ //iterate over all properties
-        properties[i]->onUpdate(1); //and call onUpdate on each property
+        properties[i]->onUpdate(deltaTime); //and call onUpdate on each property
     }
 }
 
 World::World(){
-    objects.reserve(6000);
+    objects.reserve(11000);
     proj_ptr = nullptr;
 }
 
@@ -413,9 +413,15 @@ void World::saveToFile(QString file){
     for(unsigned int obj_i = 0; obj_i < static_cast<unsigned int>(obj_num); obj_i ++){ //Iterate over all game objects
         GameObject* object_ptr = static_cast<GameObject*>(&this->objects[obj_i]);
         if(object_ptr->alive == true){
-            world_stream << "\nG_OBJECT " << object_ptr->str_id << " " << object_ptr->render_type; //Start object's header
+            world_stream << "\nG_OBJECT " << object_ptr->str_id << " ";
+            world_stream.write(reinterpret_cast<char*>(&object_ptr->render_type), sizeof(int));
+
             if(object_ptr->children.size() > 0){ //If object has at least one child object
-                world_stream << "\nG_CHI " << object_ptr->getAliveChildrenAmount() << " "; //Start children header
+                int children_num = object_ptr->getAliveChildrenAmount();
+                //world_stream << "\nG_CHI " << object_ptr->getAliveChildrenAmount() << " "; //Start children header
+                world_stream << "\nG_CHI ";
+                world_stream.write(reinterpret_cast<char*>(&children_num), sizeof(int));
+
                 unsigned int children_am = static_cast<unsigned int>(object_ptr->children.size());
                 for(unsigned int chi_i = 0; chi_i < children_am; chi_i ++){ //iterate over all children
                     GameObjectLink* link_ptr = &object_ptr->children[chi_i]; //Gettin pointer to child
@@ -482,7 +488,11 @@ void World::openFromFile(QString file, QTreeWidget* w_ptr){
         if(prefix.compare("G_OBJECT") == 0){ //if it is game object
             GameObject object; //firstly, define an object
             object.world_ptr = this; //Writing pointer to world
-            world_stream >> object.str_id >> object.render_type;
+            world_stream >> object.str_id;
+
+            world_stream.seekg(1, std::ofstream::cur);
+            world_stream.read(reinterpret_cast<char*>(&object.render_type), sizeof(int));
+
             //Then do the same sh*t, iterate until "G_END" came up
             while(true){
                 std::string _prefix;
@@ -492,7 +502,9 @@ void World::openFromFile(QString file, QTreeWidget* w_ptr){
                 }
                 if(prefix.compare("G_CHI") == 0) { //Ops, it is chidren header
                     unsigned int amount;
-                    world_stream >> amount; //Reading children amount
+                    //world_stream >> amount; //Reading children amount
+                    world_stream.seekg(1, std::ofstream::cur);
+                    world_stream.read(reinterpret_cast<char*>(&amount), sizeof(int));
 
                     for(unsigned int ch_i = 0; ch_i < amount; ch_i ++){ //Iterate over all written children to file
                         std::string child_str_id;

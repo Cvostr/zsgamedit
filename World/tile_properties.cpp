@@ -30,6 +30,7 @@ TileProperty::TileProperty(){
     active = true;
 
     this->texture_diffuse = nullptr;
+    this->diffuse_relpath = "@none";
 }
 
 void TileGroupProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
@@ -159,6 +160,12 @@ void TileProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
         colsAmount->go_property = static_cast<void*>(this);
         colsAmount->value = &this->anim_property.framesY;
         inspector->addPropertyArea(colsAmount);
+
+        IntPropertyArea* frameTime = new IntPropertyArea;
+        frameTime->setLabel("frame time");
+        frameTime->go_property = static_cast<void*>(this);
+        frameTime->value = &this->anim_property.frame_time;
+        inspector->addPropertyArea(frameTime);
     }
 
     PickResourceArea* area = new PickResourceArea;

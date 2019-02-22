@@ -109,8 +109,8 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr)
 void GameObject::Draw(RenderPipeline* pipeline){
     //Obtain EditWindow pointer to check if scene is running
     EditWindow* editwin_ptr = static_cast<EditWindow*>(pipeline->win_ptr);
-    if(editwin_ptr->isSceneRun)
-        this->onUpdate();
+    if(editwin_ptr->isSceneRun && pipeline->current_state == PIPELINE_STATE_DEFAULT)
+        this->onUpdate(16);
 
     if(active == false || alive == false) return; //if object is inactive, not to render it
     TransformProperty* transform_prop = static_cast<TransformProperty*>(this->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
@@ -129,7 +129,10 @@ void GameObject::Draw(RenderPipeline* pipeline){
     }
 
     ZSPIRE::Shader* shader = pipeline->processShaderOnObject(static_cast<void*>(this)); //Will be used next time
-    if(shader != nullptr && transform_prop != nullptr){
+    ZSVIEWPORT cam_viewport = pipeline->cam->getViewport();
+    int max_dist = cam_viewport.endX - cam_viewport.startX;
+    bool difts = isDistanceFits(pipeline->cam->getCameraViewCenterPos(), transform_prop->_last_translation, max_dist);
+    if(shader != nullptr && transform_prop != nullptr && difts){
 
         shader->setTransform(transform_prop->transform_mat);
 
@@ -164,7 +167,7 @@ void GameObject::Draw(RenderPipeline* pipeline){
 
 ZSPIRE::Shader* RenderPipeline::processShaderOnObject(void* _obj){
     GameObject* obj = static_cast<GameObject*>(_obj);
-    ZSPIRE::Shader* result;
+    ZSPIRE::Shader* result = nullptr;
 
     if(current_state == PIPELINE_STATE_MARKED) {
         obj_mark_shader.Use();
@@ -199,7 +202,19 @@ ZSPIRE::Shader* RenderPipeline::processShaderOnObject(void* _obj){
 
             }else{
                 tile_shader.setHasDiffuseTextureProperty(false); //Shader will not use diffuse texture
-                }
+            }
+
+            if(tile_ptr->anim_property.isAnimated && tile_ptr->anim_state.playing == true){ //If tile animated, then send anim state to shader
+                tile_shader.setGLuniformInt("animated", 1);
+
+                tile_shader.setGLuniformInt("total_rows", tile_ptr->anim_property.framesX);
+                tile_shader.setGLuniformInt("total_cols", tile_ptr->anim_property.framesY);
+
+                tile_shader.setGLuniformInt("selected_row", tile_ptr->anim_state.cur_frameX);
+                tile_shader.setGLuniformInt("selected_col", tile_ptr->anim_state.cur_frameY);
+            }else{ //No animation or unplayed
+                 tile_shader.setGLuniformInt("animated", 0);
+            }
             break;
         }
         case GO_RENDER_TYPE_NONE:{

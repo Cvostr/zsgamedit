@@ -3,7 +3,6 @@
 
 #include "InspectorWin.h"
 
-
 class StringPropertyArea : public PropertyEditArea{
 public:
 
@@ -84,5 +83,6 @@ public:
     void addToInspector(InspectorWin* win);
     void writeNewValues(); //Virtual, to check widget state
 };
+
 
 #endif // INSPEDITAREAS_H

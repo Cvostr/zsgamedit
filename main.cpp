@@ -20,13 +20,6 @@ int main(int argc, char *argv[])
                     w.show();
                 }
 
-                if(w.edit_win_ptr->ready == true) //If GL is ready to draw
-                    w.edit_win_ptr->getInspector()->updateAreasChanges();
-                    w.edit_win_ptr->edit_camera.updateTick(); //Update camera, if it is moving
-
-                    w.edit_win_ptr->glRender(); //Draw OpenGL window
-             }
-
             SDL_Event event;
                 while (SDL_PollEvent(&event))
                 {
@@ -65,7 +58,6 @@ int main(int argc, char *argv[])
                             w.edit_win_ptr->input_state.isLAltHold = false;
                     }
                     if (event.type == SDL_MOUSEBUTTONDOWN) { //If user pressed mouse btn
-
                         if (event.button.button == SDL_BUTTON_LEFT) {
                             w.edit_win_ptr->input_state.isLeftBtnHold = true;
                             w.edit_win_ptr->onLeftBtnClicked(event.motion.x, event.motion.y);
@@ -79,8 +71,17 @@ int main(int argc, char *argv[])
                         int newX = event.motion.xrel;
                         int newY = event.motion.yrel;
                         w.edit_win_ptr->onMouseMotion(newX, newY);
+
+                        w.edit_win_ptr->input_state.mouseX = event.motion.x;
+                        w.edit_win_ptr->input_state.mouseY = event.motion.y;
                     }
 
+                }
+                if(w.edit_win_ptr->ready == true) //If GL is ready to draw
+                    w.edit_win_ptr->getInspector()->updateAreasChanges();
+                    w.edit_win_ptr->edit_camera.updateTick(); //Update camera, if it is moving
+
+                    w.edit_win_ptr->glRender(); //Draw OpenGL window
                 }
     ZSENSDK::Input::clearPressedKeys();
     }

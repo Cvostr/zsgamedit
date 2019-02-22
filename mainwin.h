@@ -42,8 +42,9 @@ private:
 
     QMenu* menu; //Menu object to contain everything
 
-    QAction* action_rename; //Button to dublicate object
-    QAction* action_delete; //Button to delete object
+    QAction* action_run_engine;
+    QAction* action_run_engine_vk;
+    QAction* action_delete; //Button to delete project entry from list
 public:
 
 
@@ -57,16 +58,16 @@ class MainWin : public QMainWindow
     Q_OBJECT
 private:
     ProjectCtxMenu* project_menu;
-    ZSpireEngine* engine;
 public slots:
     //Executes on add project in file
     void onAddProjButtonClicked();
     void onShowCreateNewProjectWindow();
     void onSelectProjectToOpen();
 
-    void showCtxMenu();
+    void showCtxMenu(QPoint point);
 
 public:
+    ZSpireEngine* engine;
     EditWindow* edit_win_ptr;
     std::vector<ProjectConf> projects;
 

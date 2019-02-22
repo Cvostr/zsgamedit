@@ -454,7 +454,10 @@ void GameObject::saveProperties(std::ofstream* stream){
 
     for(unsigned int prop_i = 0; prop_i < props_num; prop_i ++){
         GameObjectProperty* property_ptr = static_cast<GameObjectProperty*>(this->properties[prop_i]);
-        *stream << "\nG_PROPERTY " << property_ptr->type << " "; //Writing property header
+        //*stream << "\nG_PROPERTY " << property_ptr->type << " "; //Writing property header
+        *stream << "\nG_PROPERTY ";
+        stream->write(reinterpret_cast<char*>(&property_ptr->type), sizeof(int));
+        *stream << " ";
 
         switch(property_ptr->type){
         case GO_PROPERTY_TYPE_TRANSFORM:{
@@ -574,7 +577,10 @@ void GameObject::saveProperties(std::ofstream* stream){
 
 void GameObject::loadProperty(std::ifstream* world_stream){
     int type;
-    *world_stream >> type;
+    //*world_stream >> type;
+    world_stream->seekg(1, std::ofstream::cur); //Skip space
+    world_stream->read(reinterpret_cast<char*>(&type), sizeof(int));
+    // world_stream->seekg(1, std::ofstream::cur); //Skip space
     addProperty(type);
     GameObjectProperty* prop_ptr = getPropertyPtrByType(type); //get created property
     //since more than 1 properties same type can't be on one gameobject
