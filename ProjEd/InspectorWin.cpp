@@ -51,7 +51,7 @@ void InspectorWin::onAddComponentBtnPressed(){
 }
 
 void InspectorWin::onManagePropButtonPressed(){
-    ManageComponentDialog* dialog = new ManageComponentDialog(gameobject_ptr);
+    ManageComponentDialog* dialog = new ManageComponentDialog(this, gameobject_ptr);
     dialog->win = this;
     dialog->exec();
     updateObjectProperties();
