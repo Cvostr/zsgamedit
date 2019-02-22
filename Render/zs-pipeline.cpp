@@ -109,7 +109,7 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr)
 void GameObject::Draw(RenderPipeline* pipeline){
     //Obtain EditWindow pointer to check if scene is running
     EditWindow* editwin_ptr = static_cast<EditWindow*>(pipeline->win_ptr);
-    if(editwin_ptr->isSceneRun)
+    if(editwin_ptr->isSceneRun && pipeline->current_state == PIPELINE_STATE_DEFAULT)
         this->onUpdate(16);
 
     if(active == false || alive == false) return; //if object is inactive, not to render it

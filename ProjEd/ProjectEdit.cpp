@@ -668,8 +668,6 @@ void EditWindow::onMouseMotion(int relX, int relY){
 
         GameObjectProperty* prop_ptr = obj_ptr->getPropertyPtrByType(this->ppaint_state.prop_ptr->type);
         ppaint_state.prop_ptr->copyTo(prop_ptr);
-        //obj_trstate.tprop_ptr = static_cast<TransformProperty*>(obj_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
-
     }
 
     if(project.perspective == 2){ //Only affective in 2D

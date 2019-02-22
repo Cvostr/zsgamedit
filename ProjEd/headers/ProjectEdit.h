@@ -96,7 +96,7 @@ struct PropertyPaintState{
     GameObjectProperty* prop_ptr;
 
     PropertyPaintState(){
-        enabled = true;
+        enabled = false;
         prop_ptr = nullptr;
     }
 };
