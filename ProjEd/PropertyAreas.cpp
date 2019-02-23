@@ -32,13 +32,16 @@ void AreaRadioGroup::onRadioClicked(){
             *this->value_ptr = rbutton_it + 1;
         }
     }
+    GameObjectProperty* property_ptr = static_cast<GameObjectProperty*>(this->go_property);
+    property_ptr->onValueChanged();
+
 }
 
 void AreaRadioGroup::addRadioButton(QRadioButton* btn){
     this->rad_buttons.push_back(btn); //add pointer to vector
     this->btn_layout->addWidget(btn); //add pointer to layout
     connect(btn, SIGNAL(clicked()), this, SLOT(onRadioClicked()));
-
+    //if button ID equals value, then this button is checked
     if(rad_buttons.size() == *value_ptr){
         btn->setChecked(true);
     }

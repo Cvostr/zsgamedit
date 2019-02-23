@@ -64,6 +64,7 @@ class AreaRadioGroup : public QObject{
 public slots:
     void onRadioClicked();
 public:
+    void* go_property; //Ponter to property, that created this group
     QVBoxLayout* btn_layout; //layout to contain everything
     std::vector<QRadioButton*> rad_buttons;
     uint8_t* value_ptr; //pointer to changing value

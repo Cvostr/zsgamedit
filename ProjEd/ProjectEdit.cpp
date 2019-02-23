@@ -174,6 +174,9 @@ void EditWindow::openFile(QString file_path){
 
     if(file_path.endsWith(".scn")){ //If it is scene
 
+        QString gl_win_title = "Game View - " + file_path;
+        SDL_SetWindowTitle(window, gl_win_title.toUtf8());
+
         if(isSceneRun == true)
             emit onRunProject();
 

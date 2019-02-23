@@ -301,6 +301,7 @@ void MeshProperty::copyTo(GameObjectProperty* dest){
 void LightsourceProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
     AreaRadioGroup* group = new AreaRadioGroup; //allocate button layout
     group->value_ptr = &this->light_type;
+    group->go_property = static_cast<void*>(this);
 
     QRadioButton* directional_radio = new QRadioButton; //allocate first radio
     directional_radio->setText("Directional");
