@@ -8,6 +8,7 @@
 #include "ProjEd/headers/ProjCreateWin.h"
 
 #include "include_engine.h" //include engine headers
+#include "triggers.h"
 
 typedef struct ProjectConf{
     QString projLabel;
@@ -38,15 +39,13 @@ public slots:
     void runEngineClicked();
 
 private:
-    MainWin* win;
-
     QMenu* menu; //Menu object to contain everything
 
     QAction* action_run_engine;
     QAction* action_run_engine_vk;
     QAction* action_delete; //Button to delete project entry from list
 public:
-
+    MainWin* win;
 
     ProjectCtxMenu(MainWin* win, QWidget* parent = nullptr);
     void show(QPoint point);
@@ -67,7 +66,10 @@ public slots:
     void showCtxMenu(QPoint point);
 
 public:
+    Ui::MainWin *ui;
+#ifdef USE_ZSPIRE
     ZSpireEngine* engine;
+#endif
     EditWindow* edit_win_ptr;
     std::vector<ProjectConf> projects;
 
@@ -80,10 +82,6 @@ public:
 
     explicit MainWin(QWidget *parent = nullptr);
     ~MainWin();
-
-
-private:
-    Ui::MainWin *ui;
 };
 
 #endif // MAINWIN_H

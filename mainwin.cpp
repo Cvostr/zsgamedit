@@ -36,6 +36,7 @@ MainWin::MainWin(QWidget *parent) :
     cr_w = new CreateProjectWindow;
 
     project_menu = new ProjectCtxMenu(this); //Allocate projectCtxMenu
+    project_menu->win = this;
 }
 
 MainWin::~MainWin()
@@ -79,7 +80,7 @@ void MainWin::loadProjectsConfigurations(){
             FILE* projFileD = fopen(path, "r"); //Trying to open project root directory
             if(projFileD){ //If we reached project root path
                 fclose(projFileD);
-                conf.projFilePath = QString(path);
+                conf.projFilePath = QString(path); //Read path to project configuration file and store it
                 addProjectToVector(conf);
 
                 updateListWidgetContent();
@@ -184,13 +185,16 @@ ProjectCtxMenu::ProjectCtxMenu(MainWin* win, QWidget* parent) : QObject(parent){
     this->action_run_engine_vk = new QAction("Run in engine instance (Vulkan)", win);
 
     menu->addAction(action_delete);
+#ifdef USE_ZSPIRE
     menu->addAction(action_run_engine);
     menu->addAction(action_run_engine_vk);
+#endif
 
     QObject::connect(this->action_delete, SIGNAL(triggered(bool)), this, SLOT(onDeleteClicked()));
+#ifdef USE_ZSPIRE
     QObject::connect(this->action_run_engine, SIGNAL(triggered(bool)), this, SLOT(runEngineClicked()));
     QObject::connect(this->action_run_engine_vk, SIGNAL(triggered(bool)), this, SLOT(runEngineClicked()));
-
+#endif
 }
 
 void ProjectCtxMenu::show(QPoint point){
@@ -211,6 +215,10 @@ void ProjectCtxMenu::onDeleteClicked(){
 }
 
 void ProjectCtxMenu::runEngineClicked(){
+#ifdef USE_ZSPIRE
+    QListWidgetItem* selected_proj_item = win->ui->projList->currentItem();
+    QString proj_label = selected_proj_item->text();
+
     ZSENGINE_CREATE_INFO engine_create_info;
     engine_create_info.appName = "GameEditorRun";
     engine_create_info.createWindow = true; //window already created, we don't need one
@@ -220,8 +228,11 @@ void ProjectCtxMenu::runEngineClicked(){
     window_create_info.title = "Preview";
 
     ZSGAME_DESC game_info;
-    //game_info.
+    game_info.app_label = proj_label.toStdString(); //Setting app label
+    game_info.app_version = 0;
+    game_info.resource_type = TYPE_FILES;
 
-    win->engine = new ZSpireEngine(&engine_create_info, &window_create_info);
-
+    win->engine = new ZSpireEngine(&engine_create_info, &window_create_info, &game_info);
+    win->engine->loadGame();
+#endif
 }

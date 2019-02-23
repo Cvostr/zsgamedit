@@ -142,6 +142,7 @@ void TileGroupProperty::copyTo(GameObjectProperty* dest){
 }
 
 void TileProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
+    this->insp_win = inspector;
     BoolCheckboxArea* isAnim = new BoolCheckboxArea;
     isAnim->setLabel("Animated ");
     isAnim->go_property = static_cast<void*>(this);
@@ -178,6 +179,7 @@ void TileProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
 
 void TileProperty::onValueChanged(){
     updTexturePtr();
+    insp_win->updateRequired = true;
 }
 
 void TileProperty::updTexturePtr(){

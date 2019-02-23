@@ -5,7 +5,7 @@
 #-------------------------------------------------
 
 QT       += core gui widgets
-LIBS += -lGLEW -lassimp -lSDL2 -lopenal -llua5.2 -lzsengine
+LIBS += -lGLEW -lSDL2 -lopenal -llua5.2 -lassimp -lzsengine -lvulkan
 #greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = ZSpireGameEd
@@ -69,7 +69,8 @@ HEADERS += \
     Scripting/headers/LuaScript.h \
     Scripting/headers/zsensdk.h \
     World/headers/obj_properties.h \
-    ProjEd/headers/InspEditAreas.h
+    ProjEd/headers/InspEditAreas.h \
+    triggers.h
 
 
 FORMS += \

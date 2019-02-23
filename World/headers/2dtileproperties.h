@@ -66,6 +66,8 @@ public:
 };
 
 class TileProperty : public GameObjectProperty{
+private:
+    InspectorWin* insp_win;
 public:
     TileGeometry geometry;
 

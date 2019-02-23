@@ -301,6 +301,7 @@ void MeshProperty::copyTo(GameObjectProperty* dest){
 void LightsourceProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
     AreaRadioGroup* group = new AreaRadioGroup; //allocate button layout
     group->value_ptr = &this->light_type;
+    group->go_property = static_cast<void*>(this);
 
     QRadioButton* directional_radio = new QRadioButton; //allocate first radio
     directional_radio->setText("Directional");
@@ -730,7 +731,7 @@ void ScriptGroupProperty::onValueChanged(){
             scripts_attached[script_i].fpath = project_ptr->root_path + "/" + path_names[script_i];
         }
         //Update inspector interface
-        insp_win->updateObjectProperties();
+        insp_win->updateRequired = true;
     }
 }
 

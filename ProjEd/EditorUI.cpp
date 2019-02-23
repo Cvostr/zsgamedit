@@ -121,6 +121,7 @@ FileRenameDialog::FileRenameDialog(QString file_path, QString file_name, QWidget
     QFile file(file_path);
     rename_message.setText("Rename file  " + file_name + " to ");
     this->file_path = file_path;
+    this->file_name = file_name;
 
     del_btn.setText("Rename");
     close_btn.setText("Close");
@@ -139,7 +140,10 @@ FileRenameDialog::FileRenameDialog(QString file_path, QString file_name, QWidget
 }
 
 void FileRenameDialog::onRenameButtonPressed(){
+    QString cur_path = this->file_path;
+    cur_path.resize(cur_path.size() - file_name.size()); //Calculate current directory path
+
     QFile file(file_path);
-    file.rename(edit_field.text()); //remove it!
+    file.rename(cur_path + edit_field.text()); //remove it!
     accept();
 }

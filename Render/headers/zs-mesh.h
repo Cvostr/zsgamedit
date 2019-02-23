@@ -3,12 +3,15 @@
 #endif
 
 #include "zs-math.h"
+#include "triggers.h"
 
 #define NO_INDICES 0
 
+#ifdef USE_ASSIMP
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
+#endif
 
 #ifndef zs_mesh
 #define zs_mesh
@@ -35,8 +38,9 @@ namespace ZSPIRE {
         void DestroyResource();
 
         void LoadMeshesFromFileASSIMP(const char* file_path);
+#ifdef USE_ASSIMP
         void processMesh(aiMesh* mesh, const aiScene* scene);
-
+#endif
 		Mesh();
 	};
 
