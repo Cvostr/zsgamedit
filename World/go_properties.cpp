@@ -731,7 +731,7 @@ void ScriptGroupProperty::onValueChanged(){
             scripts_attached[script_i].fpath = project_ptr->root_path + "/" + path_names[script_i];
         }
         //Update inspector interface
-        insp_win->updateObjectProperties();
+        insp_win->updateRequired = true;
     }
 }
 

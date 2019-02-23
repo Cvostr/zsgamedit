@@ -7,6 +7,7 @@
 #include <iostream>
 
 #define KEYS_QUEUE_SIZE 10
+#define KEY_NONE -2
 
 static int pressed_keys_queue[KEYS_QUEUE_SIZE];
 static int pressed_keys_q_size = 0;
@@ -22,12 +23,40 @@ void ZSENSDK::Input::addPressedKeyToQueue(int keycode){
     pressed_keys_queue[pressed_keys_q_size] = keycode;
     pressed_keys_q_size += 1;
 }
+void ZSENSDK::Input::addHeldKeyToQueue(int keycode){
+    if(hold_keys_q_size > KEYS_QUEUE_SIZE) return;
+    hold_keys_queue[hold_keys_q_size] = keycode;
+    hold_keys_q_size += 1;
+}
+void ZSENSDK::Input::removeHeldKeyFromQueue(int keycode){
+    int pos;
+    for(int iterator = 0; iterator < hold_keys_q_size; iterator ++){
+        if(hold_keys_queue[iterator] == keycode){
+            hold_keys_queue[iterator] = KEY_NONE;
+            pos = iterator;
+        }
+
+    }
+    //for (unsigned int i = 0; i < hold_keys_q_size; i ++) { //Iterating over all objects
+        for (unsigned int obj_i = pos + 1; obj_i < hold_keys_q_size; obj_i ++) { //Iterate over all next chidren
+            hold_keys_queue[obj_i - 1] = hold_keys_queue[obj_i]; //Move it to previous place
+        }
+
+    hold_keys_q_size -= 1;
+}
 void ZSENSDK::Input::clearPressedKeys(){
     pressed_keys_q_size = 0;
 }
 bool ZSENSDK::Input::isKeyPressed(int keycode){
     for(int i = 0; i < pressed_keys_q_size; i ++){
         if(pressed_keys_queue[i] == keycode)
+            return true;
+    }
+    return false;
+}
+bool ZSENSDK::Input::isKeyHold(int keycode){
+    for(int i = 0; i < hold_keys_q_size; i ++){
+        if(hold_keys_queue[i] == keycode)
             return true;
     }
     return false;
@@ -147,6 +176,7 @@ void ZSENSDK::bindSDK(lua_State* state){
     luabridge::getGlobalNamespace(state)
             .beginNamespace("input")
             .addFunction("isKeyPressed", &ZSENSDK::Input::isKeyPressed)
+            .addFunction("isKeyHold", &ZSENSDK::Input::isKeyHold)
             .endNamespace();
 
     luabridge::getGlobalNamespace(state).beginClass <ZSVECTOR3>("Vec3")
@@ -222,6 +252,37 @@ luabridge::getGlobalNamespace(state)
 
         .endNamespace();
 
-
-
+luabridge::getGlobalNamespace(state).beginNamespace("input")
+            .addVariable("KEY_Q", &keycodes::kq, false)
+            .addVariable("KEY_W", &keycodes::kw, false)
+            .addVariable("KEY_E", &keycodes::ke, false)
+            .addVariable("KEY_R", &keycodes::kr, false)
+            .addVariable("KEY_T", &keycodes::kt, false)
+            .addVariable("KEY_Y", &keycodes::ky, false)
+            .addVariable("KEY_U", &keycodes::ku, false)
+            .addVariable("KEY_I", &keycodes::ki, false)
+            .addVariable("KEY_O", &keycodes::ko, false)
+            .addVariable("KEY_P", &keycodes::kp, false)
+            .addVariable("KEY_A", &keycodes::ka, false)
+            .addVariable("KEY_S", &keycodes::ks, false)
+            .addVariable("KEY_D", &keycodes::kd, false)
+            .addVariable("KEY_F", &keycodes::kf, false)
+            .addVariable("KEY_G", &keycodes::kg, false)
+            .addVariable("KEY_H", &keycodes::kh, false)
+            .addVariable("KEY_J", &keycodes::kj, false)
+            .addVariable("KEY_K", &keycodes::kk, false)
+            .addVariable("KEY_L", &keycodes::kl, false)
+            .addVariable("KEY_Z", &keycodes::kz, false)
+            .addVariable("KEY_X", &keycodes::kx, false)
+            .addVariable("KEY_C", &keycodes::kc, false)
+            .addVariable("KEY_V", &keycodes::kv, false)
+            .addVariable("KEY_B", &keycodes::kb, false)
+            .addVariable("KEY_N", &keycodes::kn, false)
+            .addVariable("KEY_M", &keycodes::km, false)
+            .addVariable("KEY_ESCAPE", &keycodes::kescape, false)
+            .addVariable("KEY_TAB", &keycodes::ktab, false)
+            .addVariable("KEY_CTRL", &keycodes::kctrl, false)
+            .addVariable("KEY_ENTER", &keycodes::kenter, false)
+            .addVariable("KEY_SHIFT", &keycodes::kshift, false)
+            .endNamespace();
 }

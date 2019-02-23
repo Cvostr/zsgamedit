@@ -87,9 +87,10 @@ ZSPIRE::Mesh cube3Dmesh;
 unsigned int vert_size = sizeof(ZSVERTEX);
 unsigned int offset = 0;
 
+#ifdef USE_ASSIMP //Optional
 Assimp::Importer importer;
-
 unsigned int loadflags = aiProcess_CalcTangentSpace | aiProcess_Triangulate | aiProcess_FlipUVs;
+#endif
 
 unsigned int processed_meshes = 0;
 ZSPIRE::Mesh result;
@@ -246,7 +247,7 @@ void ZSPIRE::Mesh::DrawLines(){
     }
 }
 
-
+#ifdef USE_ASSIMP
 void ZSPIRE::Mesh::processMesh(aiMesh* mesh, const aiScene* scene) {
 	unsigned int vertices = mesh->mNumVertices;
 	unsigned int faces = mesh->mNumFaces;
@@ -297,16 +298,16 @@ void processNode(aiNode* node, const aiScene* scene) {
 	}
 
 }
-
-
+#endif
 
 void ZSPIRE::Mesh::LoadMeshesFromFileASSIMP(const char* file_path) {
-	std::cout << "ASSIMP: Loading mesh from file : " << file_path << std::endl;
+#ifdef USE_ASSIMP
+    std::cout << "ASSIMP: Loading mesh from file : " << file_path << std::endl;
 
 	const aiScene* scene = importer.ReadFile(file_path, loadflags);
 
     processMesh(scene->mMeshes[0], scene);
-
+#endif
 }
 
 void ZSPIRE::Mesh::DestroyResource() {

@@ -8,6 +8,7 @@
 #include "ProjEd/headers/ProjCreateWin.h"
 
 #include "include_engine.h" //include engine headers
+#include "triggers.h"
 
 typedef struct ProjectConf{
     QString projLabel;
@@ -66,8 +67,9 @@ public slots:
 
 public:
     Ui::MainWin *ui;
-
+#ifdef USE_ZSPIRE
     ZSpireEngine* engine;
+#endif
     EditWindow* edit_win_ptr;
     std::vector<ProjectConf> projects;
 

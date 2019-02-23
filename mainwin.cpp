@@ -185,13 +185,16 @@ ProjectCtxMenu::ProjectCtxMenu(MainWin* win, QWidget* parent) : QObject(parent){
     this->action_run_engine_vk = new QAction("Run in engine instance (Vulkan)", win);
 
     menu->addAction(action_delete);
+#ifdef USE_ZSPIRE
     menu->addAction(action_run_engine);
     menu->addAction(action_run_engine_vk);
+#endif
 
     QObject::connect(this->action_delete, SIGNAL(triggered(bool)), this, SLOT(onDeleteClicked()));
+#ifdef USE_ZSPIRE
     QObject::connect(this->action_run_engine, SIGNAL(triggered(bool)), this, SLOT(runEngineClicked()));
     QObject::connect(this->action_run_engine_vk, SIGNAL(triggered(bool)), this, SLOT(runEngineClicked()));
-
+#endif
 }
 
 void ProjectCtxMenu::show(QPoint point){
@@ -212,6 +215,7 @@ void ProjectCtxMenu::onDeleteClicked(){
 }
 
 void ProjectCtxMenu::runEngineClicked(){
+#ifdef USE_ZSPIRE
     QListWidgetItem* selected_proj_item = win->ui->projList->currentItem();
     QString proj_label = selected_proj_item->text();
 
@@ -230,5 +234,5 @@ void ProjectCtxMenu::runEngineClicked(){
 
     win->engine = new ZSpireEngine(&engine_create_info, &window_create_info, &game_info);
     win->engine->loadGame();
-
+#endif
 }

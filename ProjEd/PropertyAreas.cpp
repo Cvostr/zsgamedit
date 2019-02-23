@@ -524,6 +524,7 @@ void BoolCheckboxArea::writeNewValues(){
     }else{ //unchecked
         *bool_ptr = false;
     }
+    PropertyEditArea::callPropertyUpdate();
 }
 void BoolCheckboxArea::setup(){
     checkbox.setChecked(*bool_ptr);

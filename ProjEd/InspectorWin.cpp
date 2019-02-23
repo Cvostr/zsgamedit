@@ -12,6 +12,7 @@ InspectorWin::InspectorWin(QWidget *parent) :
     ui(new Ui::InspectorWin)
 {
     updateAreas = true; //update areas
+    updateRequired = false;
     ui->setupUi(this);
 
     this->ui->propertySpace->setMargin(0);
@@ -123,26 +124,39 @@ void InspectorWin::updateObjectProperties(){
 }
 
 void InspectorWin::onPropertyEdited(){
-    if(updateAreas == false) return; //if trigger is false, then exit
+    //if(updateAreas == false) return; //if trigger is false, then exit
     unsigned int areas_num = static_cast<unsigned int>(this->property_areas.size());
     for(unsigned int area_i = 0; area_i < areas_num; area_i ++){
+       // if(updateAreas == false) continue;
         PropertyEditArea* pea_ptr = this->property_areas[area_i]; //Obtain pointer to area
         pea_ptr->writeNewValues(); //Update state on it.
         areas_num = static_cast<unsigned int>(this->property_areas.size()); //recount amount
     }
+
 }
 
 void InspectorWin::updateAreasChanges(){
-    if(updateAreas == false) return; //if trigger is false, then exit
+    //if(updateAreas == false) return;
+    if(this->updateRequired == false){
+     //if trigger is false, then exit
     unsigned int areas_num = static_cast<unsigned int>(this->property_areas.size());
     for(unsigned int area_i = 0; area_i < areas_num; area_i ++){
+        //if(updateAreas == false) continue;
         PropertyEditArea* pea_ptr = this->property_areas[area_i]; //Obtain pointer to area
         pea_ptr->updateValues(); //Update state on it.
+    }
+    }else{
+        updateRequired = false;
+        this->updateObjectProperties();
+
     }
 }
 
 void InspectorWin::onPropertyChange(){
     this->onPropertyEdited();
+
+    //clearContentLayout();
+    //updateObjectProperties();
 }
 
 void AddGoComponentDialog::onAddButtonPressed(){
