@@ -27,12 +27,16 @@ AreaButton::AreaButton(){
 }
 
 void AreaRadioGroup::onRadioClicked(){
+    GameObjectProperty* property_ptr = static_cast<GameObjectProperty*>(this->go_property);
+    //make EdAction
+    getActionManager()->newPropertyAction(property_ptr->go_link, property_ptr->type);
+
     for(unsigned int rbutton_it = 0; rbutton_it < this->rad_buttons.size(); rbutton_it ++){
         if(this->rad_buttons[rbutton_it]->isChecked()){
             *this->value_ptr = rbutton_it + 1;
         }
     }
-    GameObjectProperty* property_ptr = static_cast<GameObjectProperty*>(this->go_property);
+
     property_ptr->onValueChanged();
 
 }
@@ -174,9 +178,11 @@ void Float3PropertyArea::writeNewValues(){
     float vY = this->y_field.text().toFloat();
     float vZ = this->z_field.text().toFloat();
 
-    //Store old values
-    GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(this->go_property);
-    getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
+    if(vector->X != vX || vector->Y != vY || vector->Z != vZ){
+        //Store old values
+        GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(this->go_property);
+        getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
+    }
     //Write new values
     this->vector->X = vX;
     this->vector->Y = vY;
@@ -242,10 +248,10 @@ void StringPropertyArea::writeNewValues(){
         return; //Go out
     //Get current values in textt fields
     QString current = this->edit_field.text();
-
-    GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(this->go_property);
-    getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
-
+    if(*value_ptr != current){ //if value changed, then make Action
+        GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(this->go_property);
+        getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
+    }
     *value_ptr = current;
 
     PropertyEditArea::callPropertyUpdate();
@@ -284,10 +290,11 @@ void FloatPropertyArea::writeNewValues(){
     //Get current values in text fields
     float value = this->float_field.text().toFloat();
 
-    //Store old values
-    GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(this->go_property);
-    getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
-
+    if(*this->value != value){ //if value changed, then make Action
+        //Store old values
+        GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(this->go_property);
+        getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
+    }
     *this->value = value;
 
     PropertyEditArea::callPropertyUpdate();
@@ -375,10 +382,10 @@ void IntPropertyArea::writeNewValues(){
         return; //Go out
     //Get current values in text fields
     int value = this->int_field->text().toInt();
-
-    GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(this->go_property);
-    getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
-
+    if(*this->value != value){
+        GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(this->go_property);
+        getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
+    }
     *this->value = value;
 
     PropertyEditArea::callPropertyUpdate();
@@ -519,9 +526,16 @@ void BoolCheckboxArea::addToInspector(InspectorWin* win){
 }
 void BoolCheckboxArea::writeNewValues(){
     if(bool_ptr == nullptr) return; //pointer not set, exiting
+
     if(this->checkbox.isChecked()){ //if user checked it
+        GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(this->go_property);
+        getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
+
         *bool_ptr = true;
     }else{ //unchecked
+        GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(this->go_property);
+        getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
+
         *bool_ptr = false;
     }
     PropertyEditArea::callPropertyUpdate();

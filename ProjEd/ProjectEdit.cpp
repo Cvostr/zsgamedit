@@ -729,6 +729,7 @@ void EditWindow::onMouseMotion(int relX, int relY){
 }
 
 void EditWindow::onKeyDown(SDL_Keysym sym){
+    /*
     if(sym.sym == SDLK_a){
         ZSVECTOR3 pos = edit_camera.getCameraPosition(); //obtain position
         pos = pos + edit_camera.getCameraRightVec() * -0.2f;
@@ -749,7 +750,7 @@ void EditWindow::onKeyDown(SDL_Keysym sym){
         pos.Y -= 0.2f;
         edit_camera.setPosition(pos);
     }
-
+*/
     if(input_state.isLAltHold && sym.sym == SDLK_t){
         obj_trstate.setTransformOnObject(this->obj_trstate.obj_ptr, GO_TRANSFORM_MODE_TRANSLATE);
     }

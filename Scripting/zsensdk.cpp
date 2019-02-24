@@ -7,11 +7,11 @@
 #include <iostream>
 
 #define KEYS_QUEUE_SIZE 10
-#define KEY_NONE -2
+#define KEY_NONE -200
 
 static int pressed_keys_queue[KEYS_QUEUE_SIZE];
 static int pressed_keys_q_size = 0;
-int hold_keys_queue[KEYS_QUEUE_SIZE];
+static int hold_keys_queue[KEYS_QUEUE_SIZE];
 static int hold_keys_q_size = 0;
 
 void ZSENSDK::Debug::Log(std::string text){
@@ -24,25 +24,38 @@ void ZSENSDK::Input::addPressedKeyToQueue(int keycode){
     pressed_keys_q_size += 1;
 }
 void ZSENSDK::Input::addHeldKeyToQueue(int keycode){
-    if(hold_keys_q_size > KEYS_QUEUE_SIZE) return;
-    hold_keys_queue[hold_keys_q_size] = keycode;
-    hold_keys_q_size += 1;
+    if(isKeyHold(keycode)) return;
+
+    bool insertable = false;
+    int insert_pos = 0;
+
+    for(int iterator = 0; iterator < hold_keys_q_size; iterator ++){
+        if(hold_keys_queue[iterator] == KEY_NONE){
+            insertable = true;
+            insert_pos = iterator;
+        }
+    }
+    if(!insertable){
+        if(hold_keys_q_size > KEYS_QUEUE_SIZE) return;
+        hold_keys_queue[hold_keys_q_size] = keycode;
+        hold_keys_q_size += 1;
+    }else{
+        hold_keys_queue[insert_pos] = keycode;
+    }
 }
 void ZSENSDK::Input::removeHeldKeyFromQueue(int keycode){
-    int pos;
+    //int pos;
     for(int iterator = 0; iterator < hold_keys_q_size; iterator ++){
         if(hold_keys_queue[iterator] == keycode){
             hold_keys_queue[iterator] = KEY_NONE;
-            pos = iterator;
+            //pos = iterator;
         }
-
     }
-    //for (unsigned int i = 0; i < hold_keys_q_size; i ++) { //Iterating over all objects
-        for (unsigned int obj_i = pos + 1; obj_i < hold_keys_q_size; obj_i ++) { //Iterate over all next chidren
-            hold_keys_queue[obj_i - 1] = hold_keys_queue[obj_i]; //Move it to previous place
-        }
+    /*for (unsigned int obj_i = pos + 1; obj_i < hold_keys_q_size; obj_i ++) { //Iterate over all next chidren
+        hold_keys_queue[obj_i - 1] = hold_keys_queue[obj_i]; //Move it to previous place
+    }
 
-    hold_keys_q_size -= 1;
+    hold_keys_q_size -= 1;*/
 }
 void ZSENSDK::Input::clearPressedKeys(){
     pressed_keys_q_size = 0;
