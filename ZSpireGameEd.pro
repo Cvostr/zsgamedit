@@ -5,7 +5,7 @@
 #-------------------------------------------------
 
 QT       += core gui widgets
-LIBS += -lGLEW -lSDL2 -lopenal -llua5.2 -lassimp -lzsengine -lvulkan
+LIBS += -lGLEW -lSDL2 -lopenal -llua5.2 -lassimp -lvulkan
 #greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = ZSpireGameEd
@@ -84,3 +84,10 @@ FORMS += \
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+unix:!macx: LIBS += -L$$PWD/../build-ZSpireEngine-Desktop-Debug/ -lzsengine -lvulkan
+
+INCLUDEPATH += $$PWD/../ZSpireEngine/headers
+DEPENDPATH += $$PWD/../ZSpireEngine/headers
+
+unix:!macx: PRE_TARGETDEPS += $$PWD/../build-ZSpireEngine-Desktop-Debug/libzsengine.a

@@ -146,6 +146,7 @@ protected:
 public:
     QTreeWidget* obj_widget_ptr;
     void* proj_ptr; //Pointer to Project structure
+    ZSPIRE::Camera world_camera;
 
     std::vector<GameObject> objects; //Vector, containing all gameobjects
 

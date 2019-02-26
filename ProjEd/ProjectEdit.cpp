@@ -48,6 +48,7 @@ EditWindow::EditWindow(QWidget *parent) :
     ready = false; //Firstly set it to 0
     hasSceneFile = false; //No scene loaded by default
     isSceneRun = false; //Not running by default
+    isSceneCamera = false;
 
     setupObjectsHieList();
 

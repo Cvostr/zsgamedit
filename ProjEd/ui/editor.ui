@@ -72,7 +72,7 @@
      <x>0</x>
      <y>0</y>
      <width>390</width>
-     <height>22</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -101,9 +101,10 @@
    </widget>
    <widget class="QMenu" name="menuObjects">
     <property name="title">
-     <string>Ob&amp;jects</string>
+     <string>Scene</string>
     </property>
     <addaction name="actionNew_Object"/>
+    <addaction name="actionToggle_Cameras"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -159,6 +160,11 @@
   <action name="actionBuild">
    <property name="text">
     <string>Build</string>
+   </property>
+  </action>
+  <action name="actionToggle_Cameras">
+   <property name="text">
+    <string>Toggle Cameras</string>
    </property>
   </action>
  </widget>
