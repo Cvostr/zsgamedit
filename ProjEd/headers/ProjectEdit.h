@@ -128,6 +128,7 @@ public slots:
     void onUndoPressed();
     void onRedoPressed();
 
+    void toggleCameras();
 private:
     QString current_dir; //current directory path string
     QString scene_path;

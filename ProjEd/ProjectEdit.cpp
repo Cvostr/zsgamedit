@@ -25,7 +25,9 @@ EditWindow::EditWindow(QWidget *parent) :
     QObject::connect(ui->fileList, SIGNAL(onRightClick(QPoint)), this, SLOT(onFileCtxMenuShow(QPoint)));
 
     QObject::connect(ui->actionNew_Object, SIGNAL(triggered()),
-                this, SLOT(onAddNewGameObject())); //Signal comes, when user clicks on Object->Create
+                this, SLOT(onAddNewGameObject())); //Signal comes, when user clicks on Scene->Create
+    QObject::connect(ui->actionToggle_Cameras, SIGNAL(triggered()), this, SLOT(toggleCameras()));
+
     QObject::connect(ui->actionSave, SIGNAL(triggered()), this, SLOT(onSceneSave())); //Signal comes, when user clicks on File->Save
     QObject::connect(ui->actionSave_As, SIGNAL(triggered()), this, SLOT(onSceneSaveAs())); //Signal comes, when user clicks on File->Save As
     QObject::connect(ui->actionOpen, SIGNAL(triggered()), this, SLOT(onOpenScene()));
@@ -143,7 +145,7 @@ void EditWindow::init(){
         break;
     }
     }
-
+    world.world_camera = edit_camera;
 }
 
 void EditWindow::assignIconFile(QListWidgetItem* item){
@@ -277,6 +279,7 @@ void EditWindow::onRunProject(){
         }
 
         isSceneRun = true; //set toggle to true
+        isSceneCamera = true;
 
         this->ui->actionRun->setText("Stop");
 
@@ -289,6 +292,7 @@ void EditWindow::onRunProject(){
         run_world_snapshot.clear(); //Clear snapshot to free up memory
 
         _inspector_win->clearContentLayout();
+        isSceneCamera = false;
     }
 }
 
@@ -408,6 +412,14 @@ void EditWindow::onUndoPressed(){
 }
 void EditWindow::onRedoPressed(){
     _ed_actions_container->redo();
+}
+
+void EditWindow::toggleCameras(){
+    if(this->isSceneCamera){
+        this->isSceneCamera = false;
+    }else{
+        this->isSceneCamera = true;
+    }
 }
 
 void EditWindow::glRender(){
@@ -730,7 +742,7 @@ void EditWindow::onMouseMotion(int relX, int relY){
 }
 
 void EditWindow::onKeyDown(SDL_Keysym sym){
-    /*
+
     if(sym.sym == SDLK_a){
         ZSVECTOR3 pos = edit_camera.getCameraPosition(); //obtain position
         pos = pos + edit_camera.getCameraRightVec() * -0.2f;
@@ -751,7 +763,7 @@ void EditWindow::onKeyDown(SDL_Keysym sym){
         pos.Y -= 0.2f;
         edit_camera.setPosition(pos);
     }
-*/
+
     if(input_state.isLAltHold && sym.sym == SDLK_t){
         obj_trstate.setTransformOnObject(this->obj_trstate.obj_ptr, GO_TRANSFORM_MODE_TRANSLATE);
     }

@@ -76,7 +76,14 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr)
 {
     EditWindow* editwin_ptr = static_cast<EditWindow*>(projectedit_ptr);
     World* world_ptr = &editwin_ptr->world;
-    ZSPIRE::Camera* cam_ptr = &editwin_ptr->edit_camera;
+    ZSPIRE::Camera* cam_ptr = nullptr; //We'll set it next
+
+    if(editwin_ptr->isSceneCamera){
+        cam_ptr = &world_ptr->world_camera;
+    }else{
+        cam_ptr = &editwin_ptr->edit_camera;
+    }
+
     this->cam = cam_ptr;
     this->win_ptr = editwin_ptr;
     gbuffer.bindFramebuffer();
