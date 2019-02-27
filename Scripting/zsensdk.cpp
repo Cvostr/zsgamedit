@@ -121,6 +121,9 @@ ZSENSDK::ZSENGmObject ZSENSDK::ZSEN_World::getObjectSDK(std::string name){
 void ZSENSDK::ZSEN_World::removeObject(ZSENGmObject obj){
     world_ptr->removeObj(obj.updPtr()->getLinkToThisObject());
 }
+void ZSENSDK::ZSEN_World::setCamera(ZSPIRE::Camera cam){
+
+}
 //Property functions
 ZSVECTOR3 ZSENSDK::ZSENTransformProperty::getPosition(){
     return this->prop_ptr->translation;
@@ -197,11 +200,23 @@ void ZSENSDK::bindSDK(lua_State* state){
             .addData("y", &ZSVECTOR3::Y)
             .addData("z", &ZSVECTOR3::Z)
             .addConstructor <void(*) (float, float, float)>()
-            .endClass()
-            .addFunction("length", &length)
-            .addFunction("distance", &getDistance)
-            .addFunction("normalize", &ZSENSDK::Math::vnormalize);
+            .endClass();
 
+    luabridge::getGlobalNamespace(state)
+        .addFunction("length", &length)
+        .addFunction("distance", &getDistance)
+        .addFunction("normalize", &ZSENSDK::Math::vnormalize);
+
+    luabridge::getGlobalNamespace(state).beginClass <ZSPIRE::Camera>("Camera")
+
+
+            .addFunction("pos", &ZSPIRE::Camera::getCameraPosition)
+            .addFunction("front", &ZSPIRE::Camera::getCameraFrontVec)
+
+            .addFunction("setPos", &ZSPIRE::Camera::setPosition)
+            .addFunction("setFront", &ZSPIRE::Camera::setFront)
+
+            .endClass();
 
     luabridge::getGlobalNamespace(state).beginClass <ZSRGBCOLOR>("RGBColor")
             .addData("r", &ZSRGBCOLOR::r)
@@ -228,6 +243,7 @@ luabridge::getGlobalNamespace(state)
 
         .addFunction("findObject", &ZSENSDK::ZSEN_World::getObjectSDK)
         .addFunction("removeObject", &ZSENSDK::ZSEN_World::removeObject)
+        .addFunction("setCamera", &ZSENSDK::ZSEN_World::setCamera)
 
         .endClass()
         .endNamespace();
