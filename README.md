@@ -18,6 +18,8 @@ SDL2
 
 Assimp
 
+Lua
+
 ## Building on linux
 ```
 sudo apt install qt5-default
@@ -26,6 +28,7 @@ sudo apt install libglew-dev
 sudo apt install libopenal-dev
 sudo apt install libsdl2-dev
 sudo apt install libassimp-dev
+sudo apt install liblua5.2-dev
 ```
 Next go to root of project and invoke
 ```
