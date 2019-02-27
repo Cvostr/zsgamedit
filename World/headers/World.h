@@ -90,7 +90,7 @@ public:
     QString* label; //Pointer to string label in property
     std::string str_id; //String, gameobject identified by
     bool hasParent; //If object has a parent
-    bool alive; //if object marked s removed
+    bool alive; //if object marked as removed
     bool isPicked;
     bool active;
     World* world_ptr; //pointer to world, when object placed
@@ -146,6 +146,7 @@ protected:
 public:
     QTreeWidget* obj_widget_ptr;
     void* proj_ptr; //Pointer to Project structure
+    ZSPIRE::Camera world_camera;
 
     std::vector<GameObject> objects; //Vector, containing all gameobjects
 

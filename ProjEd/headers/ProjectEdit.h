@@ -128,6 +128,7 @@ public slots:
     void onUndoPressed();
     void onRedoPressed();
 
+    void toggleCameras();
 private:
     QString current_dir; //current directory path string
     QString scene_path;
@@ -147,6 +148,7 @@ public:
     bool ready; //Is everything loaded?
     int close_reason;
     bool isSceneRun; //Is scene running right now
+    bool isSceneCamera; //Use World's camera to render world?
 
     World world;
     ZSPIRE::Camera edit_camera; //Camera to show editing scene

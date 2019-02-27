@@ -76,7 +76,14 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr)
 {
     EditWindow* editwin_ptr = static_cast<EditWindow*>(projectedit_ptr);
     World* world_ptr = &editwin_ptr->world;
-    ZSPIRE::Camera* cam_ptr = &editwin_ptr->edit_camera;
+    ZSPIRE::Camera* cam_ptr = nullptr; //We'll set it next
+
+    if(editwin_ptr->isSceneCamera){
+        cam_ptr = &world_ptr->world_camera;
+    }else{
+        cam_ptr = &editwin_ptr->edit_camera;
+    }
+
     this->cam = cam_ptr;
     this->win_ptr = editwin_ptr;
     gbuffer.bindFramebuffer();
@@ -108,11 +115,13 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr)
 
 void GameObject::Draw(RenderPipeline* pipeline){
     //Obtain EditWindow pointer to check if scene is running
+
+    if(active == false || alive == false) return; //if object is inactive, not to render it
+
     EditWindow* editwin_ptr = static_cast<EditWindow*>(pipeline->win_ptr);
     if(editwin_ptr->isSceneRun && pipeline->current_state == PIPELINE_STATE_DEFAULT)
         this->onUpdate(16);
 
-    if(active == false || alive == false) return; //if object is inactive, not to render it
     TransformProperty* transform_prop = static_cast<TransformProperty*>(this->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
     transform_prop->updateMat(); //update transform matrix
 

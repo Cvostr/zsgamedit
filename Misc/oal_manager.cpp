@@ -147,11 +147,10 @@ bool SoundBuffer::loadFileWAV(const char* file_path){
 
         fread(data_buffer, 1, static_cast<size_t>(size), fstream);
         alBufferData(this->al_buffer_id, format, static_cast<void*>((data_buffer)), size, static_cast<int>(freq));
-        std::cout << data_buffer[4678] << std::endl;
         int err = alGetError();
         if (err != AL_NO_ERROR)
         {
-            std::cout <<  "Error loading " << err << std::endl;
+            std::cout << "Error loading " << err << std::endl;
             //Free heap
             free(data_buffer);
             fclose(fstream);

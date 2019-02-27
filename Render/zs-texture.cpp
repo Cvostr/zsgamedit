@@ -14,7 +14,7 @@
 #include <cstdlib>
 #include <sys/stat.h>
 
-
+#include "../triggers.h"
 #include <iostream>
 
 #ifdef __linux__
@@ -50,7 +50,7 @@ void ZSPIRE::Texture::Use(int slot) {
 
 bool ZSPIRE::Texture::LoadDDSTextureFromFile(const char* path) {
 
-#ifdef zs_log
+#ifdef ZS_LOG
 	std::cout << "TEXTURE: Loading texture from file : " << path << std::endl;
 #endif
 
@@ -87,7 +87,7 @@ void ZSPIRE::Texture::Destroy() {
 
 	glDeleteTextures(1, &this->TEXTURE_ID);
 
-#ifdef zs_log
+#ifdef ZS_LOG
 	std::cout << "TEXTURE: realease sucess!" << std::endl;
 #endif
 }

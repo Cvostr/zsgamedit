@@ -459,6 +459,7 @@ void GameObject::pick(){
 
 void GameObject::copyTo(GameObject* dest){
     dest->array_index = this->array_index;
+    dest->alive = this->alive;
     dest->hasParent = this->hasParent;
     dest->parent = this->parent;
     dest->str_id = this->str_id;

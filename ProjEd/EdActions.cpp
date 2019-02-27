@@ -89,6 +89,7 @@ void EdActions::undo(){
         //Backup current property data
         GameObjectProperty* cur_state_prop = allocProperty(snapshot->prop_type); //Allocate property for current state
         dest->copyTo(cur_state_prop); //Copy current property data to buffer
+        //cur_state_prop->onValueChanged();
         //Make undo
 
         snapshot->container_ptr->copyTo(dest);
