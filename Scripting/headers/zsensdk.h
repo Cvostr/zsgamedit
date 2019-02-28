@@ -77,6 +77,7 @@ public:
     ZSENGmObject getObjectSDK(std::string name);
     void removeObject(ZSENGmObject obj);
     void setCamera(ZSPIRE::Camera cam);
+    ZSPIRE::Camera getCamera();
 };
 namespace Debug{
     void Log(std::string text);

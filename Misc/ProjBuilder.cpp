@@ -16,6 +16,7 @@ void ProjBuilder::start(){
     writer = new BlobWriter(proj_ptr->root_path + "/.build/resources.map", window);
     writer->directory = proj_ptr->root_path + "/.build";
     writer->name_prefix = "blob_";
+    writer->max_blob_size = 50*1024*1024; //50 megabytes limit
 
     for(unsigned int res_i = 0; res_i < proj_ptr->resources.size(); res_i ++){ //iterate over all resources
         Resource* res_ptr = &proj_ptr->resources[res_i];
@@ -90,6 +91,7 @@ int BlobWriter::getFileSize(std::string file_path){
 void BlobWriter::writeToBlob(std::string file_path){
     if(!this->bl_stream_opened){ //if blob not opened, open it
         QString blob = directory + "/" + this->name_prefix + QString::number(created_blobs);
+        //Open binary blob stream
         this->blob_stream.open(blob.toStdString(), std::ofstream::binary);
         window->addToOutput("Creating Blob /" + this->name_prefix + QString::number(created_blobs));
         bl_stream_opened = true;
@@ -104,6 +106,8 @@ void BlobWriter::writeToBlob(std::string file_path){
     file_stream.read(reinterpret_cast<char*>(data), size);
     //Write data
     blob_stream.write(reinterpret_cast<char*>(data), size);
+
+    this->written_bytes += size; //Increase amount of written bytes
 
     window->addToOutput("   Written to /" + this->name_prefix + QString::number(created_blobs - 1) + " " + QString::number(size) + " bytes");
 
