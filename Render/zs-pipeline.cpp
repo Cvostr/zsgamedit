@@ -78,6 +78,8 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr)
     World* world_ptr = &editwin_ptr->world;
     ZSPIRE::Camera* cam_ptr = nullptr; //We'll set it next
 
+    this->deltaTime = editwin_ptr->deltaTime;
+
     if(editwin_ptr->isSceneCamera){
         cam_ptr = &world_ptr->world_camera;
     }else{
@@ -120,9 +122,10 @@ void GameObject::Draw(RenderPipeline* pipeline){
 
     EditWindow* editwin_ptr = static_cast<EditWindow*>(pipeline->win_ptr);
     if(editwin_ptr->isSceneRun && pipeline->current_state == PIPELINE_STATE_DEFAULT)
-        this->onUpdate(16);
+        this->onUpdate(pipeline->deltaTime);
 
     TransformProperty* transform_prop = static_cast<TransformProperty*>(this->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
+    if(transform_prop == nullptr) return; //We have nothing to do with object without transform property
     transform_prop->updateMat(); //update transform matrix
 
     LightsourceProperty* light = static_cast<LightsourceProperty*>(this->getPropertyPtrByType(GO_PROPERTY_TYPE_LIGHTSOURCE));

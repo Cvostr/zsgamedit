@@ -30,7 +30,7 @@ void ProjBuilder::start(){
                 break;
         }
         window->addToOutput("Resource #" + QString::number(res_i) + " type: " + type_str + " " + res_ptr->rel_path);
-        writer->writeToBlob((proj_ptr->root_path + "/" + res_ptr->rel_path).toStdString());
+        writer->writeToBlob((proj_ptr->root_path + "/" + res_ptr->rel_path).toStdString(), res_ptr->rel_path.toStdString());
     }
 
 }
@@ -88,7 +88,7 @@ int BlobWriter::getFileSize(std::string file_path){
     return buff.st_size;
 }
 
-void BlobWriter::writeToBlob(std::string file_path){
+void BlobWriter::writeToBlob(std::string file_path, std::string rel_path){
     if(!this->bl_stream_opened){ //if blob not opened, open it
         QString blob = directory + "/" + this->name_prefix + QString::number(created_blobs);
         //Open binary blob stream
@@ -106,6 +106,11 @@ void BlobWriter::writeToBlob(std::string file_path){
     file_stream.read(reinterpret_cast<char*>(data), size);
     //Write data
     blob_stream.write(reinterpret_cast<char*>(data), size);
+
+    //Write data to map
+    map_stream << "entry " << rel_path << " "; //write header
+    map_stream.write(reinterpret_cast<char*>(written_bytes), sizeof(int64_t));
+    map_stream.write(reinterpret_cast<char*>(size), sizeof(int));
 
     this->written_bytes += size; //Increase amount of written bytes
 

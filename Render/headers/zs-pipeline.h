@@ -45,6 +45,7 @@ private:
     ZSPIRE::Shader deffered_light;
     std::vector<void*> lights_ptr;
 public:
+    float deltaTime;
     bool depthTest;
     int current_state;
     void setup();
