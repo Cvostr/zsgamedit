@@ -352,6 +352,19 @@ void World::getAvailableNumObjLabel(QString label, int* result){
      }
 }
 
+bool World::isObjectLabelUnique(QString label){
+    unsigned int objs_num = static_cast<unsigned int>(this->objects.size());
+    int ret_amount = 0;
+    for(unsigned int obj_it = 0; obj_it < objs_num; obj_it ++){ //Iterate over all objs in scene
+        GameObject* obj_ptr = &this->objects[obj_it]; //Get pointer to checking object
+        if(obj_ptr->label->compare(label) == 0){
+            ret_amount += 1;
+            if(ret_amount > 1) return false;
+        }
+    }
+    return true;
+}
+
 void World::removeObj(GameObjectLink link){
     GameObjectLink l = link;
     l.updLinkPtr();

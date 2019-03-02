@@ -140,9 +140,6 @@ public:
 };
 
 class World{
-protected:
-    void getAvailableNumObjLabel(QString label, int* result);
-
 public:
     QTreeWidget* obj_widget_ptr;
     void* proj_ptr; //Pointer to Project structure
@@ -154,6 +151,7 @@ public:
     GameObject* newObject(); //Add new object to world
     GameObject* getObjectByLabel(QString label);
     GameObject* getObjectByStringId(std::string id);
+    bool isObjectLabelUnique(QString label); //Get amount of objects with this label
     void removeObj(GameObjectLink link); //Remove object from world
     GameObject* dublicateObject(GameObject* original, bool parent = true);
     void trimObjectsList();
@@ -169,6 +167,9 @@ public:
 
     void putToShapshot(WorldSnapshot* snapshot);
     void recoverFromSnapshot(WorldSnapshot* snapshot);
+
+    void getAvailableNumObjLabel(QString label, int* result);
+
     World();
 
 };

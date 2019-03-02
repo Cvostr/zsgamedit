@@ -184,6 +184,8 @@ void EditWindow::openFile(QString file_path){
             emit onRunProject();
 
         obj_trstate.isTransforming = false;
+        ppaint_state.enabled = false;
+
         _ed_actions_container->clear();
         setupObjectsHieList(); //Clear everything, at first
         world.openFromFile(file_path, ui->objsList); //Open this scene

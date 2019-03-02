@@ -28,6 +28,7 @@ TileGroupProperty::TileGroupProperty(){
 TileProperty::TileProperty(){
     type = GO_PROPERTY_TYPE_TILE;
     active = true;
+    this->insp_win = nullptr; //No pointer to inspector by default
 
     this->texture_diffuse = nullptr;
     this->diffuse_relpath = "@none";

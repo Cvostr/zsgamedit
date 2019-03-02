@@ -251,6 +251,15 @@ void LabelProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
 }
 
 void LabelProperty::onValueChanged(){
+    World* world_ptr = this->go_link.world_ptr; //Obtain pointer to world object
+    //lets chack if object already exist in world
+    if(!world_ptr->isObjectLabelUnique(this->label)){
+        //If object already exist
+        int label_add = 0;
+        world_ptr->getAvailableNumObjLabel(this->label, &label_add);
+        label = label + "_" + QString::number(label_add);
+    }
+
     this->list_item_ptr->setText(0, this->label);
 }
 
