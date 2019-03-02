@@ -681,11 +681,12 @@ void EditWindow::onMouseMotion(int relX, int relY){
 
             unsigned int clicked = render->render_getpickedObj(static_cast<void*>(this), input_state.mouseX, input_state.mouseY);
 
-        GameObject* obj_ptr = &world.objects[clicked]; //Obtain pointer to selected object by label
-        if(clicked > world.objects.size() || obj_ptr == 0x0 || clicked >= 256 * 256 * 256)
-            return;
-        //Obtain pointer to object's property
-        GameObjectProperty* prop_ptr = obj_ptr->getPropertyPtrByType(this->ppaint_state.prop_ptr->type);
+            GameObject* obj_ptr = &world.objects[clicked]; //Obtain pointer to selected object by label
+            if(clicked > world.objects.size() || obj_ptr == 0x0 || clicked >= 256 * 256 * 256 || ppaint_state.last_obj == clicked)
+                return;
+            ppaint_state.last_obj = clicked; //Set clicked as last object ID
+            //Obtain pointer to object's property
+            GameObjectProperty* prop_ptr = obj_ptr->getPropertyPtrByType(this->ppaint_state.prop_ptr->type);
 
         getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
         //Copy property data

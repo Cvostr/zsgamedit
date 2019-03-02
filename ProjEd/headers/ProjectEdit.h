@@ -96,9 +96,11 @@ struct PropertyPaintState{
     GameObjectProperty* prop_ptr;
 
     float time;
+    int last_obj = 0;
 
     PropertyPaintState(){
         time = 0;
+        last_obj = -1;
         enabled = false;
         prop_ptr = nullptr;
     }
