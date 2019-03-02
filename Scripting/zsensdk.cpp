@@ -44,11 +44,9 @@ void ZSENSDK::Input::addHeldKeyToQueue(int keycode){
     }
 }
 void ZSENSDK::Input::removeHeldKeyFromQueue(int keycode){
-    //int pos;
     for(int iterator = 0; iterator < hold_keys_q_size; iterator ++){
         if(hold_keys_queue[iterator] == keycode){
             hold_keys_queue[iterator] = KEY_NONE;
-            //pos = iterator;
         }
     }
     /*for (unsigned int obj_i = pos + 1; obj_i < hold_keys_q_size; obj_i ++) { //Iterate over all next chidren
@@ -122,7 +120,11 @@ void ZSENSDK::ZSEN_World::removeObject(ZSENGmObject obj){
     world_ptr->removeObj(obj.updPtr()->getLinkToThisObject());
 }
 void ZSENSDK::ZSEN_World::setCamera(ZSPIRE::Camera cam){
-
+    cam.setViewport(world_ptr->world_camera.getViewport());
+    world_ptr->world_camera = cam;
+}
+ZSPIRE::Camera ZSENSDK::ZSEN_World::getCamera(){
+    return world_ptr->world_camera;
 }
 //Property functions
 ZSVECTOR3 ZSENSDK::ZSENTransformProperty::getPosition(){
@@ -207,14 +209,26 @@ void ZSENSDK::bindSDK(lua_State* state){
         .addFunction("distance", &getDistance)
         .addFunction("normalize", &ZSENSDK::Math::vnormalize);
 
+    luabridge::getGlobalNamespace(state).beginClass <ZSVIEWPORT>("CmViewport")
+            .addData("startX", &ZSVIEWPORT::startX)
+            .addData("startY", &ZSVIEWPORT::startY)
+            .addData("endX", &ZSVIEWPORT::endX)
+            .addData("endY", &ZSVIEWPORT::endY)
+            .addConstructor <void(*) (unsigned int, unsigned int, unsigned int, unsigned int)>()
+            .endClass();
+
     luabridge::getGlobalNamespace(state).beginClass <ZSPIRE::Camera>("Camera")
 
-
-            .addFunction("pos", &ZSPIRE::Camera::getCameraPosition)
-            .addFunction("front", &ZSPIRE::Camera::getCameraFrontVec)
-
-            .addFunction("setPos", &ZSPIRE::Camera::setPosition)
+            .addFunction("setPosition", &ZSPIRE::Camera::setPosition)
             .addFunction("setFront", &ZSPIRE::Camera::setFront)
+            .addFunction("getPosition", &ZSPIRE::Camera::getCameraPosition)
+            .addFunction("getFront", &ZSPIRE::Camera::getCameraFrontVec)
+
+            .addFunction("setProjection", &ZSPIRE::Camera::setProjectionType)
+            .addFunction("setZplanes", &ZSPIRE::Camera::setZplanes)
+
+            .addFunction("setViewport", &ZSPIRE::Camera::setViewport)
+            .addFunction("getViewport", &ZSPIRE::Camera::getViewport)
 
             .endClass();
 
@@ -222,7 +236,7 @@ void ZSENSDK::bindSDK(lua_State* state){
             .addData("r", &ZSRGBCOLOR::r)
             .addData("g", &ZSRGBCOLOR::g)
             .addData("b", &ZSRGBCOLOR::b)
-            //.addConstructor <void(*) (float, float, float)>()
+            .addConstructor <void(*) (float, float, float, float)>()
             .endClass();
 
 luabridge::getGlobalNamespace(state)
@@ -244,6 +258,7 @@ luabridge::getGlobalNamespace(state)
         .addFunction("findObject", &ZSENSDK::ZSEN_World::getObjectSDK)
         .addFunction("removeObject", &ZSENSDK::ZSEN_World::removeObject)
         .addFunction("setCamera", &ZSENSDK::ZSEN_World::setCamera)
+        .addFunction("getCamera", &ZSENSDK::ZSEN_World::getCamera)
 
         .endClass()
         .endNamespace();

@@ -460,6 +460,7 @@ void GameObject::pick(){
 void GameObject::copyTo(GameObject* dest){
     dest->array_index = this->array_index;
     dest->alive = this->alive;
+    dest->active = this->active;
     dest->hasParent = this->hasParent;
     dest->parent = this->parent;
     dest->str_id = this->str_id;
@@ -558,8 +559,10 @@ void World::clear(){
 }
 
 void World::putToShapshot(WorldSnapshot* snapshot){
-    snapshot->objects.resize(this->objects.size());
+    //iterate over all objects in scene
+    //snapshot->objects.resize(this->objects.size());
     for(unsigned int objs_num = 0; objs_num < this->objects.size(); objs_num ++){
+        //Obtain pointer to object
         GameObject* obj_ptr = &this->objects[objs_num];
         if(obj_ptr->alive == false) continue;
         for(unsigned int prop_i = 0; prop_i < obj_ptr->props_num; prop_i ++){
@@ -568,11 +571,11 @@ void World::putToShapshot(WorldSnapshot* snapshot){
             new_prop->go_link = prop_ptr->go_link;
             prop_ptr->copyTo(new_prop);
             snapshot->props.push_back(new_prop);
-
         }
         GameObject newobj;
         obj_ptr->copyTo(&newobj);
-        snapshot->objects[objs_num] = newobj;
+        snapshot->objects.push_back(newobj);
+        //snapshot->objects[objs_num] = newobj;
     }
 }
 
@@ -580,23 +583,25 @@ void World::recoverFromSnapshot(WorldSnapshot* snapshot){
     this->clear(); //clear world container first
     obj_widget_ptr->clear(); //clear objects tree
     //iterate over all objects in snapshot
+    GameObject* newobj_ptr = nullptr;
+
     for(unsigned int objs_num = 0; objs_num < snapshot->objects.size(); objs_num ++){
         GameObject* obj_ptr = &snapshot->objects[objs_num];
-
+        //Create new object
         GameObject newobj;
-        obj_ptr->copyTo(&newobj);
-        this->addObject(newobj);
+        obj_ptr->copyTo(&newobj); //Copy object's settings
+        newobj_ptr = this->addObject(newobj); //add object and store pointer to it's new place
     }
-
+    //iterate over all properties in object in snapshot
     for(unsigned int prop_i = 0; prop_i < snapshot->props.size(); prop_i ++){
         auto prop_ptr = snapshot->props[prop_i];
-        GameObjectLink link = prop_ptr->go_link;
-        link.world_ptr = this;
-        GameObject* obj_ptr = link.updLinkPtr();
-        obj_ptr->addProperty(prop_ptr->type);
+        GameObjectLink link = prop_ptr->go_link; //Define a link to created object
+        link.world_ptr = this; //Set an new world pointer
+        GameObject* obj_ptr = link.updLinkPtr(); //Calculate pointer to new object
+        obj_ptr->addProperty(prop_ptr->type); //Add new property to created object
         auto new_prop = obj_ptr->getPropertyPtrByType(prop_ptr->type);
         prop_ptr->copyTo(new_prop);
-        if(prop_ptr->type == GO_PROPERTY_TYPE_LABEL){
+        if(prop_ptr->type == GO_PROPERTY_TYPE_LABEL){ //If it is label, we have to do extra stuff
             LabelProperty* label_p = static_cast<LabelProperty*>(new_prop);
             obj_ptr->label = &label_p->label;
             obj_ptr->item_ptr->setText(0, *obj_ptr->label);
@@ -666,4 +671,5 @@ void WorldSnapshot::clear(){
     for(unsigned int prop_it = 0; prop_it < props.size(); prop_it ++){
         delete props[prop_it];
     }
+    props.clear();
 }

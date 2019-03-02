@@ -95,7 +95,12 @@ struct PropertyPaintState{
     bool enabled;
     GameObjectProperty* prop_ptr;
 
+    float time;
+    int last_obj = 0;
+
     PropertyPaintState(){
+        time = 0;
+        last_obj = -1;
         enabled = false;
         prop_ptr = nullptr;
     }
@@ -145,6 +150,7 @@ private:
     float cam_pitch = 0;
     float cam_yaw = 0;
 public:
+    float deltaTime;
     bool ready; //Is everything loaded?
     int close_reason;
     bool isSceneRun; //Is scene running right now

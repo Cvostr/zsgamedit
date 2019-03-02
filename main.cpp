@@ -1,8 +1,13 @@
 #include "mainwin.h"
 #include <QApplication>
 #include <SDL2/SDL.h>
+#include <iostream>
 
 #include "Scripting/headers/zsensdk.h"
+
+uint64_t NOW = SDL_GetPerformanceCounter();
+uint64_t last = 0;
+float deltaTime = 0;
 
 int main(int argc, char *argv[])
 {
@@ -11,16 +16,22 @@ int main(int argc, char *argv[])
     w.show();
     bool working = true; //Application started and it is working
     while (working) {
-            a.processEvents();
+        //Time calculation
+        last = NOW;
+        NOW = SDL_GetPerformanceCounter();
+        deltaTime = (NOW - last) * 1000 / SDL_GetPerformanceFrequency();
 
-            if(w.edit_win_ptr != nullptr){ //Check if project editor window is created
-                //Close checks
-                if(w.edit_win_ptr->close_reason == EW_CLOSE_REASON_PROJLIST){
-                    w.edit_win_ptr->close_reason = EW_CLOSE_REASON_UNCLOSED;
-                    w.show();
-                }
+        a.processEvents();
 
-            SDL_Event event;
+        if(w.edit_win_ptr != nullptr){ //Check if project editor window is created
+            //Close checks
+            if(w.edit_win_ptr->close_reason == EW_CLOSE_REASON_PROJLIST){
+                w.edit_win_ptr->close_reason = EW_CLOSE_REASON_UNCLOSED;
+                w.show();
+             }
+        w.edit_win_ptr->deltaTime = deltaTime; //Send delta time to editor window
+        //std::cout << deltaTime << std::endl;
+        SDL_Event event;
                 while (SDL_PollEvent(&event))
                 {
                     if (event.type == SDL_QUIT) { //If user caused SDL window to close
