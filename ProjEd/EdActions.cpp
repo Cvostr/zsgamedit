@@ -23,12 +23,20 @@ EdPropertyAction::EdPropertyAction(){
     this->container_ptr = nullptr;
 }
 
+EdObjectAction::EdObjectAction(){
+    this->type = ACT_TYPE_OBJECT;
+}
+
 void EdSnapshotAction::clear(){
     this->snapshot.clear();
 }
 
 void EdPropertyAction::clear(){
     delete container_ptr;
+}
+
+void EdObjectAction::clear(){
+
 }
 
 void EdActions::newSnapshotAction(World* world_ptr){
@@ -66,6 +74,22 @@ void EdActions::newPropertyAction(GameObjectLink link, int property_type){
     }
 }
 
+void EdActions::newGameObjectAction(GameObjectLink link){
+    EdObjectAction* new_action = new EdObjectAction;
+
+    link.updLinkPtr()->putToSnapshot(&new_action->snapshot);
+
+    if(this->current_pos < this->end_pos){
+        this->action_list[current_pos] = new_action;
+
+        current_pos += 1;
+    }else{
+        this->action_list.push_back(new_action);
+        current_pos += 1;
+        end_pos += 1;
+    }
+}
+
 void EdActions::undo(){
     if(current_pos == 0) return; //if no actions done
     int act_type = this->action_list[current_pos - 1]->type; //getting action type
@@ -80,6 +104,20 @@ void EdActions::undo(){
 
         snapshot->clear(); //Clear previous state
         snapshot->snapshot = cur_state_snap; //put previous state to current actions
+    }
+
+    if(act_type == ACT_TYPE_OBJECT){ //if this action is snapshot
+        EdObjectAction* snapshot = static_cast<EdObjectAction*>(this->action_list[current_pos - 1]);
+
+        //WorldSnapshot cur_state_snap; //Declare snapshot to store current state
+        //world_ptr->putToShapshot(&cur_state_snap); //Backup current state
+
+        int array_index = snapshot->snapshot.obj_array_ind;
+
+        world_ptr->objects[array_index].recoverFromSnapshot(&snapshot->snapshot); //Recover previous state
+
+        //snapshot->clear(); //Clear previous state
+        //snapshot->snapshot = cur_state_snap; //put previous state to current actions
     }
 
     if(act_type == ACT_TYPE_PROPERTY){ //if this action is property

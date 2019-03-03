@@ -140,9 +140,14 @@ public:
 class GameObjectSnapshot{
 public:
     GameObject reserved_obj;
+    std::vector<GameObjectLink> children; //Vector to store links to children of object
     GameObjectProperty* properties[OBJ_PROPS_SIZE];
 
+    GameObjectLink parent_link;
+
     int props_num;
+
+    int obj_array_ind;
 
     GameObjectSnapshot();
 };

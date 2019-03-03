@@ -203,6 +203,8 @@ public slots:
     void onMoveClicked();
     void onScaleClicked();
     void onRotateClicked();
+
+    void onInfoPressed();
 private:
     GameObject* obj_ptr;
     QMenu* menu; //Menu object to contain everything
@@ -213,6 +215,8 @@ private:
     QAction* action_move;
     QAction* action_scale;
     QAction* action_rotate;
+
+    QAction* object_info; //Show dialog with detailed object information
 public:
     bool displayTransforms;
     EditWindow* win_ptr;

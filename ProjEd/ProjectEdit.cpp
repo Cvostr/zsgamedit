@@ -564,10 +564,6 @@ InspectorWin* EditWindow::getInspector(){
     return _inspector_win;
 }
 
-void ObjectCtxMenu::setObjectPtr(GameObject* obj_ptr){
-    this->obj_ptr = obj_ptr;
-}
-
 void ObjectCtxMenu::close(){
     menu->removeAction(action_move);
     menu->removeAction(action_scale);
@@ -592,17 +588,6 @@ void ObjectCtxMenu::onDublicateClicked(){
     }else{
         win_ptr->ui->objsList->addTopLevelItem(result->item_ptr);
     }
-}
-
-void ObjectCtxMenu::onMoveClicked(){
-    win_ptr->obj_trstate.setTransformOnObject(win_ptr->obj_trstate.obj_ptr, GO_TRANSFORM_MODE_TRANSLATE);
-}
-void ObjectCtxMenu::onScaleClicked(){
-    win_ptr->obj_trstate.setTransformOnObject(win_ptr->obj_trstate.obj_ptr, GO_TRANSFORM_MODE_SCALE);
-}
-void ObjectCtxMenu::onRotateClicked(){
-    //Set state to rotate object
-    win_ptr->obj_trstate.setTransformOnObject(win_ptr->obj_trstate.obj_ptr, GO_TRANSFORM_MODE_ROTATE);
 }
 
 void ObjTreeWgt::dropEvent(QDropEvent* event){
@@ -811,7 +796,9 @@ void EditWindow::onKeyDown(SDL_Keysym sym){
 }
 
 void EditWindow::callObjectDeletion(GameObjectLink link){
-    _ed_actions_container->newSnapshotAction(&this->world);
+    //_ed_actions_container->newSnapshotAction(&this->world);
+    _ed_actions_container->newGameObjectAction(link);
+
     world.removeObj(link); //delete object
     this->obj_trstate.isTransforming = false; //disabling object transform
     getInspector()->clearContentLayout(); //Detach object from inspector

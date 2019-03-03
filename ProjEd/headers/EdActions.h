@@ -8,6 +8,7 @@
 #define ACT_TYPE_NONE 0
 #define ACT_TYPE_SNAPSHOT 1
 #define ACT_TYPE_PROPERTY 2
+#define ACT_TYPE_OBJECT 3
 
 class EdAction{
 public:
@@ -36,6 +37,14 @@ public:
     EdPropertyAction();
 };
 
+class EdObjectAction : public EdAction{
+public:
+    GameObjectSnapshot snapshot;
+
+    void clear();
+    EdObjectAction();
+};
+
 class EdActions{
 public:
     std::vector<EdAction*> action_list;
@@ -47,6 +56,8 @@ public:
 
     void newSnapshotAction(World* world_ptr);
     void newPropertyAction(GameObjectLink link, int property_type);
+    void newGameObjectAction(GameObjectLink link);
+
     void clear();
 
     void undo();

@@ -1,5 +1,6 @@
 #include "headers/ProjectEdit.h"
 
+#include <QMessageBox>
 #include <QMouseEvent>
 
 ObjTreeWgt::ObjTreeWgt(QWidget* parent) : QTreeWidget (parent){
@@ -39,6 +40,8 @@ ObjectCtxMenu::ObjectCtxMenu(EditWindow* win, QWidget* parent ) : QObject(parent
     action_move = new QAction("Move", win);
     action_scale = new QAction("Scale", win);
     action_rotate = new QAction("Rotate", win);
+
+    object_info = new QAction("Info", win);
     //Adding actions to menu container
     this->menu->addAction(action_dub);
     this->menu->addAction(action_delete);
@@ -46,6 +49,7 @@ ObjectCtxMenu::ObjectCtxMenu(EditWindow* win, QWidget* parent ) : QObject(parent
     this->menu->addAction(action_move);
     this->menu->addAction(action_scale);
     this->menu->addAction(action_rotate);
+    this->menu->addAction(object_info);
     //Connect actions to slots
     QObject::connect(this->action_delete, SIGNAL(triggered(bool)), this, SLOT(onDeleteClicked()));
     QObject::connect(this->action_dub, SIGNAL(triggered(bool)), this, SLOT(onDublicateClicked()));
@@ -53,10 +57,40 @@ ObjectCtxMenu::ObjectCtxMenu(EditWindow* win, QWidget* parent ) : QObject(parent
     QObject::connect(this->action_move, SIGNAL(triggered(bool)), this, SLOT(onMoveClicked()));
     QObject::connect(this->action_scale, SIGNAL(triggered(bool)), this, SLOT(onScaleClicked()));
     QObject::connect(this->action_rotate, SIGNAL(triggered(bool)), this, SLOT(onRotateClicked()));
+
+    QObject::connect(this->object_info, SIGNAL(triggered(bool)), this, SLOT(onInfoPressed()));
 }
 
 void ObjectCtxMenu::show(QPoint point){
     menu->popup(point);
+}
+
+void ObjectCtxMenu::setObjectPtr(GameObject* obj_ptr){
+    this->obj_ptr = obj_ptr;
+}
+
+void ObjectCtxMenu::onMoveClicked(){
+    win_ptr->obj_trstate.setTransformOnObject(win_ptr->obj_trstate.obj_ptr, GO_TRANSFORM_MODE_TRANSLATE);
+}
+void ObjectCtxMenu::onScaleClicked(){
+    win_ptr->obj_trstate.setTransformOnObject(win_ptr->obj_trstate.obj_ptr, GO_TRANSFORM_MODE_SCALE);
+}
+void ObjectCtxMenu::onRotateClicked(){
+    //Set state to rotate object
+    win_ptr->obj_trstate.setTransformOnObject(win_ptr->obj_trstate.obj_ptr, GO_TRANSFORM_MODE_ROTATE);
+}
+
+void ObjectCtxMenu::onInfoPressed(){
+    QString out = "";
+    out += ("Label : " + *obj_ptr->label + QString(" \n"));
+    out += "STR ID : " + QString::fromStdString(obj_ptr->str_id) + QString(" \n");
+    out += "ARRAY ID : " + QString::number(obj_ptr->array_index) + QString(" \n");
+    out += "RENDER_MODE : " + QString::number(obj_ptr->render_type) + QString(" \n");
+
+    QMessageBox msgBox;
+    msgBox.setWindowTitle("Object");
+    msgBox.setText(out);
+    msgBox.exec();
 }
 
 FileCtxMenu::FileCtxMenu(EditWindow* win, QWidget* parent) : QObject(parent){

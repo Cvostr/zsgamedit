@@ -223,8 +223,11 @@ void GameObject::onUpdate(int deltaTime){
 void GameObject::putToSnapshot(GameObjectSnapshot* snapshot){
     snapshot->props_num = 0;
 
-    this->copyTo(&snapshot->reserved_obj);
+    snapshot->parent_link = this->parent;
+    snapshot->obj_array_ind = this->array_index;
 
+    this->copyTo(&snapshot->reserved_obj);
+    //Copy all properties
     for(unsigned int i = 0; i < this->props_num; i ++){
         GameObjectProperty* prop_ptr = this->properties[i];
         GameObjectProperty* new_prop_ptr = allocProperty(prop_ptr->type);
@@ -232,18 +235,29 @@ void GameObject::putToSnapshot(GameObjectSnapshot* snapshot){
         snapshot->properties[snapshot->props_num] = new_prop_ptr;
         snapshot->props_num += 1;
     }
+    //Copy all children links
+    for(unsigned int i = 0; i < this->children.size(); i ++){
+        snapshot->children.push_back(this->children[i]);
+    }
+
 }
 void GameObject::recoverFromSnapshot(GameObjectSnapshot* snapshot){
 
     snapshot->reserved_obj.copyTo(this);
 
-    for(unsigned int i = 0; i < this->snapshot->props_num; i ++){
-       /* GameObjectProperty* prop_ptr = this->properties[i];
+    for(unsigned int i = 0; i < snapshot->props_num; i ++){
+        GameObjectProperty* prop_ptr = snapshot->properties[i];
         GameObjectProperty* new_prop_ptr = allocProperty(prop_ptr->type);
         prop_ptr->copyTo(new_prop_ptr);
-        snapshot->properties[snapshot->props_num] = new_prop_ptr;
-        snapshot->props_num += 1;*/
+        this->properties[props_num] = new_prop_ptr;
+        props_num += 1;
     }
+    if(this->hasParent){
+        snapshot->parent_link.updLinkPtr()->children.push_back(this->getLinkToThisObject());
+    }
+}
+
+GameObjectSnapshot::GameObjectSnapshot(){
 }
 
 World::World(){
