@@ -14,9 +14,13 @@
 #include "../../Render/headers/zs-shader.h"
 #include "../../Misc/headers/oal_manager.h"
 
+#define OBJ_PROPS_SIZE 11
+#define MAX_OBJS 12000
+
 class GameObject;
 class World;
 class GameObjectProperty;
+class GameObjectSnapshot;
 
 class GameObjectLink{
 public:
@@ -91,15 +95,15 @@ public:
     std::string str_id; //String, gameobject identified by
     bool hasParent; //If object has a parent
     bool alive; //if object marked as removed
-    bool isPicked;
+    bool isPicked; //if user selected this object to edit it
     bool active;
     World* world_ptr; //pointer to world, when object placed
     GameObjectLink parent; //Link to object's parent
-    int render_type;
+    int render_type; //Render mode of this object
 
     unsigned int props_num; //Count of created props
     QTreeWidgetItem* item_ptr;
-    GameObjectProperty* properties[10]; //Vector to store pointers to all properties
+    GameObjectProperty* properties[OBJ_PROPS_SIZE]; //Vector to store pointers to all properties
     std::vector<GameObjectLink> children; //Vector to store links to children of object
     int getAliveChildrenAmount(); //Gets current amount of children objects (exclude removed chidren)
     void pick(); //Mark object and its children picked
@@ -126,8 +130,21 @@ public:
     void Draw(RenderPipeline* pipeline); //On render pipeline wish to draw the object
     void onUpdate(int deltaTime); //calls onUpdate on all properties
 
+    void putToSnapshot(GameObjectSnapshot* snapshot);
+    void recoverFromSnapshot(GameObjectSnapshot* snapshot);
+
     GameObject(); //Default constructor
     ~GameObject();
+};
+
+class GameObjectSnapshot{
+public:
+    GameObject reserved_obj;
+    GameObjectProperty* properties[OBJ_PROPS_SIZE];
+
+    int props_num;
+
+    GameObjectSnapshot();
 };
 
 class WorldSnapshot{

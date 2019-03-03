@@ -44,7 +44,7 @@ GameObject::GameObject(){
     props_num = 0;
     label = nullptr;
 
-    for(int prop_i = 0; prop_i < 10; prop_i ++){ //iterate over all property pointers and clear them
+    for(int prop_i = 0; prop_i < OBJ_PROPS_SIZE; prop_i ++){ //iterate over all property pointers and clear them
         properties[prop_i] = nullptr;
     }
 }
@@ -220,8 +220,34 @@ void GameObject::onUpdate(int deltaTime){
     }
 }
 
+void GameObject::putToSnapshot(GameObjectSnapshot* snapshot){
+    snapshot->props_num = 0;
+
+    this->copyTo(&snapshot->reserved_obj);
+
+    for(unsigned int i = 0; i < this->props_num; i ++){
+        GameObjectProperty* prop_ptr = this->properties[i];
+        GameObjectProperty* new_prop_ptr = allocProperty(prop_ptr->type);
+        prop_ptr->copyTo(new_prop_ptr);
+        snapshot->properties[snapshot->props_num] = new_prop_ptr;
+        snapshot->props_num += 1;
+    }
+}
+void GameObject::recoverFromSnapshot(GameObjectSnapshot* snapshot){
+
+    snapshot->reserved_obj.copyTo(this);
+
+    for(unsigned int i = 0; i < this->snapshot->props_num; i ++){
+       /* GameObjectProperty* prop_ptr = this->properties[i];
+        GameObjectProperty* new_prop_ptr = allocProperty(prop_ptr->type);
+        prop_ptr->copyTo(new_prop_ptr);
+        snapshot->properties[snapshot->props_num] = new_prop_ptr;
+        snapshot->props_num += 1;*/
+    }
+}
+
 World::World(){
-    objects.reserve(11000);
+    objects.reserve(MAX_OBJS);
     proj_ptr = nullptr;
 }
 
