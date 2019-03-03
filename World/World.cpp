@@ -250,11 +250,27 @@ void GameObject::recoverFromSnapshot(GameObjectSnapshot* snapshot){
         GameObjectProperty* new_prop_ptr = allocProperty(prop_ptr->type);
         prop_ptr->copyTo(new_prop_ptr);
         this->properties[props_num] = new_prop_ptr;
+        new_prop_ptr->go_link = this->getLinkToThisObject();
         props_num += 1;
+
+        if(prop_ptr->type == GO_PROPERTY_TYPE_LABEL){ //If it is label, we have to do extra stuff
+            if(this->item_ptr == 0x0) item_ptr = new QTreeWidgetItem;   
+
+            LabelProperty* label_p = static_cast<LabelProperty*>(new_prop_ptr);
+            this->label = &label_p->label;
+            this->item_ptr->setText(0, *this->label);
+            label_p->list_item_ptr = this->item_ptr;
+        }
     }
-    if(this->hasParent){
+    if(this->hasParent){ //if object was parented
         snapshot->parent_link.updLinkPtr()->children.push_back(this->getLinkToThisObject());
+        this->parent = snapshot->parent_link;
+
+        parent.updLinkPtr()->item_ptr->addChild(this->item_ptr);
+    }else{
+        this->world_ptr->obj_widget_ptr->addTopLevelItem(this->item_ptr);
     }
+    this->getTransformProperty()->updateMat();
 }
 
 GameObjectSnapshot::GameObjectSnapshot(){

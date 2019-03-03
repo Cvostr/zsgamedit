@@ -239,6 +239,7 @@ void TransformProperty::copyTo(GameObjectProperty* dest){
     _dest->scale = scale;
     _dest->rotation = rotation;
     _dest->transform_mat = transform_mat;
+    _dest->transform_mat = this->transform_mat;
 }
 
 //Label property functions
