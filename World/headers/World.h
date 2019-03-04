@@ -141,6 +141,7 @@ class GameObjectSnapshot{
 public:
     GameObject reserved_obj;
     std::vector<GameObjectLink> children; //Vector to store links to children of object
+    std::vector<GameObjectSnapshot> children_snapshots;
     GameObjectProperty* properties[OBJ_PROPS_SIZE];
 
     GameObjectLink parent_link;
@@ -173,6 +174,7 @@ public:
     GameObject* newObject(); //Add new object to world
     GameObject* getObjectByLabel(QString label);
     GameObject* getObjectByStringId(std::string id);
+    int getFreeObjectSpaceIndex();
     bool isObjectLabelUnique(QString label); //Get amount of objects with this label
     void removeObj(GameObjectLink link); //Remove object from world
     GameObject* dublicateObject(GameObject* original, bool parent = true);

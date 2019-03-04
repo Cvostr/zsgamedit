@@ -235,14 +235,17 @@ void GameObject::putToSnapshot(GameObjectSnapshot* snapshot){
         snapshot->properties[snapshot->props_num] = new_prop_ptr;
         snapshot->props_num += 1;
     }
+    snapshot->children_snapshots.resize(this->children.size());
     //Copy all children links
     for(unsigned int i = 0; i < this->children.size(); i ++){
         snapshot->children.push_back(this->children[i]);
+
+        children[i].ptr->putToSnapshot(&snapshot->children_snapshots[i]);
     }
 
 }
 void GameObject::recoverFromSnapshot(GameObjectSnapshot* snapshot){
-
+    this->clearAll();
     snapshot->reserved_obj.copyTo(this);
 
     for(unsigned int i = 0; i < snapshot->props_num; i ++){
@@ -262,6 +265,14 @@ void GameObject::recoverFromSnapshot(GameObjectSnapshot* snapshot){
             label_p->list_item_ptr = this->item_ptr;
         }
     }
+
+    for(unsigned int i = 0; i < snapshot->children.size(); i ++){
+        //snapshot->children.push_back(this->children[i]);
+        GameObjectLink link = snapshot->children[i];
+        link.updLinkPtr()->recoverFromSnapshot(&snapshot->children_snapshots[i]);
+        //children[i].ptr->putToSnapshot(&snapshot->children_snapshots[i]);
+    }
+
     if(this->hasParent){ //if object was parented
         snapshot->parent_link.updLinkPtr()->children.push_back(this->getLinkToThisObject());
         this->parent = snapshot->parent_link;
@@ -270,7 +281,7 @@ void GameObject::recoverFromSnapshot(GameObjectSnapshot* snapshot){
     }else{
         this->world_ptr->obj_widget_ptr->addTopLevelItem(this->item_ptr);
     }
-    this->getTransformProperty()->updateMat();
+    //this->getTransformProperty()->updateMat();
 }
 
 GameObjectSnapshot::GameObjectSnapshot(){
@@ -279,6 +290,22 @@ GameObjectSnapshot::GameObjectSnapshot(){
 World::World(){
     objects.reserve(MAX_OBJS);
     proj_ptr = nullptr;
+}
+
+int World::getFreeObjectSpaceIndex(){
+    int index_to_push = -1;
+    unsigned int objects_num = static_cast<unsigned int>(this->objects.size());
+    for(unsigned int objs_i = 0; objs_i < objects_num; objs_i ++){
+        if(objects[objs_i].alive == false){
+            index_to_push = objs_i;
+        }
+    }
+
+    if(index_to_push == -1){ //if all indeces are busy
+        return objects.size();
+    }else{ //if vector has an empty space
+        return index_to_push;
+    }
 }
 
 GameObject* World::addObject(GameObject obj){

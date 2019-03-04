@@ -235,6 +235,9 @@ void EditWindow::onNewScene(){
 }
 
 void EditWindow::onAddNewGameObject(){
+    int free_ind = world.getFreeObjectSpaceIndex();
+    _ed_actions_container->newGameObjectAction(world.objects[free_ind].getLinkToThisObject());
+
     GameObject* obj_ptr = this->world.newObject(); //Add new object to world
     ui->objsList->addTopLevelItem(obj_ptr->item_ptr); //New object will not have parents, so will be spawned at top
 }
