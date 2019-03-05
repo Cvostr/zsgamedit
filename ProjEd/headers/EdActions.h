@@ -40,6 +40,7 @@ public:
 class EdObjectAction : public EdAction{
 public:
     GameObjectSnapshot snapshot;
+    GameObjectLink linkToObj;
 
     void clear();
     EdObjectAction();

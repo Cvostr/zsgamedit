@@ -245,7 +245,18 @@ void GameObject::putToSnapshot(GameObjectSnapshot* snapshot){
 
 }
 void GameObject::recoverFromSnapshot(GameObjectSnapshot* snapshot){
-    this->clearAll();
+    this->clearAll(false);
+
+    if(snapshot->reserved_obj.alive == false && this->alive == true && this->item_ptr != 0x0){
+        delete this->item_ptr;
+        this->item_ptr = 0x0;
+    }
+
+    if(snapshot->reserved_obj.alive == true && this->alive == false && this->item_ptr == 0x0){
+        this->item_ptr = new QTreeWidgetItem;
+    }
+
+    //Copy object class content
     snapshot->reserved_obj.copyTo(this);
 
     for(unsigned int i = 0; i < snapshot->props_num; i ++){
@@ -257,8 +268,6 @@ void GameObject::recoverFromSnapshot(GameObjectSnapshot* snapshot){
         props_num += 1;
 
         if(prop_ptr->type == GO_PROPERTY_TYPE_LABEL){ //If it is label, we have to do extra stuff
-            if(this->item_ptr == 0x0) item_ptr = new QTreeWidgetItem;   
-
             LabelProperty* label_p = static_cast<LabelProperty*>(new_prop_ptr);
             this->label = &label_p->label;
             this->item_ptr->setText(0, *this->label);
@@ -266,12 +275,6 @@ void GameObject::recoverFromSnapshot(GameObjectSnapshot* snapshot){
         }
     }
 
-    for(unsigned int i = 0; i < snapshot->children.size(); i ++){
-        //snapshot->children.push_back(this->children[i]);
-        GameObjectLink link = snapshot->children[i];
-        link.updLinkPtr()->recoverFromSnapshot(&snapshot->children_snapshots[i]);
-        //children[i].ptr->putToSnapshot(&snapshot->children_snapshots[i]);
-    }
 
     if(this->hasParent){ //if object was parented
         snapshot->parent_link.updLinkPtr()->children.push_back(this->getLinkToThisObject());
@@ -281,7 +284,30 @@ void GameObject::recoverFromSnapshot(GameObjectSnapshot* snapshot){
     }else{
         this->world_ptr->obj_widget_ptr->addTopLevelItem(this->item_ptr);
     }
-    //this->getTransformProperty()->updateMat();
+
+
+    for(unsigned int i = 0; i < snapshot->children.size(); i ++){
+        GameObjectLink link = snapshot->children[i];
+        link.updLinkPtr()->recoverFromSnapshot(&snapshot->children_snapshots[i]);
+    }
+
+
+}
+
+void GameObjectSnapshot::clear(){
+    this->children.clear();
+
+    for(unsigned int prop = 0; prop < this->props_num; prop ++){
+        auto prop_ptr = this->properties[prop];
+        delete prop_ptr;
+    }
+
+
+    for(unsigned int child = 0; child < this->children.size(); child ++){
+        children_snapshots[child].clear();
+    }
+    children_snapshots.clear(); //Free snapshot vector
+    this->children.size(); //Free link vector
 }
 
 GameObjectSnapshot::GameObjectSnapshot(){
@@ -452,6 +478,8 @@ void World::removeObj(GameObjectLink link){
     GameObjectLink l = link;
     l.updLinkPtr();
     l.ptr->alive = false; //Mark object as dead
+
+    //this->obj_widget_ptr->removeItemWidget(link.updLinkPtr()->item_ptr, 0);
 
     unsigned int children_num = static_cast<unsigned int>(l.ptr->children.size());
 

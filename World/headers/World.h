@@ -150,6 +150,7 @@ public:
 
     int obj_array_ind;
 
+    void clear();
     GameObjectSnapshot();
 };
 

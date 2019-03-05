@@ -36,7 +36,7 @@ void EdPropertyAction::clear(){
 }
 
 void EdObjectAction::clear(){
-
+    this->snapshot.clear();
 }
 
 void EdActions::newSnapshotAction(World* world_ptr){
@@ -78,6 +78,8 @@ void EdActions::newGameObjectAction(GameObjectLink link){
     EdObjectAction* new_action = new EdObjectAction;
 
     link.updLinkPtr()->putToSnapshot(&new_action->snapshot);
+    new_action->linkToObj = link;
+    new_action->linkToObj.updLinkPtr();
 
     if(this->current_pos < this->end_pos){
         this->action_list[current_pos] = new_action;
@@ -109,15 +111,15 @@ void EdActions::undo(){
     if(act_type == ACT_TYPE_OBJECT){ //if this action is snapshot
         EdObjectAction* snapshot = static_cast<EdObjectAction*>(this->action_list[current_pos - 1]);
 
-        //WorldSnapshot cur_state_snap; //Declare snapshot to store current state
-        //world_ptr->putToShapshot(&cur_state_snap); //Backup current state
+        GameObjectSnapshot cur_state_snap; //Declare snapshot to store current state
+        snapshot->linkToObj.ptr->putToSnapshot(&cur_state_snap); //Backup current state
 
         int array_index = snapshot->snapshot.obj_array_ind;
 
         world_ptr->objects[array_index].recoverFromSnapshot(&snapshot->snapshot); //Recover previous state
 
-        //snapshot->clear(); //Clear previous state
-        //snapshot->snapshot = cur_state_snap; //put previous state to current actions
+        snapshot->clear(); //Clear previous state
+        snapshot->snapshot = cur_state_snap; //put previous state to current actions
     }
 
     if(act_type == ACT_TYPE_PROPERTY){ //if this action is property
@@ -152,6 +154,20 @@ void EdActions::redo(){
         world_ptr->recoverFromSnapshot(&snapshot->snapshot);
 
         snapshot->snapshot = cur_state_snap;
+    }
+
+    if(act_type == ACT_TYPE_OBJECT){
+        EdObjectAction* snapshot = static_cast<EdObjectAction*>(this->action_list[current_pos ]);
+
+        GameObjectSnapshot cur_state_snap; //Declare snapshot to store current state
+        snapshot->linkToObj.ptr->putToSnapshot(&cur_state_snap); //Backup current state
+
+        int array_index = snapshot->snapshot.obj_array_ind;
+
+        world_ptr->objects[array_index].recoverFromSnapshot(&snapshot->snapshot); //Recover previous state
+
+        snapshot->clear(); //Clear previous state
+        snapshot->snapshot = cur_state_snap; //put previous state to current actions
     }
 
     if(act_type == ACT_TYPE_PROPERTY){ //if this action is property
