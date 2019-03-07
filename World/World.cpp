@@ -247,12 +247,11 @@ void GameObject::putToSnapshot(GameObjectSnapshot* snapshot){
 void GameObject::recoverFromSnapshot(GameObjectSnapshot* snapshot){
     this->clearAll(false);
 
-    if(snapshot->reserved_obj.alive == false && this->alive == true && this->item_ptr != 0x0){
+    if(snapshot->reserved_obj.alive == false){
         delete this->item_ptr;
-        this->item_ptr = 0x0;
     }
 
-    if(snapshot->reserved_obj.alive == true && this->alive == false && this->item_ptr == 0x0){
+    if(snapshot->reserved_obj.alive == true){
         this->item_ptr = new QTreeWidgetItem;
     }
 
