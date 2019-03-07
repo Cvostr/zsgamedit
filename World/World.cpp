@@ -300,13 +300,13 @@ void GameObjectSnapshot::clear(){
         auto prop_ptr = this->properties[prop];
         delete prop_ptr;
     }
-
+    props_num = 0;
 
     for(unsigned int child = 0; child < this->children.size(); child ++){
         children_snapshots[child].clear();
     }
     children_snapshots.clear(); //Free snapshot vector
-    this->children.size(); //Free link vector
+    this->children.clear(); //Free link vector
 }
 
 GameObjectSnapshot::GameObjectSnapshot(){
