@@ -90,12 +90,16 @@ bool SoundBuffer::loadFileWAV(const char* file_path){
         fread(data_buffer, 1, 8, fstream);
         if (data_buffer[0] != 'f' || data_buffer[1] != 'm' || data_buffer[2] != 't' || data_buffer[3] != ' ')
         {
+            free(data_buffer); //Free heap
+            fclose(fstream); //Close stream
             return false;
         }
         fread(data_buffer, 1, 2, fstream);
         if (data_buffer[1] != 0 || data_buffer[0] != 1)
         {
-            fprintf(stderr, "Not PCM :(\n");
+            fclose(fstream);
+            free(data_buffer); //Free heap
+            fprintf(stderr, "Not PCM :(\n"); //Close stream
             return false;
         }
 
@@ -131,6 +135,7 @@ bool SoundBuffer::loadFileWAV(const char* file_path){
         }
         if (!format)
         {
+            free(data_buffer); //Free heap
             fprintf(stderr, "Incompatible format (%d, %d) :(\n", channels, bits);
             return false;
         }

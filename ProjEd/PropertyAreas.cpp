@@ -54,6 +54,7 @@ void AreaRadioGroup::addRadioButton(QRadioButton* btn){
 AreaRadioGroup::AreaRadioGroup(){
     btn_layout = new QVBoxLayout; //allocate layout object
     this->value_ptr = nullptr;
+    this->go_property = nullptr;
 }
 
 AreaRadioGroup::~AreaRadioGroup(){

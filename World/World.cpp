@@ -44,7 +44,7 @@ GameObject::GameObject(){
     props_num = 0;
     label = nullptr;
 
-    for(int prop_i = 0; prop_i < 10; prop_i ++){ //iterate over all property pointers and clear them
+    for(int prop_i = 0; prop_i < OBJ_PROPS_SIZE; prop_i ++){ //iterate over all property pointers and clear them
         properties[prop_i] = nullptr;
     }
 }
@@ -220,9 +220,117 @@ void GameObject::onUpdate(int deltaTime){
     }
 }
 
+void GameObject::putToSnapshot(GameObjectSnapshot* snapshot){
+    snapshot->props_num = 0;
+
+    snapshot->parent_link = this->parent;
+    snapshot->obj_array_ind = this->array_index;
+
+    this->copyTo(&snapshot->reserved_obj);
+    //Copy all properties
+    for(unsigned int i = 0; i < this->props_num; i ++){
+        GameObjectProperty* prop_ptr = this->properties[i];
+        GameObjectProperty* new_prop_ptr = allocProperty(prop_ptr->type);
+        prop_ptr->copyTo(new_prop_ptr);
+        snapshot->properties[snapshot->props_num] = new_prop_ptr;
+        snapshot->props_num += 1;
+    }
+    snapshot->children_snapshots.resize(this->children.size());
+    //Copy all children links
+    for(unsigned int i = 0; i < this->children.size(); i ++){
+        snapshot->children.push_back(this->children[i]);
+
+        children[i].ptr->putToSnapshot(&snapshot->children_snapshots[i]);
+    }
+
+}
+void GameObject::recoverFromSnapshot(GameObjectSnapshot* snapshot){
+    this->clearAll(false);
+
+    if(snapshot->reserved_obj.alive == false){
+        delete this->item_ptr;
+    }
+
+    if(snapshot->reserved_obj.alive == true){
+        this->item_ptr = new QTreeWidgetItem;
+    }
+
+    //Copy object class content
+    snapshot->reserved_obj.copyTo(this);
+
+    for(unsigned int i = 0; i < snapshot->props_num; i ++){
+        GameObjectProperty* prop_ptr = snapshot->properties[i];
+        GameObjectProperty* new_prop_ptr = allocProperty(prop_ptr->type);
+        prop_ptr->copyTo(new_prop_ptr);
+        this->properties[props_num] = new_prop_ptr;
+        new_prop_ptr->go_link = this->getLinkToThisObject();
+        props_num += 1;
+
+        if(prop_ptr->type == GO_PROPERTY_TYPE_LABEL){ //If it is label, we have to do extra stuff
+            LabelProperty* label_p = static_cast<LabelProperty*>(new_prop_ptr);
+            this->label = &label_p->label;
+            this->item_ptr->setText(0, *this->label);
+            label_p->list_item_ptr = this->item_ptr;
+        }
+    }
+
+
+    if(this->hasParent){ //if object was parented
+        snapshot->parent_link.updLinkPtr()->children.push_back(this->getLinkToThisObject());
+        this->parent = snapshot->parent_link;
+
+        parent.updLinkPtr()->item_ptr->addChild(this->item_ptr);
+    }else{
+        this->world_ptr->obj_widget_ptr->addTopLevelItem(this->item_ptr);
+    }
+
+
+    for(unsigned int i = 0; i < snapshot->children.size(); i ++){
+        GameObjectLink link = snapshot->children[i];
+        link.updLinkPtr()->recoverFromSnapshot(&snapshot->children_snapshots[i]);
+    }
+
+
+}
+
+void GameObjectSnapshot::clear(){
+    this->children.clear();
+
+    for(unsigned int prop = 0; prop < this->props_num; prop ++){
+        auto prop_ptr = this->properties[prop];
+        delete prop_ptr;
+    }
+    props_num = 0;
+
+    for(unsigned int child = 0; child < this->children.size(); child ++){
+        children_snapshots[child].clear();
+    }
+    children_snapshots.clear(); //Free snapshot vector
+    this->children.clear(); //Free link vector
+}
+
+GameObjectSnapshot::GameObjectSnapshot(){
+}
+
 World::World(){
-    objects.reserve(11000);
+    objects.reserve(MAX_OBJS);
     proj_ptr = nullptr;
+}
+
+int World::getFreeObjectSpaceIndex(){
+    int index_to_push = -1;
+    unsigned int objects_num = static_cast<unsigned int>(this->objects.size());
+    for(unsigned int objs_i = 0; objs_i < objects_num; objs_i ++){
+        if(objects[objs_i].alive == false){
+            index_to_push = objs_i;
+        }
+    }
+
+    if(index_to_push == -1){ //if all indeces are busy
+        return objects.size();
+    }else{ //if vector has an empty space
+        return index_to_push;
+    }
 }
 
 GameObject* World::addObject(GameObject obj){
@@ -352,10 +460,25 @@ void World::getAvailableNumObjLabel(QString label, int* result){
      }
 }
 
+bool World::isObjectLabelUnique(QString label){
+    unsigned int objs_num = static_cast<unsigned int>(this->objects.size());
+    int ret_amount = 0;
+    for(unsigned int obj_it = 0; obj_it < objs_num; obj_it ++){ //Iterate over all objs in scene
+        GameObject* obj_ptr = &this->objects[obj_it]; //Get pointer to checking object
+        if(obj_ptr->label->compare(label) == 0){
+            ret_amount += 1;
+            if(ret_amount > 1) return false;
+        }
+    }
+    return true;
+}
+
 void World::removeObj(GameObjectLink link){
     GameObjectLink l = link;
     l.updLinkPtr();
     l.ptr->alive = false; //Mark object as dead
+
+    //this->obj_widget_ptr->removeItemWidget(link.updLinkPtr()->item_ptr, 0);
 
     unsigned int children_num = static_cast<unsigned int>(l.ptr->children.size());
 

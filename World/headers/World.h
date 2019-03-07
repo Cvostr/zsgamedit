@@ -14,9 +14,13 @@
 #include "../../Render/headers/zs-shader.h"
 #include "../../Misc/headers/oal_manager.h"
 
+#define OBJ_PROPS_SIZE 11
+#define MAX_OBJS 12000
+
 class GameObject;
 class World;
 class GameObjectProperty;
+class GameObjectSnapshot;
 
 class GameObjectLink{
 public:
@@ -91,15 +95,15 @@ public:
     std::string str_id; //String, gameobject identified by
     bool hasParent; //If object has a parent
     bool alive; //if object marked as removed
-    bool isPicked;
+    bool isPicked; //if user selected this object to edit it
     bool active;
     World* world_ptr; //pointer to world, when object placed
     GameObjectLink parent; //Link to object's parent
-    int render_type;
+    int render_type; //Render mode of this object
 
     unsigned int props_num; //Count of created props
     QTreeWidgetItem* item_ptr;
-    GameObjectProperty* properties[10]; //Vector to store pointers to all properties
+    GameObjectProperty* properties[OBJ_PROPS_SIZE]; //Vector to store pointers to all properties
     std::vector<GameObjectLink> children; //Vector to store links to children of object
     int getAliveChildrenAmount(); //Gets current amount of children objects (exclude removed chidren)
     void pick(); //Mark object and its children picked
@@ -126,8 +130,28 @@ public:
     void Draw(RenderPipeline* pipeline); //On render pipeline wish to draw the object
     void onUpdate(int deltaTime); //calls onUpdate on all properties
 
+    void putToSnapshot(GameObjectSnapshot* snapshot);
+    void recoverFromSnapshot(GameObjectSnapshot* snapshot);
+
     GameObject(); //Default constructor
     ~GameObject();
+};
+
+class GameObjectSnapshot{
+public:
+    GameObject reserved_obj;
+    std::vector<GameObjectLink> children; //Vector to store links to children of object
+    std::vector<GameObjectSnapshot> children_snapshots;
+    GameObjectProperty* properties[OBJ_PROPS_SIZE];
+
+    GameObjectLink parent_link;
+
+    int props_num;
+
+    int obj_array_ind;
+
+    void clear();
+    GameObjectSnapshot();
 };
 
 class WorldSnapshot{
@@ -140,9 +164,6 @@ public:
 };
 
 class World{
-protected:
-    void getAvailableNumObjLabel(QString label, int* result);
-
 public:
     QTreeWidget* obj_widget_ptr;
     void* proj_ptr; //Pointer to Project structure
@@ -154,6 +175,8 @@ public:
     GameObject* newObject(); //Add new object to world
     GameObject* getObjectByLabel(QString label);
     GameObject* getObjectByStringId(std::string id);
+    int getFreeObjectSpaceIndex();
+    bool isObjectLabelUnique(QString label); //Get amount of objects with this label
     void removeObj(GameObjectLink link); //Remove object from world
     GameObject* dublicateObject(GameObject* original, bool parent = true);
     void trimObjectsList();
@@ -169,6 +192,9 @@ public:
 
     void putToShapshot(WorldSnapshot* snapshot);
     void recoverFromSnapshot(WorldSnapshot* snapshot);
+
+    void getAvailableNumObjLabel(QString label, int* result);
+
     World();
 
 };

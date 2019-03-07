@@ -50,6 +50,7 @@ public:
     int getFileSize(std::string file_path);
 
     BlobWriter(QString map_path, BuilderWindow* window);
+    ~BlobWriter();
 };
 
 class ProjBuilder{
@@ -62,6 +63,7 @@ private:
 public:
     void showWindow();
     void start();
+
     ProjBuilder(Project* proj);
 };
 

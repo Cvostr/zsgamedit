@@ -23,6 +23,10 @@ EdPropertyAction::EdPropertyAction(){
     this->container_ptr = nullptr;
 }
 
+EdObjectAction::EdObjectAction(){
+    this->type = ACT_TYPE_OBJECT;
+}
+
 void EdSnapshotAction::clear(){
     this->snapshot.clear();
 }
@@ -31,19 +35,15 @@ void EdPropertyAction::clear(){
     delete container_ptr;
 }
 
+void EdObjectAction::clear(){
+    this->snapshot.clear();
+}
+
 void EdActions::newSnapshotAction(World* world_ptr){
     EdSnapshotAction* new_action = new EdSnapshotAction;
     world_ptr->putToShapshot(&new_action->snapshot);
 
-    if(this->current_pos < this->end_pos){
-        this->action_list[current_pos] = new_action;
-
-        current_pos += 1;
-    }else{
-        this->action_list.push_back(new_action);
-        current_pos += 1;
-        end_pos += 1;
-    }
+    putNewAction(new_action);
 }
 
 void EdActions::newPropertyAction(GameObjectLink link, int property_type){
@@ -55,15 +55,17 @@ void EdActions::newPropertyAction(GameObjectLink link, int property_type){
     GameObjectProperty* origin_prop = link.updLinkPtr()->getPropertyPtrByType(property_type);
     origin_prop->copyTo(new_action->container_ptr);
 
-    if(this->current_pos < this->end_pos){
-        this->action_list[current_pos] = new_action;
+    putNewAction(new_action);
+}
 
-        current_pos += 1;
-    }else{
-        this->action_list.push_back(new_action);
-        current_pos += 1;
-        end_pos += 1;
-    }
+void EdActions::newGameObjectAction(GameObjectLink link){
+    EdObjectAction* new_action = new EdObjectAction;
+
+    link.updLinkPtr()->putToSnapshot(&new_action->snapshot);
+    new_action->linkToObj = link;
+    new_action->linkToObj.updLinkPtr();
+
+    putNewAction(new_action);
 }
 
 void EdActions::undo(){
@@ -77,6 +79,20 @@ void EdActions::undo(){
         world_ptr->putToShapshot(&cur_state_snap); //Backup current state
 
         world_ptr->recoverFromSnapshot(&snapshot->snapshot); //Recover previous state
+
+        snapshot->clear(); //Clear previous state
+        snapshot->snapshot = cur_state_snap; //put previous state to current actions
+    }
+
+    if(act_type == ACT_TYPE_OBJECT){ //if this action is snapshot
+        EdObjectAction* snapshot = static_cast<EdObjectAction*>(this->action_list[current_pos - 1]);
+
+        GameObjectSnapshot cur_state_snap; //Declare snapshot to store current state
+        snapshot->linkToObj.ptr->putToSnapshot(&cur_state_snap); //Backup current state
+
+        int array_index = snapshot->snapshot.obj_array_ind;
+
+        world_ptr->objects[array_index].recoverFromSnapshot(&snapshot->snapshot); //Recover previous state
 
         snapshot->clear(); //Clear previous state
         snapshot->snapshot = cur_state_snap; //put previous state to current actions
@@ -116,6 +132,20 @@ void EdActions::redo(){
         snapshot->snapshot = cur_state_snap;
     }
 
+    if(act_type == ACT_TYPE_OBJECT){
+        EdObjectAction* snapshot = static_cast<EdObjectAction*>(this->action_list[current_pos ]);
+
+        GameObjectSnapshot cur_state_snap; //Declare snapshot to store current state
+        snapshot->linkToObj.ptr->putToSnapshot(&cur_state_snap); //Backup current state
+
+        int array_index = snapshot->snapshot.obj_array_ind;
+
+        world_ptr->objects[array_index].recoverFromSnapshot(&snapshot->snapshot); //Recover previous state
+
+        snapshot->clear(); //Clear previous state
+        snapshot->snapshot = cur_state_snap; //put previous state to current actions
+    }
+
     if(act_type == ACT_TYPE_PROPERTY){ //if this action is property
         EdPropertyAction* snapshot = static_cast<EdPropertyAction*>(this->action_list[current_pos]);
         //Declare pointer to destination
@@ -132,6 +162,19 @@ void EdActions::redo(){
         snapshot->container_ptr = cur_state_prop;
     }
     current_pos += 1; //Move forward
+}
+
+void EdActions::putNewAction(EdAction* action){
+    //if we have some positions left in vector
+    if(this->current_pos < this->end_pos){
+        this->action_list[current_pos] = action;
+
+        current_pos += 1;
+    }else{ //Allocate new space in vector
+        this->action_list.push_back(action);
+        current_pos += 1;
+        end_pos += 1;
+    }
 }
 
 void EdActions::clear(){

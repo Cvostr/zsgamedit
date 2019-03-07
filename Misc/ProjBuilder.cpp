@@ -32,12 +32,14 @@ void ProjBuilder::start(){
         window->addToOutput("Resource #" + QString::number(res_i) + " type: " + type_str + " " + res_ptr->rel_path);
         writer->writeToBlob((proj_ptr->root_path + "/" + res_ptr->rel_path).toStdString(), res_ptr->rel_path.toStdString());
     }
-
+    delete writer;
 }
 
 ProjBuilder::ProjBuilder(Project* proj){
     this->window = new BuilderWindow;
     this->proj_ptr = proj;
+
+    this->writer = nullptr; //No writer by default
 }
 
 void ProjBuilder::prepareDirectory(){
@@ -77,6 +79,10 @@ BlobWriter::BlobWriter(QString map_path, BuilderWindow* window){
     created_blobs = 0;
 }
 
+BlobWriter::~BlobWriter(){
+    this->map_stream.close();
+}
+
 int BlobWriter::getFileSize(std::string file_path){
     FILE* file = fopen(file_path.c_str(), "rb");
     struct stat buff;
@@ -109,8 +115,9 @@ void BlobWriter::writeToBlob(std::string file_path, std::string rel_path){
 
     //Write data to map
     map_stream << "entry " << rel_path << " "; //write header
-    map_stream.write(reinterpret_cast<char*>(written_bytes), sizeof(int64_t));
-    map_stream.write(reinterpret_cast<char*>(size), sizeof(int));
+    map_stream.write(reinterpret_cast<char*>(&written_bytes), sizeof(int64_t));
+    map_stream.write(reinterpret_cast<char*>(&size), sizeof(int));
+    map_stream << "\n";
 
     this->written_bytes += size; //Increase amount of written bytes
 
