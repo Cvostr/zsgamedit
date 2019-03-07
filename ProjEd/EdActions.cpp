@@ -43,15 +43,7 @@ void EdActions::newSnapshotAction(World* world_ptr){
     EdSnapshotAction* new_action = new EdSnapshotAction;
     world_ptr->putToShapshot(&new_action->snapshot);
 
-    if(this->current_pos < this->end_pos){
-        this->action_list[current_pos] = new_action;
-
-        current_pos += 1;
-    }else{
-        this->action_list.push_back(new_action);
-        current_pos += 1;
-        end_pos += 1;
-    }
+    putNewAction(new_action);
 }
 
 void EdActions::newPropertyAction(GameObjectLink link, int property_type){
@@ -63,15 +55,7 @@ void EdActions::newPropertyAction(GameObjectLink link, int property_type){
     GameObjectProperty* origin_prop = link.updLinkPtr()->getPropertyPtrByType(property_type);
     origin_prop->copyTo(new_action->container_ptr);
 
-    if(this->current_pos < this->end_pos){
-        this->action_list[current_pos] = new_action;
-
-        current_pos += 1;
-    }else{
-        this->action_list.push_back(new_action);
-        current_pos += 1;
-        end_pos += 1;
-    }
+    putNewAction(new_action);
 }
 
 void EdActions::newGameObjectAction(GameObjectLink link){
@@ -81,15 +65,7 @@ void EdActions::newGameObjectAction(GameObjectLink link){
     new_action->linkToObj = link;
     new_action->linkToObj.updLinkPtr();
 
-    if(this->current_pos < this->end_pos){
-        this->action_list[current_pos] = new_action;
-
-        current_pos += 1;
-    }else{
-        this->action_list.push_back(new_action);
-        current_pos += 1;
-        end_pos += 1;
-    }
+    putNewAction(new_action);
 }
 
 void EdActions::undo(){
@@ -186,6 +162,19 @@ void EdActions::redo(){
         snapshot->container_ptr = cur_state_prop;
     }
     current_pos += 1; //Move forward
+}
+
+void EdActions::putNewAction(EdAction* action){
+    //if we have some positions left in vector
+    if(this->current_pos < this->end_pos){
+        this->action_list[current_pos] = action;
+
+        current_pos += 1;
+    }else{ //Allocate new space in vector
+        this->action_list.push_back(action);
+        current_pos += 1;
+        end_pos += 1;
+    }
 }
 
 void EdActions::clear(){

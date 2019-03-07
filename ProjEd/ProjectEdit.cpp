@@ -78,6 +78,7 @@ EditWindow::EditWindow(QWidget *parent) :
 
     ui->actionBuild->setShortcut(Qt::Key_B | Qt::CTRL);
     ui->actionRun->setShortcut(Qt::Key_R | Qt::CTRL);
+
 }
 
 EditWindow::~EditWindow()

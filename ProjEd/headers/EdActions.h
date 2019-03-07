@@ -59,6 +59,8 @@ public:
     void newPropertyAction(GameObjectLink link, int property_type);
     void newGameObjectAction(GameObjectLink link);
 
+    void putNewAction(EdAction* action);
+
     void clear();
 
     void undo();
