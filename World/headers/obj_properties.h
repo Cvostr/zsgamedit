@@ -60,6 +60,7 @@ public:
 
 
 class MaterialProperty : public GameObjectProperty{
+public:
     MaterialProperty();
 };
 

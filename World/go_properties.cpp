@@ -50,6 +50,9 @@ QString getPropertyString(int type){
         case GO_PROPERTY_TYPE_AUDSOURCE:{
             return QString("Audio Source");
         }
+        case GO_PROPERTY_TYPE_MATERIAL:{
+            return QString("Material");
+        }
         case GO_PROPERTY_TYPE_TILE_GROUP:{
             return QString("Tile Group");
         }
@@ -89,7 +92,12 @@ GameObjectProperty* allocProperty(int type){
         }
         case GO_PROPERTY_TYPE_AUDSOURCE:{
             AudioSourceProperty* ptr = new AudioSourceProperty;
-            _ptr = static_cast<AudioSourceProperty*>(ptr);
+            _ptr = static_cast<GameObjectProperty*>(ptr);
+            break;
+        }
+        case GO_PROPERTY_TYPE_MATERIAL:{
+            MaterialProperty* ptr = new MaterialProperty;
+            _ptr = static_cast<GameObjectProperty*>(ptr);
             break;
         }
         case GO_PROPERTY_TYPE_TILE_GROUP:{
@@ -458,6 +466,10 @@ void AudioSourceProperty::audio_stop(){
 void AudioSourceProperty::onObjectDeleted(){
     this->source.stop(); //Stop at first
     this->source.Destroy();
+}
+
+MaterialProperty::MaterialProperty(){
+    type = GO_PROPERTY_TYPE_MATERIAL;
 }
 
 void GameObject::saveProperties(std::ofstream* stream){

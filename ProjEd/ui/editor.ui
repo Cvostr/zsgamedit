@@ -18,7 +18,7 @@
   </property>
   <property name="maximumSize">
    <size>
-    <width>600</width>
+    <width>650</width>
     <height>16777215</height>
    </size>
   </property>
@@ -37,6 +37,15 @@
       <width>411</width>
       <height>421</height>
      </rect>
+    </property>
+    <property name="verticalScrollBarPolicy">
+     <enum>Qt::ScrollBarAsNeeded</enum>
+    </property>
+    <property name="horizontalScrollBarPolicy">
+     <enum>Qt::ScrollBarAlwaysOff</enum>
+    </property>
+    <property name="horizontalScrollMode">
+     <enum>QAbstractItemView::ScrollPerItem</enum>
     </property>
     <column>
      <property name="text">

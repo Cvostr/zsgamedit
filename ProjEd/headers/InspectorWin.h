@@ -59,6 +59,16 @@ public:
     ~AreaButton(); //Destroy button widget
 };
 
+class AreaText : public QObject{
+    Q_OBJECT
+public:
+    InspectorWin* insp_ptr;
+    QLabel* label;
+
+    AreaText();
+    ~AreaText(); //Destroy button widget
+};
+
 class AreaRadioGroup : public QObject{
     Q_OBJECT
 public slots:

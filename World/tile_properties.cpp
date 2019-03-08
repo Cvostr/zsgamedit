@@ -67,6 +67,17 @@ void TileGroupProperty::addPropertyInterfaceToInspector(InspectorWin* inspector)
         btn->insp_ptr = inspector; //Setting inspector pointer
         inspector->registerUiObject(btn);
     }else{
+        QString out = "";
+        out += ("Tiles X : " + QString::number(this->tiles_amount_X) + QString(" \n"));
+        out += "Tiles Y : " + QString::number(this->tiles_amount_Y) + QString(" \n");
+        out += ("Tile Width : " + QString::number(this->geometry.tileWidth) + QString(" \n"));
+        out += "Tile Height : " + QString::number(this->geometry.tileHeight) + QString(" \n");
+
+        AreaText* group_info = new AreaText;
+        group_info->label->setText(out);
+        inspector->getContentLayout()->addWidget(group_info->label);
+        inspector->registerUiObject(group_info);
+
         AreaButton* btn = new AreaButton;
         btn->onPressFuncPtr = &onClearBtnPress;
         btn->button->setText("Clear");

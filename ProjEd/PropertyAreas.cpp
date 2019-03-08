@@ -87,6 +87,16 @@ PropertyEditArea::PropertyEditArea(){
     elem_layout->setSpacing(0);
 }
 
+AreaText::AreaText(){
+    this->label = new QLabel;
+    label->setContentsMargins(0,0,0,0);
+    label->setMaximumHeight(100);
+    label->setMargin(0);
+}
+AreaText::~AreaText(){
+    delete this->label;
+}
+
 void PropertyEditArea::destroyLayout(){
     delete this->label_widget;
     delete this->elem_layout;
@@ -321,6 +331,8 @@ PickResourceArea::PickResourceArea(){
     respick_btn = new QPushButton; //Allocation of QPushButton
     relpath_label = new QLabel; //Allocation of resource relpath text
     elem_layout->addWidget(relpath_label);
+    //Space between text and button
+    elem_layout->addSpacing(10);
     elem_layout->addWidget(respick_btn);
     respick_btn->setText("Select...");
 
