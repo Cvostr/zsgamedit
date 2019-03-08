@@ -237,6 +237,15 @@ void EditWindow::onNewScene(){
 
 void EditWindow::onAddNewGameObject(){
     int free_ind = world.getFreeObjectSpaceIndex();
+
+    if(free_ind == world.objects.size()){
+        GameObject obj;
+        obj.alive = false;
+        obj.world_ptr = &world;
+        obj.array_index = free_ind;
+        world.objects.push_back(obj);
+    }
+
     _ed_actions_container->newGameObjectAction(world.objects[free_ind].getLinkToThisObject());
 
     GameObject* obj_ptr = this->world.newObject(); //Add new object to world

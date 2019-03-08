@@ -70,7 +70,8 @@ HEADERS += \
     Scripting/headers/zsensdk.h \
     World/headers/obj_properties.h \
     ProjEd/headers/InspEditAreas.h \
-    triggers.h
+    triggers.h \
+    Render/headers/MatShaderProps.h
 
 
 FORMS += \

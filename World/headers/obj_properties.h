@@ -3,6 +3,7 @@
 
 #include "World.h"
 #include "../../Scripting/headers/LuaScript.h"
+#include "../../Render/headers/MatShaderProps.h"
 
 #define GO_PROPERTY_TYPE_NONE 0
 #define GO_PROPERTY_TYPE_TRANSFORM 1
@@ -61,6 +62,9 @@ public:
 
 class MaterialProperty : public GameObjectProperty{
 public:
+
+    std::list<MaterialShaderProperty*> properties;
+
     MaterialProperty();
 };
 
