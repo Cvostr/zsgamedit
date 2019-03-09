@@ -47,6 +47,10 @@ EditWindow::EditWindow(QWidget *parent) :
     QObject::connect(ui->objsList, SIGNAL(onRightClick(QPoint)), this, SLOT(onObjectCtxMenuShow(QPoint)));
     QObject::connect(ui->objsList, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(onCameraToObjTeleport()));
 
+    QObject::connect(ui->actionNew_Cube, SIGNAL(triggered()), this, SLOT(addNewCube()));
+    QObject::connect(ui->actionNew_Light, SIGNAL(triggered()), this, SLOT(addNewLight()));
+
+
     ready = false; //Firstly set it to 0
     hasSceneFile = false; //No scene loaded by default
     isSceneRun = false; //Not running by default
@@ -78,6 +82,9 @@ EditWindow::EditWindow(QWidget *parent) :
 
     ui->actionBuild->setShortcut(Qt::Key_B | Qt::CTRL);
     ui->actionRun->setShortcut(Qt::Key_R | Qt::CTRL);
+
+    ui->actionNew_Object->setShortcut(Qt::Key_N | Qt::CTRL);
+    ui->actionToggle_Cameras->setShortcut(Qt::Key_Apostrophe | Qt::CTRL);
 
 }
 
@@ -236,7 +243,7 @@ void EditWindow::onNewScene(){
     hasSceneFile = false; //We have new scene
 }
 
-void EditWindow::onAddNewGameObject(){
+GameObject* EditWindow::onAddNewGameObject(){
     int free_ind = world.getFreeObjectSpaceIndex();
 
     if(free_ind == world.objects.size()){
@@ -251,6 +258,22 @@ void EditWindow::onAddNewGameObject(){
 
     GameObject* obj_ptr = this->world.newObject(); //Add new object to world
     ui->objsList->addTopLevelItem(obj_ptr->item_ptr); //New object will not have parents, so will be spawned at top
+
+    return obj_ptr;
+}
+
+void EditWindow::addNewCube(){
+    GameObject* obj = onAddNewGameObject();
+    obj->addProperty(GO_PROPERTY_TYPE_MESH);
+    obj->addProperty(GO_PROPERTY_TYPE_MATERIAL);
+
+    MeshProperty* mesh = static_cast<MeshProperty*>(obj->getPropertyPtrByType(GO_PROPERTY_TYPE_MESH));
+    mesh->resource_relpath = "@cube";
+    mesh->updateMeshPtr();
+}
+void EditWindow::addNewLight(){
+    GameObject* obj = onAddNewGameObject();
+    obj->addProperty(GO_PROPERTY_TYPE_LIGHTSOURCE);
 }
 
 void EditWindow::setupObjectsHieList(){
@@ -806,6 +829,9 @@ void EditWindow::onKeyDown(SDL_Keysym sym){
     }
     if(input_state.isLCtrlHold && sym.sym == SDLK_r){
         emit onRunProject();
+    }
+    if(input_state.isLCtrlHold && sym.sym == SDLK_n){
+        emit onAddNewGameObject();
     }
 }
 

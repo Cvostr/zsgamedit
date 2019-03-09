@@ -90,7 +90,7 @@ void TileGroupProperty::addPropertyInterfaceToInspector(InspectorWin* inspector)
 
 void TileGroupProperty::process(){
     //receive pointer to object that own this property
-    getActionManager()->newGameObjectAction(go_link);
+    getActionManager()->newSnapshotAction(go_link.world_ptr);
     World* wrld = world_ptr;
 
     for(int x_i = 0; x_i < tiles_amount_X; x_i ++){
@@ -132,7 +132,8 @@ void TileGroupProperty::process(){
 void TileGroupProperty::clear(){
     go_link.updLinkPtr();
 
-    getActionManager()->newGameObjectAction(go_link);
+    getActionManager()->newSnapshotAction(go_link.world_ptr);
+    //getActionManager()->newGameObjectAction(go_link);
 
     GameObject* parent = go_link.ptr;
     unsigned int children_am = parent->children.size();

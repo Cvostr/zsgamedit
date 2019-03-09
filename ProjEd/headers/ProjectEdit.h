@@ -120,7 +120,10 @@ public slots:
     void onFileCtxMenuShow(QPoint point);
     void onCameraToObjTeleport();
 
-    void onAddNewGameObject();
+    GameObject* onAddNewGameObject();
+    void addNewCube();
+    void addNewLight();
+
     void onSceneSave();
     void onSceneSaveAs();
     void onOpenScene();
