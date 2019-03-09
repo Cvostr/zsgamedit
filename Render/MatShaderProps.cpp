@@ -27,9 +27,6 @@ TextureMaterialShaderProperty::TextureMaterialShaderProperty(){
     this->slotToBind = 0;
 }
 //Configuration class
-void TextureMtShPropConf::updateTexturePath(){
-
-}
 TextureMtShPropConf::TextureMtShPropConf(){
     this->type = MATSHPROP_TYPE_TEXTURE;
 

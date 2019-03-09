@@ -56,7 +56,6 @@ public:
      ZSPIRE::Texture* texture;
      QString path;
 
-     void updateTexturePath();
      TextureMtShPropConf();
 };
 

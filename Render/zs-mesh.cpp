@@ -33,47 +33,47 @@ ZSVERTEX iso_tile_vertices[] = {
 
 ZSVERTEX cube_vertices[] = {
         // positions          // normals           // texture coords
-        ZSVERTEX(ZSVECTOR3(-0.5f, -0.5f, -0.5f), ZSVECTOR2(0.0f, 0.0f), ZSVECTOR3(-1.0f,  0.0f,  0.0f)),
-        ZSVERTEX(ZSVECTOR3(0.5f, -0.5f, -0.5f), ZSVECTOR2(0.0f, 0.0f), ZSVECTOR3(-1.0f,  1.0f,  0.0f)),
-        ZSVERTEX(ZSVECTOR3(0.5f,  0.5f, -0.5f), ZSVECTOR2(0.0f, 0.0f), ZSVECTOR3(-1.0f,  1.0f,  1.0f)),
-        ZSVERTEX(ZSVECTOR3(0.5f,  0.5f, -0.5f), ZSVECTOR2(0.0f, 0.0f), ZSVECTOR3(-1.0f,  1.0f,  1.0f)),
-        ZSVERTEX(ZSVECTOR3(-0.5f,  0.5f, -0.5f), ZSVECTOR2(0.0f, 0.0f), ZSVECTOR3(-1.0f,  0.0f,  1.0f)),
-        ZSVERTEX(ZSVECTOR3(-0.5f, -0.5f, -0.5f), ZSVECTOR2(0.0f, 0.0f), ZSVECTOR3(-1.0f,  0.0f,  0.0f)),
+        ZSVERTEX(ZSVECTOR3(-0.5f, -0.5f, -0.5f), ZSVECTOR2(0.0f, 0.0f), ZSVECTOR3(0.0f,  0.0f,  -1.0f)),
+        ZSVERTEX(ZSVECTOR3(0.5f, -0.5f, -0.5f), ZSVECTOR2(1.0f, 0.0f), ZSVECTOR3(0.0f,  0.0f,  -1.0f)),
+        ZSVERTEX(ZSVECTOR3(0.5f,  0.5f, -0.5f), ZSVECTOR2(1.0f, 1.0f), ZSVECTOR3(0.0f,  0.0f,  -1.0f)),
+        ZSVERTEX(ZSVECTOR3(0.5f,  0.5f, -0.5f), ZSVECTOR2(1.0f, 1.0f), ZSVECTOR3(0.0f,  0.0f,  -1.0f)),
+        ZSVERTEX(ZSVECTOR3(-0.5f,  0.5f, -0.5f), ZSVECTOR2(0.0f, 1.0f), ZSVECTOR3(0.0f,  0.0f,  -1.0f)),
+        ZSVERTEX(ZSVECTOR3(-0.5f, -0.5f, -0.5f), ZSVECTOR2(0.0f, 0.0f), ZSVECTOR3(0.0f,  0.0f,  -1.0f)),
 
-        ZSVERTEX(ZSVECTOR3(-0.5f, -0.5f,  0.5f), ZSVECTOR2(0.0f, 0.0f), ZSVECTOR3(1.0f,  0.0f,  0.0f)),
-        ZSVERTEX(ZSVECTOR3(0.5f, -0.5f,  0.5f), ZSVECTOR2(0.0f, 0.0f), ZSVECTOR3(1.0f,  1.0f,  0.0f)),
-        ZSVERTEX(ZSVECTOR3(0.5f,  0.5f,  0.5f), ZSVECTOR2(0.0f, 0.0f), ZSVECTOR3(1.0f,  1.0f,  1.0f)),
-        ZSVERTEX(ZSVECTOR3(0.5f,  0.5f,  0.5f), ZSVECTOR2(0.0f, 0.0f), ZSVECTOR3(1.0f,  1.0f,  1.0f)),
-        ZSVERTEX(ZSVECTOR3(-0.5f,  0.5f,  0.5f), ZSVECTOR2(0.0f, 0.0f), ZSVECTOR3(1.0f,  0.0f,  1.0f)),
-        ZSVERTEX(ZSVECTOR3(-0.5f, -0.5f,  0.5f), ZSVECTOR2(0.0f, 0.0f), ZSVECTOR3(1.0f,  0.0f,  0.0f)),
+        ZSVERTEX(ZSVECTOR3(-0.5f, -0.5f,  0.5f), ZSVECTOR2(0.0f, 0.0f), ZSVECTOR3(0.0f,  0.0f,  1.0f)),
+        ZSVERTEX(ZSVECTOR3(0.5f, -0.5f,  0.5f), ZSVECTOR2(1.0f, 0.0f), ZSVECTOR3(0.0f,  0.0f,  1.0f)),
+        ZSVERTEX(ZSVECTOR3(0.5f,  0.5f,  0.5f), ZSVECTOR2(1.0f, 1.0f), ZSVECTOR3(0.0f,  0.0f,  1.0f)),
+        ZSVERTEX(ZSVECTOR3(0.5f,  0.5f,  0.5f), ZSVECTOR2(1.0f, 1.0f), ZSVECTOR3(0.0f,  0.0f,  1.0f)),
+        ZSVERTEX(ZSVECTOR3(-0.5f,  0.5f,  0.5f), ZSVECTOR2(0.0f, 1.0f), ZSVECTOR3(0.0f,  0.0f,  1.0f)),
+        ZSVERTEX(ZSVECTOR3(-0.5f, -0.5f,  0.5f), ZSVECTOR2(0.0f, 0.0f), ZSVECTOR3(0.0f,  0.0f,  1.0f)),
+//
+        ZSVERTEX(ZSVECTOR3(-0.5f,  0.5f,  0.5f), ZSVECTOR2(1.0f, 0.0f), ZSVECTOR3(-1.0f,  0.0f,  0.0f)),
+        ZSVERTEX(ZSVECTOR3(-0.5f,  0.5f, -0.5f), ZSVECTOR2(1.0f, 1.0f), ZSVECTOR3(-1.0f,  0.0f,  0.0f)),
+        ZSVERTEX(ZSVECTOR3(-0.5f, -0.5f, -0.5f), ZSVECTOR2(0.0f, 1.0f), ZSVECTOR3(-1.0f,  0.0f,  0.0f)),
+        ZSVERTEX(ZSVECTOR3(-0.5f, -0.5f, -0.5f), ZSVECTOR2(0.0f, 1.0f), ZSVECTOR3(-1.0f,  0.0f,  0.0f)),
+        ZSVERTEX(ZSVECTOR3(-0.5f, -0.5f,  0.5f), ZSVECTOR2(0.0f, 0.0f), ZSVECTOR3(-1.0f,  0.0f,  0.0f)),
+        ZSVERTEX(ZSVECTOR3(-0.5f,  0.5f,  0.5f), ZSVECTOR2(1.0f, 0.0f), ZSVECTOR3(-1.0f,  0.0f,  0.0f)),
+//starts here
+        ZSVERTEX(ZSVECTOR3(0.5f,  0.5f,  0.5f), ZSVECTOR2(1.0f,  0.0f), ZSVECTOR3(1.0f,  0.0f,  0.0f)),
+        ZSVERTEX(ZSVECTOR3(0.5f,  0.5f, -0.5f), ZSVECTOR2(1.0f,  1.0f), ZSVECTOR3(1.0f,  0.0f,  0.0f)),
+        ZSVERTEX(ZSVECTOR3(0.5f, -0.5f, -0.5f), ZSVECTOR2(0.0f,  1.0f), ZSVECTOR3(1.0f,  0.0f,  0.0f)),
+        ZSVERTEX(ZSVECTOR3(0.5f, -0.5f, -0.5f), ZSVECTOR2(0.0f,  1.0f), ZSVECTOR3(1.0f,  0.0f,  0.0f)),
+        ZSVERTEX(ZSVECTOR3(0.5f, -0.5f,  0.5f), ZSVECTOR2(0.0f,  0.0f), ZSVECTOR3(1.0f,  0.0f,  0.0f)),
+        ZSVERTEX(ZSVECTOR3(0.5f,  0.5f,  0.5f), ZSVECTOR2(1.0f,  0.0f), ZSVECTOR3(1.0f,  0.0f,  0.0f)),
 
-        ZSVERTEX(ZSVECTOR3(-0.5f,  0.5f,  0.5f), ZSVECTOR2(-1.0f, 0.0f), ZSVECTOR3(0.0f,  1.0f,  0.0f)),
-        ZSVERTEX(ZSVECTOR3(-0.5f,  0.5f, -0.5f), ZSVECTOR2(-1.0f, 0.0f), ZSVECTOR3(0.0f,  1.0f,  1.0f)),
-        ZSVERTEX(ZSVECTOR3(-0.5f, -0.5f, -0.5f), ZSVECTOR2(-1.0f, 0.0f), ZSVECTOR3(0.0f,  0.0f,  1.0f)),
-        ZSVERTEX(ZSVECTOR3(-0.5f, -0.5f, -0.5f), ZSVECTOR2(-1.0f, 0.0f), ZSVECTOR3(0.0f,  0.0f,  1.0f)),
-        ZSVERTEX(ZSVECTOR3(-0.5f, -0.5f,  0.5f), ZSVECTOR2(-1.0f, 0.0f), ZSVECTOR3(0.0f,  0.0f,  0.0f)),
-        ZSVERTEX(ZSVECTOR3(-0.5f,  0.5f,  0.5f), ZSVECTOR2(-1.0f, 0.0f), ZSVECTOR3(0.0f,  1.0f,  0.0f)),
+        ZSVERTEX(ZSVECTOR3(-0.5f, -0.5f, -0.5f), ZSVECTOR2(0.0f, 1.0f), ZSVECTOR3(0.0f,  -1.0f,  0.0f)),
+        ZSVERTEX(ZSVECTOR3(0.5f, -0.5f, -0.5f), ZSVECTOR2(1.0f, 1.0f), ZSVECTOR3(0.0f,  -1.0f,  0.0f)),
+        ZSVERTEX(ZSVECTOR3(0.5f, -0.5f,  0.5f), ZSVECTOR2(1.0f, 0.0f), ZSVECTOR3(0.0f,  -1.0f,  0.0f)),
+        ZSVERTEX(ZSVECTOR3(0.5f, -0.5f,  0.5f), ZSVECTOR2(1.0f, 0.0f), ZSVECTOR3(0.0f,  -1.0f,  0.0f)),
+        ZSVERTEX(ZSVECTOR3(-0.5f, -0.5f,  0.5f), ZSVECTOR2(0.0f, 0.0f), ZSVECTOR3(0.0f,  -1.0f,  0.0f)),
+        ZSVERTEX(ZSVECTOR3(-0.5f, -0.5f, -0.5f), ZSVECTOR2(0.0f, 1.0f), ZSVECTOR3(0.0f,  -1.0f,  0.0f)),
 
+        ZSVERTEX(ZSVECTOR3(-0.5f,  0.5f, -0.5f), ZSVECTOR2(0.0f,  1.0f), ZSVECTOR3(0.0f,  1.0f,  0.0f)),
+        ZSVERTEX(ZSVECTOR3(0.5f,  0.5f, -0.5f), ZSVECTOR2(1.0f,  1.0f), ZSVECTOR3(0.0f,  1.0f,  0.0f)),
         ZSVERTEX(ZSVECTOR3(0.5f,  0.5f,  0.5f), ZSVECTOR2(1.0f,  0.0f), ZSVECTOR3(0.0f,  1.0f,  0.0f)),
-        ZSVERTEX(ZSVECTOR3(0.5f,  0.5f, -0.5f), ZSVECTOR2(1.0f,  0.0f), ZSVECTOR3(0.0f,  1.0f,  1.0f)),
-        ZSVERTEX(ZSVECTOR3(0.5f, -0.5f, -0.5f), ZSVECTOR2(1.0f,  0.0f), ZSVECTOR3(0.0f,  0.0f,  1.0f)),
-        ZSVERTEX(ZSVECTOR3(0.5f, -0.5f, -0.5f), ZSVECTOR2(1.0f,  0.0f), ZSVECTOR3(0.0f,  0.0f,  1.0f)),
-        ZSVERTEX(ZSVECTOR3(0.5f, -0.5f,  0.5f), ZSVECTOR2(1.0f,  0.0f), ZSVECTOR3(0.0f,  0.0f,  0.0f)),
         ZSVERTEX(ZSVECTOR3(0.5f,  0.5f,  0.5f), ZSVECTOR2(1.0f,  0.0f), ZSVECTOR3(0.0f,  1.0f,  0.0f)),
-
-        ZSVERTEX(ZSVECTOR3(-0.5f, -0.5f, -0.5f), ZSVECTOR2(0.0f, -1.0f), ZSVECTOR3(0.0f,  0.0f,  1.0f)),
-        ZSVERTEX(ZSVECTOR3(0.5f, -0.5f, -0.5f), ZSVECTOR2(0.0f, -1.0f), ZSVECTOR3(0.0f,  1.0f,  1.0f)),
-        ZSVERTEX(ZSVECTOR3(0.5f, -0.5f,  0.5f), ZSVECTOR2(0.0f, -1.0f), ZSVECTOR3(0.0f,  1.0f,  0.0f)),
-        ZSVERTEX(ZSVECTOR3(0.5f, -0.5f,  0.5f), ZSVECTOR2(0.0f, -1.0f), ZSVECTOR3(0.0f,  1.0f,  0.0f)),
-        ZSVERTEX(ZSVECTOR3(-0.5f, -0.5f,  0.5f), ZSVECTOR2(0.0f, -1.0f), ZSVECTOR3(0.0f,  0.0f,  0.0f)),
-        ZSVERTEX(ZSVECTOR3(-0.5f, -0.5f, -0.5f), ZSVECTOR2(0.0f, -1.0f), ZSVECTOR3(0.0f,  0.0f,  1.0f)),
-
-        ZSVERTEX(ZSVECTOR3(-0.5f,  0.5f, -0.5f), ZSVECTOR2(0.0f,  1.0f), ZSVECTOR3(0.0f,  0.0f,  1.0f)),
-        ZSVERTEX(ZSVECTOR3(0.5f,  0.5f, -0.5f), ZSVECTOR2(0.0f,  1.0f), ZSVECTOR3(0.0f,  1.0f,  1.0f)),
-        ZSVERTEX(ZSVECTOR3(0.5f,  0.5f,  0.5f), ZSVECTOR2(0.0f,  1.0f), ZSVECTOR3(0.0f,  1.0f,  0.0f)),
-        ZSVERTEX(ZSVECTOR3(0.5f,  0.5f,  0.5f), ZSVECTOR2(0.0f,  1.0f), ZSVECTOR3(0.0f,  1.0f,  0.0f)),
-        ZSVERTEX(ZSVECTOR3(-0.5f,  0.5f,  0.5f), ZSVECTOR2(0.0f,  1.0f), ZSVECTOR3(0.0f,  0.0f,  0.0f)),
-        ZSVERTEX(ZSVECTOR3(-0.5f,  0.5f, -0.5f), ZSVECTOR2(0.0f,  1.0f), ZSVECTOR3(0.0f,  0.0f,  1.0f))
+        ZSVERTEX(ZSVECTOR3(-0.5f,  0.5f,  0.5f), ZSVECTOR2(0.0f,  0.0f), ZSVECTOR3(0.0f,  1.0f,  0.0f)),
+        ZSVERTEX(ZSVECTOR3(-0.5f,  0.5f, -0.5f), ZSVECTOR2(0.0f,  1.0f), ZSVECTOR3(0.0f,  1.0f,  0.0f))
 };
 
 unsigned int plane_inds[] = { 0,1,2, 0,2,3 };

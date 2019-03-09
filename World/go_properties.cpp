@@ -513,7 +513,21 @@ void MaterialProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
     }
 }
 void MaterialProperty::onValueChanged(){
+    for(unsigned int prop_i = 0; prop_i < group_ptr->properties.size(); prop_i ++){
+        MaterialShaderProperty* prop_ptr = group_ptr->properties[prop_i];
+        MaterialShaderPropertyConf* conf_ptr = this->property_confs[prop_i];
+        switch(prop_ptr->type){
+            case MATSHPROP_TYPE_TEXTURE:{
+                //Cast pointer
+                TextureMaterialShaderProperty* texture_p = static_cast<TextureMaterialShaderProperty*>(prop_ptr);
+                TextureMtShPropConf* texture_conf = static_cast<TextureMtShPropConf*>(conf_ptr);
 
+                texture_conf->texture = go_link.world_ptr->getTexturePtrByRelPath(texture_conf->path);
+
+                break;
+            }
+        }
+    }
 }
 
 void GameObject::saveProperties(std::ofstream* stream){

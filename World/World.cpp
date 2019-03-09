@@ -249,6 +249,7 @@ void GameObject::recoverFromSnapshot(GameObjectSnapshot* snapshot){
 
     if(snapshot->reserved_obj.alive == false){
         delete this->item_ptr;
+        item_ptr = 0x0;
     }
 
     if(snapshot->reserved_obj.alive == true){
