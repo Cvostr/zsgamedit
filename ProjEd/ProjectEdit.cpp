@@ -143,6 +143,7 @@ void EditWindow::init(){
         this->edit_camera.setProjectionType(ZSCAMERA_PROJECTION_PERSPECTIVE);
         edit_camera.setPosition(ZSVECTOR3(0,0,0));
         edit_camera.setFront(ZSVECTOR3(0,0,1));
+        edit_camera.setZplanes(1, 2000);
         break;
     }
     }

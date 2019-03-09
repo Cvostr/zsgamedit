@@ -609,6 +609,14 @@ void GameObject::saveProperties(std::ofstream* stream){
 
             break;
         }
+        case GO_PROPERTY_TYPE_MATERIAL:{
+            MaterialProperty* ptr = static_cast<MaterialProperty*>(property_ptr);
+            int material_props_size = ptr->group_ptr->properties.size(); //Properties amount
+
+            stream->write(reinterpret_cast<char*>(&material_props_size), sizeof(int));
+
+            break;
+        }
         case GO_PROPERTY_TYPE_SCRIPTGROUP:{
             ScriptGroupProperty* ptr = static_cast<ScriptGroupProperty*>(property_ptr);
             int script_num = static_cast<int>(ptr->scr_num);
@@ -759,7 +767,17 @@ void GameObject::loadProperty(std::ifstream* world_stream){
         lptr->source.apply_settings(); //Apply settings to openal
 
         break;
-        }
+    }
+    case GO_PROPERTY_TYPE_MATERIAL:{
+        MaterialProperty* ptr = static_cast<MaterialProperty*>(prop_ptr);
+        int props_size = 0;
+
+        world_stream->seekg(1, std::ofstream::cur); //Skip space
+        world_stream->read(reinterpret_cast<char*>(&props_size), sizeof(int));
+
+
+        break;
+    }
     case GO_PROPERTY_TYPE_TILE_GROUP :{
         world_stream->seekg(1, std::ofstream::cur); //Skip space
         TileGroupProperty* t_ptr = static_cast<TileGroupProperty*>(prop_ptr);
