@@ -18,6 +18,8 @@ void RenderPipeline::setup(){
 
     this->gbuffer.create(640, 480);
     removeLights();
+
+    MtShProps::genDefaultMtShGroup(&diffuse3d_shader);
 }
 
 RenderPipeline::~RenderPipeline(){
@@ -234,9 +236,36 @@ ZSPIRE::Shader* RenderPipeline::processShaderOnObject(void* _obj){
             break;
         }
         case GO_RENDER_TYPE_3D:{
-            diffuse3d_shader.Use();
-            diffuse3d_shader.setGLuniformInt("hasDiffuseMap", 0);
-            result = &diffuse3d_shader;
+            MaterialProperty* material_ptr = static_cast<MaterialProperty*>(obj->getPropertyPtrByType(GO_PROPERTY_TYPE_MATERIAL));
+            if(material_ptr == nullptr) return result; //if object hasn't property
+
+            MtShaderPropertiesGroup* group_ptr = material_ptr->group_ptr;
+
+            result = group_ptr->render_shader;
+            result->Use();
+            result->setGLuniformInt("hasDiffuseMap", 0);
+
+            for(unsigned int prop_i = 0; prop_i < group_ptr->properties.size(); prop_i ++){
+                MaterialShaderProperty* prop_ptr = group_ptr->properties[prop_i];
+                MaterialShaderPropertyConf* conf_ptr = material_ptr->property_confs[prop_i];
+                switch(prop_ptr->type){
+                    case MATSHPROP_TYPE_TEXTURE:{
+                        //Cast pointer
+                        TextureMaterialShaderProperty* texture_p = static_cast<TextureMaterialShaderProperty*>(prop_ptr);
+                        TextureMtShPropConf* texture_conf = static_cast<TextureMtShPropConf*>(conf_ptr);
+
+                        if(texture_conf->texture != nullptr){
+                            result->setGLuniformInt("hasDiffuseMap", 1);
+                            texture_conf->texture->Use(texture_p->slotToBind);
+                        }
+                        break;
+                    }
+                }
+            }
+
+            //diffuse3d_shader.Use();
+            //diffuse3d_shader.setGLuniformInt("hasDiffuseMap", 0);
+
             break;
         }
     }

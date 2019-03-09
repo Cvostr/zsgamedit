@@ -181,8 +181,10 @@ ProjectCtxMenu::ProjectCtxMenu(MainWin* win, QWidget* parent) : QObject(parent){
     this->menu = new QMenu(win);
 
     this->action_delete = new QAction("Delete", win);
+#ifdef USE_ZSPIRE
     this->action_run_engine = new QAction("Run in engine instance", win);
     this->action_run_engine_vk = new QAction("Run in engine instance (Vulkan)", win);
+#endif
 
     menu->addAction(action_delete);
 #ifdef USE_ZSPIRE

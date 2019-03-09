@@ -46,7 +46,8 @@ SOURCES += \
     ProjEd/EditorUI.cpp \
     Misc/ProjBuilder.cpp \
     Scripting/LuaScript.cpp \
-    Scripting/zsensdk.cpp
+    Scripting/zsensdk.cpp \
+    Render/MatShaderProps.cpp
 
 HEADERS += \
         mainwin.h \

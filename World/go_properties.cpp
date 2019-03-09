@@ -470,6 +470,50 @@ void AudioSourceProperty::onObjectDeleted(){
 
 MaterialProperty::MaterialProperty(){
     type = GO_PROPERTY_TYPE_MATERIAL;
+
+    this->loadPropsFromGroup(MtShProps::getDefaultMtShGroup());
+}
+MaterialShaderPropertyConf* MaterialProperty::addPropertyConf(int type){
+    MaterialShaderPropertyConf* newprop_ptr =
+            static_cast<MaterialShaderPropertyConf*>(MtShProps::allocatePropertyConf(type));
+    this->property_confs.push_back(newprop_ptr);
+
+    return property_confs[property_confs.size() - 1];
+}
+void MaterialProperty::loadPropsFromGroup(MtShaderPropertiesGroup* group){
+    //Iterate over all properties in group
+    for(unsigned int prop_i = 0; prop_i < group->properties.size(); prop_i ++){
+        //Obtain pointer to property in group
+        MaterialShaderProperty* prop_ptr = group->properties[prop_i];
+        //Add PropertyConf with the same type
+        this->addPropertyConf(prop_ptr->type);
+    }
+    group_ptr = group;
+}
+void MaterialProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
+    for(unsigned int prop_i = 0; prop_i < group_ptr->properties.size(); prop_i ++){
+        MaterialShaderProperty* prop_ptr = group_ptr->properties[prop_i];
+        MaterialShaderPropertyConf* conf_ptr = this->property_confs[prop_i];
+        switch(prop_ptr->type){
+            case MATSHPROP_TYPE_TEXTURE:{
+                //Cast pointer
+                TextureMaterialShaderProperty* texture_p = static_cast<TextureMaterialShaderProperty*>(prop_ptr);
+                TextureMtShPropConf* texture_conf = static_cast<TextureMtShPropConf*>(conf_ptr);
+
+                PickResourceArea* area = new PickResourceArea;
+                area->setLabel(texture_p->prop_caption);
+                area->go_property = static_cast<void*>(this);
+                area->rel_path = &texture_conf->path;
+                area->resource_type = RESOURCE_TYPE_TEXTURE; //It should load textures only
+                inspector->addPropertyArea(area);
+
+                break;
+            }
+        }
+    }
+}
+void MaterialProperty::onValueChanged(){
+
 }
 
 void GameObject::saveProperties(std::ofstream* stream){
@@ -477,7 +521,6 @@ void GameObject::saveProperties(std::ofstream* stream){
 
     for(unsigned int prop_i = 0; prop_i < props_num; prop_i ++){
         GameObjectProperty* property_ptr = static_cast<GameObjectProperty*>(this->properties[prop_i]);
-        //*stream << "\nG_PROPERTY " << property_ptr->type << " "; //Writing property header
         *stream << "\nG_PROPERTY ";
         stream->write(reinterpret_cast<char*>(&property_ptr->type), sizeof(int));
         *stream << " ";

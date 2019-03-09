@@ -62,8 +62,14 @@ public:
 
 class MaterialProperty : public GameObjectProperty{
 public:
+    MtShaderPropertiesGroup* group_ptr;
 
-    std::list<MaterialShaderProperty*> properties;
+    std::vector<MaterialShaderPropertyConf*> property_confs;
+
+    MaterialShaderPropertyConf* addPropertyConf(int type);
+    void loadPropsFromGroup(MtShaderPropertiesGroup* group);
+    void addPropertyInterfaceToInspector(InspectorWin* inspector);
+    void onValueChanged();
 
     MaterialProperty();
 };
