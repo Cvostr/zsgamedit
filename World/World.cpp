@@ -249,6 +249,7 @@ void GameObject::recoverFromSnapshot(GameObjectSnapshot* snapshot){
 
     if(snapshot->reserved_obj.alive == false){
         delete this->item_ptr;
+        item_ptr = 0x0;
     }
 
     if(snapshot->reserved_obj.alive == true){
@@ -478,15 +479,13 @@ void World::removeObj(GameObjectLink link){
     l.updLinkPtr();
     l.ptr->alive = false; //Mark object as dead
 
-    //this->obj_widget_ptr->removeItemWidget(link.updLinkPtr()->item_ptr, 0);
-
     unsigned int children_num = static_cast<unsigned int>(l.ptr->children.size());
 
     for(unsigned int ch_i = 0; ch_i < children_num; ch_i ++){ //Walk through all children an remove them
         GameObjectLink link = l.ptr->children[0]; //Remove first of children because of trim
         removeObj(link);
     }
-
+    //Remove all content in heap, related to object class object
     l.ptr->clearAll();
     if(l.ptr->hasParent == true){ //If object parented by other obj
         GameObject* parent = l.ptr->parent.updLinkPtr(); //Receive pointer to object's parent
@@ -683,11 +682,11 @@ void World::clear(){
 
 void World::putToShapshot(WorldSnapshot* snapshot){
     //iterate over all objects in scene
-    //snapshot->objects.resize(this->objects.size());
     for(unsigned int objs_num = 0; objs_num < this->objects.size(); objs_num ++){
         //Obtain pointer to object
         GameObject* obj_ptr = &this->objects[objs_num];
         if(obj_ptr->alive == false) continue;
+        //Iterate over all properties in object and copy them into snapshot
         for(unsigned int prop_i = 0; prop_i < obj_ptr->props_num; prop_i ++){
             auto prop_ptr = obj_ptr->properties[prop_i];
             auto new_prop = allocProperty(prop_ptr->type);
@@ -695,10 +694,11 @@ void World::putToShapshot(WorldSnapshot* snapshot){
             prop_ptr->copyTo(new_prop);
             snapshot->props.push_back(new_prop);
         }
+        //Decalare new object
         GameObject newobj;
+        //Copy object data
         obj_ptr->copyTo(&newobj);
         snapshot->objects.push_back(newobj);
-        //snapshot->objects[objs_num] = newobj;
     }
 }
 

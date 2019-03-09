@@ -61,7 +61,9 @@ void EdActions::newPropertyAction(GameObjectLink link, int property_type){
 void EdActions::newGameObjectAction(GameObjectLink link){
     EdObjectAction* new_action = new EdObjectAction;
 
-    link.updLinkPtr()->putToSnapshot(&new_action->snapshot);
+    GameObject* obj_ptr = link.updLinkPtr();
+
+    obj_ptr->putToSnapshot(&new_action->snapshot);
     new_action->linkToObj = link;
     new_action->linkToObj.updLinkPtr();
 

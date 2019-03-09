@@ -50,6 +50,9 @@ QString getPropertyString(int type){
         case GO_PROPERTY_TYPE_AUDSOURCE:{
             return QString("Audio Source");
         }
+        case GO_PROPERTY_TYPE_MATERIAL:{
+            return QString("Material");
+        }
         case GO_PROPERTY_TYPE_TILE_GROUP:{
             return QString("Tile Group");
         }
@@ -89,7 +92,12 @@ GameObjectProperty* allocProperty(int type){
         }
         case GO_PROPERTY_TYPE_AUDSOURCE:{
             AudioSourceProperty* ptr = new AudioSourceProperty;
-            _ptr = static_cast<AudioSourceProperty*>(ptr);
+            _ptr = static_cast<GameObjectProperty*>(ptr);
+            break;
+        }
+        case GO_PROPERTY_TYPE_MATERIAL:{
+            MaterialProperty* ptr = new MaterialProperty;
+            _ptr = static_cast<GameObjectProperty*>(ptr);
             break;
         }
         case GO_PROPERTY_TYPE_TILE_GROUP:{
@@ -460,12 +468,73 @@ void AudioSourceProperty::onObjectDeleted(){
     this->source.Destroy();
 }
 
+MaterialProperty::MaterialProperty(){
+    type = GO_PROPERTY_TYPE_MATERIAL;
+
+    this->loadPropsFromGroup(MtShProps::getDefaultMtShGroup());
+}
+MaterialShaderPropertyConf* MaterialProperty::addPropertyConf(int type){
+    MaterialShaderPropertyConf* newprop_ptr =
+            static_cast<MaterialShaderPropertyConf*>(MtShProps::allocatePropertyConf(type));
+    this->property_confs.push_back(newprop_ptr);
+
+    return property_confs[property_confs.size() - 1];
+}
+void MaterialProperty::loadPropsFromGroup(MtShaderPropertiesGroup* group){
+    //Iterate over all properties in group
+    for(unsigned int prop_i = 0; prop_i < group->properties.size(); prop_i ++){
+        //Obtain pointer to property in group
+        MaterialShaderProperty* prop_ptr = group->properties[prop_i];
+        //Add PropertyConf with the same type
+        this->addPropertyConf(prop_ptr->type);
+    }
+    group_ptr = group;
+}
+void MaterialProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
+    for(unsigned int prop_i = 0; prop_i < group_ptr->properties.size(); prop_i ++){
+        MaterialShaderProperty* prop_ptr = group_ptr->properties[prop_i];
+        MaterialShaderPropertyConf* conf_ptr = this->property_confs[prop_i];
+        switch(prop_ptr->type){
+            case MATSHPROP_TYPE_TEXTURE:{
+                //Cast pointer
+                TextureMaterialShaderProperty* texture_p = static_cast<TextureMaterialShaderProperty*>(prop_ptr);
+                TextureMtShPropConf* texture_conf = static_cast<TextureMtShPropConf*>(conf_ptr);
+
+                PickResourceArea* area = new PickResourceArea;
+                area->setLabel(texture_p->prop_caption);
+                area->go_property = static_cast<void*>(this);
+                area->rel_path = &texture_conf->path;
+                area->resource_type = RESOURCE_TYPE_TEXTURE; //It should load textures only
+                inspector->addPropertyArea(area);
+
+                break;
+            }
+        }
+    }
+}
+void MaterialProperty::onValueChanged(){
+    for(unsigned int prop_i = 0; prop_i < group_ptr->properties.size(); prop_i ++){
+        MaterialShaderProperty* prop_ptr = group_ptr->properties[prop_i];
+        MaterialShaderPropertyConf* conf_ptr = this->property_confs[prop_i];
+        switch(prop_ptr->type){
+            case MATSHPROP_TYPE_TEXTURE:{
+                //Cast pointer
+                TextureMaterialShaderProperty* texture_p = static_cast<TextureMaterialShaderProperty*>(prop_ptr);
+                TextureMtShPropConf* texture_conf = static_cast<TextureMtShPropConf*>(conf_ptr);
+
+                texture_conf->texture = go_link.world_ptr->getTexturePtrByRelPath(texture_conf->path);
+
+                break;
+            }
+        }
+    }
+}
+
 void GameObject::saveProperties(std::ofstream* stream){
     unsigned int props_num = static_cast<unsigned int>(this->props_num);
 
     for(unsigned int prop_i = 0; prop_i < props_num; prop_i ++){
         GameObjectProperty* property_ptr = static_cast<GameObjectProperty*>(this->properties[prop_i]);
-        //*stream << "\nG_PROPERTY " << property_ptr->type << " "; //Writing property header
         *stream << "\nG_PROPERTY ";
         stream->write(reinterpret_cast<char*>(&property_ptr->type), sizeof(int));
         *stream << " ";
@@ -537,6 +606,14 @@ void GameObject::saveProperties(std::ofstream* stream){
 
             stream->write(reinterpret_cast<char*>(&ptr->source.source_gain), sizeof(float));
             stream->write(reinterpret_cast<char*>(&ptr->source.source_pitch), sizeof(float));
+
+            break;
+        }
+        case GO_PROPERTY_TYPE_MATERIAL:{
+            MaterialProperty* ptr = static_cast<MaterialProperty*>(property_ptr);
+            int material_props_size = ptr->group_ptr->properties.size(); //Properties amount
+
+            stream->write(reinterpret_cast<char*>(&material_props_size), sizeof(int));
 
             break;
         }
@@ -690,7 +767,17 @@ void GameObject::loadProperty(std::ifstream* world_stream){
         lptr->source.apply_settings(); //Apply settings to openal
 
         break;
-        }
+    }
+    case GO_PROPERTY_TYPE_MATERIAL:{
+        MaterialProperty* ptr = static_cast<MaterialProperty*>(prop_ptr);
+        int props_size = 0;
+
+        world_stream->seekg(1, std::ofstream::cur); //Skip space
+        world_stream->read(reinterpret_cast<char*>(&props_size), sizeof(int));
+
+
+        break;
+    }
     case GO_PROPERTY_TYPE_TILE_GROUP :{
         world_stream->seekg(1, std::ofstream::cur); //Skip space
         TileGroupProperty* t_ptr = static_cast<TileGroupProperty*>(prop_ptr);

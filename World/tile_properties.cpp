@@ -67,6 +67,17 @@ void TileGroupProperty::addPropertyInterfaceToInspector(InspectorWin* inspector)
         btn->insp_ptr = inspector; //Setting inspector pointer
         inspector->registerUiObject(btn);
     }else{
+        QString out = "";
+        out += ("Tiles X : " + QString::number(this->tiles_amount_X) + QString(" \n"));
+        out += "Tiles Y : " + QString::number(this->tiles_amount_Y) + QString(" \n");
+        out += ("Tile Width : " + QString::number(this->geometry.tileWidth) + QString(" \n"));
+        out += "Tile Height : " + QString::number(this->geometry.tileHeight) + QString(" \n");
+
+        AreaText* group_info = new AreaText;
+        group_info->label->setText(out);
+        inspector->getContentLayout()->addWidget(group_info->label);
+        inspector->registerUiObject(group_info);
+
         AreaButton* btn = new AreaButton;
         btn->onPressFuncPtr = &onClearBtnPress;
         btn->button->setText("Clear");
@@ -79,6 +90,7 @@ void TileGroupProperty::addPropertyInterfaceToInspector(InspectorWin* inspector)
 
 void TileGroupProperty::process(){
     //receive pointer to object that own this property
+    getActionManager()->newSnapshotAction(go_link.world_ptr);
     World* wrld = world_ptr;
 
     for(int x_i = 0; x_i < tiles_amount_X; x_i ++){
@@ -119,6 +131,10 @@ void TileGroupProperty::process(){
 
 void TileGroupProperty::clear(){
     go_link.updLinkPtr();
+
+    getActionManager()->newSnapshotAction(go_link.world_ptr);
+    //getActionManager()->newGameObjectAction(go_link);
+
     GameObject* parent = go_link.ptr;
     unsigned int children_am = parent->children.size();
     for(unsigned int ch_i = 0; ch_i < children_am; ch_i ++){
