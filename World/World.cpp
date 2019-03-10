@@ -466,6 +466,8 @@ bool World::isObjectLabelUnique(QString label){
     int ret_amount = 0;
     for(unsigned int obj_it = 0; obj_it < objs_num; obj_it ++){ //Iterate over all objs in scene
         GameObject* obj_ptr = &this->objects[obj_it]; //Get pointer to checking object
+        //if object was destroyed
+        if(!obj_ptr->alive) continue;
         if(obj_ptr->label->compare(label) == 0){
             ret_amount += 1;
             if(ret_amount > 1) return false;
@@ -590,8 +592,10 @@ void GameObject::copyTo(GameObject* dest){
 }
 
 void World::openFromFile(QString file, QTreeWidget* w_ptr){
+    this->obj_widget_ptr = w_ptr;
+
     clear(); //Clear all objects
-    std::string fpath = file.toStdString();
+    std::string fpath = file.toStdString(); //Turn QString to std::string
 
     std::ifstream world_stream;
     world_stream.open(fpath.c_str(), std::ofstream::binary); //Opening to read binary data

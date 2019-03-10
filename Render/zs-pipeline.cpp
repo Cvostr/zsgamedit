@@ -55,11 +55,18 @@ unsigned int RenderPipeline::render_getpickedObj(void* projectedit_ptr, int mous
     pick_shader.setCamera(cam_ptr);
 
     this->current_state = PIPELINE_STATE_PICKING;
+
+    if(depthTest == true) //if depth is enabled
+        glEnable(GL_DEPTH_TEST);
+    //Iterate over all objects in the world
     for(unsigned int obj_i = 0; obj_i < world_ptr->objects.size(); obj_i ++){
         GameObject* obj_ptr = &world_ptr->objects[obj_i];
         if(!obj_ptr->hasParent)
             obj_ptr->Draw(this);
     }
+
+    if(depthTest == true) //if depth is enabled
+        glDisable(GL_DEPTH_TEST);
 
     unsigned char data[4];
     glReadPixels(mouseX, 480 - mouseY, 1,1, GL_RGBA, GL_UNSIGNED_BYTE, data);
@@ -98,7 +105,7 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr)
 
     if(depthTest == true) //if depth is enabled
         glEnable(GL_DEPTH_TEST);
-
+    //Iterate over all objects in the world
     for(unsigned int obj_i = 0; obj_i < world_ptr->objects.size(); obj_i ++){
         GameObject* obj_ptr = &world_ptr->objects[obj_i];
         if(!obj_ptr->hasParent)
@@ -255,16 +262,13 @@ ZSPIRE::Shader* RenderPipeline::processShaderOnObject(void* _obj){
                         TextureMtShPropConf* texture_conf = static_cast<TextureMtShPropConf*>(conf_ptr);
 
                         if(texture_conf->texture != nullptr){
-                            result->setGLuniformInt("hasDiffuseMap", 1);
+                            result->setGLuniformInt(texture_p->ToggleUniform.c_str(), 1);
                             texture_conf->texture->Use(texture_p->slotToBind);
                         }
                         break;
                     }
                 }
             }
-
-            //diffuse3d_shader.Use();
-            //diffuse3d_shader.setGLuniformInt("hasDiffuseMap", 0);
 
             break;
         }

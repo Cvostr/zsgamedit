@@ -46,17 +46,20 @@ MtShaderPropertiesGroup::MtShaderPropertiesGroup(){
 MtShaderPropertiesGroup* MtShProps::genDefaultMtShGroup(ZSPIRE::Shader* shader3d){
     if(default_group_created) return &default_group;
 
+    default_group.str_path = "@default";
     default_group.render_shader = shader3d;
 
     TextureMaterialShaderProperty* diff_texture_prop =
             static_cast<TextureMaterialShaderProperty*>(default_group.addProperty(MATSHPROP_TYPE_TEXTURE));
     diff_texture_prop->slotToBind = 0;
     diff_texture_prop->prop_caption = "Diffuse";
+    diff_texture_prop->ToggleUniform = "hasDiffuseMap";
 
     TextureMaterialShaderProperty* normal_texture_prop =
             static_cast<TextureMaterialShaderProperty*>(default_group.addProperty(MATSHPROP_TYPE_TEXTURE));
     normal_texture_prop->slotToBind = 1;
     normal_texture_prop->prop_caption = "Normal";
+    normal_texture_prop->ToggleUniform = "hasNormalMap";
 
     default_group_created = true;
 

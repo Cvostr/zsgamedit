@@ -244,8 +244,9 @@ void EditWindow::onNewScene(){
 }
 
 GameObject* EditWindow::onAddNewGameObject(){
+    //get free index in array
     int free_ind = world.getFreeObjectSpaceIndex();
-
+    //if we have no free space inside array
     if(free_ind == world.objects.size()){
         GameObject obj;
         obj.alive = false;
@@ -253,7 +254,7 @@ GameObject* EditWindow::onAddNewGameObject(){
         obj.array_index = free_ind;
         world.objects.push_back(obj);
     }
-
+    //Create action
     _ed_actions_container->newGameObjectAction(world.objects[free_ind].getLinkToThisObject());
 
     GameObject* obj_ptr = this->world.newObject(); //Add new object to world
@@ -508,7 +509,7 @@ void EditWindow::lookForResources(QString path){
         }
 
         if(fileInfo.isDir() == true){ //If it is directory
-            QString newdir_str = path + "/"+ fileInfo.fileName();
+            QString newdir_str = path + "/" + fileInfo.fileName();
             lookForResources(newdir_str); //Call this function inside next dir
         }
     }
@@ -814,7 +815,7 @@ void EditWindow::onKeyDown(SDL_Keysym sym){
         GameObjectLink link = this->obj_trstate.obj_ptr->getLinkToThisObject();
         callObjectDeletion(link);
     }
-
+    //If we pressed CTRL + O
     if(input_state.isLCtrlHold && sym.sym == SDLK_o){
         emit onOpenScene();
     }

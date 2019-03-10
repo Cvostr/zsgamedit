@@ -480,7 +480,13 @@ MaterialShaderPropertyConf* MaterialProperty::addPropertyConf(int type){
 
     return property_confs[property_confs.size() - 1];
 }
+void MaterialProperty::clear(){
+    for(unsigned int prop_i = 0; prop_i < property_confs.size(); prop_i ++){
+        delete this->property_confs[prop_i];
+    }
+}
 void MaterialProperty::loadPropsFromGroup(MtShaderPropertiesGroup* group){
+    this->clear(); //clear all confs, first
     //Iterate over all properties in group
     for(unsigned int prop_i = 0; prop_i < group->properties.size(); prop_i ++){
         //Obtain pointer to property in group
@@ -613,7 +619,10 @@ void GameObject::saveProperties(std::ofstream* stream){
             MaterialProperty* ptr = static_cast<MaterialProperty*>(property_ptr);
             int material_props_size = ptr->group_ptr->properties.size(); //Properties amount
 
+            //Write properties amount
             stream->write(reinterpret_cast<char*>(&material_props_size), sizeof(int));
+            *stream << "\n"; //Write divider
+            *stream << ptr->group_ptr->str_path.toStdString(); //Write MaterialShaderProps group string
 
             break;
         }
@@ -775,6 +784,15 @@ void GameObject::loadProperty(std::ifstream* world_stream){
         world_stream->seekg(1, std::ofstream::cur); //Skip space
         world_stream->read(reinterpret_cast<char*>(&props_size), sizeof(int));
 
+        world_stream->seekg(1, std::ofstream::cur); //Skip space
+        std::string group;
+        *world_stream >> group; //Write MaterialShaderProps group string
+
+        if(group.compare("@default")){
+            ptr->loadPropsFromGroup(MtShProps::getDefaultMtShGroup());
+        }else{
+
+        }
 
         break;
     }

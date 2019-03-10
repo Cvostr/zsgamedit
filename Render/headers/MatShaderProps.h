@@ -29,6 +29,7 @@ public:
 
 class MtShaderPropertiesGroup{
 public:
+    QString str_path;
     ZSPIRE::Shader* render_shader; //Pointer to shader, that binds on object render
     std::vector<MaterialShaderProperty*> properties;
 
@@ -47,7 +48,8 @@ namespace MtShProps {
 
 class TextureMaterialShaderProperty : public MaterialShaderProperty{
 public:
-    unsigned int slotToBind;
+    unsigned int slotToBind; //Slot to texture
+    std::string ToggleUniform; //Uniform to set to 1
 
     TextureMaterialShaderProperty();
 };

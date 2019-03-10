@@ -3,6 +3,7 @@
 #include "../World/headers/obj_properties.h"
 #include "../World/headers/2dtileproperties.h"
 #include "../Render/headers/zs-math.h"
+#include "../ProjEd/headers/ProjectEdit.h"
 #include <QString>
 #include <iostream>
 
@@ -49,11 +50,6 @@ void ZSENSDK::Input::removeHeldKeyFromQueue(int keycode){
             hold_keys_queue[iterator] = KEY_NONE;
         }
     }
-    /*for (unsigned int obj_i = pos + 1; obj_i < hold_keys_q_size; obj_i ++) { //Iterate over all next chidren
-        hold_keys_queue[obj_i - 1] = hold_keys_queue[obj_i]; //Move it to previous place
-    }
-
-    hold_keys_q_size -= 1;*/
 }
 void ZSENSDK::Input::clearPressedKeys(){
     pressed_keys_q_size = 0;
@@ -126,6 +122,13 @@ void ZSENSDK::ZSEN_World::setCamera(ZSPIRE::Camera cam){
 ZSPIRE::Camera ZSENSDK::ZSEN_World::getCamera(){
     return world_ptr->world_camera;
 }
+void ZSENSDK::ZSEN_World::loadWorldFromFile(std::string file){
+    Project* proj_ptr = static_cast<Project*>(world_ptr->proj_ptr);
+
+    QString load = proj_ptr->root_path + "/" + QString::fromStdString(file);
+    world_ptr->openFromFile(load, world_ptr->obj_widget_ptr);
+}
+
 //Property functions
 ZSVECTOR3 ZSENSDK::ZSENTransformProperty::getPosition(){
     return this->prop_ptr->translation;

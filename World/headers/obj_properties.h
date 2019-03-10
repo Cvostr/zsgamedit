@@ -70,6 +70,7 @@ public:
     void loadPropsFromGroup(MtShaderPropertiesGroup* group);
     void addPropertyInterfaceToInspector(InspectorWin* inspector);
     void onValueChanged();
+    void clear();
 
     MaterialProperty();
 };
