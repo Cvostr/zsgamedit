@@ -263,6 +263,8 @@ luabridge::getGlobalNamespace(state)
         .addFunction("setCamera", &ZSENSDK::ZSEN_World::setCamera)
         .addFunction("getCamera", &ZSENSDK::ZSEN_World::getCamera)
 
+        .addFunction("loadSceneFromFile", &ZSENSDK::ZSEN_World::loadWorldFromFile)
+
         .endClass()
         .endNamespace();
 

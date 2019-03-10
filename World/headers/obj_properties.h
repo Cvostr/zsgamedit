@@ -70,7 +70,10 @@ public:
     void loadPropsFromGroup(MtShaderPropertiesGroup* group);
     void addPropertyInterfaceToInspector(InspectorWin* inspector);
     void onValueChanged();
+    void copyTo(GameObjectProperty* dest);
     void clear();
+    void savePropertyConfs(std::ofstream* stream);
+    void loadPropertyConfs(std::ifstream* stream);
 
     MaterialProperty();
 };
