@@ -12,6 +12,7 @@
 #include "../../Render/headers/zs-texture.h"
 #include "../../Render/headers/zs-math.h"
 #include "../../Render/headers/zs-shader.h"
+#include "../../Render/headers/MatShaderProps.h"
 #include "../../Misc/headers/oal_manager.h"
 
 #define OBJ_PROPS_SIZE 11
@@ -185,6 +186,7 @@ public:
     ZSPIRE::Mesh* getMeshPtrByRelPath(QString label); //look through all meshes in project ptr
     ZSPIRE::Texture* getTexturePtrByRelPath(QString label); //look through all meshes in project ptr
     SoundBuffer* getSoundPtrByName(QString label);
+    Material* getMaterialPtrByName(QString label);
 
     void saveToFile(QString file);
     void openFromFile(QString file, QTreeWidget* w_ptr);

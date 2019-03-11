@@ -8,7 +8,7 @@ RenderPipeline::RenderPipeline(){
     this->current_state = PIPELINE_STATE_DEFAULT;
 }
 
-void RenderPipeline::setup(){
+void RenderPipeline::setup(int bufWidth, int bufHeight){
     this->tile_shader.compileFromFile("Shaders/2d_tile/tile2d.vs", "Shaders/2d_tile/tile2d.fs");
     this->pick_shader.compileFromFile("Shaders/pick/pick.vs", "Shaders/pick/pick.fs");
     this->obj_mark_shader.compileFromFile("Shaders/mark/mark.vs", "Shaders/mark/mark.fs");
@@ -16,7 +16,7 @@ void RenderPipeline::setup(){
     this->diffuse3d_shader.compileFromFile("Shaders/3d/3d.vs", "Shaders/3d/3d.fs");
     ZSPIRE::setupDefaultMeshes();
 
-    this->gbuffer.create(640, 480);
+    this->gbuffer.create(bufWidth, bufHeight);
     removeLights();
 
     MtShProps::genDefaultMtShGroup(&diffuse3d_shader);
@@ -217,6 +217,7 @@ ZSPIRE::Shader* RenderPipeline::processShaderOnObject(void* _obj){
                 obj->render_type = GO_RENDER_TYPE_NONE;
                 return result;
             }
+            //Checking for diffuse texture
             if(tile_ptr->texture_diffuse != nullptr){
                 tile_ptr->texture_diffuse->Use(0); //Use this texture
                 tile_shader.setHasDiffuseTextureProperty(true); //Shader will use picked diffuse texture
@@ -224,7 +225,15 @@ ZSPIRE::Shader* RenderPipeline::processShaderOnObject(void* _obj){
             }else{
                 tile_shader.setHasDiffuseTextureProperty(false); //Shader will not use diffuse texture
             }
+            //Checking for transparent texture
+            if(tile_ptr->texture_transparent != nullptr){
+                tile_ptr->texture_transparent->Use(1); //Use this texture
+                tile_shader.setGLuniformInt("hasTransparentMap", 1); //Shader will use picked transparent texture
 
+            }else{
+                tile_shader.setGLuniformInt("hasTransparentMap", 0); //Shader will not use transparent texture
+            }
+            //Sending animation info
             if(tile_ptr->anim_property.isAnimated && tile_ptr->anim_state.playing == true){ //If tile animated, then send anim state to shader
                 tile_shader.setGLuniformInt("animated", 1);
 
@@ -248,13 +257,15 @@ ZSPIRE::Shader* RenderPipeline::processShaderOnObject(void* _obj){
 
             MtShaderPropertiesGroup* group_ptr = material_ptr->group_ptr;
 
+            if(material_ptr->group_ptr == nullptr) return result; //if material hasn't group
+
             result = group_ptr->render_shader;
             result->Use();
             result->setGLuniformInt("hasDiffuseMap", 0);
 
             for(unsigned int prop_i = 0; prop_i < group_ptr->properties.size(); prop_i ++){
                 MaterialShaderProperty* prop_ptr = group_ptr->properties[prop_i];
-                MaterialShaderPropertyConf* conf_ptr = material_ptr->property_confs[prop_i];
+                MaterialShaderPropertyConf* conf_ptr = material_ptr->material_ptr->confs[prop_i];
                 switch(prop_ptr->type){
                     case MATSHPROP_TYPE_TEXTURE:{
                         //Cast pointer
@@ -337,8 +348,15 @@ void G_BUFFER_GL::create(int width, int height){
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, tPos, 0);
 
-    unsigned int attachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
-    glDrawBuffers(3, attachments);
+    glGenTextures(1, &tTransparent);
+    glBindTexture(GL_TEXTURE_2D, tTransparent);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_FLOAT, 0);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, tTransparent, 0);
+
+    unsigned int attachments[4] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3};
+    glDrawBuffers(4, attachments);
 
     glGenRenderbuffers(1, &depthBuffer);
     glBindRenderbuffer(GL_RENDERBUFFER, depthBuffer);
@@ -359,6 +377,9 @@ void G_BUFFER_GL::bindTextures(){
 
     glActiveTexture(GL_TEXTURE12);
     glBindTexture(GL_TEXTURE_2D, tPos);
+
+    glActiveTexture(GL_TEXTURE13);
+    glBindTexture(GL_TEXTURE_2D, tTransparent);
 }
 
 void G_BUFFER_GL::Destroy(){

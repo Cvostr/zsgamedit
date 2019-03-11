@@ -1,4 +1,5 @@
 #include "headers/MatShaderProps.h"
+#include <fstream>
 
 static MtShaderPropertiesGroup default_group;
 static bool default_group_created = false;
@@ -90,4 +91,83 @@ MaterialShaderPropertyConf* MtShProps::allocatePropertyConf(int type){
 
     }
     return _ptr;
+}
+
+void Material::saveToFile(){
+    std::ofstream mat_stream;
+    mat_stream.open(file_path, std::ofstream::out);
+
+    for(unsigned int prop_i = 0; prop_i < group_ptr->properties.size(); prop_i ++){
+
+        MaterialShaderProperty* prop_ptr = group_ptr->properties[prop_i];
+        MaterialShaderPropertyConf* conf_ptr = this->confs[prop_i];
+        switch(prop_ptr->type){
+            case MATSHPROP_TYPE_TEXTURE:{
+                //Cast pointer
+               // TextureMaterialShaderProperty* texture_p = static_cast<TextureMaterialShaderProperty*>(prop_ptr);
+                TextureMtShPropConf* texture_conf = static_cast<TextureMtShPropConf*>(conf_ptr);
+
+                mat_stream << texture_conf->path.toStdString();
+                break;
+            }
+        }
+    mat_stream << "\n"; //Write divider
+    }
+}
+
+void Material::loadFromFile(std::string fpath){
+    this->file_path = fpath;
+    //Define and open file stream
+    std::ifstream mat_stream;
+    mat_stream.open(fpath, std::ifstream::in);
+    for(unsigned int prop_i = 0; prop_i < group_ptr->properties.size(); prop_i ++){
+
+        MaterialShaderProperty* prop_ptr = group_ptr->properties[prop_i];
+        MaterialShaderPropertyConf* conf_ptr = this->confs[prop_i];
+        switch(prop_ptr->type){
+            case MATSHPROP_TYPE_TEXTURE:{
+                //Cast pointer
+                TextureMtShPropConf* texture_conf = static_cast<TextureMtShPropConf*>(conf_ptr);
+
+                std::string path;
+                mat_stream >> path;
+
+                texture_conf->path = QString::fromStdString(path);
+                break;
+            }
+        }
+        mat_stream.seekg(1, std::ofstream::cur); //Skip space
+    }
+}
+void Material::setPropertyGroup(MtShaderPropertiesGroup* group_ptr){
+    this->clear(); //clear all confs, first
+    //Iterate over all properties in group
+    for(unsigned int prop_i = 0; prop_i < group_ptr->properties.size(); prop_i ++){
+        //Obtain pointer to property in group
+        MaterialShaderProperty* prop_ptr = group_ptr->properties[prop_i];
+        //Add PropertyConf with the same type
+        this->addPropertyConf(prop_ptr->type);
+    }
+    this->group_ptr = group_ptr;
+}
+
+Material::Material(){
+    setPropertyGroup(MtShProps::getDefaultMtShGroup());
+}
+
+void Material::clear(){
+    for(unsigned int prop_i = 0; prop_i < this->confs.size(); prop_i ++){
+        delete this->confs[prop_i];
+    }
+    confs.clear(); //Resize array to 0
+}
+
+MaterialShaderPropertyConf* Material::addPropertyConf(int type){
+    //Allocate new property
+    MaterialShaderPropertyConf* newprop_ptr =
+            static_cast<MaterialShaderPropertyConf*>(MtShProps::allocatePropertyConf(type));
+    //Push pointer to vector
+    this->confs.push_back(newprop_ptr);
+
+    return confs[confs.size() - 1];
 }

@@ -37,6 +37,7 @@ struct Project;
 #define RESOURCE_TYPE_TEXTURE 0
 #define RESOURCE_TYPE_MESH 1
 #define RESOURCE_TYPE_AUDIO 2
+#define RESOURCE_TYPE_MATERIAL 3
 
 #include <vector>
 #include <QString>
@@ -106,6 +107,16 @@ struct PropertyPaintState{
     }
 };
 
+struct EditorSettings{
+    int gameViewWin_Width;
+    int gameViewWin_Height;
+
+    EditorSettings(){
+        gameViewWin_Width = 640;
+        gameViewWin_Height = 480;
+    }
+};
+
 class ObjectCtxMenu;
 class FileCtxMenu;
 
@@ -152,6 +163,8 @@ private:
 
     float cam_pitch = 0;
     float cam_yaw = 0;
+
+    EditorSettings settings;
 public:
     float deltaTime;
     bool ready; //Is everything loaded?

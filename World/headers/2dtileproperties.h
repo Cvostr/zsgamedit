@@ -70,9 +70,13 @@ private:
     InspectorWin* insp_win;
 public:
     TileGeometry geometry;
-
+    //Defines color texture
     ZSPIRE::Texture* texture_diffuse;
     QString diffuse_relpath;
+    //Defines texture, that will cover tile
+    ZSPIRE::Texture* texture_transparent;
+    QString transparent_relpath;
+    //Defines animation
     TileAnimation anim_property;
     TileAnimationState anim_state;
 

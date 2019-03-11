@@ -38,6 +38,22 @@ public:
     MtShaderPropertiesGroup();
 };
 
+class Material{
+private:
+    std::string file_path; //path to material file
+public:
+    MtShaderPropertiesGroup* group_ptr;
+    std::vector<MaterialShaderPropertyConf*> confs;
+
+    MaterialShaderPropertyConf* addPropertyConf(int type);
+    void loadFromFile(std::string fpath);
+    void saveToFile();
+    void setPropertyGroup(MtShaderPropertiesGroup* group_ptr);
+    void clear();
+
+    Material();
+};
+
 namespace MtShProps {
     MaterialShaderProperty* allocateProperty(int type);
     MaterialShaderPropertyConf* allocatePropertyConf(int type);

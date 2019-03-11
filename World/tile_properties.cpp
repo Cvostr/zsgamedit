@@ -192,6 +192,13 @@ void TileProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
     area->rel_path = &diffuse_relpath;
     area->resource_type = RESOURCE_TYPE_TEXTURE; //It should load textures only
     inspector->addPropertyArea(area);
+
+    PickResourceArea* transparent_area = new PickResourceArea;
+    transparent_area->setLabel("Transparent Texture");
+    transparent_area->go_property = static_cast<void*>(this);
+    transparent_area->rel_path = &transparent_relpath;
+    transparent_area->resource_type = RESOURCE_TYPE_TEXTURE; //It should load textures only
+    inspector->addPropertyArea(transparent_area);
 }
 
 void TileProperty::onValueChanged(){
@@ -200,7 +207,10 @@ void TileProperty::onValueChanged(){
 }
 
 void TileProperty::updTexturePtr(){
+    //Update color texture
     this->texture_diffuse = world_ptr->getTexturePtrByRelPath(diffuse_relpath);
+    //Update transparent layer texture
+    this->texture_transparent = world_ptr->getTexturePtrByRelPath(transparent_relpath);
 }
 
 void TileProperty::onAddToObject(){

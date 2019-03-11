@@ -117,6 +117,7 @@ bool ZSPIRE::Shader::compileFromFile(const char* VSpath, const char* FSpath){
 
 	Use();
 	setGLuniformInt("diffuse", 0);
+    setGLuniformInt("transparent", 1);
 	setGLuniformInt("normal_map", 1);
 
 	setGLuniformInt("sprite_map", 0);
@@ -125,9 +126,9 @@ bool ZSPIRE::Shader::compileFromFile(const char* VSpath, const char* FSpath){
     setGLuniformInt("tDiffuse", 10);
     setGLuniformInt("tNormal", 11);
     setGLuniformInt("tPos", 12);
+    setGLuniformInt("tTransparent", 13);
 
 	setGLuniformInt("shadow0", 20);
-	setGLuniformInt("shadow1", 21);
 
     this->isCreated = true; //Shader created & compiled now
 	return true;

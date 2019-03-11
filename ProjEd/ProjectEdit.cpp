@@ -117,10 +117,10 @@ void EditWindow::init(){
     SDL_DisplayMode current;
     SDL_GetCurrentDisplayMode(0, &current);
 
-    this->window = SDL_CreateWindow("Game View", this->width(), 0, 640, 480, SDL_WINDOW_OPENGL); //Create window
+    this->window = SDL_CreateWindow("Game View", this->width(), 0, settings.gameViewWin_Width, settings.gameViewWin_Height, SDL_WINDOW_OPENGL); //Create window
     this->glcontext = SDL_GL_CreateContext(window);
 
-    glViewport(0, 0, 640, 480);
+    glViewport(0, 0, settings.gameViewWin_Width, settings.gameViewWin_Height);
 
     render = new RenderPipeline;
     render->InitGLEW();
@@ -133,7 +133,7 @@ void EditWindow::init(){
         render->depthTest = true;
     }
 
-    render->setup();
+    render->setup(settings.gameViewWin_Width, settings.gameViewWin_Height);
     ready = true;//Everything is ready
 
     ZSPIRE::SFX::initAL();
@@ -506,6 +506,15 @@ void EditWindow::lookForResources(QString path){
                 loadResource(&resource); //Perform mesh processing & loading to OpenGL
                 this->project.resources.push_back(resource);
             }
+            if(name.endsWith(".ZSMAT") || name.endsWith(".zsmat")){ //If its an mesh
+                Resource resource;
+                resource.file_path = fileInfo.absoluteFilePath();
+                resource.rel_path = resource.file_path; //Preparing to get relative path
+                resource.rel_path.remove(0, project.root_path.size() + 1); //Get relative path by removing length of project root from start
+                resource.type = RESOURCE_TYPE_MATERIAL; //Type of resource is mesh
+                loadResource(&resource); //Perform mesh processing & loading to OpenGL
+                this->project.resources.push_back(resource);
+            }
         }
 
         if(fileInfo.isDir() == true){ //If it is directory
@@ -536,6 +545,13 @@ void EditWindow::loadResource(Resource* resource){
             SoundBuffer* sound_ptr = static_cast<SoundBuffer*>(resource->class_ptr); //Aquire casted pointer
             std::string str = resource->file_path.toStdString();
             sound_ptr->loadFileWAV(str.c_str()); //Load music file
+            break;
+        }
+        case RESOURCE_TYPE_MATERIAL:{
+            resource->class_ptr = static_cast<void*>(new Material); //Initialize pointer to sound buffer
+            Material* mat_ptr = static_cast<Material*>(resource->class_ptr); //Aquire casted pointer
+            std::string str = resource->file_path.toStdString();
+            mat_ptr->loadFromFile(str); //Load music file
             break;
         }
     }
