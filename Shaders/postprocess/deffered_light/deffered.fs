@@ -26,6 +26,7 @@ in vec2 UVCoord;
 uniform sampler2D tDiffuse;
 uniform sampler2D tNormal;
 uniform sampler2D tPos;
+uniform sampler2D tTransparent;
 
 uniform int lights_amount;
 uniform Light lights[100];
