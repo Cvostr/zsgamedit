@@ -7,8 +7,10 @@
 #include "ProjEd/headers/ProjectEdit.h"
 #include "ProjEd/headers/ProjCreateWin.h"
 
-#include "engine.h" //include engine headers
 #include "triggers.h"
+#ifdef USE_ZSPIRE
+#include "engine.h" //include engine headers
+#endif
 
 typedef struct ProjectConf{
     QString projLabel;

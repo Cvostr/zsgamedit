@@ -678,8 +678,10 @@ void EditWindow::onLeftBtnClicked(int X, int Y){
     unsigned int clicked = render->render_getpickedObj(static_cast<void*>(this), X, Y);
 
     GameObject* obj_ptr = &world.objects[clicked]; //Obtain pointer to selected object by label
-    if(clicked > world.objects.size() || obj_ptr == 0x0 || clicked >= 256 * 256 * 256)
+    if(clicked > world.objects.size() || obj_ptr == 0x0 || clicked >= 256 * 256 * 256){
+        world.unpickObject();
         return;
+    }
 
     obj_trstate.obj_ptr = obj_ptr;
     obj_trstate.tprop_ptr = static_cast<TransformProperty*>(obj_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));

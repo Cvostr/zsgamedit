@@ -112,6 +112,7 @@ public:
     void copyTo(GameObjectProperty* dest);
     void updTransformPtr();
     void onObjectDeleted();
+    void onUpdate(float deltaTime);
 
     LightsourceProperty();
 };

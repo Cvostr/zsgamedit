@@ -111,6 +111,7 @@ class PickResourceArea : public PropertyEditArea{
 public:
     ResourcePickDialog* dialog; //dialog shown after button press
 
+    bool isShowNoneItem; //If enabled, @none will be added to list
     QString extension_mask; //Extension mask to show needed files
     unsigned int resource_type; //flag of resource type
     QString* rel_path; //Pointer to store result

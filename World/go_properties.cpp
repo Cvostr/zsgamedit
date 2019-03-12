@@ -250,6 +250,7 @@ void TransformProperty::copyTo(GameObjectProperty* dest){
     _dest->transform_mat = this->transform_mat;
 }
 
+
 //Label property functions
 void LabelProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
     StringPropertyArea* area = new StringPropertyArea;
@@ -380,6 +381,16 @@ void LightsourceProperty::onObjectDeleted(){
     deffered_shader_ptr->unsetLight(this->id);
 }
 
+void LightsourceProperty::onUpdate(float deltaTime){
+    /*TransformProperty* transform_prop = go_link.ptr->getTransformProperty();
+    if((this->last_pos != transform_prop->_last_translation || this->last_rot != transform_prop->rotation)){
+        this->onValueChanged();
+        //store new transform values
+        this->last_pos = transform_prop->_last_translation;
+        this->last_rot = transform_prop->rotation;
+    }*/
+}
+
 LightsourceProperty::LightsourceProperty(){
     type = GO_PROPERTY_TYPE_LIGHTSOURCE;
     active = true;
@@ -477,15 +488,16 @@ MaterialProperty::MaterialProperty(){
 }
 
 void MaterialProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
+    //Add area to pick material file
     PickResourceArea* area = new PickResourceArea;
     area->setLabel("Material");
     area->go_property = static_cast<void*>(this);
     area->rel_path = &material_path;
     area->resource_type = RESOURCE_TYPE_MATERIAL; //It should load meshes only
     inspector->addPropertyArea(area);
-
+    //if material isn't set up, exiting
     if(group_ptr == nullptr) return;
-
+    //If set up, iterating over all items
     for(unsigned int prop_i = 0; prop_i < group_ptr->properties.size(); prop_i ++){
         MaterialShaderProperty* prop_ptr = group_ptr->properties[prop_i];
         MaterialShaderPropertyConf* conf_ptr = this->material_ptr->confs[prop_i];
@@ -499,8 +511,22 @@ void MaterialProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
                 area->setLabel(texture_p->prop_caption);
                 area->go_property = static_cast<void*>(this);
                 area->rel_path = &texture_conf->path;
+                area->isShowNoneItem = true;
                 area->resource_type = RESOURCE_TYPE_TEXTURE; //It should load textures only
                 inspector->addPropertyArea(area);
+
+                break;
+            }
+            case MATSHPROP_TYPE_FLOAT:{
+                //Cast pointer
+                FloatMaterialShaderProperty* float_p = static_cast<FloatMaterialShaderProperty*>(prop_ptr);
+                FloatMtShPropConf* float_conf = static_cast<FloatMtShPropConf*>(conf_ptr);
+
+                FloatPropertyArea* gain_area = new FloatPropertyArea;
+                gain_area->setLabel(float_p->prop_caption); //Its label
+                gain_area->value = &float_conf->value;
+                gain_area->go_property = static_cast<void*>(this);
+                inspector->addPropertyArea(gain_area);
 
                 break;
             }
@@ -542,11 +568,8 @@ void MaterialProperty::copyTo(GameObjectProperty* dest){
 
     MaterialProperty* mat_prop = static_cast<MaterialProperty*>(dest);
     mat_prop->group_ptr = this->group_ptr;
-
-    /*for(unsigned int prop_i = 0; prop_i < this->property_confs.size(); prop_i ++){
-        MaterialShaderPropertyConf* conf_ptr = this->property_confs[prop_i];
-        MaterialShaderPropertyConf* newconf_ptr =
-    }*/
+    mat_prop->material_path = this->material_path;
+    mat_prop->material_ptr = this->material_ptr;
 }
 
 void GameObject::saveProperties(std::ofstream* stream){
@@ -671,6 +694,11 @@ void GameObject::saveProperties(std::ofstream* stream){
                 *stream << "@none";
             else
                 *stream << ptr->diffuse_relpath.toStdString() << "\n";
+
+            if(ptr->transparent_relpath.isEmpty()) //check if object has no texture
+                *stream << "@none";
+            else
+                *stream << ptr->transparent_relpath.toStdString() << "\n";
 
             //Animation stuff
             stream->write(reinterpret_cast<char*>(&ptr->anim_property.isAnimated), sizeof(bool));
@@ -799,21 +827,6 @@ void GameObject::loadProperty(std::ifstream* world_stream){
         if(path.compare("@none"))
             ptr->onValueChanged();
 
-        //world_stream->seekg(1, std::ofstream::cur); //Skip space
-        //world_stream->read(reinterpret_cast<char*>(&props_size), sizeof(int));
-
-        /*world_stream->seekg(1, std::ofstream::cur); //Skip space
-        std::string group;
-        *world_stream >> group; //Write MaterialShaderProps group string
-
-        if(group.compare("@default")){
-            ptr->loadPropsFromGroup(MtShProps::getDefaultMtShGroup());
-        }else{
-
-        }
-
-        ptr->loadPropertyConfs(world_stream);
-        */
         break;
     }
     case GO_PROPERTY_TYPE_TILE_GROUP :{
@@ -832,13 +845,21 @@ void GameObject::loadProperty(std::ifstream* world_stream){
     break;
     }
     case GO_PROPERTY_TYPE_TILE:{
-        std::string rel_path;
-        *world_stream >> rel_path;
+        std::string diffuse_rel_path;
+        *world_stream >> diffuse_rel_path;
         TileProperty* lptr = static_cast<TileProperty*>(prop_ptr);
-        if(rel_path.compare("@none") != 0){
-            lptr->diffuse_relpath = QString::fromStdString(rel_path); //Write loaded mesh relative path
+        if(diffuse_rel_path.compare("@none") != 0){
+            lptr->diffuse_relpath = QString::fromStdString(diffuse_rel_path); //Write loaded mesh relative path
             lptr->updTexturePtr(); //Pointer will now point to mesh resource
         }
+
+        std::string transparent_rel_path;
+        *world_stream >> transparent_rel_path;
+        if(transparent_rel_path.compare("@none") != 0){
+            lptr->transparent_relpath = QString::fromStdString(transparent_rel_path); //Write loaded mesh relative path
+            lptr->updTexturePtr(); //Pointer will now point to mesh resource
+        }
+
         world_stream->seekg(1, std::ofstream::cur);
         world_stream->read(reinterpret_cast<char*>(&lptr->anim_property.isAnimated), sizeof(bool));
         if(lptr->anim_property.isAnimated){ //if animated, then write animation properties

@@ -50,7 +50,6 @@ GameObject::GameObject(){
 }
 
 GameObject::~GameObject(){
-    //delete this->item_ptr;
 }
 
 bool GameObject::addProperty(int property){
@@ -385,7 +384,7 @@ GameObject* World::dublicateObject(GameObject* original, bool parent){
         if(parent == true)
             original->parent.ptr->addChildObject(new_obj->getLinkToThisObject());
     }
-
+    //Set new name for object
     LabelProperty* label_prop = new_obj->getLabelProperty(); //Obtain pointer to label property
     std::string to_paste;
     genRandomString(&to_paste, 3);
@@ -393,7 +392,7 @@ GameObject* World::dublicateObject(GameObject* original, bool parent){
     label_prop->list_item_ptr = new_obj->item_ptr; //Setting to label new qt item
     new_obj->label = &label_prop->label;
     new_obj->item_ptr->setText(0, label_prop->label);
-
+    //Dublicate chilldren object
     unsigned int children_amount = original->children.size();
     for(unsigned int child_i = 0; child_i < children_amount; child_i ++){
         GameObjectLink link = original->children[child_i];

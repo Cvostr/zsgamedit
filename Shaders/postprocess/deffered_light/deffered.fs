@@ -31,6 +31,7 @@ uniform sampler2D tTransparent;
 uniform int lights_amount;
 uniform Light lights[100];
 
+uniform vec3 cam_position;
 
 void main(){
 

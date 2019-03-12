@@ -328,6 +328,8 @@ PickResourceArea::PickResourceArea(){
     this->rel_path = nullptr;
     this->resource_type = RESOURCE_TYPE_TEXTURE; //Default type is texture
 
+    isShowNoneItem = false;
+
     respick_btn = new QPushButton; //Allocation of QPushButton
     relpath_label = new QLabel; //Allocation of resource relpath text
     elem_layout->addWidget(relpath_label);
@@ -423,6 +425,11 @@ void ResourcePickDialog::onNeedToShow(){
     //Receiving pointer to project
     Project* project_ptr = static_cast<Project*>(static_cast<GameObjectProperty*>(this->area->go_property)->world_ptr->proj_ptr);
     unsigned int resources_num = static_cast<unsigned int>(project_ptr->resources.size());
+
+    if(area->isShowNoneItem){
+        new QListWidgetItem("@none", this->list);
+    }
+
     if(area->resource_type == RESOURCE_TYPE_MESH){
         new QListWidgetItem("@plane", this->list);
         new QListWidgetItem("@isotile", this->list);

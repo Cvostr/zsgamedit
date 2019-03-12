@@ -126,12 +126,11 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr)
 
 void GameObject::Draw(RenderPipeline* pipeline){
     //Obtain EditWindow pointer to check if scene is running
-
-    if(active == false || alive == false) return; //if object is inactive, not to render it
-
     EditWindow* editwin_ptr = static_cast<EditWindow*>(pipeline->win_ptr);
-    if(editwin_ptr->isSceneRun && pipeline->current_state == PIPELINE_STATE_DEFAULT)
-        this->onUpdate(pipeline->deltaTime);
+    if(active == false || alive == false) return; //if object is inactive, not to render it
+    //Call update on every property in objects
+
+
 
     TransformProperty* transform_prop = static_cast<TransformProperty*>(this->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
     if(transform_prop == nullptr) return; //We have nothing to do with object without transform property
@@ -142,12 +141,16 @@ void GameObject::Draw(RenderPipeline* pipeline){
     if(light != nullptr && !light->isSent){ //if object has lightsource
         pipeline->addLight(static_cast<void*>(light)); //put light pointer to vector
     }
+
     if(light != nullptr && (light->last_pos != transform_prop->_last_translation || light->last_rot != transform_prop->rotation)){
         light->onValueChanged();
         //store new transform values
         light->last_pos = transform_prop->_last_translation;
         light->last_rot = transform_prop->rotation;
     }
+
+    if(editwin_ptr->isSceneRun && pipeline->current_state == PIPELINE_STATE_DEFAULT)
+        this->onUpdate(pipeline->deltaTime);
 
     ZSPIRE::Shader* shader = pipeline->processShaderOnObject(static_cast<void*>(this)); //Will be used next time
     ZSVIEWPORT cam_viewport = pipeline->cam->getViewport();
@@ -227,7 +230,7 @@ ZSPIRE::Shader* RenderPipeline::processShaderOnObject(void* _obj){
             }
             //Checking for transparent texture
             if(tile_ptr->texture_transparent != nullptr){
-                tile_ptr->texture_transparent->Use(1); //Use this texture
+                tile_ptr->texture_transparent->Use(5); //Use this texture
                 tile_shader.setGLuniformInt("hasTransparentMap", 1); //Shader will use picked transparent texture
 
             }else{
@@ -258,10 +261,9 @@ ZSPIRE::Shader* RenderPipeline::processShaderOnObject(void* _obj){
             MtShaderPropertiesGroup* group_ptr = material_ptr->group_ptr;
 
             if(material_ptr->group_ptr == nullptr) return result; //if material hasn't group
-
+            //Work with shader
             result = group_ptr->render_shader;
             result->Use();
-            result->setGLuniformInt("hasDiffuseMap", 0);
 
             for(unsigned int prop_i = 0; prop_i < group_ptr->properties.size(); prop_i ++){
                 MaterialShaderProperty* prop_ptr = group_ptr->properties[prop_i];
@@ -275,7 +277,17 @@ ZSPIRE::Shader* RenderPipeline::processShaderOnObject(void* _obj){
                         if(texture_conf->texture != nullptr){
                             result->setGLuniformInt(texture_p->ToggleUniform.c_str(), 1);
                             texture_conf->texture->Use(texture_p->slotToBind);
+                        }else{
+                            result->setGLuniformInt(texture_p->ToggleUniform.c_str(), 0);
                         }
+                        break;
+                    }
+                    case MATSHPROP_TYPE_FLOAT:{
+                        //Cast pointer
+                        FloatMaterialShaderProperty* float_p = static_cast<FloatMaterialShaderProperty*>(prop_ptr);
+                        FloatMtShPropConf* float_conf = static_cast<FloatMtShPropConf*>(conf_ptr);
+
+                        result->setGLuniformFloat(float_p->integerUniform.c_str(), float_conf->value);
                         break;
                     }
                 }
@@ -299,6 +311,10 @@ void RenderPipeline::updateShadersCameraInfo(ZSPIRE::Camera* cam_ptr){
     if(obj_mark_shader.isCreated == true){
         obj_mark_shader.Use();
         obj_mark_shader.setCamera(cam_ptr);
+    }
+    if(deffered_light.isCreated == true){
+        deffered_light.Use();
+        deffered_light.setCamera(cam_ptr, true);
     }
 }
 
@@ -329,7 +345,7 @@ void G_BUFFER_GL::create(int width, int height){
 
     glGenTextures(1, &tDiffuse);
     glBindTexture(GL_TEXTURE_2D, tDiffuse);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tDiffuse, 0);
@@ -387,6 +403,7 @@ void G_BUFFER_GL::Destroy(){
     glDeleteTextures(1, &tDiffuse);
     glDeleteTextures(1, &tNormal);
     glDeleteTextures(1, &tPos);
+    glDeleteTextures(1, &tTransparent);
 
     //delete framebuffer & renderbuffer
     glDeleteRenderbuffers(1, &this->depthBuffer);

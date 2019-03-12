@@ -28,7 +28,7 @@ namespace ZSPIRE {
 		void setHasNormalTextureProperty(bool hasNormalMap);
 		void setTextureCountProperty(int tX, int tY);
 		void setTransform(ZSMATRIX4x4 transform);
-        void setCamera(Camera* cam);
+        void setCamera(Camera* cam, bool sendPos = false);
         void sendLight(unsigned int index, void* _light);
         void unsetLight(unsigned int index);
 

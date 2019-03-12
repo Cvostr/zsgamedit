@@ -64,17 +64,42 @@ namespace MtShProps {
 
 class TextureMaterialShaderProperty : public MaterialShaderProperty{
 public:
-    unsigned int slotToBind; //Slot to texture
+    int slotToBind; //Slot to texture
     std::string ToggleUniform; //Uniform to set to 1
 
     TextureMaterialShaderProperty();
 };
+class IntegerMaterialShaderProperty : public MaterialShaderProperty{
+public:
+    std::string integerUniform;
+    //Construct
+    IntegerMaterialShaderProperty();
+};
+class FloatMaterialShaderProperty : public MaterialShaderProperty{
+public:
+    std::string integerUniform;
+    //Construct
+    FloatMaterialShaderProperty();
+};
+//Property configurations
 class TextureMtShPropConf : public MaterialShaderPropertyConf{
 public:
      ZSPIRE::Texture* texture;
      QString path;
 
      TextureMtShPropConf();
+};
+class IntegerMtShPropConf : public MaterialShaderPropertyConf{
+public:
+    int value;
+    //Construct
+    IntegerMtShPropConf();
+};
+class FloatMtShPropConf : public MaterialShaderPropertyConf{
+public:
+    float value;
+    //Construct
+    FloatMtShPropConf();
 };
 
 #endif

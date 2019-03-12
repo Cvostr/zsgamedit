@@ -2,7 +2,7 @@
 #extension GL_ARB_explicit_attrib_location : require
 #extension GL_ARB_explicit_uniform_location : require
 
-layout (location = 0) out vec3 tDiffuse;
+layout (location = 0) out vec4 tDiffuse;
 layout (location = 2) out vec3 tPos;
 layout (location = 4) out vec4 tTransparent;
 
@@ -37,8 +37,8 @@ void main(){
 	if(hasDiffuseMap) //if diffuse texture picked
 		result = texture(diffuse, uv).xyz;
 		
-	FragColor = vec4(result, 1);
-	tDiffuse = result;
+	//FragColor = vec4(result, 1);
+	tDiffuse = vec4(result, 1);
 	tPos = FragPos;
 	
 	if(hasTransparentMap){

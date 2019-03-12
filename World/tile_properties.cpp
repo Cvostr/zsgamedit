@@ -32,6 +32,9 @@ TileProperty::TileProperty(){
 
     this->texture_diffuse = nullptr;
     this->diffuse_relpath = "@none";
+
+    this->texture_transparent = nullptr;
+    this->transparent_relpath = "@none";
 }
 
 void TileGroupProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){

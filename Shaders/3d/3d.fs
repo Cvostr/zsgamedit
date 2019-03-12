@@ -2,7 +2,7 @@
 #extension GL_ARB_explicit_attrib_location : require
 #extension GL_ARB_explicit_uniform_location : require
 
-layout (location = 0) out vec3 tDiffuse;
+layout (location = 0) out vec4 tDiffuse;
 layout (location = 1) out vec3 tNormal;
 layout (location = 2) out vec3 tPos;
 
@@ -14,21 +14,27 @@ in vec2 UVCoord;
 
 //textures
 uniform sampler2D diffuse;
-uniform sampler2D normal;
+uniform sampler2D normal_map;
 
 uniform bool hasDiffuseMap;
 uniform bool hasNormalMap;
+
+uniform float material_shininess;
 
 void main(){
 
 	vec2 uv = UVCoord;
 	
 	vec3 result = vec3(1.0, 0.078, 0.574); //Default value
+	vec3 Normal = InNormal; //defaultly, use normals from mesh
+	
 	if(hasDiffuseMap)
 		result = texture(diffuse, uv).xyz ;
 		
-	FragColor = vec4(result, 1);
-	tDiffuse = result;
+    if(hasNormalMap)
+        Normal = texture(normal_map, uv).xyz;
+		
+	tDiffuse = vec4(result, material_shininess);
 	tPos = FragPos;
-	tNormal = InNormal;
+	tNormal = Normal;
 }

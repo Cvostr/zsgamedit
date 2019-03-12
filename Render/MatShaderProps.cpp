@@ -34,7 +34,24 @@ TextureMtShPropConf::TextureMtShPropConf(){
     this->path = "@none";
     this->texture = nullptr;
 }
+//Integer stuff
+IntegerMaterialShaderProperty::IntegerMaterialShaderProperty(){
+    type = MATSHPROP_TYPE_INTEGER;
+}
+IntegerMtShPropConf::IntegerMtShPropConf(){
+    type = MATSHPROP_TYPE_INTEGER;
 
+    value = 0;
+}
+//Float stuff
+FloatMaterialShaderProperty::FloatMaterialShaderProperty(){
+    type = MATSHPROP_TYPE_FLOAT;
+}
+FloatMtShPropConf::FloatMtShPropConf(){
+    type = MATSHPROP_TYPE_FLOAT;
+
+    value = 0;
+}
 
 void MtShaderPropertiesGroup::loadFromFile(const char* fpath){
 
@@ -62,6 +79,11 @@ MtShaderPropertiesGroup* MtShProps::genDefaultMtShGroup(ZSPIRE::Shader* shader3d
     normal_texture_prop->prop_caption = "Normal";
     normal_texture_prop->ToggleUniform = "hasNormalMap";
 
+    FloatMaterialShaderProperty* shininess_factor_prop =
+            static_cast<FloatMaterialShaderProperty*>(default_group.addProperty(MATSHPROP_TYPE_FLOAT));
+    shininess_factor_prop->integerUniform = "material_shininess";
+    shininess_factor_prop->prop_caption = "Shininess";
+
     default_group_created = true;
 
     return &default_group;
@@ -77,6 +99,14 @@ MaterialShaderProperty* MtShProps::allocateProperty(int type){
             _ptr = static_cast<MaterialShaderProperty*>(new TextureMaterialShaderProperty); //Allocation of transform in heap
             break;
         }
+        case MATSHPROP_TYPE_INTEGER:{ //If type is transfrom
+            _ptr = static_cast<MaterialShaderProperty*>(new IntegerMaterialShaderProperty); //Allocation of transform in heap
+            break;
+        }
+        case MATSHPROP_TYPE_FLOAT:{ //If type is transfrom
+            _ptr = static_cast<MaterialShaderProperty*>(new FloatMaterialShaderProperty); //Allocation of transform in heap
+            break;
+        }
 
     }
     return _ptr;
@@ -86,6 +116,14 @@ MaterialShaderPropertyConf* MtShProps::allocatePropertyConf(int type){
     switch (type) {
         case MATSHPROP_TYPE_TEXTURE:{ //If type is transfrom
             _ptr = static_cast<MaterialShaderPropertyConf*>(new TextureMtShPropConf); //Allocation of transform in heap
+            break;
+        }
+        case MATSHPROP_TYPE_INTEGER:{ //If type is transfrom
+            _ptr = static_cast<MaterialShaderPropertyConf*>(new IntegerMtShPropConf); //Allocation of transform in heap
+            break;
+        }
+        case MATSHPROP_TYPE_FLOAT:{ //If type is transfrom
+            _ptr = static_cast<MaterialShaderPropertyConf*>(new FloatMtShPropConf); //Allocation of transform in heap
             break;
         }
 
@@ -104,7 +142,6 @@ void Material::saveToFile(){
         switch(prop_ptr->type){
             case MATSHPROP_TYPE_TEXTURE:{
                 //Cast pointer
-               // TextureMaterialShaderProperty* texture_p = static_cast<TextureMaterialShaderProperty*>(prop_ptr);
                 TextureMtShPropConf* texture_conf = static_cast<TextureMtShPropConf*>(conf_ptr);
 
                 mat_stream << texture_conf->path.toStdString();
