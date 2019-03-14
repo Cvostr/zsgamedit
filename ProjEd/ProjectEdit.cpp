@@ -131,6 +131,8 @@ void EditWindow::init(){
     if(project.perspective == 3){
         glEnable(GL_DEPTH_TEST);
         render->depthTest = true;
+        render->cullFaces = true;
+        glFrontFace(GL_CCW);
     }
 
     render->setup(settings.gameViewWin_Width, settings.gameViewWin_Height);

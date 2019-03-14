@@ -47,7 +47,8 @@ private:
     std::vector<void*> lights_ptr;
 public:
     float deltaTime;
-    bool depthTest;
+    bool depthTest; //if enabled, GL will do depth testing
+    bool cullFaces; //if enabled, GL will cull faces
     int current_state;
     void setup(int bufWidth, int bufHeight);
     bool InitGLEW();

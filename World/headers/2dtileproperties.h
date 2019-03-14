@@ -57,6 +57,9 @@ public:
     bool isCreated;
     TileGeometry geometry; //Tile to add geometry
 
+    QString diffuse_relpath; //Diffuse texture to generate
+    QString mesh_string; //Mesh to generate
+
     void addPropertyInterfaceToInspector(InspectorWin* inspector);
     void process();
     void clear();

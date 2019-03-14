@@ -109,6 +109,10 @@ void ZSPIRE::Mesh::Init() {
 void ZSPIRE::setupDefaultMeshes() {
     picked_mesh = 0x0;
 
+    for(unsigned int cube_v = 0; cube_v < 36; cube_v ++){
+        cube_vertices[cube_v].pos.X *= -1;
+    }
+
     plane2Dmesh.Init(); //Initialize mesh for GL
     plane2Dmesh.setMeshData(plane_verts, plane_inds, 4, 6); //Send plane data
 

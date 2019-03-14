@@ -147,6 +147,13 @@ void Material::saveToFile(){
                 mat_stream << texture_conf->path.toStdString();
                 break;
             }
+            case MATSHPROP_TYPE_FLOAT:{
+                //Cast pointer
+                FloatMtShPropConf* float_conf = static_cast<FloatMtShPropConf*>(conf_ptr);
+
+                mat_stream << float_conf->value;
+                break;
+            }
         }
     mat_stream << "\n"; //Write divider
     }
@@ -170,6 +177,16 @@ void Material::loadFromFile(std::string fpath){
                 mat_stream >> path;
 
                 texture_conf->path = QString::fromStdString(path);
+                break;
+            }
+            case MATSHPROP_TYPE_FLOAT:{
+                //Cast pointer
+                FloatMtShPropConf* float_conf = static_cast<FloatMtShPropConf*>(conf_ptr);
+
+                float value;
+                mat_stream >> value;
+
+                float_conf->value = value;
                 break;
             }
         }

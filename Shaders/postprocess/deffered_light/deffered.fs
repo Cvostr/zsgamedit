@@ -34,16 +34,25 @@ uniform Light lights[100];
 uniform vec3 cam_position;
 
 void main(){
-
-	vec3 result = texture(tDiffuse, UVCoord).xyz;
+    vec4 Diffuse = texture(tDiffuse, UVCoord);
     vec3 FragPos = texture(tPos, UVCoord).rgb;
     vec3 Normal = texture(tNormal, UVCoord).rgb;
     
+    vec3 result = Diffuse.xyz;
 
+    float specularFactor = Diffuse.w; //Get factor in A channel
+    vec3 camToFragDirection = normalize(cam_position - FragPos);
+    
     for(int lg = 0; lg < lights_amount; lg ++){
 		if(lights[lg].type == LIGHTSOURCE_DIR){
 			float lightcoeff = max(dot(Normal, normalize(lights[lg].dir)), 0.0) * lights[lg].intensity;
 			vec3 rlight = lightcoeff * lights[lg].color;
+			
+			//Specular calculation
+            vec3 lightDirReflected = reflect(normalize(-lights[lg].dir), Normal);
+            float angle = max(dot(camToFragDirection, lightDirReflected), 0.0);
+            rlight += pow(angle, 32) * specularFactor * lights[lg].color;
+			
 			result += rlight;
 		}
 		if(lights[lg].type == LIGHTSOURCE_POINT){

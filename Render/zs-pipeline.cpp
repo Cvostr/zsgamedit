@@ -6,6 +6,8 @@
 
 RenderPipeline::RenderPipeline(){
     this->current_state = PIPELINE_STATE_DEFAULT;
+
+    this->cullFaces = false;
 }
 
 void RenderPipeline::setup(int bufWidth, int bufHeight){
@@ -58,6 +60,10 @@ unsigned int RenderPipeline::render_getpickedObj(void* projectedit_ptr, int mous
 
     if(depthTest == true) //if depth is enabled
         glEnable(GL_DEPTH_TEST);
+
+    if(cullFaces == true)
+        glDisable(GL_CULL_FACE);
+
     //Iterate over all objects in the world
     for(unsigned int obj_i = 0; obj_i < world_ptr->objects.size(); obj_i ++){
         GameObject* obj_ptr = &world_ptr->objects[obj_i];
@@ -105,6 +111,10 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr)
 
     if(depthTest == true) //if depth is enabled
         glEnable(GL_DEPTH_TEST);
+
+    if(cullFaces == true)
+        glEnable(GL_CULL_FACE);
+
     //Iterate over all objects in the world
     for(unsigned int obj_i = 0; obj_i < world_ptr->objects.size(); obj_i ++){
         GameObject* obj_ptr = &world_ptr->objects[obj_i];
@@ -114,6 +124,9 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr)
 
     if(depthTest == true) //if depth is enabled
         glDisable(GL_DEPTH_TEST);
+
+    if(cullFaces == true)
+        glDisable(GL_CULL_FACE);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0); //Back to default framebuffer
     glClear(GL_COLOR_BUFFER_BIT); //Clear screen

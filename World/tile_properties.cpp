@@ -23,6 +23,9 @@ TileGroupProperty::TileGroupProperty(){
     this->isCreated = false;
     this->tiles_amount_X = 0;
     this->tiles_amount_Y = 0;
+
+    this->mesh_string = "@plane";
+    this->diffuse_relpath = "@none";
 }
 
 TileProperty::TileProperty(){
@@ -69,6 +72,22 @@ void TileGroupProperty::addPropertyInterfaceToInspector(InspectorWin* inspector)
         inspector->getContentLayout()->addWidget(btn->button);
         btn->insp_ptr = inspector; //Setting inspector pointer
         inspector->registerUiObject(btn);
+
+        PickResourceArea* mesh_area = new PickResourceArea;
+        mesh_area->setLabel("Tiles Mesh");
+        mesh_area->go_property = static_cast<void*>(this);
+        mesh_area->rel_path = &this->mesh_string;
+        mesh_area->isShowNoneItem = false;
+        mesh_area->resource_type = RESOURCE_TYPE_MESH; //It should load textures only
+        inspector->addPropertyArea(mesh_area);
+
+        PickResourceArea* diffuse_area = new PickResourceArea;
+        diffuse_area->setLabel("Tiles Diffuse");
+        diffuse_area->go_property = static_cast<void*>(this);
+        diffuse_area->rel_path = &this->diffuse_relpath;
+        diffuse_area->isShowNoneItem = true;
+        diffuse_area->resource_type = RESOURCE_TYPE_TEXTURE; //It should load textures only
+        inspector->addPropertyArea(diffuse_area);
     }else{
         QString out = "";
         out += ("Tiles X : " + QString::number(this->tiles_amount_X) + QString(" \n"));
@@ -115,9 +134,12 @@ void TileGroupProperty::process(){
             TileProperty* tile_prop = static_cast<TileProperty*>(obj->getPropertyPtrByType(GO_PROPERTY_TYPE_TILE));
             MeshProperty* mesh_prop = static_cast<MeshProperty*>(obj->getPropertyPtrByType(GO_PROPERTY_TYPE_MESH));
 
-            mesh_prop->resource_relpath = "@plane"; //Default plane as mesh
+            mesh_prop->resource_relpath = this->mesh_string; //Default plane as mesh
             mesh_prop->updateMeshPtr(); //Update mesh pointer in property
             tile_prop->geometry = this->geometry; //Assign geometry property
+            tile_prop->diffuse_relpath = this->diffuse_relpath; //Copy texture relpath
+            tile_prop->updTexturePtr(); //Find texture pointer
+
             transform->scale = ZSVECTOR3(geometry.tileWidth, geometry.tileHeight, 1);
             transform->translation = ZSVECTOR3(geometry.tileWidth * x_i * 2, geometry.tileHeight * y_i * 2, 0);
             transform->translation = transform->translation + parent_transform->translation;
