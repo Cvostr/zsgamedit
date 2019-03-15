@@ -686,6 +686,9 @@ void GameObject::saveProperties(std::ofstream* stream){
             stream->write(reinterpret_cast<char*>(&geometryHeight), sizeof(int));
             stream->write(reinterpret_cast<char*>(&amountX), sizeof(int));
             stream->write(reinterpret_cast<char*>(&amountY), sizeof(int));
+
+            *stream << "\n"; //write divider
+            *stream << ptr->diffuse_relpath.toStdString() << " " << ptr->mesh_string.toStdString();
             break;
         }
         case GO_PROPERTY_TYPE_TILE:{
@@ -842,7 +845,16 @@ void GameObject::loadProperty(std::ifstream* world_stream){
 
         t_ptr->isCreated = static_cast<bool>(isCreated);
 
-    break;
+        world_stream->seekg(1, std::ofstream::cur); //Skip space
+
+        std::string diffuse_relpath, mesh_relpath;
+
+        *world_stream >> diffuse_relpath >> mesh_relpath;
+
+        t_ptr->diffuse_relpath = QString::fromStdString(diffuse_relpath);
+        t_ptr->mesh_string = QString::fromStdString(mesh_relpath);
+
+        break;
     }
     case GO_PROPERTY_TYPE_TILE:{
         std::string diffuse_rel_path;
@@ -874,7 +886,7 @@ void GameObject::loadProperty(std::ifstream* world_stream){
 
 void ScriptGroupProperty::onValueChanged(){
     Project* project_ptr = static_cast<Project*>(this->world_ptr->proj_ptr);
-
+    //if size changed
     if(static_cast<int>(path_names.size()) != this->scr_num){
         path_names.resize(scr_num);
     }

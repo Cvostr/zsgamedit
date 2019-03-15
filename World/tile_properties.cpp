@@ -31,6 +31,8 @@ TileGroupProperty::TileGroupProperty(){
 TileProperty::TileProperty(){
     type = GO_PROPERTY_TYPE_TILE;
     active = true;
+    lastAnimState = false;
+
     this->insp_win = nullptr; //No pointer to inspector by default
 
     this->texture_diffuse = nullptr;
@@ -228,7 +230,11 @@ void TileProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
 
 void TileProperty::onValueChanged(){
     updTexturePtr();
-    insp_win->updateRequired = true;
+
+    if(lastAnimState != this->anim_property.isAnimated){
+        insp_win->updateRequired = true;
+        lastAnimState = this->anim_property.isAnimated;
+    }
 }
 
 void TileProperty::updTexturePtr(){

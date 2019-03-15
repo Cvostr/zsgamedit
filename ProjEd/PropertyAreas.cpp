@@ -5,6 +5,7 @@
 #include <QDoubleValidator>
 #include <QObject>
 #include <QDir>
+#include <iostream>
 
 AreaPropertyTitle::AreaPropertyTitle(){
     this->layout.addWidget(&this->line);
@@ -211,6 +212,8 @@ void Float3PropertyArea::updateValues(){
     float vZ = this->z_field.text().toFloat();
 
     if(vector->X != vX || vector->Y != vY || vector->Z != vZ){
+                std::cout << "ttt" << std::endl;
+
         this->x_field.setText(QString::number(static_cast<double>(vector->X)));
         this->y_field.setText(QString::number(static_cast<double>(vector->Y)));
         this->z_field.setText(QString::number(static_cast<double>(vector->Z)));

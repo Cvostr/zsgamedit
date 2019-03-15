@@ -146,7 +146,6 @@ public slots:
     void onPropertyChange();
 
 public:
-    bool updateAreas; //if TRUE, all areas will update
     bool updateRequired; //Some properties may set that to TRUE to update inspector content
     std::vector<PropertyEditArea*> property_areas; //vector for areas
     std::vector<QObject*> additional_objects;

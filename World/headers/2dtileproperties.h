@@ -71,6 +71,7 @@ public:
 class TileProperty : public GameObjectProperty{
 private:
     InspectorWin* insp_win;
+    bool lastAnimState;
 public:
     TileGeometry geometry;
     //Defines color texture

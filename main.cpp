@@ -21,6 +21,7 @@ int main(int argc, char *argv[])
         NOW = SDL_GetPerformanceCounter();
         deltaTime = (NOW - last) * 1000 / SDL_GetPerformanceFrequency();
 
+
         a.processEvents();
 
         if(w.edit_win_ptr != nullptr){ //Check if project editor window is created
@@ -29,9 +30,9 @@ int main(int argc, char *argv[])
                 w.edit_win_ptr->close_reason = EW_CLOSE_REASON_UNCLOSED;
                 w.show();
              }
-        w.edit_win_ptr->deltaTime = deltaTime; //Send delta time to editor window
-        //std::cout << deltaTime << std::endl;
-        SDL_Event event;
+
+            w.edit_win_ptr->deltaTime = deltaTime; //Send delta time to editor window
+            SDL_Event event;
                 while (SDL_PollEvent(&event))
                 {
                     if (event.type == SDL_QUIT) { //If user caused SDL window to close
