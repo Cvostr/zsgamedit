@@ -15,9 +15,11 @@ in vec2 UVCoord;
 //textures
 uniform sampler2D diffuse;
 uniform sampler2D normal_map;
+uniform sampler2D specular_map;
 
 uniform bool hasDiffuseMap;
 uniform bool hasNormalMap;
+uniform bool hasSpecularMap;
 
 uniform float material_shininess;
 

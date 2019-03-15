@@ -485,9 +485,11 @@ MaterialProperty::MaterialProperty(){
     this->group_ptr = nullptr;
     this->material_ptr = nullptr;
 
+    this->insp_win = nullptr;
 }
 
 void MaterialProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
+    this->insp_win = inspector; //assign inspector
     //Add area to pick material file
     PickResourceArea* area = new PickResourceArea;
     area->setLabel("Material");
@@ -539,6 +541,10 @@ void MaterialProperty::onValueChanged(){
     if(newmat_ptr != this->material_ptr){
         this->material_ptr = newmat_ptr;
         this->group_ptr = newmat_ptr->group_ptr;
+
+        //if available, update window
+        if(insp_win != nullptr)
+            insp_win->updateRequired = true;
     }
 
     if(group_ptr == nullptr) return;

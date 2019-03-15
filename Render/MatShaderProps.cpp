@@ -79,6 +79,12 @@ MtShaderPropertiesGroup* MtShProps::genDefaultMtShGroup(ZSPIRE::Shader* shader3d
     normal_texture_prop->prop_caption = "Normal";
     normal_texture_prop->ToggleUniform = "hasNormalMap";
 
+    TextureMaterialShaderProperty* specular_texture_prop =
+            static_cast<TextureMaterialShaderProperty*>(default_group.addProperty(MATSHPROP_TYPE_TEXTURE));
+    specular_texture_prop->slotToBind = 2;
+    specular_texture_prop->prop_caption = "Specular";
+    specular_texture_prop->ToggleUniform = "hasSpecularMap";
+
     FloatMaterialShaderProperty* shininess_factor_prop =
             static_cast<FloatMaterialShaderProperty*>(default_group.addProperty(MATSHPROP_TYPE_FLOAT));
     shininess_factor_prop->integerUniform = "material_shininess";

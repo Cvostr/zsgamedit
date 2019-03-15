@@ -270,6 +270,12 @@ void EditWindow::addNewCube(){
     obj->addProperty(GO_PROPERTY_TYPE_MESH);
     obj->addProperty(GO_PROPERTY_TYPE_MATERIAL);
 
+    //Set new name to object
+    int add_num = 0; //Declaration of addititonal integer
+    world.getAvailableNumObjLabel("Cube_", &add_num);
+    *obj->label = "Cube_" + QString::number(add_num);
+    obj->item_ptr->setText(0, *obj->label);
+
     MeshProperty* mesh = static_cast<MeshProperty*>(obj->getPropertyPtrByType(GO_PROPERTY_TYPE_MESH));
     mesh->resource_relpath = "@cube";
     mesh->updateMeshPtr();
@@ -277,6 +283,12 @@ void EditWindow::addNewCube(){
 void EditWindow::addNewLight(){
     GameObject* obj = onAddNewGameObject();
     obj->addProperty(GO_PROPERTY_TYPE_LIGHTSOURCE);
+
+    //Set new name to object
+    int add_num = 0; //Declaration of addititonal integer
+    world.getAvailableNumObjLabel("Light_", &add_num);
+    *obj->label = "Light_" + QString::number(add_num);
+    obj->item_ptr->setText(0, *obj->label);
 }
 
 void EditWindow::setupObjectsHieList(){

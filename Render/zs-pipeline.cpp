@@ -277,7 +277,7 @@ ZSPIRE::Shader* RenderPipeline::processShaderOnObject(void* _obj){
             //Work with shader
             result = group_ptr->render_shader;
             result->Use();
-
+            //iterate over all properties, send them all!
             for(unsigned int prop_i = 0; prop_i < group_ptr->properties.size(); prop_i ++){
                 MaterialShaderProperty* prop_ptr = group_ptr->properties[prop_i];
                 MaterialShaderPropertyConf* conf_ptr = material_ptr->material_ptr->confs[prop_i];
