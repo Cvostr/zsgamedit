@@ -210,10 +210,8 @@ void Float3PropertyArea::updateValues(){
     float vX = this->x_field.text().toFloat();
     float vY = this->y_field.text().toFloat();
     float vZ = this->z_field.text().toFloat();
-
+    //if variables content changed
     if(vector->X != vX || vector->Y != vY || vector->Z != vZ){
-                std::cout << "ttt" << std::endl;
-
         this->x_field.setText(QString::number(static_cast<double>(vector->X)));
         this->y_field.setText(QString::number(static_cast<double>(vector->Y)));
         this->z_field.setText(QString::number(static_cast<double>(vector->Z)));

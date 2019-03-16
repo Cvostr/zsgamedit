@@ -116,6 +116,7 @@
     <addaction name="actionNew_Object"/>
     <addaction name="actionNew_Cube"/>
     <addaction name="actionNew_Light"/>
+    <addaction name="actionNew_Tile"/>
     <addaction name="separator"/>
     <addaction name="actionToggle_Cameras"/>
    </widget>
@@ -188,6 +189,11 @@
   <action name="actionNew_Light">
    <property name="text">
     <string>New Light</string>
+   </property>
+  </action>
+  <action name="actionNew_Tile">
+   <property name="text">
+    <string>New Tile</string>
    </property>
   </action>
  </widget>

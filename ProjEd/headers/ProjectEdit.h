@@ -134,6 +134,7 @@ public slots:
     GameObject* onAddNewGameObject();
     void addNewCube();
     void addNewLight();
+    void addNewTile();
 
     void onSceneSave();
     void onSceneSaveAs();
