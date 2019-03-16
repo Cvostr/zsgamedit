@@ -114,7 +114,7 @@ public:
     void copyTo(GameObjectProperty* dest);
     void updTransformPtr();
     void onObjectDeleted();
-    void onUpdate(float deltaTime);
+    void onPreRender(RenderPipeline* pipeline);
 
     LightsourceProperty();
 };

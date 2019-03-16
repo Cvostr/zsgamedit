@@ -67,14 +67,7 @@ void TileGroupProperty::addPropertyInterfaceToInspector(InspectorWin* inspector)
         tilesAmountY->go_property = static_cast<void*>(this);
         tilesAmountY->value = &this->tiles_amount_Y;
         inspector->addPropertyArea(tilesAmountY);
-        //Add button to add objects
-        AreaButton* btn = new AreaButton;
-        btn->onPressFuncPtr = &onCreateBtnPress;
-        btn->button->setText("Process"); //Setting text to qt button
-        inspector->getContentLayout()->addWidget(btn->button);
-        btn->insp_ptr = inspector; //Setting inspector pointer
-        inspector->registerUiObject(btn);
-
+        //Resources pick
         PickResourceArea* mesh_area = new PickResourceArea;
         mesh_area->setLabel("Tiles Mesh");
         mesh_area->go_property = static_cast<void*>(this);
@@ -90,6 +83,14 @@ void TileGroupProperty::addPropertyInterfaceToInspector(InspectorWin* inspector)
         diffuse_area->isShowNoneItem = true;
         diffuse_area->resource_type = RESOURCE_TYPE_TEXTURE; //It should load textures only
         inspector->addPropertyArea(diffuse_area);
+
+        //Add button to add objects
+        AreaButton* btn = new AreaButton;
+        btn->onPressFuncPtr = &onCreateBtnPress;
+        btn->button->setText("Process"); //Setting text to qt button
+        inspector->getContentLayout()->addWidget(btn->button);
+        btn->insp_ptr = inspector; //Setting inspector pointer
+        inspector->registerUiObject(btn);
     }else{
         QString out = "";
         out += ("Tiles X : " + QString::number(this->tiles_amount_X) + QString(" \n"));

@@ -141,27 +141,12 @@ void GameObject::Draw(RenderPipeline* pipeline){
     //Obtain EditWindow pointer to check if scene is running
     EditWindow* editwin_ptr = static_cast<EditWindow*>(pipeline->win_ptr);
     if(active == false || alive == false) return; //if object is inactive, not to render it
-    //Call update on every property in objects
 
-
+    //Call prerender on each property in object
+    this->onPreRender(pipeline);
 
     TransformProperty* transform_prop = static_cast<TransformProperty*>(this->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
-    if(transform_prop == nullptr) return; //We have nothing to do with object without transform property
-    transform_prop->updateMat(); //update transform matrix
-
-    LightsourceProperty* light = static_cast<LightsourceProperty*>(this->getPropertyPtrByType(GO_PROPERTY_TYPE_LIGHTSOURCE));
-
-    if(light != nullptr && !light->isSent){ //if object has lightsource
-        pipeline->addLight(static_cast<void*>(light)); //put light pointer to vector
-    }
-
-    if(light != nullptr && (light->last_pos != transform_prop->_last_translation || light->last_rot != transform_prop->rotation)){
-        light->onValueChanged();
-        //store new transform values
-        light->last_pos = transform_prop->_last_translation;
-        light->last_rot = transform_prop->rotation;
-    }
-
+    //Call update on every property in objects
     if(editwin_ptr->isSceneRun && pipeline->current_state == PIPELINE_STATE_DEFAULT)
         this->onUpdate(pipeline->deltaTime);
 

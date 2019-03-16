@@ -29,14 +29,18 @@ void main(){
 	
 	vec3 result = vec3(1.0, 0.078, 0.574); //Default value
 	vec3 Normal = InNormal; //defaultly, use normals from mesh
+	float result_shininess = material_shininess;
 	
 	if(hasDiffuseMap)
 		result = texture(diffuse, uv).xyz ;
 		
     if(hasNormalMap)
         Normal = texture(normal_map, uv).xyz;
-		
-	tDiffuse = vec4(result, material_shininess);
+        
+    if(hasSpecularMap)
+        result_shininess *= texture(specular_map, uv).x;
+            
+	tDiffuse = vec4(result, result_shininess);
 	tPos = FragPos;
 	tNormal = Normal;
 }

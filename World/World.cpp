@@ -219,6 +219,12 @@ void GameObject::onUpdate(int deltaTime){
     }
 }
 
+void GameObject::onPreRender(RenderPipeline* pipeline){
+    for(unsigned int i = 0; i < props_num; i ++){ //iterate over all properties
+        properties[i]->onPreRender(pipeline); //and call onUpdate on each property
+    }
+}
+
 void GameObject::putToSnapshot(GameObjectSnapshot* snapshot){
     snapshot->props_num = 0;
 

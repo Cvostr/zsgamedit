@@ -30,6 +30,10 @@ void GameObjectProperty::onUpdate(float deltaTime){
 
 }
 
+void GameObjectProperty::onPreRender(RenderPipeline* pipeline){
+
+}
+
 QString getPropertyString(int type){
     switch (type) {
         case GO_PROPERTY_TYPE_TRANSFORM:{ //If type is transfrom
@@ -168,6 +172,10 @@ void TransformProperty::addPropertyInterfaceToInspector(InspectorWin* inspector)
 }
 
 void TransformProperty::onValueChanged(){
+    updateMat();
+}
+
+void TransformProperty::onPreRender(RenderPipeline* pipeline){
     updateMat();
 }
 
@@ -381,14 +389,19 @@ void LightsourceProperty::onObjectDeleted(){
     deffered_shader_ptr->unsetLight(this->id);
 }
 
-void LightsourceProperty::onUpdate(float deltaTime){
-    /*TransformProperty* transform_prop = go_link.ptr->getTransformProperty();
+void LightsourceProperty::onPreRender(RenderPipeline* pipeline){
+    TransformProperty* transform_prop = go_link.updLinkPtr()->getTransformProperty();
+
+    if(!this->isSent){ //if object hasn't been send
+        pipeline->addLight(static_cast<void*>(this)); //put light pointer to vector
+    }
+    //check, if light transformation changed
     if((this->last_pos != transform_prop->_last_translation || this->last_rot != transform_prop->rotation)){
         this->onValueChanged();
         //store new transform values
         this->last_pos = transform_prop->_last_translation;
         this->last_rot = transform_prop->rotation;
-    }*/
+    }
 }
 
 LightsourceProperty::LightsourceProperty(){
