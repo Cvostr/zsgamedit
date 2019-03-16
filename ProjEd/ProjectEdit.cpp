@@ -117,10 +117,10 @@ void EditWindow::init(){
     SDL_DisplayMode current;
     SDL_GetCurrentDisplayMode(0, &current);
 
-    this->window = SDL_CreateWindow("Game View", this->width(), 0, 640, 480, SDL_WINDOW_OPENGL); //Create window
+    this->window = SDL_CreateWindow("Game View", this->width(), 0, settings.gameViewWin_Width, settings.gameViewWin_Height, SDL_WINDOW_OPENGL); //Create window
     this->glcontext = SDL_GL_CreateContext(window);
 
-    glViewport(0, 0, 640, 480);
+    glViewport(0, 0, settings.gameViewWin_Width, settings.gameViewWin_Height);
 
     render = new RenderPipeline;
     render->InitGLEW();
@@ -131,9 +131,11 @@ void EditWindow::init(){
     if(project.perspective == 3){
         glEnable(GL_DEPTH_TEST);
         render->depthTest = true;
+        render->cullFaces = true;
+        glFrontFace(GL_CCW);
     }
 
-    render->setup();
+    render->setup(settings.gameViewWin_Width, settings.gameViewWin_Height);
     ready = true;//Everything is ready
 
     ZSPIRE::SFX::initAL();
@@ -244,8 +246,9 @@ void EditWindow::onNewScene(){
 }
 
 GameObject* EditWindow::onAddNewGameObject(){
+    //get free index in array
     int free_ind = world.getFreeObjectSpaceIndex();
-
+    //if we have no free space inside array
     if(free_ind == world.objects.size()){
         GameObject obj;
         obj.alive = false;
@@ -253,7 +256,7 @@ GameObject* EditWindow::onAddNewGameObject(){
         obj.array_index = free_ind;
         world.objects.push_back(obj);
     }
-
+    //Create action
     _ed_actions_container->newGameObjectAction(world.objects[free_ind].getLinkToThisObject());
 
     GameObject* obj_ptr = this->world.newObject(); //Add new object to world
@@ -267,6 +270,12 @@ void EditWindow::addNewCube(){
     obj->addProperty(GO_PROPERTY_TYPE_MESH);
     obj->addProperty(GO_PROPERTY_TYPE_MATERIAL);
 
+    //Set new name to object
+    int add_num = 0; //Declaration of addititonal integer
+    world.getAvailableNumObjLabel("Cube_", &add_num);
+    *obj->label = "Cube_" + QString::number(add_num);
+    obj->item_ptr->setText(0, *obj->label);
+
     MeshProperty* mesh = static_cast<MeshProperty*>(obj->getPropertyPtrByType(GO_PROPERTY_TYPE_MESH));
     mesh->resource_relpath = "@cube";
     mesh->updateMeshPtr();
@@ -274,6 +283,12 @@ void EditWindow::addNewCube(){
 void EditWindow::addNewLight(){
     GameObject* obj = onAddNewGameObject();
     obj->addProperty(GO_PROPERTY_TYPE_LIGHTSOURCE);
+
+    //Set new name to object
+    int add_num = 0; //Declaration of addititonal integer
+    world.getAvailableNumObjLabel("Light_", &add_num);
+    *obj->label = "Light_" + QString::number(add_num);
+    obj->item_ptr->setText(0, *obj->label);
 }
 
 void EditWindow::setupObjectsHieList(){
@@ -505,10 +520,19 @@ void EditWindow::lookForResources(QString path){
                 loadResource(&resource); //Perform mesh processing & loading to OpenGL
                 this->project.resources.push_back(resource);
             }
+            if(name.endsWith(".ZSMAT") || name.endsWith(".zsmat")){ //If its an mesh
+                Resource resource;
+                resource.file_path = fileInfo.absoluteFilePath();
+                resource.rel_path = resource.file_path; //Preparing to get relative path
+                resource.rel_path.remove(0, project.root_path.size() + 1); //Get relative path by removing length of project root from start
+                resource.type = RESOURCE_TYPE_MATERIAL; //Type of resource is mesh
+                loadResource(&resource); //Perform mesh processing & loading to OpenGL
+                this->project.resources.push_back(resource);
+            }
         }
 
         if(fileInfo.isDir() == true){ //If it is directory
-            QString newdir_str = path + "/"+ fileInfo.fileName();
+            QString newdir_str = path + "/" + fileInfo.fileName();
             lookForResources(newdir_str); //Call this function inside next dir
         }
     }
@@ -535,6 +559,13 @@ void EditWindow::loadResource(Resource* resource){
             SoundBuffer* sound_ptr = static_cast<SoundBuffer*>(resource->class_ptr); //Aquire casted pointer
             std::string str = resource->file_path.toStdString();
             sound_ptr->loadFileWAV(str.c_str()); //Load music file
+            break;
+        }
+        case RESOURCE_TYPE_MATERIAL:{
+            resource->class_ptr = static_cast<void*>(new Material); //Initialize pointer to sound buffer
+            Material* mat_ptr = static_cast<Material*>(resource->class_ptr); //Aquire casted pointer
+            std::string str = resource->file_path.toStdString();
+            mat_ptr->loadFromFile(str); //Load music file
             break;
         }
     }
@@ -661,8 +692,10 @@ void EditWindow::onLeftBtnClicked(int X, int Y){
     unsigned int clicked = render->render_getpickedObj(static_cast<void*>(this), X, Y);
 
     GameObject* obj_ptr = &world.objects[clicked]; //Obtain pointer to selected object by label
-    if(clicked > world.objects.size() || obj_ptr == 0x0 || clicked >= 256 * 256 * 256)
+    if(clicked > world.objects.size() || obj_ptr == 0x0 || clicked >= 256 * 256 * 256){
+        world.unpickObject();
         return;
+    }
 
     obj_trstate.obj_ptr = obj_ptr;
     obj_trstate.tprop_ptr = static_cast<TransformProperty*>(obj_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
@@ -814,7 +847,7 @@ void EditWindow::onKeyDown(SDL_Keysym sym){
         GameObjectLink link = this->obj_trstate.obj_ptr->getLinkToThisObject();
         callObjectDeletion(link);
     }
-
+    //If we pressed CTRL + O
     if(input_state.isLCtrlHold && sym.sym == SDLK_o){
         emit onOpenScene();
     }

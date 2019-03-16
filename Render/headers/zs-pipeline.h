@@ -22,9 +22,10 @@ class G_BUFFER_GL{
 protected:
     unsigned int depthBuffer;
     unsigned int gBuffer; //framebuffer
-    unsigned int tDiffuse;
-    unsigned int tNormal;
-    unsigned int tPos;
+    unsigned int tDiffuse; //To store RGB diffuse Color A - shininess
+    unsigned int tNormal; //To store normal coordinate
+    unsigned int tPos; //To store position coordinate
+    unsigned int tTransparent; //To store color with alpha
 public:
     G_BUFFER_GL();
     void create(int width, int height);
@@ -46,9 +47,10 @@ private:
     std::vector<void*> lights_ptr;
 public:
     float deltaTime;
-    bool depthTest;
+    bool depthTest; //if enabled, GL will do depth testing
+    bool cullFaces; //if enabled, GL will cull faces
     int current_state;
-    void setup();
+    void setup(int bufWidth, int bufHeight);
     bool InitGLEW();
     void render(SDL_Window* w, void* projectedit_ptr);
     unsigned int render_getpickedObj(void* projectedit_ptr, int mouseX, int mouseY);

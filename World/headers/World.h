@@ -12,6 +12,7 @@
 #include "../../Render/headers/zs-texture.h"
 #include "../../Render/headers/zs-math.h"
 #include "../../Render/headers/zs-shader.h"
+#include "../../Render/headers/MatShaderProps.h"
 #include "../../Misc/headers/oal_manager.h"
 
 #define OBJ_PROPS_SIZE 11
@@ -51,6 +52,7 @@ public:
     virtual void onAddToObject();
     virtual void onObjectDeleted();
     virtual void onUpdate(float deltaTime);
+    virtual void onPreRender(RenderPipeline* pipeline);
 };
 
 class LabelProperty : public GameObjectProperty {
@@ -82,6 +84,7 @@ public:
     void onValueChanged();
     void getAbsoluteParentTransform(ZSVECTOR3& t, ZSVECTOR3& s, ZSVECTOR3& r);
     void copyTo(GameObjectProperty* dest);
+    void onPreRender(RenderPipeline* pipeline);
     void getAbsoluteRotationMatrix(ZSMATRIX4x4& m);
 
     TransformProperty();
@@ -129,6 +132,7 @@ public:
     void copyTo(GameObject* dest);
     void Draw(RenderPipeline* pipeline); //On render pipeline wish to draw the object
     void onUpdate(int deltaTime); //calls onUpdate on all properties
+    void onPreRender(RenderPipeline* pipeline); //calls onPreRender on all properties
 
     void putToSnapshot(GameObjectSnapshot* snapshot);
     void recoverFromSnapshot(GameObjectSnapshot* snapshot);
@@ -185,6 +189,7 @@ public:
     ZSPIRE::Mesh* getMeshPtrByRelPath(QString label); //look through all meshes in project ptr
     ZSPIRE::Texture* getTexturePtrByRelPath(QString label); //look through all meshes in project ptr
     SoundBuffer* getSoundPtrByName(QString label);
+    Material* getMaterialPtrByName(QString label);
 
     void saveToFile(QString file);
     void openFromFile(QString file, QTreeWidget* w_ptr);

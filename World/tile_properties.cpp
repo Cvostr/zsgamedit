@@ -23,15 +23,23 @@ TileGroupProperty::TileGroupProperty(){
     this->isCreated = false;
     this->tiles_amount_X = 0;
     this->tiles_amount_Y = 0;
+
+    this->mesh_string = "@plane";
+    this->diffuse_relpath = "@none";
 }
 
 TileProperty::TileProperty(){
     type = GO_PROPERTY_TYPE_TILE;
     active = true;
+    lastAnimState = false;
+
     this->insp_win = nullptr; //No pointer to inspector by default
 
     this->texture_diffuse = nullptr;
     this->diffuse_relpath = "@none";
+
+    this->texture_transparent = nullptr;
+    this->transparent_relpath = "@none";
 }
 
 void TileGroupProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
@@ -59,6 +67,23 @@ void TileGroupProperty::addPropertyInterfaceToInspector(InspectorWin* inspector)
         tilesAmountY->go_property = static_cast<void*>(this);
         tilesAmountY->value = &this->tiles_amount_Y;
         inspector->addPropertyArea(tilesAmountY);
+        //Resources pick
+        PickResourceArea* mesh_area = new PickResourceArea;
+        mesh_area->setLabel("Tiles Mesh");
+        mesh_area->go_property = static_cast<void*>(this);
+        mesh_area->rel_path = &this->mesh_string;
+        mesh_area->isShowNoneItem = false;
+        mesh_area->resource_type = RESOURCE_TYPE_MESH; //It should load textures only
+        inspector->addPropertyArea(mesh_area);
+
+        PickResourceArea* diffuse_area = new PickResourceArea;
+        diffuse_area->setLabel("Tiles Diffuse");
+        diffuse_area->go_property = static_cast<void*>(this);
+        diffuse_area->rel_path = &this->diffuse_relpath;
+        diffuse_area->isShowNoneItem = true;
+        diffuse_area->resource_type = RESOURCE_TYPE_TEXTURE; //It should load textures only
+        inspector->addPropertyArea(diffuse_area);
+
         //Add button to add objects
         AreaButton* btn = new AreaButton;
         btn->onPressFuncPtr = &onCreateBtnPress;
@@ -112,9 +137,12 @@ void TileGroupProperty::process(){
             TileProperty* tile_prop = static_cast<TileProperty*>(obj->getPropertyPtrByType(GO_PROPERTY_TYPE_TILE));
             MeshProperty* mesh_prop = static_cast<MeshProperty*>(obj->getPropertyPtrByType(GO_PROPERTY_TYPE_MESH));
 
-            mesh_prop->resource_relpath = "@plane"; //Default plane as mesh
+            mesh_prop->resource_relpath = this->mesh_string; //Default plane as mesh
             mesh_prop->updateMeshPtr(); //Update mesh pointer in property
             tile_prop->geometry = this->geometry; //Assign geometry property
+            tile_prop->diffuse_relpath = this->diffuse_relpath; //Copy texture relpath
+            tile_prop->updTexturePtr(); //Find texture pointer
+
             transform->scale = ZSVECTOR3(geometry.tileWidth, geometry.tileHeight, 1);
             transform->translation = ZSVECTOR3(geometry.tileWidth * x_i * 2, geometry.tileHeight * y_i * 2, 0);
             transform->translation = transform->translation + parent_transform->translation;
@@ -192,15 +220,29 @@ void TileProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
     area->rel_path = &diffuse_relpath;
     area->resource_type = RESOURCE_TYPE_TEXTURE; //It should load textures only
     inspector->addPropertyArea(area);
+
+    PickResourceArea* transparent_area = new PickResourceArea;
+    transparent_area->setLabel("Transparent Texture");
+    transparent_area->go_property = static_cast<void*>(this);
+    transparent_area->rel_path = &transparent_relpath;
+    transparent_area->resource_type = RESOURCE_TYPE_TEXTURE; //It should load textures only
+    inspector->addPropertyArea(transparent_area);
 }
 
 void TileProperty::onValueChanged(){
     updTexturePtr();
-    insp_win->updateRequired = true;
+
+    if(lastAnimState != this->anim_property.isAnimated){
+        insp_win->updateRequired = true;
+        lastAnimState = this->anim_property.isAnimated;
+    }
 }
 
 void TileProperty::updTexturePtr(){
+    //Update color texture
     this->texture_diffuse = world_ptr->getTexturePtrByRelPath(diffuse_relpath);
+    //Update transparent layer texture
+    this->texture_transparent = world_ptr->getTexturePtrByRelPath(transparent_relpath);
 }
 
 void TileProperty::onAddToObject(){

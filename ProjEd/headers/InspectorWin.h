@@ -111,6 +111,7 @@ class PickResourceArea : public PropertyEditArea{
 public:
     ResourcePickDialog* dialog; //dialog shown after button press
 
+    bool isShowNoneItem; //If enabled, @none will be added to list
     QString extension_mask; //Extension mask to show needed files
     unsigned int resource_type; //flag of resource type
     QString* rel_path; //Pointer to store result
@@ -145,7 +146,6 @@ public slots:
     void onPropertyChange();
 
 public:
-    bool updateAreas; //if TRUE, all areas will update
     bool updateRequired; //Some properties may set that to TRUE to update inspector content
     std::vector<PropertyEditArea*> property_areas; //vector for areas
     std::vector<QObject*> additional_objects;

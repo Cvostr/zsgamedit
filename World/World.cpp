@@ -50,7 +50,6 @@ GameObject::GameObject(){
 }
 
 GameObject::~GameObject(){
-    //delete this->item_ptr;
 }
 
 bool GameObject::addProperty(int property){
@@ -220,6 +219,12 @@ void GameObject::onUpdate(int deltaTime){
     }
 }
 
+void GameObject::onPreRender(RenderPipeline* pipeline){
+    for(unsigned int i = 0; i < props_num; i ++){ //iterate over all properties
+        properties[i]->onPreRender(pipeline); //and call onUpdate on each property
+    }
+}
+
 void GameObject::putToSnapshot(GameObjectSnapshot* snapshot){
     snapshot->props_num = 0;
 
@@ -385,7 +390,7 @@ GameObject* World::dublicateObject(GameObject* original, bool parent){
         if(parent == true)
             original->parent.ptr->addChildObject(new_obj->getLinkToThisObject());
     }
-
+    //Set new name for object
     LabelProperty* label_prop = new_obj->getLabelProperty(); //Obtain pointer to label property
     std::string to_paste;
     genRandomString(&to_paste, 3);
@@ -393,7 +398,7 @@ GameObject* World::dublicateObject(GameObject* original, bool parent){
     label_prop->list_item_ptr = new_obj->item_ptr; //Setting to label new qt item
     new_obj->label = &label_prop->label;
     new_obj->item_ptr->setText(0, label_prop->label);
-
+    //Dublicate chilldren object
     unsigned int children_amount = original->children.size();
     for(unsigned int child_i = 0; child_i < children_amount; child_i ++){
         GameObjectLink link = original->children[child_i];
@@ -466,6 +471,8 @@ bool World::isObjectLabelUnique(QString label){
     int ret_amount = 0;
     for(unsigned int obj_it = 0; obj_it < objs_num; obj_it ++){ //Iterate over all objs in scene
         GameObject* obj_ptr = &this->objects[obj_it]; //Get pointer to checking object
+        //if object was destroyed
+        if(!obj_ptr->alive) continue;
         if(obj_ptr->label->compare(label) == 0){
             ret_amount += 1;
             if(ret_amount > 1) return false;
@@ -590,8 +597,10 @@ void GameObject::copyTo(GameObject* dest){
 }
 
 void World::openFromFile(QString file, QTreeWidget* w_ptr){
+    this->obj_widget_ptr = w_ptr;
+
     clear(); //Clear all objects
-    std::string fpath = file.toStdString();
+    std::string fpath = file.toStdString(); //Turn QString to std::string
 
     std::ifstream world_stream;
     world_stream.open(fpath.c_str(), std::ofstream::binary); //Opening to read binary data
@@ -780,6 +789,20 @@ SoundBuffer* World::getSoundPtrByName(QString label){
         //If resource is mesh and has same name as in argument
         if(r_ptr->type == RESOURCE_TYPE_AUDIO && r_ptr->rel_path.compare(label) == 0){
             return static_cast<SoundBuffer*>(r_ptr->class_ptr);
+        }
+    }
+    return nullptr;
+}
+
+Material* World::getMaterialPtrByName(QString label){
+    Project* proj_ptr = static_cast<Project*>(this->proj_ptr); //Convert void pointer to Project*
+    unsigned int resources_num = static_cast<unsigned int>(proj_ptr->resources.size()); //Receive resource amount in project
+
+    for(unsigned int r_it = 0; r_it < resources_num; r_it ++){ //Iteerate over all resources in project
+        Resource* r_ptr = &proj_ptr->resources[r_it]; //Obtain pointer to resource
+        //If resource is mesh and has same name as in argument
+        if(r_ptr->type == RESOURCE_TYPE_MATERIAL && r_ptr->rel_path.compare(label) == 0){
+            return static_cast<Material*>(r_ptr->class_ptr);
         }
     }
     return nullptr;

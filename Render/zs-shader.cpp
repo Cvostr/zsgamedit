@@ -117,7 +117,10 @@ bool ZSPIRE::Shader::compileFromFile(const char* VSpath, const char* FSpath){
 
 	Use();
 	setGLuniformInt("diffuse", 0);
-	setGLuniformInt("normal_map", 1);
+    setGLuniformInt("normal_map", 1);
+    setGLuniformInt("specular_map", 2);
+    setGLuniformInt("transparent", 5);
+
 
 	setGLuniformInt("sprite_map", 0);
 	setGLuniformInt("glyph_map", 1);
@@ -125,9 +128,9 @@ bool ZSPIRE::Shader::compileFromFile(const char* VSpath, const char* FSpath){
     setGLuniformInt("tDiffuse", 10);
     setGLuniformInt("tNormal", 11);
     setGLuniformInt("tPos", 12);
+    setGLuniformInt("tTransparent", 13);
 
 	setGLuniformInt("shadow0", 20);
-	setGLuniformInt("shadow1", 21);
 
     this->isCreated = true; //Shader created & compiled now
 	return true;
@@ -155,9 +158,11 @@ void ZSPIRE::Shader::setTransform(ZSMATRIX4x4 transform){
 	setGLuniformMat4x4("object_transform", transform);
 }
 
-void ZSPIRE::Shader::setCamera(Camera* cam){
+void ZSPIRE::Shader::setCamera(Camera* cam, bool sendPos){
     setGLuniformMat4x4("cam_projection", cam->getProjMatrix());
     setGLuniformMat4x4("cam_view", cam->getViewMatrix());
+    if(sendPos)
+        setGLuniformVec3("cam_position", cam->getCameraPosition());
 }
 
 void ZSPIRE::Shader::setGLuniformColor(const char* uniform_str, ZSRGBCOLOR value) {

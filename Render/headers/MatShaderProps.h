@@ -29,12 +29,29 @@ public:
 
 class MtShaderPropertiesGroup{
 public:
+    QString str_path;
     ZSPIRE::Shader* render_shader; //Pointer to shader, that binds on object render
     std::vector<MaterialShaderProperty*> properties;
 
     MaterialShaderProperty* addProperty(int type);
     void loadFromFile(const char* fpath);
     MtShaderPropertiesGroup();
+};
+
+class Material{
+private:
+    std::string file_path; //path to material file
+public:
+    MtShaderPropertiesGroup* group_ptr;
+    std::vector<MaterialShaderPropertyConf*> confs;
+
+    MaterialShaderPropertyConf* addPropertyConf(int type);
+    void loadFromFile(std::string fpath);
+    void saveToFile();
+    void setPropertyGroup(MtShaderPropertiesGroup* group_ptr);
+    void clear();
+
+    Material();
 };
 
 namespace MtShProps {
@@ -47,16 +64,42 @@ namespace MtShProps {
 
 class TextureMaterialShaderProperty : public MaterialShaderProperty{
 public:
-    unsigned int slotToBind;
+    int slotToBind; //Slot to texture
+    std::string ToggleUniform; //Uniform to set to 1
 
     TextureMaterialShaderProperty();
 };
+class IntegerMaterialShaderProperty : public MaterialShaderProperty{
+public:
+    std::string integerUniform;
+    //Construct
+    IntegerMaterialShaderProperty();
+};
+class FloatMaterialShaderProperty : public MaterialShaderProperty{
+public:
+    std::string integerUniform;
+    //Construct
+    FloatMaterialShaderProperty();
+};
+//Property configurations
 class TextureMtShPropConf : public MaterialShaderPropertyConf{
 public:
      ZSPIRE::Texture* texture;
      QString path;
 
      TextureMtShPropConf();
+};
+class IntegerMtShPropConf : public MaterialShaderPropertyConf{
+public:
+    int value;
+    //Construct
+    IntegerMtShPropConf();
+};
+class FloatMtShPropConf : public MaterialShaderPropertyConf{
+public:
+    float value;
+    //Construct
+    FloatMtShPropConf();
 };
 
 #endif

@@ -61,15 +61,17 @@ public:
 
 
 class MaterialProperty : public GameObjectProperty{
+private:
+    InspectorWin* insp_win;
 public:
     MtShaderPropertiesGroup* group_ptr;
+    //Pointer to picked material
+    Material* material_ptr;
+    QString material_path;
 
-    std::vector<MaterialShaderPropertyConf*> property_confs;
-
-    MaterialShaderPropertyConf* addPropertyConf(int type);
-    void loadPropsFromGroup(MtShaderPropertiesGroup* group);
     void addPropertyInterfaceToInspector(InspectorWin* inspector);
     void onValueChanged();
+    void copyTo(GameObjectProperty* dest);
 
     MaterialProperty();
 };
@@ -112,6 +114,7 @@ public:
     void copyTo(GameObjectProperty* dest);
     void updTransformPtr();
     void onObjectDeleted();
+    void onPreRender(RenderPipeline* pipeline);
 
     LightsourceProperty();
 };

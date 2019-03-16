@@ -11,7 +11,6 @@ InspectorWin::InspectorWin(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::InspectorWin)
 {
-    updateAreas = true; //update areas
     updateRequired = false;
     ui->setupUi(this);
 
@@ -124,10 +123,10 @@ void InspectorWin::updateObjectProperties(){
 }
 
 void InspectorWin::onPropertyEdited(){
-    //if(updateAreas == false) return; //if trigger is false, then exit
+    //Getting number of areas
     unsigned int areas_num = static_cast<unsigned int>(this->property_areas.size());
+    //iterate over all areas
     for(unsigned int area_i = 0; area_i < areas_num; area_i ++){
-       // if(updateAreas == false) continue;
         PropertyEditArea* pea_ptr = this->property_areas[area_i]; //Obtain pointer to area
         pea_ptr->writeNewValues(); //Update state on it.
         areas_num = static_cast<unsigned int>(this->property_areas.size()); //recount amount
@@ -136,27 +135,21 @@ void InspectorWin::onPropertyEdited(){
 }
 
 void InspectorWin::updateAreasChanges(){
-    //if(updateAreas == false) return;
+    //Check, if some property requested to redraw all
     if(this->updateRequired == false){
-     //if trigger is false, then exit
-    unsigned int areas_num = static_cast<unsigned int>(this->property_areas.size());
-    for(unsigned int area_i = 0; area_i < areas_num; area_i ++){
-        //if(updateAreas == false) continue;
-        PropertyEditArea* pea_ptr = this->property_areas[area_i]; //Obtain pointer to area
-        pea_ptr->updateValues(); //Update state on it.
-    }
+        unsigned int areas_num = static_cast<unsigned int>(this->property_areas.size());
+        for(unsigned int area_i = 0; area_i < areas_num; area_i ++){
+            PropertyEditArea* pea_ptr = this->property_areas[area_i]; //Obtain pointer to area
+            pea_ptr->updateValues(); //Update state on it.
+        }
     }else{
-        updateRequired = false;
-        this->updateObjectProperties();
-
+        updateRequired = false; //Unset flag
+        this->updateObjectProperties(); //Reload UI
     }
 }
 
 void InspectorWin::onPropertyChange(){
     this->onPropertyEdited();
-
-    //clearContentLayout();
-    //updateObjectProperties();
 }
 
 void AddGoComponentDialog::onAddButtonPressed(){
