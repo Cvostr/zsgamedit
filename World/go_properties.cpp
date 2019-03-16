@@ -591,6 +591,10 @@ void MaterialProperty::copyTo(GameObjectProperty* dest){
     mat_prop->material_ptr = this->material_ptr;
 }
 
+void MaterialProperty::onAddToObject(){
+    go_link.updLinkPtr()->render_type = GO_RENDER_TYPE_MATERIAL; //set flag to MATERIAL
+}
+
 void GameObject::saveProperties(std::ofstream* stream){
     unsigned int props_num = static_cast<unsigned int>(this->props_num);
 

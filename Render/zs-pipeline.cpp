@@ -151,7 +151,9 @@ void GameObject::Draw(RenderPipeline* pipeline){
         this->onUpdate(pipeline->deltaTime);
 
     ZSPIRE::Shader* shader = pipeline->processShaderOnObject(static_cast<void*>(this)); //Will be used next time
+    //Obtain camera viewport
     ZSVIEWPORT cam_viewport = pipeline->cam->getViewport();
+    //Distance limit
     int max_dist = cam_viewport.endX - cam_viewport.startX;
     bool difts = isDistanceFits(pipeline->cam->getCameraViewCenterPos(), transform_prop->_last_translation, max_dist);
     if(shader != nullptr && transform_prop != nullptr && difts){
@@ -252,7 +254,7 @@ ZSPIRE::Shader* RenderPipeline::processShaderOnObject(void* _obj){
             result = nullptr;
             break;
         }
-        case GO_RENDER_TYPE_3D:{
+        case GO_RENDER_TYPE_MATERIAL:{
             MaterialProperty* material_ptr = static_cast<MaterialProperty*>(obj->getPropertyPtrByType(GO_PROPERTY_TYPE_MATERIAL));
             if(material_ptr == nullptr) return result; //if object hasn't property
 

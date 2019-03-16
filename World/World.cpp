@@ -423,7 +423,7 @@ GameObject* World::newObject(){
 
     Project* p_ptr = static_cast<Project*>(this->proj_ptr);
     if(p_ptr->perspective == 3)
-        obj.render_type = GO_RENDER_TYPE_3D;
+        obj.render_type = GO_RENDER_TYPE_MATERIAL;
 
     obj.addProperty(GO_PROPERTY_TYPE_TRANSFORM);
     return this->addObject(obj); //Return pointer to new object

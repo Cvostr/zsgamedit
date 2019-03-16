@@ -47,9 +47,10 @@ EditWindow::EditWindow(QWidget *parent) :
     QObject::connect(ui->objsList, SIGNAL(onRightClick(QPoint)), this, SLOT(onObjectCtxMenuShow(QPoint)));
     QObject::connect(ui->objsList, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(onCameraToObjTeleport()));
 
+    //Create new something (actions)
     QObject::connect(ui->actionNew_Cube, SIGNAL(triggered()), this, SLOT(addNewCube()));
     QObject::connect(ui->actionNew_Light, SIGNAL(triggered()), this, SLOT(addNewLight()));
-
+    QObject::connect(ui->actionNew_Tile, SIGNAL(triggered()), this, SLOT(addNewTile()));
 
     ready = false; //Firstly set it to 0
     hasSceneFile = false; //No scene loaded by default
@@ -291,6 +292,28 @@ void EditWindow::addNewLight(){
     obj->item_ptr->setText(0, *obj->label);
 }
 
+void EditWindow::addNewTile(){
+    GameObject* obj = onAddNewGameObject();
+    obj->addProperty(1001); //Creates tile inside
+    obj->addProperty(GO_PROPERTY_TYPE_MESH);
+    obj->render_type = GO_RENDER_TYPE_TILE;
+
+    //Set new name to object
+    int add_num = 0; //Declaration of addititonal integer
+    world.getAvailableNumObjLabel("Tile_", &add_num);
+    *obj->label = "Tile_" + QString::number(add_num);
+    obj->item_ptr->setText(0, *obj->label);
+
+    MeshProperty* mesh = static_cast<MeshProperty*>(obj->getPropertyPtrByType(GO_PROPERTY_TYPE_MESH));
+    mesh->resource_relpath = "@cube";
+    mesh->updateMeshPtr();
+
+    TransformProperty* transform =
+            static_cast<TransformProperty*>(obj->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
+    transform->scale = ZSVECTOR3(100, 100, 1);
+    transform->updateMat();
+}
+
 void EditWindow::setupObjectsHieList(){
     QTreeWidget* w_ptr = ui->objsList; //Getting pointer to objects list widget
     w_ptr->clear(); //Clears widget
@@ -477,7 +500,7 @@ void EditWindow::toggleCameras(){
 }
 
 void EditWindow::glRender(){
-    if(ready == true)
+    if(ready == true) //if opengl ready, then render scene
         render->render(this->window, static_cast<void*>(this));
 }
 
@@ -770,9 +793,9 @@ void EditWindow::onMouseMotion(int relX, int relY){
 
             dir = ZSVECTOR3(-relX, -relY, 0);
 
-            if ((abs(relX) > abs(relY)) && abs(relX - relY) > 5)
+            if ((abs(relX) > abs(relY)) && abs(relX - relY) > 15)
                 dir = ZSVECTOR3(-relX, 0, 0);
-            if ((abs(relX) < abs(relY)) && abs(relX - relY) > 5)
+            if ((abs(relX) < abs(relY)) && abs(relX - relY) > 15)
                 dir = ZSVECTOR3(0, -relY, 0);
             //if we translating
             if(obj_trstate.transformMode == GO_TRANSFORM_MODE_TRANSLATE){
@@ -782,10 +805,11 @@ void EditWindow::onMouseMotion(int relX, int relY){
             if(obj_trstate.transformMode == GO_TRANSFORM_MODE_SCALE){
                 obj_trstate.tprop_ptr->scale = obj_trstate.tprop_ptr->scale + dir / 3;
             }
+            //if we rotating
             if(obj_trstate.transformMode == GO_TRANSFORM_MODE_ROTATE){
                 obj_trstate.tprop_ptr->rotation = obj_trstate.tprop_ptr->rotation + dir / 3;
             }
-
+            //Update our changes
             obj_trstate.tprop_ptr->updateMat();
         }
     }

@@ -72,6 +72,7 @@ public:
     void addPropertyInterfaceToInspector(InspectorWin* inspector);
     void onValueChanged();
     void copyTo(GameObjectProperty* dest);
+    void onAddToObject(); //will update render flag
 
     MaterialProperty();
 };
