@@ -2,7 +2,21 @@
 
 #include <iostream>
 #include <GL/glew.h>
+/*
+#ifdef _WIN32 //Fix for windows GLEW
 
+#undef glGenVertexArrays
+
+#include <GL\gl.h>
+#include <GL\glu.h>
+#include <GL\glext.h>
+#include <GL\wglext.h>
+
+static PFNGLGENVERTEXARRAYSPROC glGenVertexArrays;
+static PFNGLGENBUFFERSPROC glGenBuffers;
+
+#endif
+*/
 ZSPIRE::Mesh* picked_mesh = 0x0;
 
 ZSVERTEX plane_verts[] = {
@@ -107,6 +121,10 @@ void ZSPIRE::Mesh::Init() {
 }
 
 void ZSPIRE::setupDefaultMeshes() {
+#ifdef _WIN32
+    //glGenVertexArrays = (PFNGLGENVERTEXARRAYSPROC)wglGetProcAddress("glGenVertexArrays");
+    //glGenBuffers = (PFNGLGENBUFFERSPROC)wglGetProcAddress("glGenBuffers");
+#endif
     picked_mesh = 0x0;
 
     for(unsigned int cube_v = 0; cube_v < 36; cube_v ++){

@@ -22,7 +22,6 @@ ZSENSDK::ZSENGmObject ObjectScript::getGameObjectSDK(){
 
 void ObjectScript::_DestroyScript(){
     delete L; //Release this
-    L = 0x0; //Mark as deleted
 }
 
 void ObjectScript::_callStart() {
@@ -30,14 +29,18 @@ void ObjectScript::_callStart() {
     world.world_ptr = link.world_ptr;
 
     luabridge::LuaRef start = luabridge::getGlobal(L, "onStart");
+    int result = 0;
     if (start.isFunction() == true) { //If function found
         try {
-            int result = start(getGameObjectSDK(), world);
+            result = start(getGameObjectSDK(), world); //Call script onStart()
         }
         catch (luabridge::LuaException e) {
            std::cout << "SCRIPT" << "Error occured in script (onStart) " << fpath.toStdString() << e.what() << std::endl;
         }
     }
+    //Some error returned by script
+    if(result == 1) std::cout << "SCRIPT" << "Script (onStart) function exited with 1" << fpath.toStdString() << std::endl;
+
 }
 
 
@@ -46,7 +49,7 @@ void ObjectScript::_callDraw() {
    luabridge::LuaRef frame = luabridge::getGlobal(L, "onFrame");
     if (frame.isFunction() == true) { //If function found
         try {
-            int result = frame();
+            frame();
         }
         catch (luabridge::LuaException e) {
             std::cout << "SCRIPT" << "Error occured in script (onFrame) " << fpath.toStdString() << e.what() << std::endl;
@@ -58,7 +61,7 @@ void ObjectScript::callDrawUI() {
     luabridge::LuaRef ui = luabridge::getGlobal(L, "onDrawUI");
     if (ui.isFunction() == true) { //If function found
         try {
-            int result = ui();
+            ui();
         }
         catch (luabridge::LuaException e) {
 

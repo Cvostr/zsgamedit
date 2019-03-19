@@ -105,7 +105,6 @@ void EditWindow::init(){
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0)
     {
         printf("Error: %s\n", SDL_GetError());
-        //return -1;
     }
 
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
@@ -117,9 +116,10 @@ void EditWindow::init(){
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
     SDL_DisplayMode current;
     SDL_GetCurrentDisplayMode(0, &current);
-
+    std::cout << "SDL window creation requested" << std::endl;
     this->window = SDL_CreateWindow("Game View", this->width(), 0, settings.gameViewWin_Width, settings.gameViewWin_Height, SDL_WINDOW_OPENGL); //Create window
     this->glcontext = SDL_GL_CreateContext(window);
+    std::cout << "SDL - GL context creation requested!" << std::endl;
 
     glViewport(0, 0, settings.gameViewWin_Width, settings.gameViewWin_Height);
 
@@ -714,11 +714,11 @@ void EditWindow::onLeftBtnClicked(int X, int Y){
     if(obj_trstate.isTransforming) return;
     unsigned int clicked = render->render_getpickedObj(static_cast<void*>(this), X, Y);
 
-    GameObject* obj_ptr = &world.objects[clicked]; //Obtain pointer to selected object by label
-    if(clicked > world.objects.size() || obj_ptr == 0x0 || clicked >= 256 * 256 * 256){
+    if(clicked > world.objects.size() || clicked >= 256 * 256 * 256){
         world.unpickObject();
         return;
     }
+    GameObject* obj_ptr = &world.objects[clicked]; //Obtain pointer to selected object by label
 
     obj_trstate.obj_ptr = obj_ptr;
     obj_trstate.tprop_ptr = static_cast<TransformProperty*>(obj_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
@@ -726,18 +726,21 @@ void EditWindow::onLeftBtnClicked(int X, int Y){
     this->ui->objsList->setCurrentItem(obj_ptr->item_ptr); //item selected in tree
 }
 void EditWindow::onRightBtnClicked(int X, int Y){
+#ifdef __linux__
     this->obj_trstate.isTransforming = false; //disabling object transform
     unsigned int clicked = render->render_getpickedObj(static_cast<void*>(this), X, Y);
 
-    GameObject* obj_ptr = &world.objects[clicked]; //Obtain pointer to selected object by label
-    if(clicked > world.objects.size() || obj_ptr == 0x0 || clicked >= 256 * 256 * 256)
+    if(clicked > world.objects.size() || clicked >= 256 * 256 * 256)
         return;
+    GameObject* obj_ptr = &world.objects[clicked]; //Obtain pointer to selected object by label
+
     world.unpickObject(); //Clear isPicked property from all objects
     obj_ptr->pick(); //mark object picked
     this->obj_ctx_menu->setObjectPtr(obj_ptr);
     this->obj_ctx_menu->displayTransforms = true;
     this->obj_ctx_menu->show(QPoint(this->width() + X, Y));
     this->obj_ctx_menu->displayTransforms = false;
+#endif
 }
 void EditWindow::onMouseWheel(int x, int y){
     if(project.perspective == 3){
@@ -762,9 +765,9 @@ void EditWindow::onMouseMotion(int relX, int relY){
             unsigned int clicked = render->render_getpickedObj(static_cast<void*>(this), input_state.mouseX, input_state.mouseY);
 
             GameObject* obj_ptr = &world.objects[clicked]; //Obtain pointer to selected object by label
-            if(clicked > world.objects.size() || obj_ptr == 0x0 || clicked >= 256 * 256 * 256 || ppaint_state.last_obj == clicked)
+            if(clicked > world.objects.size() || obj_ptr == nullptr || clicked >= 256 * 256 * 256 || ppaint_state.last_obj == clicked)
                 return;
-            ppaint_state.last_obj = clicked; //Set clicked as last object ID
+            ppaint_state.last_obj = static_cast<int>(clicked); //Set clicked as last object ID
             //Obtain pointer to object's property
             GameObjectProperty* prop_ptr = obj_ptr->getPropertyPtrByType(this->ppaint_state.prop_ptr->type);
 

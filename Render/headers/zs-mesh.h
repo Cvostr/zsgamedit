@@ -3,7 +3,7 @@
 #endif
 
 #include "zs-math.h"
-#include "triggers.h"
+#include "../../triggers.h"
 
 #define NO_INDICES 0
 

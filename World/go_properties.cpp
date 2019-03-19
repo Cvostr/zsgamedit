@@ -104,6 +104,11 @@ GameObjectProperty* allocProperty(int type){
             _ptr = static_cast<GameObjectProperty*>(ptr);
             break;
         }
+        case GO_PROPERTY_TYPE_COLLIDER:{
+            ColliderProperty* ptr = new ColliderProperty;
+            _ptr = static_cast<GameObjectProperty*>(ptr);
+            break;
+        }
         case GO_PROPERTY_TYPE_TILE_GROUP:{
             TileGroupProperty* ptr = new TileGroupProperty;
             _ptr = static_cast<GameObjectProperty*>(ptr);
@@ -736,6 +741,17 @@ void GameObject::saveProperties(std::ofstream* stream){
         }
         }
     }
+}
+
+void ColliderProperty::onAddToObject(){
+
+} //will register in world
+void ColliderProperty::onObjectDeleted(){
+
+} //unregister in world
+
+ColliderProperty::ColliderProperty(){
+    type = GO_PROPERTY_TYPE_COLLIDER;
 }
 
 void GameObject::loadProperty(std::ifstream* world_stream){

@@ -1,3 +1,5 @@
+#define _CRT_SECURE_NO_WARNINGS
+
 #include "headers/zs-shader.h"
 #include "../World/headers/World.h"
 #include "../World/headers/obj_properties.h"

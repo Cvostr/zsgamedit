@@ -90,6 +90,13 @@ public:
     TransformProperty();
 };
 
+class ColliderProperty : public GameObjectProperty{
+public:
+    void onAddToObject(); //will register in world
+    void onObjectDeleted(); //unregister in world
+
+    ColliderProperty();
+};
 
 class GameObject{
 public:

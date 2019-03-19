@@ -13,6 +13,7 @@
 #define GO_PROPERTY_TYPE_AUDSOURCE 5
 #define GO_PROPERTY_TYPE_MATERIAL 6
 #define GO_PROPERTY_TYPE_SCRIPTGROUP 7
+#define GO_PROPERTY_TYPE_COLLIDER 8
 
 #define LIGHTSOURCE_TYPE_DIRECTIONAL 1
 #define LIGHTSOURCE_TYPE_POINT 2
@@ -58,7 +59,6 @@ public:
 
     AudioSourceProperty();
 };
-
 
 class MaterialProperty : public GameObjectProperty{
 private:

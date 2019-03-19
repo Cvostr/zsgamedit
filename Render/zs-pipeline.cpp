@@ -38,9 +38,15 @@ RenderPipeline::~RenderPipeline(){
 
 bool RenderPipeline::InitGLEW(){
     glewExperimental = GL_TRUE;
+    std::cout << "Calling GLEW creation" << std::endl;
         if (glewInit() != GLEW_OK)
         {
             std::cout << "OPENGL GLEW: Creation failed ";
+            return false;
+        }
+
+        if (glGenVertexArrays == NULL)
+        {
             return false;
         }
         return true;

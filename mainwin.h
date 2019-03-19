@@ -38,8 +38,10 @@ class ProjectCtxMenu : public QObject{
     Q_OBJECT
 public slots:
     void onDeleteClicked();
+#ifdef USE_ZSPIRE
     void runEngineClickedGL();
     void runEngineClickedVK();
+#endif
 
 private:
     QMenu* menu; //Menu object to contain everything
@@ -52,7 +54,9 @@ public:
 
     ProjectCtxMenu(MainWin* win, QWidget* parent = nullptr);
     void show(QPoint point);
+#ifdef USE_ZSPIRE
     void runEngineClicked(ZSGAPI gapi);
+#endif
     void close();
 };
 

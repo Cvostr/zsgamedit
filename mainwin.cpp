@@ -215,7 +215,7 @@ void ProjectCtxMenu::onDeleteClicked(){
     win->updateListWidgetContent();
     win->saveProjectsConfiguration();
 }
-
+#ifdef USE_ZSPIRE
 void ProjectCtxMenu::runEngineClickedGL(){
     runEngineClicked(OGL32);
 }
@@ -224,7 +224,7 @@ void ProjectCtxMenu::runEngineClickedVK(){
 }
 
 void ProjectCtxMenu::runEngineClicked(ZSGAPI gapi){
-#ifdef USE_ZSPIRE
+
     QListWidgetItem* selected_proj_item = win->ui->projList->currentItem();
     QString proj_label = selected_proj_item->text();
 
@@ -253,5 +253,6 @@ void ProjectCtxMenu::runEngineClicked(ZSGAPI gapi){
 
     win->engine = new ZSpireEngine(&engine_create_info, &window_create_info, &game_info);
     win->engine->loadGame();
-#endif
+
 }
+#endif

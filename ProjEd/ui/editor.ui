@@ -7,13 +7,13 @@
     <x>0</x>
     <y>0</y>
     <width>390</width>
-    <height>720</height>
+    <height>650</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
     <width>190</width>
-    <height>720</height>
+    <height>650</height>
    </size>
   </property>
   <property name="maximumSize">
@@ -34,8 +34,8 @@
      <rect>
       <x>0</x>
       <y>0</y>
-      <width>411</width>
-      <height>421</height>
+      <width>381</width>
+      <height>411</height>
      </rect>
     </property>
     <property name="verticalScrollBarPolicy">
@@ -68,9 +68,9 @@
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>440</y>
-      <width>411</width>
-      <height>231</height>
+      <y>410</y>
+      <width>381</width>
+      <height>201</height>
      </rect>
     </property>
    </widget>
@@ -81,7 +81,7 @@
      <x>0</x>
      <y>0</y>
      <width>390</width>
-     <height>23</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

@@ -14,8 +14,9 @@
 
 class MaterialShaderProperty{
 public:
-    int type;
+    int type; //type of property
     QString prop_caption;
+    QString prop_identifier; //String identifier, that will appear in material file
 
     MaterialShaderProperty();
 };
