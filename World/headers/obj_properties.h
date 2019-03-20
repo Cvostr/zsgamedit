@@ -15,8 +15,14 @@
 #define GO_PROPERTY_TYPE_SCRIPTGROUP 7
 #define GO_PROPERTY_TYPE_COLLIDER 8
 
-#define LIGHTSOURCE_TYPE_DIRECTIONAL 1
-#define LIGHTSOURCE_TYPE_POINT 2
+enum LIGHTSOURCE_TYPE {
+    LIGHTSOURCE_TYPE_NONE,
+    LIGHTSOURCE_TYPE_DIRECTIONAL,
+    LIGHTSOURCE_TYPE_POINT
+};
+
+//#define LIGHTSOURCE_TYPE_DIRECTIONAL 1
+//#define LIGHTSOURCE_TYPE_POINT 2
 
 typedef uint8_t ZSLIGHTSOURCE_TYPE; //type to store lightsource type
 typedef uint8_t ZSLIGHTSOURCE_GL_ID;
@@ -93,7 +99,7 @@ public:
 
 class LightsourceProperty : public GameObjectProperty{
 public:
-    ZSLIGHTSOURCE_TYPE light_type; //type of lightsource
+    LIGHTSOURCE_TYPE light_type; //type of lightsource
     TransformProperty* transform; //pointer to object's transform
 
     ZSVECTOR3 direction; //direction for directional & spotlight in quats

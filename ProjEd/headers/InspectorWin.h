@@ -17,15 +17,8 @@
 
 #include "../../Render/headers/zs-math.h"
 
-#define PEA_TYPE_NONE 0
-#define PEA_TYPE_STRING 1
-#define PEA_TYPE_FLOAT 2
-#define PEA_TYPE_FLOAT2 3
-#define PEA_TYPE_FLOAT3 4
-#define PEA_TYPE_INT 5
-#define PEA_TYPE_RESPICK 6
-#define PEA_TYPE_COLOR 7
-#define PEA_TYPE_BOOL 8
+enum EDITAREA_TYPE {PEA_TYPE_NONE, PEA_TYPE_STRING, PEA_TYPE_FLOAT, PEA_TYPE_FLOAT2, PEA_TYPE_FLOAT3, PEA_TYPE_INT,
+                   PEA_TYPE_RESPICK, PEA_TYPE_COLOR, PEA_TYPE_BOOL};
 
 #define PICK_RES_TYPE_MESH 0
 #define PICK_RES_TYPE_TEXTURE 1
@@ -86,7 +79,7 @@ public:
 
 class PropertyEditArea {
 public:
-    int type;
+    EDITAREA_TYPE type; //Type of EditArea
     QString label; //Label, describing content
     QLabel* label_widget; //Widget for upper variable
     void* go_property; //Pointer to connected property

@@ -184,6 +184,19 @@ void TransformProperty::onPreRender(RenderPipeline* pipeline){
     updateMat();
 }
 
+void TransformProperty::setTranslation(ZSVECTOR3 new_translation){
+    ZSVECTOR3 temp_pos = this->translation;
+
+    this->translation = new_translation;
+    updateMat();
+
+    if(go_link.world_ptr->isCollide(this)){ //if really collides
+        this->translation = temp_pos; //Set temporary value
+        updateMat(); //Update matrix again
+        return;
+    }
+}
+
 void TransformProperty::updateMat(){
     //Variables to store
     ZSVECTOR3 p_translation = ZSVECTOR3(0,0,0);
@@ -193,8 +206,9 @@ void TransformProperty::updateMat(){
     GameObject* ptr = go_link.updLinkPtr(); //Pointer to object with this property
     if(ptr != nullptr){ //if object exist
         if(ptr->hasParent){ //if object dependent
-
+            //Get parent's transform property
             TransformProperty* property = static_cast<TransformProperty*>(ptr->parent.updLinkPtr()->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
+            //Calculate parent transform offset
             property->getAbsoluteParentTransform(p_translation, p_scale, p_rotation);
         }
     }
@@ -202,9 +216,12 @@ void TransformProperty::updateMat(){
     if(this->translation + p_translation == this->_last_translation
             && this->scale * p_scale == this->_last_scale
             && this->rotation + p_rotation == this->_last_rotation) {
-        return;
+        return; //No changes, nothing to be done
     }else{
+        //Store last pos to work with collisions
 
+
+        //rewrite last values
         this->_last_translation = this->translation + p_translation;
         this->_last_scale = this->scale * p_scale;
         this->_last_rotation = this->rotation + p_rotation;
@@ -332,7 +349,7 @@ void MeshProperty::copyTo(GameObjectProperty* dest){
 
 void LightsourceProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
     AreaRadioGroup* group = new AreaRadioGroup; //allocate button layout
-    group->value_ptr = &this->light_type;
+    group->value_ptr = reinterpret_cast<uint8_t*>(&this->light_type);
     group->go_property = static_cast<void*>(this);
 
     QRadioButton* directional_radio = new QRadioButton; //allocate first radio
@@ -701,6 +718,16 @@ void GameObject::saveProperties(std::ofstream* stream){
 
             break;
         }
+        case GO_PROPERTY_TYPE_COLLIDER:{
+            ColliderProperty* ptr = static_cast<ColliderProperty*>(property_ptr);
+            //write collider type
+            stream->write(reinterpret_cast<char*>(&ptr->coll_type), sizeof(COLLIDER_TYPE));
+            //write isTrigger boolean
+            stream->write(reinterpret_cast<char*>(&ptr->isTrigger), sizeof(bool));
+            *stream << "\n"; //write divider
+
+            break;
+        }
         case GO_PROPERTY_TYPE_TILE_GROUP:{
             TileGroupProperty* ptr = static_cast<TileGroupProperty*>(property_ptr);
             int isCreated = static_cast<int>(ptr->isCreated);
@@ -744,22 +771,59 @@ void GameObject::saveProperties(std::ofstream* stream){
 }
 
 void ColliderProperty::onAddToObject(){
-
+    this->go_link.world_ptr->pushCollider(this);
 } //will register in world
 void ColliderProperty::onObjectDeleted(){
-
+    this->go_link.world_ptr->removeCollider(this);
 } //unregister in world
+void ColliderProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
+    AreaRadioGroup* group = new AreaRadioGroup; //allocate button layout
+    group->value_ptr = reinterpret_cast<uint8_t*>(&this->coll_type);
+    group->go_property = static_cast<void*>(this);
+
+    QRadioButton* box_radio = new QRadioButton; //allocate first radio
+    box_radio->setText("Box");
+    QRadioButton* cube_radio = new QRadioButton;
+    cube_radio->setText("Cube");
+    //add created radio buttons
+    group->addRadioButton(box_radio);
+    group->addRadioButton(cube_radio);
+    //Register in Inspector
+    inspector->registerUiObject(group);
+    inspector->getContentLayout()->addLayout(group->btn_layout);
+
+    //isTrigger checkbox
+    BoolCheckboxArea* istrigger = new BoolCheckboxArea;
+    istrigger->setLabel("IsTrigger ");
+    istrigger->go_property = static_cast<void*>(this);
+    istrigger->bool_ptr = &this->isTrigger;
+    inspector->addPropertyArea(istrigger);
+}
+
+void ColliderProperty::copyTo(GameObjectProperty* dest){
+    if(dest->type != GO_PROPERTY_TYPE_COLLIDER) return;
+
+    ColliderProperty* coll_prop = static_cast<ColliderProperty*>(dest);
+    coll_prop->isTrigger = this->isTrigger;
+    coll_prop->coll_type = this->coll_type;
+}
+
+TransformProperty* ColliderProperty::getTransformProperty(){
+    return go_link.updLinkPtr()->getTransformProperty();
+}
 
 ColliderProperty::ColliderProperty(){
     type = GO_PROPERTY_TYPE_COLLIDER;
+
+    isTrigger = false;
+    coll_type = COLLIDER_TYPE_BOX;
 }
 
 void GameObject::loadProperty(std::ifstream* world_stream){
     int type;
-    //*world_stream >> type;
     world_stream->seekg(1, std::ofstream::cur); //Skip space
     world_stream->read(reinterpret_cast<char*>(&type), sizeof(int));
-    // world_stream->seekg(1, std::ofstream::cur); //Skip space
+    //Spawn new property with readed type
     addProperty(type);
     GameObjectProperty* prop_ptr = getPropertyPtrByType(type); //get created property
     //since more than 1 properties same type can't be on one gameobject
@@ -868,6 +932,18 @@ void GameObject::loadProperty(std::ifstream* world_stream){
         ptr->material_path = QString::fromStdString(path);
         if(path.compare("@none"))
             ptr->onValueChanged();
+
+        break;
+    }
+    case GO_PROPERTY_TYPE_COLLIDER:{
+        ColliderProperty* ptr = static_cast<ColliderProperty*>(prop_ptr);
+        world_stream->seekg(1, std::ofstream::cur);
+        //read collider type
+        world_stream->read(reinterpret_cast<char*>(&ptr->coll_type), sizeof(COLLIDER_TYPE));
+        //read isTrigger boolean
+        world_stream->read(reinterpret_cast<char*>(&ptr->isTrigger), sizeof(bool));
+
+        world_ptr->pushCollider(ptr); //send collider to world
 
         break;
     }

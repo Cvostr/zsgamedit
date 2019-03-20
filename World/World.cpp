@@ -328,12 +328,12 @@ int World::getFreeObjectSpaceIndex(){
     unsigned int objects_num = static_cast<unsigned int>(this->objects.size());
     for(unsigned int objs_i = 0; objs_i < objects_num; objs_i ++){
         if(objects[objs_i].alive == false){
-            index_to_push = objs_i;
+            index_to_push = static_cast<int>(objs_i);
         }
     }
 
     if(index_to_push == -1){ //if all indeces are busy
-        return objects.size();
+        return static_cast<int>(objects.size());
     }else{ //if vector has an empty space
         return index_to_push;
     }
@@ -596,6 +596,46 @@ void GameObject::copyTo(GameObject* dest){
     dest->render_type = this->render_type;
 }
 
+void World::pushCollider(ColliderProperty* property){
+    this->colliders.push_back(property);
+}
+
+void World::removeCollider(ColliderProperty* property){
+    this->colliders.remove(property);
+}
+
+bool World::isCollide(TransformProperty* prop){
+
+    ZSVECTOR3 object_pos = prop->_last_translation; //last translation is absolute
+    ZSVECTOR3 object_size = prop->_last_scale;
+
+    std::list <ColliderProperty*> :: iterator it;
+    for(it = colliders.begin(); it != colliders.end(); it ++){
+        ColliderProperty* coll_prop_ptr = static_cast<ColliderProperty*>((*it));
+        //Obtain pointer to Collider's transform property
+        TransformProperty* coll_transform_ptr = coll_prop_ptr->getTransformProperty();
+        //Get Collider's position and scale
+        ZSVECTOR3 collider_pos = coll_transform_ptr->_last_translation;
+        ZSVECTOR3 collider_size = coll_transform_ptr->_last_scale;
+
+        if(!coll_prop_ptr->isTrigger){ //Non triggerble
+            //Perform AABB with X and Y
+            bool CollideX = fabs(object_pos.X - collider_pos.X) < fabs(object_size.X + collider_size.X);
+            bool CollideY = fabs(object_pos.Y - collider_pos.Y) < fabs(object_size.Y + collider_size.Y);
+
+            //Checking for type
+            if(coll_prop_ptr->coll_type == COLLIDER_TYPE_BOX){
+                if(CollideX && CollideY) return true;
+            }
+            else if(coll_prop_ptr->coll_type == COLLIDER_TYPE_CUBE){
+                bool CollideZ = fabs(object_pos.Z - collider_pos.Z) < fabs(object_size.Z + collider_size.Z);
+                if(CollideX && CollideY && CollideZ) return true;
+            }
+        }
+    }
+    return false;
+}
+
 void World::openFromFile(QString file, QTreeWidget* w_ptr){
     this->obj_widget_ptr = w_ptr;
 
@@ -687,6 +727,7 @@ void World::clear(){
         obj_ptr->clearAll(false);
     }
     objects.clear();
+    colliders.clear();
 }
 
 void World::putToShapshot(WorldSnapshot* snapshot){

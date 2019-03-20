@@ -34,10 +34,7 @@ struct Project;
 
 #endif
 
-#define RESOURCE_TYPE_TEXTURE 0
-#define RESOURCE_TYPE_MESH 1
-#define RESOURCE_TYPE_AUDIO 2
-#define RESOURCE_TYPE_MATERIAL 3
+enum RESOURCE_TYPE {RESOURCE_TYPE_TEXTURE, RESOURCE_TYPE_MESH, RESOURCE_TYPE_AUDIO, RESOURCE_TYPE_MATERIAL};
 
 #include <vector>
 #include <QString>
@@ -51,7 +48,7 @@ class EditWindow;
 typedef struct Resource{
     QString file_path; //Resource file
     QString rel_path; //Resource project dir related path
-    unsigned int type; //Resource type
+    RESOURCE_TYPE type; //Resource type
     void* class_ptr; //Pointer to resource class
 }Resource;
 

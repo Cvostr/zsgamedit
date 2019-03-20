@@ -642,7 +642,7 @@ EditWindow* ZSEditor::openEditor(){
     _inspector_win->show();
     _inspector_win->move(_editor_win->width() + 640, 0);
 
-     _inspector_win->editwindow_ptr = static_cast<void*>(_editor_win);
+    _inspector_win->editwindow_ptr = static_cast<void*>(_editor_win);
 
     _ed_actions_container = new EdActions; //Allocating EdActions
     _ed_actions_container->world_ptr = &_editor_win->world; //Put world pointer

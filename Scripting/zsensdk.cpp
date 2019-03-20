@@ -112,6 +112,9 @@ bool ZSENSDK::Input::isKeyHold(int keycode){
 ZSENSDK::Input::MouseState* ZSENSDK::Input::getMouseStatePtr(){
     return &mouse;
 }
+ZSENSDK::Input::MouseState ZSENSDK::Input::getMouseState(){
+    return mouse;
+}
 
 ZSVECTOR3 ZSENSDK::Math::vnormalize(ZSVECTOR3 vec){
     ZSVECTOR3 result = vec;
@@ -184,8 +187,7 @@ ZSVECTOR3 ZSENSDK::ZSENTransformProperty::getRotation(){
     return this->prop_ptr->rotation;
 }
 void ZSENSDK::ZSENTransformProperty::setPosition(ZSVECTOR3 pos){
-    this->prop_ptr->translation = pos;
-    this->prop_ptr->updateMat();
+    this->prop_ptr->setTranslation(pos);
 }
 void ZSENSDK::ZSENTransformProperty::setRotation(ZSVECTOR3 rot){
     this->prop_ptr->rotation = rot;
@@ -242,6 +244,16 @@ void ZSENSDK::bindSDK(lua_State* state){
             .beginNamespace("input")
             .addFunction("isKeyPressed", &ZSENSDK::Input::isKeyPressed)
             .addFunction("isKeyHold", &ZSENSDK::Input::isKeyHold)
+            //Add mouse state class
+            .beginClass <Input::MouseState>("MouseState")
+            .addData("cursorX", &Input::MouseState::mouseX)
+            .addData("cursorY", &Input::MouseState::mouseY)
+            .addData("relX", &Input::MouseState::mouseRelX)
+            .addData("relY", &Input::MouseState::mouseRelY)
+            .endClass()
+
+            .addFunction("getMouseState", &ZSENSDK::Input::getMouseState)
+
             .endNamespace();
 
     luabridge::getGlobalNamespace(state).beginClass <ZSVECTOR3>("Vec3")

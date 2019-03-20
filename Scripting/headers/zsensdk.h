@@ -97,14 +97,15 @@ namespace Input {
     bool isKeyHold(int keycode);
 
     struct MouseState{
-        unsigned int mouseX;
+        int mouseX;
         int mouseRelX;
 
-        unsigned int mouseY;
+        int mouseY;
         int mouseRelY;
     };
 
     MouseState* getMouseStatePtr();
+    MouseState getMouseState();
 }
 
 void bindSDK(lua_State* state);
