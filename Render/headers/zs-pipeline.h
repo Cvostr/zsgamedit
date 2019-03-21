@@ -13,9 +13,11 @@
 #define GO_RENDER_TYPE_TILE 1
 #define GO_RENDER_TYPE_MATERIAL 2
 
-#define PIPELINE_STATE_DEFAULT 0
-#define PIPELINE_STATE_PICKING 1
-#define PIPELINE_STATE_MARKED 2
+enum PIPELINE_STATE {
+    PIPELINE_STATE_DEFAULT,
+    PIPELINE_STATE_PICKING,
+    PIPELINE_STATE_MARKED
+};
 
 class G_BUFFER_GL{
 protected:
@@ -48,7 +50,7 @@ public:
     float deltaTime;
     bool depthTest; //if enabled, GL will do depth testing
     bool cullFaces; //if enabled, GL will cull faces
-    int current_state;
+    PIPELINE_STATE current_state;
     void setup(int bufWidth, int bufHeight);
     bool InitGLEW();
     void render(SDL_Window* w, void* projectedit_ptr);

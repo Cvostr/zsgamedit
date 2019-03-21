@@ -3,7 +3,6 @@
 
 #include "zs-math.h"
 #include "../../World/headers/zs-camera.h"
-//#include "../../World/headers/props/lightsource.h"
 
 namespace ZSPIRE {
 	class Shader {

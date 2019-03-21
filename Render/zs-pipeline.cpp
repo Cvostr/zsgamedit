@@ -45,10 +45,6 @@ bool RenderPipeline::InitGLEW(){
             return false;
         }
 
-        if (glGenVertexArrays == NULL)
-        {
-            return false;
-        }
         return true;
 }
 
@@ -172,7 +168,7 @@ void GameObject::Draw(RenderPipeline* pipeline){
                 mesh_prop->mesh_ptr->Draw();
                 //if object is picked
                 if(this->isPicked == true && pipeline->current_state != PIPELINE_STATE_PICKING){
-                    int cur_state = pipeline->current_state; //Storing current state
+                    PIPELINE_STATE cur_state = pipeline->current_state; //Storing current state
                     pipeline->current_state = PIPELINE_STATE_MARKED;
                     ZSPIRE::Shader* mark_s = pipeline->processShaderOnObject(static_cast<void*>(this));
                     mark_s->setTransform(transform_prop->transform_mat);
@@ -180,7 +176,7 @@ void GameObject::Draw(RenderPipeline* pipeline){
                     if(w->obj_trstate.isTransforming == true)
                          mark_s->setGLuniformInt("isTransformMark", 1);
                     mesh_prop->mesh_ptr->DrawLines();
-                    pipeline->current_state = cur_state;
+                    pipeline->current_state = cur_state; //assign last value
                     mark_s->setGLuniformInt("isTransformMark", 0);
                 }
             }

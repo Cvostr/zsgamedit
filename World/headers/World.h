@@ -152,6 +152,7 @@ public:
     void Draw(RenderPipeline* pipeline); //On render pipeline wish to draw the object
     void onUpdate(int deltaTime); //calls onUpdate on all properties
     void onPreRender(RenderPipeline* pipeline); //calls onPreRender on all properties
+    void onTrigger(GameObject* obj);
 
     void putToSnapshot(GameObjectSnapshot* snapshot);
     void recoverFromSnapshot(GameObjectSnapshot* snapshot);

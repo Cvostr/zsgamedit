@@ -666,7 +666,7 @@ void GameObject::saveProperties(std::ofstream* stream){
         }
         case GO_PROPERTY_TYPE_LIGHTSOURCE:{
             LightsourceProperty* ptr = static_cast<LightsourceProperty*>(property_ptr);
-            ZSLIGHTSOURCE_TYPE type = ptr->light_type;
+            LIGHTSOURCE_TYPE type = ptr->light_type;
             float intensity = ptr->intensity;
             float range = ptr->range;
 
@@ -674,7 +674,7 @@ void GameObject::saveProperties(std::ofstream* stream){
             float color_g = ptr->color.g;
             float color_b = ptr->color.b;
 
-            stream->write(reinterpret_cast<char*>(&type), sizeof(ZSLIGHTSOURCE_TYPE));
+            stream->write(reinterpret_cast<char*>(&type), sizeof(LIGHTSOURCE_TYPE));
             stream->write(reinterpret_cast<char*>(&intensity), sizeof(float));
             stream->write(reinterpret_cast<char*>(&range), sizeof(float));
 
@@ -869,7 +869,7 @@ void GameObject::loadProperty(std::ifstream* world_stream){
         LightsourceProperty* ptr = static_cast<LightsourceProperty*>(prop_ptr);
         world_stream->seekg(1, std::ofstream::cur);
 
-        world_stream->read(reinterpret_cast<char*>(&ptr->light_type), sizeof(ZSLIGHTSOURCE_TYPE));
+        world_stream->read(reinterpret_cast<char*>(&ptr->light_type), sizeof(LIGHTSOURCE_TYPE));
         world_stream->read(reinterpret_cast<char*>(&ptr->intensity), sizeof(float));
         world_stream->read(reinterpret_cast<char*>(&ptr->range), sizeof(float));
 

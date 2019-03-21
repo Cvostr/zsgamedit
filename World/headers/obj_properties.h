@@ -21,10 +21,6 @@ enum LIGHTSOURCE_TYPE {
     LIGHTSOURCE_TYPE_POINT
 };
 
-//#define LIGHTSOURCE_TYPE_DIRECTIONAL 1
-//#define LIGHTSOURCE_TYPE_POINT 2
-
-typedef uint8_t ZSLIGHTSOURCE_TYPE; //type to store lightsource type
 typedef uint8_t ZSLIGHTSOURCE_GL_ID;
 
 class ScriptGroupProperty : public GameObjectProperty {
