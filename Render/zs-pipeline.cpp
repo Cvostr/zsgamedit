@@ -120,23 +120,23 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr)
     //Iterate over all objects in the world
     for(unsigned int obj_i = 0; obj_i < world_ptr->objects.size(); obj_i ++){
         GameObject* obj_ptr = &world_ptr->objects[obj_i];
-        if(!obj_ptr->hasParent)
-            obj_ptr->Draw(this);
+        if(!obj_ptr->hasParent) //if it is a root object
+            obj_ptr->Draw(this); //Draw object
     }
 
     if(depthTest == true) //if depth is enabled
         glDisable(GL_DEPTH_TEST);
 
-    if(cullFaces == true)
+    if(cullFaces == true) //if GL face cull is enabled
         glDisable(GL_CULL_FACE);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0); //Back to default framebuffer
     glClear(GL_COLOR_BUFFER_BIT); //Clear screen
     gbuffer.bindTextures(); //Bind gBuffer textures
-    deffered_light.Use();
+    deffered_light.Use(); //use deffered shader
     ZSPIRE::getPlaneMesh2D()->Draw(); //Draw screen
 
-    SDL_GL_SwapWindow(w);
+    SDL_GL_SwapWindow(w); //Send rendered frame
 }
 
 void GameObject::Draw(RenderPipeline* pipeline){
@@ -329,7 +329,7 @@ void RenderPipeline::addLight(void* light_ptr){
     this->lights_ptr.push_back(light_ptr); //pushing pointer
     this->deffered_light.Use(); //correctly put uniforms
     this->deffered_light.sendLight(_light_ptr->id, light_ptr);
-    this->deffered_light.setGLuniformInt("lights_amount", lights_ptr.size());
+    this->deffered_light.setGLuniformInt("lights_amount", static_cast<int>(lights_ptr.size()));
 }
 
 void RenderPipeline::removeLights(){

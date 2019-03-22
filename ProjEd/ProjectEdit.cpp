@@ -1,6 +1,7 @@
 #include "headers/ProjectEdit.h"
 #include "headers/InspectorWin.h"
 #include "../World/headers/obj_properties.h"
+#include "../World/headers/2dtileproperties.h"
 #include "ui_editor.h"
 #include "stdio.h"
 #include <iostream>
@@ -250,7 +251,7 @@ GameObject* EditWindow::onAddNewGameObject(){
     //get free index in array
     int free_ind = world.getFreeObjectSpaceIndex();
     //if we have no free space inside array
-    if(free_ind == world.objects.size()){
+    if(free_ind == static_cast<int>(world.objects.size())){
         GameObject obj;
         obj.alive = false;
         obj.world_ptr = &world;
@@ -294,8 +295,8 @@ void EditWindow::addNewLight(){
 
 void EditWindow::addNewTile(){
     GameObject* obj = onAddNewGameObject();
-    obj->addProperty(1001); //Creates tile inside
-    obj->addProperty(GO_PROPERTY_TYPE_MESH);
+    obj->addProperty(GO_PROPERTY_TYPE_TILE); //Creates tile inside
+    obj->addProperty(GO_PROPERTY_TYPE_MESH); //Creates mesh inside
     obj->render_type = GO_RENDER_TYPE_TILE;
 
     //Set new name to object
@@ -303,11 +304,11 @@ void EditWindow::addNewTile(){
     world.getAvailableNumObjLabel("Tile_", &add_num);
     *obj->label = "Tile_" + QString::number(add_num);
     obj->item_ptr->setText(0, *obj->label);
-
+    //Assign @mesh
     MeshProperty* mesh = static_cast<MeshProperty*>(obj->getPropertyPtrByType(GO_PROPERTY_TYPE_MESH));
     mesh->resource_relpath = "@cube";
     mesh->updateMeshPtr();
-
+    //Assign new scale
     TransformProperty* transform =
             static_cast<TransformProperty*>(obj->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
     transform->scale = ZSVECTOR3(100, 100, 1);
@@ -447,7 +448,7 @@ void EditWindow::onObjectListItemClicked(){
 void EditWindow::onObjectCtxMenuShow(QPoint point){
     QTreeWidgetItem* selected_item = ui->objsList->currentItem(); //Obtain pointer to clicked obj item
     //We selected empty space
-    if(selected_item == 0x0) return;
+    if(selected_item == nullptr) return;
     QString obj_name = selected_item->text(0); //Get label of clicked obj
     GameObject* obj_ptr = world.getObjectByLabel(obj_name); //Obtain pointer to selected object by label
 
@@ -711,7 +712,7 @@ void ObjTreeWgt::dropEvent(QDropEvent* event){
 }
 
 void EditWindow::onLeftBtnClicked(int X, int Y){
-    if(obj_trstate.isTransforming) return;
+    if(obj_trstate.isTransforming || isSceneRun) return;
     unsigned int clicked = render->render_getpickedObj(static_cast<void*>(this), X, Y);
 
     if(clicked > world.objects.size() || clicked >= 256 * 256 * 256){
@@ -726,6 +727,7 @@ void EditWindow::onLeftBtnClicked(int X, int Y){
     this->ui->objsList->setCurrentItem(obj_ptr->item_ptr); //item selected in tree
 }
 void EditWindow::onRightBtnClicked(int X, int Y){
+    if(isSceneRun) return;
 #ifdef __linux__
     this->obj_trstate.isTransforming = false; //disabling object transform
     unsigned int clicked = render->render_getpickedObj(static_cast<void*>(this), X, Y);
@@ -759,21 +761,30 @@ void EditWindow::onMouseWheel(int x, int y){
 }
 void EditWindow::onMouseMotion(int relX, int relY){
     if(this->ppaint_state.enabled && input_state.isLeftBtnHold == true){ //we just move on map
-        if(ppaint_state.time == 0){
+        if(ppaint_state.time == 0.0f && !isSceneRun){
             ppaint_state.time += deltaTime;
 
             unsigned int clicked = render->render_getpickedObj(static_cast<void*>(this), input_state.mouseX, input_state.mouseY);
 
-            GameObject* obj_ptr = &world.objects[clicked]; //Obtain pointer to selected object by label
-            if(clicked > world.objects.size() || obj_ptr == nullptr || clicked >= 256 * 256 * 256 || ppaint_state.last_obj == clicked)
+            if(clicked > world.objects.size() || clicked >= 256 * 256 * 256 || ppaint_state.last_obj == clicked)
                 return;
+
+            GameObject* obj_ptr = &world.objects[clicked]; //Obtain pointer to selected object by label
+
             ppaint_state.last_obj = static_cast<int>(clicked); //Set clicked as last object ID
             //Obtain pointer to object's property
             GameObjectProperty* prop_ptr = obj_ptr->getPropertyPtrByType(this->ppaint_state.prop_ptr->type);
 
-        getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
-        //Copy property data
-        ppaint_state.prop_ptr->copyTo(prop_ptr);
+            if (prop_ptr == nullptr) { //if no property with that type in object
+                //add new property
+                obj_ptr->addProperty(this->ppaint_state.prop_ptr->type);
+                //update pointer
+                prop_ptr = obj_ptr->getPropertyPtrByType(this->ppaint_state.prop_ptr->type);
+            }
+
+            getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
+            //Copy property data
+            ppaint_state.prop_ptr->copyTo(prop_ptr);
         }else{
             ppaint_state.time += deltaTime;
             if(ppaint_state.time >= 100) ppaint_state.time = 0;
@@ -792,9 +803,7 @@ void EditWindow::onMouseMotion(int relX, int relY){
 
         if(obj_trstate.isTransforming == true && input_state.isLeftBtnHold == true){ //Only affective if object is transforming
 
-            ZSVECTOR3 dir = ZSVECTOR3(0.0f);
-
-            dir = ZSVECTOR3(-relX, -relY, 0);
+            ZSVECTOR3 dir = ZSVECTOR3(-relX, -relY, 0);
 
             if ((abs(relX) > abs(relY)) && abs(relX - relY) > 15)
                 dir = ZSVECTOR3(-relX, 0, 0);
@@ -896,7 +905,7 @@ void EditWindow::onKeyDown(SDL_Keysym sym){
 }
 
 void EditWindow::callObjectDeletion(GameObjectLink link){
-    //_ed_actions_container->newSnapshotAction(&this->world);
+    //Create new Object action
     _ed_actions_container->newGameObjectAction(link);
 
     world.removeObj(link); //delete object

@@ -57,6 +57,9 @@ QString getPropertyString(int type){
         case GO_PROPERTY_TYPE_MATERIAL:{
             return QString("Material");
         }
+        case GO_PROPERTY_TYPE_COLLIDER:{
+            return QString("Collider");
+        }
         case GO_PROPERTY_TYPE_TILE_GROUP:{
             return QString("Tile Group");
         }
@@ -712,7 +715,7 @@ void GameObject::saveProperties(std::ofstream* stream){
             //write amount of scripts
             stream->write(reinterpret_cast<char*>(&script_num), sizeof(int));
             *stream << "\n"; //write divider
-            for(unsigned int script_w_i = 0; script_w_i < script_num; script_w_i ++){
+            for(unsigned int script_w_i = 0; script_w_i < static_cast<unsigned int>(script_num); script_w_i ++){
                  *stream << ptr->path_names[script_w_i].toStdString() << "\n";
             }
 
@@ -1054,14 +1057,14 @@ void ScriptGroupProperty::copyTo(GameObjectProperty* dest){
     _dest->scripts_attached.resize(scr_num);
     _dest->path_names.resize(scr_num);
     //Copy data
-    for(unsigned int script_i = 0; script_i < scr_num; script_i ++){
+    for(unsigned int script_i = 0; script_i < static_cast<unsigned int>(scr_num); script_i ++){
         _dest->scripts_attached[script_i] = this->scripts_attached[script_i];
         _dest->path_names[script_i] = this->path_names[script_i];
     }
 }
 
 void ScriptGroupProperty::wakeUp(){
-    for(unsigned int script_i = 0; script_i < scr_num; script_i ++){
+    for(unsigned int script_i = 0; script_i < static_cast<unsigned int>(scr_num); script_i ++){
         this->scripts_attached[script_i].link = this->go_link;
 
         this->scripts_attached[script_i]._InitScript();
@@ -1073,5 +1076,5 @@ ScriptGroupProperty::ScriptGroupProperty(){
     type = GO_PROPERTY_TYPE_SCRIPTGROUP;
 
     scr_num = 0;
-    this->scripts_attached.resize(this->scr_num);
+    this->scripts_attached.resize(static_cast<unsigned int>(this->scr_num));
 }

@@ -556,7 +556,7 @@ void World::saveToFile(QString file){
                 int children_num = object_ptr->getAliveChildrenAmount();
                 //world_stream << "\nG_CHI " << object_ptr->getAliveChildrenAmount() << " "; //Start children header
                 world_stream << "\nG_CHI ";
-                world_stream.write(reinterpret_cast<char*>(&children_num), sizeof(int));
+                world_stream.write(reinterpret_cast<char*>(&children_num), sizeof(GO_RENDER_TYPE));
 
                 unsigned int children_am = static_cast<unsigned int>(object_ptr->children.size());
                 for(unsigned int chi_i = 0; chi_i < children_am; chi_i ++){ //iterate over all children
@@ -681,7 +681,7 @@ void World::openFromFile(QString file, QTreeWidget* w_ptr){
             world_stream >> object.str_id;
 
             world_stream.seekg(1, std::ofstream::cur);
-            world_stream.read(reinterpret_cast<char*>(&object.render_type), sizeof(int));
+            world_stream.read(reinterpret_cast<char*>(&object.render_type), sizeof(GO_RENDER_TYPE));
 
             //Then do the same sh*t, iterate until "G_END" came up
             while(true){

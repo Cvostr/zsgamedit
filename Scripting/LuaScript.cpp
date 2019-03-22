@@ -21,7 +21,7 @@ ZSENSDK::ZSENGmObject ObjectScript::getGameObjectSDK(){
 }
 
 void ObjectScript::_DestroyScript(){
-    delete L; //Release this
+
 }
 
 void ObjectScript::_callStart() {
@@ -53,7 +53,7 @@ void ObjectScript::_callDraw() {
         }
         catch (luabridge::LuaException e) {
             std::cout << "SCRIPT" << "Error occured in script (onFrame) " << fpath.toStdString() << e.what() << std::endl;
-      }
+        }
     }
 }
 void ObjectScript::callDrawUI() {
@@ -64,10 +64,7 @@ void ObjectScript::callDrawUI() {
             ui();
         }
         catch (luabridge::LuaException e) {
-
-          //  dlogger::Log(TYPE_SCRIPTERROR, "%s %s %m %i %k %s", "Error occured in script (onDrawUI) ", script_path, obj_pos, e.what());
+            std::cout << "SCRIPT" << "Error occured in script (onDrawUI) " << fpath.toStdString() << e.what() << std::endl;
         }
-
     }
-
 }

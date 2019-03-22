@@ -121,7 +121,7 @@ public:
     bool active;
     World* world_ptr; //pointer to world, when object placed
     GameObjectLink parent; //Link to object's parent
-    int render_type; //Render mode of this object
+    GO_RENDER_TYPE render_type; //Render mode of this object
 
     unsigned int props_num; //Count of created props
     QTreeWidgetItem* item_ptr;
