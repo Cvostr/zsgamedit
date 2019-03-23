@@ -6,6 +6,7 @@
 #include <string>
 #include <fstream>
 
+#include <QFile>
 #include <QFileDialog>
 #include <QPushButton>
 #include <QAction>
@@ -51,6 +52,10 @@ void MainWin::addProjectToVector(ProjectConf conf){
           conf.projLabel.insert(0, conf.projFilePath[len - step]);
           step += 1;
     }
+    //Calculate root project path
+    conf.projectRootPath = conf.projFilePath;
+    conf.projectRootPath.resize(conf.projectRootPath.size() - step);
+    //push to vector
     this->projects.push_back(conf);
     saveProjectsConfiguration();
 }
@@ -75,13 +80,17 @@ void MainWin::loadProjectsConfigurations(){
 
         if(prefix.compare("project") == 0){ //If reched to proj_num
             ProjectConf conf;
-            char path[128];
-            proj_inf_file >> path;
-            FILE* projFileD = fopen(path, "r"); //Trying to open project root directory
-            if(projFileD){ //If we reached project root path
-                fclose(projFileD);
-                conf.projFilePath = QString(path); //Read path to project configuration file and store it
-                addProjectToVector(conf);
+            std::string project_inf_path;
+            proj_inf_file >> project_inf_path; //read path to path
+            QString str = QString::fromStdString(project_inf_path);
+
+            //std::ifstream conf_stream;
+            //open projs.inf file
+            //conf_stream.open(project_inf_path, std::ofstream::out);
+            if(QFile::exists(str)){ //If we reached project root path
+
+                conf.projFilePath = str; //Read path to project configuration file and store it
+                addProjectToVector(conf); //Add project vector
 
                 updateListWidgetContent();
             }
@@ -92,26 +101,27 @@ void MainWin::loadProjectsConfigurations(){
 
 
 void MainWin::setupProjectsConfFile(){
-     FILE* proj_inf_file = fopen("projs.inf", "w");
-
-     fprintf(proj_inf_file, "proj_num 0"); //Write proj amount
-
-     fclose(proj_inf_file);
+    //Write basic information
+    std::ofstream conf_stream;
+    //open projs.inf file
+    conf_stream.open("projs.inf", std::ofstream::out);
+    conf_stream << "proj_num 0";
+    conf_stream.close();
 }
 
 void MainWin::saveProjectsConfiguration(){
-    FILE* proj_inf_file = fopen("projs.inf", "w"); //Open projects lst file stream
-
-    fprintf(proj_inf_file, "proj_num %d\n", static_cast<int>(this->projects.size())); //Write proj amount
-
+    std::ofstream conf_stream;
+    //open projs.inf file
+    conf_stream.open("projs.inf", std::ofstream::out);
+    //Write projects amount
+    conf_stream << "proj_num " << static_cast<int>(this->projects.size()) << "\n";
+    //Iterate over all projects and write them
     for(unsigned int i = 0; i < this->projects.size(); i ++){ //Iterate over all projects in vector
-        char path_tw[128];
         std::string pth_str_stl = this->projects[i].projFilePath.toStdString();
-        strcpy(path_tw, pth_str_stl.c_str());
-        fprintf(proj_inf_file, "project %s\n", path_tw); //Write project path
+        conf_stream << "project " << pth_str_stl << "\n";
     }
 
-    fclose(proj_inf_file);
+    conf_stream.close();
 }
 
 void MainWin::onAddProjButtonClicked(){

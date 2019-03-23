@@ -6,15 +6,17 @@
 #include <vector>
 #include <QString>
 
-#define MATSHPROP_TYPE_NONE 0
-#define MATSHPROP_TYPE_TEXTURE 1
-#define MATSHPROP_TYPE_INTEGER 2
-#define MATSHPROP_TYPE_FLOAT 3
-#define MATSHPROP_TYPE_FVEC3 4
+enum MATSHPROP_TYPE{
+    MATSHPROP_TYPE_NONE,
+    MATSHPROP_TYPE_TEXTURE,
+    MATSHPROP_TYPE_INTEGER,
+    MATSHPROP_TYPE_FLOAT,
+    MATSHPROP_TYPE_FVEC3
+};
 
 class MaterialShaderProperty{
 public:
-    int type; //type of property
+    MATSHPROP_TYPE type; //type of property
     QString prop_caption;
     QString prop_identifier; //String identifier, that will appear in material file
 
@@ -23,14 +25,16 @@ public:
 
 class MaterialShaderPropertyConf{
 public:
-    int type;
+    MATSHPROP_TYPE type;
 
     MaterialShaderPropertyConf();
 };
 
 class MtShaderPropertiesGroup{
 public:
-    QString str_path;
+    std::string str_path;
+    QString groupCaption;
+
     ZSPIRE::Shader* render_shader; //Pointer to shader, that binds on object render
     std::vector<MaterialShaderProperty*> properties;
 
@@ -42,6 +46,7 @@ public:
 class Material{
 private:
     std::string file_path; //path to material file
+    std::string group_str;
 public:
     MtShaderPropertiesGroup* group_ptr;
     std::vector<MaterialShaderPropertyConf*> confs;
@@ -61,6 +66,10 @@ namespace MtShProps {
 
     MtShaderPropertiesGroup* genDefaultMtShGroup(ZSPIRE::Shader* shader3d);
     MtShaderPropertiesGroup* getDefaultMtShGroup();
+
+    void addMtShaderPropertyGroup(MtShaderPropertiesGroup* group);
+    MtShaderPropertiesGroup* getMtShaderPropertyGroup(std::string group_name);
+    void clearMtShaderGroups();
 }
 
 class TextureMaterialShaderProperty : public MaterialShaderProperty{

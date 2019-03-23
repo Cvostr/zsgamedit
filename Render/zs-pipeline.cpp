@@ -57,7 +57,7 @@ unsigned int RenderPipeline::render_getpickedObj(void* projectedit_ptr, int mous
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     pick_shader.Use();
     pick_shader.setCamera(cam_ptr);
-
+    //Picking state
     this->current_state = PIPELINE_STATE_PICKING;
 
     if(depthTest == true) //if depth is enabled
@@ -105,6 +105,7 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr)
 
     this->cam = cam_ptr;
     this->win_ptr = editwin_ptr;
+    //Active Geometry framebuffer
     gbuffer.bindFramebuffer();
     glClearColor(0,0,0,1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -150,18 +151,18 @@ void GameObject::Draw(RenderPipeline* pipeline){
     TransformProperty* transform_prop = static_cast<TransformProperty*>(this->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
     //Call update on every property in objects
     if(editwin_ptr->isSceneRun && pipeline->current_state == PIPELINE_STATE_DEFAULT)
-        this->onUpdate(pipeline->deltaTime);
+        this->onUpdate(static_cast<int>(pipeline->deltaTime));
 
     ZSPIRE::Shader* shader = pipeline->processShaderOnObject(static_cast<void*>(this)); //Will be used next time
     //Obtain camera viewport
     ZSVIEWPORT cam_viewport = pipeline->cam->getViewport();
     //Distance limit
-    int max_dist = cam_viewport.endX - cam_viewport.startX;
+    int max_dist = static_cast<int>(cam_viewport.endX - cam_viewport.startX);
     bool difts = isDistanceFits(pipeline->cam->getCameraViewCenterPos(), transform_prop->_last_translation, max_dist);
     if(shader != nullptr && transform_prop != nullptr && difts){
-
+        //send transform matrix to shader
         shader->setTransform(transform_prop->transform_mat);
-
+        //Get mesh pointer
         MeshProperty* mesh_prop = static_cast<MeshProperty*>(this->getPropertyPtrByType(GO_PROPERTY_TYPE_MESH));
         if(mesh_prop != nullptr){
             if(mesh_prop->mesh_ptr != nullptr){

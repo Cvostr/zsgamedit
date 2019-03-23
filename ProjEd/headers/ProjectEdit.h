@@ -9,24 +9,25 @@
 #include <QListWidget>
 #include <QMenu>
 #include <SDL2/SDL.h>
+#include <fstream>
 
 #include "EdActions.h"
 #include "../../Render/headers/zs-pipeline.h"
 #include "../../World/headers/zs-camera.h"
-
 #include "../../Misc/headers/oal_manager.h"
 
 struct Resource;
 struct Project;
 
 #include "../../World/headers/World.h"
-
 #include "../../Misc/headers/ProjBuilder.h"
 
-#define GO_TRANSFORM_MODE_NONE 0
-#define GO_TRANSFORM_MODE_TRANSLATE 1
-#define GO_TRANSFORM_MODE_SCALE 2
-#define GO_TRANSFORM_MODE_ROTATE 3
+enum GO_TRANSFORM_MODE{
+    GO_TRANSFORM_MODE_NONE,
+    GO_TRANSFORM_MODE_TRANSLATE,
+    GO_TRANSFORM_MODE_SCALE,
+    GO_TRANSFORM_MODE_ROTATE
+};
 
 #define EW_CLOSE_REASON_UNCLOSED 0
 #define EW_CLOSE_REASON_PROJLIST 1
@@ -77,9 +78,9 @@ struct ObjectTransformState{
     bool isTransforming;
     GameObject* obj_ptr;
     TransformProperty* tprop_ptr; //Pointer to transform property of obj_ptr
-    int transformMode;
+    GO_TRANSFORM_MODE transformMode;
 
-    void setTransformOnObject(GameObject* obj_ptr, int transformMode);
+    void setTransformOnObject(GameObject* obj_ptr, GO_TRANSFORM_MODE transformMode);
 
     ObjectTransformState(){ //Default construct
         isTransforming = false;
@@ -136,7 +137,10 @@ public slots:
     void onSceneSave();
     void onSceneSaveAs();
     void onOpenScene();
+
     void onNewScene();
+    void onNewScript();
+    void onNewMaterial();
 
     void onCloseProject();
     void onBuildProject();
@@ -172,7 +176,7 @@ public:
 
     World world;
     ZSPIRE::Camera edit_camera; //Camera to show editing scene
-    Project project;
+    Project project; //info about current project
     EditorInputState input_state;
     ObjectTransformState obj_trstate; //Describes object transform
     PropertyPaintState ppaint_state; //Describes property painting feature state
@@ -186,6 +190,7 @@ public:
     void lookForResources(QString path); //Recursively walk through game directory and load founded resources
     void loadResource(Resource* resource);
 
+    void createNewTextFile(QString directory, QString name, QString ext, std::string content);
     void openFile(QString file_path); //Useful to open a file
     void assignIconFile(QListWidgetItem* item);
 

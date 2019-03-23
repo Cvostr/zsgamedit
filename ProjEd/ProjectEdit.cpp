@@ -1,4 +1,4 @@
-#include "headers/ProjectEdit.h"
+﻿#include "headers/ProjectEdit.h"
 #include "headers/InspectorWin.h"
 #include "../World/headers/obj_properties.h"
 #include "../World/headers/2dtileproperties.h"
@@ -34,6 +34,8 @@ EditWindow::EditWindow(QWidget *parent) :
     QObject::connect(ui->actionOpen, SIGNAL(triggered()), this, SLOT(onOpenScene()));
 
     QObject::connect(ui->actionCreateScene, SIGNAL(triggered()), this, SLOT(onNewScene()));
+    QObject::connect(ui->actionCreateMaterial, SIGNAL(triggered()), this, SLOT(onNewMaterial()));
+    QObject::connect(ui->actionCreateScript, SIGNAL(triggered()), this, SLOT(onNewScript()));
 
     QObject::connect(ui->actionClose_project, SIGNAL(triggered()), this, SLOT(onCloseProject()));
     QObject::connect(ui->actionBuild, SIGNAL(triggered(bool)), this, SLOT(onBuildProject()));
@@ -210,7 +212,21 @@ void EditWindow::openFile(QString file_path){
     }else{
         QDesktopServices::openUrl(QUrl::fromLocalFile("file://" + file_path));
     }
+}
 
+void EditWindow::createNewTextFile(QString directory, QString name, QString ext, std::string content){
+    int addition_number = 0;
+    QString newfile_name = directory + "/" + name + "_" + QString::number(addition_number) + ext;
+    //Iterate until we find free name
+    while(QFile::exists(newfile_name)){
+        addition_number += 1;
+        newfile_name = directory + "/" + name + "_" + QString::number(addition_number) + ext;
+    }
+    //create new file and write content to it.
+    std::ofstream newfile_stream;
+    newfile_stream.open(newfile_name.toStdString(), std::ofstream::out);
+    newfile_stream << content;
+    newfile_stream.close();
 }
 
 void EditWindow::onSceneSaveAs(){
@@ -245,6 +261,16 @@ void EditWindow::onNewScene(){
     world.clear();
     obj_trstate.isTransforming = false;
     hasSceneFile = false; //We have new scene
+}
+
+void EditWindow::onNewScript(){
+    std::string scriptContent = "onStart = function(g_object, world)\n return 0\nend\n\n";
+            scriptContent +=  "onFrame = function()\n return 0\nend";
+    this->createNewTextFile(current_dir, "Script", ".lua",scriptContent);
+}
+void EditWindow::onNewMaterial(){
+    std::string matContent = "ZSP_MATERIAL\nGROUP @default\n";
+    this->createNewTextFile(current_dir, "Material", ".zsmat", matContent);
 }
 
 GameObject* EditWindow::onAddNewGameObject(){
@@ -401,7 +427,7 @@ void EditWindow::updateFileList(){
 //Signal
 void EditWindow::onFileListItemClicked(){
     QListWidgetItem* selected_file_item = ui->fileList->currentItem();
-
+    //if user pressed back button
     if(selected_file_item->text().compare("(back)") == 0){
         QDir cur_folder = QDir(this->current_dir);
         cur_folder.cdUp();
@@ -458,11 +484,15 @@ void EditWindow::onObjectCtxMenuShow(QPoint point){
 
 void EditWindow::onFileCtxMenuShow(QPoint point){
     QListWidgetItem* selected_item = ui->fileList->currentItem(); //get selected item
-    QString file_name = selected_item->text();
+    if(selected_item != nullptr){ //if selected file
+        QString file_name = selected_item->text();
 
-    this->file_ctx_menu->file_path = current_dir + "/" + file_name; //set file path
-    this->file_ctx_menu->file_name = file_name;
-    this->file_ctx_menu->show(point);
+        this->file_ctx_menu->file_path = current_dir + "/" + file_name; //set file path
+        this->file_ctx_menu->file_name = file_name;
+        this->file_ctx_menu->show(point);
+    }else{ //we selected empty space
+
+    }
 }
 
 void EditWindow::onCameraToObjTeleport(){
@@ -917,7 +947,7 @@ EdActions* getActionManager(){
     return _ed_actions_container;
 }
 
-void ObjectTransformState::setTransformOnObject(GameObject* obj_ptr, int transformMode){
+void ObjectTransformState::setTransformOnObject(GameObject* obj_ptr, GO_TRANSFORM_MODE transformMode){
     this->obj_ptr = obj_ptr; //Set pointer to object
     //Calculate pointer to transform property
     this->tprop_ptr = static_cast<TransformProperty*>(obj_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));

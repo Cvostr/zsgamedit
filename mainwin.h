@@ -13,8 +13,10 @@
 #endif
 
 typedef struct ProjectConf{
-    QString projLabel;
-    QString projFilePath;
+    QString projLabel; //Label of project
+    QString projFilePath; //Path to .inf file of project
+
+    QString projectRootPath; //Root path of object
 }ProjectConf;
 
 namespace Ui {

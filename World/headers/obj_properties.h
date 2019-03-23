@@ -66,9 +66,11 @@ class MaterialProperty : public GameObjectProperty{
 private:
     InspectorWin* insp_win;
 public:
+    //Pointer to picked material group
     MtShaderPropertiesGroup* group_ptr;
     //Pointer to picked material
     Material* material_ptr;
+    //Path to material fil
     QString material_path;
 
     void addPropertyInterfaceToInspector(InspectorWin* inspector);

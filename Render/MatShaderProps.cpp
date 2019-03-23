@@ -4,6 +4,8 @@
 static MtShaderPropertiesGroup default_group;
 static bool default_group_created = false;
 
+static std::vector<MtShaderPropertiesGroup*> MatGroups;
+
 MaterialShaderProperty::MaterialShaderProperty(){
     type = MATSHPROP_TYPE_NONE;
 }
@@ -60,11 +62,11 @@ MtShaderPropertiesGroup::MtShaderPropertiesGroup(){
     properties.resize(0);
 }
 
-
 MtShaderPropertiesGroup* MtShProps::genDefaultMtShGroup(ZSPIRE::Shader* shader3d){
     if(default_group_created) return &default_group;
 
     default_group.str_path = "@default";
+    default_group.groupCaption = "Default 3D";
     default_group.render_shader = shader3d;
 
     TextureMaterialShaderProperty* diff_texture_prop =
@@ -96,10 +98,29 @@ MtShaderPropertiesGroup* MtShProps::genDefaultMtShGroup(ZSPIRE::Shader* shader3d
 
     default_group_created = true;
 
+    MtShProps::addMtShaderPropertyGroup(&default_group);
+
     return &default_group;
 }
 MtShaderPropertiesGroup* MtShProps::getDefaultMtShGroup(){
     return &default_group;
+}
+
+void MtShProps::addMtShaderPropertyGroup(MtShaderPropertiesGroup* group){
+    //Check if this property already added
+    if(getMtShaderPropertyGroup(group->str_path) == nullptr)
+        MatGroups.push_back(group);
+}
+MtShaderPropertiesGroup* MtShProps::getMtShaderPropertyGroup(std::string group_name){
+    for(unsigned int group_i = 0; group_i < MatGroups.size(); group_i ++){
+        MtShaderPropertiesGroup* group_ptr = MatGroups[group_i];
+        if(group_ptr->str_path.compare(group_name) == false)
+            return group_ptr;
+    }
+    return nullptr;
+}
+void MtShProps::clearMtShaderGroups(){
+
 }
 
 MaterialShaderProperty* MtShProps::allocateProperty(int type){
@@ -144,7 +165,10 @@ MaterialShaderPropertyConf* MtShProps::allocatePropertyConf(int type){
 void Material::saveToFile(){
     std::ofstream mat_stream;
     mat_stream.open(file_path, std::ofstream::out);
-
+    //Write material header
+    mat_stream << "ZSP_MATERIAL\n";
+    //Write group string
+    mat_stream << "GROUP " << this->group_str << "\n";
     for(unsigned int prop_i = 0; prop_i < group_ptr->properties.size(); prop_i ++){
         //Obtain pointers to prop and prop's configuration
         MaterialShaderProperty* prop_ptr = group_ptr->properties[prop_i];
@@ -170,6 +194,7 @@ void Material::saveToFile(){
         }
     mat_stream << "\n"; //Write divider
     }
+    mat_stream.close();
 }
 
 void Material::loadFromFile(std::string fpath){
@@ -179,9 +204,21 @@ void Material::loadFromFile(std::string fpath){
     //Open stream
     mat_stream.open(fpath, std::ifstream::in);
 
+    std::string test_header;
+    mat_stream >> test_header; //Read header
+    if(test_header.compare("ZSP_MATERIAL") != 0) //If it isn't zspire scene
+        return; //Go out, we have nothing to do
+
     while(!mat_stream.eof()){ //While file not finished reading
         std::string prefix;
         mat_stream >> prefix; //Read prefix
+
+        if(prefix.compare("GROUP") == 0){ //if it is game object
+            mat_stream >> this->group_str; //Read identifier
+
+            this->group_ptr = MtShProps::getMtShaderPropertyGroup(group_str);
+        }
+
         if(prefix.compare("ENTRY") == 0){ //if it is game object
             std::string prop_identifier;
             mat_stream >> prop_identifier; //Read identifier
@@ -218,6 +255,7 @@ void Material::loadFromFile(std::string fpath){
             }
         }
     }
+    mat_stream.close();
 }
 void Material::setPropertyGroup(MtShaderPropertiesGroup* group_ptr){
     this->clear(); //clear all confs, first
@@ -233,6 +271,7 @@ void Material::setPropertyGroup(MtShaderPropertiesGroup* group_ptr){
 
 Material::Material(){
     setPropertyGroup(MtShProps::getDefaultMtShGroup());
+    group_str = "@default";
 }
 
 void Material::clear(){

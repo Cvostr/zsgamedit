@@ -108,6 +108,8 @@
      <string>&amp;Create</string>
     </property>
     <addaction name="actionCreateScene"/>
+    <addaction name="actionCreateMaterial"/>
+    <addaction name="actionCreateScript"/>
    </widget>
    <widget class="QMenu" name="menuObjects">
     <property name="title">
@@ -194,6 +196,16 @@
   <action name="actionNew_Tile">
    <property name="text">
     <string>New Tile</string>
+   </property>
+  </action>
+  <action name="actionCreateMaterial">
+   <property name="text">
+    <string>Material</string>
+   </property>
+  </action>
+  <action name="actionCreateScript">
+   <property name="text">
+    <string>Script</string>
    </property>
   </action>
  </widget>

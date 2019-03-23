@@ -274,13 +274,12 @@ void TransformProperty::getAbsoluteParentTransform(ZSVECTOR3& t, ZSVECTOR3& s, Z
 
 void TransformProperty::copyTo(GameObjectProperty* dest){
     if(dest->type != this->type) return; //if it isn't transform
-
+    //cast pointer and send data
     TransformProperty* _dest = static_cast<TransformProperty*>(dest);
     _dest->translation = translation;
     _dest->scale = scale;
     _dest->rotation = rotation;
     _dest->transform_mat = transform_mat;
-    _dest->transform_mat = this->transform_mat;
 }
 
 
@@ -701,7 +700,7 @@ void GameObject::saveProperties(std::ofstream* stream){
         }
         case GO_PROPERTY_TYPE_MATERIAL:{
             MaterialProperty* ptr = static_cast<MaterialProperty*>(property_ptr);
-            //int material_props_size = ptr->group_ptr->properties.size(); //Properties amount
+            //Write path to material string
             if(ptr->material_ptr != nullptr)
                 *stream << ptr->material_path.toStdString(); //Write material relpath
             else
@@ -930,8 +929,9 @@ void GameObject::loadProperty(std::ifstream* world_stream){
         MaterialProperty* ptr = static_cast<MaterialProperty*>(prop_ptr);
 
         std::string path;
-
+        //reading path
         *world_stream >> path;
+        //Assigning path
         ptr->material_path = QString::fromStdString(path);
         if(path.compare("@none"))
             ptr->onValueChanged();

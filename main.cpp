@@ -5,9 +5,9 @@
 
 #include "Scripting/headers/zsensdk.h"
 
-uint64_t NOW = SDL_GetPerformanceCounter();
-uint64_t last = 0;
-float deltaTime = 0;
+static uint64_t NOW = SDL_GetPerformanceCounter();
+static uint64_t last = 0;
+static float deltaTime = 0;
 
 int main(int argc, char *argv[])
 {
