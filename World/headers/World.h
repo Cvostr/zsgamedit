@@ -2,6 +2,7 @@
 #define WORLD_H
 
 #include <vector>
+#include <list>
 #include <QString>
 #include <QTreeWidget>
 #include <fstream>
@@ -17,6 +18,8 @@
 
 #define OBJ_PROPS_SIZE 11
 #define MAX_OBJS 12000
+
+enum COLLIDER_TYPE {COLLIDER_TYPE_NONE, COLLIDER_TYPE_BOX, COLLIDER_TYPE_CUBE};
 
 class GameObject;
 class World;
@@ -87,9 +90,25 @@ public:
     void onPreRender(RenderPipeline* pipeline);
     void getAbsoluteRotationMatrix(ZSMATRIX4x4& m);
 
+    void setTranslation(ZSVECTOR3 new_translation);
+
     TransformProperty();
 };
 
+class ColliderProperty : public GameObjectProperty{
+public:
+    void onAddToObject(); //will register in world
+    void onObjectDeleted(); //unregister in world
+    void addPropertyInterfaceToInspector(InspectorWin* inspector);
+    void copyTo(GameObjectProperty* dest);
+
+    TransformProperty* getTransformProperty();
+
+    bool isTrigger;
+    COLLIDER_TYPE coll_type;
+
+    ColliderProperty();
+};
 
 class GameObject{
 public:
@@ -102,7 +121,7 @@ public:
     bool active;
     World* world_ptr; //pointer to world, when object placed
     GameObjectLink parent; //Link to object's parent
-    int render_type; //Render mode of this object
+    GO_RENDER_TYPE render_type; //Render mode of this object
 
     unsigned int props_num; //Count of created props
     QTreeWidgetItem* item_ptr;
@@ -133,6 +152,7 @@ public:
     void Draw(RenderPipeline* pipeline); //On render pipeline wish to draw the object
     void onUpdate(int deltaTime); //calls onUpdate on all properties
     void onPreRender(RenderPipeline* pipeline); //calls onPreRender on all properties
+    void onTrigger(GameObject* obj);
 
     void putToSnapshot(GameObjectSnapshot* snapshot);
     void recoverFromSnapshot(GameObjectSnapshot* snapshot);
@@ -174,6 +194,7 @@ public:
     ZSPIRE::Camera world_camera;
 
     std::vector<GameObject> objects; //Vector, containing all gameobjects
+    std::list<ColliderProperty*> colliders; //Vector, containing all collider properties;
 
     GameObject* addObject(GameObject obj);
     GameObject* newObject(); //Add new object to world
@@ -199,6 +220,10 @@ public:
     void recoverFromSnapshot(WorldSnapshot* snapshot);
 
     void getAvailableNumObjLabel(QString label, int* result);
+
+    void pushCollider(ColliderProperty* property);
+    void removeCollider(ColliderProperty* property);
+    bool isCollide(TransformProperty* prop);
 
     World();
 

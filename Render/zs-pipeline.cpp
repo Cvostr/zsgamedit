@@ -38,11 +38,13 @@ RenderPipeline::~RenderPipeline(){
 
 bool RenderPipeline::InitGLEW(){
     glewExperimental = GL_TRUE;
+    std::cout << "Calling GLEW creation" << std::endl;
         if (glewInit() != GLEW_OK)
         {
             std::cout << "OPENGL GLEW: Creation failed ";
             return false;
         }
+
         return true;
 }
 
@@ -55,7 +57,7 @@ unsigned int RenderPipeline::render_getpickedObj(void* projectedit_ptr, int mous
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     pick_shader.Use();
     pick_shader.setCamera(cam_ptr);
-
+    //Picking state
     this->current_state = PIPELINE_STATE_PICKING;
 
     if(depthTest == true) //if depth is enabled
@@ -103,6 +105,7 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr)
 
     this->cam = cam_ptr;
     this->win_ptr = editwin_ptr;
+    //Active Geometry framebuffer
     gbuffer.bindFramebuffer();
     glClearColor(0,0,0,1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -118,23 +121,23 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr)
     //Iterate over all objects in the world
     for(unsigned int obj_i = 0; obj_i < world_ptr->objects.size(); obj_i ++){
         GameObject* obj_ptr = &world_ptr->objects[obj_i];
-        if(!obj_ptr->hasParent)
-            obj_ptr->Draw(this);
+        if(!obj_ptr->hasParent) //if it is a root object
+            obj_ptr->Draw(this); //Draw object
     }
 
     if(depthTest == true) //if depth is enabled
         glDisable(GL_DEPTH_TEST);
 
-    if(cullFaces == true)
+    if(cullFaces == true) //if GL face cull is enabled
         glDisable(GL_CULL_FACE);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0); //Back to default framebuffer
     glClear(GL_COLOR_BUFFER_BIT); //Clear screen
     gbuffer.bindTextures(); //Bind gBuffer textures
-    deffered_light.Use();
+    deffered_light.Use(); //use deffered shader
     ZSPIRE::getPlaneMesh2D()->Draw(); //Draw screen
 
-    SDL_GL_SwapWindow(w);
+    SDL_GL_SwapWindow(w); //Send rendered frame
 }
 
 void GameObject::Draw(RenderPipeline* pipeline){
@@ -148,25 +151,25 @@ void GameObject::Draw(RenderPipeline* pipeline){
     TransformProperty* transform_prop = static_cast<TransformProperty*>(this->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
     //Call update on every property in objects
     if(editwin_ptr->isSceneRun && pipeline->current_state == PIPELINE_STATE_DEFAULT)
-        this->onUpdate(pipeline->deltaTime);
+        this->onUpdate(static_cast<int>(pipeline->deltaTime));
 
     ZSPIRE::Shader* shader = pipeline->processShaderOnObject(static_cast<void*>(this)); //Will be used next time
     //Obtain camera viewport
     ZSVIEWPORT cam_viewport = pipeline->cam->getViewport();
     //Distance limit
-    int max_dist = cam_viewport.endX - cam_viewport.startX;
+    int max_dist = static_cast<int>(cam_viewport.endX - cam_viewport.startX);
     bool difts = isDistanceFits(pipeline->cam->getCameraViewCenterPos(), transform_prop->_last_translation, max_dist);
     if(shader != nullptr && transform_prop != nullptr && difts){
-
+        //send transform matrix to shader
         shader->setTransform(transform_prop->transform_mat);
-
+        //Get mesh pointer
         MeshProperty* mesh_prop = static_cast<MeshProperty*>(this->getPropertyPtrByType(GO_PROPERTY_TYPE_MESH));
         if(mesh_prop != nullptr){
             if(mesh_prop->mesh_ptr != nullptr){
                 mesh_prop->mesh_ptr->Draw();
                 //if object is picked
                 if(this->isPicked == true && pipeline->current_state != PIPELINE_STATE_PICKING){
-                    int cur_state = pipeline->current_state; //Storing current state
+                    PIPELINE_STATE cur_state = pipeline->current_state; //Storing current state
                     pipeline->current_state = PIPELINE_STATE_MARKED;
                     ZSPIRE::Shader* mark_s = pipeline->processShaderOnObject(static_cast<void*>(this));
                     mark_s->setTransform(transform_prop->transform_mat);
@@ -174,7 +177,7 @@ void GameObject::Draw(RenderPipeline* pipeline){
                     if(w->obj_trstate.isTransforming == true)
                          mark_s->setGLuniformInt("isTransformMark", 1);
                     mesh_prop->mesh_ptr->DrawLines();
-                    pipeline->current_state = cur_state;
+                    pipeline->current_state = cur_state; //assign last value
                     mark_s->setGLuniformInt("isTransformMark", 0);
                 }
             }
@@ -327,7 +330,7 @@ void RenderPipeline::addLight(void* light_ptr){
     this->lights_ptr.push_back(light_ptr); //pushing pointer
     this->deffered_light.Use(); //correctly put uniforms
     this->deffered_light.sendLight(_light_ptr->id, light_ptr);
-    this->deffered_light.setGLuniformInt("lights_amount", lights_ptr.size());
+    this->deffered_light.setGLuniformInt("lights_amount", static_cast<int>(lights_ptr.size()));
 }
 
 void RenderPipeline::removeLights(){

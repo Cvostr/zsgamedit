@@ -2,6 +2,10 @@
 #include <stdlib.h>
 #endif
 
+#ifdef _WIN32
+#include <cstring>
+#endif
+
 #ifndef zs_texture
 #define zs_texture
 

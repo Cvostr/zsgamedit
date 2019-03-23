@@ -23,10 +23,10 @@ void ZSPIRE::Camera::setViewport(ZSVIEWPORT viewport){
 
 void ZSPIRE::Camera::updateProjectionMat(){
     if(proj_type == ZSCAMERA_PROJECTION_PERSPECTIVE){
-        float aspect = static_cast<float>((viewport.endX - viewport.startX)) / (float)(viewport.endY - viewport.startY);
+        float aspect = static_cast<float>((viewport.endX - viewport.startX)) / static_cast<float>(viewport.endY - viewport.startY);
         proj = getPerspective(FOV, aspect, nearZ, farZ);
     }else{
-		proj = getOrthogonal(0, (float)(viewport.endX - viewport.startX), 0, (float)(viewport.endY - viewport.startY), nearZ, farZ);
+        proj = getOrthogonal(0, static_cast<float>(viewport.endX - viewport.startX), 0, static_cast<float>(viewport.endY - viewport.startY), nearZ, farZ);
     }
 }
 

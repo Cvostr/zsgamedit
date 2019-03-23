@@ -3,9 +3,10 @@
 #include "headers/Misc.h"
 #include <QLineEdit>
 #include <cstdlib>
+#include "headers/obj_properties.h"
 
-#define GO_PROPERTY_TYPE_TRANSFORM 1
-#define GO_PROPERTY_TYPE_LABEL 2
+//#define GO_PROPERTY_TYPE_TRANSFORM 1
+//#define GO_PROPERTY_TYPE_LABEL 2
 
 GameObjectLink::GameObjectLink(){
     ptr = nullptr;
@@ -219,6 +220,12 @@ void GameObject::onUpdate(int deltaTime){
     }
 }
 
+void GameObject::onTrigger(GameObject* obj){
+    for(unsigned int i = 0; i < props_num; i ++){ //iterate over all properties
+        //properties[i]->onUpdate(deltaTime); //and call onUpdate on each property
+    }
+}
+
 void GameObject::onPreRender(RenderPipeline* pipeline){
     for(unsigned int i = 0; i < props_num; i ++){ //iterate over all properties
         properties[i]->onPreRender(pipeline); //and call onUpdate on each property
@@ -328,12 +335,12 @@ int World::getFreeObjectSpaceIndex(){
     unsigned int objects_num = static_cast<unsigned int>(this->objects.size());
     for(unsigned int objs_i = 0; objs_i < objects_num; objs_i ++){
         if(objects[objs_i].alive == false){
-            index_to_push = objs_i;
+            index_to_push = static_cast<int>(objs_i);
         }
     }
 
     if(index_to_push == -1){ //if all indeces are busy
-        return objects.size();
+        return static_cast<int>(objects.size());
     }else{ //if vector has an empty space
         return index_to_push;
     }
@@ -399,7 +406,7 @@ GameObject* World::dublicateObject(GameObject* original, bool parent){
     new_obj->label = &label_prop->label;
     new_obj->item_ptr->setText(0, label_prop->label);
     //Dublicate chilldren object
-    unsigned int children_amount = original->children.size();
+    unsigned int children_amount = static_cast<unsigned int>(original->children.size());
     for(unsigned int child_i = 0; child_i < children_amount; child_i ++){
         GameObjectLink link = original->children[child_i];
         GameObject* new_child = dublicateObject(link.ptr, false);
@@ -549,7 +556,7 @@ void World::saveToFile(QString file){
                 int children_num = object_ptr->getAliveChildrenAmount();
                 //world_stream << "\nG_CHI " << object_ptr->getAliveChildrenAmount() << " "; //Start children header
                 world_stream << "\nG_CHI ";
-                world_stream.write(reinterpret_cast<char*>(&children_num), sizeof(int));
+                world_stream.write(reinterpret_cast<char*>(&children_num), sizeof(GO_RENDER_TYPE));
 
                 unsigned int children_am = static_cast<unsigned int>(object_ptr->children.size());
                 for(unsigned int chi_i = 0; chi_i < children_am; chi_i ++){ //iterate over all children
@@ -596,6 +603,56 @@ void GameObject::copyTo(GameObject* dest){
     dest->render_type = this->render_type;
 }
 
+void World::pushCollider(ColliderProperty* property){
+    this->colliders.push_back(property);
+}
+
+void World::removeCollider(ColliderProperty* property){
+    this->colliders.remove(property);
+}
+
+bool World::isCollide(TransformProperty* prop){
+
+    ZSVECTOR3 object_pos = prop->_last_translation; //last translation is absolute
+    ZSVECTOR3 object_size = prop->_last_scale;
+
+    std::list <ColliderProperty*> :: iterator it;
+    for(it = colliders.begin(); it != colliders.end(); it ++){
+        ColliderProperty* coll_prop_ptr = static_cast<ColliderProperty*>((*it));
+        //Obtain pointer to Collider's transform property
+        TransformProperty* coll_transform_ptr = coll_prop_ptr->getTransformProperty();
+        //Get Collider's position and scale
+        ZSVECTOR3 collider_pos = coll_transform_ptr->_last_translation;
+        ZSVECTOR3 collider_size = coll_transform_ptr->_last_scale;
+
+        //Perform AABB with X and Y
+        bool CollideX = fabs(object_pos.X - collider_pos.X) < fabs(object_size.X + collider_size.X);
+        bool CollideY = fabs(object_pos.Y - collider_pos.Y) < fabs(object_size.Y + collider_size.Y);
+
+        if(!coll_prop_ptr->isTrigger){ //Non triggerble
+            //Checking for type
+            if(coll_prop_ptr->coll_type == COLLIDER_TYPE_BOX){
+                if(CollideX && CollideY) return true;
+            }
+            else if(coll_prop_ptr->coll_type == COLLIDER_TYPE_CUBE){
+                bool CollideZ = fabs(object_pos.Z - collider_pos.Z) < fabs(object_size.Z + collider_size.Z);
+                if(CollideX && CollideY && CollideZ) return true;
+            }
+        }else{ //Triggerable object
+            //Checking for type
+            if(coll_prop_ptr->coll_type == COLLIDER_TYPE_BOX){
+                if(CollideX && CollideY) coll_prop_ptr->go_link.updLinkPtr()->onTrigger(prop->go_link.updLinkPtr());
+            }
+            else if(coll_prop_ptr->coll_type == COLLIDER_TYPE_CUBE){
+                bool CollideZ = fabs(object_pos.Z - collider_pos.Z) < fabs(object_size.Z + collider_size.Z);
+                if(CollideX && CollideY && CollideZ)
+                    coll_prop_ptr->go_link.updLinkPtr()->onTrigger(prop->go_link.updLinkPtr());
+            }
+        }
+    }
+    return false;
+}
+
 void World::openFromFile(QString file, QTreeWidget* w_ptr){
     this->obj_widget_ptr = w_ptr;
 
@@ -624,7 +681,7 @@ void World::openFromFile(QString file, QTreeWidget* w_ptr){
             world_stream >> object.str_id;
 
             world_stream.seekg(1, std::ofstream::cur);
-            world_stream.read(reinterpret_cast<char*>(&object.render_type), sizeof(int));
+            world_stream.read(reinterpret_cast<char*>(&object.render_type), sizeof(GO_RENDER_TYPE));
 
             //Then do the same sh*t, iterate until "G_END" came up
             while(true){
@@ -687,6 +744,7 @@ void World::clear(){
         obj_ptr->clearAll(false);
     }
     objects.clear();
+    colliders.clear();
 }
 
 void World::putToShapshot(WorldSnapshot* snapshot){
@@ -736,14 +794,20 @@ void World::recoverFromSnapshot(WorldSnapshot* snapshot){
         if(prop_ptr->type == GO_PROPERTY_TYPE_LABEL){ //If it is label, we have to do extra stuff
             LabelProperty* label_p = static_cast<LabelProperty*>(new_prop);
             obj_ptr->label = &label_p->label;
-            obj_ptr->item_ptr->setText(0, *obj_ptr->label);
-            label_p->list_item_ptr = obj_ptr->item_ptr;
+            obj_ptr->item_ptr->setText(0, *obj_ptr->label); //set text to qt widget
+            label_p->list_item_ptr = obj_ptr->item_ptr; //send item to LabelProperty
         }
+        if(prop_ptr->type == GO_PROPERTY_TYPE_COLLIDER){ //If it is collider, we need to push it
+            ColliderProperty* collider_p = static_cast<ColliderProperty*>(new_prop);
+            this->pushCollider(collider_p); //push collider
+        }
+
     }
+    //iterate over all objects
     for(unsigned int objs_num = 0; objs_num < snapshot->objects.size(); objs_num ++){
         GameObject* obj_ptr = &objects[objs_num];
-        if(!obj_ptr->hasParent) {
-            obj_widget_ptr->addTopLevelItem(obj_ptr->item_ptr);
+        if(!obj_ptr->hasParent) { //if object is unparented
+            obj_widget_ptr->addTopLevelItem(obj_ptr->item_ptr); //add to top of widget
             continue;
         }
         GameObject* parent_p = obj_ptr->parent.updLinkPtr();

@@ -1,6 +1,13 @@
 #include "../ProjEd/headers/ProjectEdit.h"
 #include "headers/World.h"
+
+#ifdef __linux__
 #include <unistd.h>
+#endif
+
+#ifdef _WIN32
+#include <windows.h> //For Sleep();
+#endif
 
 #include "headers/2dtileproperties.h"
 #include "headers/obj_properties.h"
@@ -120,7 +127,12 @@ void TileGroupProperty::process(){
 
     for(int x_i = 0; x_i < tiles_amount_X; x_i ++){
         for(int y_i = 0; y_i < tiles_amount_Y; y_i ++){
+#ifdef __linux__
             usleep(1100); //Wait some time to make random generator work properly
+#endif
+#ifdef _WIN32
+            Sleep(10);
+#endif
             GameObject* obj = wrld->newObject(); //Invoke new object creation
 
             go_link.updLinkPtr();
@@ -159,12 +171,11 @@ void TileGroupProperty::process(){
 
 void TileGroupProperty::clear(){
     go_link.updLinkPtr();
-
+    //Create snapshot
     getActionManager()->newSnapshotAction(go_link.world_ptr);
-    //getActionManager()->newGameObjectAction(go_link);
 
     GameObject* parent = go_link.ptr;
-    unsigned int children_am = parent->children.size();
+    unsigned int children_am = static_cast<unsigned int>(parent->children.size());
     for(unsigned int ch_i = 0; ch_i < children_am; ch_i ++){
         GameObjectLink link_toremove = parent->children[0];
         world_ptr->removeObj(link_toremove);

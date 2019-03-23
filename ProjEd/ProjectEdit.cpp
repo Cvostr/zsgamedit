@@ -1,6 +1,7 @@
-#include "headers/ProjectEdit.h"
+﻿#include "headers/ProjectEdit.h"
 #include "headers/InspectorWin.h"
 #include "../World/headers/obj_properties.h"
+#include "../World/headers/2dtileproperties.h"
 #include "ui_editor.h"
 #include "stdio.h"
 #include <iostream>
@@ -33,6 +34,8 @@ EditWindow::EditWindow(QWidget *parent) :
     QObject::connect(ui->actionOpen, SIGNAL(triggered()), this, SLOT(onOpenScene()));
 
     QObject::connect(ui->actionCreateScene, SIGNAL(triggered()), this, SLOT(onNewScene()));
+    QObject::connect(ui->actionCreateMaterial, SIGNAL(triggered()), this, SLOT(onNewMaterial()));
+    QObject::connect(ui->actionCreateScript, SIGNAL(triggered()), this, SLOT(onNewScript()));
 
     QObject::connect(ui->actionClose_project, SIGNAL(triggered()), this, SLOT(onCloseProject()));
     QObject::connect(ui->actionBuild, SIGNAL(triggered(bool)), this, SLOT(onBuildProject()));
@@ -105,7 +108,6 @@ void EditWindow::init(){
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0)
     {
         printf("Error: %s\n", SDL_GetError());
-        //return -1;
     }
 
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
@@ -117,9 +119,10 @@ void EditWindow::init(){
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
     SDL_DisplayMode current;
     SDL_GetCurrentDisplayMode(0, &current);
-
+    std::cout << "SDL window creation requested" << std::endl;
     this->window = SDL_CreateWindow("Game View", this->width(), 0, settings.gameViewWin_Width, settings.gameViewWin_Height, SDL_WINDOW_OPENGL); //Create window
     this->glcontext = SDL_GL_CreateContext(window);
+    std::cout << "SDL - GL context creation requested!" << std::endl;
 
     glViewport(0, 0, settings.gameViewWin_Width, settings.gameViewWin_Height);
 
@@ -209,7 +212,21 @@ void EditWindow::openFile(QString file_path){
     }else{
         QDesktopServices::openUrl(QUrl::fromLocalFile("file://" + file_path));
     }
+}
 
+void EditWindow::createNewTextFile(QString directory, QString name, QString ext, std::string content){
+    int addition_number = 0;
+    QString newfile_name = directory + "/" + name + "_" + QString::number(addition_number) + ext;
+    //Iterate until we find free name
+    while(QFile::exists(newfile_name)){
+        addition_number += 1;
+        newfile_name = directory + "/" + name + "_" + QString::number(addition_number) + ext;
+    }
+    //create new file and write content to it.
+    std::ofstream newfile_stream;
+    newfile_stream.open(newfile_name.toStdString(), std::ofstream::out);
+    newfile_stream << content;
+    newfile_stream.close();
 }
 
 void EditWindow::onSceneSaveAs(){
@@ -246,11 +263,21 @@ void EditWindow::onNewScene(){
     hasSceneFile = false; //We have new scene
 }
 
+void EditWindow::onNewScript(){
+    std::string scriptContent = "onStart = function(g_object, world)\n return 0\nend\n\n";
+            scriptContent +=  "onFrame = function()\n return 0\nend";
+    this->createNewTextFile(current_dir, "Script", ".lua",scriptContent);
+}
+void EditWindow::onNewMaterial(){
+    std::string matContent = "ZSP_MATERIAL\nGROUP @default\n";
+    this->createNewTextFile(current_dir, "Material", ".zsmat", matContent);
+}
+
 GameObject* EditWindow::onAddNewGameObject(){
     //get free index in array
     int free_ind = world.getFreeObjectSpaceIndex();
     //if we have no free space inside array
-    if(free_ind == world.objects.size()){
+    if(free_ind == static_cast<int>(world.objects.size())){
         GameObject obj;
         obj.alive = false;
         obj.world_ptr = &world;
@@ -294,8 +321,8 @@ void EditWindow::addNewLight(){
 
 void EditWindow::addNewTile(){
     GameObject* obj = onAddNewGameObject();
-    obj->addProperty(1001); //Creates tile inside
-    obj->addProperty(GO_PROPERTY_TYPE_MESH);
+    obj->addProperty(GO_PROPERTY_TYPE_TILE); //Creates tile inside
+    obj->addProperty(GO_PROPERTY_TYPE_MESH); //Creates mesh inside
     obj->render_type = GO_RENDER_TYPE_TILE;
 
     //Set new name to object
@@ -303,11 +330,11 @@ void EditWindow::addNewTile(){
     world.getAvailableNumObjLabel("Tile_", &add_num);
     *obj->label = "Tile_" + QString::number(add_num);
     obj->item_ptr->setText(0, *obj->label);
-
+    //Assign @mesh
     MeshProperty* mesh = static_cast<MeshProperty*>(obj->getPropertyPtrByType(GO_PROPERTY_TYPE_MESH));
     mesh->resource_relpath = "@cube";
     mesh->updateMeshPtr();
-
+    //Assign new scale
     TransformProperty* transform =
             static_cast<TransformProperty*>(obj->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
     transform->scale = ZSVECTOR3(100, 100, 1);
@@ -400,7 +427,7 @@ void EditWindow::updateFileList(){
 //Signal
 void EditWindow::onFileListItemClicked(){
     QListWidgetItem* selected_file_item = ui->fileList->currentItem();
-
+    //if user pressed back button
     if(selected_file_item->text().compare("(back)") == 0){
         QDir cur_folder = QDir(this->current_dir);
         cur_folder.cdUp();
@@ -447,7 +474,7 @@ void EditWindow::onObjectListItemClicked(){
 void EditWindow::onObjectCtxMenuShow(QPoint point){
     QTreeWidgetItem* selected_item = ui->objsList->currentItem(); //Obtain pointer to clicked obj item
     //We selected empty space
-    if(selected_item == 0x0) return;
+    if(selected_item == nullptr) return;
     QString obj_name = selected_item->text(0); //Get label of clicked obj
     GameObject* obj_ptr = world.getObjectByLabel(obj_name); //Obtain pointer to selected object by label
 
@@ -457,11 +484,15 @@ void EditWindow::onObjectCtxMenuShow(QPoint point){
 
 void EditWindow::onFileCtxMenuShow(QPoint point){
     QListWidgetItem* selected_item = ui->fileList->currentItem(); //get selected item
-    QString file_name = selected_item->text();
+    if(selected_item != nullptr){ //if selected file
+        QString file_name = selected_item->text();
 
-    this->file_ctx_menu->file_path = current_dir + "/" + file_name; //set file path
-    this->file_ctx_menu->file_name = file_name;
-    this->file_ctx_menu->show(point);
+        this->file_ctx_menu->file_path = current_dir + "/" + file_name; //set file path
+        this->file_ctx_menu->file_name = file_name;
+        this->file_ctx_menu->show(point);
+    }else{ //we selected empty space
+
+    }
 }
 
 void EditWindow::onCameraToObjTeleport(){
@@ -642,7 +673,7 @@ EditWindow* ZSEditor::openEditor(){
     _inspector_win->show();
     _inspector_win->move(_editor_win->width() + 640, 0);
 
-     _inspector_win->editwindow_ptr = static_cast<void*>(_editor_win);
+    _inspector_win->editwindow_ptr = static_cast<void*>(_editor_win);
 
     _ed_actions_container = new EdActions; //Allocating EdActions
     _ed_actions_container->world_ptr = &_editor_win->world; //Put world pointer
@@ -711,14 +742,14 @@ void ObjTreeWgt::dropEvent(QDropEvent* event){
 }
 
 void EditWindow::onLeftBtnClicked(int X, int Y){
-    if(obj_trstate.isTransforming) return;
+    if(obj_trstate.isTransforming || isSceneRun) return;
     unsigned int clicked = render->render_getpickedObj(static_cast<void*>(this), X, Y);
 
-    GameObject* obj_ptr = &world.objects[clicked]; //Obtain pointer to selected object by label
-    if(clicked > world.objects.size() || obj_ptr == 0x0 || clicked >= 256 * 256 * 256){
+    if(clicked > world.objects.size() || clicked >= 256 * 256 * 256){
         world.unpickObject();
         return;
     }
+    GameObject* obj_ptr = &world.objects[clicked]; //Obtain pointer to selected object by label
 
     obj_trstate.obj_ptr = obj_ptr;
     obj_trstate.tprop_ptr = static_cast<TransformProperty*>(obj_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
@@ -726,18 +757,22 @@ void EditWindow::onLeftBtnClicked(int X, int Y){
     this->ui->objsList->setCurrentItem(obj_ptr->item_ptr); //item selected in tree
 }
 void EditWindow::onRightBtnClicked(int X, int Y){
+    if(isSceneRun) return;
+#ifdef __linux__
     this->obj_trstate.isTransforming = false; //disabling object transform
     unsigned int clicked = render->render_getpickedObj(static_cast<void*>(this), X, Y);
 
-    GameObject* obj_ptr = &world.objects[clicked]; //Obtain pointer to selected object by label
-    if(clicked > world.objects.size() || obj_ptr == 0x0 || clicked >= 256 * 256 * 256)
+    if(clicked > world.objects.size() || clicked >= 256 * 256 * 256)
         return;
+    GameObject* obj_ptr = &world.objects[clicked]; //Obtain pointer to selected object by label
+
     world.unpickObject(); //Clear isPicked property from all objects
     obj_ptr->pick(); //mark object picked
     this->obj_ctx_menu->setObjectPtr(obj_ptr);
     this->obj_ctx_menu->displayTransforms = true;
     this->obj_ctx_menu->show(QPoint(this->width() + X, Y));
     this->obj_ctx_menu->displayTransforms = false;
+#endif
 }
 void EditWindow::onMouseWheel(int x, int y){
     if(project.perspective == 3){
@@ -756,21 +791,30 @@ void EditWindow::onMouseWheel(int x, int y){
 }
 void EditWindow::onMouseMotion(int relX, int relY){
     if(this->ppaint_state.enabled && input_state.isLeftBtnHold == true){ //we just move on map
-        if(ppaint_state.time == 0){
+        if(ppaint_state.time == 0.0f && !isSceneRun){
             ppaint_state.time += deltaTime;
 
             unsigned int clicked = render->render_getpickedObj(static_cast<void*>(this), input_state.mouseX, input_state.mouseY);
 
-            GameObject* obj_ptr = &world.objects[clicked]; //Obtain pointer to selected object by label
-            if(clicked > world.objects.size() || obj_ptr == 0x0 || clicked >= 256 * 256 * 256 || ppaint_state.last_obj == clicked)
+            if(clicked > world.objects.size() || clicked >= 256 * 256 * 256 || ppaint_state.last_obj == clicked)
                 return;
-            ppaint_state.last_obj = clicked; //Set clicked as last object ID
+
+            GameObject* obj_ptr = &world.objects[clicked]; //Obtain pointer to selected object by label
+
+            ppaint_state.last_obj = static_cast<int>(clicked); //Set clicked as last object ID
             //Obtain pointer to object's property
             GameObjectProperty* prop_ptr = obj_ptr->getPropertyPtrByType(this->ppaint_state.prop_ptr->type);
 
-        getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
-        //Copy property data
-        ppaint_state.prop_ptr->copyTo(prop_ptr);
+            if (prop_ptr == nullptr) { //if no property with that type in object
+                //add new property
+                obj_ptr->addProperty(this->ppaint_state.prop_ptr->type);
+                //update pointer
+                prop_ptr = obj_ptr->getPropertyPtrByType(this->ppaint_state.prop_ptr->type);
+            }
+
+            getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
+            //Copy property data
+            ppaint_state.prop_ptr->copyTo(prop_ptr);
         }else{
             ppaint_state.time += deltaTime;
             if(ppaint_state.time >= 100) ppaint_state.time = 0;
@@ -789,9 +833,7 @@ void EditWindow::onMouseMotion(int relX, int relY){
 
         if(obj_trstate.isTransforming == true && input_state.isLeftBtnHold == true){ //Only affective if object is transforming
 
-            ZSVECTOR3 dir = ZSVECTOR3(0.0f);
-
-            dir = ZSVECTOR3(-relX, -relY, 0);
+            ZSVECTOR3 dir = ZSVECTOR3(-relX, -relY, 0);
 
             if ((abs(relX) > abs(relY)) && abs(relX - relY) > 15)
                 dir = ZSVECTOR3(-relX, 0, 0);
@@ -893,7 +935,7 @@ void EditWindow::onKeyDown(SDL_Keysym sym){
 }
 
 void EditWindow::callObjectDeletion(GameObjectLink link){
-    //_ed_actions_container->newSnapshotAction(&this->world);
+    //Create new Object action
     _ed_actions_container->newGameObjectAction(link);
 
     world.removeObj(link); //delete object
@@ -905,7 +947,7 @@ EdActions* getActionManager(){
     return _ed_actions_container;
 }
 
-void ObjectTransformState::setTransformOnObject(GameObject* obj_ptr, int transformMode){
+void ObjectTransformState::setTransformOnObject(GameObject* obj_ptr, GO_TRANSFORM_MODE transformMode){
     this->obj_ptr = obj_ptr; //Set pointer to object
     //Calculate pointer to transform property
     this->tprop_ptr = static_cast<TransformProperty*>(obj_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));

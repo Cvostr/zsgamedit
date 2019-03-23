@@ -9,13 +9,17 @@
 #include <QMainWindow>
 #include <SDL2/SDL.h>
 
-#define GO_RENDER_TYPE_NONE 0
-#define GO_RENDER_TYPE_TILE 1
-#define GO_RENDER_TYPE_MATERIAL 2
+enum GO_RENDER_TYPE {
+    GO_RENDER_TYPE_NONE,
+    GO_RENDER_TYPE_TILE,
+    GO_RENDER_TYPE_MATERIAL
+};
 
-#define PIPELINE_STATE_DEFAULT 0
-#define PIPELINE_STATE_PICKING 1
-#define PIPELINE_STATE_MARKED 2
+enum PIPELINE_STATE {
+    PIPELINE_STATE_DEFAULT,
+    PIPELINE_STATE_PICKING,
+    PIPELINE_STATE_MARKED
+};
 
 class G_BUFFER_GL{
 protected:
@@ -48,7 +52,7 @@ public:
     float deltaTime;
     bool depthTest; //if enabled, GL will do depth testing
     bool cullFaces; //if enabled, GL will cull faces
-    int current_state;
+    PIPELINE_STATE current_state;
     void setup(int bufWidth, int bufHeight);
     bool InitGLEW();
     void render(SDL_Window* w, void* projectedit_ptr);

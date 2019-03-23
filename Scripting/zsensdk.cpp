@@ -6,14 +6,53 @@
 #include "../ProjEd/headers/ProjectEdit.h"
 #include <QString>
 #include <iostream>
+#include <SDL2/SDL.h>
 
 #define KEYS_QUEUE_SIZE 10
 #define KEY_NONE -200
+
+namespace keycodes {
+    static int kq = SDLK_q;
+    static int kw = SDLK_w;
+    static int ke = SDLK_e;
+    static int kr = SDLK_r;
+    static int kt = SDLK_t;
+    static int ky = SDLK_y;
+    static int ku = SDLK_u;
+    static int ki = SDLK_i;
+    static int ko = SDLK_o;
+    static int kp = SDLK_p;
+    static int ka = SDLK_a;
+    static int ks = SDLK_s;
+    static int kd = SDLK_d;
+    static int kf = SDLK_f;
+    static int kg = SDLK_g;
+    static int kh = SDLK_h;
+    static int kj = SDLK_j;
+    static int kk = SDLK_k;
+    static int kl = SDLK_l;
+    static int kz = SDLK_z;
+    static int kx = SDLK_x;
+    static int kc = SDLK_c;
+    static int kv = SDLK_v;
+    static int kb = SDLK_b;
+    static int kn = SDLK_n;
+    static int km = SDLK_m;
+
+    static int kspace = SDLK_SPACE;
+    static int kenter = SDLK_RETURN;
+    static int ktab = SDLK_TAB;
+    static int kshift = SDLK_LSHIFT;
+    static int kctrl = SDLK_LCTRL;
+    static int kescape = SDLK_ESCAPE;
+}
 
 static int pressed_keys_queue[KEYS_QUEUE_SIZE];
 static int pressed_keys_q_size = 0;
 static int hold_keys_queue[KEYS_QUEUE_SIZE];
 static int hold_keys_q_size = 0;
+
+static ZSENSDK::Input::MouseState mouse;
 
 void ZSENSDK::Debug::Log(std::string text){
     std::cout << "SCRIPT: " << text << std::endl;
@@ -25,6 +64,7 @@ void ZSENSDK::Input::addPressedKeyToQueue(int keycode){
     pressed_keys_q_size += 1;
 }
 void ZSENSDK::Input::addHeldKeyToQueue(int keycode){
+    //if key already held, do nothing
     if(isKeyHold(keycode)) return;
 
     bool insertable = false;
@@ -67,6 +107,13 @@ bool ZSENSDK::Input::isKeyHold(int keycode){
             return true;
     }
     return false;
+}
+
+ZSENSDK::Input::MouseState* ZSENSDK::Input::getMouseStatePtr(){
+    return &mouse;
+}
+ZSENSDK::Input::MouseState ZSENSDK::Input::getMouseState(){
+    return mouse;
 }
 
 ZSVECTOR3 ZSENSDK::Math::vnormalize(ZSVECTOR3 vec){
@@ -140,8 +187,7 @@ ZSVECTOR3 ZSENSDK::ZSENTransformProperty::getRotation(){
     return this->prop_ptr->rotation;
 }
 void ZSENSDK::ZSENTransformProperty::setPosition(ZSVECTOR3 pos){
-    this->prop_ptr->translation = pos;
-    this->prop_ptr->updateMat();
+    this->prop_ptr->setTranslation(pos);
 }
 void ZSENSDK::ZSENTransformProperty::setRotation(ZSVECTOR3 rot){
     this->prop_ptr->rotation = rot;
@@ -198,6 +244,16 @@ void ZSENSDK::bindSDK(lua_State* state){
             .beginNamespace("input")
             .addFunction("isKeyPressed", &ZSENSDK::Input::isKeyPressed)
             .addFunction("isKeyHold", &ZSENSDK::Input::isKeyHold)
+            //Add mouse state class
+            .beginClass <Input::MouseState>("MouseState")
+            .addData("cursorX", &Input::MouseState::mouseX)
+            .addData("cursorY", &Input::MouseState::mouseY)
+            .addData("relX", &Input::MouseState::mouseRelX)
+            .addData("relY", &Input::MouseState::mouseRelY)
+            .endClass()
+
+            .addFunction("getMouseState", &ZSENSDK::Input::getMouseState)
+
             .endNamespace();
 
     luabridge::getGlobalNamespace(state).beginClass <ZSVECTOR3>("Vec3")

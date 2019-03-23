@@ -5,9 +5,9 @@
 
 #include "Scripting/headers/zsensdk.h"
 
-uint64_t NOW = SDL_GetPerformanceCounter();
-uint64_t last = 0;
-float deltaTime = 0;
+static uint64_t NOW = SDL_GetPerformanceCounter();
+static uint64_t last = 0;
+static float deltaTime = 0;
 
 int main(int argc, char *argv[])
 {
@@ -33,6 +33,7 @@ int main(int argc, char *argv[])
 
             w.edit_win_ptr->deltaTime = deltaTime; //Send delta time to editor window
             SDL_Event event;
+            ZSENSDK::Input::MouseState* mstate = ZSENSDK::Input::getMouseStatePtr();
                 while (SDL_PollEvent(&event))
                 {
                     if (event.type == SDL_QUIT) { //If user caused SDL window to close
@@ -85,9 +86,14 @@ int main(int argc, char *argv[])
                         int newX = event.motion.xrel;
                         int newY = event.motion.yrel;
                         w.edit_win_ptr->onMouseMotion(newX, newY);
-
+                        //update state in Editor
                         w.edit_win_ptr->input_state.mouseX = event.motion.x;
                         w.edit_win_ptr->input_state.mouseY = event.motion.y;
+                        //update state in ZSENSDK
+                        mstate->mouseX = event.motion.x;
+                        mstate->mouseX = event.motion.x;
+                        mstate->mouseRelX = event.motion.xrel;
+                        mstate->mouseRelY = event.motion.yrel;
                     }
 
                 }

@@ -1,3 +1,5 @@
+#define _CRT_SECURE_NO_WARNINGS
+
 #include <AL/al.h>
 #include <AL/alc.h>
 

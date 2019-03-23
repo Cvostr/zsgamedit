@@ -57,6 +57,9 @@ QString getPropertyString(int type){
         case GO_PROPERTY_TYPE_MATERIAL:{
             return QString("Material");
         }
+        case GO_PROPERTY_TYPE_COLLIDER:{
+            return QString("Collider");
+        }
         case GO_PROPERTY_TYPE_TILE_GROUP:{
             return QString("Tile Group");
         }
@@ -101,6 +104,11 @@ GameObjectProperty* allocProperty(int type){
         }
         case GO_PROPERTY_TYPE_MATERIAL:{
             MaterialProperty* ptr = new MaterialProperty;
+            _ptr = static_cast<GameObjectProperty*>(ptr);
+            break;
+        }
+        case GO_PROPERTY_TYPE_COLLIDER:{
+            ColliderProperty* ptr = new ColliderProperty;
             _ptr = static_cast<GameObjectProperty*>(ptr);
             break;
         }
@@ -179,6 +187,19 @@ void TransformProperty::onPreRender(RenderPipeline* pipeline){
     updateMat();
 }
 
+void TransformProperty::setTranslation(ZSVECTOR3 new_translation){
+    ZSVECTOR3 temp_pos = this->translation;
+
+    this->translation = new_translation;
+    updateMat();
+
+    if(go_link.world_ptr->isCollide(this)){ //if really collides
+        this->translation = temp_pos; //Set temporary value
+        updateMat(); //Update matrix again
+        return;
+    }
+}
+
 void TransformProperty::updateMat(){
     //Variables to store
     ZSVECTOR3 p_translation = ZSVECTOR3(0,0,0);
@@ -188,8 +209,9 @@ void TransformProperty::updateMat(){
     GameObject* ptr = go_link.updLinkPtr(); //Pointer to object with this property
     if(ptr != nullptr){ //if object exist
         if(ptr->hasParent){ //if object dependent
-
+            //Get parent's transform property
             TransformProperty* property = static_cast<TransformProperty*>(ptr->parent.updLinkPtr()->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
+            //Calculate parent transform offset
             property->getAbsoluteParentTransform(p_translation, p_scale, p_rotation);
         }
     }
@@ -197,9 +219,12 @@ void TransformProperty::updateMat(){
     if(this->translation + p_translation == this->_last_translation
             && this->scale * p_scale == this->_last_scale
             && this->rotation + p_rotation == this->_last_rotation) {
-        return;
+        return; //No changes, nothing to be done
     }else{
+        //Store last pos to work with collisions
 
+
+        //rewrite last values
         this->_last_translation = this->translation + p_translation;
         this->_last_scale = this->scale * p_scale;
         this->_last_rotation = this->rotation + p_rotation;
@@ -249,13 +274,12 @@ void TransformProperty::getAbsoluteParentTransform(ZSVECTOR3& t, ZSVECTOR3& s, Z
 
 void TransformProperty::copyTo(GameObjectProperty* dest){
     if(dest->type != this->type) return; //if it isn't transform
-
+    //cast pointer and send data
     TransformProperty* _dest = static_cast<TransformProperty*>(dest);
     _dest->translation = translation;
     _dest->scale = scale;
     _dest->rotation = rotation;
     _dest->transform_mat = transform_mat;
-    _dest->transform_mat = this->transform_mat;
 }
 
 
@@ -327,7 +351,7 @@ void MeshProperty::copyTo(GameObjectProperty* dest){
 
 void LightsourceProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
     AreaRadioGroup* group = new AreaRadioGroup; //allocate button layout
-    group->value_ptr = &this->light_type;
+    group->value_ptr = reinterpret_cast<uint8_t*>(&this->light_type);
     group->go_property = static_cast<void*>(this);
 
     QRadioButton* directional_radio = new QRadioButton; //allocate first radio
@@ -644,7 +668,7 @@ void GameObject::saveProperties(std::ofstream* stream){
         }
         case GO_PROPERTY_TYPE_LIGHTSOURCE:{
             LightsourceProperty* ptr = static_cast<LightsourceProperty*>(property_ptr);
-            ZSLIGHTSOURCE_TYPE type = ptr->light_type;
+            LIGHTSOURCE_TYPE type = ptr->light_type;
             float intensity = ptr->intensity;
             float range = ptr->range;
 
@@ -652,7 +676,7 @@ void GameObject::saveProperties(std::ofstream* stream){
             float color_g = ptr->color.g;
             float color_b = ptr->color.b;
 
-            stream->write(reinterpret_cast<char*>(&type), sizeof(ZSLIGHTSOURCE_TYPE));
+            stream->write(reinterpret_cast<char*>(&type), sizeof(LIGHTSOURCE_TYPE));
             stream->write(reinterpret_cast<char*>(&intensity), sizeof(float));
             stream->write(reinterpret_cast<char*>(&range), sizeof(float));
 
@@ -676,7 +700,7 @@ void GameObject::saveProperties(std::ofstream* stream){
         }
         case GO_PROPERTY_TYPE_MATERIAL:{
             MaterialProperty* ptr = static_cast<MaterialProperty*>(property_ptr);
-            //int material_props_size = ptr->group_ptr->properties.size(); //Properties amount
+            //Write path to material string
             if(ptr->material_ptr != nullptr)
                 *stream << ptr->material_path.toStdString(); //Write material relpath
             else
@@ -690,9 +714,19 @@ void GameObject::saveProperties(std::ofstream* stream){
             //write amount of scripts
             stream->write(reinterpret_cast<char*>(&script_num), sizeof(int));
             *stream << "\n"; //write divider
-            for(unsigned int script_w_i = 0; script_w_i < script_num; script_w_i ++){
+            for(unsigned int script_w_i = 0; script_w_i < static_cast<unsigned int>(script_num); script_w_i ++){
                  *stream << ptr->path_names[script_w_i].toStdString() << "\n";
             }
+
+            break;
+        }
+        case GO_PROPERTY_TYPE_COLLIDER:{
+            ColliderProperty* ptr = static_cast<ColliderProperty*>(property_ptr);
+            //write collider type
+            stream->write(reinterpret_cast<char*>(&ptr->coll_type), sizeof(COLLIDER_TYPE));
+            //write isTrigger boolean
+            stream->write(reinterpret_cast<char*>(&ptr->isTrigger), sizeof(bool));
+            *stream << "\n"; //write divider
 
             break;
         }
@@ -738,12 +772,60 @@ void GameObject::saveProperties(std::ofstream* stream){
     }
 }
 
+void ColliderProperty::onAddToObject(){
+    this->go_link.world_ptr->pushCollider(this);
+} //will register in world
+void ColliderProperty::onObjectDeleted(){
+    this->go_link.world_ptr->removeCollider(this);
+} //unregister in world
+void ColliderProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
+    AreaRadioGroup* group = new AreaRadioGroup; //allocate button layout
+    group->value_ptr = reinterpret_cast<uint8_t*>(&this->coll_type);
+    group->go_property = static_cast<void*>(this);
+
+    QRadioButton* box_radio = new QRadioButton; //allocate first radio
+    box_radio->setText("Box");
+    QRadioButton* cube_radio = new QRadioButton;
+    cube_radio->setText("Cube");
+    //add created radio buttons
+    group->addRadioButton(box_radio);
+    group->addRadioButton(cube_radio);
+    //Register in Inspector
+    inspector->registerUiObject(group);
+    inspector->getContentLayout()->addLayout(group->btn_layout);
+
+    //isTrigger checkbox
+    BoolCheckboxArea* istrigger = new BoolCheckboxArea;
+    istrigger->setLabel("IsTrigger ");
+    istrigger->go_property = static_cast<void*>(this);
+    istrigger->bool_ptr = &this->isTrigger;
+    inspector->addPropertyArea(istrigger);
+}
+
+void ColliderProperty::copyTo(GameObjectProperty* dest){
+    if(dest->type != GO_PROPERTY_TYPE_COLLIDER) return;
+
+    ColliderProperty* coll_prop = static_cast<ColliderProperty*>(dest);
+    coll_prop->isTrigger = this->isTrigger;
+    coll_prop->coll_type = this->coll_type;
+}
+
+TransformProperty* ColliderProperty::getTransformProperty(){
+    return go_link.updLinkPtr()->getTransformProperty();
+}
+
+ColliderProperty::ColliderProperty(){
+    type = GO_PROPERTY_TYPE_COLLIDER;
+
+    isTrigger = false;
+    coll_type = COLLIDER_TYPE_BOX;
+}
+
 void GameObject::loadProperty(std::ifstream* world_stream){
     int type;
-    //*world_stream >> type;
     world_stream->seekg(1, std::ofstream::cur); //Skip space
     world_stream->read(reinterpret_cast<char*>(&type), sizeof(int));
-    // world_stream->seekg(1, std::ofstream::cur); //Skip space
+    //Spawn new property with readed type
     addProperty(type);
     GameObjectProperty* prop_ptr = getPropertyPtrByType(type); //get created property
     //since more than 1 properties same type can't be on one gameobject
@@ -789,7 +871,7 @@ void GameObject::loadProperty(std::ifstream* world_stream){
         LightsourceProperty* ptr = static_cast<LightsourceProperty*>(prop_ptr);
         world_stream->seekg(1, std::ofstream::cur);
 
-        world_stream->read(reinterpret_cast<char*>(&ptr->light_type), sizeof(ZSLIGHTSOURCE_TYPE));
+        world_stream->read(reinterpret_cast<char*>(&ptr->light_type), sizeof(LIGHTSOURCE_TYPE));
         world_stream->read(reinterpret_cast<char*>(&ptr->intensity), sizeof(float));
         world_stream->read(reinterpret_cast<char*>(&ptr->range), sizeof(float));
 
@@ -847,11 +929,24 @@ void GameObject::loadProperty(std::ifstream* world_stream){
         MaterialProperty* ptr = static_cast<MaterialProperty*>(prop_ptr);
 
         std::string path;
-
+        //reading path
         *world_stream >> path;
+        //Assigning path
         ptr->material_path = QString::fromStdString(path);
         if(path.compare("@none"))
             ptr->onValueChanged();
+
+        break;
+    }
+    case GO_PROPERTY_TYPE_COLLIDER:{
+        ColliderProperty* ptr = static_cast<ColliderProperty*>(prop_ptr);
+        world_stream->seekg(1, std::ofstream::cur);
+        //read collider type
+        world_stream->read(reinterpret_cast<char*>(&ptr->coll_type), sizeof(COLLIDER_TYPE));
+        //read isTrigger boolean
+        world_stream->read(reinterpret_cast<char*>(&ptr->isTrigger), sizeof(bool));
+
+        world_ptr->pushCollider(ptr); //send collider to world
 
         break;
     }
@@ -962,14 +1057,14 @@ void ScriptGroupProperty::copyTo(GameObjectProperty* dest){
     _dest->scripts_attached.resize(scr_num);
     _dest->path_names.resize(scr_num);
     //Copy data
-    for(unsigned int script_i = 0; script_i < scr_num; script_i ++){
+    for(unsigned int script_i = 0; script_i < static_cast<unsigned int>(scr_num); script_i ++){
         _dest->scripts_attached[script_i] = this->scripts_attached[script_i];
         _dest->path_names[script_i] = this->path_names[script_i];
     }
 }
 
 void ScriptGroupProperty::wakeUp(){
-    for(unsigned int script_i = 0; script_i < scr_num; script_i ++){
+    for(unsigned int script_i = 0; script_i < static_cast<unsigned int>(scr_num); script_i ++){
         this->scripts_attached[script_i].link = this->go_link;
 
         this->scripts_attached[script_i]._InitScript();
@@ -981,5 +1076,5 @@ ScriptGroupProperty::ScriptGroupProperty(){
     type = GO_PROPERTY_TYPE_SCRIPTGROUP;
 
     scr_num = 0;
-    this->scripts_attached.resize(this->scr_num);
+    this->scripts_attached.resize(static_cast<unsigned int>(this->scr_num));
 }

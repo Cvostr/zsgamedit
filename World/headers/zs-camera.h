@@ -3,10 +3,10 @@
 
 #include "../../Render/headers/zs-math.h"
 
-#define ZSCAMERA_PROJECTION_ORTHOGONAL 1
-#define ZSCAMERA_PROJECTION_PERSPECTIVE 2
 
-typedef unsigned int ZSCAMERAPROJECTIONTYPE;
+enum ZSCAMERAPROJECTIONTYPE {ZSCAMERA_PROJECTION_NONE,
+                            ZSCAMERA_PROJECTION_ORTHOGONAL,
+                            ZSCAMERA_PROJECTION_PERSPECTIVE};
 
 typedef struct ZSVIEWPORT{
     unsigned int startX;

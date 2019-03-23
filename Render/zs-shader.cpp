@@ -1,3 +1,5 @@
+#define _CRT_SECURE_NO_WARNINGS
+
 #include "headers/zs-shader.h"
 #include "../World/headers/World.h"
 #include "../World/headers/obj_properties.h"
@@ -256,5 +258,5 @@ void ZSPIRE::Shader::unsetLight(unsigned int index){
     std::string type;
     type = "lights[" + std::to_string(index) + "].type";
 
-    setGLuniformInt(type.c_str(), 0);
+    setGLuniformInt(type.c_str(), LIGHTSOURCE_TYPE_NONE);
 }
