@@ -6,7 +6,7 @@
 #endif
 
 #ifdef _WIN32
-#include <windows.h> //For Sleep();
+#include <Windows.h> //For Sleep();
 #endif
 
 #include "headers/2dtileproperties.h"

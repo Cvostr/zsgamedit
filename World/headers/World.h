@@ -21,6 +21,20 @@
 
 enum COLLIDER_TYPE {COLLIDER_TYPE_NONE, COLLIDER_TYPE_BOX, COLLIDER_TYPE_CUBE};
 
+enum PROPERTY_TYPE{
+    GO_PROPERTY_TYPE_NONE,
+    GO_PROPERTY_TYPE_TRANSFORM,
+    GO_PROPERTY_TYPE_LABEL,
+    GO_PROPERTY_TYPE_MESH,
+    GO_PROPERTY_TYPE_LIGHTSOURCE,
+    GO_PROPERTY_TYPE_AUDSOURCE,
+    GO_PROPERTY_TYPE_MATERIAL,
+    GO_PROPERTY_TYPE_SCRIPTGROUP,
+    GO_PROPERTY_TYPE_COLLIDER,
+    GO_PROPERTY_TYPE_TILE_GROUP = 1000,
+    GO_PROPERTY_TYPE_TILE = 1001
+};
+
 class GameObject;
 class World;
 class GameObjectProperty;
@@ -41,7 +55,7 @@ public:
 
 class GameObjectProperty{
 public:
-    int type; //Describe TYPE of property
+    PROPERTY_TYPE type; //Describe TYPE of property
     bool active; //Is property working
     GameObjectLink go_link;
     World* world_ptr; //Sometimes may be useful

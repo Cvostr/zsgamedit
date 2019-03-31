@@ -1,10 +1,10 @@
 #ifndef DTILEPROPERTIES
 #define DTILEPROPERTIES
 
-#include "World.h"
+#include "obj_properties.h"
 
-#define GO_PROPERTY_TYPE_TILE_GROUP 1000
-#define GO_PROPERTY_TYPE_TILE 1001
+//#define GO_PROPERTY_TYPE_TILE_GROUP 1000
+//#define GO_PROPERTY_TYPE_TILE 1001
 
 typedef struct TileGeometry{
     int tileWidth;

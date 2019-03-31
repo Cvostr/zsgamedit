@@ -6,9 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>433</width>
+    <height>320</height>
    </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>433</width>
+    <height>320</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>Projects window</string>
@@ -19,9 +25,15 @@
      <rect>
       <x>0</x>
       <y>0</y>
-      <width>401</width>
-      <height>261</height>
+      <width>431</width>
+      <height>281</height>
      </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
     </property>
     <property name="gridSize">
      <size>
@@ -42,8 +54,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>400</width>
-     <height>22</height>
+     <width>433</width>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

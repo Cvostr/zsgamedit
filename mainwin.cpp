@@ -85,9 +85,6 @@ void MainWin::loadProjectsConfigurations(){
             proj_inf_file >> project_inf_path; //read path to path
             QString str = QString::fromStdString(project_inf_path);
 
-            //std::ifstream conf_stream;
-            //open projs.inf file
-            //conf_stream.open(project_inf_path, std::ofstream::out);
             if(QFile::exists(str)){ //If we reached project root path
 
                 conf.projFilePath = str; //Read path to project configuration file and store it
@@ -95,8 +92,8 @@ void MainWin::loadProjectsConfigurations(){
 
                 updateListWidgetContent();
             }
-            }
         }
+    }
     proj_inf_file.close();
 }
 
@@ -229,7 +226,7 @@ void ProjectCtxMenu::show(QPoint point){
     this->menu->popup(QCursor::pos());
 }
 void ProjectCtxMenu::onDeleteClicked(){
-    this->project_conf_ptr->removed = true;
+    this->project_conf_ptr->removed = true; //mark as removed
 
     for (unsigned int i = 0; i < win->projects.size(); i ++) { //Iterating over all objects
 
@@ -242,7 +239,7 @@ void ProjectCtxMenu::onDeleteClicked(){
 
         }
     }
-    win->projects.resize(win->projects.size() - 1);
+    win->projects.resize(win->projects.size() - 1); //remove last element
 
     win->updateListWidgetContent();
     win->saveProjectsConfiguration();

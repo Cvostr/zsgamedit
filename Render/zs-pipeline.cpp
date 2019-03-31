@@ -242,8 +242,8 @@ ZSPIRE::Shader* RenderPipeline::processShaderOnObject(void* _obj){
             }
             //Sending animation info
             if(tile_ptr->anim_property.isAnimated && tile_ptr->anim_state.playing == true){ //If tile animated, then send anim state to shader
-                tile_shader.setGLuniformInt("animated", 1);
-
+                tile_shader.setGLuniformInt("animated", 1); //Send as animated shader
+                //Send current animation state
                 tile_shader.setGLuniformInt("total_rows", tile_ptr->anim_property.framesX);
                 tile_shader.setGLuniformInt("total_cols", tile_ptr->anim_property.framesY);
 

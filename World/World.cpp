@@ -5,9 +5,6 @@
 #include <cstdlib>
 #include "headers/obj_properties.h"
 
-//#define GO_PROPERTY_TYPE_TRANSFORM 1
-//#define GO_PROPERTY_TYPE_LABEL 2
-
 GameObjectLink::GameObjectLink(){
     ptr = nullptr;
     world_ptr = nullptr;
@@ -207,7 +204,7 @@ void GameObject::removeProperty(int index){
     prop_ptr->onObjectDeleted();
     this->properties[index] = nullptr; //set as deleted
 
-    for(unsigned int i = index; i < props_num - 1; i ++){
+    for(unsigned int i = static_cast<unsigned int>(index); i < props_num - 1; i ++){
         properties[i] = properties[i + 1];
     }
 
@@ -270,10 +267,13 @@ void GameObject::recoverFromSnapshot(GameObjectSnapshot* snapshot){
 
     //Copy object class content
     snapshot->reserved_obj.copyTo(this);
-
-    for(unsigned int i = 0; i < snapshot->props_num; i ++){
+    //iterate over all properties in snapshot
+    for(unsigned int i = 0; i < static_cast<unsigned int>(snapshot->props_num); i ++){
+        //Pointer to property in snapshot
         GameObjectProperty* prop_ptr = snapshot->properties[i];
+        //Pointer to new allocated property
         GameObjectProperty* new_prop_ptr = allocProperty(prop_ptr->type);
+        //Copy pointer in snapshot to new pointer
         prop_ptr->copyTo(new_prop_ptr);
         this->properties[props_num] = new_prop_ptr;
         new_prop_ptr->go_link = this->getLinkToThisObject();
@@ -309,7 +309,7 @@ void GameObject::recoverFromSnapshot(GameObjectSnapshot* snapshot){
 void GameObjectSnapshot::clear(){
     this->children.clear();
 
-    for(unsigned int prop = 0; prop < this->props_num; prop ++){
+    for(unsigned int prop = 0; prop < static_cast<unsigned int>(this->props_num); prop ++){
         auto prop_ptr = this->properties[prop];
         delete prop_ptr;
     }

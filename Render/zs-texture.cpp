@@ -21,7 +21,7 @@
 #define _fileno fileno
 #endif
 
-unsigned int tex_slots[SLOTS_COUNT] = { 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff };
+static unsigned int tex_slots[SLOTS_COUNT] = { 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff };
 
 
 void ZSPIRE::Texture::Init() {
@@ -100,7 +100,8 @@ bool ZSPIRE::Texture::LoadDDSTextureFromBuffer(unsigned char* data, size_t data_
 	int WIDTH = *(unsigned int*)&(data[16]); //Getting width of texture in px info
 	unsigned int linearSize = *(unsigned int*)&(data[20]);
 	unsigned int mipMapCount = *(unsigned int*)&(data[28]);
-	unsigned int fourCC = *(unsigned int*)&(data[84]);
+    unsigned int fourCC = *(unsigned int*)&(data[84]);
+    //unsigned int fourCC = *(reinterpret_cast<unsigned int*>(&(data[84])));
 
 	unsigned char * bufferT;
 	unsigned int bufsize;
