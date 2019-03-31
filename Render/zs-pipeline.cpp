@@ -39,12 +39,13 @@ RenderPipeline::~RenderPipeline(){
 bool RenderPipeline::InitGLEW(){
     glewExperimental = GL_TRUE;
     std::cout << "Calling GLEW creation" << std::endl;
-        if (glewInit() != GLEW_OK)
-        {
-            std::cout << "OPENGL GLEW: Creation failed ";
-            return false;
-        }
 
+    if (glewInit() != GLEW_OK){
+        std::cout << "OPENGL GLEW: Creation failed ";
+        return false;
+    }
+
+    std::cout << "GLEW creation successful" << std::endl;
         return true;
 }
 
@@ -343,7 +344,7 @@ G_BUFFER_GL::G_BUFFER_GL(){
 }
 
 void G_BUFFER_GL::create(int width, int height){
-    glCreateFramebuffers(1, &gBuffer);
+    glGenFramebuffers(1, &gBuffer);
     glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
 
     glGenTextures(1, &tDiffuse);

@@ -685,7 +685,6 @@ void World::openFromFile(QString file, QTreeWidget* w_ptr){
 
             //Then do the same sh*t, iterate until "G_END" came up
             while(true){
-                std::string _prefix;
                 world_stream >> prefix; //Read prefix
                 if(prefix.compare("G_END") == 0){ //If end reached
                     break; //Then end this infinity loop
@@ -704,7 +703,6 @@ void World::openFromFile(QString file, QTreeWidget* w_ptr){
                         link.world_ptr = this; //Setting world pointer
                         link.obj_str_id = child_str_id; //Setting string ID
                         object.children.push_back(link); //Adding to object
-                        //object.addChildObject(link);
                     }
                 }
                 if(prefix.compare("G_PROPERTY") == 0){ //We found an property, zaeb*s'

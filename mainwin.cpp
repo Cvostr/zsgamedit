@@ -11,6 +11,7 @@
 #include <QPushButton>
 #include <QAction>
 #include <QMouseEvent>
+#include <QDesktopServices>
 
 static CreateProjectWindow* cr_w;
 
@@ -127,7 +128,7 @@ void MainWin::saveProjectsConfiguration(){
 void MainWin::onAddProjButtonClicked(){
 
     QString path = QFileDialog::getOpenFileName(this, tr("Project Configuration File"), "/");
-    if ( path.isNull() == false ) //If user specified file path
+    if ( path.isNull() == false && path.endsWith(".inf")) //If user specified file path
     {
         ProjectConf conf; //Preparing struct
         conf.projFilePath = path; //Assigning project file path
@@ -171,6 +172,18 @@ void MainWin::updateListWidgetContent(){
 }
 
 void MainWin::showCtxMenu(QPoint point){
+    QListWidgetItem* selected_proj_item = ui->projList->currentItem();
+    QString proj_label = selected_proj_item->text();
+
+    ProjectConf* conf = nullptr;
+
+    for(unsigned int entry_i = 0; entry_i < this->projects.size(); entry_i++){ //Iterate over all projects
+        ProjectConf* conf_ptr = &projects[entry_i];
+        if(proj_label.compare(conf_ptr->projLabel) == 0){ //If strings have same content
+            conf = conf_ptr;
+        }
+    }
+    project_menu->project_conf_ptr = conf;
     project_menu->show(point);
 }
 
@@ -191,18 +204,21 @@ ProjectCtxMenu::ProjectCtxMenu(MainWin* win, QWidget* parent) : QObject(parent){
     this->menu = new QMenu(win);
 
     this->action_delete = new QAction("Delete", win);
+    this->action_open_folder = new QAction("Open Root directory", win);
 #ifdef USE_ZSPIRE
     this->action_run_engine = new QAction("Run in engine instance", win);
     this->action_run_engine_vk = new QAction("Run in engine instance (Vulkan)", win);
 #endif
 
     menu->addAction(action_delete);
+    menu->addAction(action_open_folder);
 #ifdef USE_ZSPIRE
     menu->addAction(action_run_engine);
     menu->addAction(action_run_engine_vk);
 #endif
 
     QObject::connect(this->action_delete, SIGNAL(triggered(bool)), this, SLOT(onDeleteClicked()));
+    QObject::connect(this->action_open_folder, SIGNAL(triggered(bool)), this, SLOT(onOpenDirClicked()));
 #ifdef USE_ZSPIRE
     QObject::connect(this->action_run_engine, SIGNAL(triggered(bool)), this, SLOT(runEngineClickedGL()));
     QObject::connect(this->action_run_engine_vk, SIGNAL(triggered(bool)), this, SLOT(runEngineClickedVK()));
@@ -213,18 +229,29 @@ void ProjectCtxMenu::show(QPoint point){
     this->menu->popup(QCursor::pos());
 }
 void ProjectCtxMenu::onDeleteClicked(){
+    this->project_conf_ptr->removed = true;
+
     for (unsigned int i = 0; i < win->projects.size(); i ++) { //Iterating over all objects
+
+        if(&win->projects[i] == this->project_conf_ptr){ //we found removed object
+
 
             for (unsigned int obj_i = i + 1; obj_i < win->projects.size(); obj_i ++) { //Iterate over all next chidren
                 win->projects[obj_i - 1] = win->projects[obj_i]; //Move it to previous place
-
             }
-            win->projects.resize(win->projects.size() - 1);
 
+        }
     }
+    win->projects.resize(win->projects.size() - 1);
+
     win->updateListWidgetContent();
     win->saveProjectsConfiguration();
 }
+
+void ProjectCtxMenu::onOpenDirClicked(){
+    QDesktopServices::openUrl(QUrl::fromLocalFile(this->project_conf_ptr->projectRootPath));
+}
+
 #ifdef USE_ZSPIRE
 void ProjectCtxMenu::runEngineClickedGL(){
     runEngineClicked(OGL32);
@@ -259,7 +286,7 @@ void ProjectCtxMenu::runEngineClicked(ZSGAPI gapi){
     game_info.app_label = proj_label.toStdString(); //Setting app label
     game_info.app_version = 0;
     game_info.resource_type = TYPE_FILES;
-    game_info.game_dir = conf->projFilePath.toStdString();
+    game_info.game_dir = conf->projectRootPath.toStdString();
 
     win->engine = new ZSpireEngine(&engine_create_info, &window_create_info, &game_info);
     win->engine->loadGame();

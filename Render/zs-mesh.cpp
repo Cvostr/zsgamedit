@@ -7,17 +7,13 @@
 
 #undef glGenVertexArrays
 
-#include <GL\gl.h>
-#include <GL\glu.h>
-#include <GL\glext.h>
-#include <GL\wglext.h>
 
-static PFNGLGENVERTEXARRAYSPROC glGenVertexArrays;
-static PFNGLGENBUFFERSPROC glGenBuffers;
+
+
 
 #endif
 */
-ZSPIRE::Mesh* picked_mesh = 0x0;
+static ZSPIRE::Mesh* picked_mesh = nullptr;
 
 ZSVERTEX plane_verts[] = {
 	// positions              // texture coords
@@ -93,10 +89,10 @@ ZSVERTEX cube_vertices[] = {
 unsigned int plane_inds[] = { 0,1,2, 0,2,3 };
 unsigned int isotile_ind[] = { 0,1,2, 2,3,4, 2,4,5, 2,5,0 };
 
-ZSPIRE::Mesh plane2Dmesh;
-ZSPIRE::Mesh uiSprite2Dmesh;
-ZSPIRE::Mesh iso_tile2Dmesh;
-ZSPIRE::Mesh cube3Dmesh;
+static ZSPIRE::Mesh plane2Dmesh;
+static ZSPIRE::Mesh uiSprite2Dmesh;
+static ZSPIRE::Mesh iso_tile2Dmesh;
+static ZSPIRE::Mesh cube3Dmesh;
 
 unsigned int vert_size = sizeof(ZSVERTEX);
 unsigned int offset = 0;
@@ -181,7 +177,7 @@ void ZSPIRE::Mesh::setMeshData(ZSVERTEX* vertices, unsigned int* indices, unsign
     glBindVertexArray(this->meshVAO); //Bind vertex array
 
     glBindBuffer(GL_ARRAY_BUFFER, this->meshVBO); //Bind vertex buffer
-    glBufferData(GL_ARRAY_BUFFER, (int)vertices_num * sizeof(ZSVERTEX), vertices, GL_STATIC_DRAW); //send vertices to buffer
+    glBufferData(GL_ARRAY_BUFFER, static_cast<int>(vertices_num) * static_cast<int>(sizeof(ZSVERTEX)), vertices, GL_STATIC_DRAW); //send vertices to buffer
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->meshEBO); //Bind index buffer
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, (int)indices_num * sizeof(unsigned int), indices, GL_STATIC_DRAW); //Send indices to buffer

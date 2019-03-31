@@ -2,6 +2,7 @@
 
 #include <QMessageBox>
 #include <QMouseEvent>
+#include <QDesktopServices>
 
 ObjTreeWgt::ObjTreeWgt(QWidget* parent) : QTreeWidget (parent){
     this->world_ptr = nullptr; //Not assigned by default
@@ -101,13 +102,20 @@ FileCtxMenu::FileCtxMenu(EditWindow* win, QWidget* parent) : QObject(parent){
 
     this->action_delete = new QAction("Delete", win);
     this->action_rename = new QAction("Rename", win);
+    this->action_open_in_explorer = new QAction("Open in explorer", win);
 
     menu->addAction(action_rename);
     menu->addAction(action_delete);
+    menu->addAction(action_open_in_explorer);
 
     QObject::connect(this->action_delete, SIGNAL(triggered(bool)), this, SLOT(onDeleteClicked()));
     QObject::connect(this->action_rename, SIGNAL(triggered(bool)), this, SLOT(onRename()));
+    QObject::connect(this->action_open_in_explorer, SIGNAL(triggered(bool)), this, SLOT(onOpenInExplorerPressed()));
 
+}
+
+void FileCtxMenu::onOpenInExplorerPressed(){
+    QDesktopServices::openUrl( QUrl::fromLocalFile( this->directory ) );
 }
 
 void FileCtxMenu::show(QPoint point){
@@ -135,8 +143,8 @@ FileDeleteDialog::FileDeleteDialog(QString file_path, QWidget* parent) : QDialog
     close_btn.setText("Close");
 
     contentLayout.addWidget(&del_message, 0, 0);
-    contentLayout.addWidget(&del_btn, 1, 0);
-    contentLayout.addWidget(&close_btn, 1, 1);
+    contentLayout.addWidget(&del_btn, 1, 1);
+    contentLayout.addWidget(&close_btn, 1, 2);
     setLayout(&contentLayout);
 
     this->setWindowTitle("File deletion");
@@ -181,3 +189,4 @@ void FileRenameDialog::onRenameButtonPressed(){
     file.rename(cur_path + edit_field.text()); //remove it!
     accept();
 }
+

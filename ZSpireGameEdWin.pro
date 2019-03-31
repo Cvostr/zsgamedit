@@ -47,7 +47,8 @@ SOURCES += \
     Misc/ProjBuilder.cpp \
     Scripting/LuaScript.cpp \
     Scripting/zsensdk.cpp \
-    Render/MatShaderProps.cpp
+    Render/MatShaderProps.cpp \
+    Misc/zsp_gl.cpp
 
 HEADERS += \
         mainwin.h \
@@ -72,7 +73,8 @@ HEADERS += \
     World/headers/obj_properties.h \
     ProjEd/headers/InspEditAreas.h \
     triggers.h \
-    Render/headers/MatShaderProps.h
+    Render/headers/MatShaderProps.h \
+    Misc/headers/zsp_gl.h
 
 
 FORMS += \

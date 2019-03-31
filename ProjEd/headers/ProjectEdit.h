@@ -117,6 +117,7 @@ struct EditorSettings{
 
 class ObjectCtxMenu;
 class FileCtxMenu;
+class FileBrowserCtxMenu;
 
 class EditWindow : public QMainWindow
 {
@@ -251,15 +252,20 @@ class FileCtxMenu : public QObject{
 public slots:
     void onDeleteClicked();
     void onRename();
+
+    void onOpenInExplorerPressed();
 private:
     QMenu* menu; //Menu object to contain everything
 
     QAction* action_rename; //Button to dublicate object
     QAction* action_delete; //Button to delete object
+
+    QAction* action_open_in_explorer; //Button to delete object
 public:
     EditWindow* win_ptr;
     QString file_path; //path to selected file
     QString file_name;
+    QString directory;
 
     FileCtxMenu(EditWindow* win, QWidget* parent = nullptr);
     void show(QPoint point);

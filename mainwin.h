@@ -17,6 +17,12 @@ typedef struct ProjectConf{
     QString projFilePath; //Path to .inf file of project
 
     QString projectRootPath; //Root path of object
+
+    bool removed;
+
+    ProjectConf(){
+        removed = false;
+    }
 }ProjectConf;
 
 namespace Ui {
@@ -40,6 +46,7 @@ class ProjectCtxMenu : public QObject{
     Q_OBJECT
 public slots:
     void onDeleteClicked();
+    void onOpenDirClicked();
 #ifdef USE_ZSPIRE
     void runEngineClickedGL();
     void runEngineClickedVK();
@@ -51,8 +58,10 @@ private:
     QAction* action_run_engine;
     QAction* action_run_engine_vk;
     QAction* action_delete; //Button to delete project entry from list
+    QAction* action_open_folder; //Button to show explorer with root project folder
 public:
     MainWin* win;
+    ProjectConf* project_conf_ptr; //pointer to conf of selected project
 
     ProjectCtxMenu(MainWin* win, QWidget* parent = nullptr);
     void show(QPoint point);

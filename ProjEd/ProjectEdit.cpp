@@ -90,6 +90,7 @@ EditWindow::EditWindow(QWidget *parent) :
     ui->actionNew_Object->setShortcut(Qt::Key_N | Qt::CTRL);
     ui->actionToggle_Cameras->setShortcut(Qt::Key_Apostrophe | Qt::CTRL);
 
+    this->glcontext = nullptr;
 }
 
 EditWindow::~EditWindow()
@@ -488,10 +489,9 @@ void EditWindow::onFileCtxMenuShow(QPoint point){
         QString file_name = selected_item->text();
 
         this->file_ctx_menu->file_path = current_dir + "/" + file_name; //set file path
-        this->file_ctx_menu->file_name = file_name;
-        this->file_ctx_menu->show(point);
-    }else{ //we selected empty space
-
+        this->file_ctx_menu->file_name = file_name; //set file name
+        this->file_ctx_menu->directory = this->current_dir; //set dirctory
+        this->file_ctx_menu->show(point); //show menu
     }
 }
 
