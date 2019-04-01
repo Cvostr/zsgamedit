@@ -625,40 +625,13 @@ void EditWindow::loadResource(Resource* resource){
     }
 }
 
-EditWindow* ZSEditor::openProject(QString conf_file_path){
+EditWindow* ZSEditor::openProject(Project project){
     _editor_win = new EditWindow(); //Creating class object
     _inspector_win = new InspectorWin();
-
-    //Now reading config file
-    std::ifstream project_conf_stream;
-    project_conf_stream.open(conf_file_path.toStdString(), std::ifstream::in); //Opening file stream for reading
-
-    while(!project_conf_stream.eof()){ //If reaading finished
-        std::string prefix;
-        project_conf_stream >> prefix; //Reading prefix
-        if(prefix.compare("ver") == 0){ //If reched to ver
-            int ver = 0;
-            project_conf_stream >> ver; //Reading version
-            _editor_win->project.version = ver; //Storing version in project struct
-        }
-        if(prefix.compare("persp") == 0){ //If reched to persp
-            project_conf_stream >> _editor_win->project.perspective; //Reading perspective
-        }
-    }
-
-    //These stupid funcs calculate project root directory
-    int step = 5;
-    int len = conf_file_path.size();
-    while(conf_file_path[len - step] != '/'){
-          _editor_win->project.label.insert(0, conf_file_path[len - step]);
-          step += 1;
-    }
-    QString proj_root_dir = conf_file_path;
-    proj_root_dir.resize(proj_root_dir.length() - step);
-    _editor_win->project.root_path = proj_root_dir; //Setting root path
-    _editor_win->setViewDirectory(proj_root_dir);
-
-    project_conf_stream.close(); //Close file stream
+    //Send project datas to editor window class
+    _editor_win->project = project;
+    //Update widget content
+    _editor_win->setViewDirectory(_editor_win->project.root_path);
 
     return openEditor(); //Return pointer to edit window
 }

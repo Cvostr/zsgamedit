@@ -150,8 +150,33 @@ void MainWin::onSelectProjectToOpen(){
         ProjectConf* conf_ptr = &this->projects[entry_i];
         if(proj_label.compare(conf_ptr->projLabel) == 0){ //If strings have same content
             //We found index, keep going
+
+            //Now reading config file
+            std::ifstream project_conf_stream;
+            project_conf_stream.open(conf_ptr->projFilePath.toStdString(), std::ifstream::in); //Opening file stream for reading
+
+            Project mProject;
+
+            while(!project_conf_stream.eof()){ //If reaading finished
+                std::string prefix;
+                project_conf_stream >> prefix; //Reading prefix
+                if(prefix.compare("ver") == 0){ //If reched to ver
+                    int ver = 0;
+                    project_conf_stream >> ver; //Reading version
+                    mProject.version = ver; //Storing version in project struct
+                }
+                if(prefix.compare("persp") == 0){ //If reched to persp
+                    project_conf_stream >> mProject.perspective; //Reading perspective
+                }
+            }
+
             this->hide(); //Close project selection window
-            this->edit_win_ptr = ZSEditor::openProject(conf_ptr->projFilePath); //Call project opening
+
+            //Copy required data
+            mProject.label = conf_ptr->projLabel;
+            mProject.root_path = conf_ptr->projectRootPath;
+
+            this->edit_win_ptr = ZSEditor::openProject(mProject); //Call project opening
         }
     }
 
@@ -231,7 +256,6 @@ void ProjectCtxMenu::onDeleteClicked(){
     for (unsigned int i = 0; i < win->projects.size(); i ++) { //Iterating over all objects
 
         if(&win->projects[i] == this->project_conf_ptr){ //we found removed object
-
 
             for (unsigned int obj_i = i + 1; obj_i < win->projects.size(); obj_i ++) { //Iterate over all next chidren
                 win->projects[obj_i - 1] = win->projects[obj_i]; //Move it to previous place

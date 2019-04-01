@@ -341,7 +341,7 @@ public:
 };
 
 namespace ZSEditor {
-    EditWindow* openProject(QString conf_file_path);
+    EditWindow* openProject(Project project);
     EditWindow* openEditor();
 }
 

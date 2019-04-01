@@ -15,10 +15,9 @@
 typedef struct ProjectConf{
     QString projLabel; //Label of project
     QString projFilePath; //Path to .inf file of project
-
     QString projectRootPath; //Root path of object
 
-    bool removed;
+    bool removed; //mark project as marked
 
     ProjectConf(){
         removed = false;
