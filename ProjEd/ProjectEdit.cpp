@@ -266,7 +266,7 @@ void EditWindow::onNewScene(){
 
 void EditWindow::onNewScript(){
     std::string scriptContent = "onStart = function(g_object, world)\n return 0\nend\n\n";
-            scriptContent +=  "onFrame = function()\n return 0\nend";
+            scriptContent +=  "onFrame = function(frameTime)\n return 0\nend";
     this->createNewTextFile(current_dir, "Script", ".lua",scriptContent);
 }
 void EditWindow::onNewMaterial(){
@@ -644,7 +644,7 @@ EditWindow* ZSEditor::openEditor(){
     _editor_win->show(); //Show editor window
 
     _inspector_win->show();
-    _inspector_win->move(_editor_win->width() + 640, 0);
+    _inspector_win->move(_editor_win->width() + _editor_win->settings.gameViewWin_Width, 0);
 
     _inspector_win->editwindow_ptr = static_cast<void*>(_editor_win);
 

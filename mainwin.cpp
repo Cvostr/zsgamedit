@@ -56,6 +56,11 @@ void MainWin::addProjectToVector(ProjectConf conf){
     //Calculate root project path
     conf.projectRootPath = conf.projFilePath;
     conf.projectRootPath.resize(conf.projectRootPath.size() - step);
+
+    //Copy required data
+    conf.editwin_proj.label = conf.projLabel;
+    conf.editwin_proj.root_path = conf.projectRootPath;
+
     //push to vector
     this->projects.push_back(conf);
     saveProjectsConfiguration();
@@ -88,6 +93,25 @@ void MainWin::loadProjectsConfigurations(){
             if(QFile::exists(str)){ //If we reached project root path
 
                 conf.projFilePath = str; //Read path to project configuration file and store it
+
+                std::ifstream project_conf_stream;
+                project_conf_stream.open(conf.projFilePath.toStdString(), std::ifstream::in); //Opening file stream for reading
+                //read project's configuration file
+                Project mProject;
+                while(!project_conf_stream.eof()){ //If reaading finished
+                    std::string prefix;
+                    project_conf_stream >> prefix; //Reading prefix
+                    if(prefix.compare("ver") == 0){ //If reched to ver
+                        int ver = 0;
+                        project_conf_stream >> ver; //Reading version
+                        mProject.version = ver; //Storing version in project struct
+                    }
+                    if(prefix.compare("persp") == 0){ //If reched to persp
+                        project_conf_stream >> mProject.perspective; //Reading perspective
+                    }
+                }
+                conf.editwin_proj = mProject; //Copy project data
+
                 addProjectToVector(conf); //Add project vector
 
                 updateListWidgetContent();
@@ -151,32 +175,9 @@ void MainWin::onSelectProjectToOpen(){
         if(proj_label.compare(conf_ptr->projLabel) == 0){ //If strings have same content
             //We found index, keep going
 
-            //Now reading config file
-            std::ifstream project_conf_stream;
-            project_conf_stream.open(conf_ptr->projFilePath.toStdString(), std::ifstream::in); //Opening file stream for reading
-
-            Project mProject;
-
-            while(!project_conf_stream.eof()){ //If reaading finished
-                std::string prefix;
-                project_conf_stream >> prefix; //Reading prefix
-                if(prefix.compare("ver") == 0){ //If reched to ver
-                    int ver = 0;
-                    project_conf_stream >> ver; //Reading version
-                    mProject.version = ver; //Storing version in project struct
-                }
-                if(prefix.compare("persp") == 0){ //If reched to persp
-                    project_conf_stream >> mProject.perspective; //Reading perspective
-                }
-            }
-
             this->hide(); //Close project selection window
 
-            //Copy required data
-            mProject.label = conf_ptr->projLabel;
-            mProject.root_path = conf_ptr->projectRootPath;
-
-            this->edit_win_ptr = ZSEditor::openProject(mProject); //Call project opening
+            this->edit_win_ptr = ZSEditor::openProject(conf_ptr->editwin_proj); //Call project opening
         }
     }
 

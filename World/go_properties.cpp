@@ -1043,7 +1043,7 @@ void ScriptGroupProperty::addPropertyInterfaceToInspector(InspectorWin* inspecto
 void ScriptGroupProperty::onUpdate(float deltaTime){
     for(unsigned int script_i = 0; script_i < this->scripts_attached.size(); script_i ++){
         ObjectScript* script_ptr = &this->scripts_attached[script_i]; //Obtain pointer to script
-        script_ptr->_callDraw(); //Run onDraw() function in script
+        script_ptr->_callDraw(deltaTime); //Run onDraw() function in script
     }
 }
 

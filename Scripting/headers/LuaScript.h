@@ -25,7 +25,7 @@ public:
     void _DestroyScript();
 
     void _callStart();
-    void _callDraw();
+    void _callDraw(float deltaTime);
     void callDrawUI();
 
 };

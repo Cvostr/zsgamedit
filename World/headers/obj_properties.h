@@ -4,18 +4,6 @@
 #include "World.h"
 #include "../../Scripting/headers/LuaScript.h"
 #include "../../Render/headers/MatShaderProps.h"
-/*
-#define GO_PROPERTY_TYPE_NONE 0
-#define GO_PROPERTY_TYPE_TRANSFORM 1
-#define GO_PROPERTY_TYPE_LABEL 2
-#define GO_PROPERTY_TYPE_MESH 3
-#define GO_PROPERTY_TYPE_LIGHTSOURCE 4
-#define GO_PROPERTY_TYPE_AUDSOURCE 5
-#define GO_PROPERTY_TYPE_MATERIAL 6
-#define GO_PROPERTY_TYPE_SCRIPTGROUP 7
-#define GO_PROPERTY_TYPE_COLLIDER 8
-*/
-
 
 enum LIGHTSOURCE_TYPE {
     LIGHTSOURCE_TYPE_NONE,

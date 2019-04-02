@@ -166,8 +166,6 @@ private:
 
     float cam_pitch = 0;
     float cam_yaw = 0;
-
-    EditorSettings settings;
 public:
     float deltaTime;
     bool ready; //Is everything loaded?
@@ -182,6 +180,8 @@ public:
     ObjectTransformState obj_trstate; //Describes object transform
     PropertyPaintState ppaint_state; //Describes property painting feature state
     WorldSnapshot run_world_snapshot; //useful to recover world state after running
+
+    EditorSettings settings; //seetings for editor
 
     void init();
     void updateFileList(); //Updates content in file list widget
