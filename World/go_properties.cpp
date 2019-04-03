@@ -822,7 +822,7 @@ ColliderProperty::ColliderProperty(){
 }
 
 void GameObject::loadProperty(std::ifstream* world_stream){
-    int type;
+    PROPERTY_TYPE type;
     world_stream->seekg(1, std::ofstream::cur); //Skip space
     world_stream->read(reinterpret_cast<char*>(&type), sizeof(int));
     //Spawn new property with readed type

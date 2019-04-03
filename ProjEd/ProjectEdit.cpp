@@ -352,6 +352,8 @@ void EditWindow::onCloseProject(){
     SDL_DestroyWindow(window); //Destroy SDL and opengl
     SDL_GL_DeleteContext(glcontext);
 
+    this->project.resources.clear(); //Clear resources list
+
     //Close Qt windows
     _editor_win->close();
     _inspector_win->close();

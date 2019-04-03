@@ -109,6 +109,9 @@ void MainWin::loadProjectsConfigurations(){
                     if(prefix.compare("persp") == 0){ //If reched to persp
                         project_conf_stream >> mProject.perspective; //Reading perspective
                     }
+                    if(prefix.compare("startup_scene") == 0){ //If reched to persp
+                        project_conf_stream >> mProject.startup_scene; //Reading perspective
+                    }
                 }
                 conf.editwin_proj = mProject; //Copy project data
 
@@ -309,6 +312,7 @@ void ProjectCtxMenu::runEngineClicked(ZSGAPI gapi){
     game_info.app_version = 0;
     game_info.resource_type = TYPE_FILES;
     game_info.game_dir = conf->projectRootPath.toStdString();
+    game_info.startup_scene = conf->editwin_proj.startup_scene;
 
     win->engine = new ZSpireEngine(&engine_create_info, &window_create_info, &game_info);
     win->engine->loadGame();

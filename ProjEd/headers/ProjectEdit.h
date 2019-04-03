@@ -60,6 +60,8 @@ struct Project{
     int version; //Project version
     int perspective; //3D or 2D
 
+    std::string startup_scene;
+
     std::vector<Resource> resources;
 };
 #ifndef INCLUDE_PRJ_ONLY
