@@ -38,8 +38,6 @@ SOURCES += \
     ProjEd/InspectorWin.cpp \
     ProjEd/ProjCreateWin.cpp \
     World/zs-camera.cpp \
-    World/go_properties.cpp \
-    World/tile_properties.cpp \
     ProjEd/PropertyAreas.cpp \
     ProjEd/EdActions.cpp \
     Misc/oal_manager.cpp \
@@ -47,7 +45,11 @@ SOURCES += \
     Misc/ProjBuilder.cpp \
     Scripting/LuaScript.cpp \
     Scripting/zsensdk.cpp \
-    Render/MatShaderProps.cpp
+    Render/MatShaderProps.cpp \
+    World/GameObject.cpp \
+    World/GoProperty/go_filestream.cpp \
+    World/GoProperty/go_properties.cpp \
+    World/GoProperty/tile_properties.cpp
 
 HEADERS += \
         mainwin.h \

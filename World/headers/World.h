@@ -144,7 +144,7 @@ public:
     int getAliveChildrenAmount(); //Gets current amount of children objects (exclude removed chidren)
     void pick(); //Mark object and its children picked
 
-    bool addProperty(int property); //Adds property with property ID
+    bool addProperty(PROPERTY_TYPE property); //Adds property with property ID
     bool addTransformProperty();
     bool addLabelProperty();
 

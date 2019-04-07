@@ -54,7 +54,7 @@ bool ZSPIRE::Texture::LoadDDSTextureFromFile(const char* path) {
 	std::cout << "TEXTURE: Loading texture from file : " << path << std::endl;
 #endif
 
-	FILE * file = fopen(path, "rb"); //Opening file stream
+    FILE * file = fopen(path, "rb"); //Opening file stream
 	if (file == NULL) { //Opening file stream failed, no file
 		std::cout << "TEXTURE: FATAL: Error opening file stream! Perhaps, file " << path << " is missing!" << std::endl;
 		return false;
@@ -100,8 +100,7 @@ bool ZSPIRE::Texture::LoadDDSTextureFromBuffer(unsigned char* data, size_t data_
 	int WIDTH = *(unsigned int*)&(data[16]); //Getting width of texture in px info
 	unsigned int linearSize = *(unsigned int*)&(data[20]);
 	unsigned int mipMapCount = *(unsigned int*)&(data[28]);
-    unsigned int fourCC = *(unsigned int*)&(data[84]);
-    //unsigned int fourCC = *(reinterpret_cast<unsigned int*>(&(data[84])));
+    unsigned int fourCC = *(reinterpret_cast<unsigned int*>(&(data[84])));
 
 	unsigned char * bufferT;
 	unsigned int bufsize;

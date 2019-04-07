@@ -132,8 +132,6 @@ bool ZSPIRE::Shader::compileFromFile(const char* VSpath, const char* FSpath){
     setGLuniformInt("tPos", 12);
     setGLuniformInt("tTransparent", 13);
 
-	setGLuniformInt("shadow0", 20);
-
     this->isCreated = true; //Shader created & compiled now
 	return true;
 

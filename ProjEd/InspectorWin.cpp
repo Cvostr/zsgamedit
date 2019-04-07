@@ -154,7 +154,7 @@ void InspectorWin::onPropertyChange(){
 
 void AddGoComponentDialog::onAddButtonPressed(){
     GameObject* object_ptr = static_cast<GameObject*>(this->g_object_ptr);
-    object_ptr->addProperty(comp_type->text().toInt());
+    object_ptr->addProperty(static_cast<PROPERTY_TYPE>(comp_type->text().toInt()));
 
     auto prop_ptr = object_ptr->getPropertyPtrByType(comp_type->text().toInt());
     prop_ptr->onAddToObject();

@@ -127,6 +127,10 @@ GameObject* ZSENSDK::ZSENGmObject::updPtr(){
     return object_ptr;
 }
 
+std::string ZSENSDK::ZSENGmObject::getLabel(){
+    return this->updPtr()->label->toStdString();
+}
+
 ZSENSDK::ZSENTransformProperty ZSENSDK::ZSENGmObject::transform(){
     ZSENTransformProperty result;
     result.prop_ptr = static_cast<TransformProperty*>(this->updPtr()->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
@@ -301,6 +305,8 @@ void ZSENSDK::bindSDK(lua_State* state){
 luabridge::getGlobalNamespace(state)
         .beginNamespace("engine")
         .beginClass <ZSENGmObject>("GameObject")
+
+        .addFunction("getLabel", &ZSENSDK::ZSENGmObject::getLabel)
 
         .addFunction("transform", &ZSENSDK::ZSENGmObject::transform)
         .addFunction("audio", &ZSENSDK::ZSENGmObject::audio)
