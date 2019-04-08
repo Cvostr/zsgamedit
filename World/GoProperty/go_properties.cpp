@@ -575,6 +575,7 @@ void MaterialProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
 void MaterialProperty::onValueChanged(){
     Material* newmat_ptr = go_link.world_ptr->getMaterialPtrByName(material_path);
 
+    //Check, if material file has changed
     if(newmat_ptr != this->material_ptr){
         this->material_ptr = newmat_ptr;
         this->group_ptr = newmat_ptr->group_ptr;
@@ -592,7 +593,6 @@ void MaterialProperty::onValueChanged(){
         switch(prop_ptr->type){
             case MATSHPROP_TYPE_TEXTURE:{
                 //Cast pointer
-                TextureMaterialShaderProperty* texture_p = static_cast<TextureMaterialShaderProperty*>(prop_ptr);
                 TextureMtShPropConf* texture_conf = static_cast<TextureMtShPropConf*>(conf_ptr);
 
                 texture_conf->texture = go_link.world_ptr->getTexturePtrByRelPath(texture_conf->path);
@@ -601,7 +601,7 @@ void MaterialProperty::onValueChanged(){
             }
         }
     }
-
+    //save changes to material file
     material_ptr->saveToFile();
 }
 
@@ -678,7 +678,7 @@ void ScriptGroupProperty::onValueChanged(){
     if(static_cast<int>(scripts_attached.size()) != this->scr_num){ //if size changed
         this->scripts_attached.resize(this->scr_num);
         //Iterate over all scripts and use absolute path
-        for(unsigned int script_i = 0; script_i < scr_num; script_i ++){
+        for(int script_i = 0; script_i < scr_num; script_i ++){
             //Set absolute path to script object
             scripts_attached[script_i].fpath = project_ptr->root_path + "/" + path_names[script_i];
         }
@@ -696,7 +696,7 @@ void ScriptGroupProperty::addPropertyInterfaceToInspector(InspectorWin* inspecto
     scriptnum_area->go_property = static_cast<void*>(this);
     inspector->addPropertyArea(scriptnum_area);
 
-    for(unsigned int script_i = 0; script_i < scr_num; script_i ++){
+    for(int script_i = 0; script_i < scr_num; script_i ++){
         PickResourceArea* area = new PickResourceArea;
         area->setLabel("Lua Script");
         area->go_property = static_cast<void*>(this);

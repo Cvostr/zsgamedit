@@ -4,9 +4,16 @@
 
 void ObjectScript::_InitScript() {
     L = luaL_newstate();
-    luaL_dofile(L, fpath.toStdString().c_str());
+    int start_result = luaL_dofile(L, fpath.toStdString().c_str());
+
+    if(start_result == 1){
+        std::cout << "SCRIPT" << fpath.toStdString() << " error loading occured!" << std::endl;
+        std::cout << "ERROR: " << lua_tostring(L, -1) << std::endl;
+    }
+
     luaL_openlibs(L);
     lua_pcall(L, 0, 0, 0);
+
 
     //Bind DSDK to script
     ZSENSDK::bindSDK(L);

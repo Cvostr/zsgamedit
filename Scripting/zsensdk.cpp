@@ -116,6 +116,11 @@ ZSENSDK::Input::MouseState ZSENSDK::Input::getMouseState(){
     return mouse;
 }
 
+void ZSENSDK::Input::clearMouseState(){
+    mouse.mouseRelX = 0;
+    mouse.mouseRelY = 0;
+}
+
 ZSVECTOR3 ZSENSDK::Math::vnormalize(ZSVECTOR3 vec){
     ZSVECTOR3 result = vec;
     vNormalize(&result);

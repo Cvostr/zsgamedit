@@ -104,6 +104,7 @@ int main(int argc, char *argv[])
                     w.edit_win_ptr->glRender(); //Draw OpenGL window
                 }
            }
+    ZSENSDK::Input::clearMouseState();
     ZSENSDK::Input::clearPressedKeys();
     }
     return 0;

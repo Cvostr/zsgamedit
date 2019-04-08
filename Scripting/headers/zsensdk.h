@@ -93,6 +93,7 @@ namespace Input {
     void addPressedKeyToQueue(int keycode);
     void addHeldKeyToQueue(int keycode);
     void removeHeldKeyFromQueue(int keycode);
+    void clearMouseState();
 
     void clearPressedKeys();
     bool isKeyPressed(int keycode);

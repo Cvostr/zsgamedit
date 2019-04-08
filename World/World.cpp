@@ -374,7 +374,7 @@ void World::openFromFile(QString file, QTreeWidget* w_ptr){
             child_go_ptr->hasParent = true;
         }
     }
-
+    //Now add all objects to inspector tree
     for(unsigned int obj_i = 0; obj_i < this->objects.size(); obj_i ++){
         GameObject* obj_ptr = &this->objects[obj_i];
         if(obj_ptr->parent.isEmpty()){ //If object has no parent

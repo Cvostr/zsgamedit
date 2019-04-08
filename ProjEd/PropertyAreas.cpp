@@ -424,7 +424,7 @@ void ResourcePickDialog::onNeedToShow(){
     this->extension_mask = area->extension_mask; //send extension mask
     this->list->clear();
     //Receiving pointer to project
-    Project* project_ptr = static_cast<Project*>(static_cast<GameObjectProperty*>(this->area->go_property)->world_ptr->proj_ptr);
+    Project* project_ptr = static_cast<Project*>(static_cast<GameObjectProperty*>(this->area->go_property)->go_link.world_ptr->proj_ptr);
     unsigned int resources_num = static_cast<unsigned int>(project_ptr->resources.size());
 
     if(area->isShowNoneItem){
@@ -453,7 +453,7 @@ void ResourcePickDialog::onNeedToShow(){
 
 void ResourcePickDialog::findFiles(QString directory){
     //Obtain pointer to project
-    Project* project_ptr = static_cast<Project*>(static_cast<GameObjectProperty*>(this->area->go_property)->world_ptr->proj_ptr);
+    Project* project_ptr = static_cast<Project*>(static_cast<GameObjectProperty*>(this->area->go_property)->go_link.world_ptr->proj_ptr);
     QDir _directory (directory); //Creating QDir object
     _directory.setFilter(QDir::Files | QDir::Dirs | QDir::NoSymLinks | QDir::NoDot | QDir::NoDotDot);
     _directory.setSorting(QDir::DirsLast); //I want to recursive call this function after all files

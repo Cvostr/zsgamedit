@@ -57,7 +57,7 @@ class GameObjectProperty{
 public:
     PROPERTY_TYPE type; //Describe TYPE of property
     bool active; //Is property working
-    GameObjectLink go_link;
+    GameObjectLink go_link; //link to object, that holds this property
     World* world_ptr; //Sometimes may be useful
 
     GameObjectProperty();
