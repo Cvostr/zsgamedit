@@ -443,6 +443,7 @@ AudioSourceProperty::AudioSourceProperty(){
     type = GO_PROPERTY_TYPE_AUDSOURCE;
 
     buffer_ptr = nullptr;
+    this->resource_relpath = "@none";
 
     source.Init();
 }
@@ -477,6 +478,8 @@ void AudioSourceProperty::onValueChanged(){
 void AudioSourceProperty::updateAudioPtr(){
     this->buffer_ptr = world_ptr->getSoundPtrByName(resource_relpath);
 
+    if(buffer_ptr == nullptr) return;
+
     this->source.setAlBuffer(this->buffer_ptr);
 }
 
@@ -500,7 +503,7 @@ void AudioSourceProperty::copyTo(GameObjectProperty* dest){
     _dest->source.source_pitch = this->source.source_pitch;
     _dest->source.setPosition(this->source.source_pos);
     _dest->buffer_ptr = this->buffer_ptr;
-    _dest->source.setAlBuffer(this->buffer_ptr);
+    //_dest->source.setAlBuffer(this->buffer_ptr);
 }
 
 void AudioSourceProperty::audio_start(){

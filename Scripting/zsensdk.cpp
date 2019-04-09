@@ -59,6 +59,7 @@ void ZSENSDK::Debug::Log(std::string text){
 }
 
 void ZSENSDK::Input::addPressedKeyToQueue(int keycode){
+    //if we have enough free space
     if(pressed_keys_q_size > KEYS_QUEUE_SIZE) return;
     pressed_keys_queue[pressed_keys_q_size] = keycode;
     pressed_keys_q_size += 1;
@@ -207,6 +208,13 @@ void ZSENSDK::ZSENTransformProperty::setScale(ZSVECTOR3 scale){
     this->prop_ptr->updateMat();
 }
 //AudioSource functions
+void ZSENSDK::ZSENAudSourceProperty::setAudioFile(std::string aud){
+    AudioSourceProperty* prop_ptr = static_cast<AudioSourceProperty*>(this->prop_ptr);
+    //Assign new audio path
+    prop_ptr->resource_relpath = QString::fromStdString(aud);
+    //update audio buffer pointer
+    prop_ptr->updateAudioPtr();
+}
 void ZSENSDK::ZSENAudSourceProperty::Play(){
     AudioSourceProperty* prop_ptr = static_cast<AudioSourceProperty*>(this->prop_ptr);
     prop_ptr->audio_start();
@@ -234,6 +242,13 @@ void ZSENSDK::ZSENAudSourceProperty::setPitch(float pitch){
     prop_ptr->source.apply_settings(); //Apply sound settings
 }
 //TileProperty functions
+void ZSENSDK::ZSENTileProperty::setDiffuseTexture(std::string texture){
+    TileProperty* prop_ptr = static_cast<TileProperty*>(this->prop_ptr);
+    //Assign new texture path
+    prop_ptr->diffuse_relpath = QString::fromStdString(texture);
+    //Update texture pointer
+    prop_ptr->updTexturePtr();
+}
 void ZSENSDK::ZSENTileProperty::playAnim(){
     TileProperty* prop_ptr = static_cast<TileProperty*>(this->prop_ptr);
     prop_ptr->anim_state.playing = true; //Set boolean to playing
@@ -353,6 +368,7 @@ luabridge::getGlobalNamespace(state)
 
 
         .deriveClass <ZSENAudSourceProperty, ZSENObjectProperty>("AudioSource")
+        .addFunction("setAudioFile", &ZSENSDK::ZSENAudSourceProperty::setAudioFile)
         .addFunction("Play", &ZSENSDK::ZSENAudSourceProperty::Play)
         .addFunction("Stop", &ZSENSDK::ZSENAudSourceProperty::Stop)
         .addFunction("getGain", &ZSENSDK::ZSENAudSourceProperty::getGain)
@@ -363,6 +379,7 @@ luabridge::getGlobalNamespace(state)
 
         .deriveClass <ZSENTileProperty, ZSENObjectProperty>("Tile2D")
         .addFunction("playAnim", &ZSENSDK::ZSENTileProperty::playAnim)
+        .addFunction("setDiffuseTexture", &ZSENSDK::ZSENTileProperty::setDiffuseTexture)
         .addFunction("stopAnim", &ZSENSDK::ZSENTileProperty::stopAnim)
         .endClass()
 

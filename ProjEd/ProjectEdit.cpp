@@ -265,13 +265,17 @@ void EditWindow::onNewScene(){
 }
 
 void EditWindow::onNewScript(){
-    std::string scriptContent = "onStart = function(g_object, world)\n return 0\nend\n\n";
-            scriptContent +=  "onFrame = function(frameTime)\n return 0\nend";
+    std::string scriptContent = "onStart = function(g_object, world)\n  return 0\nend\n\n";
+            scriptContent +=  "onFrame = function(frameTime)\n  return 0\nend";
     this->createNewTextFile(current_dir, "Script", ".lua",scriptContent);
+
+    updateFileList(); //Make new file visible
 }
 void EditWindow::onNewMaterial(){
     std::string matContent = "ZSP_MATERIAL\nGROUP @default\n";
     this->createNewTextFile(current_dir, "Material", ".zsmat", matContent);
+
+    updateFileList(); //Make new file visible
 }
 
 GameObject* EditWindow::onAddNewGameObject(){

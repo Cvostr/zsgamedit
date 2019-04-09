@@ -106,12 +106,17 @@ void BlobWriter::writeToBlob(std::string file_path, std::string rel_path){
 
     int size = getFileSize(file_path);
     unsigned char* data = new unsigned char[size]; //allocate memory
-
+    //open input stream of resource file
     std::ifstream file_stream;
     file_stream.open(file_path, std::ifstream::binary);
+    //read resource file
     file_stream.read(reinterpret_cast<char*>(data), size);
+    file_stream.close();
+
     //Write data
     blob_stream.write(reinterpret_cast<char*>(data), size);
+
+    delete[] data; //free data
 
     //Write data to map
     map_stream << "entry " << rel_path << " "; //write header

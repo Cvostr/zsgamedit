@@ -1,5 +1,5 @@
-#include "../ProjEd/headers/ProjectEdit.h"
-#include "headers/World.h"
+#include "../../ProjEd/headers/ProjectEdit.h"
+#include "../headers/World.h"
 
 #ifdef __linux__
 #include <unistd.h>
@@ -9,9 +9,9 @@
 #include <Windows.h> //For Sleep();
 #endif
 
-#include "headers/2dtileproperties.h"
-#include "headers/obj_properties.h"
-#include "../ProjEd/headers/InspEditAreas.h"
+#include "../headers/2dtileproperties.h"
+#include "../headers/obj_properties.h"
+#include "../../ProjEd/headers/InspEditAreas.h"
 
 static TileGroupProperty* current_property; //Property, that shown
 

@@ -10,6 +10,12 @@
     <height>390</height>
    </rect>
   </property>
+  <property name="minimumSize">
+   <size>
+    <width>518</width>
+    <height>390</height>
+   </size>
+  </property>
   <property name="windowTitle">
    <string>Build Project</string>
   </property>
@@ -43,7 +49,7 @@
      <x>0</x>
      <y>0</y>
      <width>518</width>
-     <height>23</height>
+     <height>22</height>
     </rect>
    </property>
   </widget>

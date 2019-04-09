@@ -35,6 +35,8 @@ class ZSENTileProperty : public ZSENObjectProperty{
 public:
     void* prop_ptr;
 
+    void setDiffuseTexture(std::string texture);
+
     void playAnim();
     void stopAnim();
 };
@@ -42,6 +44,8 @@ public:
 class ZSENAudSourceProperty : public ZSENObjectProperty{
 public:
     void* prop_ptr;
+
+    void setAudioFile(std::string aud);
 
     float getGain();
     float getPitch();
