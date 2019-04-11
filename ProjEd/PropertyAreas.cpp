@@ -364,8 +364,15 @@ void PickResourceArea::setup(){
     relpath_label->setText(resource_relpath);
 }
 
-void PickResourceArea::updateState(){
+void PickResourceArea::updateValues(){
+    if(this->rel_path == nullptr) //If vector hasn't been set
+        return; //Go out
+    //Get current value in text field
+    QString cur = this->relpath_label->text();
 
+    if(*rel_path != cur){
+        this->relpath_label->setText(*rel_path);
+    }
 }
 
 IntPropertyArea::IntPropertyArea(){
@@ -522,13 +529,16 @@ ZSColorPickDialog::ZSColorPickDialog(QWidget* parent) : QColorDialog(parent){
 
 void ZSColorPickDialog::onNeedToShow(){
     QColor color = this->getColor(QColor(color_ptr->r, color_ptr->g, color_ptr->b)); //invoke dialog
+
+    if(!color.isValid()) return; //user canceled dialog
+    //transform QColor to ZSRGBCOLOR
     ZSRGBCOLOR _color = ZSRGBCOLOR(color.red(), color.green(), color.blue());
     _color.updateGL();
 
     //Store old values
     GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(this->area_ptr->go_property);
     getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
-
+    //Store new value and call property update
     *color_ptr = _color;
     area_ptr->updText();
     area_ptr->PropertyEditArea::callPropertyUpdate();

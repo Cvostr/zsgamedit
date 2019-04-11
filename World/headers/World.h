@@ -31,6 +31,7 @@ enum PROPERTY_TYPE{
     GO_PROPERTY_TYPE_MATERIAL,
     GO_PROPERTY_TYPE_SCRIPTGROUP,
     GO_PROPERTY_TYPE_COLLIDER,
+    GO_PROPERTY_TYPE_RIGIDBODY,
     GO_PROPERTY_TYPE_TILE_GROUP = 1000,
     GO_PROPERTY_TYPE_TILE = 1001
 };
@@ -144,6 +145,8 @@ public:
     int getAliveChildrenAmount(); //Gets current amount of children objects (exclude removed chidren)
     void pick(); //Mark object and its children picked
 
+    void setActive(bool active);
+
     bool addProperty(PROPERTY_TYPE property); //Adds property with property ID
     bool addTransformProperty();
     bool addLabelProperty();
@@ -152,7 +155,7 @@ public:
     LabelProperty* getLabelProperty();
     TransformProperty* getTransformProperty();
     GameObjectLink getLinkToThisObject();
-    void trimChildrenArray();
+    void trimChildrenArray(); //remove deleted children from vector
 
     void addChildObject(GameObjectLink link);
     void removeChildObject(GameObjectLink link);
@@ -167,6 +170,7 @@ public:
     void onUpdate(int deltaTime); //calls onUpdate on all properties
     void onPreRender(RenderPipeline* pipeline); //calls onPreRender on all properties
     void onTrigger(GameObject* obj);
+    bool isRigidbody(); //true, if object has rigidbody component
 
     void putToSnapshot(GameObjectSnapshot* snapshot);
     void recoverFromSnapshot(GameObjectSnapshot* snapshot);
@@ -177,14 +181,14 @@ public:
 
 class GameObjectSnapshot{
 public:
-    GameObject reserved_obj;
+    GameObject reserved_obj; //class object
     std::vector<GameObjectLink> children; //Vector to store links to children of object
     std::vector<GameObjectSnapshot> children_snapshots;
-    GameObjectProperty* properties[OBJ_PROPS_SIZE];
+    GameObjectProperty* properties[OBJ_PROPS_SIZE]; //pointers to properties of object
 
     GameObjectLink parent_link;
 
-    int props_num;
+    int props_num; //number of properties
 
     int obj_array_ind;
 

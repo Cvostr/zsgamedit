@@ -92,8 +92,8 @@ public:
     void destroyLayout(); //Destoroy base layout
     virtual void destroyContent(); //Destroy content, placed by inherited class
     virtual void setup(); //Uses to prepare base values
-    virtual void writeNewValues(); //Updates value
-    virtual void updateValues(); //if some text edited
+    virtual void writeNewValues(); //if some text edited
+    virtual void updateValues(); //if value changed by other method
     virtual void addToInspector(InspectorWin* win); //Add edit area to inspector layout
     void callPropertyUpdate(); //Call property, that created this area to update
 
@@ -117,7 +117,7 @@ public:
     void destroyContent(); //destroy content, created by this class
     void setup(); //Virtual, to prepare base values
     void addToInspector(InspectorWin* win);
-    void updateState();
+    void updateValues();
 };
 
 

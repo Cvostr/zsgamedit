@@ -114,4 +114,19 @@ public:
     LightsourceProperty();
 };
 
+class RigidbodyProperty : public GameObjectProperty{
+public:
+
+    ZSVECTOR3 speed;
+
+    float mass;
+    bool hasGravity;
+
+    void addPropertyInterfaceToInspector(InspectorWin* inspector);
+    void onUpdate(float deltaTime);
+    void copyTo(GameObjectProperty* dest);
+
+    RigidbodyProperty();
+};
+
 #endif // OBJ_PROPERTIES_H

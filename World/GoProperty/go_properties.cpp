@@ -60,6 +60,9 @@ QString getPropertyString(int type){
         case GO_PROPERTY_TYPE_COLLIDER:{
             return QString("Collider");
         }
+        case GO_PROPERTY_TYPE_RIGIDBODY:{
+            return QString("Rigidbody");
+        }
         case GO_PROPERTY_TYPE_TILE_GROUP:{
             return QString("Tile Group");
         }
@@ -109,6 +112,11 @@ GameObjectProperty* allocProperty(int type){
         }
         case GO_PROPERTY_TYPE_COLLIDER:{
             ColliderProperty* ptr = new ColliderProperty;
+            _ptr = static_cast<GameObjectProperty*>(ptr);
+            break;
+        }
+        case GO_PROPERTY_TYPE_RIGIDBODY:{
+            RigidbodyProperty* ptr = new RigidbodyProperty;
             _ptr = static_cast<GameObjectProperty*>(ptr);
             break;
         }
@@ -193,7 +201,7 @@ void TransformProperty::setTranslation(ZSVECTOR3 new_translation){
     this->translation = new_translation;
     updateMat();
 
-    if(go_link.world_ptr->isCollide(this)){ //if really collides
+    if(go_link.world_ptr->isCollide(this) && go_link.ptr->isRigidbody()){ //if really collides
         this->translation = temp_pos; //Set temporary value
         updateMat(); //Update matrix again
         return;
@@ -445,6 +453,9 @@ AudioSourceProperty::AudioSourceProperty(){
     buffer_ptr = nullptr;
     this->resource_relpath = "@none";
 
+    this->source.source_gain = 1.0f;
+    this->source.source_pitch = 1.0f;
+
     source.Init();
 }
 
@@ -669,6 +680,50 @@ ColliderProperty::ColliderProperty(){
 
     isTrigger = false;
     coll_type = COLLIDER_TYPE_BOX;
+}
+
+RigidbodyProperty::RigidbodyProperty(){
+
+    speed = ZSVECTOR3(0.0f, 0.0f, 0.0f);
+
+    mass = 1.0f;
+    hasGravity = true;
+
+    type = GO_PROPERTY_TYPE_RIGIDBODY;
+}
+
+bool GameObject::isRigidbody(){
+    if(getPropertyPtrByType(GO_PROPERTY_TYPE_RIGIDBODY) != nullptr)
+        return true;
+
+    return false;
+}
+
+void RigidbodyProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
+    BoolCheckboxArea* grav = new BoolCheckboxArea;
+    grav->setLabel("has gravity ");
+    grav->go_property = static_cast<void*>(this);
+    grav->bool_ptr = &this->hasGravity;
+    inspector->addPropertyArea(grav);
+
+    FloatPropertyArea* mass_area = new FloatPropertyArea;
+    mass_area->setLabel("Mass"); //Its label
+    mass_area->value = &this->mass;
+    mass_area->go_property = static_cast<void*>(this);
+    inspector->addPropertyArea(mass_area);
+}
+
+void RigidbodyProperty::onUpdate(float deltaTime){
+    //Obtain pointer to transform property
+    TransformProperty* transform_ptr = go_link.updLinkPtr()->getTransformProperty();
+}
+
+void RigidbodyProperty::copyTo(GameObjectProperty* dest){
+    if(dest->type != GO_PROPERTY_TYPE_RIGIDBODY) return;
+
+    RigidbodyProperty* rigi_prop = static_cast<RigidbodyProperty*>(dest);
+    rigi_prop->hasGravity = this->hasGravity;
+    rigi_prop->mass = this->mass;
 }
 
 void ScriptGroupProperty::onValueChanged(){

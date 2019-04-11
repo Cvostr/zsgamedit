@@ -341,6 +341,10 @@ void GameObject::pick(){
     }
 }
 
+void GameObject::setActive(bool active){
+    this->active = active;
+}
+
 void GameObject::copyTo(GameObject* dest){
     dest->array_index = this->array_index;
     dest->alive = this->alive;
