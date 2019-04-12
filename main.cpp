@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
                         w.edit_win_ptr->input_state.mouseY = event.motion.y;
                         //update state in ZSENSDK
                         mstate->mouseX = event.motion.x;
-                        mstate->mouseX = event.motion.x;
+                        mstate->mouseY = event.motion.y;
                         mstate->mouseRelX = event.motion.xrel;
                         mstate->mouseRelY = event.motion.yrel;
                     }

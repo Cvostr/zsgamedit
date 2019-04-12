@@ -310,7 +310,8 @@ void ProjectCtxMenu::runEngineClicked(ZSGAPI gapi){
     ZSGAME_DESC game_info;
     game_info.app_label = proj_label.toStdString(); //Setting app label
     game_info.app_version = 0;
-    game_info.resource_type = TYPE_FILES;
+    game_info.game_perspective = static_cast<ZSPERSPECTIVE>(conf->editwin_proj.perspective);
+    game_info.resource_map_file_path = conf->projectRootPath.toStdString() + "/.build/resources.map";
     game_info.game_dir = conf->projectRootPath.toStdString();
     game_info.startup_scene = conf->editwin_proj.startup_scene;
 

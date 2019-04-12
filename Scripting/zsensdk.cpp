@@ -128,6 +128,10 @@ ZSVECTOR3 ZSENSDK::Math::vnormalize(ZSVECTOR3 vec){
     return result;
 }
 
+ZSVECTOR3 ZSENSDK::Math::vadd(ZSVECTOR3 v1, ZSVECTOR3 v2){
+    return v1 + v2;
+}
+
 GameObject* ZSENSDK::ZSENGmObject::updPtr(){
     this->object_ptr = world_ptr->getObjectByStringId(this->str_id);
     return object_ptr;
@@ -290,7 +294,8 @@ void ZSENSDK::bindSDK(lua_State* state){
     luabridge::getGlobalNamespace(state)
         .addFunction("length", &length)
         .addFunction("distance", &getDistance)
-        .addFunction("normalize", &ZSENSDK::Math::vnormalize);
+        .addFunction("normalize", &ZSENSDK::Math::vnormalize)
+        .addFunction("v_add", &ZSENSDK::Math::vadd);
 
     luabridge::getGlobalNamespace(state).beginClass <ZSVIEWPORT>("CmViewport")
             .addData("startX", &ZSVIEWPORT::startX)

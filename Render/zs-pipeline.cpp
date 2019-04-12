@@ -294,6 +294,14 @@ ZSPIRE::Shader* RenderPipeline::processShaderOnObject(void* _obj){
                         result->setGLuniformFloat(float_p->integerUniform.c_str(), float_conf->value);
                         break;
                     }
+                    case MATSHPROP_TYPE_INTEGER:{
+                        //Cast pointer
+                        IntegerMaterialShaderProperty* int_p = static_cast<IntegerMaterialShaderProperty*>(prop_ptr);
+                        IntegerMtShPropConf* int_conf = static_cast<IntegerMtShPropConf*>(conf_ptr);
+
+                        result->setGLuniformInt(int_p->integerUniform.c_str(), int_conf->value);
+                        break;
+                    }
                 }
             }
 

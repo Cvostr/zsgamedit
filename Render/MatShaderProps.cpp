@@ -191,6 +191,13 @@ void Material::saveToFile(){
                 mat_stream << float_conf->value;
                 break;
             }
+            case MATSHPROP_TYPE_INTEGER:{
+                //Cast pointer
+                IntegerMtShPropConf* int_conf = static_cast<IntegerMtShPropConf*>(conf_ptr);
+                //Write value
+                mat_stream << int_conf->value;
+                break;
+            }
         }
     mat_stream << "\n"; //Write divider
     }
@@ -248,9 +255,19 @@ void Material::loadFromFile(std::string fpath){
 
                             float_conf->value = value;
                             break;
-                        }
+                       }
+                    case MATSHPROP_TYPE_INTEGER:{
+                        //Cast pointer
+                        IntegerMtShPropConf* int_conf = static_cast<IntegerMtShPropConf*>(conf_ptr);
+
+                        int value;
+                        mat_stream >> value;
+
+                        int_conf->value = value;
+                        break;
                    }
-                    mat_stream.seekg(1, std::ofstream::cur); //Skip space
+                   }
+                   mat_stream.seekg(1, std::ofstream::cur); //Skip space
                 }
             }
         }
