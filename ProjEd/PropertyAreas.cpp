@@ -444,7 +444,7 @@ void ResourcePickDialog::onNeedToShow(){
         new QListWidgetItem("@cube", this->list);
     }
 
-    if(area->resource_type < PICK_RES_TYPE_FILE){ // if it is an resource
+    if(area->resource_type < RESOURCE_TYPE_FILE){ // if it is an resource
         //Iterate over all resources
         for(unsigned int res_i = 0; res_i < resources_num; res_i ++){
             Resource* resource_ptr = &project_ptr->resources[res_i];
@@ -494,6 +494,7 @@ ResourcePickDialog::ResourcePickDialog(QWidget* parent) : QDialog (parent){
     contentLayout->addWidget(list);
     connect(this->list, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(onResourceSelected())); //Connect to slot
     setLayout(contentLayout);
+
 }
 ResourcePickDialog::~ResourcePickDialog(){
     delete list;

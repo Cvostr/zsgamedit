@@ -3,6 +3,7 @@
 
 #ifndef project_edit_h
 #define INCLUDE_PRJ_ONLY
+#include "../../Misc/headers/zs_types.h"
 #include "../../ProjEd/headers/ProjectEdit.h"
 #include <QDialog>
 #include <QMainWindow>

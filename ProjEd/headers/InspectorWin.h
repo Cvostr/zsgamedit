@@ -16,14 +16,11 @@
 #include <QScrollArea>
 
 #include "../../Render/headers/zs-math.h"
+#include "../../Misc/headers/zs_types.h"
 
 enum EDITAREA_TYPE {PEA_TYPE_NONE, PEA_TYPE_STRING, PEA_TYPE_FLOAT, PEA_TYPE_FLOAT2, PEA_TYPE_FLOAT3, PEA_TYPE_INT,
                    PEA_TYPE_RESPICK, PEA_TYPE_COLOR, PEA_TYPE_BOOL};
 
-#define PICK_RES_TYPE_MESH 0
-#define PICK_RES_TYPE_TEXTURE 1
-#define PICK_RES_TYPE_AUDIO 2
-#define PICK_RES_TYPE_FILE 1000
 
 class InspectorWin;
 class ResourcePickDialog;
@@ -106,7 +103,7 @@ public:
 
     bool isShowNoneItem; //If enabled, @none will be added to list
     QString extension_mask; //Extension mask to show needed files
-    unsigned int resource_type; //flag of resource type
+    RESOURCE_TYPE resource_type; //flag of resource type
     QString* rel_path; //Pointer to store result
 
     QPushButton* respick_btn; //button to press

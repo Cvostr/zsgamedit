@@ -21,6 +21,7 @@ struct Project;
 
 #include "../../World/headers/World.h"
 #include "../../Misc/headers/ProjBuilder.h"
+#include "../../Misc/headers/zs_types.h"
 
 enum GO_TRANSFORM_MODE{
     GO_TRANSFORM_MODE_NONE,
@@ -29,14 +30,13 @@ enum GO_TRANSFORM_MODE{
     GO_TRANSFORM_MODE_ROTATE
 };
 
-
 #define EW_CLOSE_REASON_UNCLOSED 0
 #define EW_CLOSE_REASON_PROJLIST 1
 #define EW_CLOSE_REASON_BUILD 2
 
 #endif
 
-enum RESOURCE_TYPE {RESOURCE_TYPE_TEXTURE, RESOURCE_TYPE_MESH, RESOURCE_TYPE_AUDIO, RESOURCE_TYPE_MATERIAL};
+
 
 #include <vector>
 #include <QString>

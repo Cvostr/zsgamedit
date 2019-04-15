@@ -760,7 +760,7 @@ void ScriptGroupProperty::addPropertyInterfaceToInspector(InspectorWin* inspecto
         area->go_property = static_cast<void*>(this);
         area->rel_path = &path_names[script_i];
         area->extension_mask = ".lua";
-        area->resource_type = PICK_RES_TYPE_FILE; //It should load meshes only
+        area->resource_type = RESOURCE_TYPE_FILE; //It should load meshes only
         inspector->addPropertyArea(area);
     }
 }

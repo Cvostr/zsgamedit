@@ -74,7 +74,8 @@ HEADERS += \
     World/headers/obj_properties.h \
     ProjEd/headers/InspEditAreas.h \
     triggers.h \
-    Render/headers/MatShaderProps.h
+    Render/headers/MatShaderProps.h \
+    Misc/headers/zs_types.h
 
 
 FORMS += \
