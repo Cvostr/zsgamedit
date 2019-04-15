@@ -6,7 +6,7 @@ void ObjectScript::_InitScript() {
     L = luaL_newstate();
     int start_result = luaL_dofile(L, fpath.toStdString().c_str());
 
-    if(start_result == 1){
+    if(start_result == 1){ //if error in script
         std::cout << "SCRIPT" << fpath.toStdString() << " error loading occured!" << std::endl;
         std::cout << "ERROR: " << lua_tostring(L, -1) << std::endl;
     }
