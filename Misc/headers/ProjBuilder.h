@@ -1,16 +1,15 @@
 #ifndef PROJBUILDER_H
 #define PROJBUILDER_H
 
-#ifndef project_edit_h
-#define INCLUDE_PRJ_ONLY
+
 #include "../../Misc/headers/zs_types.h"
-#include "../../ProjEd/headers/ProjectEdit.h"
+
 #include <QDialog>
 #include <QMainWindow>
 #include <QGridLayout>
 #include "ui_buildconsole.h"
 #include <fstream>
-#endif
+
 
 namespace Ui {
 class BuilderWindow;

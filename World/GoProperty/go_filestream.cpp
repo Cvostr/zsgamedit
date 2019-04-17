@@ -339,15 +339,15 @@ void GameObject::loadProperty(std::ifstream* world_stream){
         TileProperty* lptr = static_cast<TileProperty*>(prop_ptr);
         if(diffuse_rel_path.compare("@none") != 0){
             lptr->diffuse_relpath = QString::fromStdString(diffuse_rel_path); //Write loaded mesh relative path
-            lptr->updTexturePtr(); //Pointer will now point to mesh resource
         }
 
         std::string transparent_rel_path;
         *world_stream >> transparent_rel_path;
         if(transparent_rel_path.compare("@none") != 0){
             lptr->transparent_relpath = QString::fromStdString(transparent_rel_path); //Write loaded mesh relative path
-            lptr->updTexturePtr(); //Pointer will now point to mesh resource
         }
+
+        lptr->updTexturePtr(); //set pointers to textures in tile property
 
         world_stream->seekg(1, std::ofstream::cur);
         world_stream->read(reinterpret_cast<char*>(&lptr->anim_property.isAnimated), sizeof(bool));

@@ -47,24 +47,7 @@ class EditWindow;
 }
 #endif
 
-typedef struct Resource{
-    QString file_path; //Resource file
-    QString rel_path; //Resource project dir related path
-    RESOURCE_TYPE type; //Resource type
-    void* class_ptr; //Pointer to resource class
-}Resource;
 
-struct Project{
-    QString label; //Label of the project
-    QString root_path; //Project root folder
-
-    int version; //Project version
-    int perspective; //3D or 2D
-
-    std::string startup_scene;
-
-    std::vector<Resource> resources;
-};
 #ifndef INCLUDE_PRJ_ONLY
 struct EditorInputState{
     bool isLeftBtnHold; //Left mouse button
