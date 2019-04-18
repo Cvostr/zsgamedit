@@ -55,6 +55,8 @@ EditWindow::EditWindow(QWidget *parent) :
     QObject::connect(ui->actionNew_Light, SIGNAL(triggered()), this, SLOT(addNewLight()));
     QObject::connect(ui->actionNew_Tile, SIGNAL(triggered()), this, SLOT(addNewTile()));
 
+    QObject::connect(ui->actionRender_settings, SIGNAL(triggered()), this, SLOT(openRenderSettings()));
+
     ready = false; //Firstly set it to 0
     hasSceneFile = false; //No scene loaded by default
     isSceneRun = false; //Not running by default
@@ -278,6 +280,17 @@ void EditWindow::onNewMaterial(){
     updateFileList(); //Make new file visible
 }
 
+void EditWindow::openRenderSettings(){
+    _inspector_win->clearContentLayout(); //clear everything, that was before
+
+    RenderSettings* ptr = this->render->getRenderSettings();
+
+    ColorDialogArea* lcolor = new ColorDialogArea;
+    lcolor->setLabel("Ambient light color");
+    lcolor->color = &ptr->ambient_light_color;
+    _inspector_win->addPropertyArea(lcolor);
+}
+
 GameObject* EditWindow::onAddNewGameObject(){
     //get free index in array
     int free_ind = world.getFreeObjectSpaceIndex();
@@ -290,7 +303,7 @@ GameObject* EditWindow::onAddNewGameObject(){
         world.objects.push_back(obj);
     }
     //Create action
-    _ed_actions_container->newGameObjectAction(world.objects[free_ind].getLinkToThisObject());
+    _ed_actions_container->newGameObjectAction(world.objects[static_cast<unsigned int>(free_ind)].getLinkToThisObject());
 
     GameObject* obj_ptr = this->world.newObject(); //Add new object to world
     ui->objsList->addTopLevelItem(obj_ptr->item_ptr); //New object will not have parents, so will be spawned at top

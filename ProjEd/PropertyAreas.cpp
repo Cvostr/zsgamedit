@@ -538,7 +538,9 @@ void ZSColorPickDialog::onNeedToShow(){
 
     //Store old values
     GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(this->area_ptr->go_property);
-    getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
+    if(prop_ptr != nullptr){
+        getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
+    }
     //Store new value and call property update
     *color_ptr = _color;
     area_ptr->updText();

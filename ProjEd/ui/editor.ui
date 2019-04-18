@@ -133,6 +133,7 @@
     <addaction name="actionNew_Tile"/>
     <addaction name="separator"/>
     <addaction name="actionToggle_Cameras"/>
+    <addaction name="actionRender_settings"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -218,6 +219,11 @@
   <action name="actionCreateScript">
    <property name="text">
     <string>Script</string>
+   </property>
+  </action>
+  <action name="actionRender_settings">
+   <property name="text">
+    <string>Render settings</string>
    </property>
   </action>
  </widget>

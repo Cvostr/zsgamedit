@@ -21,6 +21,14 @@ enum PIPELINE_STATE {
     PIPELINE_STATE_MARKED
 };
 
+struct RenderSettings {
+    ZSRGBCOLOR ambient_light_color;
+
+    RenderSettings(){
+        ambient_light_color = ZSRGBCOLOR(255, 255, 255, 255);
+    }
+};
+
 class G_BUFFER_GL{
 protected:
     unsigned int depthBuffer;
@@ -48,6 +56,8 @@ private:
 
     ZSPIRE::Shader deffered_light;
     std::vector<void*> lights_ptr;
+
+    RenderSettings render_settings;
 public:
     float deltaTime;
     bool depthTest; //if enabled, GL will do depth testing
@@ -63,6 +73,8 @@ public:
     ZSPIRE::Shader* processShaderOnObject(void* _obj);
     ZSPIRE::Camera* cam;
     void* win_ptr;
+
+    RenderSettings* getRenderSettings();
 
     RenderPipeline();
     ~RenderPipeline();

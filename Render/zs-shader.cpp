@@ -77,14 +77,8 @@ bool readShaderFile(const char* path, char* result) {
 }
 
 bool ZSPIRE::Shader::compileFromFile(const char* VSpath, const char* FSpath){
-	char vsp[64];
-	char fsp[64];
 
-	strcpy(vsp, VSpath);
-	strcpy(fsp, FSpath);
-
-
-	std::cout << "OGL: Compiling shader " << vsp << " " << fsp << std::endl;
+    std::cout << "OGL: Compiling shader " << VSpath << " " << FSpath << std::endl;
 
 	Init();
 
@@ -97,8 +91,8 @@ bool ZSPIRE::Shader::compileFromFile(const char* VSpath, const char* FSpath){
 	const GLchar* vs = &vs_data[0];
 	const GLchar* fs = &fs_data[0];
 
-	readShaderFile(vsp, &vs_data[0]);
-	readShaderFile(fsp, &fs_data[0]);
+    readShaderFile(VSpath, &vs_data[0]);
+    readShaderFile(FSpath, &fs_data[0]);
 
 	glShaderSource(VS, 1, &vs, NULL); //Setting shader code text on vs
 	glShaderSource(FS, 1, &fs, NULL); //Setting shader code text on fs
@@ -241,7 +235,7 @@ void ZSPIRE::Shader::sendLight(unsigned int index, void* _light){
         //std::string spot_oangle;
         //spot_oangle = "lights[" + std::to_string(index) + "].spot_out_angle";
 
-        setGLuniformInt(type.c_str(), (int)light->light_type);
+        setGLuniformInt(type.c_str(), static_cast<int>(light->light_type));
         setGLuniformVec3(pos.c_str(), light->transform->_last_translation);
         setGLuniformVec3(dir.c_str(), light->direction);
         setGLuniformFloat(range.c_str(), light->range);

@@ -12,7 +12,7 @@ namespace ZSPIRE {
 	public:
 
 		void Init();
-		bool compileFromFile(const char* VSpath, const char* FSpath);
+        bool compileFromFile(const char* VSpath, const char* FSpath);
 		void Use();
 		void Destroy();
 

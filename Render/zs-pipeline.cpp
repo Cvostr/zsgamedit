@@ -10,6 +10,10 @@ RenderPipeline::RenderPipeline(){
     this->cullFaces = false;
 }
 
+RenderSettings* RenderPipeline::getRenderSettings(){
+    return &this->render_settings;
+}
+
 void RenderPipeline::setup(int bufWidth, int bufHeight){
     this->tile_shader.compileFromFile("Shaders/2d_tile/tile2d.vs", "Shaders/2d_tile/tile2d.fs");
     this->pick_shader.compileFromFile("Shaders/pick/pick.vs", "Shaders/pick/pick.fs");
@@ -136,6 +140,11 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr)
     glClear(GL_COLOR_BUFFER_BIT); //Clear screen
     gbuffer.bindTextures(); //Bind gBuffer textures
     deffered_light.Use(); //use deffered shader
+
+    deffered_light.setGLuniformVec3("ambient_color", ZSVECTOR3(render_settings.ambient_light_color.r / 255.0f,
+                                                               render_settings.ambient_light_color.g / 255.0f,
+                                                               render_settings.ambient_light_color.b / 255.0f));
+
     ZSPIRE::getPlaneMesh2D()->Draw(); //Draw screen
 
     SDL_GL_SwapWindow(w); //Send rendered frame

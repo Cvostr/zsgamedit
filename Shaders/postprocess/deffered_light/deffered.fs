@@ -31,6 +31,8 @@ uniform sampler2D tTransparent;
 uniform int lights_amount;
 uniform Light lights[100];
 
+uniform vec3 ambient_color;
+
 uniform vec3 cam_position;
 
 void main(){
@@ -38,7 +40,7 @@ void main(){
     vec3 FragPos = texture(tPos, UVCoord).rgb;
     vec3 Normal = texture(tNormal, UVCoord).rgb;
     
-    vec3 result = Diffuse.xyz;
+    vec3 result = Diffuse.xyz * ambient_color;
 
     float specularFactor = Diffuse.w; //Get factor in A channel
     vec3 camToFragDirection = normalize(cam_position - FragPos);

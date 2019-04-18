@@ -137,6 +137,8 @@ public slots:
     void onRedoPressed();
 
     void toggleCameras();
+
+    void openRenderSettings();
 private:
     QString current_dir; //current directory path string
     QString scene_path;
