@@ -230,8 +230,8 @@ public:
     SoundBuffer* getSoundPtrByName(QString label);
     Material* getMaterialPtrByName(QString label);
 
-    void saveToFile(QString file);
-    void openFromFile(QString file, QTreeWidget* w_ptr);
+    void saveToFile(QString file, RenderSettings* settings_ptr);
+    void openFromFile(QString file, QTreeWidget* w_ptr, RenderSettings* settings_ptr);
     void clear();
 
     void putToShapshot(WorldSnapshot* snapshot);

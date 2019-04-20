@@ -203,10 +203,12 @@ void EditWindow::openFile(QString file_path){
 
         obj_trstate.isTransforming = false;
         ppaint_state.enabled = false;
+        //Back render settings to defaults
+        this->render->getRenderSettings()->defaults();
 
         _ed_actions_container->clear();
         setupObjectsHieList(); //Clear everything, at first
-        world.openFromFile(file_path, ui->objsList); //Open this scene
+        world.openFromFile(file_path, ui->objsList, render->getRenderSettings()); //Open this scene
 
         scene_path = file_path; //Assign scene path
         hasSceneFile = true; //Scene is saved
@@ -236,7 +238,7 @@ void EditWindow::onSceneSaveAs(){
     QString filename = QFileDialog::getSaveFileName(this, tr("Save scene file"), project.root_path, "*.scn");
     if(!filename.endsWith(".scn")) //If filename doesn't end with ".scn"
         filename.append(".scn"); //Add this extension
-    world.saveToFile(filename); //Save to picked file
+    world.saveToFile(filename, render->getRenderSettings()); //Save to picked file
     scene_path = filename; //Assign scene path
     hasSceneFile = true; //Scene is saved
 
@@ -255,14 +257,25 @@ void EditWindow::onSceneSave(){
     if(hasSceneFile == false){ //If new created scene without file
         onSceneSaveAs(); //Show dialog and save
     }else{
-        world.saveToFile(this->scene_path);
+        world.saveToFile(this->scene_path, render->getRenderSettings());
     }
 }
 
 void EditWindow::onNewScene(){
     setupObjectsHieList();
     world.clear();
+
+    if(isSceneRun == true)
+        emit onRunProject();
+
+    ppaint_state.enabled = false;
     obj_trstate.isTransforming = false;
+    //clear actions history
+    _ed_actions_container->clear();
+
+    //Back render settings to defaults
+    this->render->getRenderSettings()->defaults();
+
     hasSceneFile = false; //We have new scene
 }
 

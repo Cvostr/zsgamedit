@@ -187,7 +187,7 @@ void ZSENSDK::ZSEN_World::loadWorldFromFile(std::string file){
     Project* proj_ptr = static_cast<Project*>(world_ptr->proj_ptr);
 
     QString load = proj_ptr->root_path + "/" + QString::fromStdString(file);
-    world_ptr->openFromFile(load, world_ptr->obj_widget_ptr);
+    //world_ptr->openFromFile(load, world_ptr->obj_widget_ptr, );
 }
 
 //Property functions

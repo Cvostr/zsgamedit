@@ -214,7 +214,7 @@ void World::unpickObject(){
     }
 }
 
-void World::saveToFile(QString file){
+void World::saveToFile(QString file, RenderSettings* settings_ptr){
     std::string fpath = file.toStdString();
 
     std::ofstream world_stream;
@@ -224,6 +224,12 @@ void World::saveToFile(QString file){
     world_stream << "ZSP_SCENE ";
     world_stream.write(reinterpret_cast<char*>(&version), sizeof(int));//Writing version
     world_stream.write(reinterpret_cast<char*>(&obj_num), sizeof(int)); //Writing objects amount
+    //Writing render settings
+    world_stream << "\nRENDER_SETTINGS_AMB_COLOR\n";
+    world_stream.write(reinterpret_cast<char*>(&settings_ptr->ambient_light_color.r), sizeof(int)); //Writing R component of amb color
+    world_stream.write(reinterpret_cast<char*>(&settings_ptr->ambient_light_color.g), sizeof(int)); //Writing G component of amb color
+    world_stream.write(reinterpret_cast<char*>(&settings_ptr->ambient_light_color.b), sizeof(int)); //Writing B component of amb color
+    world_stream << "\n_END\n";
 
     for(unsigned int obj_i = 0; obj_i < static_cast<unsigned int>(obj_num); obj_i ++){ //Iterate over all game objects
         GameObject* object_ptr = static_cast<GameObject*>(&this->objects[obj_i]);
@@ -304,7 +310,7 @@ bool World::isCollide(TransformProperty* prop){
     return false;
 }
 
-void World::openFromFile(QString file, QTreeWidget* w_ptr){
+void World::openFromFile(QString file, QTreeWidget* w_ptr, RenderSettings* settings_ptr){
     this->obj_widget_ptr = w_ptr;
 
     clear(); //Clear all objects
@@ -326,6 +332,14 @@ void World::openFromFile(QString file, QTreeWidget* w_ptr){
     while(!world_stream.eof()){ //While file not finished reading
         std::string prefix;
         world_stream >> prefix; //Read prefix
+
+        if(prefix.compare("RENDER_SETTINGS_AMB_COLOR") == 0){ //if it is render setting of ambient light color
+            world_stream.seekg(1, std::ofstream::cur);
+            world_stream.read(reinterpret_cast<char*>(&settings_ptr->ambient_light_color.r), sizeof(int)); //Writing R component of amb color
+            world_stream.read(reinterpret_cast<char*>(&settings_ptr->ambient_light_color.g), sizeof(int)); //Writing G component of amb color
+            world_stream.read(reinterpret_cast<char*>(&settings_ptr->ambient_light_color.b), sizeof(int)); //Writing B component of amb color
+        }
+
         if(prefix.compare("G_OBJECT") == 0){ //if it is game object
             GameObject object; //firstly, define an object
             object.world_ptr = this; //Writing pointer to world

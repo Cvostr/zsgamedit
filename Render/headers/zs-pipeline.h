@@ -24,8 +24,10 @@ enum PIPELINE_STATE {
 struct RenderSettings {
     ZSRGBCOLOR ambient_light_color;
 
+    void defaults();
+
     RenderSettings(){
-        ambient_light_color = ZSRGBCOLOR(255, 255, 255, 255);
+        defaults();
     }
 };
 

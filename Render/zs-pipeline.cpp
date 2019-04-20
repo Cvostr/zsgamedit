@@ -14,6 +14,10 @@ RenderSettings* RenderPipeline::getRenderSettings(){
     return &this->render_settings;
 }
 
+void RenderSettings::defaults(){
+    ambient_light_color = ZSRGBCOLOR(255, 255, 255, 255);
+}
+
 void RenderPipeline::setup(int bufWidth, int bufHeight){
     this->tile_shader.compileFromFile("Shaders/2d_tile/tile2d.vs", "Shaders/2d_tile/tile2d.fs");
     this->pick_shader.compileFromFile("Shaders/pick/pick.vs", "Shaders/pick/pick.fs");
