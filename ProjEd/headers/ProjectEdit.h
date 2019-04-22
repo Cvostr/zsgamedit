@@ -52,6 +52,7 @@ class EditWindow;
 struct EditorInputState{
     bool isLeftBtnHold; //Left mouse button
     bool isRightBtnHold; //Right mouse button
+    bool isMidBtnHold; //Middle button (wheel) hold
     bool isLCtrlHold;
     bool isRCtrlHold;
     bool isLAltHold;

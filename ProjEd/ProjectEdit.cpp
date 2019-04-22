@@ -107,6 +107,7 @@ void EditWindow::init(){
     input_state.isLCtrlHold = false;
     input_state.isRCtrlHold = false;
     input_state.isLAltHold = false;
+    input_state.isMidBtnHold = false;
 
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0)
     {
@@ -691,11 +692,6 @@ InspectorWin* EditWindow::getInspector(){
     return _inspector_win;
 }
 
-void ObjectCtxMenu::close(){
-    menu->removeAction(action_move);
-    menu->removeAction(action_scale);
-    menu->removeAction(action_rotate);
-}
 //Object Ctx menu slots
 void ObjectCtxMenu::onDeleteClicked(){
     _inspector_win->clearContentLayout(); //Prevent variable conflicts
@@ -747,6 +743,8 @@ void ObjTreeWgt::dropEvent(QDropEvent* event){
 }
 
 void EditWindow::onLeftBtnClicked(int X, int Y){
+    this->obj_ctx_menu->close(); //Close ctx menu
+
     if(obj_trstate.isTransforming || isSceneRun) return;
     unsigned int clicked = render->render_getpickedObj(static_cast<void*>(this), X, Y);
 
@@ -763,7 +761,7 @@ void EditWindow::onLeftBtnClicked(int X, int Y){
 }
 void EditWindow::onRightBtnClicked(int X, int Y){
     if(isSceneRun) return;
-#ifdef __linux__
+
     this->obj_trstate.isTransforming = false; //disabling object transform
     unsigned int clicked = render->render_getpickedObj(static_cast<void*>(this), X, Y);
 
@@ -777,7 +775,7 @@ void EditWindow::onRightBtnClicked(int X, int Y){
     this->obj_ctx_menu->displayTransforms = true;
     this->obj_ctx_menu->show(QPoint(this->width() + X, Y));
     this->obj_ctx_menu->displayTransforms = false;
-#endif
+
 }
 void EditWindow::onMouseWheel(int x, int y){
     if(project.perspective == 3){
@@ -829,7 +827,7 @@ void EditWindow::onMouseMotion(int relX, int relY){
 
     if(project.perspective == 2){ //Only affective in 2D
 
-        if(input_state.isRightBtnHold == true){ //we just move on map
+        if(input_state.isMidBtnHold == true){ //we just move on map
             ZSVECTOR3 cam_pos = edit_camera.getCameraPosition();
             cam_pos.X += relX;
             cam_pos.Y += relY;
@@ -862,7 +860,7 @@ void EditWindow::onMouseMotion(int relX, int relY){
     }
     if(project.perspective == 3){//Only affective in 3D
 
-        if(input_state.isRightBtnHold == true){
+        if(input_state.isMidBtnHold == true){
             this->cam_yaw += relX * 0.16f;
             cam_pitch += relY * 0.16f;
 

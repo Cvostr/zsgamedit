@@ -66,6 +66,10 @@ void ObjectCtxMenu::show(QPoint point){
     menu->popup(point);
 }
 
+void ObjectCtxMenu::close(){
+    menu->close();
+}
+
 void ObjectCtxMenu::setObjectPtr(GameObject* obj_ptr){
     this->obj_ptr = obj_ptr;
 }

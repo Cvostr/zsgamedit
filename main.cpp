@@ -47,6 +47,9 @@ int main(int argc, char *argv[])
                         if (event.button.button == SDL_BUTTON_RIGHT) {
                             w.edit_win_ptr->input_state.isRightBtnHold = false;
                         }
+                        if (event.button.button == SDL_BUTTON_MIDDLE) {
+                            w.edit_win_ptr->input_state.isMidBtnHold = false;
+                        }
                     }
                     if (event.type == SDL_MOUSEWHEEL) {
                         w.edit_win_ptr->onMouseWheel(event.wheel.x, event.wheel.y);
@@ -80,6 +83,10 @@ int main(int argc, char *argv[])
                         if (event.button.button == SDL_BUTTON_RIGHT) {
                             w.edit_win_ptr->input_state.isRightBtnHold = true;
                             w.edit_win_ptr->onRightBtnClicked(event.motion.x, event.motion.y);
+                        }
+
+                        if (event.button.button == SDL_BUTTON_MIDDLE) {
+                            w.edit_win_ptr->input_state.isMidBtnHold = true;
                         }
                     }
                     if (event.type == SDL_MOUSEMOTION) { //If user moved mouse

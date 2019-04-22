@@ -1,11 +1,8 @@
-#define _CRT_SECURE_NO_WARNINGS
-
 #include <AL/al.h>
 #include <AL/alc.h>
 
 #include <iostream>
-#include <cstdio>
-#include <sys/stat.h>
+#include <fstream>
 
 #include "headers/oal_manager.h"
 
@@ -73,50 +70,46 @@ bool SoundBuffer::loadFileWAV(const char* file_path){
 
         unsigned char* data_buffer;
 
-        FILE* fstream = fopen(file_path, "rb");
-        if (!fstream) return false;
+        std::ifstream audio_stream;
+        audio_stream.open(file_path, std::iostream::binary | std::iostream::ate);
 
-        struct stat buff;
+        if (audio_stream.fail()) return false;
 
-    #ifdef _WIN32
-        fstat(_fileno(fstream), &buff); //Getting file info
-    #endif
-    #ifdef __linux__
-        fstat(fileno(fstream), &buff); //Getting file info
-    #endif
+        int size = static_cast<int>(audio_stream.tellg());
+        data_buffer = new unsigned char[size];
 
-        data_buffer = static_cast<unsigned char*>(malloc(buff.st_size));
+        audio_stream.seekg(0);
 
-        fread(data_buffer, 1, 12, fstream);
+        audio_stream.read(reinterpret_cast<char*>(data_buffer), 12);
 
-        fread(data_buffer, 1, 8, fstream);
+        audio_stream.read(reinterpret_cast<char*>(data_buffer), 8);
         if (data_buffer[0] != 'f' || data_buffer[1] != 'm' || data_buffer[2] != 't' || data_buffer[3] != ' ')
         {
-            free(data_buffer); //Free heap
-            fclose(fstream); //Close stream
+            delete [] data_buffer; //Free heap
+            audio_stream.close();
             return false;
         }
-        fread(data_buffer, 1, 2, fstream);
+        audio_stream.read(reinterpret_cast<char*>(data_buffer), 2);
         if (data_buffer[1] != 0 || data_buffer[0] != 1)
         {
-            fclose(fstream);
-            free(data_buffer); //Free heap
+            delete [] data_buffer; //Free heap
+            audio_stream.close();
             fprintf(stderr, "Not PCM :(\n"); //Close stream
             return false;
         }
 
-        fread(data_buffer, 1, 2, fstream);
+        audio_stream.read(reinterpret_cast<char*>(data_buffer), 2);
         channels = data_buffer[1] << 8;
         channels |= data_buffer[0];
 
-        fread(data_buffer, 1, 4, fstream);
+        audio_stream.read(reinterpret_cast<char*>(data_buffer), 4);
         freq = data_buffer[3] << 24;
         freq |= data_buffer[2] << 16;
         freq |= data_buffer[1] << 8;
         freq |= data_buffer[0];
 
-        fread(data_buffer, 1, 6, fstream);
-        fread(data_buffer, 1, 2, fstream);
+        audio_stream.read(reinterpret_cast<char*>(data_buffer), 6);
+        audio_stream.read(reinterpret_cast<char*>(data_buffer), 2);
 
         bits = data_buffer[1] << 8;
         bits |= data_buffer[0];
@@ -137,36 +130,35 @@ bool SoundBuffer::loadFileWAV(const char* file_path){
         }
         if (!format)
         {
-            free(data_buffer); //Free heap
+            delete [] data_buffer; //Free heap
+            audio_stream.close();
             fprintf(stderr, "Incompatible format (%d, %d) :(\n", channels, bits);
             return false;
         }
 
         while(data_buffer[0] != 'd' || data_buffer[1] != 'a' || data_buffer[2] != 't' || data_buffer[3] != 'a')
-            fread(data_buffer, 1, 4, fstream);
+            audio_stream.read(reinterpret_cast<char*>(data_buffer), 4);
 
-        fread(data_buffer, 1, 4, fstream);
+        audio_stream.read(reinterpret_cast<char*>(data_buffer), 4);
 
-        int size = data_buffer[3] << 24; //Getting size, 32 bit value
+        int _size = data_buffer[3] << 24; //Getting size, 32 bit value
         size |= data_buffer[2] << 16;
         size |= data_buffer[1] << 8;
         size |= data_buffer[0];
 
-        fread(data_buffer, 1, static_cast<size_t>(size), fstream);
+        audio_stream.read(reinterpret_cast<char*>(data_buffer), _size);
         alBufferData(this->al_buffer_id, format, static_cast<void*>((data_buffer)), size, static_cast<int>(freq));
         int err = alGetError();
         if (err != AL_NO_ERROR)
         {
             std::cout << "Error loading " << err << std::endl;
-            //Free heap
-            free(data_buffer);
-            fclose(fstream);
+            delete [] data_buffer; //Free heap
+            audio_stream.close();
             return false;
         }
 
-        free(data_buffer);
-
-        fclose(fstream);
+        delete [] data_buffer; //Free heap
+        audio_stream.close();
         return true;
 }
 void SoundBuffer::Destroy(){
