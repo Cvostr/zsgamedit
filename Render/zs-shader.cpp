@@ -1,5 +1,3 @@
-#define _CRT_SECURE_NO_WARNINGS
-
 #include "headers/zs-shader.h"
 #include "../World/headers/World.h"
 #include "../World/headers/obj_properties.h"
@@ -11,7 +9,7 @@
 #include <sstream>
 #include <iostream>
 
-int cur_shader_gl_id = -1;
+static int cur_shader_gl_id = -1;
 
 ZSPIRE::Shader::Shader(){
     isCreated = false; //Not created by default
@@ -85,8 +83,8 @@ bool ZSPIRE::Shader::compileFromFile(const char* VSpath, const char* FSpath){
 	int VS = glCreateShader(GL_VERTEX_SHADER);
 	int FS = glCreateShader(GL_FRAGMENT_SHADER);
 
-	GLchar vs_data[4096];
-	GLchar fs_data[4096];
+    GLchar vs_data[8192];
+    GLchar fs_data[8192];
 
 	const GLchar* vs = &vs_data[0];
 	const GLchar* fs = &fs_data[0];

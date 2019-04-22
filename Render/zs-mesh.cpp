@@ -15,7 +15,7 @@
 */
 static ZSPIRE::Mesh* picked_mesh = nullptr;
 
-ZSVERTEX plane_verts[] = {
+static ZSVERTEX plane_verts[] = {
 	// positions              // texture coords
 	ZSVERTEX(ZSVECTOR3(1.0f,  1.0f, 0.0f),		ZSVECTOR2(1.0f, 1.0f)),   // top right
 	ZSVERTEX(ZSVECTOR3(1.0f, -1.0f, 0.0f),		ZSVECTOR2(1.0f, 0.0f)),   // bottom right
@@ -23,7 +23,7 @@ ZSVERTEX plane_verts[] = {
 	ZSVERTEX(ZSVECTOR3(-1.0f,  1.0f, 0.0f),		ZSVECTOR2(0.0f, 1.0f))   // top left 
 };
 
-ZSVERTEX ui_sprite_vertices[] = {
+static ZSVERTEX ui_sprite_vertices[] = {
 	// positions // texture coords 
 	ZSVERTEX(ZSVECTOR3(1.0f, 1.0f, 0.0f), ZSVECTOR2(1.0f, 0.0f)), // top right 
 	ZSVERTEX(ZSVECTOR3(1.0f, 0.0f, 0.0f), ZSVECTOR2(1.0f, 1.0f)), // bottom right 
@@ -98,7 +98,7 @@ unsigned int vert_size = sizeof(ZSVERTEX);
 unsigned int offset = 0;
 
 #ifdef USE_ASSIMP //Optional
-Assimp::Importer importer;
+static Assimp::Importer importer;
 unsigned int loadflags = aiProcess_CalcTangentSpace | aiProcess_Triangulate | aiProcess_FlipUVs;
 #endif
 
@@ -180,7 +180,7 @@ void ZSPIRE::Mesh::setMeshData(ZSVERTEX* vertices, unsigned int* indices, unsign
     glBufferData(GL_ARRAY_BUFFER, static_cast<int>(vertices_num) * static_cast<int>(sizeof(ZSVERTEX)), vertices, GL_STATIC_DRAW); //send vertices to buffer
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->meshEBO); //Bind index buffer
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, (int)indices_num * sizeof(unsigned int), indices, GL_STATIC_DRAW); //Send indices to buffer
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, static_cast<unsigned int>(indices_num) * sizeof(unsigned int), indices, GL_STATIC_DRAW); //Send indices to buffer
 
 	//Vertex pos 3 floats
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(ZSVERTEX), (void*)0);
@@ -270,8 +270,8 @@ void ZSPIRE::Mesh::processMesh(aiMesh* mesh, const aiScene* scene) {
 	unsigned int vertices = mesh->mNumVertices;
 	unsigned int faces = mesh->mNumFaces;
 
-	ZSVERTEX* vertices_arr = (ZSVERTEX*)malloc(sizeof(ZSVERTEX) * vertices);
-	unsigned int* indices = (unsigned int*)malloc(sizeof(unsigned int) * faces * 3);
+    ZSVERTEX* vertices_arr = new ZSVERTEX[vertices];
+    unsigned int* indices = new unsigned int[faces * 3];
 
 	for (unsigned int v = 0; v < vertices; v++) {
 		aiVector3D vertex_pos = mesh->mVertices[v];

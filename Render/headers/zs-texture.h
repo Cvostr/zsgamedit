@@ -1,7 +1,3 @@
-#ifdef __linux__
-#include <stdlib.h>
-#endif
-
 #ifdef _WIN32
 #include <cstring>
 #endif
@@ -19,7 +15,7 @@ namespace ZSPIRE {
 		//Only for OGL : initialize texture in GL
 		void Init();
 		//Loads texture from buffer
-		bool LoadDDSTextureFromBuffer(unsigned char* data, size_t data_size);
+        bool LoadDDSTextureFromBuffer(unsigned char* data);
 		//Loads texture from file
 		bool LoadDDSTextureFromFile(const char* path);
 		//Use in rendering pipeline

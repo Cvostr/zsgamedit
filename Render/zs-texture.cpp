@@ -1,5 +1,3 @@
-#define _CRT_SECURE_NO_WARNINGS
-
 #define FOURCC_DXT1 0x31545844 // Equivalent to "DXT1" in ASCII
 #define FOURCC_DXT3 0x33545844 // Equivalent to "DXT3" in ASCII
 #define FOURCC_DXT5 0x35545844 // Equivalent to "DXT5" in ASCII
@@ -10,9 +8,7 @@
 
 #include <GL/glew.h>
 //Working with filesystem and mem
-#include <cstdio>
-#include <cstdlib>
-#include <sys/stat.h>
+#include <fstream>
 
 #include "../triggers.h"
 #include <iostream>
@@ -54,31 +50,36 @@ bool ZSPIRE::Texture::LoadDDSTextureFromFile(const char* path) {
 	std::cout << "TEXTURE: Loading texture from file : " << path << std::endl;
 #endif
 
-    FILE * file = fopen(path, "rb"); //Opening file stream
-	if (file == NULL) { //Opening file stream failed, no file
+    std::ifstream texture_stream;
+    texture_stream.open(path, std::ifstream::binary | std::ifstream::ate);
+
+    if (texture_stream.fail()) { //Opening file stream failed, no file
 		std::cout << "TEXTURE: FATAL: Error opening file stream! Perhaps, file " << path << " is missing!" << std::endl;
 		return false;
 	}
-	unsigned char header[128];
-	fread(header, 1, 128, file);
+
+    //texture file size
+    int size = static_cast<int>(texture_stream.tellg());
+    texture_stream.seekg(0);
+
+    unsigned char header[128];
+    //reading texture header
+    texture_stream.read(reinterpret_cast<char*>(&header[0]), 128);
 
 	if (header[0] != 'D' && header[1] != 'D' && header[2] != 'S') { //File found, but isn't DDS texture
 		std::cout << "TEXTURE: FATAL: Error processing file! Perhaps, file " << path << " is not DDS texture!" << std::endl;
-        fclose(file);
+        texture_stream.close();
         return false;
 	}
-	fseek(file, 0, SEEK_SET); //returning to start of file
+    //back to start
+    texture_stream.seekg(0);
 
-	struct stat buff;
+    unsigned char * data = new unsigned char[size]; //Allocating buffer for file in heap
+    texture_stream.read(reinterpret_cast<char*>(data), size); //Reading file to buffer
+    LoadDDSTextureFromBuffer(data); //Read texture from buffer
 
-	fstat(_fileno(file), &buff); //Getting file info
-
-    unsigned char * data = (unsigned char*)malloc(sizeof(unsigned char) * buff.st_size); //Allocating buffer for file in heap
-	fread(data, 1, buff.st_size, file); //Reading file to buffer
-	LoadDDSTextureFromBuffer(data, buff.st_size); //Read texture from buffer
-
-	free(data); //freeing buffer
-	fclose(file); //closing stream
+    delete[] (data); //freeing buffer
+    texture_stream.close(); //closing stream
 
 	return true;
 }
@@ -92,14 +93,14 @@ void ZSPIRE::Texture::Destroy() {
 #endif
 }
 
-bool ZSPIRE::Texture::LoadDDSTextureFromBuffer(unsigned char* data, size_t data_size){
+bool ZSPIRE::Texture::LoadDDSTextureFromBuffer(unsigned char* data){
 
 	Init();
 
-	int HEIGHT = *(unsigned int*)&(data[12]); //Getting height of texture in px info
-	int WIDTH = *(unsigned int*)&(data[16]); //Getting width of texture in px info
-	unsigned int linearSize = *(unsigned int*)&(data[20]);
-	unsigned int mipMapCount = *(unsigned int*)&(data[28]);
+    int HEIGHT = *(reinterpret_cast<int*>(&(data[12]))); //Getting height of texture in px info
+    int WIDTH = *(reinterpret_cast<int*>(&(data[16]))); //Getting width of texture in px info
+    unsigned int linearSize = *(reinterpret_cast<unsigned int*>(&(data[20])));
+    unsigned int mipMapCount = *(reinterpret_cast<unsigned int*>(&(data[28])));
     unsigned int fourCC = *(reinterpret_cast<unsigned int*>(&(data[84])));
 
 	unsigned char * bufferT;
