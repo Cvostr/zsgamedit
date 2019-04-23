@@ -2,6 +2,7 @@
 #include "headers/InspectorWin.h"
 #include "../World/headers/obj_properties.h"
 #include "../World/headers/2dtileproperties.h"
+#include "../Misc/headers/AssimpMeshLoader.h"
 #include "ui_editor.h"
 #include "stdio.h"
 #include <iostream>
@@ -585,24 +586,36 @@ void EditWindow::lookForResources(QString path){
                 resource.file_path = fileInfo.absoluteFilePath(); //Writing full path
                 resource.rel_path = resource.file_path; //Preparing to get relative path
                 resource.rel_path.remove(0, project.root_path.size() + 1); //Get relative path by removing length of project root from start
+                resource.resource_label = resource.rel_path.toStdString();
                 resource.type = RESOURCE_TYPE_TEXTURE; //Type is texture
                 loadResource(&resource); //Perform texture loading to OpenGL
                 this->project.resources.push_back(resource);
             }
             if(name.endsWith(".FBX") || name.endsWith(".fbx")){ //If its an mesh
-                Resource resource;
-                resource.file_path = fileInfo.absoluteFilePath();
-                resource.rel_path = resource.file_path; //Preparing to get relative path
-                resource.rel_path.remove(0, project.root_path.size() + 1); //Get relative path by removing length of project root from start
-                resource.type = RESOURCE_TYPE_MESH; //Type of resource is mesh
-                loadResource(&resource); //Perform mesh processing & loading to OpenGL
-                this->project.resources.push_back(resource);
+                //getting meshes amount
+                unsigned int num_meshes = Engine::getMeshesAmount(fileInfo.absoluteFilePath().toStdString());
+                //iterate to read all the meshes
+                for(unsigned int mesh_i = 0; mesh_i < num_meshes; mesh_i ++){
+                    Resource resource;
+                    resource.file_path = fileInfo.absoluteFilePath();
+                    resource.rel_path = resource.file_path; //Preparing to get relative path
+                    resource.rel_path.remove(0, project.root_path.size() + 1); //Get relative path by removing length of project root from start
+                    resource.type = RESOURCE_TYPE_MESH; //Type of resource is mesh
+
+                    resource.class_ptr = static_cast<void*>(new ZSPIRE::Mesh);
+
+                    //loadResource(&resource); //Perform mesh processing & loading to OpenGL
+                    this->project.resources.push_back(resource);
+                    Engine::loadMesh(fileInfo.absoluteFilePath().toStdString(), static_cast<ZSPIRE::Mesh*>(this->project.resources.back().class_ptr), mesh_i);
+                    this->project.resources.back().resource_label = static_cast<ZSPIRE::Mesh*>(this->project.resources.back().class_ptr)->mesh_label;
+                }
             }
             if(name.endsWith(".WAV") || name.endsWith(".wav")){ //If its an mesh
                 Resource resource;
                 resource.file_path = fileInfo.absoluteFilePath();
                 resource.rel_path = resource.file_path; //Preparing to get relative path
                 resource.rel_path.remove(0, project.root_path.size() + 1); //Get relative path by removing length of project root from start
+                resource.resource_label = resource.rel_path.toStdString();
                 resource.type = RESOURCE_TYPE_AUDIO; //Type of resource is mesh
                 loadResource(&resource); //Perform mesh processing & loading to OpenGL
                 this->project.resources.push_back(resource);
@@ -612,6 +625,7 @@ void EditWindow::lookForResources(QString path){
                 resource.file_path = fileInfo.absoluteFilePath();
                 resource.rel_path = resource.file_path; //Preparing to get relative path
                 resource.rel_path.remove(0, project.root_path.size() + 1); //Get relative path by removing length of project root from start
+                resource.resource_label = resource.rel_path.toStdString();
                 resource.type = RESOURCE_TYPE_MATERIAL; //Type of resource is mesh
                 loadResource(&resource); //Perform mesh processing & loading to OpenGL
                 this->project.resources.push_back(resource);
@@ -635,10 +649,10 @@ void EditWindow::loadResource(Resource* resource){
             break;
         }
         case RESOURCE_TYPE_MESH:{
-            resource->class_ptr = static_cast<void*>(new ZSPIRE::Mesh); //Initialize pointer to mesh
-            ZSPIRE::Mesh* mesh_ptr = static_cast<ZSPIRE::Mesh*>(resource->class_ptr); //Aquire casted pointer
-            std::string str = resource->file_path.toStdString();
-            mesh_ptr->LoadMeshesFromFileASSIMP(str.c_str());
+            //resource->class_ptr = static_cast<void*>(new ZSPIRE::Mesh); //Initialize pointer to mesh
+            //ZSPIRE::Mesh* mesh_ptr = static_cast<ZSPIRE::Mesh*>(resource->class_ptr); //Aquire casted pointer
+            //std::string str = resource->file_path.toStdString();
+            //mesh_ptr->LoadMeshesFromFileASSIMP(str.c_str());
             break;
         }
         case RESOURCE_TYPE_AUDIO:{
@@ -658,7 +672,7 @@ void EditWindow::loadResource(Resource* resource){
     }
 }
 
-EditWindow* ZSEditor::openProject(Project project){
+EditWindow* ZSEditor::openProject(Project& project){
     _editor_win = new EditWindow(); //Creating class object
     _inspector_win = new InspectorWin();
     //Send project datas to editor window class
@@ -694,6 +708,7 @@ InspectorWin* EditWindow::getInspector(){
 
 //Object Ctx menu slots
 void ObjectCtxMenu::onDeleteClicked(){
+    //delete all ui from inspector
     _inspector_win->clearContentLayout(); //Prevent variable conflicts
     GameObjectLink link = obj_ptr->getLinkToThisObject();
     win_ptr->obj_trstate.isTransforming = false; //disabling object transform

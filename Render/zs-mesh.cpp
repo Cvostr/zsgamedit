@@ -2,17 +2,7 @@
 
 #include <iostream>
 #include <GL/glew.h>
-/*
-#ifdef _WIN32 //Fix for windows GLEW
 
-#undef glGenVertexArrays
-
-
-
-
-
-#endif
-*/
 static ZSPIRE::Mesh* picked_mesh = nullptr;
 
 static ZSVERTEX plane_verts[] = {
@@ -31,7 +21,7 @@ static ZSVERTEX ui_sprite_vertices[] = {
 	ZSVERTEX(ZSVECTOR3(0.0f, 1.0f, 0.0f), ZSVECTOR2(0.0f, 0.0f)) // top left 
 };
 
-ZSVERTEX iso_tile_vertices[] = {
+static ZSVERTEX iso_tile_vertices[] = {
 	// positions              // texture coords
 	ZSVERTEX(ZSVECTOR3(0.0f,  1.0f, 0.0f),		ZSVECTOR2(0.5f, 1.0f)), 
 	ZSVERTEX(ZSVECTOR3(1.0f, 0.1f, 0.0f),		ZSVECTOR2(1.0f, 0.55f)),   
@@ -41,7 +31,7 @@ ZSVERTEX iso_tile_vertices[] = {
 	ZSVERTEX(ZSVECTOR3(-1.0f,  0.1f, 0.0f),	ZSVECTOR2(0.0f, 0.55f))   // top left 
 };
 
-ZSVERTEX cube_vertices[] = {
+static ZSVERTEX cube_vertices[] = {
         // positions          // normals           // texture coords
         ZSVERTEX(ZSVECTOR3(-0.5f, -0.5f, -0.5f), ZSVECTOR2(0.0f, 0.0f), ZSVECTOR3(0.0f,  0.0f,  -1.0f)),
         ZSVERTEX(ZSVECTOR3(0.5f, -0.5f, -0.5f), ZSVECTOR2(1.0f, 0.0f), ZSVECTOR3(0.0f,  0.0f,  -1.0f)),
@@ -56,14 +46,14 @@ ZSVERTEX cube_vertices[] = {
         ZSVERTEX(ZSVECTOR3(0.5f,  0.5f,  0.5f), ZSVECTOR2(1.0f, 1.0f), ZSVECTOR3(0.0f,  0.0f,  1.0f)),
         ZSVERTEX(ZSVECTOR3(-0.5f,  0.5f,  0.5f), ZSVECTOR2(0.0f, 1.0f), ZSVECTOR3(0.0f,  0.0f,  1.0f)),
         ZSVERTEX(ZSVECTOR3(-0.5f, -0.5f,  0.5f), ZSVECTOR2(0.0f, 0.0f), ZSVECTOR3(0.0f,  0.0f,  1.0f)),
-//
+
         ZSVERTEX(ZSVECTOR3(-0.5f,  0.5f,  0.5f), ZSVECTOR2(1.0f, 0.0f), ZSVECTOR3(-1.0f,  0.0f,  0.0f)),
         ZSVERTEX(ZSVECTOR3(-0.5f,  0.5f, -0.5f), ZSVECTOR2(1.0f, 1.0f), ZSVECTOR3(-1.0f,  0.0f,  0.0f)),
         ZSVERTEX(ZSVECTOR3(-0.5f, -0.5f, -0.5f), ZSVECTOR2(0.0f, 1.0f), ZSVECTOR3(-1.0f,  0.0f,  0.0f)),
         ZSVERTEX(ZSVECTOR3(-0.5f, -0.5f, -0.5f), ZSVECTOR2(0.0f, 1.0f), ZSVECTOR3(-1.0f,  0.0f,  0.0f)),
         ZSVERTEX(ZSVECTOR3(-0.5f, -0.5f,  0.5f), ZSVECTOR2(0.0f, 0.0f), ZSVECTOR3(-1.0f,  0.0f,  0.0f)),
         ZSVERTEX(ZSVECTOR3(-0.5f,  0.5f,  0.5f), ZSVECTOR2(1.0f, 0.0f), ZSVECTOR3(-1.0f,  0.0f,  0.0f)),
-//starts here
+
         ZSVERTEX(ZSVECTOR3(0.5f,  0.5f,  0.5f), ZSVECTOR2(1.0f,  0.0f), ZSVECTOR3(1.0f,  0.0f,  0.0f)),
         ZSVERTEX(ZSVECTOR3(0.5f,  0.5f, -0.5f), ZSVECTOR2(1.0f,  1.0f), ZSVECTOR3(1.0f,  0.0f,  0.0f)),
         ZSVERTEX(ZSVECTOR3(0.5f, -0.5f, -0.5f), ZSVECTOR2(0.0f,  1.0f), ZSVECTOR3(1.0f,  0.0f,  0.0f)),
@@ -86,24 +76,13 @@ ZSVERTEX cube_vertices[] = {
         ZSVERTEX(ZSVECTOR3(-0.5f,  0.5f, -0.5f), ZSVECTOR2(0.0f,  1.0f), ZSVECTOR3(0.0f,  1.0f,  0.0f))
 };
 
-unsigned int plane_inds[] = { 0,1,2, 0,2,3 };
-unsigned int isotile_ind[] = { 0,1,2, 2,3,4, 2,4,5, 2,5,0 };
+static unsigned int plane_inds[] = { 0,1,2, 0,2,3 };
+static unsigned int isotile_ind[] = { 0,1,2, 2,3,4, 2,4,5, 2,5,0 };
 
 static ZSPIRE::Mesh plane2Dmesh;
 static ZSPIRE::Mesh uiSprite2Dmesh;
 static ZSPIRE::Mesh iso_tile2Dmesh;
 static ZSPIRE::Mesh cube3Dmesh;
-
-unsigned int vert_size = sizeof(ZSVERTEX);
-unsigned int offset = 0;
-
-#ifdef USE_ASSIMP //Optional
-static Assimp::Importer importer;
-unsigned int loadflags = aiProcess_CalcTangentSpace | aiProcess_Triangulate | aiProcess_FlipUVs;
-#endif
-
-unsigned int processed_meshes = 0;
-ZSPIRE::Mesh result;
 
 ZSPIRE::Mesh::Mesh() {
 	this->alive = false;
@@ -117,11 +96,7 @@ void ZSPIRE::Mesh::Init() {
 }
 
 void ZSPIRE::setupDefaultMeshes() {
-#ifdef _WIN32
-    //glGenVertexArrays = (PFNGLGENVERTEXARRAYSPROC)wglGetProcAddress("glGenVertexArrays");
-    //glGenBuffers = (PFNGLGENBUFFERSPROC)wglGetProcAddress("glGenBuffers");
-#endif
-    picked_mesh = 0x0;
+    picked_mesh = nullptr;
 
     for(unsigned int cube_v = 0; cube_v < 36; cube_v ++){
         cube_vertices[cube_v].pos.X *= -1;
@@ -183,20 +158,20 @@ void ZSPIRE::Mesh::setMeshData(ZSVERTEX* vertices, unsigned int* indices, unsign
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, static_cast<unsigned int>(indices_num) * sizeof(unsigned int), indices, GL_STATIC_DRAW); //Send indices to buffer
 
 	//Vertex pos 3 floats
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(ZSVERTEX), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(ZSVERTEX), nullptr);
     glEnableVertexAttribArray(0);
 	//Vertex UV 2 floats
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(ZSVERTEX), (void*)(sizeof(float) * 3));
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(ZSVERTEX), reinterpret_cast<void*>(sizeof(float) * 3));
     glEnableVertexAttribArray(1);
 	//Vertex Normals 3 floats
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(ZSVERTEX), (void*)(sizeof(float) * 5));
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(ZSVERTEX), reinterpret_cast<void*>(sizeof(float) * 5));
     glEnableVertexAttribArray(2);
 
 	//Vertex Tangents 3 floats
-    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(ZSVERTEX), (void*)(sizeof(float) * 8));
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(ZSVERTEX), reinterpret_cast<void*>(sizeof(float) * 8));
     glEnableVertexAttribArray(3);
 	//Vertex Bitangents 3 floats
-    glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(ZSVERTEX), (void*)(sizeof(float) * 11));
+    glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(ZSVERTEX), reinterpret_cast<void*>(sizeof(float) * 11));
     glEnableVertexAttribArray(4);
 
 }
@@ -210,20 +185,20 @@ void ZSPIRE::Mesh::setMeshData(ZSVERTEX* vertices, unsigned int vertices_num) {
     glBufferData(GL_ARRAY_BUFFER, vertices_num * sizeof(ZSMATRIX4x4), vertices, GL_STATIC_DRAW); //send vertices to buffer
 
 	//Vertex pos 3 floats
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(ZSVERTEX), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(ZSVERTEX), nullptr);
     glEnableVertexAttribArray(0);
 	//Vertex UV 2 floats
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(ZSVERTEX), (void*)(sizeof(float) * 3));
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(ZSVERTEX), reinterpret_cast<void*>(sizeof(float) * 3));
     glEnableVertexAttribArray(1);
 	//Vertex Normals 3 floats
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(ZSVERTEX), (void*)(sizeof(float) * 5));
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(ZSVERTEX), reinterpret_cast<void*>(sizeof(float) * 5));
     glEnableVertexAttribArray(2);
 
 	//Vertex Tangents 3 floats
-    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(ZSVERTEX), (void*)(sizeof(float) * 8));
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(ZSVERTEX), reinterpret_cast<void*>(sizeof(float) * 8));
     glEnableVertexAttribArray(3);
 	//Vertex Bitangents 3 floats
-    glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(ZSVERTEX), (void*)(sizeof(float) * 11));
+    glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(ZSVERTEX), reinterpret_cast<void*>(sizeof(float) * 11));
     glEnableVertexAttribArray(4);
 }
 
@@ -261,73 +236,6 @@ void ZSPIRE::Mesh::DrawLines(){
     }
     else {
         //Indexed draw
-        glDrawElements(GL_LINE_LOOP, this->indices_num, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_LINE_LOOP, this->indices_num, GL_UNSIGNED_INT, nullptr);
     }
-}
-
-#ifdef USE_ASSIMP
-void ZSPIRE::Mesh::processMesh(aiMesh* mesh, const aiScene* scene) {
-	unsigned int vertices = mesh->mNumVertices;
-	unsigned int faces = mesh->mNumFaces;
-
-    ZSVERTEX* vertices_arr = new ZSVERTEX[vertices];
-    unsigned int* indices = new unsigned int[faces * 3];
-
-	for (unsigned int v = 0; v < vertices; v++) {
-		aiVector3D vertex_pos = mesh->mVertices[v];
-		aiVector3D vertex_normal = mesh->mNormals[v];
-		aiVector3D vertex_tangent = mesh->mTangents[v];
-		aiVector3D vertex_bitangent = mesh->mBitangents[v];
-
-		float U = mesh->mTextureCoords[0][v].x;
-		float V = mesh->mTextureCoords[0][v].y;
-
-		vertices_arr[v] = ZSVERTEX(ZSVECTOR3(vertex_pos.x, vertex_pos.y, vertex_pos.z), ZSVECTOR2(U, V),
-			ZSVECTOR3(vertex_normal.x, vertex_normal.y, vertex_normal.z), ZSVECTOR3(vertex_tangent.x, vertex_tangent.y, vertex_tangent.z),
-			ZSVECTOR3(vertex_bitangent.x, vertex_bitangent.y, vertex_bitangent.z)
-		);
-
-		vNormalize(&vertices_arr[v].normal);
-
-	}
-
-	for (unsigned int i = 0; i < faces; i++)
-	{
-		aiFace face = mesh->mFaces[i];
-		for (unsigned int j = 0; j < face.mNumIndices; j++)
-			indices[i * 3 + j] = face.mIndices[j];
-	}
-
-    Init();
-    setMeshData(vertices_arr, indices, vertices, faces * 3);
-}
-
-void processNode(aiNode* node, const aiScene* scene) {
-	unsigned int child_nodes_amount = node->mNumChildren;
-	unsigned int meshes_amount = node->mNumMeshes;
-
-	//Iterate child nodes
-	for (unsigned int i = 0; i < child_nodes_amount; i++) {
-        processNode(node->mChildren[i], scene);
-	}
-	//Iterate meshes
-	for (unsigned int i = 0; i < meshes_amount; i++) {
-       // processMesh(scene->mMeshes[node->mMeshes[i]], scene);
-	}
-
-}
-#endif
-
-void ZSPIRE::Mesh::LoadMeshesFromFileASSIMP(const char* file_path) {
-#ifdef USE_ASSIMP
-    std::cout << "ASSIMP: Loading mesh from file : " << file_path << std::endl;
-
-	const aiScene* scene = importer.ReadFile(file_path, loadflags);
-
-    processMesh(scene->mMeshes[0], scene);
-#endif
-}
-
-void ZSPIRE::Mesh::DestroyResource() {
-    (this)->Destroy(); //Destroy next to this pointer object
 }

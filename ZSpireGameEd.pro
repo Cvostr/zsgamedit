@@ -49,7 +49,8 @@ SOURCES += \
     World/GameObject.cpp \
     World/GoProperty/go_filestream.cpp \
     World/GoProperty/go_properties.cpp \
-    World/GoProperty/tile_properties.cpp
+    World/GoProperty/tile_properties.cpp \
+    Misc/AssimpMeshLoader.cpp
 
 HEADERS += \
         mainwin.h \
@@ -75,7 +76,8 @@ HEADERS += \
     ProjEd/headers/InspEditAreas.h \
     triggers.h \
     Render/headers/MatShaderProps.h \
-    Misc/headers/zs_types.h
+    Misc/headers/zs_types.h \
+    Misc/headers/AssimpMeshLoader.h
 
 
 FORMS += \

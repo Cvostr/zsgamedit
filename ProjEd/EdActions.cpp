@@ -1,9 +1,10 @@
 #include "headers/EdActions.h"
 
 EdActions::EdActions(){
-    this->current_pos = 0;
-    this->end_pos = 0;
+    this->current_pos = 0; //Default pos is zero
+    this->end_pos = 0; //Default tail pos is zero as well
     action_list.resize(0);
+    this->insp_win = nullptr;
 }
 
 EdAction::EdAction(){

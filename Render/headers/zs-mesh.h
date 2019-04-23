@@ -1,14 +1,9 @@
 #include "zs-math.h"
 #include "../../triggers.h"
 #include "../../Misc/headers/zs_types.h"
+#include <string>
 
 #define NO_INDICES 0
-
-#ifdef USE_ASSIMP
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
-#endif
 
 #ifndef zs_mesh
 #define zs_mesh
@@ -18,6 +13,7 @@ namespace ZSPIRE {
 	class Mesh {
 	public:
 		bool alive; //Non destroyed
+        std::string mesh_label;
 
 		unsigned int meshVAO;
 		unsigned int meshVBO;
@@ -32,12 +28,7 @@ namespace ZSPIRE {
         void Draw();
         void DrawLines();
         void Destroy();
-        void DestroyResource();
 
-        void LoadMeshesFromFileASSIMP(const char* file_path);
-#ifdef USE_ASSIMP
-        void processMesh(aiMesh* mesh, const aiScene* scene);
-#endif
 		Mesh();
 	};
 

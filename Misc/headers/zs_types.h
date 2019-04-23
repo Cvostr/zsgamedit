@@ -15,6 +15,7 @@ enum RESOURCE_TYPE {RESOURCE_TYPE_NONE,
 typedef struct Resource{
     QString file_path; //Resource file
     QString rel_path; //Resource project dir related path
+    std::string resource_label;
     RESOURCE_TYPE type; //Resource type
     void* class_ptr; //Pointer to resource class
 }Resource;

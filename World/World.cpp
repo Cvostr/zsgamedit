@@ -486,7 +486,7 @@ ZSPIRE::Mesh* World::getMeshPtrByRelPath(QString label){
     for(unsigned int r_it = 0; r_it < resources_num; r_it ++){ //Iteerate over all resources in project
         Resource* r_ptr = &proj_ptr->resources[r_it]; //Obtain pointer to resource
         //If resource is mesh and has same name as in argument
-        if(r_ptr->type == RESOURCE_TYPE_MESH && r_ptr->rel_path.compare(label) == 0){
+        if(r_ptr->type == RESOURCE_TYPE_MESH && r_ptr->resource_label.compare(label.toStdString()) == 0){
             return static_cast<ZSPIRE::Mesh*>(r_ptr->class_ptr);
         }
     }

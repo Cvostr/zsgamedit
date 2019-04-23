@@ -449,7 +449,7 @@ void ResourcePickDialog::onNeedToShow(){
         for(unsigned int res_i = 0; res_i < resources_num; res_i ++){
             Resource* resource_ptr = &project_ptr->resources[res_i];
             if(resource_ptr->type == area->resource_type){ //if type is the same
-                new QListWidgetItem(resource_ptr->rel_path, this->list); //add resource to list
+                new QListWidgetItem(QString::fromStdString(resource_ptr->resource_label), this->list); //add resource to list
             }
         }
     }else{ //we want to pick common file

@@ -104,6 +104,7 @@ void InspectorWin::ShowObjectProperties(void* object_ptr){
     obj_ptr->pick(); //Object is picked now
 
     unsigned int props_num = static_cast<unsigned int>(obj_ptr->props_num);
+    //iterate over props to show them all
     for(unsigned int prop_it = 0; prop_it < props_num; prop_it ++){ //iterate over all properties and send them to inspector
         GameObjectProperty* property_ptr = (obj_ptr->properties[prop_it]); //Obtain pointer to object property
 

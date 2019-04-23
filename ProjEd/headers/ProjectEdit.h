@@ -330,7 +330,7 @@ public:
 };
 
 namespace ZSEditor {
-    EditWindow* openProject(Project project);
+    EditWindow* openProject(Project& project);
     EditWindow* openEditor();
 }
 
