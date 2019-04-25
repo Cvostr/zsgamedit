@@ -39,7 +39,6 @@ namespace ZSPIRE {
 	Mesh* getUiSpriteMesh2D();
 	Mesh* getIsoTileMesh2D();
     Mesh* getCubeMesh3D();
-   // Mesh LoadMeshesFromFile(const char* file_path);
 
 }
 

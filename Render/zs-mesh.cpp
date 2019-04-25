@@ -86,7 +86,6 @@ static ZSPIRE::Mesh cube3Dmesh;
 
 ZSPIRE::Mesh::Mesh() {
 	this->alive = false;
-
 }
 
 void ZSPIRE::Mesh::Init() {

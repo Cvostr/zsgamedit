@@ -221,6 +221,14 @@ void EditWindow::openFile(QString file_path){
     }
 }
 
+void EditWindow::addFileToObjectList(QString file_path){
+
+}
+
+QString EditWindow::getCurrentDirectory(){
+    return this->current_dir;
+}
+
 void EditWindow::createNewTextFile(QString directory, QString name, QString ext, std::string content){
     int addition_number = 0;
     QString newfile_name = directory + "/" + name + "_" + QString::number(addition_number) + ext;
@@ -733,27 +741,35 @@ void ObjTreeWgt::dropEvent(QDropEvent* event){
     _inspector_win->clearContentLayout(); //Prevent variable conflicts
     //User dropped object item
     QList<QTreeWidgetItem*> kids = this->selectedItems(); //Get list of selected object(it is moving object)
+    QList<QListWidgetItem*> file_dropped = _editor_win->ui->fileList->selectedItems();
 
-    GameObject* obj_ptr = world_ptr->getObjectByLabel(kids.at(0)->text(0)); //Receiving pointer to moving object
+    if(kids.length() > 0){ //if we dropped gameobject
+        GameObject* obj_ptr = world_ptr->getObjectByLabel(kids.at(0)->text(0)); //Receiving pointer to moving object
 
-    QTreeWidgetItem* pparent = kids.at(0)->parent(); //parent of moved object
-    if(pparent == nullptr){ //If object hadn't any parent
+        QTreeWidgetItem* pparent = kids.at(0)->parent(); //parent of moved object
+        if(pparent == nullptr){ //If object hadn't any parent
 
-    }else{ //If object already parented
-        GameObjectLink link = obj_ptr->getLinkToThisObject();
-        GameObject* pparent_go = world_ptr->getObjectByLabel(pparent->text(0));
-        pparent_go->removeChildObject(link); //Remove object from previous parent
+        }else{ //If object already parented
+            GameObjectLink link = obj_ptr->getLinkToThisObject();
+            GameObject* pparent_go = world_ptr->getObjectByLabel(pparent->text(0));
+            pparent_go->removeChildObject(link); //Remove object from previous parent
+        }
+
+        QTreeWidget::dropEvent(event);
+
+        QTreeWidgetItem* nparent = obj_ptr->item_ptr->parent(); //new parent
+        if(nparent != nullptr){ //If we moved obj to another parent
+            GameObject* nparent_go = world_ptr->getObjectByLabel(nparent->text(0));
+            nparent_go->addChildObject(obj_ptr->getLinkToThisObject());
+        }else{ //We unparented object
+            obj_ptr->hasParent = false;
+            this->addTopLevelItem(obj_ptr->item_ptr);
+        }
     }
 
-    QTreeWidget::dropEvent(event);
-
-    QTreeWidgetItem* nparent = obj_ptr->item_ptr->parent(); //new parent
-    if(nparent != nullptr){ //If we moved obj to another parent
-        GameObject* nparent_go = world_ptr->getObjectByLabel(nparent->text(0));
-        nparent_go->addChildObject(obj_ptr->getLinkToThisObject());
-    }else{ //We unparented object
-        obj_ptr->hasParent = false;
-        this->addTopLevelItem(obj_ptr->item_ptr);
+    if(file_dropped.length() > 0){ //if we dropped some file
+        QString file_path = _editor_win->getCurrentDirectory() + "/" + file_dropped.at(0)->text();
+        _editor_win->addFileToObjectList(file_path);
     }
 }
 

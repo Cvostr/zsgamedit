@@ -120,7 +120,7 @@ void BlobWriter::writeToBlob(std::string file_path, std::string rel_path, Resour
     delete[] data; //free data
 
     //Write data to map
-    map_stream << "entry " << rel_path << " "; //write header
+    map_stream << "entry " << rel_path << " " << res_ptr->resource_label << " "; //write header
     map_stream.write(reinterpret_cast<char*>(&written_bytes), sizeof(int64_t));
     map_stream.write(reinterpret_cast<char*>(&size), sizeof(int));
     map_stream.write(reinterpret_cast<char*>(&res_ptr->type), sizeof(RESOURCE_TYPE));

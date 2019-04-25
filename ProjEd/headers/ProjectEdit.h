@@ -172,6 +172,8 @@ public:
 
     EditorSettings settings; //seetings for editor
 
+    QString getCurrentDirectory();
+
     void init();
     void updateFileList(); //Updates content in file list widget
     void setupObjectsHieList();
@@ -182,6 +184,7 @@ public:
 
     void createNewTextFile(QString directory, QString name, QString ext, std::string content);
     void openFile(QString file_path); //Useful to open a file
+    void addFileToObjectList(QString file_path);
     void assignIconFile(QListWidgetItem* item);
 
     void glRender(); //Invoke opengl rendering

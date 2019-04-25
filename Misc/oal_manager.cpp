@@ -10,13 +10,13 @@ static ALCdevice* al_device;
 static ALCcontext* al_context;
 
 bool ZSPIRE::SFX::initAL() {
-	al_device = alcOpenDevice(NULL);
+    al_device = alcOpenDevice(nullptr);
 	if (!al_device) {
 		std::cout << "AL: Can't initialize OpenAL device" << std::endl;
 		return false;
 	}
 
-	al_context = alcCreateContext(al_device, NULL);
+    al_context = alcCreateContext(al_device, nullptr);
 
 	if (!al_context) {
 		std::cout << "AL: Can't initialize OpenAL device context" << std::endl;
@@ -132,7 +132,7 @@ bool SoundBuffer::loadFileWAV(const char* file_path){
         {
             delete [] data_buffer; //Free heap
             audio_stream.close();
-            fprintf(stderr, "Incompatible format (%d, %d) :(\n", channels, bits);
+            std::cout << "Incompatible format (" << channels << ", " << bits << ") :(" << std::endl;
             return false;
         }
 
