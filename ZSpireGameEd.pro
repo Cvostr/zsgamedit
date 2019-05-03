@@ -50,7 +50,8 @@ SOURCES += \
     World/GoProperty/go_filestream.cpp \
     World/GoProperty/go_properties.cpp \
     World/GoProperty/tile_properties.cpp \
-    Misc/AssimpMeshLoader.cpp
+    Misc/AssimpMeshLoader.cpp \
+    Render/GizmosRenderer.cpp
 
 HEADERS += \
         mainwin.h \
@@ -77,7 +78,8 @@ HEADERS += \
     triggers.h \
     Render/headers/MatShaderProps.h \
     Misc/headers/zs_types.h \
-    Misc/headers/AssimpMeshLoader.h
+    Misc/headers/AssimpMeshLoader.h \
+    Render/headers/GizmosRenderer.h
 
 
 FORMS += \
@@ -114,6 +116,7 @@ win32:INCLUDEPATH += $$PWD/../../LIBS/GLEW
 win32:DEPENDPATH += $$PWD/../../LIBS/GLEW
 
 win32:!win32-g++: PRE_TARGETDEPS += $$PWD/../../LIBS/glew32s.lib
+win32: LIBS += -lOpenGL32
 
 #SDL2 lib
 win32: LIBS += -L$$PWD/../../LIBS/ -lSDL2
@@ -136,10 +139,10 @@ win32:DEPENDPATH += $$PWD/../../LIBS/LUABRIDGE
 
 #-------------------------------------------------- ZSPIRE ENGINE Library ---------------------
 
-unix|win32: LIBS += -L$$PWD/../build-ZSpireEngine-Desktop-Debug/ -lzsengine -lvulkan
+unix: LIBS += -L$$PWD/../build-ZSpireEngine-Desktop-Debug/ -lzsengine -lvulkan
 
 INCLUDEPATH += $$PWD/../ENGINE/headers
 DEPENDPATH += $$PWD/../ENGINE/headers
 
-win32:!win32-g++: PRE_TARGETDEPS += $$PWD/../build-ZSpireEngine-Desktop-Debug/zsengine.lib
-else:unix|win32-g++: PRE_TARGETDEPS += $$PWD/../build-ZSpireEngine-Desktop-Debug/libzsengine.a
+#win32:!win32-g++: PRE_TARGETDEPS += $$PWD/../build-ZSpireEngine-Desktop-Debug/zsengine.lib
+unix: PRE_TARGETDEPS += $$PWD/../build-ZSpireEngine-Desktop-Debug/libzsengine.a

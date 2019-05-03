@@ -42,6 +42,8 @@ ObjectCtxMenu::ObjectCtxMenu(EditWindow* win, QWidget* parent ) : QObject(parent
     action_scale = new QAction("Scale", win);
     action_rotate = new QAction("Rotate", win);
 
+    store_to_prefab = new QAction("Store to Prefab", win);
+
     object_info = new QAction("Info", win);
     //Adding actions to menu container
     this->menu->addAction(action_dub);
@@ -50,6 +52,7 @@ ObjectCtxMenu::ObjectCtxMenu(EditWindow* win, QWidget* parent ) : QObject(parent
     this->menu->addAction(action_move);
     this->menu->addAction(action_scale);
     this->menu->addAction(action_rotate);
+    this->menu->addAction(store_to_prefab);
     this->menu->addAction(object_info);
     //Connect actions to slots
     QObject::connect(this->action_delete, SIGNAL(triggered(bool)), this, SLOT(onDeleteClicked()));
@@ -59,6 +62,7 @@ ObjectCtxMenu::ObjectCtxMenu(EditWindow* win, QWidget* parent ) : QObject(parent
     QObject::connect(this->action_scale, SIGNAL(triggered(bool)), this, SLOT(onScaleClicked()));
     QObject::connect(this->action_rotate, SIGNAL(triggered(bool)), this, SLOT(onRotateClicked()));
 
+    QObject::connect(this->store_to_prefab, SIGNAL(triggered(bool)), this, SLOT(onStorePrefabPressed()));
     QObject::connect(this->object_info, SIGNAL(triggered(bool)), this, SLOT(onInfoPressed()));
 }
 
@@ -83,6 +87,10 @@ void ObjectCtxMenu::onScaleClicked(){
 void ObjectCtxMenu::onRotateClicked(){
     //Set state to rotate object
     win_ptr->obj_trstate.setTransformOnObject(win_ptr->obj_trstate.obj_ptr, GO_TRANSFORM_MODE_ROTATE);
+}
+
+void ObjectCtxMenu::onStorePrefabPressed(){
+
 }
 
 void ObjectCtxMenu::onInfoPressed(){

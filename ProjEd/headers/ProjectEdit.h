@@ -216,6 +216,7 @@ public slots:
     void onScaleClicked();
     void onRotateClicked();
 
+    void onStorePrefabPressed();
     void onInfoPressed();
 private:
     GameObject* obj_ptr;
@@ -227,6 +228,8 @@ private:
     QAction* action_move;
     QAction* action_scale;
     QAction* action_rotate;
+
+    QAction* store_to_prefab;
 
     QAction* object_info; //Show dialog with detailed object information
 public:

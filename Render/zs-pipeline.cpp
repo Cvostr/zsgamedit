@@ -14,6 +14,10 @@ RenderSettings* RenderPipeline::getRenderSettings(){
     return &this->render_settings;
 }
 
+GizmosRenderer* RenderPipeline::getGizmosRenderer(){
+    return this->gizmos;
+}
+
 void RenderSettings::defaults(){
     ambient_light_color = ZSRGBCOLOR(255, 255, 255, 255);
 }
@@ -30,6 +34,8 @@ void RenderPipeline::setup(int bufWidth, int bufHeight){
     removeLights();
 
     MtShProps::genDefaultMtShGroup(&diffuse3d_shader);
+
+    gizmos = new GizmosRenderer(&obj_mark_shader);
 }
 
 RenderPipeline::~RenderPipeline(){
@@ -183,16 +189,11 @@ void GameObject::Draw(RenderPipeline* pipeline){
                 mesh_prop->mesh_ptr->Draw();
                 //if object is picked
                 if(this->isPicked == true && pipeline->current_state != PIPELINE_STATE_PICKING){
-                    PIPELINE_STATE cur_state = pipeline->current_state; //Storing current state
-                    pipeline->current_state = PIPELINE_STATE_MARKED;
-                    ZSPIRE::Shader* mark_s = pipeline->processShaderOnObject(static_cast<void*>(this));
-                    mark_s->setTransform(transform_prop->transform_mat);
-                    EditWindow* w = static_cast<EditWindow*>(pipeline->win_ptr);
-                    if(w->obj_trstate.isTransforming == true)
-                         mark_s->setGLuniformInt("isTransformMark", 1);
-                    mesh_prop->mesh_ptr->DrawLines();
-                    pipeline->current_state = cur_state; //assign last value
-                    mark_s->setGLuniformInt("isTransformMark", 0);
+                    ZSRGBCOLOR color = ZSRGBCOLOR(0.23f * 255.0f, 0.23f * 255.0f, 0.54f * 255.0f);;
+                    if(editwin_ptr->obj_trstate.isTransforming == true)
+                         color = ZSRGBCOLOR(255.0f, 255.0f, 0.0f);
+
+                    pipeline->getGizmosRenderer()->drawPickedMeshWireframe(mesh_prop->mesh_ptr, transform_prop->transform_mat, color);
                 }
             }
         }

@@ -6,6 +6,8 @@
 #include "zs-mesh.h"
 #include "zs-texture.h"
 
+#include "GizmosRenderer.h"
+
 #include <QMainWindow>
 #include <SDL2/SDL.h>
 
@@ -49,6 +51,9 @@ public:
 
 class RenderPipeline{
 private:
+
+    GizmosRenderer* gizmos;
+
     G_BUFFER_GL gbuffer;
 
     ZSPIRE::Shader tile_shader; //Shader to draw tiles
@@ -77,6 +82,7 @@ public:
     void* win_ptr;
 
     RenderSettings* getRenderSettings();
+    GizmosRenderer* getGizmosRenderer();
 
     RenderPipeline();
     ~RenderPipeline();

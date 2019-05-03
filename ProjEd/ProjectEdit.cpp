@@ -64,10 +64,14 @@ EditWindow::EditWindow(QWidget *parent) :
     isSceneCamera = false;
 
     setupObjectsHieList();
-
+    //Drag & drop in objects tree
     ui->objsList->setAcceptDrops(true);
     ui->objsList->setDragEnabled(true);
-    ui->objsList->setDragDropMode(QAbstractItemView::InternalMove);
+    //Drag & drop in file list
+    ui->fileList->setAcceptDrops(true);
+    ui->fileList->setDragEnabled(true);
+    ui->fileList->setDragDropMode(QAbstractItemView::InternalMove);
+
     ui->objsList->world_ptr = &world;
 
     world.proj_ptr = static_cast<void*>(&project); //Assigning project pointer into world's variable

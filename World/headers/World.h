@@ -232,6 +232,11 @@ public:
 
     void saveToFile(QString file, RenderSettings* settings_ptr);
     void openFromFile(QString file, QTreeWidget* w_ptr, RenderSettings* settings_ptr);
+    void writeGameObject(GameObject* object_ptr, std::ofstream* world_stream);
+    void loadGameObject(GameObject* object_ptr, std::ifstream* world_stream);
+
+    void storeObjectToPrefab(GameObject* object_ptr, QString file);
+
     void clear();
 
     void putToShapshot(WorldSnapshot* snapshot);

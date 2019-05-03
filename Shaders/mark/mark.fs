@@ -6,11 +6,10 @@ layout (location = 0) out vec4 tDiffuse;
 
 out vec4 FragColor;
 
-uniform int isTransformMark = 0;
+uniform vec3 color;
 
 void main(){
 	
-	FragColor = vec4(0.23, 0.23, 0.54, 1);
-	if(isTransformMark == 1) FragColor = vec4(1, 1, 0.0, 1);
+	FragColor = vec4(color, 1);
 	tDiffuse = FragColor;
 }

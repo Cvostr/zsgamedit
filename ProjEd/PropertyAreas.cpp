@@ -335,7 +335,7 @@ PickResourceArea::PickResourceArea(){
     relpath_label = new QLabel; //Allocation of resource relpath text
     elem_layout->addWidget(relpath_label);
     //Space between text and button
-    elem_layout->addSpacing(10);
+    elem_layout->addSpacing(6);
     elem_layout->addWidget(respick_btn);
     respick_btn->setText("Select...");
 
