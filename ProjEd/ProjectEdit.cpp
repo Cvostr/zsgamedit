@@ -833,8 +833,8 @@ void EditWindow::onMouseMotion(int relX, int relY){
             ppaint_state.time += deltaTime;
 
             unsigned int clicked = render->render_getpickedObj(static_cast<void*>(this), input_state.mouseX, input_state.mouseY);
-
-            if(clicked > world.objects.size() || clicked >= 256 * 256 * 256 || ppaint_state.last_obj == clicked)
+            //if we pressed on empty space
+            if(clicked > world.objects.size() || clicked >= 256 * 256 * 256 || ppaint_state.last_obj == static_cast<int>(clicked))
                 return;
 
             GameObject* obj_ptr = &world.objects[clicked]; //Obtain pointer to selected object by label
@@ -871,26 +871,31 @@ void EditWindow::onMouseMotion(int relX, int relY){
 
         if(obj_trstate.isTransforming == true && input_state.isLeftBtnHold == true){ //Only affective if object is transforming
 
-            ZSVECTOR3 dir = ZSVECTOR3(-relX, -relY, 0);
+            ZSRGBCOLOR color = render->getColorOfPickedTransformControl(obj_trstate.tprop_ptr->_last_translation, this->input_state.mouseX, this->input_state.mouseY);
 
-            if ((abs(relX) > abs(relY)) && abs(relX - relY) > 15)
-                dir = ZSVECTOR3(-relX, 0, 0);
-            if ((abs(relX) < abs(relY)) && abs(relX - relY) > 15)
-                dir = ZSVECTOR3(0, -relY, 0);
-            //if we translating
+            if(color.r == 255) color.r = 1; else
+                color.r = 0;
+            if(color.g == 255) color.g = 1; else
+                color.g = 0;
+            if(color.b == 255) color.b = 1; else
+                color.b = 0;
+
+            ZSVECTOR3* vec_ptr = nullptr; //pointer to modifying vector
+
             if(obj_trstate.transformMode == GO_TRANSFORM_MODE_TRANSLATE){
-                obj_trstate.tprop_ptr->translation = obj_trstate.tprop_ptr->translation + dir;
+                vec_ptr = &obj_trstate.tprop_ptr->translation;
             }
             //if we scaling
             if(obj_trstate.transformMode == GO_TRANSFORM_MODE_SCALE){
-                obj_trstate.tprop_ptr->scale = obj_trstate.tprop_ptr->scale + dir / 3;
+                vec_ptr = &obj_trstate.tprop_ptr->scale;
             }
             //if we rotating
             if(obj_trstate.transformMode == GO_TRANSFORM_MODE_ROTATE){
-                obj_trstate.tprop_ptr->rotation = obj_trstate.tprop_ptr->rotation + dir / 3;
+                vec_ptr = &obj_trstate.tprop_ptr->rotation;
             }
-            //Update our changes
-            obj_trstate.tprop_ptr->updateMat();
+
+            *vec_ptr = *vec_ptr + ZSVECTOR3(-relX, -relY,relX) * ZSVECTOR3(color.r, color.g, color.b);
+
         }
     }
     if(project.perspective == 3){//Only affective in 3D
@@ -918,22 +923,22 @@ void EditWindow::onKeyDown(SDL_Keysym sym){
 
     if(sym.sym == SDLK_a){
         ZSVECTOR3 pos = edit_camera.getCameraPosition(); //obtain position
-        pos = pos + edit_camera.getCameraRightVec() * -0.2f;
+        pos = pos + edit_camera.getCameraRightVec() * -2.2f * deltaTime;
         edit_camera.setPosition(pos);
     }
     if(sym.sym == SDLK_d){
         ZSVECTOR3 pos = edit_camera.getCameraPosition(); //obtain position
-        pos = pos + edit_camera.getCameraRightVec() * 0.2f;
+        pos = pos + edit_camera.getCameraRightVec() * 2.2f * deltaTime;
         edit_camera.setPosition(pos);
     }
     if(sym.sym == SDLK_w){
         ZSVECTOR3 pos = edit_camera.getCameraPosition(); //obtain position
-        pos.Y += 0.2f;
+        pos.Y += 2.2f * deltaTime;
         edit_camera.setPosition(pos);
     }
     if(sym.sym == SDLK_s){
         ZSVECTOR3 pos = edit_camera.getCameraPosition(); //obtain position
-        pos.Y -= 0.2f;
+        pos.Y -= 2.2f * deltaTime;
         edit_camera.setPosition(pos);
     }
 
@@ -986,6 +991,9 @@ EdActions* getActionManager(){
 }
 
 void ObjectTransformState::setTransformOnObject(GameObject* obj_ptr, GO_TRANSFORM_MODE transformMode){
+    //if null object passed
+    if(obj_ptr == nullptr) return;
+
     this->obj_ptr = obj_ptr; //Set pointer to object
     //Calculate pointer to transform property
     this->tprop_ptr = static_cast<TransformProperty*>(obj_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));

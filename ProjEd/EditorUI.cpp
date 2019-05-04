@@ -64,6 +64,7 @@ ObjectCtxMenu::ObjectCtxMenu(EditWindow* win, QWidget* parent ) : QObject(parent
 
     QObject::connect(this->store_to_prefab, SIGNAL(triggered(bool)), this, SLOT(onStorePrefabPressed()));
     QObject::connect(this->object_info, SIGNAL(triggered(bool)), this, SLOT(onInfoPressed()));
+
 }
 
 void ObjectCtxMenu::show(QPoint point){

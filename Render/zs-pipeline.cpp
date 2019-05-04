@@ -48,6 +48,7 @@ RenderPipeline::~RenderPipeline(){
 
     this->gbuffer.Destroy();
     removeLights();
+    delete gizmos;
 }
 
 bool RenderPipeline::InitGLEW(){
@@ -61,6 +62,25 @@ bool RenderPipeline::InitGLEW(){
 
     std::cout << "GLEW creation successful" << std::endl;
         return true;
+}
+
+ZSRGBCOLOR RenderPipeline::getColorOfPickedTransformControl(ZSVECTOR3 translation, int mouseX, int mouseY){
+    glClearColor(0,0,0,1);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    //Picking state
+
+    if(depthTest == true) //if depth is enabled
+        glDisable(GL_DEPTH_TEST);
+
+    if(cullFaces == true)
+        glDisable(GL_CULL_FACE);
+
+    getGizmosRenderer()->drawTransformControls(translation, 100, 10);
+
+    unsigned char data[4];
+    glReadPixels(mouseX, 480 - mouseY, 1,1, GL_RGBA, GL_UNSIGNED_BYTE, data);
+
+    return ZSRGBCOLOR(data[0], data[1], data[2]);
 }
 
 unsigned int RenderPipeline::render_getpickedObj(void* projectedit_ptr, int mouseX, int mouseY){
@@ -139,7 +159,7 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr)
         if(!obj_ptr->hasParent) //if it is a root object
             obj_ptr->Draw(this); //Draw object
     }
-
+    //Turn everything off to draw deffered plane correctly
     if(depthTest == true) //if depth is enabled
         glDisable(GL_DEPTH_TEST);
 
@@ -189,11 +209,13 @@ void GameObject::Draw(RenderPipeline* pipeline){
                 mesh_prop->mesh_ptr->Draw();
                 //if object is picked
                 if(this->isPicked == true && pipeline->current_state != PIPELINE_STATE_PICKING){
-                    ZSRGBCOLOR color = ZSRGBCOLOR(0.23f * 255.0f, 0.23f * 255.0f, 0.54f * 255.0f);;
+                    ZSRGBCOLOR color = ZSRGBCOLOR(0.23f * 255.0f, 0.23f * 255.0f, 0.54f * 255.0f);
                     if(editwin_ptr->obj_trstate.isTransforming == true)
                          color = ZSRGBCOLOR(255.0f, 255.0f, 0.0f);
 
                     pipeline->getGizmosRenderer()->drawPickedMeshWireframe(mesh_prop->mesh_ptr, transform_prop->transform_mat, color);
+                    if(editwin_ptr->obj_trstate.isTransforming == true)
+                        pipeline->getGizmosRenderer()->drawTransformControls(transform_prop->_last_translation, 100, 10);
                 }
             }
         }
@@ -210,11 +232,6 @@ void GameObject::Draw(RenderPipeline* pipeline){
 ZSPIRE::Shader* RenderPipeline::processShaderOnObject(void* _obj){
     GameObject* obj = static_cast<GameObject*>(_obj);
     ZSPIRE::Shader* result = nullptr;
-
-    if(current_state == PIPELINE_STATE_MARKED) {
-        obj_mark_shader.Use();
-        return &obj_mark_shader;
-    }
 
     if(current_state == PIPELINE_STATE_PICKING) {
         unsigned char* to_send = reinterpret_cast<unsigned char*>(&obj->array_index);
