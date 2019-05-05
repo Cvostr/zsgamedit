@@ -212,9 +212,10 @@ void GameObject::Draw(RenderPipeline* pipeline){
                     ZSRGBCOLOR color = ZSRGBCOLOR(0.23f * 255.0f, 0.23f * 255.0f, 0.54f * 255.0f);
                     if(editwin_ptr->obj_trstate.isTransforming == true)
                          color = ZSRGBCOLOR(255.0f, 255.0f, 0.0f);
-
+                    //draw wireframe mesh for picked object
                     pipeline->getGizmosRenderer()->drawPickedMeshWireframe(mesh_prop->mesh_ptr, transform_prop->transform_mat, color);
-                    if(editwin_ptr->obj_trstate.isTransforming == true)
+                    //compare pointers
+                    if(editwin_ptr->obj_trstate.isTransforming == true && this == editwin_ptr->obj_trstate.obj_ptr)
                         pipeline->getGizmosRenderer()->drawTransformControls(transform_prop->_last_translation, 100, 10);
                 }
             }

@@ -236,6 +236,8 @@ public:
     void loadGameObject(GameObject* object_ptr, std::ifstream* world_stream);
 
     void storeObjectToPrefab(GameObject* object_ptr, QString file);
+    void writeObjectToPrefab(GameObject* object_ptr, std::ofstream* stream);
+    void addObjectsFromPrefab(QString file);
 
     void clear();
 

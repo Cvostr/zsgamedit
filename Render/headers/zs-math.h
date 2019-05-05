@@ -196,6 +196,14 @@
 
 	}
 
+    inline ZSVECTOR2 operator-(const ZSVECTOR2& l, const ZSVECTOR2& r)
+    {
+        ZSVECTOR2 Ret(l.X - r.X, l.Y - r.Y);
+
+        return Ret;
+    }
+
+
 	inline ZSVECTOR3 operator-(const ZSVECTOR3& l, const ZSVECTOR3& r)
 	{
 		ZSVECTOR3 Ret(l.X - r.X, l.Y - r.Y, l.Z - r.Z);

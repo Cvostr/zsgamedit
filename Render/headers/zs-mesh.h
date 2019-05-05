@@ -25,6 +25,7 @@ namespace ZSPIRE {
         void Init();
         void setMeshData(ZSVERTEX* vertices, unsigned int* indices, unsigned int vertices_num, unsigned int indices_num);
         void setMeshData(ZSVERTEX* vertices, unsigned int vertices_num);
+
         void Draw();
         void DrawLines();
         void Destroy();
@@ -40,6 +41,7 @@ namespace ZSPIRE {
 	Mesh* getIsoTileMesh2D();
     Mesh* getCubeMesh3D();
 
+    void processTangentSpace(ZSVERTEX* vert_array, unsigned int* indices_array, int indices_num, int vertex_num);
 }
 
 

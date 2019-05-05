@@ -226,7 +226,9 @@ void EditWindow::openFile(QString file_path){
 }
 
 void EditWindow::addFileToObjectList(QString file_path){
-
+    if(file_path.endsWith(".prefab")){
+        this->world.addObjectsFromPrefab(file_path);
+    }
 }
 
 QString EditWindow::getCurrentDirectory(){

@@ -365,6 +365,54 @@ void World::openFromFile(QString file, QTreeWidget* w_ptr, RenderSettings* setti
     }
 }
 
+void World::writeObjectToPrefab(GameObject* object_ptr, std::ofstream* stream){
+    //Write an object
+    writeGameObject(object_ptr, stream);
+    //get children amount
+    unsigned int children_am = static_cast<unsigned int>(object_ptr->children.size());
+    //iterate over all children and write them
+    for(unsigned int ch_i = 0; ch_i < children_am; ch_i ++){
+        GameObjectLink link = object_ptr->children[ch_i];
+        writeObjectToPrefab(link.updLinkPtr(), stream);
+    }
+}
+
+void World::addObjectsFromPrefab(QString file){
+    std::ifstream prefab_stream;
+    //opening prefab stream
+    prefab_stream.open(file.toStdString(), std::ifstream::binary);
+
+    std::string header;
+    //reading headers
+    prefab_stream >> header;
+    //testing header
+    if(header.compare("ZSPIRE_PREFAB")) return;
+
+    std::string prefix;
+
+    std::vector<GameObject> mObjects;
+
+    while(!prefab_stream.eof()){
+        prefab_stream >> prefix;
+
+        if(!prefix.compare("G_OBJECT")){
+            GameObject obj;
+            this->loadGameObject(&obj, &prefab_stream);
+            mObjects.push_back(obj);
+        }
+    }
+}
+
+void World::storeObjectToPrefab(GameObject* object_ptr, QString file){
+    //open stream
+    std::ofstream prefab_stream;
+    prefab_stream.open(file.toStdString(), std::ofstream::binary);
+    //Writing prefab header
+    prefab_stream << "ZSPIRE_PREFAB\n";
+    //Call first object writing
+    writeObjectToPrefab(object_ptr, &prefab_stream);
+}
+
 void World::pushCollider(ColliderProperty* property){
     this->colliders.push_back(property);
 }

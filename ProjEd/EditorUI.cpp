@@ -91,7 +91,9 @@ void ObjectCtxMenu::onRotateClicked(){
 }
 
 void ObjectCtxMenu::onStorePrefabPressed(){
+    QString prefab_filepath = win_ptr->getCurrentDirectory() + "/" + *obj_ptr->label + ".prefab";
 
+    win_ptr->world.storeObjectToPrefab(this->obj_ptr, prefab_filepath);
 }
 
 void ObjectCtxMenu::onInfoPressed(){
