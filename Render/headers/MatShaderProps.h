@@ -11,7 +11,8 @@ enum MATSHPROP_TYPE{
     MATSHPROP_TYPE_TEXTURE,
     MATSHPROP_TYPE_INTEGER,
     MATSHPROP_TYPE_FLOAT,
-    MATSHPROP_TYPE_FVEC3
+    MATSHPROP_TYPE_FVEC3,
+    MATSHPROP_TYPE_COLOR
 };
 
 class MaterialShaderProperty{
@@ -87,10 +88,17 @@ public:
 };
 class FloatMaterialShaderProperty : public MaterialShaderProperty{
 public:
-    std::string integerUniform;
+    std::string floatUniform;
     //Construct
     FloatMaterialShaderProperty();
 };
+class ColorMaterialShaderProperty : public MaterialShaderProperty{
+public:
+    std::string colorUniform;
+
+    ColorMaterialShaderProperty();
+};
+
 //Property configurations
 class TextureMtShPropConf : public MaterialShaderPropertyConf{
 public:
@@ -110,6 +118,13 @@ public:
     float value;
     //Construct
     FloatMtShPropConf();
+};
+
+class ColorMtShPropConf : public MaterialShaderPropertyConf{
+public:
+    ZSRGBCOLOR color;
+
+    ColorMtShPropConf();
 };
 
 #endif

@@ -11,6 +11,7 @@ out vec4 FragColor;
 in vec3 FragPos;
 in vec3 InNormal;
 in vec2 UVCoord;
+in mat3 TBN;
 
 //textures
 uniform sampler2D diffuse;
@@ -34,9 +35,12 @@ void main(){
 	if(hasDiffuseMap)
 		result = texture(diffuse, uv).xyz ;
 		
-    if(hasNormalMap)
+    if(hasNormalMap){
         Normal = texture(normal_map, uv).xyz;
-        
+		Normal = normalize(Normal * 2 - 1);
+		Normal = normalize(TBN * Normal);
+	}    
+		
     if(hasSpecularMap)
         result_shininess *= texture(specular_map, uv).x;
             

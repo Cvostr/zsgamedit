@@ -213,9 +213,10 @@ void GameObject::Draw(RenderPipeline* pipeline){
                     if(editwin_ptr->obj_trstate.isTransforming == true)
                          color = ZSRGBCOLOR(255.0f, 255.0f, 0.0f);
                     //draw wireframe mesh for picked object
-                    pipeline->getGizmosRenderer()->drawPickedMeshWireframe(mesh_prop->mesh_ptr, transform_prop->transform_mat, color);
+                    if(!editwin_ptr->isSceneRun) //avoid drawing gizmos during playtime
+                        pipeline->getGizmosRenderer()->drawPickedMeshWireframe(mesh_prop->mesh_ptr, transform_prop->transform_mat, color);
                     //compare pointers
-                    if(editwin_ptr->obj_trstate.isTransforming == true && this == editwin_ptr->obj_trstate.obj_ptr)
+                    if(editwin_ptr->obj_trstate.isTransforming == true && this == editwin_ptr->obj_trstate.obj_ptr && !editwin_ptr->isSceneRun)
                         pipeline->getGizmosRenderer()->drawTransformControls(transform_prop->_last_translation, 100, 10);
                 }
             }
@@ -323,7 +324,7 @@ ZSPIRE::Shader* RenderPipeline::processShaderOnObject(void* _obj){
                         FloatMaterialShaderProperty* float_p = static_cast<FloatMaterialShaderProperty*>(prop_ptr);
                         FloatMtShPropConf* float_conf = static_cast<FloatMtShPropConf*>(conf_ptr);
 
-                        result->setGLuniformFloat(float_p->integerUniform.c_str(), float_conf->value);
+                        result->setGLuniformFloat(float_p->floatUniform.c_str(), float_conf->value);
                         break;
                     }
                     case MATSHPROP_TYPE_INTEGER:{
@@ -332,6 +333,14 @@ ZSPIRE::Shader* RenderPipeline::processShaderOnObject(void* _obj){
                         IntegerMtShPropConf* int_conf = static_cast<IntegerMtShPropConf*>(conf_ptr);
 
                         result->setGLuniformInt(int_p->integerUniform.c_str(), int_conf->value);
+                        break;
+                    }
+                    case MATSHPROP_TYPE_COLOR:{
+                        //Cast pointer
+                        ColorMaterialShaderProperty* color_p = static_cast<ColorMaterialShaderProperty*>(prop_ptr);
+                        ColorMtShPropConf* color_conf = static_cast<ColorMtShPropConf*>(conf_ptr);
+
+                        result->setGLuniformColor(color_p->colorUniform.c_str(), color_conf->color);
                         break;
                     }
                 }

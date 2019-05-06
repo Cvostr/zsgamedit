@@ -365,6 +365,35 @@ void World::openFromFile(QString file, QTreeWidget* w_ptr, RenderSettings* setti
     }
 }
 
+void World::processPrefabObject(GameObject* object_ptr, std::vector<GameObject>* objects_array){
+    unsigned int props_amount = object_ptr->props_num;
+    //iterate over all props and update gameobject links
+    for(unsigned int prop_i = 0; prop_i < props_amount; prop_i ++){
+        GameObjectProperty* prop_ptr = object_ptr->properties[prop_i];
+        prop_ptr->go_link.obj_str_id = object_ptr->str_id; //set new string id
+        prop_ptr->go_link.updLinkPtr();
+    }
+
+    unsigned int children_amount = object_ptr->children.size();
+
+    for(unsigned int chi_i = 0; chi_i < children_amount; chi_i ++){
+        GameObjectLink link = object_ptr->children[chi_i];
+        //find object with same string name as in link
+        for(unsigned int obj_i = 0; obj_i < objects_array->size(); obj_i ++){
+            GameObject* _object_ptr = &objects_array->at(obj_i);
+            if(_object_ptr->str_id.compare(link.obj_str_id) == 0){ //we found object
+                genRandomString(&_object_ptr->str_id, 15); //generate new string ID
+                object_ptr->children[chi_i].obj_str_id = _object_ptr->str_id; //update string id in children array
+                _object_ptr->parent.obj_str_id = object_ptr->str_id; //update string ID of parent link
+                _object_ptr->hasParent = true;
+
+                processPrefabObject(_object_ptr, objects_array);
+            }
+        }
+    }
+}
+
+
 void World::writeObjectToPrefab(GameObject* object_ptr, std::ofstream* stream){
     //Write an object
     writeGameObject(object_ptr, stream);
@@ -400,6 +429,20 @@ void World::addObjectsFromPrefab(QString file){
             this->loadGameObject(&obj, &prefab_stream);
             mObjects.push_back(obj);
         }
+    }
+
+    genRandomString(&mObjects[0].str_id, 15); //generate new string ID for first object
+    processPrefabObject(&mObjects[0], &mObjects);
+    //iterate over all objects and push them to world
+    for(unsigned int obj_i = 0; obj_i < mObjects.size(); obj_i ++)
+        this->addObject(mObjects[obj_i]);
+    //Add first object to top of tree
+    this->obj_widget_ptr->addTopLevelItem(this->getObjectByStringId(mObjects[0].str_id)->item_ptr);
+
+    for(unsigned int obj_i = 1; obj_i < mObjects.size(); obj_i ++){
+        GameObject* object_ptr = this->getObjectByStringId(mObjects[obj_i].str_id);
+        object_ptr->parent.world_ptr = this;
+        object_ptr->parent.updLinkPtr()->item_ptr->addChild(object_ptr->item_ptr);
     }
 }
 

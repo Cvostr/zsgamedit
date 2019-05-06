@@ -23,6 +23,7 @@ unsigned int current_timestamp() {
 }
 
 void genRandomString(std::string* result, unsigned int len){
+    result->clear(); //make string empty, first
     srand (SDL_GetPerformanceCounter());
     unsigned int _len = len + rand() % 3;
     for(unsigned int digit_i = 0; digit_i < _len; digit_i ++){//Iterate over all chars in string

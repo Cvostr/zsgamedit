@@ -54,6 +54,13 @@ FloatMtShPropConf::FloatMtShPropConf(){
 
     value = 0.0f;
 }
+//Color stuff
+ColorMaterialShaderProperty::ColorMaterialShaderProperty(){
+    type = MATSHPROP_TYPE_COLOR;
+}
+ColorMtShPropConf::ColorMtShPropConf(){
+    //Nothing much to do
+}
 
 void MtShaderPropertiesGroup::loadFromFile(const char* fpath){
 
@@ -92,7 +99,7 @@ MtShaderPropertiesGroup* MtShProps::genDefaultMtShGroup(ZSPIRE::Shader* shader3d
 
     FloatMaterialShaderProperty* shininess_factor_prop =
             static_cast<FloatMaterialShaderProperty*>(default_group.addProperty(MATSHPROP_TYPE_FLOAT));
-    shininess_factor_prop->integerUniform = "material_shininess";
+    shininess_factor_prop->floatUniform = "material_shininess";
     shininess_factor_prop->prop_caption = "Shininess";
     shininess_factor_prop->prop_identifier = "f_shininess"; //Identifier to save
 
@@ -138,6 +145,10 @@ MaterialShaderProperty* MtShProps::allocateProperty(int type){
             _ptr = static_cast<MaterialShaderProperty*>(new FloatMaterialShaderProperty); //Allocation of transform in heap
             break;
         }
+        case MATSHPROP_TYPE_COLOR:{ //If type is transfrom
+            _ptr = static_cast<MaterialShaderProperty*>(new ColorMaterialShaderProperty); //Allocation of transform in heap
+            break;
+        }
 
     }
     return _ptr;
@@ -157,7 +168,10 @@ MaterialShaderPropertyConf* MtShProps::allocatePropertyConf(int type){
             _ptr = static_cast<MaterialShaderPropertyConf*>(new FloatMtShPropConf); //Allocation of transform in heap
             break;
         }
-
+        case MATSHPROP_TYPE_COLOR:{ //If type is transfrom
+            _ptr = static_cast<MaterialShaderPropertyConf*>(new ColorMtShPropConf); //Allocation of transform in heap
+            break;
+        }
     }
     return _ptr;
 }
@@ -173,7 +187,7 @@ void Material::saveToFile(){
         //Obtain pointers to prop and prop's configuration
         MaterialShaderProperty* prop_ptr = group_ptr->properties[prop_i];
         MaterialShaderPropertyConf* conf_ptr = this->confs[prop_i];
-
+        //write entry header
         mat_stream << "ENTRY " << prop_ptr->prop_identifier.toStdString() << " "; //Write identifier
 
         switch(prop_ptr->type){
@@ -198,10 +212,17 @@ void Material::saveToFile(){
                 mat_stream << int_conf->value;
                 break;
             }
+            case MATSHPROP_TYPE_COLOR:{
+                //Cast pointer
+                ColorMtShPropConf* color_conf = static_cast<ColorMtShPropConf*>(conf_ptr);
+                //Write value
+                mat_stream << color_conf->color.r << color_conf->color.g << color_conf->color.b;
+                break;
+            }
         }
     mat_stream << "\n"; //Write divider
     }
-    mat_stream.close();
+    mat_stream.close(); //close stream
 }
 
 void Material::loadFromFile(std::string fpath){
@@ -255,24 +276,24 @@ void Material::loadFromFile(std::string fpath){
 
                             float_conf->value = value;
                             break;
-                       }
-                    case MATSHPROP_TYPE_INTEGER:{
-                        //Cast pointer
-                        IntegerMtShPropConf* int_conf = static_cast<IntegerMtShPropConf*>(conf_ptr);
+                        }
+                        case MATSHPROP_TYPE_INTEGER:{
+                            //Cast pointer
+                            IntegerMtShPropConf* int_conf = static_cast<IntegerMtShPropConf*>(conf_ptr);
 
-                        int value;
-                        mat_stream >> value;
+                            int value;
+                            mat_stream >> value;
 
-                        int_conf->value = value;
-                        break;
-                   }
+                            int_conf->value = value;
+                            break;
+                        }
                    }
                    mat_stream.seekg(1, std::ofstream::cur); //Skip space
                 }
             }
         }
     }
-    mat_stream.close();
+    mat_stream.close(); //close material stream
 }
 void Material::setPropertyGroup(MtShaderPropertiesGroup* group_ptr){
     this->clear(); //clear all confs, first
