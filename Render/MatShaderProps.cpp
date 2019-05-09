@@ -287,6 +287,13 @@ void Material::loadFromFile(std::string fpath){
                             int_conf->value = value;
                             break;
                         }
+                        case MATSHPROP_TYPE_COLOR:{
+                            //Cast pointer
+                            ColorMtShPropConf* color_conf = static_cast<ColorMtShPropConf*>(conf_ptr);
+                            //Write value
+                            mat_stream >> color_conf->color.r >> color_conf->color.g >> color_conf->color.b;
+                            break;
+                        }
                    }
                    mat_stream.seekg(1, std::ofstream::cur); //Skip space
                 }

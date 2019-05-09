@@ -11,9 +11,20 @@
 #include <assimp/postprocess.h>
 #endif
 
+class MeshNode
+{
+public:
+    std::string node_label;
+
+    std::vector<MeshNode> children;
+    std::vector<std::string> mesh_names;
+    MeshNode() {}
+};
+
 namespace Engine {
 
-
+void processNodeForTree(MeshNode* node, aiNode* node_assimp, const aiScene* scene);
+void loadNodeTree(std::string file_path, MeshNode* node);
 unsigned int getMeshesAmount(std::string file_path);
 void loadMeshes(std::string file_path, ZSPIRE::Mesh* meshes_array);
 void loadMesh(std::string file_path, ZSPIRE::Mesh* mesh_ptr, int index);

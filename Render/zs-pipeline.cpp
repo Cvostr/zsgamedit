@@ -34,8 +34,10 @@ void RenderPipeline::setup(int bufWidth, int bufHeight){
     removeLights();
 
     MtShProps::genDefaultMtShGroup(&diffuse3d_shader);
+}
 
-    gizmos = new GizmosRenderer(&obj_mark_shader);
+void RenderPipeline::initGizmos(int projectPespective){
+    gizmos = new GizmosRenderer(&obj_mark_shader, this->depthTest, this->cullFaces, projectPespective);
 }
 
 RenderPipeline::~RenderPipeline(){

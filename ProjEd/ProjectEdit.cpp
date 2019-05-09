@@ -147,7 +147,9 @@ void EditWindow::init(){
         render->cullFaces = true;
         glFrontFace(GL_CCW);
     }
-
+    //initialize gizmos component
+    render->initGizmos(project.perspective);
+    //setup GBUFFER
     render->setup(settings.gameViewWin_Width, settings.gameViewWin_Height);
     ready = true;//Everything is ready
 
@@ -229,13 +231,16 @@ void EditWindow::addFileToObjectList(QString file_path){
     if(file_path.endsWith(".prefab")){
         this->world.addObjectsFromPrefab(file_path);
     }
+    if(file_path.endsWith(".fbx") || file_path.endsWith(".FBX")){
+        this->world.addMeshGroup(file_path.toStdString());
+    }
 }
 
 QString EditWindow::getCurrentDirectory(){
     return this->current_dir;
 }
 
-void EditWindow::createNewTextFile(QString directory, QString name, QString ext, std::string content){
+QString EditWindow::createNewTextFile(QString directory, QString name, QString ext, std::string content){
     int addition_number = 0;
     QString newfile_name = directory + "/" + name + "_" + QString::number(addition_number) + ext;
     //Iterate until we find free name
@@ -248,6 +253,8 @@ void EditWindow::createNewTextFile(QString directory, QString name, QString ext,
     newfile_stream.open(newfile_name.toStdString(), std::ofstream::out);
     newfile_stream << content;
     newfile_stream.close();
+
+    return newfile_name;
 }
 
 void EditWindow::onSceneSaveAs(){
@@ -304,7 +311,16 @@ void EditWindow::onNewScript(){
 }
 void EditWindow::onNewMaterial(){
     std::string matContent = "ZSP_MATERIAL\nGROUP @default\n";
-    this->createNewTextFile(current_dir, "Material", ".zsmat", matContent);
+    QString picked_name = this->createNewTextFile(current_dir, "Material", ".zsmat", matContent);
+    //Rgister new material in list
+    Resource resource;
+    resource.file_path = picked_name;
+    resource.rel_path = picked_name; //Preparing to get relative path
+    resource.rel_path.remove(0, project.root_path.size() + 1); //Get relative path by removing length of project root from start
+    resource.resource_label = resource.rel_path.toStdString();
+    resource.type = RESOURCE_TYPE_MATERIAL; //Type of resource is mesh
+    loadResource(&resource); //Perform mesh processing & loading to OpenGL
+    this->project.resources.push_back(resource);
 
     updateFileList(); //Make new file visible
 }

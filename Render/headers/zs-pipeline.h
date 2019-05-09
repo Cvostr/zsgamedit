@@ -72,6 +72,7 @@ public:
     PIPELINE_STATE current_state;
     void setup(int bufWidth, int bufHeight);
     bool InitGLEW();
+    void initGizmos(int projectPespective);
 
     void render(SDL_Window* w, void* projectedit_ptr);
     unsigned int render_getpickedObj(void* projectedit_ptr, int mouseX, int mouseY);

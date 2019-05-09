@@ -182,7 +182,7 @@ public:
     void lookForResources(QString path); //Recursively walk through game directory and load founded resources
     void loadResource(Resource* resource);
 
-    void createNewTextFile(QString directory, QString name, QString ext, std::string content);
+    QString createNewTextFile(QString directory, QString name, QString ext, std::string content);
     void openFile(QString file_path); //Useful to open a file
     void addFileToObjectList(QString file_path);
     void assignIconFile(QListWidgetItem* item);

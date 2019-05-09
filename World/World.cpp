@@ -4,24 +4,25 @@
 #include <QLineEdit>
 #include "headers/obj_properties.h"
 
+
 World::World(){
     objects.reserve(MAX_OBJS);
     proj_ptr = nullptr;
 }
 
 int World::getFreeObjectSpaceIndex(){
-    unsigned int index_to_push = objects.size(); //Set free index to objects amount
+    unsigned int index_to_push = static_cast<unsigned int>(objects.size()); //Set free index to objects amount
     unsigned int objects_num = static_cast<unsigned int>(this->objects.size());
     for(unsigned int objs_i = 0; objs_i < objects_num; objs_i ++){
         if(objects[objs_i].alive == false){ //if object deleted
-            index_to_push = static_cast<int>(objs_i); //set free index to index of deleted object
+            index_to_push = objs_i; //set free index to index of deleted object
         }
     }
 
     if(index_to_push == objects.size()){ //if all indeces are busy
         return static_cast<int>(objects.size());
     }else{ //if vector has an empty space
-        return index_to_push;
+        return static_cast<int>(index_to_push);
     }
 }
 
@@ -31,7 +32,7 @@ GameObject* World::addObject(GameObject obj){
     unsigned int objects_num = static_cast<unsigned int>(this->objects.size());
     for(unsigned int objs_i = 0; objs_i < objects_num; objs_i ++){
         if(objects[objs_i].alive == false){
-            index_to_push = objs_i;
+            index_to_push = static_cast<int>(objs_i);
         }
     }
 
@@ -374,7 +375,7 @@ void World::processPrefabObject(GameObject* object_ptr, std::vector<GameObject>*
         prop_ptr->go_link.updLinkPtr();
     }
 
-    unsigned int children_amount = object_ptr->children.size();
+    unsigned int children_amount = static_cast<unsigned int>(object_ptr->children.size());
 
     for(unsigned int chi_i = 0; chi_i < children_amount; chi_i ++){
         GameObjectLink link = object_ptr->children[chi_i];
@@ -444,6 +445,72 @@ void World::addObjectsFromPrefab(QString file){
         object_ptr->parent.world_ptr = this;
         object_ptr->parent.updLinkPtr()->item_ptr->addChild(object_ptr->item_ptr);
     }
+}
+
+void World::addMeshGroup(std::string file_path){
+    MeshNode node;
+    Engine::loadNodeTree(file_path, &node);
+
+    GameObject* rootobj = addMeshNode(&node);
+    this->obj_widget_ptr->addTopLevelItem(rootobj->item_ptr);
+}
+
+GameObject* World::addMeshNode(MeshNode* node){
+    GameObject obj; //Creating base gameobject
+    int add_num = 0; //Declaration of addititonal integer
+    getAvailableNumObjLabel(QString::fromStdString(node->node_label), &add_num);
+
+    obj.world_ptr = this;
+    obj.addLabelProperty();
+    obj.addProperty(GO_PROPERTY_TYPE_TRANSFORM);
+    obj.label = &obj.getLabelProperty()->label;
+    *obj.label = QString::fromStdString(node->node_label) + QString::number(add_num); //Assigning label to object
+    obj.item_ptr->setText(0, *obj.label);
+    //Add node to world
+    GameObject* node_object = this->addObject(obj);
+
+    for(unsigned int node_i = 0; node_i < node->children.size(); node_i ++){
+        MeshNode* ptr = &node->children[node_i];
+        //Create new node object
+        GameObject* newobj = addMeshNode(ptr);
+        node_object->addChildObject(newobj->getLinkToThisObject());
+        node_object->item_ptr->addChild(newobj->item_ptr);
+
+    }
+
+    for(unsigned int mesh_i = 0; mesh_i < node->mesh_names.size(); mesh_i ++){
+        std::string mesh_label = node->mesh_names[mesh_i];
+        ZSPIRE::Mesh* mesh_ptr = this->getMeshPtrByRelPath(QString::fromStdString(mesh_label));
+
+        GameObject mesh_obj; //Creating base gameobject
+        int add_num = 0; //Declaration of addititonal integer
+        getAvailableNumObjLabel(QString::fromStdString(mesh_label), &add_num);
+
+        mesh_obj.world_ptr = this;
+        mesh_obj.addLabelProperty();
+        mesh_obj.addProperty(GO_PROPERTY_TYPE_TRANSFORM);
+        mesh_obj.addProperty(GO_PROPERTY_TYPE_MESH); //add mesh property
+        mesh_obj.addProperty(GO_PROPERTY_TYPE_MATERIAL); //add material property
+        mesh_obj.label = &mesh_obj.getLabelProperty()->label;
+        *mesh_obj.label = QString::fromStdString(mesh_label) + QString::number(add_num); //Assigning label to object
+        mesh_obj.item_ptr->setText(0, *mesh_obj.label);
+        mesh_obj.render_type = GO_RENDER_TYPE_MATERIAL;
+        //configure mesh
+        MeshProperty* mesh_prop_ptr = static_cast<MeshProperty*>(mesh_obj.getPropertyPtrByType(GO_PROPERTY_TYPE_MESH));
+        mesh_prop_ptr->resource_relpath = QString::fromStdString(mesh_label);
+        mesh_prop_ptr->updateMeshPtr();
+        //configure material
+        MaterialProperty* mat_prop_ptr = static_cast<MaterialProperty*>(mesh_obj.getPropertyPtrByType(GO_PROPERTY_TYPE_MATERIAL));
+        Project* proj_ptr = static_cast<Project*>(this->proj_ptr); //Convert void pointer to Project*
+        //mat_prop_ptr->material_path = ZSPIRE
+
+        //Add to world object and parent it
+        GameObject* mesh_obj_ptr = this->addObject(mesh_obj);
+        node_object->addChildObject(mesh_obj_ptr->getLinkToThisObject());
+        node_object->item_ptr->addChild(mesh_obj_ptr->item_ptr);
+    }
+
+    return node_object; //Return pointer to new object
 }
 
 void World::storeObjectToPrefab(GameObject* object_ptr, QString file){

@@ -5,6 +5,8 @@ static Assimp::Importer importer;
 static unsigned int loadflags = aiProcess_CalcTangentSpace | aiProcess_Triangulate | aiProcess_FlipUVs;
 #endif
 
+#include <iostream>
+
 unsigned int Engine::getMeshesAmount(std::string file_path){
     const aiScene* scene = importer.ReadFile(file_path, loadflags);
 
@@ -78,6 +80,38 @@ void Engine::loadMeshes(std::string file_path, ZSPIRE::Mesh* meshes_array){
 
 void Engine::loadMesh(std::string file_path, ZSPIRE::Mesh* mesh_ptr, int index){
     const aiScene* scene = importer.ReadFile(file_path, loadflags);
+     std::cout << "Loading mesh " << scene->mMeshes[index]->mName.C_Str() << "from file " << file_path << std::endl;
 
     processMesh(scene->mMeshes[index], scene, mesh_ptr);
+}
+
+
+void Engine::loadNodeTree(std::string file_path, MeshNode* node){
+    const aiScene* scene = importer.ReadFile(file_path, loadflags);
+
+    MeshNode* root_node = new MeshNode;
+    processNodeForTree(root_node, scene->mRootNode, scene);
+
+    *node = *root_node;
+}
+
+
+void Engine::processNodeForTree(MeshNode* node, aiNode* node_assimp, const aiScene* scene){
+    node->node_label = node_assimp->mName.C_Str(); //assigning node name
+
+    unsigned int meshes_num = node_assimp->mNumMeshes;
+    for(unsigned int ch_i = 0; ch_i < meshes_num; ch_i ++){
+        aiMesh* mesh = scene->mMeshes[node_assimp->mMeshes[ch_i]];
+        node->mesh_names.push_back(mesh->mName.C_Str());
+    }
+
+    unsigned int nodes_num = node_assimp->mNumChildren;
+    for(unsigned int ch_i = 0; ch_i < nodes_num; ch_i ++){
+        aiNode* child = node_assimp->mChildren[ch_i];
+        MeshNode mNode;
+        mNode.node_label = child->mName.C_Str();
+
+        processNodeForTree(&mNode, child, scene);
+        node->children.push_back(mNode);
+    }
 }

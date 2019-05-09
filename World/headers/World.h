@@ -16,6 +16,8 @@
 #include "../../Render/headers/MatShaderProps.h"
 #include "../../Misc/headers/oal_manager.h"
 
+#include "../../Misc/headers/AssimpMeshLoader.h"
+
 #define OBJ_PROPS_SIZE 11
 #define MAX_OBJS 12000
 
@@ -239,6 +241,9 @@ public:
     void writeObjectToPrefab(GameObject* object_ptr, std::ofstream* stream);
     void addObjectsFromPrefab(QString file);
     void processPrefabObject(GameObject* object_ptr, std::vector<GameObject>* objects_array);
+
+    void addMeshGroup(std::string file_path);
+    GameObject* addMeshNode(MeshNode* node);
 
     void clear();
 
