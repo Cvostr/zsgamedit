@@ -63,7 +63,8 @@ ColorMtShPropConf::ColorMtShPropConf(){
 }
 
 void MtShaderPropertiesGroup::loadFromFile(const char* fpath){
-
+    std::ifstream mat_shader_group;
+    mat_shader_group.open(fpath);
 }
 MtShaderPropertiesGroup::MtShaderPropertiesGroup(){
     properties.resize(0);

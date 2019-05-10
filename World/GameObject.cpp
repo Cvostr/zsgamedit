@@ -185,13 +185,11 @@ void GameObject::clearAll(bool clearQtWigt){
         GameObjectProperty* prop_ptr = properties[prop_i];
         prop_ptr->onObjectDeleted(); //Call on object deletion
         delete prop_ptr; //Destroy property
-        prop_ptr = 0x0;
     }
     this->props_num = 0; //Set property counter to zero
     children.clear();
     if(item_ptr != nullptr && clearQtWigt == true){ //if Qt tree widget item not cleared
         delete item_ptr; //Destroy Qt tree widget item to remove object from tree
-        item_ptr = 0x0;
     }
 }
 

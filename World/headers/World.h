@@ -168,6 +168,7 @@ public:
     void loadProperty(std::ifstream* world_stream); //Loads one property from stream
     void clearAll(bool clearQtWigt = true); //Release all associated memory with this object
     void copyTo(GameObject* dest);
+    void processObject(RenderPipeline* pipeline); //On render pipeline wish to work with object
     void Draw(RenderPipeline* pipeline); //On render pipeline wish to draw the object
     void onUpdate(int deltaTime); //calls onUpdate on all properties
     void onPreRender(RenderPipeline* pipeline); //calls onPreRender on all properties

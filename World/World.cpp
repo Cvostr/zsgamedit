@@ -40,7 +40,7 @@ GameObject* World::addObject(GameObject obj){
     if(index_to_push == -1){ //if all indeces are busy
         this->objects.push_back(obj); //Push object to vector's end
         ptr = &objects[objects.size() - 1];
-        ptr->array_index = objects.size() - 1;
+        ptr->array_index = static_cast<int>(objects.size() - 1);
     }else{ //if vector has an empty space
         objects[index_to_push] = obj;
         ptr = &objects[index_to_push];
@@ -202,7 +202,7 @@ void World::trimObjectsList(){
                 objects[obj_i - 1] = objects[obj_i]; //Move it to previous place
 
             }
-            objects.resize(objects.size() - 1);
+            objects.resize(objects.size() - 1); //remove last position
         }
     }
 }

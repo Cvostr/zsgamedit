@@ -97,21 +97,24 @@ unsigned int RenderPipeline::render_getpickedObj(void* projectedit_ptr, int mous
     //Picking state
     this->current_state = PIPELINE_STATE_PICKING;
 
-    if(depthTest == true) //if depth is enabled
+    if(depthTest == false) //if depth is disable, then enable it for a little time
         glEnable(GL_DEPTH_TEST);
 
-    if(cullFaces == true)
+    if(cullFaces == true) // if face cull is enabled, then disable it
         glDisable(GL_CULL_FACE);
 
     //Iterate over all objects in the world
     for(unsigned int obj_i = 0; obj_i < world_ptr->objects.size(); obj_i ++){
         GameObject* obj_ptr = &world_ptr->objects[obj_i];
         if(!obj_ptr->hasParent)
-            obj_ptr->Draw(this);
+            obj_ptr->processObject(this);
     }
 
-    if(depthTest == true) //if depth is enabled
+    if(depthTest == false) //if depth is enabled, then disable it
         glDisable(GL_DEPTH_TEST);
+
+    if(cullFaces == true) //if cull faces is enabled, then enable GL function
+        glEnable(GL_CULL_FACE);
 
     unsigned char data[4];
     glReadPixels(mouseX, 480 - mouseY, 1,1, GL_RGBA, GL_UNSIGNED_BYTE, data);
@@ -159,7 +162,7 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr)
     for(unsigned int obj_i = 0; obj_i < world_ptr->objects.size(); obj_i ++){
         GameObject* obj_ptr = &world_ptr->objects[obj_i];
         if(!obj_ptr->hasParent) //if it is a root object
-            obj_ptr->Draw(this); //Draw object
+            obj_ptr->processObject(this); //Draw object
     }
     //Turn everything off to draw deffered plane correctly
     if(depthTest == true) //if depth is enabled
@@ -183,25 +186,11 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr)
 }
 
 void GameObject::Draw(RenderPipeline* pipeline){
-    //Obtain EditWindow pointer to check if scene is running
-    EditWindow* editwin_ptr = static_cast<EditWindow*>(pipeline->win_ptr);
-    if(active == false || alive == false) return; //if object is inactive, not to render it
-
-    //Call prerender on each property in object
-    this->onPreRender(pipeline);
-
-    TransformProperty* transform_prop = static_cast<TransformProperty*>(this->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
-    //Call update on every property in objects
-    if(editwin_ptr->isSceneRun && pipeline->current_state == PIPELINE_STATE_DEFAULT)
-        this->onUpdate(static_cast<int>(pipeline->deltaTime));
-
     ZSPIRE::Shader* shader = pipeline->processShaderOnObject(static_cast<void*>(this)); //Will be used next time
-    //Obtain camera viewport
-    ZSVIEWPORT cam_viewport = pipeline->cam->getViewport();
-    //Distance limit
-    int max_dist = static_cast<int>(cam_viewport.endX - cam_viewport.startX);
-    bool difts = isDistanceFits(pipeline->cam->getCameraViewCenterPos(), transform_prop->_last_translation, max_dist);
-    if(shader != nullptr && transform_prop != nullptr && difts){
+    EditWindow* editwin_ptr = static_cast<EditWindow*>(pipeline->win_ptr);
+    TransformProperty* transform_prop = static_cast<TransformProperty*>(this->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
+
+    if(shader != nullptr && transform_prop != nullptr){
         //send transform matrix to shader
         shader->setTransform(transform_prop->transform_mat);
         //Get mesh pointer
@@ -224,11 +213,35 @@ void GameObject::Draw(RenderPipeline* pipeline){
             }
         }
     }
+}
+
+void GameObject::processObject(RenderPipeline* pipeline){
+    //Obtain EditWindow pointer to check if scene is running
+    EditWindow* editwin_ptr = static_cast<EditWindow*>(pipeline->win_ptr);
+    if(active == false || alive == false) return; //if object is inactive, not to render it
+
+    //Call prerender on each property in object
+    this->onPreRender(pipeline);
+
+    TransformProperty* transform_prop = static_cast<TransformProperty*>(this->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
+    //Call update on every property in objects
+    if(editwin_ptr->isSceneRun && pipeline->current_state == PIPELINE_STATE_DEFAULT)
+        this->onUpdate(static_cast<int>(pipeline->deltaTime));
+
+    //Obtain camera viewport
+    ZSVIEWPORT cam_viewport = pipeline->cam->getViewport();
+    //Distance limit
+    int max_dist = static_cast<int>(cam_viewport.endX - cam_viewport.startX);
+    bool difts = isDistanceFits(pipeline->cam->getCameraViewCenterPos(), transform_prop->_last_translation, max_dist);
+
+    if(difts)
+        this->Draw(pipeline);
+
     for(unsigned int obj_i = 0; obj_i < this->children.size(); obj_i ++){
         if(!children[obj_i].isEmpty()){ //if link isn't broken
             children[obj_i].updLinkPtr();
             GameObject* child_ptr = this->children[obj_i].ptr;
-            child_ptr->Draw(pipeline);
+            child_ptr->processObject(pipeline);
         }
     }
 }
@@ -377,7 +390,7 @@ void RenderPipeline::addLight(void* light_ptr){
     LightsourceProperty* _light_ptr = static_cast<LightsourceProperty*>(light_ptr);
     _light_ptr->isSent = true;
     _light_ptr->updTransformPtr();
-    _light_ptr->id = lights_ptr.size(); //setting id of uniform
+    _light_ptr->id = static_cast<unsigned char>(lights_ptr.size()); //setting id of uniform
     _light_ptr->deffered_shader_ptr = &this->deffered_light; //putting ptr to deffered shader
     this->lights_ptr.push_back(light_ptr); //pushing pointer
     this->deffered_light.Use(); //correctly put uniforms

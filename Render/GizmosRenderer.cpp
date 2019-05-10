@@ -59,7 +59,7 @@ void GizmosRenderer::drawTransformControls(ZSVECTOR3 position, int tall, int dim
 
 void GizmosRenderer::glFeaturesOff(){
     if(this->depthTestEnabled == true) //if depth is enabled
-        glEnable(GL_DEPTH_TEST);
+        glDisable(GL_DEPTH_TEST);
 
     if(this->cullFaceEnabled == true)
         glDisable(GL_CULL_FACE);
@@ -69,5 +69,5 @@ void GizmosRenderer::glFeaturesOn(){
         glEnable(GL_DEPTH_TEST);
 
     if(this->cullFaceEnabled == true)
-        glDisable(GL_CULL_FACE);
+        glEnable(GL_CULL_FACE);
 }

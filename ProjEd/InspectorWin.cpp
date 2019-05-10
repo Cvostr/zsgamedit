@@ -1,4 +1,5 @@
 #include "headers/InspectorWin.h"
+#include "headers/InspEditAreas.h"
 #include "headers/ProjectEdit.h"
 #include "ui_inspector_win.h"
 
@@ -18,14 +19,9 @@ InspectorWin::InspectorWin(QWidget *parent) :
     this->ui->propertySpace->setSpacing(5);
     this->ui->propertySpace->setContentsMargins(5,1,2,0);
 
-     addObjComponentBtn.setText("Add property");
-     managePropButton.setText("Manage");
-
-     line.setFrameShape(QFrame::HLine);
-     line.setFrameShadow(QFrame::Sunken);
-
-     connect(&addObjComponentBtn, SIGNAL(clicked()), this, SLOT(onAddComponentBtnPressed()));
-     connect(&managePropButton, SIGNAL(clicked()), this, SLOT(onManagePropButtonPressed()));
+     managePropButton = nullptr;
+     line = nullptr;
+     this->addObjComponentBtn = nullptr;
 
      QWidget* widget = new QWidget;
      widget->setLayout(getContentLayout());
@@ -71,12 +67,20 @@ void InspectorWin::clearContentLayout(){
     }
     this->property_areas.clear(); //No areas in list
     this->additional_objects.clear(); //No objects in list
-    //remove divider
-    getContentLayout()->removeWidget(&line);
-    //remove buttons
-    getContentLayout()->removeWidget(&addObjComponentBtn);
-    getContentLayout()->removeWidget(&managePropButton);
 
+    //remove buttons
+    if(managePropButton != nullptr){
+        delete managePropButton;
+        managePropButton = nullptr;
+    }
+    if(addObjComponentBtn != nullptr){
+        delete addObjComponentBtn;
+        addObjComponentBtn = nullptr;
+    }
+    if(line != nullptr){
+        delete line;
+        line = nullptr;
+    }
 }
 
 void InspectorWin::addPropertyArea(PropertyEditArea* area){
@@ -91,10 +95,21 @@ void InspectorWin::registerUiObject(QObject* object){
 
 void InspectorWin::addPropButtons(){
     //add divider
-    ui->propertySpace->addWidget(&line);
+    line = new QFrame;
+    line->setFrameShape(QFrame::HLine);
+    line->setFrameShadow(QFrame::Sunken);
+    ui->propertySpace->addWidget(line);
     //add buttons
-    ui->propertySpace->addWidget(&addObjComponentBtn);
-    ui->propertySpace->addWidget(&managePropButton);
+    addObjComponentBtn = new QPushButton;
+    addObjComponentBtn->setText("Add Property");
+    ui->propertySpace->addWidget(addObjComponentBtn);
+
+    managePropButton = new QPushButton;
+    managePropButton->setText("Manage");
+    ui->propertySpace->addWidget(managePropButton);
+
+    connect(addObjComponentBtn, SIGNAL(clicked()), this, SLOT(onAddComponentBtnPressed()));
+    connect(managePropButton, SIGNAL(clicked()), this, SLOT(onManagePropButtonPressed()));
 }
 
 void InspectorWin::ShowObjectProperties(void* object_ptr){
@@ -102,6 +117,12 @@ void InspectorWin::ShowObjectProperties(void* object_ptr){
     GameObject* obj_ptr = static_cast<GameObject*>(object_ptr);
     obj_ptr->world_ptr->unpickObject();
     obj_ptr->pick(); //Object is picked now
+
+    BoolCheckboxArea* isActive = new BoolCheckboxArea;
+    isActive->setLabel("Active ");
+    isActive->go_property = obj_ptr->getLabelProperty();
+    isActive->bool_ptr = &obj_ptr->active;
+    addPropertyArea(isActive);
 
     unsigned int props_num = static_cast<unsigned int>(obj_ptr->props_num);
     //iterate over props to show them all
@@ -169,7 +190,7 @@ ManageComponentDialog::ManageComponentDialog(InspectorWin* win, void* g_object_p
     ctx_menu = new PropertyCtxMenu(win, this);
     this->g_object_ptr = g_object_ptr;
     GameObject* obj_ptr = static_cast<GameObject*>(g_object_ptr); //cast pointer
-    for(int prop_i = 0; prop_i < obj_ptr->props_num; prop_i ++){
+    for(int prop_i = 0; prop_i < static_cast<int>(obj_ptr->props_num); prop_i ++){ //iterate over all properties
         GameObjectProperty* prop_ptr = obj_ptr->properties[prop_i]; //obtain property pointer
         new QListWidgetItem(getPropertyString(prop_ptr->type), &this->property_list);
     }
@@ -200,7 +221,7 @@ void ManageComponentDialog::deleteProperty(){
     QListWidgetItem* item = property_list.currentItem(); //Get pressed item
     QString text = item->text(); //get text of pressed item
     int item_ind = 0; //iterator
-    for(int i = 0; i < obj_ptr->props_num; i ++){ //Iterate over all properties in object
+    for(int i = 0; i < static_cast<int>(obj_ptr->props_num); i ++){ //Iterate over all properties in object
         GameObjectProperty* prop_ptr = obj_ptr->properties[i];
         if(getPropertyString(prop_ptr->type).compare(text) == 0){
             item_ind = i;
@@ -241,7 +262,7 @@ void PropertyCtxMenu::onPainClicked(){
 
     QListWidgetItem* item = dialog->property_list.currentItem(); //Get pressed item
     QString text = item->text(); //get text of pressed item
-    for(int i = 0; i < obj_ptr->props_num; i ++){ //Iterate over all properties in object
+    for(int i = 0; i < static_cast<int>(obj_ptr->props_num); i ++){ //Iterate over all properties in object
         GameObjectProperty* prop_ptr = obj_ptr->properties[i];
         if(getPropertyString(prop_ptr->type).compare(text) == 0){
             editwin->ppaint_state.prop_ptr = obj_ptr->properties[i];

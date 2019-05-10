@@ -7,6 +7,7 @@
 #include "zs-texture.h"
 
 #include "GizmosRenderer.h"
+//#include "../../World/headers/obj_properties.h"
 
 #include <QMainWindow>
 #include <SDL2/SDL.h>
