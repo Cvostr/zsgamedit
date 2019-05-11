@@ -135,7 +135,7 @@ public:
     bool hasParent; //If object has a parent
     bool alive; //if object marked as removed
     bool isPicked; //if user selected this object to edit it
-    bool active;
+    bool active; //if true, object will be active in scene
     World* world_ptr; //pointer to world, when object placed
     GameObjectLink parent; //Link to object's parent
     GO_RENDER_TYPE render_type; //Render mode of this object
@@ -147,13 +147,13 @@ public:
     int getAliveChildrenAmount(); //Gets current amount of children objects (exclude removed chidren)
     void pick(); //Mark object and its children picked
 
-    void setActive(bool active);
+    void setActive(bool active); //toggle gameobject active property
 
     bool addProperty(PROPERTY_TYPE property); //Adds property with property ID
     bool addTransformProperty();
     bool addLabelProperty();
 
-    GameObjectProperty* getPropertyPtrByType(int property);
+    GameObjectProperty* getPropertyPtrByType(PROPERTY_TYPE property); //returns pointer to property by property type
     LabelProperty* getLabelProperty();
     TransformProperty* getTransformProperty();
     GameObjectLink getLinkToThisObject();

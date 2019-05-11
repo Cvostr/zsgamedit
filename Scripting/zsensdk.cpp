@@ -140,7 +140,9 @@ GameObject* ZSENSDK::ZSENGmObject::updPtr(){
 std::string ZSENSDK::ZSENGmObject::getLabel(){
     return this->updPtr()->label->toStdString();
 }
-
+void ZSENSDK::ZSENGmObject::setActive(bool active){
+    this->updPtr()->setActive(active);
+}
 ZSENSDK::ZSENTransformProperty ZSENSDK::ZSENGmObject::transform(){
     ZSENTransformProperty result;
     result.prop_ptr = static_cast<TransformProperty*>(this->updPtr()->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
@@ -187,7 +189,7 @@ void ZSENSDK::ZSEN_World::loadWorldFromFile(std::string file){
     Project* proj_ptr = static_cast<Project*>(world_ptr->proj_ptr);
 
     QString load = proj_ptr->root_path + "/" + QString::fromStdString(file);
-    //world_ptr->openFromFile(load, world_ptr->obj_widget_ptr, );
+    //world_ptr->openFromFile(load, world_ptr->obj_widget_ptr);
 }
 
 //Property functions

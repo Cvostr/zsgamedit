@@ -76,7 +76,7 @@ bool GameObject::addLabelProperty(){
     return addProperty(GO_PROPERTY_TYPE_LABEL);
 }
 
-GameObjectProperty* GameObject::getPropertyPtrByType(int property){
+GameObjectProperty* GameObject::getPropertyPtrByType(PROPERTY_TYPE property){
     unsigned int props = static_cast<unsigned int>(this->props_num);
     for(unsigned int prop_i = 0; prop_i < props; prop_i ++){
         GameObjectProperty* property_ptr = this->properties[prop_i];

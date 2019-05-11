@@ -16,6 +16,7 @@ public:
 
     virtual void clear();
     EdAction();
+    virtual ~EdAction();
 };
 
 class EdSnapshotAction : public EdAction{
@@ -31,7 +32,7 @@ public:
     GameObjectProperty* container_ptr;
 
     GameObjectLink linkToObj;
-    int prop_type;
+    PROPERTY_TYPE prop_type;
 
     void clear();
     EdPropertyAction();
@@ -56,7 +57,7 @@ public:
     int end_pos;
 
     void newSnapshotAction(World* world_ptr);
-    void newPropertyAction(GameObjectLink link, int property_type);
+    void newPropertyAction(GameObjectLink link, PROPERTY_TYPE property_type);
     void newGameObjectAction(GameObjectLink link);
 
     void putNewAction(EdAction* action);

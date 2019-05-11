@@ -219,6 +219,7 @@ void World::writeGameObject(GameObject* object_ptr, std::ofstream* world_stream)
     if(object_ptr->alive == true){
         *world_stream << "\nG_OBJECT " << object_ptr->str_id << " ";
         world_stream->write(reinterpret_cast<char*>(&object_ptr->render_type), sizeof(int));
+        world_stream->write(reinterpret_cast<char*>(&object_ptr->active), sizeof(bool));
 
         if(object_ptr->children.size() > 0){ //If object has at least one child object
             int children_num = object_ptr->getAliveChildrenAmount();
@@ -248,6 +249,7 @@ void World::loadGameObject(GameObject* object_ptr, std::ifstream* world_stream){
 
     world_stream->seekg(1, std::ofstream::cur);
     world_stream->read(reinterpret_cast<char*>(&object_ptr->render_type), sizeof(GO_RENDER_TYPE));
+    world_stream->read(reinterpret_cast<char*>(&object_ptr->active), sizeof(bool));
 
     //Then do the same sh*t, iterate until "G_END" came up
     while(true){
@@ -541,6 +543,10 @@ bool World::isCollide(TransformProperty* prop){
         ColliderProperty* coll_prop_ptr = static_cast<ColliderProperty*>((*it));
         //Obtain pointer to Collider's transform property
         TransformProperty* coll_transform_ptr = coll_prop_ptr->getTransformProperty();
+        GameObject* obj_ptr = coll_prop_ptr->go_link.updLinkPtr();
+        //if object is inactive, we have nothing to check
+        if(!obj_ptr->active) continue;
+
         //Get Collider's position and scale
         ZSVECTOR3 collider_pos = coll_transform_ptr->_last_translation;
         ZSVECTOR3 collider_size = coll_transform_ptr->_last_scale;

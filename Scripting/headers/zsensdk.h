@@ -67,6 +67,7 @@ public:
     GameObject* updPtr();
 
     std::string getLabel();
+    void setActive(bool active);
 
     ZSENTransformProperty transform();
     ZSENAudSourceProperty audio();

@@ -11,6 +11,10 @@ EdAction::EdAction(){
     type = ACT_TYPE_NONE;
 }
 
+EdAction::~EdAction(){
+
+}
+
 void EdAction::clear(){
 
 }
@@ -47,7 +51,7 @@ void EdActions::newSnapshotAction(World* world_ptr){
     putNewAction(new_action);
 }
 
-void EdActions::newPropertyAction(GameObjectLink link, int property_type){
+void EdActions::newPropertyAction(GameObjectLink link, PROPERTY_TYPE property_type){
     EdPropertyAction* new_action = new EdPropertyAction; //Allocate memory for action class
     new_action->linkToObj = link; //Store link to object
     new_action->linkToObj.updLinkPtr();
