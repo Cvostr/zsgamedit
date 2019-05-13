@@ -14,7 +14,6 @@ void ObjectScript::_InitScript() {
     luaL_openlibs(L);
     lua_pcall(L, 0, 0, 0);
 
-
     //Bind DSDK to script
     ZSENSDK::bindSDK(L);
 }
@@ -28,7 +27,7 @@ ZSENSDK::ZSENGmObject ObjectScript::getGameObjectSDK(){
 }
 
 void ObjectScript::_DestroyScript(){
-
+    lua_close(L);
 }
 
 void ObjectScript::_callStart() {

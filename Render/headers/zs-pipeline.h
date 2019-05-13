@@ -60,6 +60,7 @@ private:
     ZSPIRE::Shader diffuse3d_shader;
     ZSPIRE::Shader pick_shader; //Shader to draw & pick objects
     ZSPIRE::Shader obj_mark_shader; //Shader to draw mark of selected objects
+    ZSPIRE::Shader ui_shader;
 
     ZSPIRE::Shader deffered_light;
     std::vector<void*> lights_ptr;
@@ -87,6 +88,8 @@ public:
 
     RenderSettings* getRenderSettings();
     GizmosRenderer* getGizmosRenderer();
+
+    void renderSprite(ZSPIRE::Texture* texture_sprite, int X, int Y, int scaleX, int scaleY);
 
     RenderPipeline();
     ~RenderPipeline();

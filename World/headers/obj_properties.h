@@ -25,6 +25,7 @@ public:
     void onValueChanged();
     void addPropertyInterfaceToInspector(InspectorWin* inspector);
     void wakeUp(); //on scene startup
+    void shutdown();
     void onUpdate(float deltaTime); //calls update in scripts
     void copyTo(GameObjectProperty* dest);
 

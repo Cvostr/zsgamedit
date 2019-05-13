@@ -252,7 +252,7 @@ void GameObject::recoverFromSnapshot(GameObjectSnapshot* snapshot){
 
     if(snapshot->reserved_obj.alive == false){
         delete this->item_ptr;
-        item_ptr = 0x0;
+        item_ptr = nullptr;
     }
 
     if(snapshot->reserved_obj.alive == true){
@@ -306,6 +306,7 @@ void GameObjectSnapshot::clear(){
     for(unsigned int prop = 0; prop < static_cast<unsigned int>(this->props_num); prop ++){
         auto prop_ptr = this->properties[prop];
         delete prop_ptr;
+        prop_ptr = nullptr;
     }
     props_num = 0;
 

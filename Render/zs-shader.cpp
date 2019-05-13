@@ -29,7 +29,7 @@ void GLcheckCompileErrors(unsigned int shader, const char* type, const char* fil
 		glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
 		if (!success)
 		{
-			glGetShaderInfoLog(shader, 1024, NULL, infoLog);
+            glGetShaderInfoLog(shader, 1024, nullptr, infoLog);
 
 			if (filepath != nullptr)
 				printf("%s :\n", filepath);
@@ -42,7 +42,7 @@ void GLcheckCompileErrors(unsigned int shader, const char* type, const char* fil
 		glGetProgramiv(shader, GL_LINK_STATUS, &success);
 		if (!success)
 		{
-			glGetProgramInfoLog(shader, 1024, NULL, infoLog);
+            glGetProgramInfoLog(shader, 1024, nullptr, infoLog);
 
 			std::cout << "Shader program compilation error! " << infoLog;
 		}
@@ -142,7 +142,7 @@ void ZSPIRE::Shader::Use() {
 }
 
 void ZSPIRE::Shader::setGLuniformMat4x4(const char* uniform_str, ZSMATRIX4x4 value) {
-	unsigned int uniform_id = glGetUniformLocation(this->SHADER_ID, uniform_str);
+    int uniform_id = glGetUniformLocation(this->SHADER_ID, uniform_str);
 	glUniformMatrix4fv(uniform_id, 1, GL_FALSE, &value.m[0][0]);
 }
 
@@ -157,46 +157,50 @@ void ZSPIRE::Shader::setCamera(Camera* cam, bool sendPos){
         setGLuniformVec3("cam_position", cam->getCameraPosition());
 }
 
+void ZSPIRE::Shader::setCameraUiProjMatrix(Camera* cam){
+    setGLuniformMat4x4("cam_projection", cam->getProjMatrix());
+}
+
 void ZSPIRE::Shader::setGLuniformColor(const char* uniform_str, ZSRGBCOLOR value) {
 
-	unsigned int uniform_id = glGetUniformLocation(this->SHADER_ID, uniform_str);
+    int uniform_id = glGetUniformLocation(this->SHADER_ID, uniform_str);
 	glUniform3f(uniform_id, value.gl_r, value.gl_g, value.gl_b);
 
 }
 void ZSPIRE::Shader::setGLuniformFloat(const char* uniform_str, float value) {
 
-	unsigned int uniform_id = glGetUniformLocation(this->SHADER_ID, uniform_str);
+    int uniform_id = glGetUniformLocation(this->SHADER_ID, uniform_str);
 	glUniform1f(uniform_id, value);
 
 }
 
 void ZSPIRE::Shader::setGLuniformVec3(const char* uniform_str, ZSVECTOR3 value){
 
-	unsigned int uniform_id = glGetUniformLocation(this->SHADER_ID, uniform_str);
+    int uniform_id = glGetUniformLocation(this->SHADER_ID, uniform_str);
 	glUniform3f(uniform_id, value.X, value.Y, value.Z);
 
 }
 
 void ZSPIRE::Shader::setGLuniformVec4(const char* uniform_str, ZSVECTOR4 value){
 
-    unsigned int uniform_id = glGetUniformLocation(this->SHADER_ID, uniform_str);
+    int uniform_id = glGetUniformLocation(this->SHADER_ID, uniform_str);
     glUniform4f(uniform_id, value.X, value.Y, value.Z, value.W);
 
 }
 
 void ZSPIRE::Shader::setGLuniformInt(const char* uniform_str, int value) {
 
-	unsigned int uniform_id = glGetUniformLocation(this->SHADER_ID, uniform_str);
+    int uniform_id = glGetUniformLocation(this->SHADER_ID, uniform_str);
 	glUniform1i(uniform_id, value);
 
 }
 
 void ZSPIRE::Shader::setHasDiffuseTextureProperty(bool hasDiffuseMap){
-	this->setGLuniformInt("hasDiffuseMap", (int)hasDiffuseMap);
+    this->setGLuniformInt("hasDiffuseMap", static_cast<int>(hasDiffuseMap));
 }
 
 void ZSPIRE::Shader::setHasNormalTextureProperty(bool hasNormalMap){
-	this->setGLuniformInt("hasNormalMap", (int)hasNormalMap);
+    this->setGLuniformInt("hasNormalMap", static_cast<int>(hasNormalMap));
 }
 
 void ZSPIRE::Shader::setTextureCountProperty(int tX, int tY) {

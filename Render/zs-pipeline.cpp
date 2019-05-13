@@ -28,6 +28,8 @@ void RenderPipeline::setup(int bufWidth, int bufHeight){
     this->obj_mark_shader.compileFromFile("Shaders/mark/mark.vs", "Shaders/mark/mark.fs");
     this->deffered_light.compileFromFile("Shaders/postprocess/deffered_light/deffered.vs", "Shaders/postprocess/deffered_light/deffered.fs");
     this->diffuse3d_shader.compileFromFile("Shaders/3d/3d.vs", "Shaders/3d/3d.fs");
+    this->ui_shader.compileFromFile("Shaders/ui/ui.vs", "Shaders/ui/ui.fs");
+
     ZSPIRE::setupDefaultMeshes();
 
     this->gbuffer.create(bufWidth, bufHeight);
@@ -77,7 +79,7 @@ ZSRGBCOLOR RenderPipeline::getColorOfPickedTransformControl(ZSVECTOR3 translatio
     if(cullFaces == true)
         glDisable(GL_CULL_FACE);
 
-    getGizmosRenderer()->drawTransformControls(translation, 100, 10);
+    getGizmosRenderer()->drawTransformControls(translation, 200, 25);
 
     unsigned char data[4];
     glReadPixels(mouseX, 480 - mouseY, 1,1, GL_RGBA, GL_UNSIGNED_BYTE, data);
@@ -97,7 +99,7 @@ unsigned int RenderPipeline::render_getpickedObj(void* projectedit_ptr, int mous
     //Picking state
     this->current_state = PIPELINE_STATE_PICKING;
 
-    if(depthTest == false) //if depth is disable, then enable it for a little time
+    if(depthTest == true) //if depth is disable, then enable it for a little time
         glEnable(GL_DEPTH_TEST);
 
     if(cullFaces == true) // if face cull is enabled, then disable it
@@ -164,6 +166,12 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr)
         if(!obj_ptr->hasParent) //if it is a root object
             obj_ptr->processObject(this); //Draw object
     }
+
+    //compare pointers
+    if(editwin_ptr->obj_trstate.isTransforming == true && !editwin_ptr->isSceneRun)
+        getGizmosRenderer()->drawTransformControls(editwin_ptr->obj_trstate.obj_ptr->getTransformProperty()->_last_translation, 100, 10);
+
+
     //Turn everything off to draw deffered plane correctly
     if(depthTest == true) //if depth is enabled
         glDisable(GL_DEPTH_TEST);
@@ -176,6 +184,16 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr)
     gbuffer.bindTextures(); //Bind gBuffer textures
     deffered_light.Use(); //use deffered shader
 
+    for(unsigned int light_i = 0; light_i < this->lights_ptr.size(); light_i ++){
+        LightsourceProperty* _light_ptr = static_cast<LightsourceProperty*>(lights_ptr[light_i]);
+
+        this->deffered_light.sendLight(light_i, _light_ptr);
+    }
+    //send amount of lights to deffered shader
+    this->deffered_light.setGLuniformInt("lights_amount", static_cast<int>(lights_ptr.size()));
+    //free lights array
+    this->removeLights();
+
     deffered_light.setGLuniformVec3("ambient_color", ZSVECTOR3(render_settings.ambient_light_color.r / 255.0f,
                                                                render_settings.ambient_light_color.g / 255.0f,
                                                                render_settings.ambient_light_color.b / 255.0f));
@@ -186,6 +204,9 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr)
 }
 
 void GameObject::Draw(RenderPipeline* pipeline){
+    //Call prerender on each property in object
+    this->onPreRender(pipeline);
+
     ZSPIRE::Shader* shader = pipeline->processShaderOnObject(static_cast<void*>(this)); //Will be used next time
     EditWindow* editwin_ptr = static_cast<EditWindow*>(pipeline->win_ptr);
     TransformProperty* transform_prop = static_cast<TransformProperty*>(this->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
@@ -200,15 +221,15 @@ void GameObject::Draw(RenderPipeline* pipeline){
                 mesh_prop->mesh_ptr->Draw();
                 //if object is picked
                 if(this->isPicked == true && pipeline->current_state != PIPELINE_STATE_PICKING){
-                    ZSRGBCOLOR color = ZSRGBCOLOR(0.23f * 255.0f, 0.23f * 255.0f, 0.54f * 255.0f);
+                    ZSRGBCOLOR color = ZSRGBCOLOR(static_cast<int>(0.23f * 255.0f),
+                                                  static_cast<int>(0.23f * 255.0f),
+                                                  static_cast<int>(0.54f * 255.0f));
                     if(editwin_ptr->obj_trstate.isTransforming == true)
                          color = ZSRGBCOLOR(255.0f, 255.0f, 0.0f);
                     //draw wireframe mesh for picked object
                     if(!editwin_ptr->isSceneRun) //avoid drawing gizmos during playtime
                         pipeline->getGizmosRenderer()->drawPickedMeshWireframe(mesh_prop->mesh_ptr, transform_prop->transform_mat, color);
-                    //compare pointers
-                    if(editwin_ptr->obj_trstate.isTransforming == true && this == editwin_ptr->obj_trstate.obj_ptr && !editwin_ptr->isSceneRun)
-                        pipeline->getGizmosRenderer()->drawTransformControls(transform_prop->_last_translation, 100, 10);
+
                 }
             }
         }
@@ -219,9 +240,6 @@ void GameObject::processObject(RenderPipeline* pipeline){
     //Obtain EditWindow pointer to check if scene is running
     EditWindow* editwin_ptr = static_cast<EditWindow*>(pipeline->win_ptr);
     if(active == false || alive == false) return; //if object is inactive, not to render it
-
-    //Call prerender on each property in object
-    this->onPreRender(pipeline);
 
     TransformProperty* transform_prop = static_cast<TransformProperty*>(this->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
     //Call update on every property in objects
@@ -236,6 +254,7 @@ void GameObject::processObject(RenderPipeline* pipeline){
 
     if(difts)
         this->Draw(pipeline);
+
 
     for(unsigned int obj_i = 0; obj_i < this->children.size(); obj_i ++){
         if(!children[obj_i].isEmpty()){ //if link isn't broken
@@ -384,23 +403,18 @@ void RenderPipeline::updateShadersCameraInfo(ZSPIRE::Camera* cam_ptr){
         deffered_light.Use();
         deffered_light.setCamera(cam_ptr, true);
     }
+    if(ui_shader.isCreated == true){
+        ui_shader.Use();
+        ui_shader.setCameraUiProjMatrix(cam_ptr);
+    }
 }
 
 void RenderPipeline::addLight(void* light_ptr){
-    LightsourceProperty* _light_ptr = static_cast<LightsourceProperty*>(light_ptr);
-    _light_ptr->isSent = true;
-    _light_ptr->updTransformPtr();
-    _light_ptr->id = static_cast<unsigned char>(lights_ptr.size()); //setting id of uniform
-    _light_ptr->deffered_shader_ptr = &this->deffered_light; //putting ptr to deffered shader
-    this->lights_ptr.push_back(light_ptr); //pushing pointer
-    this->deffered_light.Use(); //correctly put uniforms
-    this->deffered_light.sendLight(_light_ptr->id, light_ptr);
-    this->deffered_light.setGLuniformInt("lights_amount", static_cast<int>(lights_ptr.size()));
+    this->lights_ptr.push_back(light_ptr);
 }
 
 void RenderPipeline::removeLights(){
     this->lights_ptr.clear(); //clear ptr vector
-    this->deffered_light.setGLuniformInt("lights_amount", 0); //set null lights in shader
 }
 
 G_BUFFER_GL::G_BUFFER_GL(){
@@ -476,4 +490,12 @@ void G_BUFFER_GL::Destroy(){
     //delete framebuffer & renderbuffer
     glDeleteRenderbuffers(1, &this->depthBuffer);
     glDeleteFramebuffers(1, &this->gBuffer);
+}
+
+void RenderPipeline::renderSprite(ZSPIRE::Texture* texture_sprite, int X, int Y, int scaleX, int scaleY){
+    this->ui_shader.Use();
+    //Use texture at 0 slot
+    texture_sprite->Use(0);
+
+    ZSPIRE::getUiSpriteMesh2D()->Draw();
 }

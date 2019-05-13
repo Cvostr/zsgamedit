@@ -80,14 +80,14 @@ void ObjectCtxMenu::setObjectPtr(GameObject* obj_ptr){
 }
 
 void ObjectCtxMenu::onMoveClicked(){
-    win_ptr->obj_trstate.setTransformOnObject(win_ptr->obj_trstate.obj_ptr, GO_TRANSFORM_MODE_TRANSLATE);
+    win_ptr->obj_trstate.setTransformOnObject(GO_TRANSFORM_MODE_TRANSLATE);
 }
 void ObjectCtxMenu::onScaleClicked(){
-    win_ptr->obj_trstate.setTransformOnObject(win_ptr->obj_trstate.obj_ptr, GO_TRANSFORM_MODE_SCALE);
+    win_ptr->obj_trstate.setTransformOnObject(GO_TRANSFORM_MODE_SCALE);
 }
 void ObjectCtxMenu::onRotateClicked(){
     //Set state to rotate object
-    win_ptr->obj_trstate.setTransformOnObject(win_ptr->obj_trstate.obj_ptr, GO_TRANSFORM_MODE_ROTATE);
+    win_ptr->obj_trstate.setTransformOnObject(GO_TRANSFORM_MODE_ROTATE);
 }
 
 void ObjectCtxMenu::onStorePrefabPressed(){

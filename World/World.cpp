@@ -437,8 +437,16 @@ void World::addObjectsFromPrefab(QString file){
     genRandomString(&mObjects[0].str_id, 15); //generate new string ID for first object
     processPrefabObject(&mObjects[0], &mObjects);
     //iterate over all objects and push them to world
-    for(unsigned int obj_i = 0; obj_i < mObjects.size(); obj_i ++)
+    for(unsigned int obj_i = 0; obj_i < mObjects.size(); obj_i ++){
+        QString label = *mObjects[obj_i].label;
+        int add_num = 0; //Declaration of addititonal integer
+        getAvailableNumObjLabel(label, &add_num);
+
+        *mObjects[obj_i].label += QString::number(add_num); //Set new label to object
+        mObjects[obj_i].item_ptr->setText(0, *mObjects[obj_i].label); //Set text on widget
+
         this->addObject(mObjects[obj_i]);
+    }
     //Add first object to top of tree
     this->obj_widget_ptr->addTopLevelItem(this->getObjectByStringId(mObjects[0].str_id)->item_ptr);
 

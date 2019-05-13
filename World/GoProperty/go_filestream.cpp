@@ -203,7 +203,7 @@ void GameObject::loadProperty(std::ifstream* world_stream){
             world_stream->read(reinterpret_cast<char*>(&t_ptr->rotation.Y), sizeof(float));
             world_stream->read(reinterpret_cast<char*>(&t_ptr->rotation.Z), sizeof(float));
 
-            t_ptr->updateMat(); //After everything is loaded, update matrices
+            //t_ptr->updateMat(); //After everything is loaded, update matrices
 
         break;
     }
@@ -242,11 +242,11 @@ void GameObject::loadProperty(std::ifstream* world_stream){
         world_stream->read(reinterpret_cast<char*>(&ptr->scr_num), sizeof(int));
         world_stream->seekg(1, std::ofstream::cur);
         //resize arrays
-        ptr->path_names.resize(ptr->scr_num);
-        ptr->scripts_attached.resize(ptr->scr_num);
+        ptr->path_names.resize(static_cast<unsigned int>(ptr->scr_num));
+        ptr->scripts_attached.resize(static_cast<unsigned int>(ptr->scr_num));
         //iterate over all scripts and read their path
         Project* project_ptr = static_cast<Project*>(this->world_ptr->proj_ptr);
-        for(unsigned int script_w_i = 0; script_w_i < ptr->scr_num; script_w_i ++){
+        for(unsigned int script_w_i = 0; script_w_i < static_cast<unsigned int>(ptr->scr_num); script_w_i ++){
             std::string scr_path;
             *world_stream >> scr_path;
             ptr->path_names[script_w_i] = QString::fromStdString(scr_path);

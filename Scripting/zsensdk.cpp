@@ -11,6 +11,8 @@
 #define KEYS_QUEUE_SIZE 10
 #define KEY_NONE -200
 
+extern EditWindow* _editor_win;
+
 namespace keycodes {
     static int kq = SDLK_q;
     static int kw = SDLK_w;
@@ -189,7 +191,8 @@ void ZSENSDK::ZSEN_World::loadWorldFromFile(std::string file){
     Project* proj_ptr = static_cast<Project*>(world_ptr->proj_ptr);
 
     QString load = proj_ptr->root_path + "/" + QString::fromStdString(file);
-    //world_ptr->openFromFile(load, world_ptr->obj_widget_ptr);
+
+   _editor_win->sheduleWorldLoad(load);
 }
 
 //Property functions
@@ -334,6 +337,7 @@ luabridge::getGlobalNamespace(state)
         .beginClass <ZSENGmObject>("GameObject")
 
         .addFunction("getLabel", &ZSENSDK::ZSENGmObject::getLabel)
+        .addFunction("setActive", &ZSENSDK::ZSENGmObject::setActive)
 
         .addFunction("transform", &ZSENSDK::ZSENGmObject::transform)
         .addFunction("audio", &ZSENSDK::ZSENGmObject::audio)
@@ -419,6 +423,7 @@ luabridge::getGlobalNamespace(state).beginNamespace("input")
             .addVariable("KEY_B", &keycodes::kb, false)
             .addVariable("KEY_N", &keycodes::kn, false)
             .addVariable("KEY_M", &keycodes::km, false)
+            .addVariable("KEY_SPACE", &keycodes::kspace, false)
             .addVariable("KEY_ESCAPE", &keycodes::kescape, false)
             .addVariable("KEY_TAB", &keycodes::ktab, false)
             .addVariable("KEY_CTRL", &keycodes::kctrl, false)

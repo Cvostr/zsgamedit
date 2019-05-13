@@ -418,15 +418,16 @@ void LightsourceProperty::updTransformPtr(){
 }
 
 void LightsourceProperty::onObjectDeleted(){
-    deffered_shader_ptr->unsetLight(this->id);
+  //  deffered_shader_ptr->unsetLight(this->id);
 }
 
 void LightsourceProperty::onPreRender(RenderPipeline* pipeline){
     TransformProperty* transform_prop = go_link.updLinkPtr()->getTransformProperty();
 
-    if(!this->isSent){ //if object hasn't been send
-        pipeline->addLight(static_cast<void*>(this)); //put light pointer to vector
-    }
+    updTransformPtr();
+
+    pipeline->addLight(static_cast<void*>(this)); //put light pointer to vector
+
     //check, if light transformation changed
     if((this->last_pos != transform_prop->_last_translation || this->last_rot != transform_prop->rotation)){
         this->onValueChanged();
@@ -730,11 +731,11 @@ void ScriptGroupProperty::onValueChanged(){
     Project* project_ptr = static_cast<Project*>(this->world_ptr->proj_ptr);
     //if size changed
     if(static_cast<int>(path_names.size()) != this->scr_num){
-        path_names.resize(scr_num);
+        path_names.resize(static_cast<unsigned int>(scr_num));
     }
 
     if(static_cast<int>(scripts_attached.size()) != this->scr_num){ //if size changed
-        this->scripts_attached.resize(this->scr_num);
+        this->scripts_attached.resize(static_cast<unsigned int>(this->scr_num));
         //Iterate over all scripts and use absolute path
         for(int script_i = 0; script_i < scr_num; script_i ++){
             //Set absolute path to script object
@@ -758,7 +759,7 @@ void ScriptGroupProperty::addPropertyInterfaceToInspector(InspectorWin* inspecto
         PickResourceArea* area = new PickResourceArea;
         area->setLabel("Lua Script");
         area->go_property = static_cast<void*>(this);
-        area->rel_path = &path_names[script_i];
+        area->rel_path = &path_names[static_cast<unsigned int>(script_i)];
         area->extension_mask = ".lua";
         area->resource_type = RESOURCE_TYPE_FILE; //It should load meshes only
         inspector->addPropertyArea(area);
@@ -778,8 +779,8 @@ void ScriptGroupProperty::copyTo(GameObjectProperty* dest){
     _dest->scr_num = this->scr_num;
 
     //resize data vectors
-    _dest->scripts_attached.resize(scr_num);
-    _dest->path_names.resize(scr_num);
+    _dest->scripts_attached.resize(static_cast<unsigned int>(scr_num));
+    _dest->path_names.resize(static_cast<unsigned int>(scr_num));
     //Copy data
     for(unsigned int script_i = 0; script_i < static_cast<unsigned int>(scr_num); script_i ++){
         _dest->scripts_attached[script_i] = this->scripts_attached[script_i];
@@ -793,6 +794,14 @@ void ScriptGroupProperty::wakeUp(){
 
         this->scripts_attached[script_i]._InitScript();
         this->scripts_attached[script_i]._callStart();
+    }
+}
+
+void ScriptGroupProperty::shutdown(){
+    for(unsigned int script_i = 0; script_i < static_cast<unsigned int>(scr_num); script_i ++){
+        this->scripts_attached[script_i].link = this->go_link;
+
+        this->scripts_attached[script_i]._DestroyScript();
     }
 }
 

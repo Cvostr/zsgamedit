@@ -80,7 +80,7 @@ void Engine::loadMeshes(std::string file_path, ZSPIRE::Mesh* meshes_array){
 
 void Engine::loadMesh(std::string file_path, ZSPIRE::Mesh* mesh_ptr, int index){
     const aiScene* scene = importer.ReadFile(file_path, loadflags);
-     std::cout << "Loading mesh " << scene->mMeshes[index]->mName.C_Str() << "from file " << file_path << std::endl;
+     std::cout << "Loading mesh " << scene->mMeshes[index]->mName.C_Str() << " from file " << file_path << std::endl;
 
     processMesh(scene->mMeshes[index], scene, mesh_ptr);
 }

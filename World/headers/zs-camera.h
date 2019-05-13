@@ -40,6 +40,7 @@ namespace ZSPIRE{
             ZSVIEWPORT viewport;
 
             ZSMATRIX4x4 proj; //Calculated Projection matrix
+            ZSMATRIX4x4 ui_proj;
             ZSMATRIX4x4 view; //Calculated View matrix
 
             ZSCAMERAPROJECTIONTYPE proj_type;
@@ -73,6 +74,7 @@ namespace ZSPIRE{
 
             ZSMATRIX4x4 getViewMatrix();
             ZSMATRIX4x4 getProjMatrix();
+            ZSMATRIX4x4 getUiProjMatrix();
             void updateTick();
 
             Camera();

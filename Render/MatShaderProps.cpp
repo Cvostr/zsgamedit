@@ -59,7 +59,7 @@ ColorMaterialShaderProperty::ColorMaterialShaderProperty(){
     type = MATSHPROP_TYPE_COLOR;
 }
 ColorMtShPropConf::ColorMtShPropConf(){
-    //Nothing much to do
+    type = MATSHPROP_TYPE_COLOR;
 }
 
 void MtShaderPropertiesGroup::loadFromFile(const char* fpath){

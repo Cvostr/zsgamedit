@@ -13,7 +13,7 @@
 #include <QShortcut>
 #include <QDesktopServices>
 
-static EditWindow* _editor_win;
+EditWindow* _editor_win;
 static InspectorWin* _inspector_win;
 static EdActions* _ed_actions_container;
 
@@ -435,33 +435,56 @@ void EditWindow::onBuildProject(){
     builder.start();
 }
 
+void EditWindow::runWorld(){
+    this->world.putToShapshot(&run_world_snapshot); //create snapshot of current state to recover it later
+    //Prepare world for running
+    for(unsigned int object_i = 0; object_i < world.objects.size(); object_i ++){
+        GameObject* object_ptr = &world.objects[object_i];
+        //Obtain script
+        ScriptGroupProperty* script_ptr = static_cast<ScriptGroupProperty*>(object_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_SCRIPTGROUP));
+        if(script_ptr != nullptr)
+            script_ptr->wakeUp(); //start all scripts
+    }
+
+    isSceneRun = true; //set toggle to true
+    isSceneCamera = true;
+}
+void EditWindow::stopWorld(){
+    isSceneRun = false; //set toggle to true
+
+    //Prepare world for stopping
+    for(unsigned int object_i = 0; object_i < world.objects.size(); object_i ++){
+        GameObject* object_ptr = &world.objects[object_i];
+        //Obtain script
+        ScriptGroupProperty* script_ptr = static_cast<ScriptGroupProperty*>(object_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_SCRIPTGROUP));
+        if(script_ptr != nullptr)
+            script_ptr->shutdown(); //stop all scripts
+    }
+
+    _inspector_win->clearContentLayout();
+    isSceneCamera = false;
+}
+
+void EditWindow::sheduleWorldLoad(QString file_path){
+    this->sheduled_world = file_path;
+    hasSheduledWorld = true;
+
+}
+
 void EditWindow::onRunProject(){
     if(isSceneRun == false){ //if we are Not running scene
-        this->world.putToShapshot(&run_world_snapshot); //create snapshot of current state to recover it later
-        //Prepare world for running
-        for(unsigned int object_i = 0; object_i < world.objects.size(); object_i ++){
-            GameObject* object_ptr = &world.objects[object_i];
-            //Obtain script
-            ScriptGroupProperty* script_ptr = static_cast<ScriptGroupProperty*>(object_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_SCRIPTGROUP));
-            if(script_ptr != nullptr)
-                script_ptr->wakeUp(); //start all scripts
-        }
-
-        isSceneRun = true; //set toggle to true
-        isSceneCamera = true;
+        //perform world activity startup
+        runWorld();
 
         this->ui->actionRun->setText("Stop");
 
     }else{ //lets stop scene run
-        isSceneRun = false; //set toggle to true
-
-        this->ui->actionRun->setText("Run");
+        stopWorld();
 
         this->world.recoverFromSnapshot(&run_world_snapshot); //create snapshot of current state to recover it later
         run_world_snapshot.clear(); //Clear snapshot to free up memory
 
-        _inspector_win->clearContentLayout();
-        isSceneCamera = false;
+        this->ui->actionRun->setText("Run");
     }
 }
 
@@ -595,8 +618,22 @@ void EditWindow::toggleCameras(){
 }
 
 void EditWindow::glRender(){
-    if(ready == true) //if opengl ready, then render scene
+    if(hasSheduledWorld){
+        stopWorld(); //firstly, stop world
+        //load world
+        world.openFromFile(this->sheduled_world, world.obj_widget_ptr, _editor_win->getRenderPipeline()->getRenderSettings());
+        //run loaded world
+        runWorld();
+
+        hasSheduledWorld = false;
+    }
+
+    if(ready == true && !hasSheduledWorld) //if opengl ready, then render scene
         render->render(this->window, static_cast<void*>(this));
+}
+
+RenderPipeline* EditWindow::getRenderPipeline(){
+    return render;
 }
 
 void EditWindow::lookForResources(QString path){
@@ -791,6 +828,7 @@ void ObjTreeWgt::dropEvent(QDropEvent* event){
 
     if(file_dropped.length() > 0){ //if we dropped some file
         QString file_path = _editor_win->getCurrentDirectory() + "/" + file_dropped.at(0)->text();
+        //call function, that performs some things after object dropped
         _editor_win->addFileToObjectList(file_path);
     }
 }
@@ -824,6 +862,8 @@ void EditWindow::onRightBtnClicked(int X, int Y){
 
     world.unpickObject(); //Clear isPicked property from all objects
     obj_ptr->pick(); //mark object picked
+    this->obj_trstate.obj_ptr = obj_ptr;
+
     this->obj_ctx_menu->setObjectPtr(obj_ptr);
     this->obj_ctx_menu->displayTransforms = true;
     this->obj_ctx_menu->show(QPoint(this->width() + X, Y));
@@ -886,7 +926,7 @@ void EditWindow::onMouseMotion(int relX, int relY){
             cam_pos.Y += relY;
             edit_camera.setPosition(cam_pos);
         }
-
+    }
         if(obj_trstate.isTransforming == true && input_state.isLeftBtnHold == true){ //Only affective if object is transforming
 
             ZSRGBCOLOR color = render->getColorOfPickedTransformControl(obj_trstate.tprop_ptr->_last_translation, this->input_state.mouseX, this->input_state.mouseY);
@@ -914,7 +954,7 @@ void EditWindow::onMouseMotion(int relX, int relY){
 
             *vec_ptr = *vec_ptr + ZSVECTOR3(-relX, -relY,relX) * ZSVECTOR3(color.r, color.g, color.b);
 
-        }
+
     }
     if(project.perspective == 3){//Only affective in 3D
 
@@ -961,13 +1001,13 @@ void EditWindow::onKeyDown(SDL_Keysym sym){
     }
 
     if(input_state.isLAltHold && sym.sym == SDLK_t){
-        obj_trstate.setTransformOnObject(this->obj_trstate.obj_ptr, GO_TRANSFORM_MODE_TRANSLATE);
+        obj_trstate.setTransformOnObject(GO_TRANSFORM_MODE_TRANSLATE);
     }
     if(input_state.isLAltHold && sym.sym == SDLK_e){
-        obj_trstate.setTransformOnObject(this->obj_trstate.obj_ptr, GO_TRANSFORM_MODE_SCALE);
+        obj_trstate.setTransformOnObject(GO_TRANSFORM_MODE_SCALE);
     }
     if(input_state.isLAltHold && sym.sym == SDLK_r){
-        obj_trstate.setTransformOnObject(this->obj_trstate.obj_ptr, GO_TRANSFORM_MODE_ROTATE);
+        obj_trstate.setTransformOnObject(GO_TRANSFORM_MODE_ROTATE);
     }
 
     if(sym.sym == SDLK_DELETE){
@@ -1008,11 +1048,7 @@ EdActions* getActionManager(){
     return _ed_actions_container;
 }
 
-void ObjectTransformState::setTransformOnObject(GameObject* obj_ptr, GO_TRANSFORM_MODE transformMode){
-    //if null object passed
-    if(obj_ptr == nullptr) return;
-
-    this->obj_ptr = obj_ptr; //Set pointer to object
+void ObjectTransformState::setTransformOnObject(GO_TRANSFORM_MODE transformMode){
     //Calculate pointer to transform property
     this->tprop_ptr = static_cast<TransformProperty*>(obj_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
 

@@ -67,7 +67,7 @@ struct ObjectTransformState{
     TransformProperty* tprop_ptr; //Pointer to transform property of obj_ptr
     GO_TRANSFORM_MODE transformMode;
 
-    void setTransformOnObject(GameObject* obj_ptr, GO_TRANSFORM_MODE transformMode);
+    void setTransformOnObject(GO_TRANSFORM_MODE transformMode);
 
     ObjectTransformState(){ //Default construct
         isTransforming = false;
@@ -155,6 +155,9 @@ private:
 
     float cam_pitch = 0;
     float cam_yaw = 0;
+
+    QString sheduled_world;
+    bool hasSheduledWorld;
 public:
     float deltaTime;
     bool ready; //Is everything loaded?
@@ -187,8 +190,13 @@ public:
     void addFileToObjectList(QString file_path);
     void assignIconFile(QListWidgetItem* item);
 
+    void runWorld();
+    void stopWorld();
+    void sheduleWorldLoad(QString file_path);
+
     void glRender(); //Invoke opengl rendering
 
+    RenderPipeline* getRenderPipeline();
     InspectorWin* getInspector();
     //SDL2 input events stuff
     void onLeftBtnClicked(int X, int Y);

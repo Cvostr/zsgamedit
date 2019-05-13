@@ -561,15 +561,14 @@ void BoolCheckboxArea::addToInspector(InspectorWin* win){
 void BoolCheckboxArea::writeNewValues(){
     if(bool_ptr == nullptr) return; //pointer not set, exiting
 
-    if(this->checkbox.isChecked()){ //if user checked it
+    if(go_property != nullptr){
         GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(this->go_property);
         getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
+    }
 
+    if(this->checkbox.isChecked()){ //if user checked it
         *bool_ptr = true;
     }else{ //unchecked
-        GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(this->go_property);
-        getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
-
         *bool_ptr = false;
     }
     PropertyEditArea::callPropertyUpdate();
