@@ -576,11 +576,37 @@ void MaterialProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
                 FloatMaterialShaderProperty* float_p = static_cast<FloatMaterialShaderProperty*>(prop_ptr);
                 FloatMtShPropConf* float_conf = static_cast<FloatMtShPropConf*>(conf_ptr);
 
-                FloatPropertyArea* gain_area = new FloatPropertyArea;
-                gain_area->setLabel(float_p->prop_caption); //Its label
-                gain_area->value = &float_conf->value;
-                gain_area->go_property = static_cast<void*>(this);
-                inspector->addPropertyArea(gain_area);
+                FloatPropertyArea* float_area = new FloatPropertyArea;
+                float_area->setLabel(float_p->prop_caption); //Its label
+                float_area->value = &float_conf->value;
+                float_area->go_property = static_cast<void*>(this);
+                inspector->addPropertyArea(float_area);
+
+                break;
+            }
+            case MATSHPROP_TYPE_INTEGER:{
+                //Cast pointer
+                IntegerMaterialShaderProperty* integer_p = static_cast<IntegerMaterialShaderProperty*>(prop_ptr);
+                IntegerMtShPropConf* integer_conf = static_cast<IntegerMtShPropConf*>(conf_ptr);
+
+                IntPropertyArea* integer_area = new IntPropertyArea;
+                integer_area->setLabel(integer_p->prop_caption); //Its label
+                integer_area->value = &integer_conf->value;
+                integer_area->go_property = static_cast<void*>(this);
+                inspector->addPropertyArea(integer_area);
+
+                break;
+            }
+            case MATSHPROP_TYPE_COLOR:{
+                //Cast pointer
+                ColorMaterialShaderProperty* color_p = static_cast<ColorMaterialShaderProperty*>(prop_ptr);
+                ColorMtShPropConf* color_conf = static_cast<ColorMtShPropConf*>(conf_ptr);
+
+                ColorDialogArea* color_area = new ColorDialogArea;
+                color_area->setLabel(color_p->prop_caption); //Its label
+                color_area->color = &color_conf->color;
+                color_area->go_property = static_cast<void*>(this);
+                inspector->addPropertyArea(color_area);
 
                 break;
             }

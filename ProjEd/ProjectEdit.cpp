@@ -450,8 +450,6 @@ void EditWindow::runWorld(){
     isSceneCamera = true;
 }
 void EditWindow::stopWorld(){
-    isSceneRun = false; //set toggle to true
-
     //Prepare world for stopping
     for(unsigned int object_i = 0; object_i < world.objects.size(); object_i ++){
         GameObject* object_ptr = &world.objects[object_i];
@@ -463,12 +461,12 @@ void EditWindow::stopWorld(){
 
     _inspector_win->clearContentLayout();
     isSceneCamera = false;
+    isSceneRun = false; //set toggle to true
 }
 
 void EditWindow::sheduleWorldLoad(QString file_path){
     this->sheduled_world = file_path;
     hasSheduledWorld = true;
-
 }
 
 void EditWindow::onRunProject(){

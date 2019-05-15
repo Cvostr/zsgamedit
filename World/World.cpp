@@ -42,8 +42,8 @@ GameObject* World::addObject(GameObject obj){
         ptr = &objects[objects.size() - 1];
         ptr->array_index = static_cast<int>(objects.size() - 1);
     }else{ //if vector has an empty space
-        objects[index_to_push] = obj;
-        ptr = &objects[index_to_push];
+        objects[static_cast<unsigned int>(index_to_push)] = obj;
+        ptr = &objects[static_cast<unsigned int>(index_to_push)];
         ptr->array_index = index_to_push;
     }
     ptr->world_ptr = this;

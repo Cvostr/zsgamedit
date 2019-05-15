@@ -77,6 +77,14 @@ MtShaderPropertiesGroup* MtShProps::genDefaultMtShGroup(ZSPIRE::Shader* shader3d
     default_group.groupCaption = "Default 3D";
     default_group.render_shader = shader3d;
 
+    ColorMaterialShaderProperty* diff_color_prop =
+            static_cast<ColorMaterialShaderProperty*>(default_group.addProperty(MATSHPROP_TYPE_COLOR));
+    //diff_color_prop->slotToBind = 0;
+    diff_color_prop->prop_caption = "Color"; //Set caption in Inspector
+    //diff_color_prop->ToggleUniform = "hasDiffuseMap";
+    diff_color_prop->prop_identifier = "c_diffuse"; //Identifier to save
+    diff_color_prop->colorUniform = "diffuse_color";
+
     TextureMaterialShaderProperty* diff_texture_prop =
             static_cast<TextureMaterialShaderProperty*>(default_group.addProperty(MATSHPROP_TYPE_TEXTURE));
     diff_texture_prop->slotToBind = 0;
@@ -217,7 +225,7 @@ void Material::saveToFile(){
                 //Cast pointer
                 ColorMtShPropConf* color_conf = static_cast<ColorMtShPropConf*>(conf_ptr);
                 //Write value
-                mat_stream << color_conf->color.r << color_conf->color.g << color_conf->color.b;
+                mat_stream << color_conf->color.r << " " << color_conf->color.g << " " << color_conf->color.b;
                 break;
             }
         }
