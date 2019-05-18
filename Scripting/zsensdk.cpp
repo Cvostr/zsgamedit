@@ -194,6 +194,16 @@ void ZSENSDK::ZSEN_World::loadWorldFromFile(std::string file){
 
    _editor_win->sheduleWorldLoad(load);
 }
+void ZSENSDK::ZSEN_World::Instantiate(ZSENGmObject obj){
+    GameObjectLink link = obj.updPtr()->getLinkToThisObject();
+    GameObject* result = this->world_ptr->dublicateObject(link.ptr);
+
+    if(result->hasParent){ //if object parented
+        result->parent.ptr->item_ptr->addChild(result->item_ptr);
+    }else{
+        this->world_ptr->obj_widget_ptr->addTopLevelItem(result->item_ptr);
+    }
+}
 
 //Property functions
 ZSVECTOR3 ZSENSDK::ZSENTransformProperty::getPosition(){
@@ -357,6 +367,7 @@ luabridge::getGlobalNamespace(state)
         .addFunction("getCamera", &ZSENSDK::ZSEN_World::getCamera)
 
         .addFunction("loadSceneFromFile", &ZSENSDK::ZSEN_World::loadWorldFromFile)
+        .addFunction("instantiate", &ZSENSDK::ZSEN_World::Instantiate)
 
         .endClass()
         .endNamespace();

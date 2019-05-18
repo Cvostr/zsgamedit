@@ -92,6 +92,12 @@ public:
     //Construct
     FloatMaterialShaderProperty();
 };
+class Float3MaterialShaderProperty : public MaterialShaderProperty{
+public:
+    std::string floatUniform;
+    //Construct
+    Float3MaterialShaderProperty();
+};
 class ColorMaterialShaderProperty : public MaterialShaderProperty{
 public:
     std::string colorUniform;
@@ -119,7 +125,12 @@ public:
     //Construct
     FloatMtShPropConf();
 };
-
+class Float3MtShPropConf : public MaterialShaderPropertyConf{
+public:
+    ZSVECTOR3 value;
+    //Construct
+    Float3MtShPropConf();
+};
 class ColorMtShPropConf : public MaterialShaderPropertyConf{
 public:
     ZSRGBCOLOR color;

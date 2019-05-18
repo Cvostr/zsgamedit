@@ -589,6 +589,7 @@ bool World::isCollide(TransformProperty* prop){
 
 
 void World::clear(){
+    //iterate over all objects and purge them all
     for(unsigned int objs_i = 0; objs_i < objects.size(); objs_i ++){
         GameObject* obj_ptr = &objects[objs_i];
         obj_ptr->alive = false;

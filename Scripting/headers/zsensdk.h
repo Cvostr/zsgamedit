@@ -85,6 +85,7 @@ public:
     void setCamera(ZSPIRE::Camera cam);
     ZSPIRE::Camera getCamera();
     void loadWorldFromFile(std::string file);
+    void Instantiate(ZSENGmObject obj);
 };
 namespace Debug{
     void Log(std::string text);

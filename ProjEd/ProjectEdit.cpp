@@ -436,7 +436,6 @@ void EditWindow::onBuildProject(){
 }
 
 void EditWindow::runWorld(){
-    this->world.putToShapshot(&run_world_snapshot); //create snapshot of current state to recover it later
     //Prepare world for running
     for(unsigned int object_i = 0; object_i < world.objects.size(); object_i ++){
         GameObject* object_ptr = &world.objects[object_i];
@@ -471,6 +470,7 @@ void EditWindow::sheduleWorldLoad(QString file_path){
 
 void EditWindow::onRunProject(){
     if(isSceneRun == false){ //if we are Not running scene
+        this->world.putToShapshot(&run_world_snapshot); //create snapshot of current state to recover it later
         //perform world activity startup
         runWorld();
 
@@ -619,6 +619,7 @@ void EditWindow::glRender(){
     if(hasSheduledWorld){
         stopWorld(); //firstly, stop world
         //load world
+        ui->objsList->clear();
         world.openFromFile(this->sheduled_world, world.obj_widget_ptr, _editor_win->getRenderPipeline()->getRenderSettings());
         //run loaded world
         runWorld();

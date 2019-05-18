@@ -59,7 +59,7 @@ bool ZSPIRE::Texture::LoadDDSTextureFromFile(const char* path) {
 	}
 
     //texture file size
-    int size = static_cast<int>(texture_stream.tellg());
+    unsigned int size = static_cast<unsigned int>(texture_stream.tellg());
     texture_stream.seekg(0);
 
     unsigned char header[128];
