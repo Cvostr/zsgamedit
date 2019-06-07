@@ -22,6 +22,7 @@ struct Project;
 #include "../../World/headers/World.h"
 #include "../../Misc/headers/ProjBuilder.h"
 #include "../../Misc/headers/zs_types.h"
+#include "../../Misc/headers/GlyphManager.h"
 
 enum GO_TRANSFORM_MODE{
     GO_TRANSFORM_MODE_NONE,
@@ -152,6 +153,8 @@ private:
 
     ObjectCtxMenu* obj_ctx_menu; //Context menu on object right click
     FileCtxMenu* file_ctx_menu;
+
+    GlyphManager* glyph_manager;
 
     float cam_pitch = 0;
     float cam_yaw = 0;

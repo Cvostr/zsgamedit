@@ -4,7 +4,6 @@
 #include "../World/headers/2dtileproperties.h"
 #include "../Misc/headers/AssimpMeshLoader.h"
 #include "ui_editor.h"
-#include "stdio.h"
 #include <iostream>
 #include <fstream>
 #include <QDir>
@@ -116,7 +115,7 @@ void EditWindow::init(){
 
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0)
     {
-        printf("Error: %s\n", SDL_GetError());
+        std::cout << "Error: " << SDL_GetError() << std::endl;
     }
 
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
@@ -134,9 +133,11 @@ void EditWindow::init(){
     std::cout << "SDL - GL context creation requested!" << std::endl;
 
     glViewport(0, 0, settings.gameViewWin_Width, settings.gameViewWin_Height);
-
+    //init render
     render = new RenderPipeline;
     render->InitGLEW();
+    //init glyph manager
+    this->glyph_manager = new GlyphManager;
 
     glEnable(GL_LINE_SMOOTH);
     glLineWidth(16.0f);
@@ -419,7 +420,7 @@ void EditWindow::onCloseProject(){
     //Close Qt windows
     _editor_win->close();
     _inspector_win->close();
-
+    delete glyph_manager;
     delete render;
     _ed_actions_container->clear();
     ZSPIRE::SFX::destroyAL();
@@ -647,6 +648,10 @@ void EditWindow::lookForResources(QString path){
 
         if(fileInfo.isFile() == true){
             QString name = fileInfo.fileName();
+            if(name.endsWith(".ttf") || name.endsWith(".TTF")){
+                GlyphFontContainer gf_container (fileInfo.absoluteFilePath().toStdString(), 48, this->glyph_manager);
+                gf_container.loadGlyphs();
+            }
             if(name.endsWith(".DDS") || name.endsWith(".dds")){ //If its an texture
                 Resource resource;
                 resource.file_path = fileInfo.absoluteFilePath(); //Writing full path

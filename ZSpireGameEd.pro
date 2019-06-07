@@ -51,7 +51,8 @@ SOURCES += \
     World/GoProperty/go_properties.cpp \
     World/GoProperty/tile_properties.cpp \
     Misc/AssimpMeshLoader.cpp \
-    Render/GizmosRenderer.cpp
+    Render/GizmosRenderer.cpp \
+    Misc/GlyphManager.cpp
 
 HEADERS += \
         mainwin.h \
@@ -79,7 +80,8 @@ HEADERS += \
     Render/headers/MatShaderProps.h \
     Misc/headers/zs_types.h \
     Misc/headers/AssimpMeshLoader.h \
-    Render/headers/GizmosRenderer.h
+    Render/headers/GizmosRenderer.h \
+    Misc/headers/GlyphManager.h
 
 
 FORMS += \
@@ -95,6 +97,13 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 #-------------------------------------WINDOWS LIBS PATHS---------------------------
+#FREETYPE library
+win32: LIBS += -L$$PWD/../../LIBS/ -lfreetype
+win32:INCLUDEPATH += $$PWD/../../LIBS/
+win32:DEPENDPATH += $$PWD/../../LIBS/
+
+win32:!win32-g++: PRE_TARGETDEPS += $$PWD/../../LIBS/freetype.lib
+
 #ASSIMP library
 win32: LIBS += -L$$PWD/../../LIBS/ -lassimp_x64
 
