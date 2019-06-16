@@ -200,6 +200,8 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr)
 
     ZSPIRE::getPlaneMesh2D()->Draw(); //Draw screen
 
+    //std::cout << static_cast<int>(deltaTime) << std::endl;
+
     SDL_GL_SwapWindow(w); //Send rendered frame
 }
 
@@ -254,7 +256,6 @@ void GameObject::processObject(RenderPipeline* pipeline){
 
     if(difts)
         this->Draw(pipeline);
-
 
     for(unsigned int obj_i = 0; obj_i < this->children.size(); obj_i ++){
         if(!children[obj_i].isEmpty()){ //if link isn't broken
@@ -375,6 +376,14 @@ ZSPIRE::Shader* RenderPipeline::processShaderOnObject(void* _obj){
                         ColorMtShPropConf* color_conf = static_cast<ColorMtShPropConf*>(conf_ptr);
 
                         result->setGLuniformColor(color_p->colorUniform.c_str(), color_conf->color);
+                        break;
+                    }
+                    case MATSHPROP_TYPE_FVEC3:{
+                        //Cast pointer
+                        Float3MaterialShaderProperty* fvec3_p = static_cast<Float3MaterialShaderProperty*>(prop_ptr);
+                        Float3MtShPropConf* fvec3_conf = static_cast<Float3MtShPropConf*>(conf_ptr);
+
+                        result->setGLuniformVec3(fvec3_p->floatUniform.c_str(), fvec3_conf->value);
                         break;
                     }
                 }

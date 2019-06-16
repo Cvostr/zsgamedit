@@ -5,7 +5,6 @@
 
 #include "headers/zs-texture.h"
 
-
 #include <GL/glew.h>
 //Working with filesystem and mem
 #include <fstream>
@@ -13,11 +12,7 @@
 #include "../triggers.h"
 #include <iostream>
 
-#ifdef __linux__
-#define _fileno fileno
-#endif
-
-static unsigned int tex_slots[SLOTS_COUNT] = { 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff };
+//static unsigned int tex_slots[SLOTS_COUNT] = { 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff };
 
 
 void ZSPIRE::Texture::Init() {
@@ -36,11 +31,11 @@ ZSPIRE::Texture::Texture() {
 
 void ZSPIRE::Texture::Use(int slot) {
 
-    if ((slot < SLOTS_COUNT) && (this->TEXTURE_ID != tex_slots[slot])) {
+    //if ((slot < SLOTS_COUNT) && (this->TEXTURE_ID != tex_slots[slot])) {
 		glActiveTexture(GL_TEXTURE0 + slot); //Activating texture slot
 		glBindTexture(GL_TEXTURE_2D, this->TEXTURE_ID); //Sending texture to activated slot
-        tex_slots[slot] = this->TEXTURE_ID;
-	}
+      //  tex_slots[slot] = this->TEXTURE_ID;
+    //}
 }
 
 

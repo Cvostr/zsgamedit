@@ -128,7 +128,7 @@ void EditWindow::init(){
     SDL_DisplayMode current;
     SDL_GetCurrentDisplayMode(0, &current);
     std::cout << "SDL window creation requested" << std::endl;
-    this->window = SDL_CreateWindow("Game View", this->width(), 0, settings.gameViewWin_Width, settings.gameViewWin_Height, SDL_WINDOW_OPENGL); //Create window
+    this->window = SDL_CreateWindow("Game View", this->x() + this->width(), 0, settings.gameViewWin_Width, settings.gameViewWin_Height, SDL_WINDOW_OPENGL); //Create window
     this->glcontext = SDL_GL_CreateContext(window);
     std::cout << "SDL - GL context creation requested!" << std::endl;
 

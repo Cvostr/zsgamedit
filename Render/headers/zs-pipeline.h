@@ -5,8 +5,8 @@
 #include "zs-shader.h"
 #include "zs-mesh.h"
 #include "zs-texture.h"
-
 #include "GizmosRenderer.h"
+#include "../../Misc/headers/EngineManager.h"
 
 #include <QMainWindow>
 #include <SDL2/SDL.h>
@@ -49,7 +49,7 @@ public:
     void Destroy();
 };
 
-class RenderPipeline{
+class RenderPipeline : public EngineComponentManager{
 private:
 
     GizmosRenderer* gizmos;

@@ -55,7 +55,7 @@ void ObjectScript::_callDraw(float deltaTime) {
    luabridge::LuaRef frame = luabridge::getGlobal(L, "onFrame");
     if (frame.isFunction() == true) { //If function found
         try {
-            frame(deltaTime);
+            frame(deltaTime / 1000.0f);
         }
         catch (luabridge::LuaException e) {
             std::cout << "SCRIPT" << "Error occured in script (onFrame) " << fpath.toStdString() << e.what() << std::endl;

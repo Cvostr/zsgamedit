@@ -5,8 +5,8 @@
 #-------------------------------------------------
 
 QT       += core gui widgets
-unix:LIBS += -lGLEW -lSDL2 -lopenal -llua5.2 -lassimp -lvulkan
-#greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+unix:LIBS += -lGLEW -lSDL2 -lopenal -llua5.2 -lassimp -lvulkan -lfreetype
+unix:INCLUDEPATH += /usr/include/freetype2/
 
 TARGET = ZSpireGameEd
 TEMPLATE = app
@@ -81,7 +81,8 @@ HEADERS += \
     Misc/headers/zs_types.h \
     Misc/headers/AssimpMeshLoader.h \
     Render/headers/GizmosRenderer.h \
-    Misc/headers/GlyphManager.h
+    Misc/headers/GlyphManager.h \
+    Misc/headers/EngineManager.h
 
 
 FORMS += \

@@ -352,6 +352,7 @@ void World::openFromFile(QString file, QTreeWidget* w_ptr, RenderSettings* setti
         for(unsigned int chi_i = 0; chi_i < obj_ptr->children.size(); chi_i ++){ //Now iterate over all children
             GameObjectLink* child_ptr = &obj_ptr->children[chi_i];
             GameObject* child_go_ptr = child_ptr->updLinkPtr();
+
             child_go_ptr->parent = obj_ptr->getLinkToThisObject();
             child_go_ptr->hasParent = true;
         }
