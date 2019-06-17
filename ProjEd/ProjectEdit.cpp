@@ -132,45 +132,33 @@ void EditWindow::init(){
     this->glcontext = SDL_GL_CreateContext(window);
     std::cout << "SDL - GL context creation requested!" << std::endl;
 
-    glViewport(0, 0, settings.gameViewWin_Width, settings.gameViewWin_Height);
+
     //init render
     render = new RenderPipeline;
-    render->InitGLEW();
+    this->startManager(render);
     //init glyph manager
     this->glyph_manager = new GlyphManager;
+    this->startManager(glyph_manager);
 
-    glEnable(GL_LINE_SMOOTH);
-    glLineWidth(16.0f);
-    //If our proj is 3D, then enable depth test by default
-    if(project.perspective == 3){
-        glEnable(GL_DEPTH_TEST);
-        render->depthTest = true;
-        render->cullFaces = true;
-        glFrontFace(GL_CCW);
-    }
-    //initialize gizmos component
-    render->initGizmos(project.perspective);
-    //setup GBUFFER
-    render->setup(settings.gameViewWin_Width, settings.gameViewWin_Height);
     ready = true;//Everything is ready
 
     ZSPIRE::SFX::initAL();
 
     switch(project.perspective){
-    case 2:{ //2D project
+        case 2:{ //2D project
 
-        this->edit_camera.setProjectionType(ZSCAMERA_PROJECTION_ORTHOGONAL);
-        edit_camera.setPosition(ZSVECTOR3(0,0,0));
-        edit_camera.setFront(ZSVECTOR3(0,0,1));
-        break;
-    }
-    case 3:{ //3D project
-        this->edit_camera.setProjectionType(ZSCAMERA_PROJECTION_PERSPECTIVE);
-        edit_camera.setPosition(ZSVECTOR3(0,0,0));
-        edit_camera.setFront(ZSVECTOR3(0,0,1));
-        edit_camera.setZplanes(1, 2000);
-        break;
-    }
+            this->edit_camera.setProjectionType(ZSCAMERA_PROJECTION_ORTHOGONAL);
+            edit_camera.setPosition(ZSVECTOR3(0,0,0));
+            edit_camera.setFront(ZSVECTOR3(0,0,1));
+            break;
+        }
+        case 3:{ //3D project
+            this->edit_camera.setProjectionType(ZSCAMERA_PROJECTION_PERSPECTIVE);
+            edit_camera.setPosition(ZSVECTOR3(0,0,0));
+            edit_camera.setFront(ZSVECTOR3(0,0,1));
+            edit_camera.setZplanes(1, 2000);
+            break;
+        }
     }
     world.world_camera = edit_camera;
 }
@@ -636,6 +624,10 @@ RenderPipeline* EditWindow::getRenderPipeline(){
     return render;
 }
 
+GlyphFontContainer* EditWindow::getFontContainer(std::string label){
+    return this->glyph_manager->getFontContainer(label);
+}
+
 void EditWindow::lookForResources(QString path){
     QDir directory (path); //Creating QDir object
     directory.setFilter(QDir::Files | QDir::Dirs | QDir::NoSymLinks | QDir::NoDot | QDir::NoDotDot);
@@ -649,8 +641,11 @@ void EditWindow::lookForResources(QString path){
         if(fileInfo.isFile() == true){
             QString name = fileInfo.fileName();
             if(name.endsWith(".ttf") || name.endsWith(".TTF")){
-                GlyphFontContainer gf_container (fileInfo.absoluteFilePath().toStdString(), 48, this->glyph_manager);
-                gf_container.loadGlyphs();
+                GlyphFontContainer* gf_container = new GlyphFontContainer(fileInfo.absoluteFilePath().toStdString(), 48, this->glyph_manager);
+                //load font
+                gf_container->loadGlyphs();
+                //register font
+                glyph_manager->addFontContainer(gf_container);
             }
             if(name.endsWith(".DDS") || name.endsWith(".dds")){ //If its an texture
                 Resource resource;
@@ -1061,4 +1056,11 @@ void ObjectTransformState::setTransformOnObject(GO_TRANSFORM_MODE transformMode)
     //Add property action
     GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(obj_ptr->getTransformProperty());
     getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
+}
+
+void EditWindow::startManager(EngineComponentManager* manager){
+    manager->setDpMetrics(this->settings.gameViewWin_Width, this->settings.gameViewWin_Height);
+    manager->setProjectStructPtr(&this->project);
+    manager->init();
+    this->managers.push_back(manager);
 }

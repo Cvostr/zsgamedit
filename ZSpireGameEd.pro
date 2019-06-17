@@ -52,7 +52,8 @@ SOURCES += \
     World/GoProperty/tile_properties.cpp \
     Misc/AssimpMeshLoader.cpp \
     Render/GizmosRenderer.cpp \
-    Misc/GlyphManager.cpp
+    Misc/GlyphManager.cpp \
+    Misc/EngineManager.cpp
 
 HEADERS += \
         mainwin.h \

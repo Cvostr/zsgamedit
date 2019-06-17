@@ -68,6 +68,27 @@ bool RenderPipeline::InitGLEW(){
         return true;
 }
 
+void RenderPipeline::init(){
+    glViewport(0, 0, this->WIDTH, this->HEIGHT);
+
+    InitGLEW();
+
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    glEnable(GL_LINE_SMOOTH);
+    glLineWidth(16.0f);
+    //If our proj is 3D, then enable depth test by default
+    if(this->project_struct_ptr->perspective == 3){
+        glEnable(GL_DEPTH_TEST);
+        depthTest = true;
+        cullFaces = true;
+        glFrontFace(GL_CCW);
+    }
+    //initialize gizmos component
+    initGizmos(this->project_struct_ptr->perspective);
+    //setup GBUFFER
+    setup(this->WIDTH, this->HEIGHT);
+}
+
 ZSRGBCOLOR RenderPipeline::getColorOfPickedTransformControl(ZSVECTOR3 translation, int mouseX, int mouseY){
     glClearColor(0,0,0,1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -199,6 +220,16 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr)
                                                                render_settings.ambient_light_color.b / 255.0f));
 
     ZSPIRE::getPlaneMesh2D()->Draw(); //Draw screen
+
+
+    this->ui_shader.Use();
+    GlyphFontContainer* c = editwin_ptr->getFontContainer("LiberationMono-Regular.ttf");
+    int f[5];
+    f[0] = static_cast<int>('T');
+    f[1] = static_cast<int>('e');
+    f[2] = static_cast<int>('s');
+    f[3] = static_cast<int>('t');
+    c->DrawString(f, 4, ZSVECTOR2(0,0));
 
     //std::cout << static_cast<int>(deltaTime) << std::endl;
 

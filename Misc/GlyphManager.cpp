@@ -16,8 +16,26 @@ FT_Library GlyphManager::getFreetypeLibraryInstance(){
     return this->ftlib;
 }
 
+void GlyphManager::addFontContainer(GlyphFontContainer* ptr){
+    this->fonts.push_back(ptr);
+}
+GlyphFontContainer* GlyphManager::getFontContainer(std::string path){
+    for(unsigned int i = 0; i < this->fonts.size(); i ++){
+        if(this->fonts[i]->path.compare(path) == 0){
+            return fonts[i];
+        }
+    }
+    return nullptr;
+}
+
 GlyphFontContainer::GlyphFontContainer(std::string path, unsigned int size, GlyphManager* manager){
     std::cout << "FREETYPE: Loading font " << path << std::endl;
+
+    manager_ptr = manager;
+
+    for(unsigned int i = this->manager_ptr->project_struct_ptr->root_path.size() + 1; i < path.size() ; i ++){
+        this->path.push_back(path[i]);
+    }
 
     FT_New_Face(manager->getFreetypeLibraryInstance(), path.c_str(), 0, &this->font);
     FT_Set_Pixel_Sizes(this->font, 0, size);
@@ -74,7 +92,7 @@ void GlyphFontContainer::loadGlyph(unsigned int index){
 
 void GlyphFontContainer::DrawChar(int _char, ZSVECTOR2 pos, unsigned int* char_length){
     CharacterGlyph* glyph = this->characters.at(_char);
-    *char_length = glyph->glyph_size.X;
+    *char_length = glyph->glyph_bearing.X + glyph->glyph_size.X;
 }
 void GlyphFontContainer::DrawString(int* string, unsigned int len, ZSVECTOR2 pos){
     unsigned int xpos_offset = static_cast<unsigned int>(pos.X);

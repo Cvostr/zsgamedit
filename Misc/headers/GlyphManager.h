@@ -6,6 +6,7 @@
 
 #include "../../Render/headers/zs-math.h"
 #include "EngineManager.h"
+#include "../../Render/headers/zs-shader.h"
 
 #include "ft2build.h"
 
@@ -31,9 +32,9 @@ class GlyphFontContainer{
 private:
     FT_Face font;
     std::map<unsigned int, CharacterGlyph*> characters;
-
-
+    GlyphManager* manager_ptr;
 public:
+    std::string path;
     GlyphFontContainer(std::string path, unsigned int size, GlyphManager* manager);
     void loadGlyphs();
     void loadGlyph(unsigned int index);
@@ -45,7 +46,13 @@ public:
 class GlyphManager : public EngineComponentManager{
 private:
     FT_Library ftlib;
+    std::vector<GlyphFontContainer*> fonts;
 public:
+    ZSPIRE::Shader* ui_shader;
+
+    void addFontContainer(GlyphFontContainer* ptr); //add font container to vector
+    GlyphFontContainer* getFontContainer(std::string path);
+
     FT_Library getFreetypeLibraryInstance();
     GlyphManager();
 };

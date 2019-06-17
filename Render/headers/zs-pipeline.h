@@ -90,6 +90,8 @@ public:
     GizmosRenderer* getGizmosRenderer();
 
     void renderSprite(ZSPIRE::Texture* texture_sprite, int X, int Y, int scaleX, int scaleY);
+    //override virtual function from EngineComponentManager
+    void init();
 
     RenderPipeline();
     ~RenderPipeline();

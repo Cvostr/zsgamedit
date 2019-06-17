@@ -142,6 +142,8 @@ public slots:
 
     void openRenderSettings();
 private:
+    std::vector<EngineComponentManager*> managers;
+
     QString current_dir; //current directory path string
     QString scene_path;
     bool hasSceneFile; //Is scene saved or loaded
@@ -207,6 +209,9 @@ public:
     void onMouseMotion(int relX, int relY);
     void onMouseWheel(int x, int y);
     void onKeyDown(SDL_Keysym sym);
+
+    void startManager(EngineComponentManager* manager);
+    GlyphFontContainer* getFontContainer(std::string label);
 
     Ui::EditWindow *ui;
     explicit EditWindow(QWidget *parent = nullptr);
