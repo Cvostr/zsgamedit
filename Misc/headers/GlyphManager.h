@@ -7,6 +7,7 @@
 #include "../../Render/headers/zs-math.h"
 #include "EngineManager.h"
 #include "../../Render/headers/zs-shader.h"
+#include "../../Render/headers/zs-pipeline.h"
 
 #include "ft2build.h"
 
@@ -39,8 +40,8 @@ public:
     void loadGlyphs();
     void loadGlyph(unsigned int index);
 
-    void DrawChar(int _char, ZSVECTOR2 pos, unsigned int* char_length);
-    void DrawString(int* string, unsigned int len, ZSVECTOR2 pos);
+    void DrawChar(int _char, ZSVECTOR2 pos, unsigned int* char_length, ZSRGBCOLOR color);
+    void DrawString(int* string, unsigned int len, ZSVECTOR2 pos, ZSRGBCOLOR color = ZSRGBCOLOR(255,255,255));
 };
 
 class GlyphManager : public EngineComponentManager{
@@ -48,7 +49,7 @@ private:
     FT_Library ftlib;
     std::vector<GlyphFontContainer*> fonts;
 public:
-    ZSPIRE::Shader* ui_shader;
+    RenderPipeline* pipeline_ptr;
 
     void addFontContainer(GlyphFontContainer* ptr); //add font container to vector
     GlyphFontContainer* getFontContainer(std::string path);

@@ -8,13 +8,13 @@ layout (location = 1) in vec2 uv;
 out vec2 _UV;
 
 uniform mat4 cam_projection;
-uniform mat4 transform;
+uniform mat4 object_transform;
 
 void main(){
 
 _UV = uv;
 
-gl_Position = cam_projection * transform * vec4(pos, 1);
+gl_Position = cam_projection * object_transform * vec4(pos, 1);
 
 
 }

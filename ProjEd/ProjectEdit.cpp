@@ -138,6 +138,7 @@ void EditWindow::init(){
     this->startManager(render);
     //init glyph manager
     this->glyph_manager = new GlyphManager;
+    glyph_manager->pipeline_ptr = render;
     this->startManager(glyph_manager);
 
     ready = true;//Everything is ready

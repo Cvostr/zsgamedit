@@ -90,15 +90,17 @@ void GlyphFontContainer::loadGlyph(unsigned int index){
     this->characters.insert(std::pair<unsigned int, CharacterGlyph*>(index, character));
 }
 
-void GlyphFontContainer::DrawChar(int _char, ZSVECTOR2 pos, unsigned int* char_length){
+void GlyphFontContainer::DrawChar(int _char, ZSVECTOR2 pos, unsigned int* char_length, ZSRGBCOLOR color){
     CharacterGlyph* glyph = this->characters.at(_char);
     *char_length = glyph->glyph_bearing.X + glyph->glyph_size.X;
+
+    manager_ptr->pipeline_ptr->renderGlyph(glyph->gl_texture_id, pos.X, pos.Y - (glyph->glyph_size.Y - glyph->glyph_bearing.Y), glyph->glyph_size.X, glyph->glyph_size.Y, color);
 }
-void GlyphFontContainer::DrawString(int* string, unsigned int len, ZSVECTOR2 pos){
+void GlyphFontContainer::DrawString(int* string, unsigned int len, ZSVECTOR2 pos, ZSRGBCOLOR color){
     unsigned int xpos_offset = static_cast<unsigned int>(pos.X);
     for(unsigned int i = 0; i < len; i ++){
         unsigned int char_len = 0;
-        DrawChar(string[i], ZSVECTOR2(xpos_offset, pos.Y), &char_len);
+        DrawChar(string[i], ZSVECTOR2(xpos_offset, pos.Y), &char_len, color);
         xpos_offset += char_len;
     }
 }

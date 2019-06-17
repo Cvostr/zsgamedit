@@ -115,6 +115,7 @@ unsigned int RenderPipeline::render_getpickedObj(void* projectedit_ptr, int mous
 
     glClearColor(1,1,1,1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glDisable(GL_BLEND);
     pick_shader.Use();
     pick_shader.setCamera(cam_ptr);
     //Picking state
@@ -172,6 +173,7 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr)
     gbuffer.bindFramebuffer();
     glClearColor(0,0,0,1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glDisable(GL_BLEND);
 
     this->updateShadersCameraInfo(cam_ptr); //Send camera properties to all drawing shaders
 
@@ -221,15 +223,18 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr)
 
     ZSPIRE::getPlaneMesh2D()->Draw(); //Draw screen
 
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     this->ui_shader.Use();
     GlyphFontContainer* c = editwin_ptr->getFontContainer("LiberationMono-Regular.ttf");
-    int f[5];
+    int f[6];
     f[0] = static_cast<int>('T');
     f[1] = static_cast<int>('e');
     f[2] = static_cast<int>('s');
     f[3] = static_cast<int>('t');
-    c->DrawString(f, 4, ZSVECTOR2(0,0));
+    f[4] = static_cast<int>('g');
+    //c->DrawString(f, 5, ZSVECTOR2(10,10));
 
     //std::cout << static_cast<int>(deltaTime) << std::endl;
 
@@ -533,9 +538,40 @@ void G_BUFFER_GL::Destroy(){
 }
 
 void RenderPipeline::renderSprite(ZSPIRE::Texture* texture_sprite, int X, int Y, int scaleX, int scaleY){
+    renderSprite(texture_sprite->TEXTURE_ID, X, Y, scaleX, scaleY);
+}
+
+void RenderPipeline::renderSprite(unsigned int texture_id, int X, int Y, int scaleX, int scaleY){
     this->ui_shader.Use();
+    ui_shader.setGLuniformInt("render_mode", 1);
     //Use texture at 0 slot
-    texture_sprite->Use(0);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture_id);
+
+    ZSMATRIX4x4 translation = getTranslationMat(X, Y, 0.0f);
+    ZSMATRIX4x4 scale = getScaleMat(scaleX, scaleY, 0.0f);
+    ZSMATRIX4x4 transform = scale * translation;
+
+    ui_shader.setTransform(transform);
+
+    ZSPIRE::getUiSpriteMesh2D()->Draw();
+}
+
+void RenderPipeline::renderGlyph(unsigned int texture_id, int X, int Y, int scaleX, int scaleY, ZSRGBCOLOR color){
+    this->ui_shader.Use();
+    //tell shader, that we will render glyph
+    ui_shader.setGLuniformInt("render_mode", 2);
+    //sending glyph color
+    ui_shader.setGLuniformColor("text_color", color);
+    //Use texture at 0 slot
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture_id);
+
+    ZSMATRIX4x4 translation = getTranslationMat(X, Y, 0.0f);
+    ZSMATRIX4x4 scale = getScaleMat(scaleX, scaleY, 0.0f);
+    ZSMATRIX4x4 transform = scale * translation;
+
+    ui_shader.setTransform(transform);
 
     ZSPIRE::getUiSpriteMesh2D()->Draw();
 }

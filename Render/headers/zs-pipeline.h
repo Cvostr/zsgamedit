@@ -89,7 +89,10 @@ public:
     RenderSettings* getRenderSettings();
     GizmosRenderer* getGizmosRenderer();
 
+    void renderSprite(unsigned int texture_id, int X, int Y, int scaleX, int scaleY);
     void renderSprite(ZSPIRE::Texture* texture_sprite, int X, int Y, int scaleX, int scaleY);
+
+    void renderGlyph(unsigned int texture_id, int X, int Y, int scaleX, int scaleY, ZSRGBCOLOR color);
     //override virtual function from EngineComponentManager
     void init();
 
