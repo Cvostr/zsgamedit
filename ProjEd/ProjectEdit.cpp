@@ -467,8 +467,11 @@ void EditWindow::onRunProject(){
         this->ui->actionRun->setText("Stop");
 
     }else{ //lets stop scene run
+        //return base window size
+        SDL_SetWindowSize(this->window, this->settings.gameViewWin_Width, this->settings.gameViewWin_Height);
+        //Stop world
         stopWorld();
-
+        //Recover world snapshot
         this->world.recoverFromSnapshot(&run_world_snapshot); //create snapshot of current state to recover it later
         run_world_snapshot.clear(); //Clear snapshot to free up memory
 
@@ -773,14 +776,6 @@ InspectorWin* EditWindow::getInspector(){
     return _inspector_win;
 }
 
-//Object Ctx menu slots
-void ObjectCtxMenu::onDeleteClicked(){
-    //delete all ui from inspector
-    _inspector_win->clearContentLayout(); //Prevent variable conflicts
-    GameObjectLink link = obj_ptr->getLinkToThisObject();
-    win_ptr->obj_trstate.isTransforming = false; //disabling object transform
-    win_ptr->callObjectDeletion(link);
-}
 void ObjectCtxMenu::onDublicateClicked(){
     //Make snapshot actions
     _ed_actions_container->newSnapshotAction(&win_ptr->world);
@@ -834,6 +829,8 @@ void ObjTreeWgt::dropEvent(QDropEvent* event){
 }
 
 void EditWindow::onLeftBtnClicked(int X, int Y){
+    //Stop camera moving
+    this->edit_camera.stopMoving();
     this->obj_ctx_menu->close(); //Close ctx menu
 
     if(obj_trstate.isTransforming || isSceneRun) return;
@@ -853,6 +850,9 @@ void EditWindow::onLeftBtnClicked(int X, int Y){
 void EditWindow::onRightBtnClicked(int X, int Y){
     if(isSceneRun) return;
 
+    //Stop camera moving
+    this->edit_camera.stopMoving();
+
     this->obj_trstate.isTransforming = false; //disabling object transform
     unsigned int clicked = render->render_getpickedObj(static_cast<void*>(this), X, Y);
 
@@ -871,12 +871,16 @@ void EditWindow::onRightBtnClicked(int X, int Y){
 
 }
 void EditWindow::onMouseWheel(int x, int y){
+    //Stop camera moving
+    this->edit_camera.stopMoving();
+    //If we are in 3D project
     if(project.perspective == 3){
         ZSVECTOR3 front = edit_camera.getCameraFrontVec(); //obtain front vector
         ZSVECTOR3 pos = edit_camera.getCameraPosition(); //obtain position
 
         edit_camera.setPosition(pos + front * y);
     }
+    //2D project
     if(project.perspective == 2){
         ZSVECTOR3 pos = edit_camera.getCameraPosition(); //obtain position
         pos.Y += y * 5;
@@ -921,6 +925,9 @@ void EditWindow::onMouseMotion(int relX, int relY){
     if(project.perspective == 2){ //Only affective in 2D
 
         if(input_state.isMidBtnHold == true){ //we just move on map
+            //Stop camera moving
+            this->edit_camera.stopMoving();
+
             ZSVECTOR3 cam_pos = edit_camera.getCameraPosition();
             cam_pos.X += relX;
             cam_pos.Y += relY;
@@ -1059,9 +1066,29 @@ void ObjectTransformState::setTransformOnObject(GO_TRANSFORM_MODE transformMode)
     getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
 }
 
-void EditWindow::startManager(EngineComponentManager* manager){
+void EditWindow::startManager(EditorComponentManager* manager){
     manager->setDpMetrics(this->settings.gameViewWin_Width, this->settings.gameViewWin_Height);
     manager->setProjectStructPtr(&this->project);
     manager->init();
     this->managers.push_back(manager);
+}
+
+void EditWindow::updateDeltaTime(float deltaTime){
+    this->deltaTime = deltaTime;
+
+    for(unsigned int i = 0; i < managers.size(); i ++){
+        managers[i]->deltaTime = deltaTime;
+    }
+}
+
+void EditWindow::setGameViewWindowSize(int W, int H){
+    SDL_SetWindowSize(this->window, W, H);
+
+    ZSVIEWPORT viewport = ZSVIEWPORT(0,0,W,H);
+    edit_camera.setViewport(viewport);
+    world.world_camera.setViewport(viewport);
+
+    for(unsigned int i = 0; i < managers.size(); i ++){
+        managers[i]->updateWindowSize(W, H);
+    }
 }

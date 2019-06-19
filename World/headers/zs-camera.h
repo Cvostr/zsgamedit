@@ -71,11 +71,12 @@ namespace ZSPIRE{
 
             void setProjectionType(ZSCAMERAPROJECTIONTYPE type);
             void startMoving();
+            void stopMoving();
 
             ZSMATRIX4x4 getViewMatrix();
             ZSMATRIX4x4 getProjMatrix();
             ZSMATRIX4x4 getUiProjMatrix();
-            void updateTick();
+            void updateTick(float deltaTime);
 
             Camera();
     };

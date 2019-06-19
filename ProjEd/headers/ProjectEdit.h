@@ -142,7 +142,7 @@ public slots:
 
     void openRenderSettings();
 private:
-    std::vector<EngineComponentManager*> managers;
+    std::vector<EditorComponentManager*> managers;
 
     QString current_dir; //current directory path string
     QString scene_path;
@@ -210,8 +210,11 @@ public:
     void onMouseWheel(int x, int y);
     void onKeyDown(SDL_Keysym sym);
 
-    void startManager(EngineComponentManager* manager);
+    void startManager(EditorComponentManager* manager);
+    void updateDeltaTime(float deltaTime);
     GlyphFontContainer* getFontContainer(std::string label);
+
+    void setGameViewWindowSize(int W, int H);
 
     Ui::EditWindow *ui;
     explicit EditWindow(QWidget *parent = nullptr);

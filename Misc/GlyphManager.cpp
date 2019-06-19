@@ -36,7 +36,7 @@ GlyphFontContainer::GlyphFontContainer(std::string path, unsigned int size, Glyp
     for(unsigned int i = this->manager_ptr->project_struct_ptr->root_path.size() + 1; i < path.size() ; i ++){
         this->path.push_back(path[i]);
     }
-
+    //Load font by freetype
     FT_New_Face(manager->getFreetypeLibraryInstance(), path.c_str(), 0, &this->font);
     FT_Set_Pixel_Sizes(this->font, 0, size);
 

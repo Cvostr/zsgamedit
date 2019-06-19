@@ -16,6 +16,7 @@ void ObjectScript::_InitScript() {
 
     //Bind DSDK to script
     ZSENSDK::bindSDK(L);
+    ZSENSDK::bindKeyCodesSDK(L);
 }
 
 ZSENSDK::ZSENGmObject ObjectScript::getGameObjectSDK(){

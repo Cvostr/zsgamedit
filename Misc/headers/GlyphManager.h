@@ -5,7 +5,7 @@
 #include <string>
 
 #include "../../Render/headers/zs-math.h"
-#include "EngineManager.h"
+#include "EditorManager.h"
 #include "../../Render/headers/zs-shader.h"
 #include "../../Render/headers/zs-pipeline.h"
 
@@ -44,7 +44,7 @@ public:
     void DrawString(int* string, unsigned int len, ZSVECTOR2 pos, ZSRGBCOLOR color = ZSRGBCOLOR(255,255,255));
 };
 
-class GlyphManager : public EngineComponentManager{
+class GlyphManager : public EditorComponentManager{
 private:
     FT_Library ftlib;
     std::vector<GlyphFontContainer*> fonts;

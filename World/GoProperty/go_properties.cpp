@@ -290,7 +290,6 @@ void TransformProperty::copyTo(GameObjectProperty* dest){
     _dest->transform_mat = transform_mat;
 }
 
-
 //Label property functions
 void LabelProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
     StringPropertyArea* area = new StringPropertyArea;

@@ -106,11 +106,11 @@ ZSPIRE::Camera::Camera(){
     isMoving = false;
 }
 
-void ZSPIRE::Camera::updateTick(){
+void ZSPIRE::Camera::updateTick(float deltaTime){
     if(!isMoving) return;
 
 
-    if(getDistance(camera_pos, _dest_pos) < 3){
+    if(getDistance(camera_pos, _dest_pos) < 6){
         camera_pos = _dest_pos;
         updateViewMat();
         isMoving = false;
@@ -119,7 +119,7 @@ void ZSPIRE::Camera::updateTick(){
         float dist = getDistance(camera_pos, _dest_pos);
 
         ZSVECTOR3 toMove = delta / dist;
-        toMove = toMove * 6.0f;
+        toMove = toMove * (deltaTime) - (10 / dist);
         camera_pos = camera_pos - toMove;
         updateViewMat();
     }
@@ -136,4 +136,8 @@ void ZSPIRE::Camera::startMoving(){
     }
 
     this->isMoving = true;
+}
+
+void ZSPIRE::Camera::stopMoving(){
+    this->isMoving = false;
 }

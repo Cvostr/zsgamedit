@@ -6,7 +6,7 @@
 #include "zs-mesh.h"
 #include "zs-texture.h"
 #include "GizmosRenderer.h"
-#include "../../Misc/headers/EngineManager.h"
+#include "../../Misc/headers/EditorManager.h"
 
 #include <QMainWindow>
 #include <SDL2/SDL.h>
@@ -49,7 +49,7 @@ public:
     void Destroy();
 };
 
-class RenderPipeline : public EngineComponentManager{
+class RenderPipeline : public EditorComponentManager{
 private:
 
     GizmosRenderer* gizmos;
@@ -67,7 +67,6 @@ private:
 
     RenderSettings render_settings;
 public:
-    float deltaTime;
     bool depthTest; //if enabled, GL will do depth testing
     bool cullFaces; //if enabled, GL will cull faces
     PIPELINE_STATE current_state;
@@ -95,6 +94,7 @@ public:
     void renderGlyph(unsigned int texture_id, int X, int Y, int scaleX, int scaleY, ZSRGBCOLOR color);
     //override virtual function from EngineComponentManager
     void init();
+    void updateWindowSize(int W, int H);
 
     RenderPipeline();
     ~RenderPipeline();

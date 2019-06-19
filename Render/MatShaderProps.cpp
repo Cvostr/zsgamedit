@@ -320,6 +320,13 @@ void Material::loadFromFile(std::string fpath){
                             mat_stream >> color_conf->color.r >> color_conf->color.g >> color_conf->color.b;
                             break;
                         }
+                        case MATSHPROP_TYPE_FVEC3:{
+                            //Cast pointer
+                            Float3MtShPropConf* fvec3_conf = static_cast<Float3MtShPropConf*>(conf_ptr);
+                            //Write value
+                            mat_stream >> fvec3_conf->value.X >> fvec3_conf->value.Y >> fvec3_conf->value.Z;
+                            break;
+                        }
                    }
                    mat_stream.seekg(1, std::ofstream::cur); //Skip space
                 }

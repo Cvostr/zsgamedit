@@ -53,7 +53,8 @@ SOURCES += \
     Misc/AssimpMeshLoader.cpp \
     Render/GizmosRenderer.cpp \
     Misc/GlyphManager.cpp \
-    Misc/EngineManager.cpp
+    Misc/EditorManager.cpp \
+    Scripting/zsensdk_input.cpp
 
 HEADERS += \
         mainwin.h \
@@ -83,7 +84,7 @@ HEADERS += \
     Misc/headers/AssimpMeshLoader.h \
     Render/headers/GizmosRenderer.h \
     Misc/headers/GlyphManager.h \
-    Misc/headers/EngineManager.h
+    Misc/headers/EditorManager.h
 
 
 FORMS += \

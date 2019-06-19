@@ -96,6 +96,11 @@ namespace Math{
     ZSVECTOR3 vadd(ZSVECTOR3 v1, ZSVECTOR3 v2);
 }
 
+namespace Window {
+    void setWindowSize(int W, int H);
+    void setWindowFullscreen();
+}
+
 namespace Input {
     void addPressedKeyToQueue(int keycode);
     void addHeldKeyToQueue(int keycode);
@@ -112,6 +117,9 @@ namespace Input {
 
         int mouseY;
         int mouseRelY;
+
+        bool isLButtonDown;
+        bool isRButtonDown;
     };
 
     MouseState* getMouseStatePtr();
@@ -119,6 +127,7 @@ namespace Input {
 }
 
 void bindSDK(lua_State* state);
+void bindKeyCodesSDK(lua_State* state);
 
 }
 

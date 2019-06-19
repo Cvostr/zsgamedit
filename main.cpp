@@ -31,7 +31,8 @@ int main(int argc, char *argv[])
                 w.show();
              }
 
-            w.edit_win_ptr->deltaTime = deltaTime; //Send delta time to editor window
+            w.edit_win_ptr->updateDeltaTime(deltaTime);
+            //w.edit_win_ptr->deltaTime = deltaTime; //Send delta time to editor window
             SDL_Event event;
             ZSENSDK::Input::MouseState* mstate = ZSENSDK::Input::getMouseStatePtr();
                 while (SDL_PollEvent(&event))
@@ -43,9 +44,11 @@ int main(int argc, char *argv[])
 
                         if (event.button.button == SDL_BUTTON_LEFT) {
                             w.edit_win_ptr->input_state.isLeftBtnHold = false;
+                            mstate->isLButtonDown = false;
                         }
                         if (event.button.button == SDL_BUTTON_RIGHT) {
                             w.edit_win_ptr->input_state.isRightBtnHold = false;
+                            mstate->isRButtonDown = false;
                         }
                         if (event.button.button == SDL_BUTTON_MIDDLE) {
                             w.edit_win_ptr->input_state.isMidBtnHold = false;
@@ -79,10 +82,14 @@ int main(int argc, char *argv[])
                         if (event.button.button == SDL_BUTTON_LEFT) {
                             w.edit_win_ptr->input_state.isLeftBtnHold = true;
                             w.edit_win_ptr->onLeftBtnClicked(event.motion.x, event.motion.y);
+
+                            mstate->isLButtonDown = true;
                         }
                         if (event.button.button == SDL_BUTTON_RIGHT) {
                             w.edit_win_ptr->input_state.isRightBtnHold = true;
                             w.edit_win_ptr->onRightBtnClicked(event.motion.x, event.motion.y);
+
+                            mstate->isRButtonDown = true;
                         }
 
                         if (event.button.button == SDL_BUTTON_MIDDLE) {
@@ -106,7 +113,7 @@ int main(int argc, char *argv[])
                 }
                 if(w.edit_win_ptr->ready == true){ //If GL is ready to draw
                     w.edit_win_ptr->getInspector()->updateAreasChanges();
-                    w.edit_win_ptr->edit_camera.updateTick(); //Update camera, if it is moving
+                    w.edit_win_ptr->edit_camera.updateTick(deltaTime); //Update camera, if it is moving
 
                     w.edit_win_ptr->glRender(); //Draw OpenGL window
                 }

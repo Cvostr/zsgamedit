@@ -1,9 +1,9 @@
-#ifndef engine_manager
-#define engine_manager
+#ifndef editor_manager
+#define editor_manager
 
 #include "zs_types.h"
 
-class EngineComponentManager{
+class EditorComponentManager{
 private:
 
 public:
@@ -15,10 +15,14 @@ public:
     void setDpMetrics(int W, int H);
     void setProjectStructPtr(Project* ptr);
 
-    virtual void init();
+    float deltaTime;
 
-    EngineComponentManager();
-    virtual ~EngineComponentManager();
+    virtual void init();
+    virtual void destroy();
+    virtual void updateWindowSize(int W, int H);
+
+    EditorComponentManager();
+    virtual ~EditorComponentManager();
 };
 
 #endif

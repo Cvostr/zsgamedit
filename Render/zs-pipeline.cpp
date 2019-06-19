@@ -575,3 +575,10 @@ void RenderPipeline::renderGlyph(unsigned int texture_id, int X, int Y, int scal
 
     ZSPIRE::getUiSpriteMesh2D()->Draw();
 }
+
+void RenderPipeline::updateWindowSize(int W, int H){
+     glViewport(0, 0, W, H);
+
+     this->gbuffer.Destroy();
+     this->gbuffer.create(W, H);
+}

@@ -79,6 +79,14 @@ void ObjectCtxMenu::setObjectPtr(GameObject* obj_ptr){
     this->obj_ptr = obj_ptr;
 }
 
+//Object Ctx menu slots
+void ObjectCtxMenu::onDeleteClicked(){
+    //delete all ui from inspector
+    win_ptr->getInspector()->clearContentLayout(); //Prevent variable conflicts
+    GameObjectLink link = obj_ptr->getLinkToThisObject();
+    win_ptr->obj_trstate.isTransforming = false; //disabling object transform
+    win_ptr->callObjectDeletion(link);
+}
 void ObjectCtxMenu::onMoveClicked(){
     win_ptr->obj_trstate.setTransformOnObject(GO_TRANSFORM_MODE_TRANSLATE);
 }
@@ -206,4 +214,3 @@ void FileRenameDialog::onRenameButtonPressed(){
     file.rename(cur_path + edit_field.text()); //remove it!
     accept();
 }
-
