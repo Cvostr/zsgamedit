@@ -435,6 +435,7 @@ void EditWindow::runWorld(){
             script_ptr->wakeUp(); //start all scripts
     }
 
+    _ed_actions_container->setStoreActions(false);
     isSceneRun = true; //set toggle to true
     isSceneCamera = true;
 }
@@ -448,6 +449,7 @@ void EditWindow::stopWorld(){
             script_ptr->shutdown(); //stop all scripts
     }
 
+    _ed_actions_container->setStoreActions(true);
     _inspector_win->clearContentLayout();
     isSceneCamera = false;
     isSceneRun = false; //set toggle to true

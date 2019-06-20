@@ -4,6 +4,7 @@ EdActions::EdActions(){
     this->current_pos = 0; //Default pos is zero
     this->end_pos = 0; //Default tail pos is zero as well
     action_list.resize(0);
+    storeActions = false;
     this->insp_win = nullptr;
 }
 
@@ -172,6 +173,12 @@ void EdActions::redo(){
 }
 
 void EdActions::putNewAction(EdAction* action){
+    //Actions storing disabled
+    if(!storeActions) {
+        action->clear();
+        return;
+    }
+
     //if we have some positions left in vector
     if(this->current_pos < this->end_pos){
         this->action_list[current_pos] = action;
@@ -191,4 +198,8 @@ void EdActions::clear(){
     current_pos = 0;
     end_pos = 0;
     action_list.clear();
+}
+
+void EdActions::setStoreActions(bool store){
+    this->storeActions = store;
 }

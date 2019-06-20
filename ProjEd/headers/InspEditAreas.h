@@ -16,6 +16,7 @@ public:
     void setup(); //Virtual, prepares base values
     void addToInspector(InspectorWin* win); //Add edit area to inspector layout
     void writeNewValues(); //Updates value
+    void updateValues(); //on text fields or other edited from side
 
 };
 
@@ -82,7 +83,19 @@ public:
     void setup(); //Virtual
     void addToInspector(InspectorWin* win);
     void writeNewValues(); //Virtual, to check widget state
+    void updateValues(); //bool value changed from side
 };
 
+class ComboBoxArea : public PropertyEditArea{
+public:
+    QComboBox widget;
+    QString* result_string;
+
+    void setup(); //Virtual
+    void addToInspector(InspectorWin* win);
+    void writeNewValues(); //Virtual, to check widget state
+
+    ComboBoxArea();
+};
 
 #endif // INSPEDITAREAS_H

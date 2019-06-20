@@ -548,6 +548,18 @@ void MaterialProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
     area->rel_path = &material_path;
     area->resource_type = RESOURCE_TYPE_MATERIAL; //It should load meshes only
     inspector->addPropertyArea(area);
+
+    ComboBoxArea* mt_shader_group_area = new ComboBoxArea;
+    mt_shader_group_area->setLabel("Shader Group");
+    mt_shader_group_area->go_property = static_cast<void*>(this);
+    mt_shader_group_area->result_string = &this->group_label;
+
+    for(unsigned int i = 0; i < MtShProps::getMaterialShaderPropertyAmount(); i ++){
+        MtShaderPropertiesGroup* ptr = MtShProps::getMtShaderPropertiesGroupByIndex(i);
+        mt_shader_group_area->widget.addItem(ptr->groupCaption);
+    }
+    inspector->addPropertyArea(mt_shader_group_area);
+
     //if material isn't set up, exiting
     if(group_ptr == nullptr) return;
     //If set up, iterating over all items
@@ -619,13 +631,25 @@ void MaterialProperty::onValueChanged(){
     if(newmat_ptr != this->material_ptr){
         this->material_ptr = newmat_ptr;
         this->group_ptr = newmat_ptr->group_ptr;
+        this->group_label = group_ptr->groupCaption;
 
         //if available, update window
         if(insp_win != nullptr)
             insp_win->updateRequired = true;
     }
 
-    if(group_ptr == nullptr) return;
+
+    if(group_ptr == nullptr) {
+        if(MtShProps::getMtShaderPropertyGroupByLabel(this->group_label) != nullptr){
+            group_ptr = MtShProps::getMtShaderPropertyGroupByLabel(this->group_label);
+        }else {
+            return;
+        }
+    }else{
+        if(MtShProps::getMtShaderPropertyGroupByLabel(this->group_label) != this->group_ptr){
+            this->material_ptr->setPropertyGroup(MtShProps::getMtShaderPropertyGroupByLabel(this->group_label));
+        }
+    }
 
     for(unsigned int prop_i = 0; prop_i < group_ptr->properties.size(); prop_i ++){
         MaterialShaderProperty* prop_ptr = group_ptr->properties[prop_i];

@@ -148,6 +148,7 @@ public:
     void pick(); //Mark object and its children picked
 
     void setActive(bool active); //toggle gameobject active property
+    void setLabel(std::string label);
 
     bool addProperty(PROPERTY_TYPE property); //Adds property with property ID
     bool addTransformProperty();

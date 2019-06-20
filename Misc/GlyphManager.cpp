@@ -33,7 +33,7 @@ GlyphFontContainer::GlyphFontContainer(std::string path, unsigned int size, Glyp
 
     manager_ptr = manager;
 
-    for(unsigned int i = this->manager_ptr->project_struct_ptr->root_path.size() + 1; i < path.size() ; i ++){
+    for(unsigned int i = static_cast<unsigned int>(this->manager_ptr->project_struct_ptr->root_path.size() + 1); i < path.size() ; i ++){
         this->path.push_back(path[i]);
     }
     //Load font by freetype

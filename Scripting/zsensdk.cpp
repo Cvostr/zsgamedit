@@ -33,6 +33,9 @@ GameObject* ZSENSDK::ZSENGmObject::updPtr(){
 std::string ZSENSDK::ZSENGmObject::getLabel(){
     return this->updPtr()->label->toStdString();
 }
+void ZSENSDK::ZSENGmObject::setLabel(std::string label){
+    this->updPtr()->setLabel(label);
+}
 void ZSENSDK::ZSENGmObject::setActive(bool active){
     this->updPtr()->setActive(active);
 }
@@ -245,6 +248,7 @@ luabridge::getGlobalNamespace(state)
         .beginClass <ZSENGmObject>("GameObject")
 
         .addFunction("getLabel", &ZSENSDK::ZSENGmObject::getLabel)
+        .addFunction("setLabel", &ZSENSDK::ZSENGmObject::setLabel)
         .addFunction("setActive", &ZSENSDK::ZSENGmObject::setActive)
 
         .addFunction("transform", &ZSENSDK::ZSENGmObject::transform)

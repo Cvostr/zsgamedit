@@ -67,6 +67,7 @@ public:
     GameObject* updPtr();
 
     std::string getLabel();
+    void setLabel(std::string label);
     void setActive(bool active);
 
     ZSENTransformProperty transform();

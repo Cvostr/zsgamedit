@@ -88,9 +88,7 @@ MtShaderPropertiesGroup* MtShProps::genDefaultMtShGroup(ZSPIRE::Shader* shader3d
 
     ColorMaterialShaderProperty* diff_color_prop =
             static_cast<ColorMaterialShaderProperty*>(default_group.addProperty(MATSHPROP_TYPE_COLOR));
-    //diff_color_prop->slotToBind = 0;
     diff_color_prop->prop_caption = "Color"; //Set caption in Inspector
-    //diff_color_prop->ToggleUniform = "hasDiffuseMap";
     diff_color_prop->prop_identifier = "c_diffuse"; //Identifier to save
     diff_color_prop->colorUniform = "diffuse_color";
 
@@ -144,6 +142,23 @@ MtShaderPropertiesGroup* MtShProps::getMtShaderPropertyGroup(std::string group_n
     }
     return nullptr;
 }
+
+MtShaderPropertiesGroup* MtShProps::getMtShaderPropertyGroupByLabel(QString group_label){
+    for(unsigned int group_i = 0; group_i < MatGroups.size(); group_i ++){
+        MtShaderPropertiesGroup* group_ptr = MatGroups[group_i];
+        if(group_ptr->groupCaption.compare(group_label) == false)
+            return group_ptr;
+    }
+    return nullptr;
+}
+
+int MtShProps::getMaterialShaderPropertyAmount(){
+    return static_cast<int>(MatGroups.size());
+}
+MtShaderPropertiesGroup* MtShProps::getMtShaderPropertiesGroupByIndex(int index){
+    return MatGroups[index];
+}
+
 void MtShProps::clearMtShaderGroups(){
 
 }
@@ -243,6 +258,13 @@ void Material::saveToFile(){
                 ColorMtShPropConf* color_conf = static_cast<ColorMtShPropConf*>(conf_ptr);
                 //Write value
                 mat_stream << color_conf->color.r << " " << color_conf->color.g << " " << color_conf->color.b;
+                break;
+            }
+            case MATSHPROP_TYPE_FVEC3:{
+                //Cast pointer
+                Float3MtShPropConf* fvec3_conf = static_cast<Float3MtShPropConf*>(conf_ptr);
+                //Write value
+                mat_stream << fvec3_conf->value.X << " " << fvec3_conf->value.Y << " " << fvec3_conf->value.Z;
                 break;
             }
         }

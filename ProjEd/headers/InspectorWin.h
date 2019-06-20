@@ -13,13 +13,14 @@
 #include <QColorDialog>
 #include <QDialog>
 #include <QCheckBox>
+#include <QComboBox>
 #include <QScrollArea>
 
 #include "../../Render/headers/zs-math.h"
 #include "../../Misc/headers/zs_types.h"
 
 enum EDITAREA_TYPE {PEA_TYPE_NONE, PEA_TYPE_STRING, PEA_TYPE_FLOAT, PEA_TYPE_FLOAT2, PEA_TYPE_FLOAT3, PEA_TYPE_INT,
-                   PEA_TYPE_RESPICK, PEA_TYPE_COLOR, PEA_TYPE_BOOL};
+                   PEA_TYPE_RESPICK, PEA_TYPE_COLOR, PEA_TYPE_BOOL, PEA_TYPE_COMBOBOX};
 
 
 class InspectorWin;
@@ -116,7 +117,6 @@ public:
     void addToInspector(InspectorWin* win);
     void updateValues();
 };
-
 
 namespace Ui {
 class InspectorWin;

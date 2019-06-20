@@ -48,6 +48,8 @@ public:
 };
 
 class EdActions{
+private:
+    bool storeActions;
 public:
     std::vector<EdAction*> action_list;
     World* world_ptr; //Pointer to world
@@ -55,6 +57,8 @@ public:
 
     int current_pos;
     int end_pos;
+
+    void setStoreActions(bool store);
 
     void newSnapshotAction(World* world_ptr);
     void newPropertyAction(GameObjectLink link, PROPERTY_TYPE property_type);

@@ -70,6 +70,12 @@ namespace MtShProps {
 
     void addMtShaderPropertyGroup(MtShaderPropertiesGroup* group);
     MtShaderPropertiesGroup* getMtShaderPropertyGroup(std::string group_name);
+    MtShaderPropertiesGroup* getMtShaderPropertyGroupByLabel(QString group_label);
+    //Get amount of registered material shader properties
+    int getMaterialShaderPropertyAmount();
+    //Get shader properties by index
+    MtShaderPropertiesGroup* getMtShaderPropertiesGroupByIndex(int index);
+
     void clearMtShaderGroups();
 }
 

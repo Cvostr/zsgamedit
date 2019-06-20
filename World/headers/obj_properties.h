@@ -56,6 +56,8 @@ public:
 class MaterialProperty : public GameObjectProperty{
 private:
     InspectorWin* insp_win;
+
+    QString group_label;
 public:
     //Pointer to picked material group
     MtShaderPropertiesGroup* group_ptr;

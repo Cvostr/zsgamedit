@@ -269,6 +269,17 @@ void StringPropertyArea::writeNewValues(){
     PropertyEditArea::callPropertyUpdate();
 }
 
+void StringPropertyArea::updateValues(){
+    if(this->value_ptr == nullptr) //If vector hasn't been set
+        return; //Go out
+    //Get current values in textt fields
+    QString str = this->edit_field.text();
+
+    if(value_ptr->compare(str)){
+        this->edit_field.setText(*value_ptr);
+    }
+}
+
 //Float property area stuff
 FloatPropertyArea::FloatPropertyArea(){
     type = PEA_TYPE_FLOAT;
@@ -575,4 +586,34 @@ void BoolCheckboxArea::writeNewValues(){
 }
 void BoolCheckboxArea::setup(){
     checkbox.setChecked(*bool_ptr);
+}
+void BoolCheckboxArea::updateValues(){
+    if(this->bool_ptr == nullptr) //If bool pointer hasn't been set
+        return; //Go out
+    //Get current value in text field
+    bool cur = this->checkbox.isChecked();
+
+    if(*bool_ptr != cur){
+        checkbox.setChecked(*bool_ptr);
+    }
+}
+
+ComboBoxArea::ComboBoxArea(){
+    type = PEA_TYPE_COMBOBOX;
+
+    elem_layout->addWidget(&this->widget);
+}
+void ComboBoxArea::setup(){ //Virtual
+
+}
+void ComboBoxArea::addToInspector(InspectorWin* win){
+    win->getContentLayout()->addLayout(this->elem_layout);
+}
+void ComboBoxArea::writeNewValues(){ //Virtual, to check widget state
+    if(result_string == nullptr) return; //pointer not set, exiting
+
+    QString selected = widget.currentText();
+    *this->result_string = selected;
+
+    PropertyEditArea::callPropertyUpdate();
 }
