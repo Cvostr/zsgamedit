@@ -205,6 +205,7 @@ private:
     QGridLayout contentLayout; //Layout to contain everything
     QPushButton close_btn;
     PropertyCtxMenu* ctx_menu; //Ctx menu, that shown on list item press
+    void refresh_list();
 public slots:
     void onPropertyDoubleClick();
     void deleteProperty();

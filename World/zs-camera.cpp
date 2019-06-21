@@ -36,11 +36,13 @@ void ZSPIRE::Camera::updateViewMat(){
 }
 
 void ZSPIRE::Camera::setPosition(ZSVECTOR3 pos){
+    ZSPIRE::SFX::setListenerPos(pos);
     this->camera_pos = pos;
     updateViewMat();
 }
 
 void ZSPIRE::Camera::setFront(ZSVECTOR3 front){
+    ZSPIRE::SFX::setListenerOri(front);
     this->camera_front = front;
     updateViewMat();
 }

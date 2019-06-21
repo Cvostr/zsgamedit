@@ -33,28 +33,33 @@ bool ZSPIRE::SFX::initAL() {
 	std::cout << "AL: OpenAL successfully initialized!" << std::endl;
 	//Set default parameters
 	setListenerPos(ZSVECTOR3(0.0f, 0.0f, 0.0f));
-    setListenerOri(ZSVECTOR3(0.0f, 1.0f, 0.0f));
+    setListenerOri(ZSVECTOR3(0.0f, 0.0f, 1.0f));
+    setListenerVelocity(ZSVECTOR3(0.0f, 0.0f, 0.0f));
 
 	return true;
 }
 
 void ZSPIRE::SFX::setListenerPos(ZSVECTOR3 pos) {
-	alListenerfv(AL_POSITION, &pos.X);
+    alListener3f(AL_POSITION, pos.X, pos.Y, pos.Z);
 }
 void ZSPIRE::SFX::setListenerOri(ZSVECTOR3 ori) {
-	alListenerfv(AL_ORIENTATION, &ori.X);
+    ALfloat listenerOri[] = { ori.X, ori.Y, ori.Z, 0.0f, 1.0f, 0.0f };
+    alListenerfv(AL_ORIENTATION, listenerOri);
 }
 
 void ZSPIRE::SFX::setListenerVolume(float value){
 	alListenerf(AL_GAIN, value);
 }
 
+void ZSPIRE::SFX::setListenerVelocity(ZSVECTOR3 velocity){
+    alListener3f(AL_VELOCITY, velocity.X, velocity.Y, velocity.Z);
+}
 
 void ZSPIRE::SFX::destroyAL(){
+    alcMakeContextCurrent(nullptr);
 	alcDestroyContext(al_context);
 	alcCloseDevice(al_device);
 }
-
 
 void SoundBuffer::Init(){
     alGenBuffers(1, &this->al_buffer_id);
@@ -99,14 +104,14 @@ bool SoundBuffer::loadFileWAV(const char* file_path){
         }
 
         audio_stream.read(reinterpret_cast<char*>(data_buffer), 2);
-        channels = data_buffer[1] << 8;
+        channels = static_cast<unsigned int>(data_buffer[1] << 8);
         channels |= data_buffer[0];
 
         audio_stream.read(reinterpret_cast<char*>(data_buffer), 4);
-        freq = data_buffer[3] << 24;
-        freq |= data_buffer[2] << 16;
-        freq |= data_buffer[1] << 8;
-        freq |= data_buffer[0];
+        freq = static_cast<unsigned int>(data_buffer[3] << 24);
+        freq |= static_cast<unsigned int>(data_buffer[2] << 16);
+        freq |= static_cast<unsigned int>(data_buffer[1] << 8);
+        freq |= static_cast<unsigned int>(data_buffer[0]);
 
         audio_stream.read(reinterpret_cast<char*>(data_buffer), 6);
         audio_stream.read(reinterpret_cast<char*>(data_buffer), 2);
@@ -188,11 +193,17 @@ void SoundSource::apply_settings(){
     alSource3f(al_source_id, AL_POSITION, this->source_pos.X, this->source_pos.Y, this->source_pos.Z);
     alSourcef(al_source_id, AL_GAIN, this->source_gain);
     alSourcef(al_source_id, AL_PITCH, this->source_pitch);
+    setVelocity(ZSVECTOR3(0.0f, 0.0f, 0.0f));
 }
 void SoundSource::setPosition(ZSVECTOR3 pos){
     this->source_pos = pos;
     alSource3f(al_source_id, AL_POSITION, pos.X, pos.Y, pos.Z);
 }
+
+void SoundSource::setVelocity(ZSVECTOR3 vel){
+    alSource3f(al_source_id, AL_VELOCITY, vel.X, vel.Y, vel.Z);
+}
+
 void SoundSource::play(){
     alSourcePlay(this->al_source_id);
 }

@@ -161,7 +161,7 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr)
 
     this->deltaTime = editwin_ptr->deltaTime;
 
-    if(editwin_ptr->isSceneCamera){
+    if(editwin_ptr->isWorldCamera){
         cam_ptr = &world_ptr->world_camera;
     }else{
         cam_ptr = &editwin_ptr->edit_camera;
@@ -191,7 +191,7 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr)
     }
 
     //compare pointers
-    if(editwin_ptr->obj_trstate.isTransforming == true && !editwin_ptr->isSceneRun)
+    if(editwin_ptr->obj_trstate.isTransforming == true && !editwin_ptr->isWorldCamera)
         getGizmosRenderer()->drawTransformControls(editwin_ptr->obj_trstate.obj_ptr->getTransformProperty()->_last_translation, 100, 10);
 
 

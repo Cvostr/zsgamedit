@@ -189,11 +189,7 @@ ManageComponentDialog::ManageComponentDialog(InspectorWin* win, void* g_object_p
 
     ctx_menu = new PropertyCtxMenu(win, this);
     this->g_object_ptr = g_object_ptr;
-    GameObject* obj_ptr = static_cast<GameObject*>(g_object_ptr); //cast pointer
-    for(int prop_i = 0; prop_i < static_cast<int>(obj_ptr->props_num); prop_i ++){ //iterate over all properties
-        GameObjectProperty* prop_ptr = obj_ptr->properties[prop_i]; //obtain property pointer
-        new QListWidgetItem(getPropertyString(prop_ptr->type), &this->property_list);
-    }
+    refresh_list();
 
     this->close_btn.setText("Close");
 
@@ -205,6 +201,16 @@ ManageComponentDialog::ManageComponentDialog(InspectorWin* win, void* g_object_p
 
     setLayout(&contentLayout);
     this->setWindowTitle("Manage properties");
+}
+
+void ManageComponentDialog::refresh_list(){
+    this->property_list.clear();
+
+    GameObject* obj_ptr = static_cast<GameObject*>(g_object_ptr); //cast pointer
+    for(int prop_i = 0; prop_i < static_cast<int>(obj_ptr->props_num); prop_i ++){ //iterate over all properties
+        GameObjectProperty* prop_ptr = obj_ptr->properties[prop_i]; //obtain property pointer
+        new QListWidgetItem(getPropertyString(prop_ptr->type), &this->property_list);
+    }
 }
 
 ManageComponentDialog::~ManageComponentDialog(){
@@ -229,7 +235,9 @@ void ManageComponentDialog::deleteProperty(){
     }
 
     obj_ptr->removeProperty(item_ind);
-    accept();
+
+    refresh_list();
+    //accept();
 }
 
 PropertyCtxMenu::PropertyCtxMenu(InspectorWin* win, ManageComponentDialog* dialog, QWidget* parent) : QObject(parent){

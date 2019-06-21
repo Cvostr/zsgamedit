@@ -12,6 +12,7 @@ namespace ZSPIRE {
 
 		void setListenerPos(ZSVECTOR3 pos);
 		void setListenerOri(ZSVECTOR3 ori);
+        void setListenerVelocity(ZSVECTOR3 velocity);
 		void setListenerVolume(float value);
 
 
@@ -41,6 +42,7 @@ public:
     void Init();
     void Destroy();
     void setPosition(ZSVECTOR3 pos);
+    void setVelocity(ZSVECTOR3 vel);
     void apply_settings();
     void play();
     void stop();

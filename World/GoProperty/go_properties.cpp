@@ -497,7 +497,7 @@ void AudioSourceProperty::updateAudioPtr(){
 void AudioSourceProperty::onUpdate(float deltaTime){
     TransformProperty* transform = go_link.updLinkPtr()->getTransformProperty();
 
-    if(transform->_last_translation != this->last_pos){
+    if(transform->translation != this->last_pos){
         this->source.setPosition(transform->translation);
         this->last_pos = transform->translation;
     }
@@ -786,13 +786,14 @@ void ScriptGroupProperty::onValueChanged(){
     if(static_cast<int>(scripts_attached.size()) != this->scr_num){ //if size changed
         this->scripts_attached.resize(static_cast<unsigned int>(this->scr_num));
         //Iterate over all scripts and use absolute path
-        for(int script_i = 0; script_i < scr_num; script_i ++){
-            //Set absolute path to script object
-            scripts_attached[script_i].fpath = project_ptr->root_path + "/" + path_names[script_i];
-        }
-        //Update inspector interface
-        insp_win->updateRequired = true;
+
     }
+    for(unsigned int script_i = 0; script_i < scr_num; script_i ++){
+        //Set absolute path to script object
+        scripts_attached[script_i].fpath = project_ptr->root_path + "/" + path_names[script_i];
+    }
+    //Update inspector interface
+    insp_win->updateRequired = true;
 }
 
 void ScriptGroupProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){

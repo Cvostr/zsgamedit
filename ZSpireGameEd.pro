@@ -5,7 +5,7 @@
 #-------------------------------------------------
 
 QT       += core gui widgets
-unix:LIBS += -lGLEW -lSDL2 -lopenal -llua5.2 -lassimp -lvulkan -lfreetype
+unix:LIBS += -lGLEW -lSDL2 -lopenal -llua5.3 -lassimp -lvulkan -lfreetype
 unix:INCLUDEPATH += /usr/include/freetype2/
 
 TARGET = ZSpireGameEd

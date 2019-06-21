@@ -60,7 +60,7 @@ EditWindow::EditWindow(QWidget *parent) :
     ready = false; //Firstly set it to 0
     hasSceneFile = false; //No scene loaded by default
     isSceneRun = false; //Not running by default
-    isSceneCamera = false;
+    isWorldCamera = false;
 
     setupObjectsHieList();
     //Drag & drop in objects tree
@@ -429,6 +429,8 @@ void EditWindow::runWorld(){
     //Prepare world for running
     for(unsigned int object_i = 0; object_i < world.objects.size(); object_i ++){
         GameObject* object_ptr = &world.objects[object_i];
+        //If object removed or ineactive, then ignore it
+        if(!object_ptr->active || !object_ptr->alive) continue;
         //Obtain script
         ScriptGroupProperty* script_ptr = static_cast<ScriptGroupProperty*>(object_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_SCRIPTGROUP));
         if(script_ptr != nullptr)
@@ -437,7 +439,7 @@ void EditWindow::runWorld(){
 
     _ed_actions_container->setStoreActions(false);
     isSceneRun = true; //set toggle to true
-    isSceneCamera = true;
+    isWorldCamera = true;
 }
 void EditWindow::stopWorld(){
     //Prepare world for stopping
@@ -451,7 +453,7 @@ void EditWindow::stopWorld(){
 
     _ed_actions_container->setStoreActions(true);
     _inspector_win->clearContentLayout();
-    isSceneCamera = false;
+    isWorldCamera = false;
     isSceneRun = false; //set toggle to true
 }
 
@@ -603,10 +605,10 @@ void EditWindow::onRedoPressed(){
 }
 
 void EditWindow::toggleCameras(){
-    if(this->isSceneCamera){
-        this->isSceneCamera = false;
+    if(this->isWorldCamera){
+        this->isWorldCamera = false;
     }else{
-        this->isSceneCamera = true;
+        this->isWorldCamera = true;
     }
 }
 
@@ -835,7 +837,7 @@ void EditWindow::onLeftBtnClicked(int X, int Y){
     this->edit_camera.stopMoving();
     this->obj_ctx_menu->close(); //Close ctx menu
 
-    if(obj_trstate.isTransforming || isSceneRun) return;
+    if(obj_trstate.isTransforming || isWorldCamera) return;
     unsigned int clicked = render->render_getpickedObj(static_cast<void*>(this), X, Y);
 
     if(clicked > world.objects.size() || clicked >= 256 * 256 * 256){
@@ -850,7 +852,7 @@ void EditWindow::onLeftBtnClicked(int X, int Y){
     this->ui->objsList->setCurrentItem(obj_ptr->item_ptr); //item selected in tree
 }
 void EditWindow::onRightBtnClicked(int X, int Y){
-    if(isSceneRun) return;
+    if(isWorldCamera) return;
 
     //Stop camera moving
     this->edit_camera.stopMoving();

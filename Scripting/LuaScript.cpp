@@ -47,9 +47,7 @@ void ObjectScript::_callStart() {
     }
     //Some error returned by script
     if(result == 1) std::cout << "SCRIPT" << "Script (onStart) function exited with 1" << fpath.toStdString() << std::endl;
-
 }
-
 
 void ObjectScript::_callDraw(float deltaTime) {
 
