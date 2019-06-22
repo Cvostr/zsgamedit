@@ -1,8 +1,6 @@
 #include "headers/MatShaderProps.h"
 #include <fstream>
-
-static MtShaderPropertiesGroup default_group;
-static bool default_group_created = false;
+#include <iostream>
 
 static std::vector<MtShaderPropertiesGroup*> MatGroups;
 
@@ -80,53 +78,53 @@ MtShaderPropertiesGroup::MtShaderPropertiesGroup(){
 }
 
 MtShaderPropertiesGroup* MtShProps::genDefaultMtShGroup(ZSPIRE::Shader* shader3d){
-    if(default_group_created) return &default_group;
+    //if(default_group_created) return &default_group;
 
-    default_group.str_path = "@default";
-    default_group.groupCaption = "Default 3D";
-    default_group.render_shader = shader3d;
+    MtShaderPropertiesGroup* default_group = new MtShaderPropertiesGroup;
+
+    default_group->str_path = "@default";
+    default_group->groupCaption = "Default 3D";
+    default_group->render_shader = shader3d;
 
     ColorMaterialShaderProperty* diff_color_prop =
-            static_cast<ColorMaterialShaderProperty*>(default_group.addProperty(MATSHPROP_TYPE_COLOR));
+            static_cast<ColorMaterialShaderProperty*>(default_group->addProperty(MATSHPROP_TYPE_COLOR));
     diff_color_prop->prop_caption = "Color"; //Set caption in Inspector
     diff_color_prop->prop_identifier = "c_diffuse"; //Identifier to save
     diff_color_prop->colorUniform = "diffuse_color";
 
     TextureMaterialShaderProperty* diff_texture_prop =
-            static_cast<TextureMaterialShaderProperty*>(default_group.addProperty(MATSHPROP_TYPE_TEXTURE));
+            static_cast<TextureMaterialShaderProperty*>(default_group->addProperty(MATSHPROP_TYPE_TEXTURE));
     diff_texture_prop->slotToBind = 0;
     diff_texture_prop->prop_caption = "Diffuse"; //Set caption in Inspector
     diff_texture_prop->ToggleUniform = "hasDiffuseMap";
     diff_texture_prop->prop_identifier = "t_diffuse"; //Identifier to save
 
     TextureMaterialShaderProperty* normal_texture_prop =
-            static_cast<TextureMaterialShaderProperty*>(default_group.addProperty(MATSHPROP_TYPE_TEXTURE));
+            static_cast<TextureMaterialShaderProperty*>(default_group->addProperty(MATSHPROP_TYPE_TEXTURE));
     normal_texture_prop->slotToBind = 1;
     normal_texture_prop->prop_caption = "Normal";
     normal_texture_prop->ToggleUniform = "hasNormalMap";
     normal_texture_prop->prop_identifier = "t_normal"; //Identifier to save
 
     TextureMaterialShaderProperty* specular_texture_prop =
-            static_cast<TextureMaterialShaderProperty*>(default_group.addProperty(MATSHPROP_TYPE_TEXTURE));
+            static_cast<TextureMaterialShaderProperty*>(default_group->addProperty(MATSHPROP_TYPE_TEXTURE));
     specular_texture_prop->slotToBind = 2;
     specular_texture_prop->prop_caption = "Specular";
     specular_texture_prop->ToggleUniform = "hasSpecularMap";
     specular_texture_prop->prop_identifier = "t_specular"; //Identifier to save
 
     FloatMaterialShaderProperty* shininess_factor_prop =
-            static_cast<FloatMaterialShaderProperty*>(default_group.addProperty(MATSHPROP_TYPE_FLOAT));
+            static_cast<FloatMaterialShaderProperty*>(default_group->addProperty(MATSHPROP_TYPE_FLOAT));
     shininess_factor_prop->floatUniform = "material_shininess";
     shininess_factor_prop->prop_caption = "Shininess";
     shininess_factor_prop->prop_identifier = "f_shininess"; //Identifier to save
 
-    default_group_created = true;
+    MtShProps::addMtShaderPropertyGroup(default_group);
 
-    MtShProps::addMtShaderPropertyGroup(&default_group);
-
-    return &default_group;
+    return default_group;
 }
 MtShaderPropertiesGroup* MtShProps::getDefaultMtShGroup(){
-    return &default_group;
+    return MatGroups[0];
 }
 
 void MtShProps::addMtShaderPropertyGroup(MtShaderPropertiesGroup* group){
@@ -155,12 +153,12 @@ MtShaderPropertiesGroup* MtShProps::getMtShaderPropertyGroupByLabel(QString grou
 int MtShProps::getMaterialShaderPropertyAmount(){
     return static_cast<int>(MatGroups.size());
 }
-MtShaderPropertiesGroup* MtShProps::getMtShaderPropertiesGroupByIndex(int index){
+MtShaderPropertiesGroup* MtShProps::getMtShaderPropertiesGroupByIndex(unsigned int index){
     return MatGroups[index];
 }
 
 void MtShProps::clearMtShaderGroups(){
-
+   MatGroups.clear();
 }
 
 MaterialShaderProperty* MtShProps::allocateProperty(int type){
@@ -274,6 +272,8 @@ void Material::saveToFile(){
 }
 
 void Material::loadFromFile(std::string fpath){
+    std::cout << "Loading Material " << fpath << std::endl;
+
     this->file_path = fpath;
     //Define and open file stream
     std::ifstream mat_stream;

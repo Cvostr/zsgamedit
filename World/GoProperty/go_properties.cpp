@@ -788,7 +788,7 @@ void ScriptGroupProperty::onValueChanged(){
         //Iterate over all scripts and use absolute path
 
     }
-    for(unsigned int script_i = 0; script_i < scr_num; script_i ++){
+    for(unsigned int script_i = 0; script_i < static_cast<unsigned int>(scr_num); script_i ++){
         //Set absolute path to script object
         scripts_attached[script_i].fpath = project_ptr->root_path + "/" + path_names[script_i];
     }

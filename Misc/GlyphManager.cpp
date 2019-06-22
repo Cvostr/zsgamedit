@@ -46,6 +46,9 @@ void GlyphFontContainer::loadGlyphs(){
     for(unsigned int i = 0; i < 255; i ++){
         loadGlyph(i);
     }
+    for(unsigned int i = 1040; i < 1103; i ++){
+        loadGlyph(i);
+    }
 }
 
 void GlyphFontContainer::loadGlyph(unsigned int index){

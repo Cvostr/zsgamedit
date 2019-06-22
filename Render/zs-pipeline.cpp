@@ -48,6 +48,7 @@ RenderPipeline::~RenderPipeline(){
     this->obj_mark_shader.Destroy();
     this->deffered_light.Destroy();
     this->diffuse3d_shader.Destroy();
+    ui_shader.Destroy();
     ZSPIRE::freeDefaultMeshes();
 
     this->gbuffer.Destroy();
@@ -82,6 +83,11 @@ void RenderPipeline::init(){
         depthTest = true;
         cullFaces = true;
         glFrontFace(GL_CCW);
+    }else{
+        glDisable(GL_DEPTH_TEST);
+        depthTest = false;
+        cullFaces = false;
+        glDisable(GL_CULL_FACE);
     }
     //initialize gizmos component
     initGizmos(this->project_struct_ptr->perspective);
@@ -228,13 +234,18 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr)
 
     this->ui_shader.Use();
     GlyphFontContainer* c = editwin_ptr->getFontContainer("LiberationMono-Regular.ttf");
-    int f[6];
+    int f[10];
     f[0] = static_cast<int>('T');
     f[1] = static_cast<int>('e');
     f[2] = static_cast<int>('s');
     f[3] = static_cast<int>('t');
     f[4] = static_cast<int>('g');
-    //c->DrawString(f, 5, ZSVECTOR2(10,10));
+    f[5] = static_cast<int>(L'П');
+    f[6] = static_cast<int>(L'р');
+    f[7] = static_cast<int>(L'и');
+    f[8] = static_cast<int>(L'в');
+    f[9] = static_cast<int>(L'е');
+    //c->DrawString(f, 10, ZSVECTOR2(10,10));
 
     //std::cout << static_cast<int>(deltaTime) << std::endl;
 

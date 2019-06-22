@@ -74,7 +74,7 @@ namespace MtShProps {
     //Get amount of registered material shader properties
     int getMaterialShaderPropertyAmount();
     //Get shader properties by index
-    MtShaderPropertiesGroup* getMtShaderPropertiesGroupByIndex(int index);
+    MtShaderPropertiesGroup* getMtShaderPropertiesGroupByIndex(unsigned int index);
 
     void clearMtShaderGroups();
 }

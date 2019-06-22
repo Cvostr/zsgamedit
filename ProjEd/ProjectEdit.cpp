@@ -213,7 +213,12 @@ void EditWindow::openFile(QString file_path){
         this->edit_camera.setPosition(ZSVECTOR3(0.0f, 0.0f, 0.0f)); //Set camera to 0
         _inspector_win->clearContentLayout(); //Clear content, if not empty
     }else{
+#ifdef _WIN32
         QDesktopServices::openUrl(QUrl::fromLocalFile("file://" + file_path));
+#endif
+#ifdef __linux
+        QDesktopServices::openUrl(QUrl::fromLocalFile(file_path));
+#endif
     }
 }
 
@@ -403,6 +408,8 @@ void EditWindow::onCloseProject(){
     world.clear(); //clear world
     SDL_DestroyWindow(window); //Destroy SDL and opengl
     SDL_GL_DeleteContext(glcontext);
+
+    MtShProps::clearMtShaderGroups();
 
     this->project.resources.clear(); //Clear resources list
 
@@ -613,6 +620,10 @@ void EditWindow::toggleCameras(){
 }
 
 void EditWindow::glRender(){
+    //int wx, wy;
+    //SDL_GetWindowPosition(this->window, &wx, &wy);
+    //std::cout << _inspector_win->x() << wx << wy << std::endl;
+
     if(hasSheduledWorld){
         stopWorld(); //firstly, stop world
         //load world
@@ -680,7 +691,7 @@ void EditWindow::lookForResources(QString path){
 
                     //loadResource(&resource); //Perform mesh processing & loading to OpenGL
                     this->project.resources.push_back(resource);
-                    Engine::loadMesh(fileInfo.absoluteFilePath().toStdString(), static_cast<ZSPIRE::Mesh*>(this->project.resources.back().class_ptr), mesh_i);
+                    Engine::loadMesh(fileInfo.absoluteFilePath().toStdString(), static_cast<ZSPIRE::Mesh*>(this->project.resources.back().class_ptr), static_cast<int>(mesh_i));
                     this->project.resources.back().resource_label = static_cast<ZSPIRE::Mesh*>(this->project.resources.back().class_ptr)->mesh_label;
                 }
             }
