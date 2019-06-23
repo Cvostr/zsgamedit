@@ -55,6 +55,13 @@ public:
 
     void Play();
     void Stop();
+};
+
+class ZSENLightSourceProperty : public ZSENObjectProperty{
+public:
+    void* prop_ptr;
+
+
 
 };
 
@@ -99,7 +106,7 @@ namespace Math{
 
 namespace Window {
     void setWindowSize(int W, int H);
-    void setWindowFullscreen();
+    void setWindowMode(unsigned int mode);
 }
 
 namespace Input {

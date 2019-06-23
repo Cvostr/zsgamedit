@@ -125,6 +125,33 @@ ZSMATRIX4x4 matrixLookAt(ZSVECTOR3 eye, ZSVECTOR3 center, ZSVECTOR3 up)
 	return out;
 }
 
+ZSMATRIX4x4 removeTranslationFromViewMat(ZSMATRIX4x4 viewMat){
+    ZSMATRIX4x4 result = viewMat;
+
+    result.m[3][0] = 0;
+    result.m[3][1] = 0;
+    result.m[3][2] = 0;
+
+    return result;
+}
+ZSMATRIX4x4 removeRotationFromTransformMat(ZSMATRIX4x4 transform, ZSMATRIX4x4 view){
+    ZSMATRIX4x4 result = transform;
+
+    result.m[0][0] = view.m[0][0];
+    result.m[0][1] = view.m[1][0];
+    result.m[0][2] = view.m[2][0];
+
+    result.m[1][0] = view.m[0][1];
+    result.m[1][1] = view.m[1][1];
+    result.m[1][2] = view.m[2][1];
+
+    result.m[2][0] = view.m[0][2];
+    result.m[2][1] = view.m[1][2];
+    result.m[2][2] = view.m[2][2];
+
+    return result;
+}
+
 ZSMATRIX4x4 getScaleMat(float scaleX, float scaleY, float scaleZ) {
 
 	ZSMATRIX4x4 mat;

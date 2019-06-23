@@ -276,7 +276,7 @@ void GameObject::Draw(RenderPipeline* pipeline){
                     if(editwin_ptr->obj_trstate.isTransforming == true)
                          color = ZSRGBCOLOR(255.0f, 255.0f, 0.0f);
                     //draw wireframe mesh for picked object
-                    if(!editwin_ptr->isSceneRun) //avoid drawing gizmos during playtime
+                    if(!editwin_ptr->isWorldCamera) //avoid drawing gizmos during playtime
                         pipeline->getGizmosRenderer()->drawPickedMeshWireframe(mesh_prop->mesh_ptr, transform_prop->transform_mat, color);
 
                 }
@@ -286,6 +286,11 @@ void GameObject::Draw(RenderPipeline* pipeline){
 }
 
 void GameObject::processObject(RenderPipeline* pipeline){
+    if(this->active)
+        item_ptr->setTextColor(0, QColor(Qt::black));
+    else
+        item_ptr->setTextColor(0, QColor(Qt::gray));
+
     //Obtain EditWindow pointer to check if scene is running
     EditWindow* editwin_ptr = static_cast<EditWindow*>(pipeline->win_ptr);
     if(active == false || alive == false) return; //if object is inactive, not to render it

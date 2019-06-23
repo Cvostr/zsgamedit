@@ -480,6 +480,8 @@ void EditWindow::onRunProject(){
     }else{ //lets stop scene run
         //return base window size
         SDL_SetWindowSize(this->window, this->settings.gameViewWin_Width, this->settings.gameViewWin_Height);
+        SDL_SetWindowFullscreen(this->window,
+                                    0);
         //Stop world
         stopWorld();
         //Recover world snapshot
@@ -1106,4 +1108,9 @@ void EditWindow::setGameViewWindowSize(int W, int H){
     for(unsigned int i = 0; i < managers.size(); i ++){
         managers[i]->updateWindowSize(W, H);
     }
+}
+
+void EditWindow::setGameViewWindowMode(unsigned int mode){
+    SDL_SetWindowFullscreen(this->window,
+                                mode);
 }

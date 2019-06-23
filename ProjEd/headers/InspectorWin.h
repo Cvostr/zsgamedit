@@ -182,17 +182,21 @@ class PropertyCtxMenu : public QObject{
     Q_OBJECT
 public slots:
     void onDeleteClicked();
-    void onPainClicked();
+    void onPaintClicked();
+    void onActiveToggleClicked();
 
 private:
     QMenu* menu; //Menu object to contain everything
 
+    QAction* toggle_active;
     QAction* action_delete;
     QAction* action_paint_prop;
 
     InspectorWin* win;
     ManageComponentDialog* dialog;
 public:
+
+    int selected_property_index;
 
     PropertyCtxMenu(InspectorWin* win, ManageComponentDialog* dialog, QWidget* parent = nullptr);
     void show(QPoint point);
@@ -205,7 +209,7 @@ private:
     QGridLayout contentLayout; //Layout to contain everything
     QPushButton close_btn;
     PropertyCtxMenu* ctx_menu; //Ctx menu, that shown on list item press
-    void refresh_list();
+
 public slots:
     void onPropertyDoubleClick();
     void deleteProperty();
@@ -215,6 +219,8 @@ public:
 
     InspectorWin* win;
     void* g_object_ptr; //Pointer to object, when we'll add components
+
+    void refresh_list();
 
     ManageComponentDialog(InspectorWin* win, void* g_object_ptr, QWidget* parent = nullptr);
     ~ManageComponentDialog();

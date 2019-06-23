@@ -7,7 +7,7 @@
 
 GameObjectProperty::GameObjectProperty(){
     type = GO_PROPERTY_TYPE_NONE;
-    active = false; //Inactive by default
+    active = true; //Inactive by default
 }
 
 GameObjectProperty::~GameObjectProperty(){
@@ -639,14 +639,17 @@ void MaterialProperty::onValueChanged(){
     }
 
 
-    if(group_ptr == nullptr) {
+    if(group_ptr == nullptr) { //if material has no MaterialShaderPropertyGroup
+        //if user specified group first time
         if(MtShProps::getMtShaderPropertyGroupByLabel(this->group_label) != nullptr){
+            //then apply that group
             group_ptr = MtShProps::getMtShaderPropertyGroupByLabel(this->group_label);
-        }else {
-            return;
+        }else { //user haven't specified
+            return; //go out
         }
-    }else{
+    }else{ //Material already had group, check, if user decided to change it
         if(MtShProps::getMtShaderPropertyGroupByLabel(this->group_label) != this->group_ptr){
+            //Apply changing
             this->material_ptr->setPropertyGroup(MtShProps::getMtShaderPropertyGroupByLabel(this->group_label));
         }
     }

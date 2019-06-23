@@ -179,6 +179,8 @@ public:
     void putToSnapshot(GameObjectSnapshot* snapshot);
     void recoverFromSnapshot(GameObjectSnapshot* snapshot);
 
+    void uncheckInactive(); //if user unchecked active checkbox
+
     GameObject(); //Default constructor
     ~GameObject();
 };

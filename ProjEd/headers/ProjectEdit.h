@@ -215,6 +215,7 @@ public:
     GlyphFontContainer* getFontContainer(std::string label);
 
     void setGameViewWindowSize(int W, int H);
+    void setGameViewWindowMode(unsigned int mode);
 
     Ui::EditWindow *ui;
     explicit EditWindow(QWidget *parent = nullptr);

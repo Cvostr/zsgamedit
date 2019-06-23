@@ -13,6 +13,7 @@ void GameObject::saveProperties(std::ofstream* stream){
         GameObjectProperty* property_ptr = static_cast<GameObjectProperty*>(this->properties[prop_i]);
         *stream << "\nG_PROPERTY ";
         stream->write(reinterpret_cast<char*>(&property_ptr->type), sizeof(int));
+        stream->write(reinterpret_cast<char*>(&property_ptr->active), sizeof(bool));
         *stream << " ";
 
         switch(property_ptr->type){
@@ -178,6 +179,7 @@ void GameObject::loadProperty(std::ifstream* world_stream){
     addProperty(type);
     GameObjectProperty* prop_ptr = getPropertyPtrByType(type); //get created property
     //since more than 1 properties same type can't be on one gameobject
+    world_stream->read(reinterpret_cast<char*>(&prop_ptr->active), sizeof(bool));
     switch(type){
         case GO_PROPERTY_TYPE_LABEL :{
             std::string label;

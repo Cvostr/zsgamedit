@@ -209,7 +209,9 @@ void ManageComponentDialog::refresh_list(){
     GameObject* obj_ptr = static_cast<GameObject*>(g_object_ptr); //cast pointer
     for(int prop_i = 0; prop_i < static_cast<int>(obj_ptr->props_num); prop_i ++){ //iterate over all properties
         GameObjectProperty* prop_ptr = obj_ptr->properties[prop_i]; //obtain property pointer
-        new QListWidgetItem(getPropertyString(prop_ptr->type), &this->property_list);
+        QListWidgetItem* item = new QListWidgetItem(getPropertyString(prop_ptr->type), &this->property_list);
+        if(!prop_ptr->active)
+            item->setTextColor(QColor(Qt::gray));
     }
 }
 
@@ -218,6 +220,9 @@ ManageComponentDialog::~ManageComponentDialog(){
 }
 
 void ManageComponentDialog::onPropertyDoubleClick(){
+    //GameObject* obj_ptr = static_cast<GameObject*>(g_object_ptr); //cast pointer
+
+    this->ctx_menu->selected_property_index = this->property_list.currentIndex().row();
     this->ctx_menu->show(QCursor::pos());
 }
 
@@ -248,20 +253,34 @@ PropertyCtxMenu::PropertyCtxMenu(InspectorWin* win, ManageComponentDialog* dialo
 
     this->action_delete = new QAction("Delete", win);
     this->action_paint_prop = new QAction("Paint", win);
+    this->toggle_active = new QAction("Active", win);
 
+    menu->addAction(toggle_active);
     menu->addAction(action_delete);
     menu->addAction(action_paint_prop);
 
     QObject::connect(this->action_delete, SIGNAL(triggered(bool)), this, SLOT(onDeleteClicked()));
-    QObject::connect(this->action_paint_prop, SIGNAL(triggered(bool)), this, SLOT(onPainClicked()));
+    QObject::connect(this->action_paint_prop, SIGNAL(triggered(bool)), this, SLOT(onPaintClicked()));
+    QObject::connect(this->toggle_active, SIGNAL(triggered(bool)), this, SLOT(onActiveToggleClicked()));
 }
 void PropertyCtxMenu::show(QPoint point){
+    GameObject* obj_ptr = static_cast<GameObject*>(this->win->gameobject_ptr); //cast pointer
+
+    GameObjectProperty* prop_ptr = obj_ptr->properties[this->selected_property_index];
+
+    if(!prop_ptr->active)
+        this->toggle_active->setText("Activate");
+    else
+        this->toggle_active->setText("Deactivate");
+
     this->menu->popup(point);
+
+
 }
 void PropertyCtxMenu::onDeleteClicked(){
     dialog->deleteProperty();
 }
-void PropertyCtxMenu::onPainClicked(){
+void PropertyCtxMenu::onPaintClicked(){
     EditWindow* editwin = static_cast<EditWindow*>(win->editwindow_ptr);
 
     editwin->ppaint_state.enabled = true;
@@ -276,6 +295,19 @@ void PropertyCtxMenu::onPainClicked(){
             editwin->ppaint_state.prop_ptr = obj_ptr->properties[i];
         }
     }
+}
+
+void PropertyCtxMenu::onActiveToggleClicked(){
+    GameObject* obj_ptr = static_cast<GameObject*>(this->win->gameobject_ptr); //cast pointer
+
+    GameObjectProperty* prop_ptr = obj_ptr->properties[this->selected_property_index];
+    if(prop_ptr->active)
+        prop_ptr->active = false;
+    else {
+        prop_ptr->active = true;
+    }
+
+    dialog->refresh_list();
 }
 
 AddGoComponentDialog::AddGoComponentDialog(QWidget* parent)

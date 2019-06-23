@@ -8,6 +8,10 @@
 #include <iostream>
 #include <SDL2/SDL.h>
 
+unsigned int mode_fullscreen = SDL_WINDOW_FULLSCREEN;
+unsigned int mode_borderless = SDL_WINDOW_FULLSCREEN_DESKTOP;
+unsigned int mode_windowed = 0;
+
 extern EditWindow* _editor_win;
 
 void ZSENSDK::Debug::Log(std::string text){
@@ -174,7 +178,11 @@ void ZSENSDK::ZSENTileProperty::stopAnim(){
 void ZSENSDK::bindSDK(lua_State* state){
     luabridge::getGlobalNamespace(state)
             .beginNamespace("window")
+            .addVariable("MODE_WINDOWED", &mode_windowed, false)
+            .addVariable("MODE_FULLSCREEN", &mode_fullscreen, false)
+            .addVariable("MODE_BORDERLESS", &mode_borderless, false)
             .addFunction("setWindowSize", &ZSENSDK::Window::setWindowSize)
+            .addFunction("setWindowMode", &ZSENSDK::Window::setWindowMode)
             .endNamespace();
 
     luabridge::getGlobalNamespace(state)
@@ -312,4 +320,7 @@ luabridge::getGlobalNamespace(state)
 
 void ZSENSDK::Window::setWindowSize(int W, int H){
     _editor_win->setGameViewWindowSize(W, H);
+}
+void ZSENSDK::Window::setWindowMode(unsigned int mode){
+    _editor_win->setGameViewWindowMode(mode);
 }

@@ -96,6 +96,9 @@ GameObjectLink GameObject::getLinkToThisObject(){
     return link;
 }
 
+void GameObject::uncheckInactive(){
+    //for(unsigned int i = 0; i < this->ch)
+}
 
 LabelProperty* GameObject::getLabelProperty(){
     return static_cast<LabelProperty*>(getPropertyPtrByType(GO_PROPERTY_TYPE_LABEL));
@@ -207,6 +210,7 @@ void GameObject::removeProperty(int index){
 
 void GameObject::onUpdate(int deltaTime){
     for(unsigned int i = 0; i < props_num; i ++){ //iterate over all properties
+        if(!properties[i]->active) continue; //if property is inactive, then skip it
         properties[i]->onUpdate(deltaTime); //and call onUpdate on each property
     }
 }
@@ -219,6 +223,7 @@ void GameObject::onTrigger(GameObject* obj){
 
 void GameObject::onPreRender(RenderPipeline* pipeline){
     for(unsigned int i = 0; i < props_num; i ++){ //iterate over all properties
+        if(!properties[i]->active) continue; //if property is inactive, then skip it
         properties[i]->onPreRender(pipeline); //and call onUpdate on each property
     }
 }

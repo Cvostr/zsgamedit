@@ -72,7 +72,7 @@ namespace MtShProps {
     MtShaderPropertiesGroup* getMtShaderPropertyGroup(std::string group_name);
     MtShaderPropertiesGroup* getMtShaderPropertyGroupByLabel(QString group_label);
     //Get amount of registered material shader properties
-    int getMaterialShaderPropertyAmount();
+    unsigned int getMaterialShaderPropertyAmount();
     //Get shader properties by index
     MtShaderPropertiesGroup* getMtShaderPropertiesGroupByIndex(unsigned int index);
 

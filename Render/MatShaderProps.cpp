@@ -150,8 +150,8 @@ MtShaderPropertiesGroup* MtShProps::getMtShaderPropertyGroupByLabel(QString grou
     return nullptr;
 }
 
-int MtShProps::getMaterialShaderPropertyAmount(){
-    return static_cast<int>(MatGroups.size());
+unsigned int MtShProps::getMaterialShaderPropertyAmount(){
+    return static_cast<unsigned int>(MatGroups.size());
 }
 MtShaderPropertiesGroup* MtShProps::getMtShaderPropertiesGroupByIndex(unsigned int index){
     return MatGroups[index];
