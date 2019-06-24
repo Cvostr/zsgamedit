@@ -55,7 +55,7 @@ GameObject* World::dublicateObject(GameObject* original, bool parent){
     GameObject _new_obj;//Create an empty
     GameObject* new_obj = addObject(_new_obj);
 
-    new_obj->render_type = original->render_type; //Restore render type from original
+    //new_obj->render_type = original->render_type; //Restore render type from original
     //Copying properties data
     for(unsigned int prop_i = 0; prop_i < original->props_num; prop_i ++){
         auto prop_ptr = original->properties[prop_i];
@@ -107,10 +107,6 @@ GameObject* World::newObject(){
     obj.label = &obj.getLabelProperty()->label;
     *obj.label = "GameObject_" + QString::number(add_num); //Assigning label to object
     obj.item_ptr->setText(0, *obj.label);
-
-    Project* p_ptr = static_cast<Project*>(this->proj_ptr);
-    if(p_ptr->perspective == 3)
-        obj.render_type = GO_RENDER_TYPE_MATERIAL;
 
     obj.addProperty(GO_PROPERTY_TYPE_TRANSFORM);
     return this->addObject(obj); //Return pointer to new object
@@ -218,7 +214,7 @@ void World::unpickObject(){
 void World::writeGameObject(GameObject* object_ptr, std::ofstream* world_stream){
     if(object_ptr->alive == true){
         *world_stream << "\nG_OBJECT " << object_ptr->str_id << " ";
-        world_stream->write(reinterpret_cast<char*>(&object_ptr->render_type), sizeof(int));
+        //world_stream->write(reinterpret_cast<char*>(&object_ptr->render_type), sizeof(int));
         world_stream->write(reinterpret_cast<char*>(&object_ptr->active), sizeof(bool));
 
         if(object_ptr->children.size() > 0){ //If object has at least one child object
@@ -226,7 +222,7 @@ void World::writeGameObject(GameObject* object_ptr, std::ofstream* world_stream)
             //Write children header
             *world_stream << "\nG_CHI ";
             //Write amount of children i object
-            world_stream->write(reinterpret_cast<char*>(&children_num), sizeof(GO_RENDER_TYPE));
+            world_stream->write(reinterpret_cast<char*>(&children_num), sizeof(int));
 
             unsigned int children_am = static_cast<unsigned int>(object_ptr->children.size());
             for(unsigned int chi_i = 0; chi_i < children_am; chi_i ++){ //iterate over all children
@@ -248,7 +244,7 @@ void World::loadGameObject(GameObject* object_ptr, std::ifstream* world_stream){
     *world_stream >> object_ptr->str_id;
 
     world_stream->seekg(1, std::ofstream::cur);
-    world_stream->read(reinterpret_cast<char*>(&object_ptr->render_type), sizeof(GO_RENDER_TYPE));
+    //world_stream->read(reinterpret_cast<char*>(&object_ptr->render_type), sizeof(GO_RENDER_TYPE));
     world_stream->read(reinterpret_cast<char*>(&object_ptr->active), sizeof(bool));
 
     //Then do the same sh*t, iterate until "G_END" came up
@@ -505,7 +501,6 @@ GameObject* World::addMeshNode(MeshNode* node){
         mesh_obj.label = &mesh_obj.getLabelProperty()->label;
         *mesh_obj.label = QString::fromStdString(mesh_label) + QString::number(add_num); //Assigning label to object
         mesh_obj.item_ptr->setText(0, *mesh_obj.label);
-        mesh_obj.render_type = GO_RENDER_TYPE_MATERIAL;
         //configure mesh
         MeshProperty* mesh_prop_ptr = static_cast<MeshProperty*>(mesh_obj.getPropertyPtrByType(GO_PROPERTY_TYPE_MESH));
         mesh_prop_ptr->resource_relpath = QString::fromStdString(mesh_label);

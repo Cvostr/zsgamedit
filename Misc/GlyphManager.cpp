@@ -43,18 +43,29 @@ GlyphFontContainer::GlyphFontContainer(std::string path, unsigned int size, Glyp
 }
 
 void GlyphFontContainer::loadGlyphs(){
+    //Common ASCII symbols
     for(unsigned int i = 0; i < 255; i ++){
         loadGlyph(i);
     }
+    //Cyrillic Russian letters
     for(unsigned int i = 1040; i < 1103; i ++){
         loadGlyph(i);
     }
+    //Additional Cyrillic Ukrainian letters
+    loadGlyph(1168);
+    loadGlyph(1169);
+    loadGlyph(1031);
+    loadGlyph(1111);
+    loadGlyph(1028);
+    loadGlyph(1108);
+    loadGlyph(1110);
+    loadGlyph(1030);
 }
 
 void GlyphFontContainer::loadGlyph(unsigned int index){
     //use freetype to load char
     FT_Load_Char(this->font, static_cast<FT_ULong>(index), FT_LOAD_RENDER);
-
+    //Allocating new Character Glyph
     CharacterGlyph* character = new CharacterGlyph;
     character->glyph_size.X = font->glyph->bitmap.width;
     character->glyph_size.Y = font->glyph->bitmap.rows;
@@ -64,8 +75,9 @@ void GlyphFontContainer::loadGlyph(unsigned int index){
 
     character->glyph_bearing.X = font->glyph->bitmap_left;
     character->glyph_bearing.Y = font->glyph->bitmap_top;
-
+    //Allocate image buffer
     character->texture_buffer = new unsigned char[font->glyph->bitmap.width * font->glyph->bitmap.rows];
+    //Copy Image data
     for(unsigned int i = 0; i < font->glyph->bitmap.width * font->glyph->bitmap.rows; i ++){
         character->texture_buffer[i] = font->glyph->bitmap.buffer[i];
     }
@@ -94,10 +106,10 @@ void GlyphFontContainer::loadGlyph(unsigned int index){
 }
 
 void GlyphFontContainer::DrawChar(int _char, ZSVECTOR2 pos, unsigned int* char_length, ZSRGBCOLOR color){
-    CharacterGlyph* glyph = this->characters.at(_char);
-    *char_length = glyph->glyph_bearing.X + glyph->glyph_size.X;
+    CharacterGlyph* glyph = this->characters.at(static_cast<unsigned int>(_char));
+    *char_length = static_cast<unsigned int>(glyph->glyph_bearing.X + glyph->glyph_size.X);
 
-    manager_ptr->pipeline_ptr->renderGlyph(glyph->gl_texture_id, pos.X, pos.Y - (glyph->glyph_size.Y - glyph->glyph_bearing.Y), glyph->glyph_size.X, glyph->glyph_size.Y, color);
+    manager_ptr->pipeline_ptr->renderGlyph(glyph->gl_texture_id, static_cast<int>(pos.X), pos.Y - (glyph->glyph_size.Y - glyph->glyph_bearing.Y), static_cast<int>(glyph->glyph_size.X), static_cast<int>(glyph->glyph_size.Y), color);
 }
 void GlyphFontContainer::DrawString(int* string, unsigned int len, ZSVECTOR2 pos, ZSRGBCOLOR color){
     unsigned int xpos_offset = static_cast<unsigned int>(pos.X);

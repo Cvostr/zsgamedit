@@ -140,7 +140,7 @@ void TileGroupProperty::process(){
             TransformProperty* parent_transform = parent->getTransformProperty();
             LabelProperty* parent_label = parent->getLabelProperty();
 
-            obj->render_type = GO_RENDER_TYPE_TILE;
+            //obj->render_type = GO_RENDER_TYPE_TILE;
             obj->addProperty(GO_PROPERTY_TYPE_MESH); //Adding mesh
             obj->addProperty(GO_PROPERTY_TYPE_TILE); //Adding tile
             //Receive properties ptrs
@@ -257,7 +257,7 @@ void TileProperty::updTexturePtr(){
 }
 
 void TileProperty::onAddToObject(){
-    go_link.updLinkPtr()->render_type = GO_RENDER_TYPE_TILE;
+    //go_link.updLinkPtr()->render_type = GO_RENDER_TYPE_TILE;
 }
 
 void TileProperty::copyTo(GameObjectProperty* dest){

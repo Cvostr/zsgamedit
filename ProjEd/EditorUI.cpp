@@ -111,7 +111,7 @@ void ObjectCtxMenu::onInfoPressed(){
     out += ("Label : " + *obj_ptr->label + QString(" \n"));
     out += "STR ID : " + QString::fromStdString(obj_ptr->str_id) + QString(" \n");
     out += "ARRAY ID : " + QString::number(obj_ptr->array_index) + QString(" \n");
-    out += "RENDER_MODE : " + QString::number(obj_ptr->render_type) + QString(" \n");
+    //out += "RENDER_MODE : " + QString::number(obj_ptr->render_type) + QString(" \n");
 
     QMessageBox msgBox;
     msgBox.setWindowTitle("Object");

@@ -230,6 +230,9 @@ void Material::saveToFile(){
         mat_stream << "ENTRY " << prop_ptr->prop_identifier.toStdString() << " "; //Write identifier
 
         switch(prop_ptr->type){
+            case MATSHPROP_TYPE_NONE:{
+                break;
+            }
             case MATSHPROP_TYPE_TEXTURE:{
                 //Cast pointer
                 TextureMtShPropConf* texture_conf = static_cast<TextureMtShPropConf*>(conf_ptr);
@@ -305,6 +308,9 @@ void Material::loadFromFile(std::string fpath){
                 //check if compare
                 if(prop_identifier.compare(prop_ptr->prop_identifier.toStdString()) == 0){
                     switch(prop_ptr->type){
+                        case MATSHPROP_TYPE_NONE:{
+                            break;
+                        }
                         case MATSHPROP_TYPE_TEXTURE:{
                             //Cast pointer
                             TextureMtShPropConf* texture_conf = static_cast<TextureMtShPropConf*>(conf_ptr);

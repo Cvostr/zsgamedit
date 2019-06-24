@@ -87,6 +87,7 @@ public:
     void copyTo(GameObjectProperty* dest);
     void onAddToObject();
     void onUpdate(float deltaTime);
+    void onRender(RenderPipeline* pipeline);
 
     TileProperty();
 };

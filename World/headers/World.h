@@ -73,6 +73,7 @@ public:
     virtual void onObjectDeleted();
     virtual void onUpdate(float deltaTime);
     virtual void onPreRender(RenderPipeline* pipeline);
+    virtual void onRender(RenderPipeline* pipeline);
 };
 
 class LabelProperty : public GameObjectProperty {
@@ -138,7 +139,6 @@ public:
     bool active; //if true, object will be active in scene
     World* world_ptr; //pointer to world, when object placed
     GameObjectLink parent; //Link to object's parent
-    GO_RENDER_TYPE render_type; //Render mode of this object
 
     unsigned int props_num; //Count of created props
     QTreeWidgetItem* item_ptr;
@@ -173,6 +173,7 @@ public:
     void Draw(RenderPipeline* pipeline); //On render pipeline wish to draw the object
     void onUpdate(int deltaTime); //calls onUpdate on all properties
     void onPreRender(RenderPipeline* pipeline); //calls onPreRender on all properties
+    void onRender(RenderPipeline* pipeline);
     void onTrigger(GameObject* obj);
     bool isRigidbody(); //true, if object has rigidbody component
 

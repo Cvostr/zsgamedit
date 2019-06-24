@@ -234,17 +234,17 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr)
 
     this->ui_shader.Use();
     GlyphFontContainer* c = editwin_ptr->getFontContainer("LiberationMono-Regular.ttf");
-    int f[10];
-    f[0] = static_cast<int>('T');
-    f[1] = static_cast<int>('e');
-    f[2] = static_cast<int>('s');
-    f[3] = static_cast<int>('t');
-    f[4] = static_cast<int>('g');
-    f[5] = static_cast<int>(L'П');
-    f[6] = static_cast<int>(L'р');
-    f[7] = static_cast<int>(L'и');
-    f[8] = static_cast<int>(L'в');
-    f[9] = static_cast<int>(L'е');
+    int f[11];
+    f[0] = static_cast<int>(L'H');
+    f[1] = static_cast<int>(L'e');
+    f[2] = static_cast<int>(L'l');
+    f[3] = static_cast<int>(L'l');
+    f[4] = static_cast<int>(L'o');
+    f[5] = static_cast<int>(L' ');
+    f[6] = static_cast<int>(L'W');
+    f[7] = static_cast<int>(L'o');
+    f[8] = static_cast<int>(L'r');
+    f[9] = static_cast<int>(L'l');
     //c->DrawString(f, 10, ZSVECTOR2(10,10));
 
     //std::cout << static_cast<int>(deltaTime) << std::endl;
@@ -254,33 +254,38 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr)
 
 void GameObject::Draw(RenderPipeline* pipeline){
     //Call prerender on each property in object
-    this->onPreRender(pipeline);
+    if(pipeline->current_state == PIPELINE_STATE_DEFAULT)
+        this->onPreRender(pipeline);
 
-    ZSPIRE::Shader* shader = pipeline->processShaderOnObject(static_cast<void*>(this)); //Will be used next time
-    EditWindow* editwin_ptr = static_cast<EditWindow*>(pipeline->win_ptr);
-    TransformProperty* transform_prop = static_cast<TransformProperty*>(this->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
+    MeshProperty* mesh_prop = static_cast<MeshProperty*>(this->getPropertyPtrByType(GO_PROPERTY_TYPE_MESH));
+    if(mesh_prop != nullptr){
+        if(pipeline->current_state == PIPELINE_STATE_DEFAULT)
+            this->onRender(pipeline);
+        if(pipeline->current_state == PIPELINE_STATE_PICKING) {
+            TransformProperty* transform_ptr = static_cast<TransformProperty*>(getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
 
-    if(shader != nullptr && transform_prop != nullptr){
-        //send transform matrix to shader
-        shader->setTransform(transform_prop->transform_mat);
-        //Get mesh pointer
-        MeshProperty* mesh_prop = static_cast<MeshProperty*>(this->getPropertyPtrByType(GO_PROPERTY_TYPE_MESH));
-        if(mesh_prop != nullptr){
-            if(mesh_prop->mesh_ptr != nullptr){
-                mesh_prop->mesh_ptr->Draw();
-                //if object is picked
-                if(this->isPicked == true && pipeline->current_state != PIPELINE_STATE_PICKING){
-                    ZSRGBCOLOR color = ZSRGBCOLOR(static_cast<int>(0.23f * 255.0f),
-                                                  static_cast<int>(0.23f * 255.0f),
-                                                  static_cast<int>(0.54f * 255.0f));
-                    if(editwin_ptr->obj_trstate.isTransforming == true)
-                         color = ZSRGBCOLOR(255.0f, 255.0f, 0.0f);
-                    //draw wireframe mesh for picked object
-                    if(!editwin_ptr->isWorldCamera) //avoid drawing gizmos during playtime
-                        pipeline->getGizmosRenderer()->drawPickedMeshWireframe(mesh_prop->mesh_ptr, transform_prop->transform_mat, color);
+            unsigned char* to_send = reinterpret_cast<unsigned char*>(&array_index);
+            float r = static_cast<float>(to_send[0]);
+            float g = static_cast<float>(to_send[1]);
+            float b = static_cast<float>(to_send[2]);
+            float a = static_cast<float>(to_send[3]);
+            pipeline->getPickingShader()->setTransform(transform_ptr->transform_mat);
+            pipeline->getPickingShader()->setGLuniformVec4("color", ZSVECTOR4(r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f));
+        }
 
-                }
-            }
+        mesh_prop->mesh_ptr->Draw();
+
+        if(this->isPicked == true && pipeline->current_state != PIPELINE_STATE_PICKING){
+            EditWindow* editwin_ptr = static_cast<EditWindow*>(pipeline->win_ptr);
+            TransformProperty* transform_ptr = static_cast<TransformProperty*>(getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
+            ZSRGBCOLOR color = ZSRGBCOLOR(static_cast<int>(0.23f * 255.0f),
+                                      static_cast<int>(0.23f * 255.0f),
+                                      static_cast<int>(0.54f * 255.0f));
+            if(editwin_ptr->obj_trstate.isTransforming == true)
+                color = ZSRGBCOLOR(255.0f, 255.0f, 0.0f);
+            //draw wireframe mesh for picked object
+            if(!editwin_ptr->isWorldCamera) //avoid drawing gizmos during playtime
+                pipeline->getGizmosRenderer()->drawPickedMeshWireframe(mesh_prop->mesh_ptr, transform_ptr->transform_mat, color);
         }
     }
 }
@@ -318,133 +323,118 @@ void GameObject::processObject(RenderPipeline* pipeline){
     }
 }
 
-ZSPIRE::Shader* RenderPipeline::processShaderOnObject(void* _obj){
-    GameObject* obj = static_cast<GameObject*>(_obj);
-    ZSPIRE::Shader* result = nullptr;
+void MaterialProperty::onRender(RenderPipeline* pipeline){
+    ZSPIRE::Shader* shader;
 
-    if(current_state == PIPELINE_STATE_PICKING) {
-        unsigned char* to_send = reinterpret_cast<unsigned char*>(&obj->array_index);
-        float r = static_cast<float>(to_send[0]);
-        float g = static_cast<float>(to_send[1]);
-        float b = static_cast<float>(to_send[2]);
-        float a = static_cast<float>(to_send[3]);
+    MaterialProperty* material_ptr = static_cast<MaterialProperty*>(this->go_link.updLinkPtr()->getPropertyPtrByType(GO_PROPERTY_TYPE_MATERIAL));
+    TransformProperty* transform_ptr = static_cast<TransformProperty*>(this->go_link.updLinkPtr()->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
+    MtShaderPropertiesGroup* group_ptr = material_ptr->group_ptr;
 
-        pick_shader.setGLuniformVec4("color", ZSVECTOR4(r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f));
+    if(material_ptr == nullptr || transform_ptr == nullptr || group_ptr == nullptr) return ; //if object hasn't property
 
-        return &pick_shader;
-    }
+    //Work with shader
+    shader = group_ptr->render_shader;
+    shader->Use();
 
-    switch(obj->render_type){
-        case GO_RENDER_TYPE_TILE:{ //if object is 2D tile
-            tile_shader.Use();
-            result = &tile_shader;
-            //Receive pointer to tile information
-            TileProperty* tile_ptr = static_cast<TileProperty*>(obj->getPropertyPtrByType(GO_PROPERTY_TYPE_TILE));
-            if(tile_ptr == nullptr){ //if no tile property anymore
-                obj->render_type = GO_RENDER_TYPE_NONE;
-                return result;
+    shader->setTransform(transform_ptr->transform_mat);
+
+    //iterate over all properties, send them all!
+    for(unsigned int prop_i = 0; prop_i < group_ptr->properties.size(); prop_i ++){
+        MaterialShaderProperty* prop_ptr = group_ptr->properties[prop_i];
+        MaterialShaderPropertyConf* conf_ptr = material_ptr->material_ptr->confs[prop_i];
+        switch(prop_ptr->type){
+            case MATSHPROP_TYPE_NONE:{
+                break;
             }
-            //Checking for diffuse texture
-            if(tile_ptr->texture_diffuse != nullptr){
-                tile_ptr->texture_diffuse->Use(0); //Use this texture
-                tile_shader.setHasDiffuseTextureProperty(true); //Shader will use picked diffuse texture
+            case MATSHPROP_TYPE_TEXTURE:{
+                //Cast pointer
+                TextureMaterialShaderProperty* texture_p = static_cast<TextureMaterialShaderProperty*>(prop_ptr);
+                TextureMtShPropConf* texture_conf = static_cast<TextureMtShPropConf*>(conf_ptr);
 
-            }else{
-                tile_shader.setHasDiffuseTextureProperty(false); //Shader will not use diffuse texture
-            }
-            //Checking for transparent texture
-            if(tile_ptr->texture_transparent != nullptr){
-                tile_ptr->texture_transparent->Use(5); //Use this texture
-                tile_shader.setGLuniformInt("hasTransparentMap", 1); //Shader will use picked transparent texture
-
-            }else{
-                tile_shader.setGLuniformInt("hasTransparentMap", 0); //Shader will not use transparent texture
-            }
-            //Sending animation info
-            if(tile_ptr->anim_property.isAnimated && tile_ptr->anim_state.playing == true){ //If tile animated, then send anim state to shader
-                tile_shader.setGLuniformInt("animated", 1); //Send as animated shader
-                //Send current animation state
-                tile_shader.setGLuniformInt("total_rows", tile_ptr->anim_property.framesX);
-                tile_shader.setGLuniformInt("total_cols", tile_ptr->anim_property.framesY);
-
-                tile_shader.setGLuniformInt("selected_row", tile_ptr->anim_state.cur_frameX);
-                tile_shader.setGLuniformInt("selected_col", tile_ptr->anim_state.cur_frameY);
-            }else{ //No animation or unplayed
-                 tile_shader.setGLuniformInt("animated", 0);
-            }
-            break;
-        }
-        case GO_RENDER_TYPE_NONE:{
-            result = nullptr;
-            break;
-        }
-        case GO_RENDER_TYPE_MATERIAL:{
-            MaterialProperty* material_ptr = static_cast<MaterialProperty*>(obj->getPropertyPtrByType(GO_PROPERTY_TYPE_MATERIAL));
-            if(material_ptr == nullptr) return result; //if object hasn't property
-
-            MtShaderPropertiesGroup* group_ptr = material_ptr->group_ptr;
-
-            if(material_ptr->group_ptr == nullptr) return result; //if material hasn't group
-            //Work with shader
-            result = group_ptr->render_shader;
-            result->Use();
-            //iterate over all properties, send them all!
-            for(unsigned int prop_i = 0; prop_i < group_ptr->properties.size(); prop_i ++){
-                MaterialShaderProperty* prop_ptr = group_ptr->properties[prop_i];
-                MaterialShaderPropertyConf* conf_ptr = material_ptr->material_ptr->confs[prop_i];
-                switch(prop_ptr->type){
-                    case MATSHPROP_TYPE_TEXTURE:{
-                        //Cast pointer
-                        TextureMaterialShaderProperty* texture_p = static_cast<TextureMaterialShaderProperty*>(prop_ptr);
-                        TextureMtShPropConf* texture_conf = static_cast<TextureMtShPropConf*>(conf_ptr);
-
-                        if(texture_conf->texture != nullptr){
-                            result->setGLuniformInt(texture_p->ToggleUniform.c_str(), 1);
-                            texture_conf->texture->Use(texture_p->slotToBind);
-                        }else{
-                            result->setGLuniformInt(texture_p->ToggleUniform.c_str(), 0);
-                        }
-                        break;
-                    }
-                    case MATSHPROP_TYPE_FLOAT:{
-                        //Cast pointer
-                        FloatMaterialShaderProperty* float_p = static_cast<FloatMaterialShaderProperty*>(prop_ptr);
-                        FloatMtShPropConf* float_conf = static_cast<FloatMtShPropConf*>(conf_ptr);
-
-                        result->setGLuniformFloat(float_p->floatUniform.c_str(), float_conf->value);
-                        break;
-                    }
-                    case MATSHPROP_TYPE_INTEGER:{
-                        //Cast pointer
-                        IntegerMaterialShaderProperty* int_p = static_cast<IntegerMaterialShaderProperty*>(prop_ptr);
-                        IntegerMtShPropConf* int_conf = static_cast<IntegerMtShPropConf*>(conf_ptr);
-
-                        result->setGLuniformInt(int_p->integerUniform.c_str(), int_conf->value);
-                        break;
-                    }
-                    case MATSHPROP_TYPE_COLOR:{
-                        //Cast pointer
-                        ColorMaterialShaderProperty* color_p = static_cast<ColorMaterialShaderProperty*>(prop_ptr);
-                        ColorMtShPropConf* color_conf = static_cast<ColorMtShPropConf*>(conf_ptr);
-
-                        result->setGLuniformColor(color_p->colorUniform.c_str(), color_conf->color);
-                        break;
-                    }
-                    case MATSHPROP_TYPE_FVEC3:{
-                        //Cast pointer
-                        Float3MaterialShaderProperty* fvec3_p = static_cast<Float3MaterialShaderProperty*>(prop_ptr);
-                        Float3MtShPropConf* fvec3_conf = static_cast<Float3MtShPropConf*>(conf_ptr);
-
-                        result->setGLuniformVec3(fvec3_p->floatUniform.c_str(), fvec3_conf->value);
-                        break;
-                    }
+                if(texture_conf->texture != nullptr){
+                    shader->setGLuniformInt(texture_p->ToggleUniform.c_str(), 1);
+                    texture_conf->texture->Use(texture_p->slotToBind);
+                }else{
+                    shader->setGLuniformInt(texture_p->ToggleUniform.c_str(), 0);
                 }
+                break;
             }
+            case MATSHPROP_TYPE_FLOAT:{
+                //Cast pointer
+                FloatMaterialShaderProperty* float_p = static_cast<FloatMaterialShaderProperty*>(prop_ptr);
+                FloatMtShPropConf* float_conf = static_cast<FloatMtShPropConf*>(conf_ptr);
 
-            break;
+                shader->setGLuniformFloat(float_p->floatUniform.c_str(), float_conf->value);
+                break;
+            }
+            case MATSHPROP_TYPE_INTEGER:{
+                //Cast pointer
+                IntegerMaterialShaderProperty* int_p = static_cast<IntegerMaterialShaderProperty*>(prop_ptr);
+                IntegerMtShPropConf* int_conf = static_cast<IntegerMtShPropConf*>(conf_ptr);
+
+                shader->setGLuniformInt(int_p->integerUniform.c_str(), int_conf->value);
+                break;
+            }
+            case MATSHPROP_TYPE_COLOR:{
+                //Cast pointer
+                ColorMaterialShaderProperty* color_p = static_cast<ColorMaterialShaderProperty*>(prop_ptr);
+                ColorMtShPropConf* color_conf = static_cast<ColorMtShPropConf*>(conf_ptr);
+
+                shader->setGLuniformColor(color_p->colorUniform.c_str(), color_conf->color);
+                break;
+            }
+            case MATSHPROP_TYPE_FVEC3:{
+                //Cast pointer
+                Float3MaterialShaderProperty* fvec3_p = static_cast<Float3MaterialShaderProperty*>(prop_ptr);
+                Float3MtShPropConf* fvec3_conf = static_cast<Float3MtShPropConf*>(conf_ptr);
+
+                shader->setGLuniformVec3(fvec3_p->floatUniform.c_str(), fvec3_conf->value);
+                break;
+            }
         }
     }
-    return result;
+}
+
+void TileProperty::onRender(RenderPipeline* pipeline){
+    //pipeline->Use();
+    ZSPIRE::Shader* tile_shader = pipeline->getTileShader();
+    //Receive pointer to tile information
+    TileProperty* tile_ptr = static_cast<TileProperty*>(this->go_link.updLinkPtr()->getPropertyPtrByType(GO_PROPERTY_TYPE_TILE));
+    TransformProperty* transform_ptr = static_cast<TransformProperty*>(this->go_link.updLinkPtr()->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
+
+    if(tile_ptr == nullptr || transform_ptr == nullptr) return;
+
+    tile_shader->Use();
+    tile_shader->setTransform(transform_ptr->transform_mat);
+
+    //Checking for diffuse texture
+    if(tile_ptr->texture_diffuse != nullptr){
+        tile_ptr->texture_diffuse->Use(0); //Use this texture
+        tile_shader->setHasDiffuseTextureProperty(true); //Shader will use picked diffuse texture
+
+    }else{
+        tile_shader->setHasDiffuseTextureProperty(false); //Shader will not use diffuse texture
+    }
+    //Checking for transparent texture
+    if(tile_ptr->texture_transparent != nullptr){
+        tile_ptr->texture_transparent->Use(5); //Use this texture
+        tile_shader->setGLuniformInt("hasTransparentMap", 1); //Shader will use picked transparent texture
+
+    }else{
+        tile_shader->setGLuniformInt("hasTransparentMap", 0); //Shader will not use transparent texture
+    }
+    //Sending animation info
+    if(tile_ptr->anim_property.isAnimated && tile_ptr->anim_state.playing == true){ //If tile animated, then send anim state to shader
+        tile_shader->setGLuniformInt("animated", 1); //Send as animated shader
+        //Send current animation state
+        tile_shader->setGLuniformInt("total_rows", tile_ptr->anim_property.framesX);
+        tile_shader->setGLuniformInt("total_cols", tile_ptr->anim_property.framesY);
+
+        tile_shader->setGLuniformInt("selected_row", tile_ptr->anim_state.cur_frameX);
+        tile_shader->setGLuniformInt("selected_col", tile_ptr->anim_state.cur_frameY);
+    }else{ //No animation or unplayed
+         tile_shader->setGLuniformInt("animated", 0);
+    }
 }
 
 void RenderPipeline::updateShadersCameraInfo(ZSPIRE::Camera* cam_ptr){
@@ -597,4 +587,12 @@ void RenderPipeline::updateWindowSize(int W, int H){
 
      this->gbuffer.Destroy();
      this->gbuffer.create(W, H);
+}
+
+ZSPIRE::Shader* RenderPipeline::getTileShader(){
+    return &this->tile_shader;
+}
+
+ZSPIRE::Shader* RenderPipeline::getPickingShader(){
+    return &this->pick_shader;
 }

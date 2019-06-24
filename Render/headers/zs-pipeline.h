@@ -11,12 +11,6 @@
 #include <QMainWindow>
 #include <SDL2/SDL.h>
 
-enum GO_RENDER_TYPE {
-    GO_RENDER_TYPE_NONE,
-    GO_RENDER_TYPE_TILE,
-    GO_RENDER_TYPE_MATERIAL
-};
-
 enum PIPELINE_STATE {
     PIPELINE_STATE_DEFAULT,
     PIPELINE_STATE_PICKING,
@@ -61,9 +55,9 @@ private:
     ZSPIRE::Shader pick_shader; //Shader to draw & pick objects
     ZSPIRE::Shader obj_mark_shader; //Shader to draw mark of selected objects
     ZSPIRE::Shader ui_shader;
-
     ZSPIRE::Shader deffered_light;
     std::vector<void*> lights_ptr;
+
 
     RenderSettings render_settings;
 public:
@@ -81,7 +75,6 @@ public:
     void updateShadersCameraInfo(ZSPIRE::Camera* cam_ptr);
     void addLight(void* light_ptr);
     void removeLights();
-    ZSPIRE::Shader* processShaderOnObject(void* _obj);
     ZSPIRE::Camera* cam;
     void* win_ptr;
 
@@ -95,6 +88,9 @@ public:
     //override virtual function from EngineComponentManager
     void init();
     void updateWindowSize(int W, int H);
+
+    ZSPIRE::Shader* getTileShader();
+    ZSPIRE::Shader* getPickingShader();
 
     RenderPipeline();
     ~RenderPipeline();

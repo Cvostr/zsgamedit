@@ -34,6 +34,10 @@ void GameObjectProperty::onPreRender(RenderPipeline* pipeline){
 
 }
 
+void GameObjectProperty::onRender(RenderPipeline* pipeline){
+
+}
+
 QString getPropertyString(int type){
     switch (type) {
         case GO_PROPERTY_TYPE_TRANSFORM:{ //If type is transfrom
@@ -683,7 +687,7 @@ void MaterialProperty::copyTo(GameObjectProperty* dest){
 }
 
 void MaterialProperty::onAddToObject(){
-    go_link.updLinkPtr()->render_type = GO_RENDER_TYPE_MATERIAL; //set flag to MATERIAL
+    //go_link.updLinkPtr()->render_type = GO_RENDER_TYPE_MATERIAL; //set flag to MATERIAL
 }
 
 void ColliderProperty::onAddToObject(){

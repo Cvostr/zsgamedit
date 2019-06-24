@@ -31,7 +31,7 @@ GameObject::GameObject(){
     this->world_ptr = nullptr;
     item_ptr = new QTreeWidgetItem; //Allocate tree widget item
     genRandomString(&this->str_id, 15); //Generate random string ID
-    render_type = GO_RENDER_TYPE_NONE; //No render by default
+    //render_type = GO_RENDER_TYPE_NONE; //No render by default
     alive = true; //Object exist by default
     isPicked = false;
     active = true;
@@ -228,6 +228,14 @@ void GameObject::onPreRender(RenderPipeline* pipeline){
     }
 }
 
+void GameObject::onRender(RenderPipeline* pipeline){
+    for(unsigned int i = 0; i < props_num; i ++){ //iterate over all properties
+        if(!properties[i]->active) continue; //if property is inactive, then skip it
+        properties[i]->onRender(pipeline); //and call onUpdate on each property
+    }
+}
+
+
 void GameObject::putToSnapshot(GameObjectSnapshot* snapshot){
     snapshot->props_num = 0;
 
@@ -361,5 +369,5 @@ void GameObject::copyTo(GameObject* dest){
     dest->hasParent = this->hasParent;
     dest->parent = this->parent;
     dest->str_id = this->str_id;
-    dest->render_type = this->render_type;
+    //dest->render_type = this->render_type;
 }
