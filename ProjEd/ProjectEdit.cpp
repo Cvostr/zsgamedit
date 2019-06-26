@@ -381,7 +381,6 @@ void EditWindow::addNewTile(){
     GameObject* obj = onAddNewGameObject();
     obj->addProperty(GO_PROPERTY_TYPE_TILE); //Creates tile inside
     obj->addProperty(GO_PROPERTY_TYPE_MESH); //Creates mesh inside
-    //obj->render_type = GO_RENDER_TYPE_TILE;
 
     //Set new name to object
     int add_num = 0; //Declaration of addititonal integer

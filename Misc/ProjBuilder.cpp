@@ -1,7 +1,6 @@
 #include "headers/ProjBuilder.h"
 #include <cstdio>
 #include <cstdlib>
-#include <sys/stat.h>
 #include <QDir>
 
 void ProjBuilder::showWindow(){
@@ -32,6 +31,9 @@ void ProjBuilder::start(){
         window->addToOutput("Resource #" + QString::number(res_i) + " type: " + type_str + " " + res_ptr->rel_path);
         writer->writeToBlob((proj_ptr->root_path + "/" + res_ptr->rel_path).toStdString(), res_ptr->rel_path.toStdString(), res_ptr);
     }
+
+    window->addToOutput("Resources Written!");
+
     delete writer;
 }
 
@@ -84,18 +86,26 @@ BlobWriter::~BlobWriter(){
     this->map_stream.close();
 }
 
-int BlobWriter::getFileSize(std::string file_path){
-    FILE* file = fopen(file_path.c_str(), "rb");
-    struct stat buff;
+unsigned int BlobWriter::getFileSize(std::string file_path){
+    std::ifstream file_stream;
+    file_stream.open(file_path, std::iostream::binary | std::iostream::ate);
 
-    fstat(fileno(file), &buff); //Getting file info
+    if (file_stream.fail()) return 0;
 
-    fclose(file);
+    unsigned int result = static_cast<unsigned int>(file_stream.tellg());
 
-    return buff.st_size;
+    file_stream.close();
+
+    return result;
 }
 
 void BlobWriter::writeToBlob(std::string file_path, std::string rel_path, Resource* res_ptr){
+    if(written_bytes >= this->max_blob_size){
+        written_bytes = 0;
+        this->bl_stream_opened = false;
+        blob_stream.close();
+    }
+
     if(!this->bl_stream_opened){ //if blob not opened, open it
         QString blob = directory + "/" + this->name_prefix + QString::number(created_blobs);
         //Open binary blob stream
@@ -105,7 +115,7 @@ void BlobWriter::writeToBlob(std::string file_path, std::string rel_path, Resour
         created_blobs += 1;
     }
 
-    int size = getFileSize(file_path);
+    unsigned int size = getFileSize(file_path);
     unsigned char* data = new unsigned char[size]; //allocate memory
     //open input stream of resource file
     std::ifstream file_stream;
@@ -119,14 +129,16 @@ void BlobWriter::writeToBlob(std::string file_path, std::string rel_path, Resour
 
     delete[] data; //free data
 
+    QString blob_path = this->name_prefix + QString::number(created_blobs - 1);
+
     //Write data to map
-    map_stream << "entry " << rel_path << " " << res_ptr->resource_label << " "; //write header
-    map_stream.write(reinterpret_cast<char*>(&written_bytes), sizeof(int64_t));
-    map_stream.write(reinterpret_cast<char*>(&size), sizeof(int));
+    map_stream << "entry " << rel_path << " " << res_ptr->resource_label << " " << blob_path.toStdString() << " "; //write header
+    map_stream.write(reinterpret_cast<char*>(&written_bytes), sizeof(uint64_t));
+    map_stream.write(reinterpret_cast<char*>(&size), sizeof(unsigned int));
     map_stream.write(reinterpret_cast<char*>(&res_ptr->type), sizeof(RESOURCE_TYPE));
     map_stream << "\n";
 
-    this->written_bytes += size; //Increase amount of written bytes
+    this->written_bytes += static_cast<unsigned int>(size); //Increase amount of written bytes
 
     window->addToOutput("   Written to /" + this->name_prefix + QString::number(created_blobs - 1) + " " + QString::number(size) + " bytes");
 

@@ -34,20 +34,20 @@ private:
     std::ofstream blob_stream;
 
     bool bl_stream_opened;
-    int64_t written_bytes;
+    uint64_t written_bytes;
 
     int created_blobs;
 
     BuilderWindow* window;
 public:
-    int64_t max_blob_size; //Limit of one blob size
+    uint64_t max_blob_size; //Limit of one blob size
     QString directory; //Directory to write blobs
     QString name_prefix; //
 
     QString map_path; // path to resource map file
 
     void writeToBlob(std::string file_path, std::string rel_path, Resource* res_ptr);
-    int getFileSize(std::string file_path);
+    unsigned int getFileSize(std::string file_path);
 
     BlobWriter(QString map_path, BuilderWindow* window);
     ~BlobWriter();

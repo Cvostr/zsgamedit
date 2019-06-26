@@ -15,6 +15,8 @@
 
 static CreateProjectWindow* cr_w;
 
+extern bool working;
+
 MainWin::MainWin(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWin)
@@ -33,12 +35,22 @@ MainWin::MainWin(QWidget *parent) :
                 this, SLOT(onSelectProjectToOpen()));
 
     QObject::connect(ui->projList, SIGNAL(onRightClick(QPoint)), this, SLOT(showCtxMenu(QPoint)));
+    QObject::connect(ui->projList, SIGNAL(destroyed()), this, SLOT(onDestroy()));
 
     loadProjectsConfigurations();
     cr_w = new CreateProjectWindow;
 
     project_menu = new ProjectCtxMenu(this); //Allocate projectCtxMenu
     project_menu->win = this;
+}
+
+void MainWin::onDestroy(){
+    working = false;
+}
+
+void MainWin::closeEvent( QCloseEvent *event )
+{
+    working = false;
 }
 
 MainWin::~MainWin()
@@ -309,8 +321,9 @@ void ProjectCtxMenu::runEngineClicked(ZSGAPI gapi){
 
     ZSGAME_DESC game_info;
     game_info.app_label = proj_label.toStdString(); //Setting app label
-    game_info.app_version = 0;
-    game_info.game_perspective = static_cast<ZSPERSPECTIVE>(conf->editwin_proj.perspective);
+    game_info.app_version = 0; //Setting base app version to 0
+    game_info.game_perspective = static_cast<ZSPERSPECTIVE>(conf->editwin_proj.perspective); //Setting perspective
+    game_info.blob_root_path = conf->projectRootPath.toStdString() + "/.build/";
     game_info.resource_map_file_path = conf->projectRootPath.toStdString() + "/.build/resources.map";
     game_info.game_dir = conf->projectRootPath.toStdString();
     game_info.startup_scene = conf->editwin_proj.startup_scene;

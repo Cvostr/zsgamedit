@@ -1,9 +1,6 @@
 #ifndef project_edit_h
 #define project_edit_h
 
-
-#ifndef INCLUDE_PRJ_ONLY
-
 #include <QMainWindow>
 #include <QTreeWidget>
 #include <QListWidget>
@@ -35,21 +32,13 @@ enum GO_TRANSFORM_MODE{
 #define EW_CLOSE_REASON_PROJLIST 1
 #define EW_CLOSE_REASON_BUILD 2
 
-#endif
-
-
-
 #include <vector>
 #include <QString>
 
-#ifndef INCLUDE_PRJ_ONLY
 namespace Ui {
 class EditWindow;
 }
-#endif
 
-
-#ifndef INCLUDE_PRJ_ONLY
 struct EditorInputState{
     bool isLeftBtnHold; //Left mouse button
     bool isRightBtnHold; //Right mouse button
@@ -96,6 +85,15 @@ struct PropertyPaintState{
 struct EditorSettings{
     int gameViewWin_Width;
     int gameViewWin_Height;
+
+    int editor_win_pos_X;
+    int editor_win_pos_Y;
+
+    int gameview_win_pos_x;
+    int gameview_win_pos_y;
+
+    int inspector_win_pos_X;
+    int inspector_win_pos_Y;
 
     EditorSettings(){
         gameViewWin_Width = 640;
@@ -361,6 +359,4 @@ namespace ZSEditor {
 }
 
 EdActions* getActionManager();
-#endif
-
 #endif

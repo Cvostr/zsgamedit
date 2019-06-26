@@ -220,8 +220,6 @@ ManageComponentDialog::~ManageComponentDialog(){
 }
 
 void ManageComponentDialog::onPropertyDoubleClick(){
-    //GameObject* obj_ptr = static_cast<GameObject*>(g_object_ptr); //cast pointer
-
     this->ctx_menu->selected_property_index = this->property_list.currentIndex().row();
     this->ctx_menu->show(QCursor::pos());
 }

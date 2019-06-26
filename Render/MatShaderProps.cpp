@@ -78,7 +78,6 @@ MtShaderPropertiesGroup::MtShaderPropertiesGroup(){
 }
 
 MtShaderPropertiesGroup* MtShProps::genDefaultMtShGroup(ZSPIRE::Shader* shader3d){
-    //if(default_group_created) return &default_group;
 
     MtShaderPropertiesGroup* default_group = new MtShaderPropertiesGroup;
 

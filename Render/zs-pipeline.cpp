@@ -396,42 +396,40 @@ void MaterialProperty::onRender(RenderPipeline* pipeline){
 }
 
 void TileProperty::onRender(RenderPipeline* pipeline){
-    //pipeline->Use();
     ZSPIRE::Shader* tile_shader = pipeline->getTileShader();
     //Receive pointer to tile information
-    TileProperty* tile_ptr = static_cast<TileProperty*>(this->go_link.updLinkPtr()->getPropertyPtrByType(GO_PROPERTY_TYPE_TILE));
     TransformProperty* transform_ptr = static_cast<TransformProperty*>(this->go_link.updLinkPtr()->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
 
-    if(tile_ptr == nullptr || transform_ptr == nullptr) return;
+    if(transform_ptr == nullptr) return;
 
     tile_shader->Use();
     tile_shader->setTransform(transform_ptr->transform_mat);
 
     //Checking for diffuse texture
-    if(tile_ptr->texture_diffuse != nullptr){
-        tile_ptr->texture_diffuse->Use(0); //Use this texture
+    if(texture_diffuse != nullptr){
+        texture_diffuse->Use(0); //Use this texture
         tile_shader->setHasDiffuseTextureProperty(true); //Shader will use picked diffuse texture
 
     }else{
         tile_shader->setHasDiffuseTextureProperty(false); //Shader will not use diffuse texture
     }
     //Checking for transparent texture
-    if(tile_ptr->texture_transparent != nullptr){
-        tile_ptr->texture_transparent->Use(5); //Use this texture
+    if(texture_transparent != nullptr){
+        texture_transparent->Use(5); //Use this texture
         tile_shader->setGLuniformInt("hasTransparentMap", 1); //Shader will use picked transparent texture
 
     }else{
         tile_shader->setGLuniformInt("hasTransparentMap", 0); //Shader will not use transparent texture
     }
     //Sending animation info
-    if(tile_ptr->anim_property.isAnimated && tile_ptr->anim_state.playing == true){ //If tile animated, then send anim state to shader
+    if(anim_property.isAnimated && anim_state.playing == true){ //If tile animated, then send anim state to shader
         tile_shader->setGLuniformInt("animated", 1); //Send as animated shader
         //Send current animation state
-        tile_shader->setGLuniformInt("total_rows", tile_ptr->anim_property.framesX);
-        tile_shader->setGLuniformInt("total_cols", tile_ptr->anim_property.framesY);
+        tile_shader->setGLuniformInt("total_rows", anim_property.framesX);
+        tile_shader->setGLuniformInt("total_cols", anim_property.framesY);
 
-        tile_shader->setGLuniformInt("selected_row", tile_ptr->anim_state.cur_frameX);
-        tile_shader->setGLuniformInt("selected_col", tile_ptr->anim_state.cur_frameY);
+        tile_shader->setGLuniformInt("selected_row", anim_state.cur_frameX);
+        tile_shader->setGLuniformInt("selected_col", anim_state.cur_frameY);
     }else{ //No animation or unplayed
          tile_shader->setGLuniformInt("animated", 0);
     }

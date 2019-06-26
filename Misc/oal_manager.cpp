@@ -68,81 +68,81 @@ bool SoundBuffer::loadFileWAV(const char* file_path){
     std::cout << "Loading WAVE sound file " << file_path << std::endl;
 
     Init();
-        unsigned int freq;
-        ALenum format;
-        unsigned int channels;
-        int bits;
+    unsigned int freq;
+    ALenum format;
+    unsigned int channels;
+    int bits;
 
-        unsigned char* data_buffer;
+    unsigned char* data_buffer;
 
-        std::ifstream audio_stream;
-        audio_stream.open(file_path, std::iostream::binary | std::iostream::ate);
+    std::ifstream audio_stream;
+    audio_stream.open(file_path, std::iostream::binary | std::iostream::ate);
 
-        if (audio_stream.fail()) return false;
+    if (audio_stream.fail()) return false;
 
-        int size = static_cast<int>(audio_stream.tellg());
-        data_buffer = new unsigned char[size];
+    int size = static_cast<int>(audio_stream.tellg());
+    data_buffer = new unsigned char[size];
 
-        audio_stream.seekg(0);
+    audio_stream.seekg(0);
 
-        audio_stream.read(reinterpret_cast<char*>(data_buffer), 12);
+    audio_stream.read(reinterpret_cast<char*>(data_buffer), 12);
 
-        audio_stream.read(reinterpret_cast<char*>(data_buffer), 8);
-        if (data_buffer[0] != 'f' || data_buffer[1] != 'm' || data_buffer[2] != 't' || data_buffer[3] != ' ')
-        {
-            delete [] data_buffer; //Free heap
-            audio_stream.close();
-            return false;
-        }
-        audio_stream.read(reinterpret_cast<char*>(data_buffer), 2);
-        if (data_buffer[1] != 0 || data_buffer[0] != 1)
-        {
-            delete [] data_buffer; //Free heap
-            audio_stream.close();
-            fprintf(stderr, "Not PCM :(\n"); //Close stream
-            return false;
-        }
+    audio_stream.read(reinterpret_cast<char*>(data_buffer), 8);
+    if (data_buffer[0] != 'f' || data_buffer[1] != 'm' || data_buffer[2] != 't' || data_buffer[3] != ' ')
+    {
+        delete [] data_buffer; //Free heap
+        audio_stream.close();
+        return false;
+    }
+    audio_stream.read(reinterpret_cast<char*>(data_buffer), 2);
+    if (data_buffer[1] != 0 || data_buffer[0] != 1)
+    {
+        delete [] data_buffer; //Free heap
+        audio_stream.close();
+        fprintf(stderr, "Not PCM :(\n"); //Close stream
+        return false;
+    }
 
-        audio_stream.read(reinterpret_cast<char*>(data_buffer), 2);
-        channels = static_cast<unsigned int>(data_buffer[1] << 8);
-        channels |= data_buffer[0];
+    audio_stream.read(reinterpret_cast<char*>(data_buffer), 2);
+    channels = static_cast<unsigned int>(data_buffer[1] << 8);
+    channels |= data_buffer[0];
 
+    audio_stream.read(reinterpret_cast<char*>(data_buffer), 4);
+    freq = static_cast<unsigned int>(data_buffer[3] << 24);
+    freq |= static_cast<unsigned int>(data_buffer[2] << 16);
+    freq |= static_cast<unsigned int>(data_buffer[1] << 8);
+    freq |= static_cast<unsigned int>(data_buffer[0]);
+
+    audio_stream.read(reinterpret_cast<char*>(data_buffer), 6);
+    audio_stream.read(reinterpret_cast<char*>(data_buffer), 2);
+
+    bits = data_buffer[1] << 8;
+    bits |= data_buffer[0];
+
+    if (bits == 8)
+    {
+        if (channels == 1)
+            format = AL_FORMAT_MONO8;
+        else if (channels == 2)
+            format = AL_FORMAT_STEREO8;
+    }
+    else if (bits == 16)
+    {
+        if (channels == 1)
+            format = AL_FORMAT_MONO16;
+        else if (channels == 2)
+            format = AL_FORMAT_STEREO16;
+    }
+    if (!format)
+    {
+        delete [] data_buffer; //Free heap
+        audio_stream.close();
+        std::cout << "Incompatible format (" << channels << ", " << bits << ") :(" << std::endl;
+        return false;
+    }
+
+    while(data_buffer[0] != 'd' || data_buffer[1] != 'a' || data_buffer[2] != 't' || data_buffer[3] != 'a')
         audio_stream.read(reinterpret_cast<char*>(data_buffer), 4);
-        freq = static_cast<unsigned int>(data_buffer[3] << 24);
-        freq |= static_cast<unsigned int>(data_buffer[2] << 16);
-        freq |= static_cast<unsigned int>(data_buffer[1] << 8);
-        freq |= static_cast<unsigned int>(data_buffer[0]);
-
-        audio_stream.read(reinterpret_cast<char*>(data_buffer), 6);
-        audio_stream.read(reinterpret_cast<char*>(data_buffer), 2);
-
-        bits = data_buffer[1] << 8;
-        bits |= data_buffer[0];
-
-        if (bits == 8)
-        {
-            if (channels == 1)
-                format = AL_FORMAT_MONO8;
-            else if (channels == 2)
-                format = AL_FORMAT_STEREO8;
-        }
-        else if (bits == 16)
-        {
-            if (channels == 1)
-                format = AL_FORMAT_MONO16;
-            else if (channels == 2)
-                format = AL_FORMAT_STEREO16;
-        }
-        if (!format)
-        {
-            delete [] data_buffer; //Free heap
-            audio_stream.close();
-            std::cout << "Incompatible format (" << channels << ", " << bits << ") :(" << std::endl;
-            return false;
-        }
-
-        while(data_buffer[0] != 'd' || data_buffer[1] != 'a' || data_buffer[2] != 't' || data_buffer[3] != 'a')
-            audio_stream.read(reinterpret_cast<char*>(data_buffer), 4);
 
         audio_stream.read(reinterpret_cast<char*>(data_buffer), 4);
 

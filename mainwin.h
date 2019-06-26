@@ -85,6 +85,8 @@ public slots:
 
     void showCtxMenu(QPoint point);
 
+    void onDestroy();
+
 public:
     Ui::MainWin *ui;
 #ifdef USE_ZSPIRE
@@ -99,6 +101,8 @@ public:
     void addProjectToVector(ProjectConf conf);
 
     void updateListWidgetContent();
+
+    virtual void closeEvent ( QCloseEvent * event );
 
     explicit MainWin(QWidget *parent = nullptr);
     ~MainWin();

@@ -9,12 +9,14 @@ static uint64_t NOW = SDL_GetPerformanceCounter();
 static uint64_t last = 0;
 static float deltaTime = 0;
 
+bool working = true; //Application started and it is working
+
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
     MainWin w;
     w.show();
-    bool working = true; //Application started and it is working
+
     while (working) {
         //Time calculation
         last = NOW;
