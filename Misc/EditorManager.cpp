@@ -21,10 +21,6 @@ void EditorComponentManager::init(){
 
 }
 
-void EditorComponentManager::destroy(){
-
-}
-
 void EditorComponentManager::updateWindowSize(int W, int H){
 
 }

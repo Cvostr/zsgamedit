@@ -415,8 +415,9 @@ void EditWindow::onCloseProject(){
     //Close Qt windows
     _editor_win->close();
     _inspector_win->close();
-    delete glyph_manager;
-    delete render;
+
+    destroyAllManagers();
+
     _ed_actions_container->clear();
     ZSPIRE::SFX::destroyAL();
 
@@ -1094,6 +1095,13 @@ void EditWindow::updateDeltaTime(float deltaTime){
 
     for(unsigned int i = 0; i < managers.size(); i ++){
         managers[i]->deltaTime = deltaTime;
+    }
+}
+
+void EditWindow::destroyAllManagers(){
+    //we must do that in reverse order
+    for(unsigned int i = static_cast<unsigned int>(managers.size()); i > 0; i --){
+        delete managers[i];
     }
 }
 

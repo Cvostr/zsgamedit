@@ -448,10 +448,10 @@ void RenderPipeline::updateShadersCameraInfo(ZSPIRE::Camera* cam_ptr){
         obj_mark_shader.Use();
         obj_mark_shader.setCamera(cam_ptr);
     }
-    if(deffered_light.isCreated == true){
-        deffered_light.Use();
-        deffered_light.setCamera(cam_ptr, true);
-    }
+
+    deffered_light.Use();
+    deffered_light.setCamera(cam_ptr, true);
+
     if(ui_shader.isCreated == true){
         ui_shader.Use();
         ui_shader.setCameraUiProjMatrix(cam_ptr);

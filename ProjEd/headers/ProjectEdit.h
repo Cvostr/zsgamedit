@@ -210,6 +210,7 @@ public:
 
     void startManager(EditorComponentManager* manager);
     void updateDeltaTime(float deltaTime);
+    void destroyAllManagers();
     GlyphFontContainer* getFontContainer(std::string label);
 
     void setGameViewWindowSize(int W, int H);

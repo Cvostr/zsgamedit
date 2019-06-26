@@ -18,7 +18,6 @@ public:
     float deltaTime;
 
     virtual void init();
-    virtual void destroy();
     virtual void updateWindowSize(int W, int H);
 
     EditorComponentManager();
