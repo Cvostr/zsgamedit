@@ -6,7 +6,7 @@
 #include "../World/headers/World.h"
 #include <QDoubleValidator>
 #include <QObject>
-
+#include <thread>
 
 InspectorWin::InspectorWin(QWidget *parent) :
     QMainWindow(parent),
@@ -27,6 +27,7 @@ InspectorWin::InspectorWin(QWidget *parent) :
      widget->setLayout(getContentLayout());
      delete this->ui->scrollAreaWidgetContents;
      ui->scrollArea->setWidget(widget);
+     updatePropertyStateLock = false;
 }
 
 InspectorWin::~InspectorWin()
@@ -145,6 +146,7 @@ void InspectorWin::updateObjectProperties(){
 }
 
 void InspectorWin::onPropertyEdited(){
+    updatePropertyStateLock = true;
     //Getting number of areas
     unsigned int areas_num = static_cast<unsigned int>(this->property_areas.size());
     //iterate over all areas
@@ -153,17 +155,21 @@ void InspectorWin::onPropertyEdited(){
         pea_ptr->writeNewValues(); //Update state on it.
         areas_num = static_cast<unsigned int>(this->property_areas.size()); //recount amount
     }
-
+    updatePropertyStateLock = false;
 }
 
 void InspectorWin::updateAreasChanges(){
     //Check, if some property requested to redraw all
     if(this->updateRequired == false){
+
         unsigned int areas_num = static_cast<unsigned int>(this->property_areas.size());
         for(unsigned int area_i = 0; area_i < areas_num; area_i ++){
+            if(this->updatePropertyStateLock == true)
+                return;
             PropertyEditArea* pea_ptr = this->property_areas[area_i]; //Obtain pointer to area
             pea_ptr->updateValues(); //Update state on it.
         }
+        //this->updatePropertyStateLock = false;
     }else{
         updateRequired = false; //Unset flag
         this->updateObjectProperties(); //Reload UI

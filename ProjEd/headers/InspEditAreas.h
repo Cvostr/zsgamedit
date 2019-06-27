@@ -72,6 +72,7 @@ public:
     void setup(); //Virtual
     void addToInspector(InspectorWin* win);
     void writeNewValues(); //Virtual, on values changed
+    void updateValues();
 };
 
 class BoolCheckboxArea : public PropertyEditArea{

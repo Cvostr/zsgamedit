@@ -48,6 +48,7 @@ namespace ZSPIRE{
             bool isMoving;
 
         public:
+            bool isAlListenerCamera;
             ZSVECTOR3 _dest_pos;
 
             ZSVECTOR3 getCameraPosition();

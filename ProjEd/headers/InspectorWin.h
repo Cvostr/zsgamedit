@@ -137,6 +137,7 @@ public slots:
 
 public:
     bool updateRequired; //Some properties may set that to TRUE to update inspector content
+    bool updatePropertyStateLock;
     std::vector<PropertyEditArea*> property_areas; //vector for areas
     std::vector<QObject*> additional_objects;
     explicit InspectorWin(QWidget *parent = nullptr);

@@ -501,10 +501,10 @@ void AudioSourceProperty::updateAudioPtr(){
 void AudioSourceProperty::onUpdate(float deltaTime){
     TransformProperty* transform = go_link.updLinkPtr()->getTransformProperty();
 
-    if(transform->translation != this->last_pos){
+    //if(transform->translation != this->last_pos){
         this->source.setPosition(transform->translation);
-        this->last_pos = transform->translation;
-    }
+      //  this->last_pos = transform->translation;
+    //}
 }
 
 void AudioSourceProperty::copyTo(GameObjectProperty* dest){
@@ -537,7 +537,7 @@ void AudioSourceProperty::onObjectDeleted(){
 MaterialProperty::MaterialProperty(){
     type = GO_PROPERTY_TYPE_MATERIAL;
 
-    this->group_ptr = nullptr;
+    //this->group_ptr = nullptr;
     this->material_ptr = nullptr;
 
     this->insp_win = nullptr;
@@ -553,6 +553,8 @@ void MaterialProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
     area->resource_type = RESOURCE_TYPE_MATERIAL; //It should load meshes only
     inspector->addPropertyArea(area);
 
+    if(material_ptr == nullptr) return;
+
     ComboBoxArea* mt_shader_group_area = new ComboBoxArea;
     mt_shader_group_area->setLabel("Shader Group");
     mt_shader_group_area->go_property = static_cast<void*>(this);
@@ -565,12 +567,15 @@ void MaterialProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
     inspector->addPropertyArea(mt_shader_group_area);
 
     //if material isn't set up, exiting
-    if(group_ptr == nullptr) return;
+    if(material_ptr->group_ptr == nullptr) return;
     //If set up, iterating over all items
-    for(unsigned int prop_i = 0; prop_i < group_ptr->properties.size(); prop_i ++){
-        MaterialShaderProperty* prop_ptr = group_ptr->properties[prop_i];
+    for(unsigned int prop_i = 0; prop_i < material_ptr->group_ptr->properties.size(); prop_i ++){
+        MaterialShaderProperty* prop_ptr = material_ptr->group_ptr->properties[prop_i];
         MaterialShaderPropertyConf* conf_ptr = this->material_ptr->confs[prop_i];
         switch(prop_ptr->type){
+            case MATSHPROP_TYPE_NONE:{
+                break;
+            }
             case MATSHPROP_TYPE_TEXTURE:{
                 //Cast pointer
                 TextureMaterialShaderProperty* texture_p = static_cast<TextureMaterialShaderProperty*>(prop_ptr);
@@ -596,6 +601,19 @@ void MaterialProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
                 float_area->value = &float_conf->value;
                 float_area->go_property = static_cast<void*>(this);
                 inspector->addPropertyArea(float_area);
+
+                break;
+            }
+            case MATSHPROP_TYPE_FVEC3:{
+                //Cast pointer
+                Float3MaterialShaderProperty* float3_p = static_cast<Float3MaterialShaderProperty*>(prop_ptr);
+                Float3MtShPropConf* float3_conf = static_cast<Float3MtShPropConf*>(conf_ptr);
+
+                Float3PropertyArea* float3_area = new Float3PropertyArea;
+                float3_area->setLabel(float3_p->prop_caption); //Its label
+                float3_area->vector = &float3_conf->value;
+                float3_area->go_property = static_cast<void*>(this);
+                inspector->addPropertyArea(float3_area);
 
                 break;
             }
@@ -634,8 +652,8 @@ void MaterialProperty::onValueChanged(){
     //Check, if material file has changed
     if(newmat_ptr != this->material_ptr){
         this->material_ptr = newmat_ptr;
-        this->group_ptr = newmat_ptr->group_ptr;
-        this->group_label = group_ptr->groupCaption;
+        //this->group_ptr = newmat_ptr->group_ptr;
+        this->group_label = material_ptr->group_ptr->groupCaption;
 
         //if available, update window
         if(insp_win != nullptr)
@@ -643,23 +661,24 @@ void MaterialProperty::onValueChanged(){
     }
 
 
-    if(group_ptr == nullptr) { //if material has no MaterialShaderPropertyGroup
+    if(material_ptr->group_ptr == nullptr) { //if material has no MaterialShaderPropertyGroup
         //if user specified group first time
         if(MtShProps::getMtShaderPropertyGroupByLabel(this->group_label) != nullptr){
             //then apply that group
-            group_ptr = MtShProps::getMtShaderPropertyGroupByLabel(this->group_label);
+            material_ptr->setPropertyGroup(MtShProps::getMtShaderPropertyGroupByLabel(this->group_label));
+            //group_ptr = MtShProps::getMtShaderPropertyGroupByLabel(this->group_label);
         }else { //user haven't specified
             return; //go out
         }
     }else{ //Material already had group, check, if user decided to change it
-        if(MtShProps::getMtShaderPropertyGroupByLabel(this->group_label) != this->group_ptr){
+        if(MtShProps::getMtShaderPropertyGroupByLabel(this->group_label) != this->material_ptr->group_ptr){
             //Apply changing
             this->material_ptr->setPropertyGroup(MtShProps::getMtShaderPropertyGroupByLabel(this->group_label));
         }
     }
 
-    for(unsigned int prop_i = 0; prop_i < group_ptr->properties.size(); prop_i ++){
-        MaterialShaderProperty* prop_ptr = group_ptr->properties[prop_i];
+    for(unsigned int prop_i = 0; prop_i < material_ptr->group_ptr->properties.size(); prop_i ++){
+        MaterialShaderProperty* prop_ptr = material_ptr->group_ptr->properties[prop_i];
         MaterialShaderPropertyConf* conf_ptr = this->material_ptr->confs[prop_i];
         switch(prop_ptr->type){
             case MATSHPROP_TYPE_TEXTURE:{
@@ -681,7 +700,7 @@ void MaterialProperty::copyTo(GameObjectProperty* dest){
     if(dest->type != GO_PROPERTY_TYPE_MATERIAL) return;
 
     MaterialProperty* mat_prop = static_cast<MaterialProperty*>(dest);
-    mat_prop->group_ptr = this->group_ptr;
+   // mat_prop->group_ptr = this->group_ptr;
     mat_prop->material_path = this->material_path;
     mat_prop->material_ptr = this->material_ptr;
 }
@@ -788,6 +807,8 @@ void ScriptGroupProperty::onValueChanged(){
     //if size changed
     if(static_cast<int>(path_names.size()) != this->scr_num){
         path_names.resize(static_cast<unsigned int>(scr_num));
+        //Update inspector interface
+        insp_win->updateRequired = true;
     }
 
     if(static_cast<int>(scripts_attached.size()) != this->scr_num){ //if size changed
@@ -799,8 +820,8 @@ void ScriptGroupProperty::onValueChanged(){
         //Set absolute path to script object
         scripts_attached[script_i].fpath = project_ptr->root_path + "/" + path_names[script_i];
     }
-    //Update inspector interface
-    insp_win->updateRequired = true;
+
+
 }
 
 void ScriptGroupProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){

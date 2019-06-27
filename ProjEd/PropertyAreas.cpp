@@ -425,6 +425,17 @@ void IntPropertyArea::writeNewValues(){
     PropertyEditArea::callPropertyUpdate();
 }
 
+void IntPropertyArea::updateValues(){
+    if(this->value == nullptr) //If vector hasn't been set
+        return; //Go out
+    //Get current values in textt fields
+    int vX = this->int_field->text().toInt();
+
+    if(*value != vX){
+        this->int_field->setText(QString::number(*value));
+    }
+}
+
 void ResourcePickDialog::onResourceSelected(){
     QListWidgetItem* selected = this->list->currentItem();
     QString resource_path = selected->text(); //Get selected text

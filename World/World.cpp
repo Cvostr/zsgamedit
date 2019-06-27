@@ -55,7 +55,6 @@ GameObject* World::dublicateObject(GameObject* original, bool parent){
     GameObject _new_obj;//Create an empty
     GameObject* new_obj = addObject(_new_obj);
 
-    //new_obj->render_type = original->render_type; //Restore render type from original
     //Copying properties data
     for(unsigned int prop_i = 0; prop_i < original->props_num; prop_i ++){
         auto prop_ptr = original->properties[prop_i];

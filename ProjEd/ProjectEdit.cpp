@@ -162,6 +162,7 @@ void EditWindow::init(){
         }
     }
     world.world_camera = edit_camera;
+    world.world_camera.isAlListenerCamera = true;
 }
 
 void EditWindow::assignIconFile(QListWidgetItem* item){

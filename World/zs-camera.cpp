@@ -32,17 +32,20 @@ void ZSPIRE::Camera::updateProjectionMat(){
 }
 
 void ZSPIRE::Camera::updateViewMat(){
+    if(isAlListenerCamera){
+        ZSPIRE::SFX::setListenerPos(camera_pos);
+        ZSPIRE::SFX::setListenerOri(camera_front, camera_up);
+    }
     view = matrixLookAt(camera_pos, (camera_pos + camera_front), camera_up);
 }
 
 void ZSPIRE::Camera::setPosition(ZSVECTOR3 pos){
-    ZSPIRE::SFX::setListenerPos(pos);
+
     this->camera_pos = pos;
     updateViewMat();
 }
 
 void ZSPIRE::Camera::setFront(ZSVECTOR3 front){
-    ZSPIRE::SFX::setListenerOri(front);
     this->camera_front = front;
     updateViewMat();
 }
@@ -106,6 +109,7 @@ ZSPIRE::Camera::Camera(){
     updateViewMat();
 
     isMoving = false;
+    isAlListenerCamera = false;
 }
 
 void ZSPIRE::Camera::updateTick(float deltaTime){

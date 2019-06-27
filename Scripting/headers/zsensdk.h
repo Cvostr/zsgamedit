@@ -93,6 +93,7 @@ public:
     void setCamera(ZSPIRE::Camera cam);
     ZSPIRE::Camera getCamera();
     void loadWorldFromFile(std::string file);
+    void addPrefab(std::string prefab);
     void Instantiate(ZSENGmObject obj);
 };
 namespace Debug{

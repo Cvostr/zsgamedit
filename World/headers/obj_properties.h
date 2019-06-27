@@ -60,7 +60,7 @@ private:
     QString group_label;
 public:
     //Pointer to picked material group
-    MtShaderPropertiesGroup* group_ptr;
+    //MtShaderPropertiesGroup* group_ptr;
     //Pointer to picked material
     Material* material_ptr;
     //Path to material fil

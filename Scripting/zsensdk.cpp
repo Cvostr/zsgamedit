@@ -102,7 +102,9 @@ void ZSENSDK::ZSEN_World::Instantiate(ZSENGmObject obj){
         this->world_ptr->obj_widget_ptr->addTopLevelItem(result->item_ptr);
     }
 }
-
+void ZSENSDK::ZSEN_World::addPrefab(std::string prefab){
+    this->world_ptr->addObjectsFromPrefab(QString::fromStdString(prefab));
+}
 //Property functions
 ZSVECTOR3 ZSENSDK::ZSENTransformProperty::getPosition(){
     return this->prop_ptr->translation;
@@ -219,7 +221,8 @@ void ZSENSDK::bindSDK(lua_State* state){
         .addFunction("length", &length)
         .addFunction("distance", &getDistance)
         .addFunction("normalize", &ZSENSDK::Math::vnormalize)
-        .addFunction("v_add", &ZSENSDK::Math::vadd);
+        .addFunction("v_add", &ZSENSDK::Math::vadd)
+        .addFunction("v_cross", &vCross);
 
     luabridge::getGlobalNamespace(state).beginClass <ZSVIEWPORT>("CmViewport")
             .addData("startX", &ZSVIEWPORT::startX)
@@ -278,6 +281,7 @@ luabridge::getGlobalNamespace(state)
 
         .addFunction("loadSceneFromFile", &ZSENSDK::ZSEN_World::loadWorldFromFile)
         .addFunction("instantiate", &ZSENSDK::ZSEN_World::Instantiate)
+        .addFunction("addFromPrefab", &ZSENSDK::ZSEN_World::addPrefab)
 
         .endClass()
         .endNamespace();

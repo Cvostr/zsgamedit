@@ -33,8 +33,9 @@ bool ZSPIRE::SFX::initAL() {
 	std::cout << "AL: OpenAL successfully initialized!" << std::endl;
 	//Set default parameters
 	setListenerPos(ZSVECTOR3(0.0f, 0.0f, 0.0f));
-    setListenerOri(ZSVECTOR3(0.0f, 0.0f, 1.0f));
+    setListenerOri(ZSVECTOR3(0.0f, 0.0f, 1.0f), ZSVECTOR3(0.0f, 1.0f, 0.0f));
     setListenerVelocity(ZSVECTOR3(0.0f, 0.0f, 0.0f));
+    ZSPIRE::SFX::setListenerVolume(1.0f);
 
 	return true;
 }
@@ -42,8 +43,8 @@ bool ZSPIRE::SFX::initAL() {
 void ZSPIRE::SFX::setListenerPos(ZSVECTOR3 pos) {
     alListener3f(AL_POSITION, pos.X, pos.Y, pos.Z);
 }
-void ZSPIRE::SFX::setListenerOri(ZSVECTOR3 ori) {
-    ALfloat listenerOri[] = { ori.X, ori.Y, ori.Z, 0.0f, 1.0f, 0.0f };
+void ZSPIRE::SFX::setListenerOri(ZSVECTOR3 front, ZSVECTOR3 up) {
+    ALfloat listenerOri[] = { front.X, front.Y, front.Z, up.X, up.Y, up.Z};
     alListenerfv(AL_ORIENTATION, listenerOri);
 }
 
@@ -69,8 +70,8 @@ bool SoundBuffer::loadFileWAV(const char* file_path){
 
     Init();
     unsigned int freq;
-    ALenum format;
-    unsigned int channels;
+    ALenum format = AL_FORMAT_MONO16;
+    unsigned int channels = 1;
     int bits;
 
     unsigned char* data_buffer;
@@ -140,18 +141,19 @@ bool SoundBuffer::loadFileWAV(const char* file_path){
         std::cout << "Incompatible format (" << channels << ", " << bits << ") :(" << std::endl;
         return false;
     }
-
+    //read 4 bytes, until "data" header found
     while(data_buffer[0] != 'd' || data_buffer[1] != 'a' || data_buffer[2] != 't' || data_buffer[3] != 'a')
         audio_stream.read(reinterpret_cast<char*>(data_buffer), 4);
-
+        //Read size
         audio_stream.read(reinterpret_cast<char*>(data_buffer), 4);
-
+        //Calculate size
         int _size = data_buffer[3] << 24; //Getting size, 32 bit value
-        size |= data_buffer[2] << 16;
-        size |= data_buffer[1] << 8;
-        size |= data_buffer[0];
-
+        _size |= data_buffer[2] << 16;
+        _size |= data_buffer[1] << 8;
+        _size |= data_buffer[0];
+        //read data
         audio_stream.read(reinterpret_cast<char*>(data_buffer), _size);
+        //Send data to OpenAL
         alBufferData(this->al_buffer_id, format, static_cast<void*>((data_buffer)), size, static_cast<int>(freq));
         int err = alGetError();
         if (err != AL_NO_ERROR)
@@ -211,5 +213,6 @@ void SoundSource::stop(){
     alSourceStop(this->al_source_id);
 }
 void SoundSource::setAlBuffer(SoundBuffer* buffer){
+    stop();
     alSourcei(al_source_id, AL_BUFFER, static_cast<ALint>(buffer->getBufferIdAL()));
 }

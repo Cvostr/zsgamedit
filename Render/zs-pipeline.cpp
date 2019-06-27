@@ -291,6 +291,7 @@ void GameObject::Draw(RenderPipeline* pipeline){
 }
 
 void GameObject::processObject(RenderPipeline* pipeline){
+    if(alive == false) return;
     if(this->active)
         item_ptr->setTextColor(0, QColor(Qt::black));
     else
@@ -298,7 +299,7 @@ void GameObject::processObject(RenderPipeline* pipeline){
 
     //Obtain EditWindow pointer to check if scene is running
     EditWindow* editwin_ptr = static_cast<EditWindow*>(pipeline->win_ptr);
-    if(active == false || alive == false) return; //if object is inactive, not to render it
+    if(active == false) return; //if object is inactive, not to render it
 
     TransformProperty* transform_prop = static_cast<TransformProperty*>(this->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
     //Call update on every property in objects
@@ -326,11 +327,13 @@ void GameObject::processObject(RenderPipeline* pipeline){
 void MaterialProperty::onRender(RenderPipeline* pipeline){
     ZSPIRE::Shader* shader;
 
+    if(material_ptr == nullptr) return;
+
     MaterialProperty* material_ptr = static_cast<MaterialProperty*>(this->go_link.updLinkPtr()->getPropertyPtrByType(GO_PROPERTY_TYPE_MATERIAL));
     TransformProperty* transform_ptr = static_cast<TransformProperty*>(this->go_link.updLinkPtr()->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
-    MtShaderPropertiesGroup* group_ptr = material_ptr->group_ptr;
+    MtShaderPropertiesGroup* group_ptr = material_ptr->material_ptr->group_ptr;
 
-    if(material_ptr == nullptr || transform_ptr == nullptr || group_ptr == nullptr) return ; //if object hasn't property
+    if(transform_ptr == nullptr || group_ptr == nullptr) return ; //if object hasn't property
 
     //Work with shader
     shader = group_ptr->render_shader;
@@ -352,8 +355,8 @@ void MaterialProperty::onRender(RenderPipeline* pipeline){
                 TextureMtShPropConf* texture_conf = static_cast<TextureMtShPropConf*>(conf_ptr);
 
                 if(texture_conf->texture != nullptr){
-                    shader->setGLuniformInt(texture_p->ToggleUniform.c_str(), 1);
-                    texture_conf->texture->Use(texture_p->slotToBind);
+                    shader->setGLuniformInt(texture_p->ToggleUniform.c_str(), 1); //Set texture uniform toggle
+                    texture_conf->texture->Use(texture_p->slotToBind); //Use texture
                 }else{
                     shader->setGLuniformInt(texture_p->ToggleUniform.c_str(), 0);
                 }

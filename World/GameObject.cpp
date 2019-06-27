@@ -369,5 +369,4 @@ void GameObject::copyTo(GameObject* dest){
     dest->hasParent = this->hasParent;
     dest->parent = this->parent;
     dest->str_id = this->str_id;
-    //dest->render_type = this->render_type;
 }

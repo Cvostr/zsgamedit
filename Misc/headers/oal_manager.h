@@ -11,7 +11,7 @@ namespace ZSPIRE {
 		void destroyAL();
 
 		void setListenerPos(ZSVECTOR3 pos);
-		void setListenerOri(ZSVECTOR3 ori);
+        void setListenerOri(ZSVECTOR3 front, ZSVECTOR3 up);
         void setListenerVelocity(ZSVECTOR3 velocity);
 		void setListenerVolume(float value);
 
