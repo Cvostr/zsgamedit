@@ -15,7 +15,7 @@ GameObjectProperty::~GameObjectProperty(){
 }
 
 void GameObjectProperty::copyTo(GameObjectProperty* dest){
-
+    dest->active = this->active;
 }
 
 void GameObjectProperty::onObjectDeleted(){
@@ -286,6 +286,9 @@ void TransformProperty::getAbsoluteParentTransform(ZSVECTOR3& t, ZSVECTOR3& s, Z
 
 void TransformProperty::copyTo(GameObjectProperty* dest){
     if(dest->type != this->type) return; //if it isn't transform
+    //Do base things
+    GameObjectProperty::copyTo(dest);
+
     //cast pointer and send data
     TransformProperty* _dest = static_cast<TransformProperty*>(dest);
     _dest->translation = translation;
@@ -317,7 +320,10 @@ void LabelProperty::onValueChanged(){
 }
 
 void LabelProperty::copyTo(GameObjectProperty* dest){
-    if(dest->type != this->type) return; //if it isn't transform
+    if(dest->type != this->type) return; //if it isn't label
+
+    //Do base things
+    GameObjectProperty::copyTo(dest);
 
     LabelProperty* _dest = static_cast<LabelProperty*>(dest);
     _dest->label = label;
@@ -353,7 +359,10 @@ void MeshProperty::onValueChanged(){
 }
 
 void MeshProperty::copyTo(GameObjectProperty* dest){
-    if(dest->type != this->type) return; //if it isn't transform
+    if(dest->type != this->type) return; //if it isn't mesh, then exit
+
+    //Do base things
+    GameObjectProperty::copyTo(dest);
 
     MeshProperty* _dest = static_cast<MeshProperty*>(dest);
     _dest->resource_relpath = resource_relpath;
@@ -397,14 +406,13 @@ void LightsourceProperty::addPropertyInterfaceToInspector(InspectorWin* inspecto
 void LightsourceProperty::onValueChanged(){
     ZSVECTOR3* rot_vec_ptr = &transform->rotation;
     this->direction = _getDirection(rot_vec_ptr->X, rot_vec_ptr->Y, rot_vec_ptr->Z);
-    if(deffered_shader_ptr != nullptr && isSent){
-        deffered_shader_ptr->Use(); //use shader to make uniforms work
-        //Send light uniforms
-        deffered_shader_ptr->sendLight(this->id, static_cast<void*>(this));
-    }
+
 }
 void LightsourceProperty::copyTo(GameObjectProperty* dest){
-    if(dest->type != this->type) return; //if it isn't transform
+    if(dest->type != this->type) return; //if it isn't Lightsource, then exit
+
+    //Do base things
+    GameObjectProperty::copyTo(dest);
 
     LightsourceProperty* _dest = static_cast<LightsourceProperty*>(dest);
     _dest->color = color;
@@ -448,7 +456,6 @@ LightsourceProperty::LightsourceProperty(){
     intensity = 1.0f; //base light instensity is 1
     range = 10.0f;
     transform = nullptr;
-    isSent = false; //isn't sent by default
 }
 
 AudioSourceProperty::AudioSourceProperty(){
@@ -470,6 +477,12 @@ void AudioSourceProperty::addPropertyInterfaceToInspector(InspectorWin* inspecto
     area->rel_path = &resource_relpath;
     area->resource_type = RESOURCE_TYPE_AUDIO; //It should load meshes only
     inspector->addPropertyArea(area);
+
+    BoolCheckboxArea* isLooped = new BoolCheckboxArea;
+    isLooped->setLabel("Loop ");
+    isLooped->go_property = static_cast<void*>(this);
+    isLooped->bool_ptr = &this->source.looped;
+    inspector->addPropertyArea(isLooped);
 
     FloatPropertyArea* gain_area = new FloatPropertyArea;
     gain_area->setLabel("Gain"); //Its label
@@ -508,9 +521,12 @@ void AudioSourceProperty::onUpdate(float deltaTime){
 }
 
 void AudioSourceProperty::copyTo(GameObjectProperty* dest){
-    if(dest->type != this->type) return; //if it isn't transform
+    if(dest->type != this->type) return; //if it isn't audiosource then exit
 
     AudioSourceProperty* _dest = static_cast<AudioSourceProperty*>(dest);
+
+    //Do base things
+    GameObjectProperty::copyTo(dest);
 
     _dest->source.Init();
     _dest->resource_relpath = this->resource_relpath;
@@ -527,6 +543,10 @@ void AudioSourceProperty::audio_start(){
 
 void AudioSourceProperty::audio_stop(){
     this->source.stop();
+}
+
+void AudioSourceProperty::audio_pause(){
+    this->source.pause();
 }
 
 void AudioSourceProperty::onObjectDeleted(){
@@ -699,8 +719,10 @@ void MaterialProperty::copyTo(GameObjectProperty* dest){
     //MaterialShaderProperty
     if(dest->type != GO_PROPERTY_TYPE_MATERIAL) return;
 
+    //Do base things
+    GameObjectProperty::copyTo(dest);
+
     MaterialProperty* mat_prop = static_cast<MaterialProperty*>(dest);
-   // mat_prop->group_ptr = this->group_ptr;
     mat_prop->material_path = this->material_path;
     mat_prop->material_ptr = this->material_ptr;
 }
@@ -797,6 +819,9 @@ void RigidbodyProperty::onUpdate(float deltaTime){
 void RigidbodyProperty::copyTo(GameObjectProperty* dest){
     if(dest->type != GO_PROPERTY_TYPE_RIGIDBODY) return;
 
+    //Do base things
+    GameObjectProperty::copyTo(dest);
+
     RigidbodyProperty* rigi_prop = static_cast<RigidbodyProperty*>(dest);
     rigi_prop->hasGravity = this->hasGravity;
     rigi_prop->mass = this->mass;
@@ -851,7 +876,10 @@ void ScriptGroupProperty::onUpdate(float deltaTime){
 }
 
 void ScriptGroupProperty::copyTo(GameObjectProperty* dest){
-    if(dest->type != this->type) return; //if it isn't transform
+    if(dest->type != this->type) return; //if it isn't script group
+
+    //Do base things
+    GameObjectProperty::copyTo(dest);
 
     ScriptGroupProperty* _dest = static_cast<ScriptGroupProperty*>(dest);
     _dest->scr_num = this->scr_num;

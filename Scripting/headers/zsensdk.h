@@ -15,13 +15,13 @@ namespace ZSENSDK {
 
 class ZSENObjectProperty{
 public:
+    GameObjectProperty* prop_ptr;
     int type;
+    void setActive(bool active);
 };
 
 class ZSENTransformProperty : public ZSENObjectProperty{
 public:
-    TransformProperty* prop_ptr;
-
     ZSVECTOR3 getPosition();
     ZSVECTOR3 getScale();
     ZSVECTOR3 getRotation();
@@ -33,8 +33,6 @@ public:
 
 class ZSENTileProperty : public ZSENObjectProperty{
 public:
-    void* prop_ptr;
-
     void setDiffuseTexture(std::string texture);
 
     void playAnim();
@@ -43,7 +41,6 @@ public:
 
 class ZSENAudSourceProperty : public ZSENObjectProperty{
 public:
-    void* prop_ptr;
 
     void setAudioFile(std::string aud);
 
@@ -54,15 +51,14 @@ public:
     void setPitch(float pitch);
 
     void Play();
+    void Pause();
     void Stop();
 };
 
 class ZSENLightSourceProperty : public ZSENObjectProperty{
 public:
-    void* prop_ptr;
-
-
-
+    void setIntesity(float intensity);
+    void setRange(float range);
 };
 
 class ZSENGmObject{

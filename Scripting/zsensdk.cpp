@@ -43,6 +43,7 @@ void ZSENSDK::ZSENGmObject::setLabel(std::string label){
 void ZSENSDK::ZSENGmObject::setActive(bool active){
     this->updPtr()->setActive(active);
 }
+
 ZSENSDK::ZSENTransformProperty ZSENSDK::ZSENGmObject::transform(){
     ZSENTransformProperty result;
     result.prop_ptr = static_cast<TransformProperty*>(this->updPtr()->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
@@ -105,26 +106,35 @@ void ZSENSDK::ZSEN_World::Instantiate(ZSENGmObject obj){
 void ZSENSDK::ZSEN_World::addPrefab(std::string prefab){
     this->world_ptr->addObjectsFromPrefab(QString::fromStdString(prefab));
 }
+void ZSENSDK::ZSENObjectProperty::setActive(bool active){
+    prop_ptr->active = active;
+}
 //Property functions
 ZSVECTOR3 ZSENSDK::ZSENTransformProperty::getPosition(){
-    return this->prop_ptr->translation;
+    TransformProperty* prop_ptr = static_cast<TransformProperty*>(this->prop_ptr);
+    return prop_ptr->translation;
 }
 ZSVECTOR3 ZSENSDK::ZSENTransformProperty::getScale(){
-    return this->prop_ptr->scale;
+    TransformProperty* prop_ptr = static_cast<TransformProperty*>(this->prop_ptr);
+    return prop_ptr->scale;
 }
 ZSVECTOR3 ZSENSDK::ZSENTransformProperty::getRotation(){
-    return this->prop_ptr->rotation;
+    TransformProperty* prop_ptr = static_cast<TransformProperty*>(this->prop_ptr);
+    return prop_ptr->rotation;
 }
 void ZSENSDK::ZSENTransformProperty::setPosition(ZSVECTOR3 pos){
-    this->prop_ptr->setTranslation(pos);
+    TransformProperty* prop_ptr = static_cast<TransformProperty*>(this->prop_ptr);
+    prop_ptr->setTranslation(pos);
 }
 void ZSENSDK::ZSENTransformProperty::setRotation(ZSVECTOR3 rot){
-    this->prop_ptr->rotation = rot;
-    this->prop_ptr->updateMat();
+    TransformProperty* prop_ptr = static_cast<TransformProperty*>(this->prop_ptr);
+    prop_ptr->rotation = rot;
+    prop_ptr->updateMat();
 }
 void ZSENSDK::ZSENTransformProperty::setScale(ZSVECTOR3 scale){
-    this->prop_ptr->scale = scale;
-    this->prop_ptr->updateMat();
+    TransformProperty* prop_ptr = static_cast<TransformProperty*>(this->prop_ptr);
+    prop_ptr->scale = scale;
+    prop_ptr->updateMat();
 }
 //AudioSource functions
 void ZSENSDK::ZSENAudSourceProperty::setAudioFile(std::string aud){
@@ -141,6 +151,10 @@ void ZSENSDK::ZSENAudSourceProperty::Play(){
 void ZSENSDK::ZSENAudSourceProperty::Stop(){
     AudioSourceProperty* prop_ptr = static_cast<AudioSourceProperty*>(this->prop_ptr);
     prop_ptr->audio_stop();
+}
+void ZSENSDK::ZSENAudSourceProperty::Pause(){
+    AudioSourceProperty* prop_ptr = static_cast<AudioSourceProperty*>(this->prop_ptr);
+    prop_ptr->audio_pause();
 }
 float ZSENSDK::ZSENAudSourceProperty::getGain(){
     AudioSourceProperty* prop_ptr = static_cast<AudioSourceProperty*>(this->prop_ptr);
@@ -290,8 +304,8 @@ luabridge::getGlobalNamespace(state)
         .beginNamespace("engine")
 
         .beginClass <ZSENObjectProperty>("ObjectProperty")
+        .addFunction("setActive", &ZSENSDK::ZSENObjectProperty::setActive)
         .endClass()
-
 
         .deriveClass <ZSENTransformProperty, ZSENObjectProperty>("Transform")
         .addFunction("getPosition", &ZSENSDK::ZSENTransformProperty::getPosition)
@@ -307,6 +321,7 @@ luabridge::getGlobalNamespace(state)
         .addFunction("setAudioFile", &ZSENSDK::ZSENAudSourceProperty::setAudioFile)
         .addFunction("Play", &ZSENSDK::ZSENAudSourceProperty::Play)
         .addFunction("Stop", &ZSENSDK::ZSENAudSourceProperty::Stop)
+        .addFunction("Pause", &ZSENSDK::ZSENAudSourceProperty::Pause)
         .addFunction("getGain", &ZSENSDK::ZSENAudSourceProperty::getGain)
         .addFunction("getPitch", &ZSENSDK::ZSENAudSourceProperty::getPitch)
         .addFunction("setGain", &ZSENSDK::ZSENAudSourceProperty::setGain)

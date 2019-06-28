@@ -38,11 +38,13 @@ public:
     ZSVECTOR3 source_pos; //Position of audio source
     float source_gain;
     float source_pitch;
+    bool looped;
 
     void Init();
     void Destroy();
     void setPosition(ZSVECTOR3 pos);
     void setVelocity(ZSVECTOR3 vel);
+    void pause();
     void apply_settings();
     void play();
     void stop();

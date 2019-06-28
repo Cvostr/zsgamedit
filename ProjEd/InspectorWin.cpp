@@ -132,6 +132,10 @@ void InspectorWin::ShowObjectProperties(void* object_ptr){
 
         AreaPropertyTitle* prop_title = new AreaPropertyTitle;
         prop_title->prop_title.setText(getPropertyString(property_ptr->type));
+
+        if(!property_ptr->active) //if property is disabled
+            prop_title->prop_title.setStyleSheet("QLabel { color : gray; }"); //then set text color to gray
+
         getContentLayout()->addLayout(&prop_title->layout);
         this->registerUiObject(prop_title);
 
@@ -146,7 +150,7 @@ void InspectorWin::updateObjectProperties(){
 }
 
 void InspectorWin::onPropertyEdited(){
-    updatePropertyStateLock = true;
+    //updatePropertyStateLock = true;
     //Getting number of areas
     unsigned int areas_num = static_cast<unsigned int>(this->property_areas.size());
     //iterate over all areas
@@ -155,7 +159,7 @@ void InspectorWin::onPropertyEdited(){
         pea_ptr->writeNewValues(); //Update state on it.
         areas_num = static_cast<unsigned int>(this->property_areas.size()); //recount amount
     }
-    updatePropertyStateLock = false;
+    //updatePropertyStateLock = false;
 }
 
 void InspectorWin::updateAreasChanges(){
@@ -164,8 +168,8 @@ void InspectorWin::updateAreasChanges(){
 
         unsigned int areas_num = static_cast<unsigned int>(this->property_areas.size());
         for(unsigned int area_i = 0; area_i < areas_num; area_i ++){
-            if(this->updatePropertyStateLock == true)
-                return;
+           // if(this->updatePropertyStateLock == true)
+             //   return;
             PropertyEditArea* pea_ptr = this->property_areas[area_i]; //Obtain pointer to area
             pea_ptr->updateValues(); //Update state on it.
         }

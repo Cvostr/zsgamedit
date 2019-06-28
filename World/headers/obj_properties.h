@@ -48,6 +48,7 @@ public:
 
     void updateAudioPtr();
     void audio_start();
+    void audio_pause();
     void audio_stop();
 
     AudioSourceProperty();
@@ -104,7 +105,6 @@ public:
     float range; //Light's range
 
     ZSLIGHTSOURCE_GL_ID id; //glsl uniform index
-    bool isSent; //is glsl uniform sent to deffered shader
 
     ZSPIRE::Shader* deffered_shader_ptr;
 

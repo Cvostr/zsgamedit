@@ -195,6 +195,7 @@ void SoundSource::apply_settings(){
     alSource3f(al_source_id, AL_POSITION, this->source_pos.X, this->source_pos.Y, this->source_pos.Z);
     alSourcef(al_source_id, AL_GAIN, this->source_gain);
     alSourcef(al_source_id, AL_PITCH, this->source_pitch);
+    alSourcei(al_source_id, AL_LOOPING, static_cast<int>(this->looped));
     setVelocity(ZSVECTOR3(0.0f, 0.0f, 0.0f));
 }
 void SoundSource::setPosition(ZSVECTOR3 pos){
@@ -211,6 +212,9 @@ void SoundSource::play(){
 }
 void SoundSource::stop(){
     alSourceStop(this->al_source_id);
+}
+void SoundSource::pause(){
+    alSourcePause(this->al_source_id);
 }
 void SoundSource::setAlBuffer(SoundBuffer* buffer){
     stop();

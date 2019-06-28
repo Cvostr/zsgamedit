@@ -83,7 +83,7 @@ void GameObject::saveProperties(std::ofstream* stream){
 
             stream->write(reinterpret_cast<char*>(&ptr->source.source_gain), sizeof(float));
             stream->write(reinterpret_cast<char*>(&ptr->source.source_pitch), sizeof(float));
-
+            stream->write(reinterpret_cast<char*>(&ptr->source.looped), sizeof(bool));
             break;
         }
         case GO_PROPERTY_TYPE_MATERIAL:{
@@ -272,6 +272,7 @@ void GameObject::loadProperty(std::ifstream* world_stream){
         //Load settings
         world_stream->read(reinterpret_cast<char*>(&lptr->source.source_gain), sizeof(float));
         world_stream->read(reinterpret_cast<char*>(&lptr->source.source_pitch), sizeof(float));
+        world_stream->read(reinterpret_cast<char*>(&lptr->source.looped), sizeof(bool));
         lptr->source.apply_settings(); //Apply settings to openal
 
         break;
