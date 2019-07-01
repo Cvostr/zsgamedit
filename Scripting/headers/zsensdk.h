@@ -59,6 +59,7 @@ class ZSENLightSourceProperty : public ZSENObjectProperty{
 public:
     void setIntesity(float intensity);
     void setRange(float range);
+    void setLightColor(ZSRGBCOLOR color);
 };
 
 class ZSENGmObject{

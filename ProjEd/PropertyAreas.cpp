@@ -373,6 +373,7 @@ void PickResourceArea::addToInspector(InspectorWin* win){
 void PickResourceArea::setup(){
     QString resource_relpath = *this->rel_path;
     relpath_label->setText(resource_relpath);
+
 }
 
 void PickResourceArea::updateValues(){

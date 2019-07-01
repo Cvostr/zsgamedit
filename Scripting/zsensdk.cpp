@@ -174,6 +174,18 @@ void ZSENSDK::ZSENAudSourceProperty::setPitch(float pitch){
     prop_ptr->source.source_pitch = pitch; //Set new gain value
     prop_ptr->source.apply_settings(); //Apply sound settings
 }
+void ZSENSDK::ZSENLightSourceProperty::setIntesity(float intensity){
+    LightsourceProperty* prop_ptr = static_cast<LightsourceProperty*>(this->prop_ptr);
+    prop_ptr->intensity = intensity;
+}
+void ZSENSDK::ZSENLightSourceProperty::setRange(float range){
+    LightsourceProperty* prop_ptr = static_cast<LightsourceProperty*>(this->prop_ptr);
+    prop_ptr->range = range;
+}
+void ZSENSDK::ZSENLightSourceProperty::setLightColor(ZSRGBCOLOR color){
+    LightsourceProperty* prop_ptr = static_cast<LightsourceProperty*>(this->prop_ptr);
+    prop_ptr->color = color;
+}
 //TileProperty functions
 void ZSENSDK::ZSENTileProperty::setDiffuseTexture(std::string texture){
     TileProperty* prop_ptr = static_cast<TileProperty*>(this->prop_ptr);
@@ -305,6 +317,12 @@ luabridge::getGlobalNamespace(state)
 
         .beginClass <ZSENObjectProperty>("ObjectProperty")
         .addFunction("setActive", &ZSENSDK::ZSENObjectProperty::setActive)
+        .endClass()
+
+        .deriveClass <ZSENLightSourceProperty, ZSENObjectProperty>("LightSource")
+        .addFunction("setIntensity", &ZSENSDK::ZSENLightSourceProperty::setIntesity)
+        .addFunction("setRange", &ZSENSDK::ZSENLightSourceProperty::setRange)
+        .addFunction("setColor", &ZSENSDK::ZSENLightSourceProperty::setLightColor)
         .endClass()
 
         .deriveClass <ZSENTransformProperty, ZSENObjectProperty>("Transform")

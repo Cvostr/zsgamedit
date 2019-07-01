@@ -106,8 +106,6 @@ public:
 
     ZSLIGHTSOURCE_GL_ID id; //glsl uniform index
 
-    ZSPIRE::Shader* deffered_shader_ptr;
-
     void addPropertyInterfaceToInspector(InspectorWin* inspector);
     void onValueChanged(); //Update mesh pointer
     void copyTo(GameObjectProperty* dest);
