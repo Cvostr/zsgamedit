@@ -170,6 +170,7 @@ public slots:
     void onAddButtonPressed();
 
 public:
+    QListWidget property_list; //list to store wgt list of props
     QLineEdit* comp_type;
     void* g_object_ptr; //Pointer to object, when we'll add components
 

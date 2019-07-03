@@ -16,7 +16,6 @@ namespace ZSENSDK {
 class ZSENObjectProperty{
 public:
     GameObjectProperty* prop_ptr;
-    int type;
     void setActive(bool active);
 };
 
@@ -77,6 +76,7 @@ public:
     ZSENTransformProperty transform();
     ZSENAudSourceProperty audio();
     ZSENTileProperty tile();
+    ZSENLightSourceProperty light();
 
     void prikol();
 };

@@ -17,6 +17,9 @@ void GameObject::saveProperties(std::ofstream* stream){
         *stream << " ";
 
         switch(property_ptr->type){
+        case GO_PROPERTY_TYPE_NONE:{
+            break;
+        }
         case GO_PROPERTY_TYPE_TRANSFORM:{
             TransformProperty* ptr = static_cast<TransformProperty*>(property_ptr);
             float posX = ptr->translation.X;
@@ -181,6 +184,9 @@ void GameObject::loadProperty(std::ifstream* world_stream){
     //since more than 1 properties same type can't be on one gameobject
     world_stream->read(reinterpret_cast<char*>(&prop_ptr->active), sizeof(bool));
     switch(type){
+        case GO_PROPERTY_TYPE_NONE :{
+            break;
+        }
         case GO_PROPERTY_TYPE_LABEL :{
             std::string label;
             *world_stream >> label;

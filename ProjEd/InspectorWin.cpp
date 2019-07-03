@@ -184,16 +184,6 @@ void InspectorWin::onPropertyChange(){
     this->onPropertyEdited();
 }
 
-void AddGoComponentDialog::onAddButtonPressed(){
-    GameObject* object_ptr = static_cast<GameObject*>(this->g_object_ptr);
-    object_ptr->addProperty(static_cast<PROPERTY_TYPE>(comp_type->text().toInt()));
-
-    auto prop_ptr = object_ptr->getPropertyPtrByType(static_cast<PROPERTY_TYPE>(comp_type->text().toInt()));
-    prop_ptr->onAddToObject();
-
-    accept(); //Close dialog with true
-}
-
 ManageComponentDialog::ManageComponentDialog(InspectorWin* win, void* g_object_ptr, QWidget* parent) :
     QDialog (parent, Qt::WindowTitleHint | Qt::WindowSystemMenuHint) {
 
@@ -328,7 +318,15 @@ AddGoComponentDialog::AddGoComponentDialog(QWidget* parent)
     //Allocation of main layout
     contentLayout = new QGridLayout;
 
-    contentLayout->addWidget(comp_type, 0, 0);
+    contentLayout->addWidget(&property_list, 0, 0);
+
+    for(int i = 1; i <= 9; i ++){
+        new QListWidgetItem(getPropertyString(i), &this->property_list);
+    }
+    new QListWidgetItem(getPropertyString(1000), &this->property_list);
+    new QListWidgetItem(getPropertyString(1001), &this->property_list);
+
+    //contentLayout->addWidget(comp_type, 0, 0);
     contentLayout->addWidget(add_btn, 1, 0);
     contentLayout->addWidget(close_btn, 1, 1);
     setLayout(contentLayout);
@@ -340,6 +338,22 @@ AddGoComponentDialog::AddGoComponentDialog(QWidget* parent)
     connect(close_btn, SIGNAL(clicked()), this, SLOT(reject()));
 
     this->setWindowTitle("Add component");
+}
+void AddGoComponentDialog::onAddButtonPressed(){
+    QString component_label = this->property_list.currentItem()->text();
+    for(int i = 1; i <= 1001; i ++){
+        if(getPropertyString(i).compare(component_label) == false){
+            GameObject* object_ptr = static_cast<GameObject*>(this->g_object_ptr);
+            object_ptr->addProperty(static_cast<PROPERTY_TYPE>(i));
+
+            auto prop_ptr = object_ptr->getPropertyPtrByType(static_cast<PROPERTY_TYPE>(i));
+            prop_ptr->onAddToObject();
+
+            accept(); //Close dialog with true
+            return;
+        }
+    }
+
 }
 AddGoComponentDialog::~AddGoComponentDialog(){
     delete this->comp_type;

@@ -15,7 +15,7 @@ void ProjBuilder::start(){
     writer = new BlobWriter(proj_ptr->root_path + "/.build/resources.map", window);
     writer->directory = proj_ptr->root_path + "/.build";
     writer->name_prefix = "blob_";
-    writer->max_blob_size = 50*1024*1024; //50 megabytes limit
+    writer->max_blob_size = 100*1024*1024; //100 megabytes limit
 
     for(unsigned int res_i = 0; res_i < proj_ptr->resources.size(); res_i ++){ //iterate over all resources
         Resource* res_ptr = &proj_ptr->resources[res_i];
@@ -32,7 +32,7 @@ void ProjBuilder::start(){
         writer->writeToBlob((proj_ptr->root_path + "/" + res_ptr->rel_path).toStdString(), res_ptr->rel_path.toStdString(), res_ptr);
     }
 
-    window->addToOutput("Resources Written!");
+    window->addToOutput("All Resources are Written!");
 
     delete writer;
 }

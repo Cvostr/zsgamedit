@@ -54,13 +54,16 @@ ZSENSDK::ZSENAudSourceProperty ZSENSDK::ZSENGmObject::audio(){
     result.prop_ptr = this->updPtr()->getPropertyPtrByType(GO_PROPERTY_TYPE_AUDSOURCE);
     return result;
 }
-
 ZSENSDK::ZSENTileProperty ZSENSDK::ZSENGmObject::tile(){
     ZSENTileProperty result;
     result.prop_ptr = this->updPtr()->getPropertyPtrByType(GO_PROPERTY_TYPE_TILE);
     return result;
 }
-
+ZSENSDK::ZSENLightSourceProperty ZSENSDK::ZSENGmObject::light(){
+    ZSENLightSourceProperty result;
+    result.prop_ptr = this->updPtr()->getPropertyPtrByType(GO_PROPERTY_TYPE_LIGHTSOURCE);
+    return result;
+}
 void ZSENSDK::ZSENGmObject::prikol(){
     static_cast<AudioSourceProperty*>(this->object_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_AUDSOURCE))->audio_start();
 }
