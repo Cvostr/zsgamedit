@@ -1,5 +1,6 @@
 #include "headers/World.h"
 #include "headers/Misc.h"
+#include "headers/obj_properties.h"
 
 GameObjectLink::GameObjectLink(){
     ptr = nullptr;
@@ -74,6 +75,14 @@ bool GameObject::addTransformProperty(){
 
 bool GameObject::addLabelProperty(){
     return addProperty(GO_PROPERTY_TYPE_LABEL);
+}
+
+bool GameObject::hasMesh(){
+    MeshProperty* mesh_prop = static_cast<MeshProperty*>(this->getPropertyPtrByType(GO_PROPERTY_TYPE_MESH));
+    if(mesh_prop != nullptr){
+        if(mesh_prop->mesh_ptr != nullptr) return true;
+    }
+    return false;
 }
 
 GameObjectProperty* GameObject::getPropertyPtrByType(PROPERTY_TYPE property){

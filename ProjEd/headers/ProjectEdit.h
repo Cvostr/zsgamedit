@@ -94,10 +94,14 @@ struct EditorSettings{
 
     int inspector_win_pos_X;
     int inspector_win_pos_Y;
+    //Maximum size of one blob
+    unsigned int _blob_writer_divide_size_kb;
 
     EditorSettings(){
         gameViewWin_Width = 640;
         gameViewWin_Height = 480;
+
+        _blob_writer_divide_size_kb = 100 * 1024;
     }
 };
 
@@ -110,6 +114,8 @@ class EditWindow : public QMainWindow
     Q_OBJECT
 
 public slots:
+    void keyPressEvent(QKeyEvent*);
+
     void onFileListItemClicked();
     void onObjectListItemClicked();
     void onObjectCtxMenuShow(QPoint point);

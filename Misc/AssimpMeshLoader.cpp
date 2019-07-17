@@ -7,6 +7,30 @@ static unsigned int loadflags = aiProcess_CalcTangentSpace | aiProcess_Triangula
 
 #include <iostream>
 
+void cmat(aiMatrix4x4 matin, ZSMATRIX4x4* matout){
+
+        matout->m[0][0] = matin.a1;
+        matout->m[0][1] = matin.b1;
+        matout->m[0][2] = matin.c1;
+        matout->m[0][3] = matin.d1;
+
+        matout->m[1][0] = matin.a2;
+        matout->m[1][1] = matin.b2;
+        matout->m[1][2] = matin.c2;
+        matout->m[1][3] = matin.d2;
+
+        matout->m[2][0] = matin.a3;
+        matout->m[2][1] = matin.b3;
+        matout->m[2][2] = matin.c3;
+        matout->m[2][3] = matin.d3;
+
+        matout->m[3][0] = matin.a4;
+        matout->m[3][1] = matin.b4;
+        matout->m[3][2] = matin.c4;
+        matout->m[3][3] = matin.d4;
+    //*matout = transpose(*matout);
+}
+
 unsigned int Engine::getMeshesAmount(std::string file_path){
     const aiScene* scene = importer.ReadFile(file_path, loadflags);
 
@@ -98,6 +122,18 @@ void Engine::loadNodeTree(std::string file_path, MeshNode* node){
 
 void Engine::processNodeForTree(MeshNode* node, aiNode* node_assimp, const aiScene* scene){
     node->node_label = node_assimp->mName.C_Str(); //assigning node name
+    //Store transform matrix
+    cmat(node_assimp->mTransformation, &node->node_transform);
+    //Declare vectors to store decomposed transform components
+    aiVector3t<float> node_scale;
+    aiVector3t<float> node_translation;
+    aiVector3t<float> node_rotation;
+    //Decompose them!
+    node_assimp->mTransformation.Decompose(node_scale, node_rotation, node_translation);
+    //Store them in engine node
+    node->translation = ZSVECTOR3(node_translation.x, node_translation.y, node_translation.z);
+    node->scale = ZSVECTOR3(node_scale.x, node_scale.y, node_scale.z);
+    node->rotation = ZSVECTOR3(node_rotation.x, node_rotation.y, node_rotation.z);
 
     unsigned int meshes_num = node_assimp->mNumMeshes;
     for(unsigned int ch_i = 0; ch_i < meshes_num; ch_i ++){

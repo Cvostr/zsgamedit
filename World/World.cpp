@@ -465,16 +465,22 @@ GameObject* World::addMeshNode(MeshNode* node){
     GameObject obj; //Creating base gameobject
     int add_num = 0; //Declaration of addititonal integer
     getAvailableNumObjLabel(QString::fromStdString(node->node_label), &add_num);
-
+    //Setting base variables
     obj.world_ptr = this;
     obj.addLabelProperty();
     obj.addProperty(GO_PROPERTY_TYPE_TRANSFORM);
     obj.label = &obj.getLabelProperty()->label;
     *obj.label = QString::fromStdString(node->node_label) + QString::number(add_num); //Assigning label to object
     obj.item_ptr->setText(0, *obj.label);
+
+    TransformProperty* transform_prop = static_cast<TransformProperty*>(obj.getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
+    transform_prop->setTranslation(node->translation);
+    transform_prop->scale = node->scale;
+    transform_prop->rotation = node->rotation;
+
     //Add node to world
     GameObject* node_object = this->addObject(obj);
-
+    //Iterate over all children nodes
     for(unsigned int node_i = 0; node_i < node->children.size(); node_i ++){
         MeshNode* ptr = &node->children[node_i];
         //Create new node object
@@ -483,36 +489,54 @@ GameObject* World::addMeshNode(MeshNode* node){
         node_object->item_ptr->addChild(newobj->item_ptr);
 
     }
-
+    //Iterate over all meshes, that inside of node
     for(unsigned int mesh_i = 0; mesh_i < node->mesh_names.size(); mesh_i ++){
         std::string mesh_label = node->mesh_names[mesh_i];
         ZSPIRE::Mesh* mesh_ptr = this->getMeshPtrByRelPath(QString::fromStdString(mesh_label));
 
-        GameObject mesh_obj; //Creating base gameobject
-        int add_num = 0; //Declaration of addititonal integer
-        getAvailableNumObjLabel(QString::fromStdString(mesh_label), &add_num);
+        GameObject* mesh_obj = nullptr;
+        if(mesh_label.compare(node->node_label) == false){
+            mesh_obj = node_object;
+        }else {
+            mesh_obj = new GameObject;
 
-        mesh_obj.world_ptr = this;
-        mesh_obj.addLabelProperty();
-        mesh_obj.addProperty(GO_PROPERTY_TYPE_TRANSFORM);
-        mesh_obj.addProperty(GO_PROPERTY_TYPE_MESH); //add mesh property
-        mesh_obj.addProperty(GO_PROPERTY_TYPE_MATERIAL); //add material property
-        mesh_obj.label = &mesh_obj.getLabelProperty()->label;
-        *mesh_obj.label = QString::fromStdString(mesh_label) + QString::number(add_num); //Assigning label to object
-        mesh_obj.item_ptr->setText(0, *mesh_obj.label);
+            int add_num = 0; //Declaration of addititonal integer
+            getAvailableNumObjLabel(QString::fromStdString(mesh_label), &add_num);
+
+            mesh_obj->world_ptr = this;
+            mesh_obj->addLabelProperty();
+            mesh_obj->addProperty(GO_PROPERTY_TYPE_TRANSFORM);
+
+            mesh_obj->label = &mesh_obj->getLabelProperty()->label;
+            *mesh_obj->label = QString::fromStdString(mesh_label) + QString::number(add_num); //Assigning label to object
+            mesh_obj->item_ptr->setText(0, *mesh_obj->label);
+            //Add to world object and parent it
+            mesh_obj = this->addObject(*mesh_obj);
+            node_object->addChildObject(mesh_obj->getLinkToThisObject());
+            node_object->item_ptr->addChild(mesh_obj->item_ptr);
+        }
+
+        mesh_obj->addProperty(GO_PROPERTY_TYPE_MESH); //add mesh property
+        mesh_obj->addProperty(GO_PROPERTY_TYPE_MATERIAL); //add material property
+
         //configure mesh
-        MeshProperty* mesh_prop_ptr = static_cast<MeshProperty*>(mesh_obj.getPropertyPtrByType(GO_PROPERTY_TYPE_MESH));
+        MeshProperty* mesh_prop_ptr = static_cast<MeshProperty*>(mesh_obj->getPropertyPtrByType(GO_PROPERTY_TYPE_MESH));
         mesh_prop_ptr->resource_relpath = QString::fromStdString(mesh_label);
         mesh_prop_ptr->updateMeshPtr();
         //configure material
-        MaterialProperty* mat_prop_ptr = static_cast<MaterialProperty*>(mesh_obj.getPropertyPtrByType(GO_PROPERTY_TYPE_MATERIAL));
+        MaterialProperty* mat_prop_ptr = static_cast<MaterialProperty*>(mesh_obj->getPropertyPtrByType(GO_PROPERTY_TYPE_MATERIAL));
         Project* proj_ptr = static_cast<Project*>(this->proj_ptr); //Convert void pointer to Project*
+
+        for(unsigned int mat_i = 0; mat_i < proj_ptr->resources.size(); mat_i ++){
+            if(proj_ptr->resources[mat_i].type == RESOURCE_TYPE_MATERIAL){
+                mat_prop_ptr->material_path = proj_ptr->resources[mat_i].rel_path;
+                mat_prop_ptr->onValueChanged();
+            }
+        }
         //mat_prop_ptr->material_path = ZSPIRE
 
-        //Add to world object and parent it
-        GameObject* mesh_obj_ptr = this->addObject(mesh_obj);
-        node_object->addChildObject(mesh_obj_ptr->getLinkToThisObject());
-        node_object->item_ptr->addChild(mesh_obj_ptr->item_ptr);
+
+
     }
 
     return node_object; //Return pointer to new object

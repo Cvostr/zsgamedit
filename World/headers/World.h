@@ -171,6 +171,7 @@ public:
     void copyTo(GameObject* dest);
     void processObject(RenderPipeline* pipeline); //On render pipeline wish to work with object
     void Draw(RenderPipeline* pipeline); //On render pipeline wish to draw the object
+    bool hasMesh(); //Check if gameobject has mesh property and mesh inside
     void onUpdate(int deltaTime); //calls onUpdate on all properties
     void onPreRender(RenderPipeline* pipeline); //calls onPreRender on all properties
     void onRender(RenderPipeline* pipeline);

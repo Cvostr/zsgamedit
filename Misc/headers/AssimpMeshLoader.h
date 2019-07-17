@@ -16,6 +16,11 @@ class MeshNode
 public:
     std::string node_label;
 
+    ZSVECTOR3 translation;
+    ZSVECTOR3 scale;
+    ZSVECTOR3 rotation;
+    ZSMATRIX4x4 node_transform;
+
     std::vector<MeshNode> children;
     std::vector<std::string> mesh_names;
     MeshNode() {}

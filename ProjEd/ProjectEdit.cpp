@@ -1018,6 +1018,17 @@ void EditWindow::onMouseMotion(int relX, int relY){
     }
 }
 
+void EditWindow::keyPressEvent(QKeyEvent* ke){
+    if(ke->key() == Qt::Key_Delete){
+        QTreeWidgetItem* item_toRemove = this->ui->objsList->currentItem();
+        GameObject* obj = this->world.getObjectByLabel(item_toRemove->text(0));
+        world.removeObj(obj->getLinkToThisObject());
+        _inspector_win->clearContentLayout();
+    }
+
+    QMainWindow::keyPressEvent(ke); // base class implementation
+}
+
 void EditWindow::onKeyDown(SDL_Keysym sym){
 
     if(sym.sym == SDLK_a){
@@ -1135,6 +1146,5 @@ void EditWindow::setGameViewWindowSize(int W, int H){
 }
 
 void EditWindow::setGameViewWindowMode(unsigned int mode){
-    SDL_SetWindowFullscreen(this->window,
-                                mode);
+    SDL_SetWindowFullscreen(this->window, mode);
 }

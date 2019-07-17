@@ -256,11 +256,13 @@ void GameObject::Draw(RenderPipeline* pipeline){
     //Call prerender on each property in object
     if(pipeline->current_state == PIPELINE_STATE_DEFAULT)
         this->onPreRender(pipeline);
-
+    //Getting pointer to mesh
     MeshProperty* mesh_prop = static_cast<MeshProperty*>(this->getPropertyPtrByType(GO_PROPERTY_TYPE_MESH));
-    if(mesh_prop != nullptr){
+    if(hasMesh()){// if object has mesh
+        //If we are in default draw mode
         if(pipeline->current_state == PIPELINE_STATE_DEFAULT)
             this->onRender(pipeline);
+        //If we picking object
         if(pipeline->current_state == PIPELINE_STATE_PICKING) {
             TransformProperty* transform_ptr = static_cast<TransformProperty*>(getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
 
@@ -272,7 +274,7 @@ void GameObject::Draw(RenderPipeline* pipeline){
             pipeline->getPickingShader()->setTransform(transform_ptr->transform_mat);
             pipeline->getPickingShader()->setGLuniformVec4("color", ZSVECTOR4(r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f));
         }
-
+        //Draw default mesh
         mesh_prop->mesh_ptr->Draw();
 
         if(this->isPicked == true && pipeline->current_state != PIPELINE_STATE_PICKING){
