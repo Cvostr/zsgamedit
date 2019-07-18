@@ -128,11 +128,13 @@ void EditWindow::init(){
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
     SDL_DisplayMode current;
     SDL_GetCurrentDisplayMode(0, &current);
-    std::cout << "SDL window creation requested" << std::endl;
-    this->window = SDL_CreateWindow("Game View", this->x() + this->width(), 0, settings.gameViewWin_Width, settings.gameViewWin_Height, SDL_WINDOW_OPENGL); //Create window
-    this->glcontext = SDL_GL_CreateContext(window);
-    std::cout << "SDL - GL context creation requested!" << std::endl;
 
+    std::cout << "SDL window creation requested" << std::endl;
+    this->window = SDL_CreateWindow("Game View", this->pos().x() + this->width(), 0, settings.gameViewWin_Width, settings.gameViewWin_Height, SDL_WINDOW_OPENGL); //Create window
+    this->glcontext = SDL_GL_CreateContext(window);
+    SDL_GL_SetSwapInterval(1); // Enable vsync
+    SDL_SetWindowResizable(window, SDL_TRUE);
+    std::cout << "SDL - GL context creation requested!" << std::endl;
 
     //init render
     render = new RenderPipeline;
@@ -482,8 +484,7 @@ void EditWindow::onRunProject(){
     }else{ //lets stop scene run
         //return base window size
         SDL_SetWindowSize(this->window, this->settings.gameViewWin_Width, this->settings.gameViewWin_Height);
-        SDL_SetWindowFullscreen(this->window,
-                                    0);
+        SDL_SetWindowFullscreen(this->window, 0);
         //Stop world
         stopWorld();
         //Recover world snapshot
@@ -626,7 +627,8 @@ void EditWindow::toggleCameras(){
 void EditWindow::glRender(){
     //int wx, wy;
     //SDL_GetWindowPosition(this->window, &wx, &wy);
-    //std::cout << _inspector_win->x() << wx << wy << std::endl;
+    //std::cout << _editor_win->pos().x() << " " << wx << " " << wy << std::endl;
+    //std::cout << _editor_win->pos().x() << std::endl;
 
     if(hasSheduledWorld){
         stopWorld(); //firstly, stop world
@@ -793,6 +795,7 @@ EditWindow* ZSEditor::openEditor(){
     _ed_actions_container = new EdActions; //Allocating EdActions
     _ed_actions_container->world_ptr = &_editor_win->world; //Put world pointer
     _ed_actions_container->insp_win = _inspector_win; //Put inspector win pointer
+//std::cout << _editor_win->pos().x() << std::endl;
 
     return _editor_win;
 }
@@ -1020,10 +1023,30 @@ void EditWindow::onMouseMotion(int relX, int relY){
 
 void EditWindow::keyPressEvent(QKeyEvent* ke){
     if(ke->key() == Qt::Key_Delete){
-        QTreeWidgetItem* item_toRemove = this->ui->objsList->currentItem();
-        GameObject* obj = this->world.getObjectByLabel(item_toRemove->text(0));
-        world.removeObj(obj->getLinkToThisObject());
-        _inspector_win->clearContentLayout();
+        QTreeWidgetItem* object_toRemove = this->ui->objsList->currentItem();
+        QListWidgetItem* file_toRemove = this->ui->fileList->currentItem();
+        if(object_toRemove != nullptr){ //if user wish to delete object
+            GameObject* obj = this->world.getObjectByLabel(object_toRemove->text(0));
+            _inspector_win->clearContentLayout(); //Prevent variable conflicts
+            GameObjectLink link = obj->getLinkToThisObject();
+            obj_trstate.isTransforming = false; //disabling object transform
+            callObjectDeletion(link); //removing object
+        }
+        if(file_toRemove != nullptr){ //if user wish to remove file
+            FileDeleteDialog* dialog = new FileDeleteDialog(this->current_dir + "/" + file_toRemove->text());
+            dialog->exec();
+            delete dialog;
+            updateFileList();
+        }
+    }
+    if(ke->key() == Qt::Key_F2){
+        QListWidgetItem* item_toRename = this->ui->fileList->currentItem();
+        if(item_toRename != nullptr){
+            FileRenameDialog* dialog = new FileRenameDialog(this->current_dir, item_toRename->text());
+            dialog->exec();
+            delete dialog;
+            updateFileList();
+        }
     }
 
     QMainWindow::keyPressEvent(ke); // base class implementation
@@ -1134,6 +1157,8 @@ void EditWindow::destroyAllManagers(){
 }
 
 void EditWindow::setGameViewWindowSize(int W, int H){
+    if(W < 1 && H < 1) return;
+
     SDL_SetWindowSize(this->window, W, H);
 
     ZSVIEWPORT viewport = ZSVIEWPORT(0,0,W,H);

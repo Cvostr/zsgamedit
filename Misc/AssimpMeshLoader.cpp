@@ -134,13 +134,13 @@ void Engine::processNodeForTree(MeshNode* node, aiNode* node_assimp, const aiSce
     node->translation = ZSVECTOR3(node_translation.x, node_translation.y, node_translation.z);
     node->scale = ZSVECTOR3(node_scale.x, node_scale.y, node_scale.z);
     node->rotation = ZSVECTOR3(node_rotation.x, node_rotation.y, node_rotation.z);
-
+    //iterate over all meshes in this node
     unsigned int meshes_num = node_assimp->mNumMeshes;
     for(unsigned int ch_i = 0; ch_i < meshes_num; ch_i ++){
         aiMesh* mesh = scene->mMeshes[node_assimp->mMeshes[ch_i]];
         node->mesh_names.push_back(mesh->mName.C_Str());
     }
-
+    //iterate over all children nodes and write their names
     unsigned int nodes_num = node_assimp->mNumChildren;
     for(unsigned int ch_i = 0; ch_i < nodes_num; ch_i ++){
         aiNode* child = node_assimp->mChildren[ch_i];

@@ -9,6 +9,7 @@
 #include <fstream>
 
 #include "EdActions.h"
+#include "EditorSettings.h"
 #include "../../Render/headers/zs-pipeline.h"
 #include "../../World/headers/zs-camera.h"
 #include "../../Misc/headers/oal_manager.h"
@@ -82,28 +83,7 @@ struct PropertyPaintState{
     }
 };
 
-struct EditorSettings{
-    int gameViewWin_Width;
-    int gameViewWin_Height;
 
-    int editor_win_pos_X;
-    int editor_win_pos_Y;
-
-    int gameview_win_pos_x;
-    int gameview_win_pos_y;
-
-    int inspector_win_pos_X;
-    int inspector_win_pos_Y;
-    //Maximum size of one blob
-    unsigned int _blob_writer_divide_size_kb;
-
-    EditorSettings(){
-        gameViewWin_Width = 640;
-        gameViewWin_Height = 480;
-
-        _blob_writer_divide_size_kb = 100 * 1024;
-    }
-};
 
 class ObjectCtxMenu;
 class FileCtxMenu;

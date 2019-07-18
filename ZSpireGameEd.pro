@@ -84,7 +84,8 @@ HEADERS += \
     Misc/headers/AssimpMeshLoader.h \
     Render/headers/GizmosRenderer.h \
     Misc/headers/GlyphManager.h \
-    Misc/headers/EditorManager.h
+    Misc/headers/EditorManager.h \
+    ProjEd/headers/EditorSettings.h
 
 
 FORMS += \
