@@ -130,7 +130,12 @@ void EditWindow::init(){
     SDL_GetCurrentDisplayMode(0, &current);
 
     std::cout << "SDL window creation requested" << std::endl;
-    this->window = SDL_CreateWindow("Game View", this->pos().x() + this->width(), 0, settings.gameViewWin_Width, settings.gameViewWin_Height, SDL_WINDOW_OPENGL); //Create window
+    if(this->settings.isFirstSetup){
+        this->settings.gameView_win_pos_x = this->width();
+        this->settings.gameView_win_pos_y = 0;
+    }
+
+    this->window = SDL_CreateWindow("Game View", this->settings.gameView_win_pos_x, this->settings.gameView_win_pos_y, settings.gameViewWin_Width, settings.gameViewWin_Height, SDL_WINDOW_OPENGL); //Create window
     this->glcontext = SDL_GL_CreateContext(window);
     SDL_GL_SetSwapInterval(1); // Enable vsync
     SDL_SetWindowResizable(window, SDL_TRUE);
@@ -463,6 +468,7 @@ void EditWindow::stopWorld(){
     }
 
     _ed_actions_container->setStoreActions(true);
+    //Clear Inspector Win
     _inspector_win->clearContentLayout();
     isWorldCamera = false;
     isSceneRun = false; //set toggle to true
@@ -478,7 +484,7 @@ void EditWindow::onRunProject(){
         this->world.putToShapshot(&run_world_snapshot); //create snapshot of current state to recover it later
         //perform world activity startup
         runWorld();
-
+        //Change button text
         this->ui->actionRun->setText("Stop");
 
     }else{ //lets stop scene run
@@ -490,7 +496,7 @@ void EditWindow::onRunProject(){
         //Recover world snapshot
         this->world.recoverFromSnapshot(&run_world_snapshot); //create snapshot of current state to recover it later
         run_world_snapshot.clear(); //Clear snapshot to free up memory
-
+        //Change button text
         this->ui->actionRun->setText("Run");
     }
 }
@@ -625,10 +631,8 @@ void EditWindow::toggleCameras(){
 }
 
 void EditWindow::glRender(){
-    //int wx, wy;
-    //SDL_GetWindowPosition(this->window, &wx, &wy);
-    //std::cout << _editor_win->pos().x() << " " << wx << " " << wy << std::endl;
-    //std::cout << _editor_win->pos().x() << std::endl;
+    this->settings.inspector_win_pos_X = _inspector_win->pos().x();
+    this->settings.inspector_win_pos_Y = _inspector_win->pos().y();
 
     if(hasSheduledWorld){
         stopWorld(); //firstly, stop world
@@ -789,9 +793,14 @@ EditWindow* ZSEditor::openEditor(){
     _editor_win->lookForResources(_editor_win->project.root_path); //Make a vector of all resource files
     _editor_win->move(0,0); //Editor base win would be in the left part of screen
     _editor_win->show(); //Show editor window
-
+    //If no settings, then set to defaults
+    if(_editor_win->settings.isFirstSetup){
+        _editor_win->settings.inspector_win_pos_X = _editor_win->width() + _editor_win->settings.gameViewWin_Width;
+        _editor_win->settings.inspector_win_pos_Y = 0;
+    }
     _inspector_win->show();
-    _inspector_win->move(_editor_win->width() + _editor_win->settings.gameViewWin_Width, 0);
+    //Move window
+    _inspector_win->move(_editor_win->settings.inspector_win_pos_X, _editor_win->settings.inspector_win_pos_Y);
 
     _inspector_win->editwindow_ptr = static_cast<void*>(_editor_win);
 
@@ -1159,8 +1168,8 @@ void EditWindow::updateDeltaTime(float deltaTime){
 
 void EditWindow::destroyAllManagers(){
     //we must do that in reverse order
-    for(unsigned int i = static_cast<unsigned int>(managers.size()); i > 0; i --){
-        delete managers[i];
+    for(int i = static_cast<int>(managers.size()) - 1; i >= 0; i --){
+        delete managers[static_cast<unsigned int>(i)];
     }
 }
 
@@ -1169,7 +1178,7 @@ void EditWindow::setGameViewWindowSize(int W, int H){
 
     SDL_SetWindowSize(this->window, W, H);
 
-    ZSVIEWPORT viewport = ZSVIEWPORT(0,0,W,H);
+    ZSVIEWPORT viewport = ZSVIEWPORT(0,0,static_cast<unsigned int>(W),static_cast<unsigned int>(H));
     edit_camera.setViewport(viewport);
     world.world_camera.setViewport(viewport);
 

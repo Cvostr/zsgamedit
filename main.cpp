@@ -30,27 +30,29 @@ int main(int argc, char *argv[])
             if(w.edit_win_ptr->close_reason == EW_CLOSE_REASON_PROJLIST){
                 w.edit_win_ptr->close_reason = EW_CLOSE_REASON_UNCLOSED;
                 w.show();
-             }
+            }
 
             w.edit_win_ptr->updateDeltaTime(deltaTime);
             SDL_Event event;
             ZSENSDK::Input::MouseState* mstate = ZSENSDK::Input::getMouseStatePtr();
-                while (SDL_PollEvent(&event))
-                {
-                    if (event.type == SDL_WINDOWEVENT) { //If user caused SDL window to close
-                       if(event.window.event == SDL_WINDOWEVENT_RESIZED){
-                            w.edit_win_ptr->setGameViewWindowSize(event.window.data1, event.window.data2);
-                            //Write new settings
-                            w.edit_win_ptr->settings.gameViewWin_Width = event.window.data1;
-                            w.edit_win_ptr->settings.gameViewWin_Height = event.window.data2;
-                       }
-                       if(event.window.event == SDL_WINDOWEVENT_MOVED){
-                            //Write new settings
-                            w.edit_win_ptr->settings.gameView_win_pos_x = event.window.data1;
-                            w.edit_win_ptr->settings.gameView_win_pos_x = event.window.data2;
-                       }
+            while (SDL_PollEvent(&event))
+            {
+                if (event.type == SDL_WINDOWEVENT) { //If user caused SDL window to close
+                    if(event.window.event == SDL_WINDOWEVENT_RESIZED){
+                        w.edit_win_ptr->setGameViewWindowSize(event.window.data1, event.window.data2);
+                        //Write new settings
+                        w.edit_win_ptr->settings.gameViewWin_Width = event.window.data1;
+                        w.edit_win_ptr->settings.gameViewWin_Height = event.window.data2;
+                    }
+                    if(event.window.event == SDL_WINDOWEVENT_MOVED){
+                        //Write new settings
+                        w.edit_win_ptr->settings.gameView_win_pos_x = event.window.data1;
+                        w.edit_win_ptr->settings.gameView_win_pos_y = event.window.data2;
+                        }
                     }
                     if (event.type == SDL_QUIT) { //If user caused SDL window to close
+                        //Close all managers and release everything
+                        w.edit_win_ptr->onCloseProject();
                         working = false;
                     }
                     if (event.type == SDL_MOUSEBUTTONUP) { //If user released mouse button

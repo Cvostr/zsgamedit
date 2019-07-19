@@ -147,7 +147,7 @@ unsigned int RenderPipeline::render_getpickedObj(void* projectedit_ptr, int mous
         glEnable(GL_CULL_FACE);
 
     unsigned char data[4];
-    glReadPixels(mouseX, 480 - mouseY, 1,1, GL_RGBA, GL_UNSIGNED_BYTE, data);
+    glReadPixels(mouseX, this->HEIGHT - mouseY, 1,1, GL_RGBA, GL_UNSIGNED_BYTE, data);
     data[3] = 0;
     unsigned int* pr_data_ = reinterpret_cast<unsigned int*>(&data[0]);
     unsigned int pr_data = *pr_data_;
