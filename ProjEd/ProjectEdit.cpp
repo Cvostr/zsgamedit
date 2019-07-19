@@ -780,6 +780,9 @@ EditWindow* ZSEditor::openProject(Project& project){
     return openEditor(); //Return pointer to edit window
 }
 EditWindow* ZSEditor::openEditor(){
+    EditorSettingsManager* settings_manager = new EditorSettingsManager(&_editor_win->settings);
+    _editor_win->startManager(settings_manager);
+
     _editor_win->init();
 
     _editor_win->close_reason = EW_CLOSE_REASON_UNCLOSED;
@@ -1022,29 +1025,34 @@ void EditWindow::onMouseMotion(int relX, int relY){
 }
 
 void EditWindow::keyPressEvent(QKeyEvent* ke){
-    if(ke->key() == Qt::Key_Delete){
+    if(ke->key() == Qt::Key_Delete){ //User pressed delete button
         QTreeWidgetItem* object_toRemove = this->ui->objsList->currentItem();
         QListWidgetItem* file_toRemove = this->ui->fileList->currentItem();
-        if(object_toRemove != nullptr){ //if user wish to delete object
+        if(object_toRemove != nullptr && ui->objsList->hasFocus()){ //if user wish to delete object
             GameObject* obj = this->world.getObjectByLabel(object_toRemove->text(0));
             _inspector_win->clearContentLayout(); //Prevent variable conflicts
             GameObjectLink link = obj->getLinkToThisObject();
             obj_trstate.isTransforming = false; //disabling object transform
             callObjectDeletion(link); //removing object
         }
-        if(file_toRemove != nullptr){ //if user wish to remove file
+        if(file_toRemove != nullptr && ui->fileList->hasFocus()){ //if user wish to remove file
             FileDeleteDialog* dialog = new FileDeleteDialog(this->current_dir + "/" + file_toRemove->text());
             dialog->exec();
             delete dialog;
             updateFileList();
         }
     }
-    if(ke->key() == Qt::Key_F2){
+    if(ke->key() == Qt::Key_F2){ //User pressed f2 key
         QListWidgetItem* item_toRename = this->ui->fileList->currentItem();
-        if(item_toRename != nullptr){
+        if(item_toRename != nullptr && ui->fileList->hasFocus()){
             FileRenameDialog* dialog = new FileRenameDialog(this->current_dir, item_toRename->text());
             dialog->exec();
             delete dialog;
+            updateFileList();
+        }
+    }
+    if(ke->key() == Qt::Key_F5){ //User pressed f2 key
+        if(ui->fileList->hasFocus()){
             updateFileList();
         }
     }

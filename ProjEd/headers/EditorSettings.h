@@ -31,7 +31,13 @@ struct EditorSettings{
 };
 
 class EditorSettingsManager : public EditorComponentManager{
+private:
+    EditorSettings* settings_ptr;
+public:
+    void init();
 
+    EditorSettingsManager(EditorSettings* settings_ptr);
+    ~EditorSettingsManager();
 };
 
 #endif // EDITORSETTINGS_H
