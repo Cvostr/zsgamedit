@@ -13,8 +13,8 @@
 #include <QDesktopServices>
 
 EditWindow* _editor_win;
-static InspectorWin* _inspector_win;
-static EdActions* _ed_actions_container;
+InspectorWin* _inspector_win;
+EdActions* _ed_actions_container;
 
 EditWindow::EditWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -169,6 +169,9 @@ void EditWindow::init(){
             break;
         }
     }
+    ZSVIEWPORT viewport = ZSVIEWPORT(0,0,static_cast<unsigned int>(this->settings.gameViewWin_Width),static_cast<unsigned int>( this->settings.gameViewWin_Height));
+    edit_camera.setViewport(viewport);
+
     world.world_camera = edit_camera;
     world.world_camera.isAlListenerCamera = true;
 }
@@ -816,66 +819,6 @@ InspectorWin* EditWindow::getInspector(){
     return _inspector_win;
 }
 
-void ObjectCtxMenu::onDublicateClicked(){
-    //Make snapshot actions
-    _ed_actions_container->newSnapshotAction(&win_ptr->world);
-    _inspector_win->clearContentLayout(); //Prevent variable conflicts
-    GameObjectLink link = obj_ptr->getLinkToThisObject();
-    GameObject* result = win_ptr->world.dublicateObject(link.ptr);
-
-    if(result->hasParent){ //if object parented
-        result->parent.ptr->item_ptr->addChild(result->item_ptr);
-    }else{
-        win_ptr->ui->objsList->addTopLevelItem(result->item_ptr);
-    }
-}
-
-void ObjTreeWgt::dropEvent(QDropEvent* event){
-    _ed_actions_container->newSnapshotAction(&win_ptr->world); //Add new snapshot action
-    _inspector_win->clearContentLayout(); //Prevent variable conflicts
-    //User dropped object item
-    QList<QTreeWidgetItem*> kids = this->selectedItems(); //Get list of selected object(it is moving object)
-    QList<QListWidgetItem*> file_dropped = _editor_win->ui->fileList->selectedItems();
-
-    if(kids.length() > 0){ //if we dropped gameobject
-        //Block internal move to avoid bugs
-        _editor_win->ui->objsList->setDragDropMode(QAbstractItemView::InternalMove);
-
-        GameObject* obj_ptr = world_ptr->getObjectByLabel(kids.at(0)->text(0)); //Receiving pointer to moving object
-
-        QTreeWidgetItem* pparent = kids.at(0)->parent(); //parent of moved object
-        if(pparent == nullptr){ //If object hadn't any parent
-            //this->removeItemWidget(obj_ptr->item_ptr, 0);
-        }else{ //If object already parented
-            GameObjectLink link = obj_ptr->getLinkToThisObject();
-            GameObject* pparent_go = world_ptr->getObjectByLabel(pparent->text(0));
-            pparent_go->removeChildObject(link); //Remove object from previous parent
-        }
-        if(file_dropped.length() == 0) //if we didn't move a file
-            QTreeWidget::dropEvent(event);
-
-        QTreeWidgetItem* nparent = obj_ptr->item_ptr->parent(); //new parent
-        if(nparent != nullptr){ //If we moved obj to another parent
-            GameObject* nparent_go = world_ptr->getObjectByLabel(nparent->text(0));
-            nparent_go->addChildObject(obj_ptr->getLinkToThisObject());
-        }else{ //Object hasn't received a parent
-            if(pparent != nullptr){//We unparented object
-                obj_ptr->hasParent = false;
-                this->addTopLevelItem(obj_ptr->item_ptr);
-            }
-        }
-    }
-
-    if(file_dropped.length() > 0){ //if we dropped some file
-        QString file_path = _editor_win->getCurrentDirectory() + "/" + file_dropped.at(0)->text();
-        //call function, that performs some things after object dropped
-        _editor_win->addFileToObjectList(file_path);
-        //this hack clears selection from file list
-        _editor_win->updateFileList();
-    }
-    //return drg&drop mode to normal
-    _editor_win->ui->objsList->setDragDropMode(QAbstractItemView::DragDrop);
-}
 
 void EditWindow::onLeftBtnClicked(int X, int Y){
     //Stop camera moving
@@ -915,7 +858,7 @@ void EditWindow::onRightBtnClicked(int X, int Y){
 
     this->obj_ctx_menu->setObjectPtr(obj_ptr);
     this->obj_ctx_menu->displayTransforms = true;
-    this->obj_ctx_menu->show(QPoint(this->width() + X, Y));
+    this->obj_ctx_menu->show(QPoint(settings.gameView_win_pos_x + X, settings.gameView_win_pos_y + Y));
     this->obj_ctx_menu->displayTransforms = false;
 
 }
@@ -939,6 +882,7 @@ void EditWindow::onMouseWheel(int x, int y){
     }
 }
 void EditWindow::onMouseMotion(int relX, int relY){
+    //Property painting
     if(this->ppaint_state.enabled && input_state.isLeftBtnHold == true){ //we just move on map
         if(ppaint_state.time == 0.0f && !isSceneRun){
             ppaint_state.time += deltaTime;
@@ -970,9 +914,9 @@ void EditWindow::onMouseMotion(int relX, int relY){
         }
 
     }
-
+    //We are in 2D project, move camera by the mouse
     if(project.perspective == 2){ //Only affective in 2D
-
+        //If middle button of mouse pressed
         if(input_state.isMidBtnHold == true){ //we just move on map
             //Stop camera moving
             this->edit_camera.stopMoving();
@@ -983,35 +927,8 @@ void EditWindow::onMouseMotion(int relX, int relY){
             edit_camera.setPosition(cam_pos);
         }
     }
-        if(obj_trstate.isTransforming == true && input_state.isLeftBtnHold == true){ //Only affective if object is transforming
 
-            ZSRGBCOLOR color = render->getColorOfPickedTransformControl(obj_trstate.tprop_ptr->_last_translation, this->input_state.mouseX, this->input_state.mouseY);
-
-            if(color.r == 255) color.r = 1; else
-                color.r = 0;
-            if(color.g == 255) color.g = 1; else
-                color.g = 0;
-            if(color.b == 255) color.b = 1; else
-                color.b = 0;
-
-            ZSVECTOR3* vec_ptr = nullptr; //pointer to modifying vector
-
-            if(obj_trstate.transformMode == GO_TRANSFORM_MODE_TRANSLATE){
-                vec_ptr = &obj_trstate.tprop_ptr->translation;
-            }
-            //if we scaling
-            if(obj_trstate.transformMode == GO_TRANSFORM_MODE_SCALE){
-                vec_ptr = &obj_trstate.tprop_ptr->scale;
-            }
-            //if we rotating
-            if(obj_trstate.transformMode == GO_TRANSFORM_MODE_ROTATE){
-                vec_ptr = &obj_trstate.tprop_ptr->rotation;
-            }
-
-            *vec_ptr = *vec_ptr + ZSVECTOR3(-relX, -relY,relX) * ZSVECTOR3(color.r, color.g, color.b);
-
-
-    }
+    //We are in 2D project, move camera by the mouse and rotate it
     if(project.perspective == 3){//Only affective in 3D
 
         if(input_state.isMidBtnHold == true){
@@ -1030,6 +947,32 @@ void EditWindow::onMouseMotion(int relX, int relY){
             vNormalize(&front);
             edit_camera.setFront(front);
         }
+    }
+    //Visual transform control
+    if(obj_trstate.isTransforming == true && input_state.isLeftBtnHold == true){ //Only affective if object is transforming
+        ZSRGBCOLOR color = render->getColorOfPickedTransformControl(obj_trstate.tprop_ptr->_last_translation, this->input_state.mouseX, this->input_state.mouseY);
+
+        if(color.r == 255) color.r = 1; else
+            color.r = 0;
+        if(color.g == 255) color.g = 1; else
+            color.g = 0;
+        if(color.b == 255) color.b = 1; else
+            color.b = 0;
+
+        ZSVECTOR3* vec_ptr = nullptr; //pointer to modifying vector
+        if(obj_trstate.transformMode == GO_TRANSFORM_MODE_TRANSLATE){
+            vec_ptr = &obj_trstate.tprop_ptr->translation;
+        }
+        //if we scaling
+        if(obj_trstate.transformMode == GO_TRANSFORM_MODE_SCALE){
+            vec_ptr = &obj_trstate.tprop_ptr->scale;
+        }
+        //if we rotating
+        if(obj_trstate.transformMode == GO_TRANSFORM_MODE_ROTATE){
+            vec_ptr = &obj_trstate.tprop_ptr->rotation;
+        }
+
+        *vec_ptr = *vec_ptr + ZSVECTOR3(-relX, -relY,relX) * ZSVECTOR3(color.r, color.g, color.b);
     }
 }
 
@@ -1054,13 +997,13 @@ void EditWindow::keyPressEvent(QKeyEvent* ke){
     if(ke->key() == Qt::Key_F2){ //User pressed f2 key
         QListWidgetItem* item_toRename = this->ui->fileList->currentItem();
         if(item_toRename != nullptr && ui->fileList->hasFocus()){
-            FileRenameDialog* dialog = new FileRenameDialog(this->current_dir, item_toRename->text());
+            FileRenameDialog* dialog = new FileRenameDialog(this->current_dir + "/" + item_toRename->text(), item_toRename->text());
             dialog->exec();
             delete dialog;
             updateFileList();
         }
     }
-    if(ke->key() == Qt::Key_F5){ //User pressed f2 key
+    if(ke->key() == Qt::Key_F5){ //User pressed f5 key
         if(ui->fileList->hasFocus()){
             updateFileList();
         }
@@ -1183,10 +1126,19 @@ void EditWindow::setGameViewWindowSize(int W, int H){
     world.world_camera.setViewport(viewport);
 
     for(unsigned int i = 0; i < managers.size(); i ++){
+        managers[i]->WIDTH = W;
+        managers[i]->HEIGHT = H;
         managers[i]->updateWindowSize(W, H);
     }
 }
 
 void EditWindow::setGameViewWindowMode(unsigned int mode){
     SDL_SetWindowFullscreen(this->window, mode);
+}
+
+QTreeWidget* EditWindow::getObjectListWidget(){
+    return this->ui->objsList;
+}
+QListWidget* EditWindow::getFilesListWidget(){
+    return this->ui->fileList;
 }

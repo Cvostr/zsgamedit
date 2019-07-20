@@ -29,21 +29,6 @@ ZSVECTOR3 ZSENSDK::Math::vadd(ZSVECTOR3 v1, ZSVECTOR3 v2){
     return v1 + v2;
 }
 
-GameObject* ZSENSDK::ZSENGmObject::updPtr(){
-    this->object_ptr = world_ptr->getObjectByStringId(this->str_id);
-    return object_ptr;
-}
-
-std::string ZSENSDK::ZSENGmObject::getLabel(){
-    return this->updPtr()->label->toStdString();
-}
-void ZSENSDK::ZSENGmObject::setLabel(std::string label){
-    this->updPtr()->setLabel(label);
-}
-void ZSENSDK::ZSENGmObject::setActive(bool active){
-    this->updPtr()->setActive(active);
-}
-
 ZSENSDK::ZSENTransformProperty ZSENSDK::ZSENGmObject::transform(){
     ZSENTransformProperty result;
     result.prop_ptr = static_cast<TransformProperty*>(this->updPtr()->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
@@ -68,47 +53,8 @@ void ZSENSDK::ZSENGmObject::prikol(){
     static_cast<AudioSourceProperty*>(this->object_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_AUDSOURCE))->audio_start();
 }
 
-ZSENSDK::ZSENGmObject ZSENSDK::ZSEN_World::getObjectSDK(std::string name){
-    ZSENGmObject result;
 
-    GameObject* common_obj_ptr = this->world_ptr->getObjectByLabel(QString::fromStdString(name));
-    result.str_id = common_obj_ptr->str_id;
-    result.world_ptr = this->world_ptr;
-    result.updPtr();
 
-    return result;
-}
-
-void ZSENSDK::ZSEN_World::removeObject(ZSENGmObject obj){
-    world_ptr->removeObj(obj.updPtr()->getLinkToThisObject());
-}
-void ZSENSDK::ZSEN_World::setCamera(ZSPIRE::Camera cam){
-    cam.setViewport(world_ptr->world_camera.getViewport());
-    world_ptr->world_camera = cam;
-}
-ZSPIRE::Camera ZSENSDK::ZSEN_World::getCamera(){
-    return world_ptr->world_camera;
-}
-void ZSENSDK::ZSEN_World::loadWorldFromFile(std::string file){
-    Project* proj_ptr = static_cast<Project*>(world_ptr->proj_ptr);
-
-    QString load = proj_ptr->root_path + "/" + QString::fromStdString(file);
-
-   _editor_win->sheduleWorldLoad(load);
-}
-void ZSENSDK::ZSEN_World::Instantiate(ZSENGmObject obj){
-    GameObjectLink link = obj.updPtr()->getLinkToThisObject();
-    GameObject* result = this->world_ptr->dublicateObject(link.ptr);
-
-    if(result->hasParent){ //if object parented
-        result->parent.ptr->item_ptr->addChild(result->item_ptr);
-    }else{
-        this->world_ptr->obj_widget_ptr->addTopLevelItem(result->item_ptr);
-    }
-}
-void ZSENSDK::ZSEN_World::addPrefab(std::string prefab){
-    this->world_ptr->addObjectsFromPrefab(QString::fromStdString(prefab));
-}
 void ZSENSDK::ZSENObjectProperty::setActive(bool active){
     prop_ptr->active = active;
 }

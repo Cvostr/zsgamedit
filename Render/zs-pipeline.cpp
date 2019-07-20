@@ -109,7 +109,7 @@ ZSRGBCOLOR RenderPipeline::getColorOfPickedTransformControl(ZSVECTOR3 translatio
     getGizmosRenderer()->drawTransformControls(translation, 200, 25);
 
     unsigned char data[4];
-    glReadPixels(mouseX, 480 - mouseY, 1,1, GL_RGBA, GL_UNSIGNED_BYTE, data);
+    glReadPixels(mouseX, this->HEIGHT - mouseY, 1,1, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
     return ZSRGBCOLOR(data[0], data[1], data[2]);
 }

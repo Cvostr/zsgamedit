@@ -4,8 +4,61 @@
 #include <QMouseEvent>
 #include <QDesktopServices>
 
+extern EditWindow* _editor_win;
+extern InspectorWin* _inspector_win;
+extern EdActions* _ed_actions_container;
+
+
 ObjTreeWgt::ObjTreeWgt(QWidget* parent) : QTreeWidget (parent){
     this->world_ptr = nullptr; //Not assigned by default
+}
+
+
+void ObjTreeWgt::dropEvent(QDropEvent* event){
+    _ed_actions_container->newSnapshotAction(&win_ptr->world); //Add new snapshot action
+    _inspector_win->clearContentLayout(); //Prevent variable conflicts
+    //User dropped object item
+    QList<QTreeWidgetItem*> kids = this->selectedItems(); //Get list of selected object(it is moving object)
+    QList<QListWidgetItem*> file_dropped = _editor_win->getFilesListWidget()->selectedItems();
+
+    if(kids.length() > 0){ //if we dropped gameobject
+        //Block internal move to avoid bugs
+        _editor_win->getObjectListWidget()->setDragDropMode(QAbstractItemView::InternalMove);
+
+        GameObject* obj_ptr = world_ptr->getObjectByLabel(kids.at(0)->text(0)); //Receiving pointer to moving object
+
+        QTreeWidgetItem* pparent = kids.at(0)->parent(); //parent of moved object
+        if(pparent == nullptr){ //If object hadn't any parent
+            //this->removeItemWidget(obj_ptr->item_ptr, 0);
+        }else{ //If object already parented
+            GameObjectLink link = obj_ptr->getLinkToThisObject();
+            GameObject* pparent_go = world_ptr->getObjectByLabel(pparent->text(0));
+            pparent_go->removeChildObject(link); //Remove object from previous parent
+        }
+        if(file_dropped.length() == 0) //if we didn't move a file
+            QTreeWidget::dropEvent(event);
+
+        QTreeWidgetItem* nparent = obj_ptr->item_ptr->parent(); //new parent
+        if(nparent != nullptr){ //If we moved obj to another parent
+            GameObject* nparent_go = world_ptr->getObjectByLabel(nparent->text(0));
+            nparent_go->addChildObject(obj_ptr->getLinkToThisObject());
+        }else{ //Object hasn't received a parent
+            if(pparent != nullptr){//We unparented object
+                obj_ptr->hasParent = false;
+                this->addTopLevelItem(obj_ptr->item_ptr);
+            }
+        }
+    }
+
+    if(file_dropped.length() > 0){ //if we dropped some file
+        QString file_path = _editor_win->getCurrentDirectory() + "/" + file_dropped.at(0)->text();
+        //call function, that performs some things after object dropped
+        _editor_win->addFileToObjectList(file_path);
+        //this hack clears selection from file list
+        _editor_win->updateFileList();
+    }
+    //return drg&drop mode to normal
+    _editor_win->getObjectListWidget()->setDragDropMode(QAbstractItemView::DragDrop);
 }
 
 void ObjTreeWgt::mousePressEvent(QMouseEvent *event){
@@ -97,7 +150,19 @@ void ObjectCtxMenu::onRotateClicked(){
     //Set state to rotate object
     win_ptr->obj_trstate.setTransformOnObject(GO_TRANSFORM_MODE_ROTATE);
 }
+void ObjectCtxMenu::onDublicateClicked(){
+    //Make snapshot actions
+    _ed_actions_container->newSnapshotAction(&win_ptr->world);
+    _inspector_win->clearContentLayout(); //Prevent variable conflicts
+    GameObjectLink link = obj_ptr->getLinkToThisObject();
+    GameObject* result = win_ptr->world.dublicateObject(link.ptr);
 
+    if(result->hasParent){ //if object parented
+        result->parent.ptr->item_ptr->addChild(result->item_ptr);
+    }else{
+        _editor_win->getObjectListWidget()->addTopLevelItem(result->item_ptr);
+    }
+}
 void ObjectCtxMenu::onStorePrefabPressed(){
     QString prefab_filepath = win_ptr->getCurrentDirectory() + "/" + *obj_ptr->label + ".prefab";
     //Call prefab storing

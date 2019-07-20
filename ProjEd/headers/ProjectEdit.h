@@ -202,7 +202,11 @@ public:
     void setGameViewWindowSize(int W, int H);
     void setGameViewWindowMode(unsigned int mode);
 
-    Ui::EditWindow *ui;
+    Ui::EditWindow* ui;
+
+    QTreeWidget* getObjectListWidget();
+    QListWidget* getFilesListWidget();
+
     explicit EditWindow(QWidget *parent = nullptr);
     ~EditWindow();
 
