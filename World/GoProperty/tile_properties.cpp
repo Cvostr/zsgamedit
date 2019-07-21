@@ -189,6 +189,9 @@ void TileGroupProperty::clear(){
 void TileGroupProperty::copyTo(GameObjectProperty* dest){
     if(dest->type != this->type) return; //if it isn't transform
 
+    //Do base things
+    GameObjectProperty::copyTo(dest);
+
     TileGroupProperty* _dest = static_cast<TileGroupProperty*>(dest);
     //Transfer all variables
     _dest->geometry = geometry;
@@ -262,6 +265,9 @@ void TileProperty::onAddToObject(){
 
 void TileProperty::copyTo(GameObjectProperty* dest){
     if(dest->type != this->type) return; //if it isn't transform
+
+    //Do base things
+    GameObjectProperty::copyTo(dest);
 
     TileProperty* _dest = static_cast<TileProperty*>(dest);
     _dest->diffuse_relpath = diffuse_relpath;

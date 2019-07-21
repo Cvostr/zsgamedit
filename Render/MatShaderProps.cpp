@@ -345,6 +345,7 @@ void Material::loadFromFile(std::string fpath){
                             ColorMtShPropConf* color_conf = static_cast<ColorMtShPropConf*>(conf_ptr);
                             //Write value
                             mat_stream >> color_conf->color.r >> color_conf->color.g >> color_conf->color.b;
+                            color_conf->color.updateGL();
                             break;
                         }
                         case MATSHPROP_TYPE_FVEC3:{

@@ -52,8 +52,8 @@ int main(int argc, char *argv[])
                     }
                     if (event.type == SDL_QUIT) { //If user caused SDL window to close
                         //Close all managers and release everything
-                        w.edit_win_ptr->onCloseProject();
-                        working = false;
+                        if(w.edit_win_ptr->onCloseProject())
+                            working = false;
                     }
                     if (event.type == SDL_MOUSEBUTTONUP) { //If user released mouse button
 

@@ -115,7 +115,7 @@ public slots:
     void onNewScript();
     void onNewMaterial();
 
-    void onCloseProject();
+    bool onCloseProject();
     void onBuildProject();
     void onRunProject();
 

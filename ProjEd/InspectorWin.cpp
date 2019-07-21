@@ -297,8 +297,12 @@ void PropertyCtxMenu::onPaintClicked(){
 
 void PropertyCtxMenu::onActiveToggleClicked(){
     GameObject* obj_ptr = static_cast<GameObject*>(this->win->gameobject_ptr); //cast pointer
-
+    //Calculate property pointer
     GameObjectProperty* prop_ptr = obj_ptr->properties[this->selected_property_index];
+
+    //Make action
+    getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
+    //Change state
     if(prop_ptr->active)
         prop_ptr->active = false;
     else {
@@ -319,7 +323,7 @@ AddGoComponentDialog::AddGoComponentDialog(QWidget* parent)
     contentLayout = new QGridLayout;
 
     contentLayout->addWidget(&property_list, 0, 0);
-
+    //Iterate over all base properties and add them to list
     for(int i = 1; i <= 9; i ++){
         new QListWidgetItem(getPropertyString(i), &this->property_list);
     }

@@ -11,6 +11,7 @@
 #include <QFileDialog>
 #include <QShortcut>
 #include <QDesktopServices>
+#include <QMessageBox>
 
 EditWindow* _editor_win;
 InspectorWin* _inspector_win;
@@ -415,26 +416,35 @@ void EditWindow::setupObjectsHieList(){
     w_ptr->clear(); //Clears widget
 }
 
-void EditWindow::onCloseProject(){
-    world.clear(); //clear world
-    SDL_DestroyWindow(window); //Destroy SDL and opengl
-    SDL_GL_DeleteContext(glcontext);
+bool EditWindow::onCloseProject(){
+    QMessageBox::StandardButton reply = QMessageBox::Yes;
+    if(_ed_actions_container->hasChangesUnsaved)
+        reply = QMessageBox::question(this, "Are you sure to quit?", "You have unsaved changes. Do you really want to quit?",
+                                    QMessageBox::Yes|QMessageBox::No);
+    if (reply == QMessageBox::Yes) {
+        world.clear(); //clear world
+        SDL_DestroyWindow(window); //Destroy SDL and opengl
+        SDL_GL_DeleteContext(glcontext);
 
-    MtShProps::clearMtShaderGroups();
+        MtShProps::clearMtShaderGroups();
 
-    this->project.resources.clear(); //Clear resources list
+        this->project.resources.clear(); //Clear resources list
 
-    //Close Qt windows
-    _editor_win->close();
-    _inspector_win->close();
+        //Close Qt windows
+        _editor_win->close();
+        _inspector_win->close();
 
-    destroyAllManagers();
+        destroyAllManagers();
 
-    _ed_actions_container->clear();
-    ZSPIRE::SFX::destroyAL();
+        _ed_actions_container->clear();
+        ZSPIRE::SFX::destroyAL();
 
-    this->ready = false; //won't render anymore
-    this->close_reason = EW_CLOSE_REASON_PROJLIST;
+        this->ready = false; //won't render anymore
+        this->close_reason = EW_CLOSE_REASON_PROJLIST;
+        QApplication::quit();
+        return true;
+    }
+    return false;
 }
 
 void EditWindow::onBuildProject(){

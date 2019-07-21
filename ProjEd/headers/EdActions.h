@@ -54,7 +54,7 @@ public:
     std::vector<EdAction*> action_list;
     World* world_ptr; //Pointer to world
     InspectorWin* insp_win; //Pointer to inspector window
-
+    bool hasChangesUnsaved;
     int current_pos;
     int end_pos;
 

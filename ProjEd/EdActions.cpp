@@ -6,6 +6,7 @@ EdActions::EdActions(){
     action_list.resize(0);
     storeActions = false;
     this->insp_win = nullptr;
+    hasChangesUnsaved = false; //Defaultly, nothing to save
 }
 
 EdAction::EdAction(){
@@ -178,6 +179,8 @@ void EdActions::putNewAction(EdAction* action){
         action->clear();
         return;
     }
+    //We made some change
+    hasChangesUnsaved = true;
 
     //if we have some positions left in vector
     if(this->current_pos < this->end_pos){
