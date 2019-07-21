@@ -304,6 +304,12 @@ void LabelProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
     area->value_ptr = &this->label;
     area->go_property = static_cast<void*>(this);
     inspector->addPropertyArea(area);
+
+    BoolCheckboxArea* isActive = new BoolCheckboxArea;
+    isActive->setLabel("Active ");
+    isActive->go_property = static_cast<void*>(this);
+    isActive->bool_ptr = &this->go_link.updLinkPtr()->active;
+    inspector->addPropertyArea(isActive);
 }
 
 void LabelProperty::onValueChanged(){

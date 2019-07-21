@@ -135,6 +135,7 @@ void PropertyEditArea::callPropertyUpdate(){
 
 void PropertyEditArea::setLabel(QString label){
     this->label_widget->setText(label);
+    this->label = label;
 }
 
 void Float3PropertyArea::destroyContent(){

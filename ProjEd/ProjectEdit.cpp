@@ -266,6 +266,8 @@ QString EditWindow::createNewTextFile(QString directory, QString name, QString e
 }
 
 void EditWindow::onSceneSaveAs(){
+    _ed_actions_container->hasChangesUnsaved = false;
+
     QString filename = QFileDialog::getSaveFileName(this, tr("Save scene file"), project.root_path, "*.scn");
     if(!filename.endsWith(".scn")) //If filename doesn't end with ".scn"
         filename.append(".scn"); //Add this extension
@@ -636,6 +638,7 @@ void EditWindow::onRedoPressed(){
 }
 
 void EditWindow::toggleCameras(){
+    //This slot toggles cameras
     if(this->isWorldCamera){
         this->isWorldCamera = false;
     }else{

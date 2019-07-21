@@ -119,11 +119,11 @@ void InspectorWin::ShowObjectProperties(void* object_ptr){
     obj_ptr->world_ptr->unpickObject();
     obj_ptr->pick(); //Object is picked now
     //Add setActive() checkbox
-    BoolCheckboxArea* isActive = new BoolCheckboxArea;
-    isActive->setLabel("Active ");
-    isActive->go_property = nullptr;
-    isActive->bool_ptr = &obj_ptr->active;
-    addPropertyArea(isActive);
+    //BoolCheckboxArea* isActive = new BoolCheckboxArea;
+    //isActive->setLabel("Active ");
+    //isActive->go_property = nullptr;
+    //isActive->bool_ptr = &obj_ptr->active;
+    //addPropertyArea(isActive);
     //Next add all property areas
     unsigned int props_num = static_cast<unsigned int>(obj_ptr->props_num);
     //iterate over props to show them all
