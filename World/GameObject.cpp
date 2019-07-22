@@ -226,7 +226,7 @@ void GameObject::onUpdate(int deltaTime){
 
 void GameObject::onTrigger(GameObject* obj){
     for(unsigned int i = 0; i < props_num; i ++){ //iterate over all properties
-        //properties[i]->onUpdate(deltaTime); //and call onUpdate on each property
+        properties[i]->onTrigger(obj); //and call onUpdate on each property
     }
 }
 

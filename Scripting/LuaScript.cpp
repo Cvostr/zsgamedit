@@ -1,4 +1,4 @@
-
+#include "headers/zsensdk.h"
 #include "headers/LuaScript.h"
 #include <iostream>
 
@@ -12,19 +12,13 @@ void ObjectScript::_InitScript() {
     }
 
     luaL_openlibs(L);
-    lua_pcall(L, 0, 0, 0);
 
     //Bind DSDK to script
     ZSENSDK::bindSDK(L);
     ZSENSDK::bindKeyCodesSDK(L);
-}
 
-ZSENSDK::ZSENGmObject ObjectScript::getGameObjectSDK(){
-    ZSENSDK::ZSENGmObject result;
-    result.str_id = this->link.updLinkPtr()->str_id;
-    result.world_ptr = this->link.world_ptr;
-    result.updPtr();
-    return result;
+    lua_pcall(L, 0, 0, 0);
+
 }
 
 void ObjectScript::_DestroyScript(){
@@ -35,11 +29,16 @@ void ObjectScript::_callStart() {
     ZSENSDK::ZSEN_World world;
     world.world_ptr = link.world_ptr;
 
+    ZSENSDK::ZSENGmObject gm_obj;
+    gm_obj.str_id = this->link.updLinkPtr()->str_id;
+    gm_obj.world_ptr = this->link.world_ptr;
+    gm_obj.updPtr();
+
     luabridge::LuaRef start = luabridge::getGlobal(L, "onStart");
     int result = 0;
     if (start.isFunction() == true) { //If function found
         try {
-            result = start(getGameObjectSDK(), world); //Call script onStart()
+            result = start(gm_obj, world); //Call script onStart()
         }
         catch (luabridge::LuaException e) {
            std::cout << "SCRIPT" << "Error occured in script (onStart) " << fpath.toStdString() << e.what() << std::endl;
@@ -70,6 +69,17 @@ void ObjectScript::callDrawUI() {
         }
         catch (luabridge::LuaException e) {
             std::cout << "SCRIPT" << "Error occured in script (onDrawUI) " << fpath.toStdString() << e.what() << std::endl;
+        }
+    }
+}
+
+void ObjectScript::func(std::string func_name){
+    luabridge::LuaRef func = luabridge::getGlobal(L, func_name.c_str());
+    if (func.isFunction() == true) { //If function found
+        try {
+            func();
+        }
+        catch (luabridge::LuaException e) {
         }
     }
 }

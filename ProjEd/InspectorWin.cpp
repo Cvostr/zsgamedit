@@ -119,11 +119,11 @@ void InspectorWin::ShowObjectProperties(void* object_ptr){
     obj_ptr->world_ptr->unpickObject();
     obj_ptr->pick(); //Object is picked now
     //Add setActive() checkbox
-    //BoolCheckboxArea* isActive = new BoolCheckboxArea;
-    //isActive->setLabel("Active ");
-    //isActive->go_property = nullptr;
-    //isActive->bool_ptr = &obj_ptr->active;
-    //addPropertyArea(isActive);
+    BoolCheckboxArea* isActive = new BoolCheckboxArea;
+    isActive->setLabel("Active ");
+    isActive->go_property = nullptr;
+    isActive->bool_ptr = &obj_ptr->active;
+    addPropertyArea(isActive);
     //Next add all property areas
     unsigned int props_num = static_cast<unsigned int>(obj_ptr->props_num);
     //iterate over props to show them all
@@ -227,6 +227,8 @@ void ManageComponentDialog::onPropertyDoubleClick(){
 void ManageComponentDialog::deleteProperty(){
     GameObject* obj_ptr = static_cast<GameObject*>(g_object_ptr); //cast pointer
 
+    getActionManager()->newGameObjectAction(obj_ptr->getLinkToThisObject());
+
     QListWidgetItem* item = property_list.currentItem(); //Get pressed item
     QString text = item->text(); //get text of pressed item
     int item_ind = 0; //iterator
@@ -240,6 +242,7 @@ void ManageComponentDialog::deleteProperty(){
     obj_ptr->removeProperty(item_ind);
 
     refresh_list();
+    this->win->updateObjectProperties();
     //accept();
 }
 
@@ -309,6 +312,7 @@ void PropertyCtxMenu::onActiveToggleClicked(){
         prop_ptr->active = true;
     }
 
+    this->win->updateObjectProperties();
     dialog->refresh_list();
 }
 

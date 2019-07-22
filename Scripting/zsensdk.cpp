@@ -49,6 +49,11 @@ ZSENSDK::ZSENLightSourceProperty ZSENSDK::ZSENGmObject::light(){
     result.prop_ptr = this->updPtr()->getPropertyPtrByType(GO_PROPERTY_TYPE_LIGHTSOURCE);
     return result;
 }
+ZSENSDK::ZSENScriptGroupProperty ZSENSDK::ZSENGmObject::script(){
+    ZSENScriptGroupProperty result;
+    result.prop_ptr = this->updPtr()->getPropertyPtrByType(GO_PROPERTY_TYPE_SCRIPTGROUP);
+    return result;
+}
 void ZSENSDK::ZSENGmObject::prikol(){
     static_cast<AudioSourceProperty*>(this->object_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_AUDSOURCE))->audio_start();
 }
@@ -135,6 +140,18 @@ void ZSENSDK::ZSENLightSourceProperty::setLightColor(ZSRGBCOLOR color){
     LightsourceProperty* prop_ptr = static_cast<LightsourceProperty*>(this->prop_ptr);
     prop_ptr->color = color;
 }
+float ZSENSDK::ZSENLightSourceProperty::getIntensity(){
+    LightsourceProperty* prop_ptr = static_cast<LightsourceProperty*>(this->prop_ptr);
+    return prop_ptr->intensity;
+}
+float ZSENSDK::ZSENLightSourceProperty::getRange(){
+    LightsourceProperty* prop_ptr = static_cast<LightsourceProperty*>(this->prop_ptr);
+    return prop_ptr->range;
+}
+ZSRGBCOLOR ZSENSDK::ZSENLightSourceProperty::getColor(){
+    LightsourceProperty* prop_ptr = static_cast<LightsourceProperty*>(this->prop_ptr);
+    return prop_ptr->color;
+}
 //TileProperty functions
 void ZSENSDK::ZSENTileProperty::setDiffuseTexture(std::string texture){
     TileProperty* prop_ptr = static_cast<TileProperty*>(this->prop_ptr);
@@ -152,45 +169,53 @@ void ZSENSDK::ZSENTileProperty::stopAnim(){
     prop_ptr->anim_state.playing = false; //Set boolean to playing
 }
 
+ObjectScript ZSENSDK::ZSENScriptGroupProperty::getScriptByName(std::string name){
+    ScriptGroupProperty* _prop_ptr = static_cast<ScriptGroupProperty*>(this->prop_ptr);
+    for(unsigned int script_i = 0; script_i < _prop_ptr->scr_num; script_i ++){
+        if(!name.compare(_prop_ptr->scripts_attached[script_i].name))
+            return _prop_ptr->scripts_attached[script_i];
+    }
+}
+
 void ZSENSDK::bindSDK(lua_State* state){
     luabridge::getGlobalNamespace(state)
-            .beginNamespace("window")
-            .addVariable("MODE_WINDOWED", &mode_windowed, false)
-            .addVariable("MODE_FULLSCREEN", &mode_fullscreen, false)
-            .addVariable("MODE_BORDERLESS", &mode_borderless, false)
-            .addFunction("setWindowSize", &ZSENSDK::Window::setWindowSize)
-            .addFunction("setWindowMode", &ZSENSDK::Window::setWindowMode)
-            .endNamespace();
+        .beginNamespace("window")
+        .addVariable("MODE_WINDOWED", &mode_windowed, false)
+        .addVariable("MODE_FULLSCREEN", &mode_fullscreen, false)
+        .addVariable("MODE_BORDERLESS", &mode_borderless, false)
+        .addFunction("setWindowSize", &ZSENSDK::Window::setWindowSize)
+        .addFunction("setWindowMode", &ZSENSDK::Window::setWindowMode)
+        .endNamespace();
 
     luabridge::getGlobalNamespace(state)
-            .beginNamespace("debug")
-            .addFunction("Log", &ZSENSDK::Debug::Log)
-            .endNamespace();
+        .beginNamespace("debug")
+        .addFunction("Log", &ZSENSDK::Debug::Log)
+        .endNamespace();
 
     luabridge::getGlobalNamespace(state)
-            .beginNamespace("input")
-            .addFunction("isKeyPressed", &ZSENSDK::Input::isKeyPressed)
-            .addFunction("isKeyHold", &ZSENSDK::Input::isKeyHold)
-            //Add mouse state class
-            .beginClass <Input::MouseState>("MouseState")
-            .addData("cursorX", &Input::MouseState::mouseX)
-            .addData("cursorY", &Input::MouseState::mouseY)
-            .addData("relX", &Input::MouseState::mouseRelX)
-            .addData("relY", &Input::MouseState::mouseRelY)
-            .addData("isLButtonDown", &Input::MouseState::isLButtonDown)
-            .addData("isRButtonDown", &Input::MouseState::isRButtonDown)
-            .endClass()
+        .beginNamespace("input")
+        .addFunction("isKeyPressed", &ZSENSDK::Input::isKeyPressed)
+        .addFunction("isKeyHold", &ZSENSDK::Input::isKeyHold)
+        //Add mouse state class
+        .beginClass <Input::MouseState>("MouseState")
+        .addData("cursorX", &Input::MouseState::mouseX)
+        .addData("cursorY", &Input::MouseState::mouseY)
+        .addData("relX", &Input::MouseState::mouseRelX)
+        .addData("relY", &Input::MouseState::mouseRelY)
+        .addData("isLButtonDown", &Input::MouseState::isLButtonDown)
+        .addData("isRButtonDown", &Input::MouseState::isRButtonDown)
+        .endClass()
 
-            .addFunction("getMouseState", &ZSENSDK::Input::getMouseState)
+        .addFunction("getMouseState", &ZSENSDK::Input::getMouseState)
 
-            .endNamespace();
+        .endNamespace();
 
     luabridge::getGlobalNamespace(state).beginClass <ZSVECTOR3>("Vec3")
-            .addData("x", &ZSVECTOR3::X)
-            .addData("y", &ZSVECTOR3::Y)
-            .addData("z", &ZSVECTOR3::Z)
-            .addConstructor <void(*) (float, float, float)>()
-            .endClass();
+        .addData("x", &ZSVECTOR3::X)
+        .addData("y", &ZSVECTOR3::Y)
+        .addData("z", &ZSVECTOR3::Z)
+        .addConstructor <void(*) (float, float, float)>()
+        .endClass();
 
     luabridge::getGlobalNamespace(state)
         .addFunction("length", &length)
@@ -200,36 +225,33 @@ void ZSENSDK::bindSDK(lua_State* state){
         .addFunction("v_cross", &vCross);
 
     luabridge::getGlobalNamespace(state).beginClass <ZSVIEWPORT>("CmViewport")
-            .addData("startX", &ZSVIEWPORT::startX)
-            .addData("startY", &ZSVIEWPORT::startY)
-            .addData("endX", &ZSVIEWPORT::endX)
-            .addData("endY", &ZSVIEWPORT::endY)
-            .addConstructor <void(*) (unsigned int, unsigned int, unsigned int, unsigned int)>()
-            .endClass();
+        .addData("startX", &ZSVIEWPORT::startX)
+        .addData("startY", &ZSVIEWPORT::startY)
+        .addData("endX", &ZSVIEWPORT::endX)
+        .addData("endY", &ZSVIEWPORT::endY)
+        .addConstructor <void(*) (unsigned int, unsigned int, unsigned int, unsigned int)>()
+        .endClass();
 
     luabridge::getGlobalNamespace(state).beginClass <ZSPIRE::Camera>("Camera")
+        .addFunction("setPosition", &ZSPIRE::Camera::setPosition)
+        .addFunction("setFront", &ZSPIRE::Camera::setFront)
+        .addFunction("getPosition", &ZSPIRE::Camera::getCameraPosition)
+        .addFunction("getFront", &ZSPIRE::Camera::getCameraFrontVec)
+        .addFunction("setProjection", &ZSPIRE::Camera::setProjectionType)
+        .addFunction("setZplanes", &ZSPIRE::Camera::setZplanes)
+        .addFunction("setViewport", &ZSPIRE::Camera::setViewport)
+        .addFunction("getViewport", &ZSPIRE::Camera::getViewport)
 
-            .addFunction("setPosition", &ZSPIRE::Camera::setPosition)
-            .addFunction("setFront", &ZSPIRE::Camera::setFront)
-            .addFunction("getPosition", &ZSPIRE::Camera::getCameraPosition)
-            .addFunction("getFront", &ZSPIRE::Camera::getCameraFrontVec)
-
-            .addFunction("setProjection", &ZSPIRE::Camera::setProjectionType)
-            .addFunction("setZplanes", &ZSPIRE::Camera::setZplanes)
-
-            .addFunction("setViewport", &ZSPIRE::Camera::setViewport)
-            .addFunction("getViewport", &ZSPIRE::Camera::getViewport)
-
-            .endClass();
+        .endClass();
 
     luabridge::getGlobalNamespace(state).beginClass <ZSRGBCOLOR>("RGBColor")
-            .addData("r", &ZSRGBCOLOR::r)
-            .addData("g", &ZSRGBCOLOR::g)
-            .addData("b", &ZSRGBCOLOR::b)
-            .addConstructor <void(*) (float, float, float, float)>()
-            .endClass();
+        .addData("r", &ZSRGBCOLOR::r)
+        .addData("g", &ZSRGBCOLOR::g)
+        .addData("b", &ZSRGBCOLOR::b)
+        .addConstructor <void(*) (float, float, float, float)>()
+        .endClass();
 
-luabridge::getGlobalNamespace(state)
+    luabridge::getGlobalNamespace(state)
         .beginNamespace("engine")
         .beginClass <ZSENGmObject>("GameObject")
 
@@ -241,11 +263,12 @@ luabridge::getGlobalNamespace(state)
         .addFunction("audio", &ZSENSDK::ZSENGmObject::audio)
         .addFunction("tile", &ZSENSDK::ZSENGmObject::tile)
         .addFunction("prikol", &ZSENSDK::ZSENGmObject::prikol)
+        .addFunction("script", &ZSENSDK::ZSENGmObject::script)
 
         .endClass()
         .endNamespace();
 
-luabridge::getGlobalNamespace(state)
+    luabridge::getGlobalNamespace(state)
         .beginNamespace("engine")
         .beginClass <ZSEN_World>("World")
 
@@ -261,8 +284,14 @@ luabridge::getGlobalNamespace(state)
         .endClass()
         .endNamespace();
 
-luabridge::getGlobalNamespace(state)
+    luabridge::getGlobalNamespace(state)
         .beginNamespace("engine")
+
+        .beginClass <ObjectScript>("Script")
+        .addFunction("onStart", &ObjectScript::_callStart)
+        .addFunction("onFrame", &ObjectScript::_callDraw)
+        .addFunction("func", &ObjectScript::func)
+        .endClass()
 
         .beginClass <ZSENObjectProperty>("ObjectProperty")
         .addFunction("setActive", &ZSENSDK::ZSENObjectProperty::setActive)
@@ -272,6 +301,9 @@ luabridge::getGlobalNamespace(state)
         .addFunction("setIntensity", &ZSENSDK::ZSENLightSourceProperty::setIntesity)
         .addFunction("setRange", &ZSENSDK::ZSENLightSourceProperty::setRange)
         .addFunction("setColor", &ZSENSDK::ZSENLightSourceProperty::setLightColor)
+        .addFunction("getIntensity", &ZSENSDK::ZSENLightSourceProperty::getIntensity)
+        .addFunction("getRange", &ZSENSDK::ZSENLightSourceProperty::getRange)
+        .addFunction("getColor", &ZSENSDK::ZSENLightSourceProperty::getColor)
         .endClass()
 
         .deriveClass <ZSENTransformProperty, ZSENObjectProperty>("Transform")
@@ -299,6 +331,11 @@ luabridge::getGlobalNamespace(state)
         .addFunction("playAnim", &ZSENSDK::ZSENTileProperty::playAnim)
         .addFunction("setDiffuseTexture", &ZSENSDK::ZSENTileProperty::setDiffuseTexture)
         .addFunction("stopAnim", &ZSENSDK::ZSENTileProperty::stopAnim)
+        .endClass()
+
+        .deriveClass <ZSENScriptGroupProperty, ZSENObjectProperty>("ScriptGroup")
+        .addFunction("getScript", &ZSENSDK::ZSENScriptGroupProperty::getScriptByName)
+
         .endClass()
 
         .endNamespace();

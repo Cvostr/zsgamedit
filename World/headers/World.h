@@ -63,6 +63,8 @@ public:
     GameObjectLink go_link; //link to object, that holds this property
     World* world_ptr; //Sometimes may be useful
 
+
+
     GameObjectProperty();
     virtual ~GameObjectProperty();
 
@@ -74,11 +76,13 @@ public:
     virtual void onUpdate(float deltaTime);
     virtual void onPreRender(RenderPipeline* pipeline);
     virtual void onRender(RenderPipeline* pipeline);
+    virtual void onTrigger(GameObject* obj);
 };
 
 class LabelProperty : public GameObjectProperty {
 public:
     QString label; //Label of gameobject
+    bool isActiveToggle;
     QTreeWidgetItem* list_item_ptr;
 
     void addPropertyInterfaceToInspector(InspectorWin* inspector);

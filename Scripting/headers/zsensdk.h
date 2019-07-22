@@ -11,6 +11,8 @@ extern "C" {
 }
 #include <LuaBridge/LuaBridge.h>
 
+#include "LuaScript.h"
+
 namespace ZSENSDK {
 
 class ZSENObjectProperty{
@@ -59,6 +61,15 @@ public:
     void setIntesity(float intensity);
     void setRange(float range);
     void setLightColor(ZSRGBCOLOR color);
+
+    float getIntensity();
+    float getRange();
+    ZSRGBCOLOR getColor();
+};
+
+class ZSENScriptGroupProperty : public ZSENObjectProperty{
+public:
+    ObjectScript getScriptByName(std::string name);
 };
 
 class ZSENGmObject{
@@ -77,6 +88,7 @@ public:
     ZSENAudSourceProperty audio();
     ZSENTileProperty tile();
     ZSENLightSourceProperty light();
+    ZSENScriptGroupProperty script();
 
     void prikol();
 };

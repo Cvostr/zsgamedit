@@ -9,17 +9,17 @@ extern "C" {
 }
 #include <LuaBridge/LuaBridge.h>
 
-#include "zsensdk.h"
 #include "../../World/headers/World.h"
+
 
 class ObjectScript {
 
 private:
     lua_State* L;
-    ZSENSDK::ZSENGmObject getGameObjectSDK();
 public:
     GameObjectLink link;
     QString fpath; //path to file
+    std::string name;
 
     void _InitScript();
     void _DestroyScript();
@@ -27,6 +27,8 @@ public:
     void _callStart();
     void _callDraw(float deltaTime);
     void callDrawUI();
+    void onTrigger();
+    void func(std::string func_name);
 
 };
 #endif

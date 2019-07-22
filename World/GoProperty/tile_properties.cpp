@@ -13,6 +13,7 @@
 #include "../headers/obj_properties.h"
 #include "../../ProjEd/headers/InspEditAreas.h"
 
+extern InspectorWin* _inspector_win;
 static TileGroupProperty* current_property; //Property, that shown
 
 void onCreateBtnPress(){
@@ -39,8 +40,6 @@ TileProperty::TileProperty(){
     type = GO_PROPERTY_TYPE_TILE;
     active = true;
     lastAnimState = false;
-
-    this->insp_win = nullptr; //No pointer to inspector by default
 
     this->texture_diffuse = nullptr;
     this->diffuse_relpath = "@none";
@@ -201,7 +200,6 @@ void TileGroupProperty::copyTo(GameObjectProperty* dest){
 }
 
 void TileProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
-    this->insp_win = inspector;
     BoolCheckboxArea* isAnim = new BoolCheckboxArea;
     isAnim->setLabel("Animated ");
     isAnim->go_property = static_cast<void*>(this);
@@ -247,7 +245,7 @@ void TileProperty::onValueChanged(){
     updTexturePtr();
 
     if(lastAnimState != this->anim_property.isAnimated){
-        insp_win->updateRequired = true;
+        _inspector_win->updateRequired = true;
         lastAnimState = this->anim_property.isAnimated;
     }
 }
@@ -260,7 +258,7 @@ void TileProperty::updTexturePtr(){
 }
 
 void TileProperty::onAddToObject(){
-    //go_link.updLinkPtr()->render_type = GO_RENDER_TYPE_TILE;
+
 }
 
 void TileProperty::copyTo(GameObjectProperty* dest){

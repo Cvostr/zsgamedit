@@ -5,6 +5,8 @@
 #include "../../Render/headers/zs-mesh.h"
 #include "../../ProjEd/headers/InspEditAreas.h"
 
+extern InspectorWin* _inspector_win;
+
 GameObjectProperty::GameObjectProperty(){
     type = GO_PROPERTY_TYPE_NONE;
     active = true; //Inactive by default
@@ -16,6 +18,7 @@ GameObjectProperty::~GameObjectProperty(){
 
 void GameObjectProperty::copyTo(GameObjectProperty* dest){
     dest->active = this->active;
+    dest->world_ptr = this->world_ptr;
 }
 
 void GameObjectProperty::onObjectDeleted(){
@@ -37,7 +40,9 @@ void GameObjectProperty::onPreRender(RenderPipeline* pipeline){
 void GameObjectProperty::onRender(RenderPipeline* pipeline){
 
 }
+void GameObjectProperty::onTrigger(GameObject* obj){
 
+}
 QString getPropertyString(int type){
     switch (type) {
         case GO_PROPERTY_TYPE_TRANSFORM:{ //If type is transfrom
@@ -305,15 +310,16 @@ void LabelProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
     area->go_property = static_cast<void*>(this);
     inspector->addPropertyArea(area);
 
-    BoolCheckboxArea* isActive = new BoolCheckboxArea;
+   /* BoolCheckboxArea* isActive = new BoolCheckboxArea;
     isActive->setLabel("Active ");
     isActive->go_property = static_cast<void*>(this);
-    isActive->bool_ptr = &this->go_link.updLinkPtr()->active;
+    isActive->bool_ptr = &this->isActiveToggle;
     inspector->addPropertyArea(isActive);
+*/
 }
 
 void LabelProperty::onValueChanged(){
-    World* world_ptr = this->go_link.world_ptr; //Obtain pointer to world object
+    World* world_ptr = this->world_ptr; //Obtain pointer to world object
     //lets chack if object already exist in world
     if(!world_ptr->isObjectLabelUnique(this->label)){
         //If object already exist
@@ -323,6 +329,7 @@ void LabelProperty::onValueChanged(){
     }
 
     this->list_item_ptr->setText(0, this->label);
+    //this->go_link.updLinkPtr()->active = isActiveToggle;
 }
 
 void LabelProperty::copyTo(GameObjectProperty* dest){
@@ -333,6 +340,7 @@ void LabelProperty::copyTo(GameObjectProperty* dest){
 
     LabelProperty* _dest = static_cast<LabelProperty*>(dest);
     _dest->label = label;
+    _dest->isActiveToggle = isActiveToggle;
 }
 
 //Mesh property functions
@@ -565,12 +573,9 @@ MaterialProperty::MaterialProperty(){
 
     //this->group_ptr = nullptr;
     this->material_ptr = nullptr;
-
-    this->insp_win = nullptr;
 }
 
 void MaterialProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
-    this->insp_win = inspector; //assign inspector
     //Add area to pick material file
     PickResourceArea* area = new PickResourceArea;
     area->setLabel("Material");
@@ -682,8 +687,8 @@ void MaterialProperty::onValueChanged(){
         this->group_label = material_ptr->group_ptr->groupCaption;
 
         //if available, update window
-        if(insp_win != nullptr)
-            insp_win->updateRequired = true;
+        //if(insp_win != nullptr)
+        _inspector_win->updateRequired = true;
     }
 
 
@@ -839,7 +844,7 @@ void ScriptGroupProperty::onValueChanged(){
     if(static_cast<int>(path_names.size()) != this->scr_num){
         path_names.resize(static_cast<unsigned int>(scr_num));
         //Update inspector interface
-        insp_win->updateRequired = true;
+        _inspector_win->updateRequired = true;
     }
 
     if(static_cast<int>(scripts_attached.size()) != this->scr_num){ //if size changed
@@ -850,13 +855,13 @@ void ScriptGroupProperty::onValueChanged(){
     for(unsigned int script_i = 0; script_i < static_cast<unsigned int>(scr_num); script_i ++){
         //Set absolute path to script object
         scripts_attached[script_i].fpath = project_ptr->root_path + "/" + path_names[script_i];
+        scripts_attached[script_i].name = path_names[script_i].toStdString();
     }
 
 
 }
 
 void ScriptGroupProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
-    this->insp_win = inspector; //store inspector window
 
     IntPropertyArea* scriptnum_area = new IntPropertyArea;
     scriptnum_area->setLabel("Scripts"); //Its label

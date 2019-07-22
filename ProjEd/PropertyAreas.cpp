@@ -441,10 +441,10 @@ void IntPropertyArea::updateValues(){
 void ResourcePickDialog::onResourceSelected(){
     QListWidgetItem* selected = this->list->currentItem();
     QString resource_path = selected->text(); //Get selected text
-
+    //Make action
     GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(area->go_property);
     getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
-
+    //Apply resource change
     *area->rel_path = resource_path;
     area->PropertyEditArea::callPropertyUpdate();
     this->resource_text->setText(resource_path);
@@ -585,7 +585,7 @@ void BoolCheckboxArea::addToInspector(InspectorWin* win){
 void BoolCheckboxArea::writeNewValues(){
     if(bool_ptr == nullptr) return; //pointer not set, exiting
 
-    if(go_property != nullptr){
+    if(go_property != nullptr && (*this->bool_ptr != checkbox.isChecked())){
         GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(this->go_property);
         getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
     }
