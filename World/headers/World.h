@@ -63,7 +63,7 @@ public:
     GameObjectLink go_link; //link to object, that holds this property
     World* world_ptr; //Sometimes may be useful
 
-
+    void setActive(bool active);
 
     GameObjectProperty();
     virtual ~GameObjectProperty();
@@ -113,6 +113,8 @@ public:
     void getAbsoluteRotationMatrix(ZSMATRIX4x4& m);
 
     void setTranslation(ZSVECTOR3 new_translation);
+    void setScale(ZSVECTOR3 new_scale);
+    void setRotation(ZSVECTOR3 new_rotation);
 
     TransformProperty();
 };

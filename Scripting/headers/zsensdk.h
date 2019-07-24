@@ -3,6 +3,8 @@
 
 #include <string>
 #include "../../World/headers/World.h"
+#include "../../World/headers/obj_properties.h"
+#include "../../World/headers/2dtileproperties.h"
 
 extern "C" {
 #include <lua5.3/lua.h>
@@ -14,63 +16,6 @@ extern "C" {
 #include "LuaScript.h"
 
 namespace ZSENSDK {
-
-class ZSENObjectProperty{
-public:
-    GameObjectProperty* prop_ptr;
-    void setActive(bool active);
-};
-
-class ZSENTransformProperty : public ZSENObjectProperty{
-public:
-    ZSVECTOR3 getPosition();
-    ZSVECTOR3 getScale();
-    ZSVECTOR3 getRotation();
-
-    void setPosition(ZSVECTOR3 pos);
-    void setRotation(ZSVECTOR3 rot);
-    void setScale(ZSVECTOR3 scale);
-};
-
-class ZSENTileProperty : public ZSENObjectProperty{
-public:
-    void setDiffuseTexture(std::string texture);
-
-    void playAnim();
-    void stopAnim();
-};
-
-class ZSENAudSourceProperty : public ZSENObjectProperty{
-public:
-
-    void setAudioFile(std::string aud);
-
-    float getGain();
-    float getPitch();
-
-    void setGain(float gain);
-    void setPitch(float pitch);
-
-    void Play();
-    void Pause();
-    void Stop();
-};
-
-class ZSENLightSourceProperty : public ZSENObjectProperty{
-public:
-    void setIntesity(float intensity);
-    void setRange(float range);
-    void setLightColor(ZSRGBCOLOR color);
-
-    float getIntensity();
-    float getRange();
-    ZSRGBCOLOR getColor();
-};
-
-class ZSENScriptGroupProperty : public ZSENObjectProperty{
-public:
-    ObjectScript getScriptByName(std::string name);
-};
 
 class ZSENGmObject{
 public:
@@ -84,13 +29,12 @@ public:
     void setLabel(std::string label);
     void setActive(bool active);
 
-    ZSENTransformProperty transform();
-    ZSENAudSourceProperty audio();
-    ZSENTileProperty tile();
-    ZSENLightSourceProperty light();
-    ZSENScriptGroupProperty script();
+    TransformProperty* transform();
+    AudioSourceProperty* audio();
+    TileProperty* tile();
+    LightsourceProperty* light();
+    ScriptGroupProperty* script();
 
-    void prikol();
 };
 
 class ZSEN_World{

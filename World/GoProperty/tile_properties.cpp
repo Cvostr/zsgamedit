@@ -295,3 +295,15 @@ void TileProperty::onUpdate(float deltaTime){
 
     }
 }
+
+void TileProperty::playAnim(){
+    anim_state.playing = true;
+}
+void TileProperty::stopAnim(){
+    anim_state.playing = false;
+}
+void TileProperty::setDiffuseTexture(std::string texture){
+    diffuse_relpath = QString::fromStdString(texture);
+        //Update texture pointer
+    updTexturePtr();
+}

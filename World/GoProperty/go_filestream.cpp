@@ -260,6 +260,7 @@ void GameObject::loadProperty(std::ifstream* world_stream){
             ptr->path_names[script_w_i] = QString::fromStdString(scr_path);
 
             ptr->scripts_attached[script_w_i].fpath = project_ptr->root_path + "/" + ptr->path_names[script_w_i];
+            ptr->scripts_attached[script_w_i].name = ptr->path_names[script_w_i].toStdString();
         }
 
         //ptr->onValueChanged();

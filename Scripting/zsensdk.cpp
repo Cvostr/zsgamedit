@@ -29,152 +29,20 @@ ZSVECTOR3 ZSENSDK::Math::vadd(ZSVECTOR3 v1, ZSVECTOR3 v2){
     return v1 + v2;
 }
 
-ZSENSDK::ZSENTransformProperty ZSENSDK::ZSENGmObject::transform(){
-    ZSENTransformProperty result;
-    result.prop_ptr = static_cast<TransformProperty*>(this->updPtr()->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
-    return result;
+TransformProperty* ZSENSDK::ZSENGmObject::transform(){
+    return static_cast<TransformProperty*>(this->updPtr()->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
 }
-ZSENSDK::ZSENAudSourceProperty ZSENSDK::ZSENGmObject::audio(){
-    ZSENAudSourceProperty result;
-    result.prop_ptr = this->updPtr()->getPropertyPtrByType(GO_PROPERTY_TYPE_AUDSOURCE);
-    return result;
+AudioSourceProperty* ZSENSDK::ZSENGmObject::audio(){
+    return static_cast<AudioSourceProperty*>(this->updPtr()->getPropertyPtrByType(GO_PROPERTY_TYPE_AUDSOURCE));
 }
-ZSENSDK::ZSENTileProperty ZSENSDK::ZSENGmObject::tile(){
-    ZSENTileProperty result;
-    result.prop_ptr = this->updPtr()->getPropertyPtrByType(GO_PROPERTY_TYPE_TILE);
-    return result;
+TileProperty* ZSENSDK::ZSENGmObject::tile(){
+    return static_cast<TileProperty*>(this->updPtr()->getPropertyPtrByType(GO_PROPERTY_TYPE_TILE));
 }
-ZSENSDK::ZSENLightSourceProperty ZSENSDK::ZSENGmObject::light(){
-    ZSENLightSourceProperty result;
-    result.prop_ptr = this->updPtr()->getPropertyPtrByType(GO_PROPERTY_TYPE_LIGHTSOURCE);
-    return result;
+LightsourceProperty* ZSENSDK::ZSENGmObject::light(){
+    return static_cast<LightsourceProperty*>(this->updPtr()->getPropertyPtrByType(GO_PROPERTY_TYPE_LIGHTSOURCE));
 }
-ZSENSDK::ZSENScriptGroupProperty ZSENSDK::ZSENGmObject::script(){
-    ZSENScriptGroupProperty result;
-    result.prop_ptr = this->updPtr()->getPropertyPtrByType(GO_PROPERTY_TYPE_SCRIPTGROUP);
-    return result;
-}
-void ZSENSDK::ZSENGmObject::prikol(){
-    static_cast<AudioSourceProperty*>(this->object_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_AUDSOURCE))->audio_start();
-}
-
-
-
-void ZSENSDK::ZSENObjectProperty::setActive(bool active){
-    prop_ptr->active = active;
-}
-//Property functions
-ZSVECTOR3 ZSENSDK::ZSENTransformProperty::getPosition(){
-    TransformProperty* prop_ptr = static_cast<TransformProperty*>(this->prop_ptr);
-    return prop_ptr->translation;
-}
-ZSVECTOR3 ZSENSDK::ZSENTransformProperty::getScale(){
-    TransformProperty* prop_ptr = static_cast<TransformProperty*>(this->prop_ptr);
-    return prop_ptr->scale;
-}
-ZSVECTOR3 ZSENSDK::ZSENTransformProperty::getRotation(){
-    TransformProperty* prop_ptr = static_cast<TransformProperty*>(this->prop_ptr);
-    return prop_ptr->rotation;
-}
-void ZSENSDK::ZSENTransformProperty::setPosition(ZSVECTOR3 pos){
-    TransformProperty* prop_ptr = static_cast<TransformProperty*>(this->prop_ptr);
-    prop_ptr->setTranslation(pos);
-}
-void ZSENSDK::ZSENTransformProperty::setRotation(ZSVECTOR3 rot){
-    TransformProperty* prop_ptr = static_cast<TransformProperty*>(this->prop_ptr);
-    prop_ptr->rotation = rot;
-    prop_ptr->updateMat();
-}
-void ZSENSDK::ZSENTransformProperty::setScale(ZSVECTOR3 scale){
-    TransformProperty* prop_ptr = static_cast<TransformProperty*>(this->prop_ptr);
-    prop_ptr->scale = scale;
-    prop_ptr->updateMat();
-}
-//AudioSource functions
-void ZSENSDK::ZSENAudSourceProperty::setAudioFile(std::string aud){
-    AudioSourceProperty* prop_ptr = static_cast<AudioSourceProperty*>(this->prop_ptr);
-    //Assign new audio path
-    prop_ptr->resource_relpath = QString::fromStdString(aud);
-    //update audio buffer pointer
-    prop_ptr->updateAudioPtr();
-}
-void ZSENSDK::ZSENAudSourceProperty::Play(){
-    AudioSourceProperty* prop_ptr = static_cast<AudioSourceProperty*>(this->prop_ptr);
-    prop_ptr->audio_start();
-}
-void ZSENSDK::ZSENAudSourceProperty::Stop(){
-    AudioSourceProperty* prop_ptr = static_cast<AudioSourceProperty*>(this->prop_ptr);
-    prop_ptr->audio_stop();
-}
-void ZSENSDK::ZSENAudSourceProperty::Pause(){
-    AudioSourceProperty* prop_ptr = static_cast<AudioSourceProperty*>(this->prop_ptr);
-    prop_ptr->audio_pause();
-}
-float ZSENSDK::ZSENAudSourceProperty::getGain(){
-    AudioSourceProperty* prop_ptr = static_cast<AudioSourceProperty*>(this->prop_ptr);
-    return prop_ptr->source.source_gain;
-}
-float ZSENSDK::ZSENAudSourceProperty::getPitch(){
-    AudioSourceProperty* prop_ptr = static_cast<AudioSourceProperty*>(this->prop_ptr);
-    return prop_ptr->source.source_pitch;
-}
-void ZSENSDK::ZSENAudSourceProperty::setGain(float gain){
-    AudioSourceProperty* prop_ptr = static_cast<AudioSourceProperty*>(this->prop_ptr);
-    prop_ptr->source.source_gain = gain; //Set new gain value
-    prop_ptr->source.apply_settings(); //Apply sound settings
-}
-void ZSENSDK::ZSENAudSourceProperty::setPitch(float pitch){
-    AudioSourceProperty* prop_ptr = static_cast<AudioSourceProperty*>(this->prop_ptr);
-    prop_ptr->source.source_pitch = pitch; //Set new gain value
-    prop_ptr->source.apply_settings(); //Apply sound settings
-}
-void ZSENSDK::ZSENLightSourceProperty::setIntesity(float intensity){
-    LightsourceProperty* prop_ptr = static_cast<LightsourceProperty*>(this->prop_ptr);
-    prop_ptr->intensity = intensity;
-}
-void ZSENSDK::ZSENLightSourceProperty::setRange(float range){
-    LightsourceProperty* prop_ptr = static_cast<LightsourceProperty*>(this->prop_ptr);
-    prop_ptr->range = range;
-}
-void ZSENSDK::ZSENLightSourceProperty::setLightColor(ZSRGBCOLOR color){
-    LightsourceProperty* prop_ptr = static_cast<LightsourceProperty*>(this->prop_ptr);
-    prop_ptr->color = color;
-}
-float ZSENSDK::ZSENLightSourceProperty::getIntensity(){
-    LightsourceProperty* prop_ptr = static_cast<LightsourceProperty*>(this->prop_ptr);
-    return prop_ptr->intensity;
-}
-float ZSENSDK::ZSENLightSourceProperty::getRange(){
-    LightsourceProperty* prop_ptr = static_cast<LightsourceProperty*>(this->prop_ptr);
-    return prop_ptr->range;
-}
-ZSRGBCOLOR ZSENSDK::ZSENLightSourceProperty::getColor(){
-    LightsourceProperty* prop_ptr = static_cast<LightsourceProperty*>(this->prop_ptr);
-    return prop_ptr->color;
-}
-//TileProperty functions
-void ZSENSDK::ZSENTileProperty::setDiffuseTexture(std::string texture){
-    TileProperty* prop_ptr = static_cast<TileProperty*>(this->prop_ptr);
-    //Assign new texture path
-    prop_ptr->diffuse_relpath = QString::fromStdString(texture);
-    //Update texture pointer
-    prop_ptr->updTexturePtr();
-}
-void ZSENSDK::ZSENTileProperty::playAnim(){
-    TileProperty* prop_ptr = static_cast<TileProperty*>(this->prop_ptr);
-    prop_ptr->anim_state.playing = true; //Set boolean to playing
-}
-void ZSENSDK::ZSENTileProperty::stopAnim(){
-    TileProperty* prop_ptr = static_cast<TileProperty*>(this->prop_ptr);
-    prop_ptr->anim_state.playing = false; //Set boolean to playing
-}
-
-ObjectScript ZSENSDK::ZSENScriptGroupProperty::getScriptByName(std::string name){
-    ScriptGroupProperty* _prop_ptr = static_cast<ScriptGroupProperty*>(this->prop_ptr);
-    for(unsigned int script_i = 0; script_i < _prop_ptr->scr_num; script_i ++){
-        if(!name.compare(_prop_ptr->scripts_attached[script_i].name))
-            return _prop_ptr->scripts_attached[script_i];
-    }
+ScriptGroupProperty* ZSENSDK::ZSENGmObject::script(){
+    return static_cast<ScriptGroupProperty*>(this->updPtr()->getPropertyPtrByType(GO_PROPERTY_TYPE_SCRIPTGROUP));
 }
 
 void ZSENSDK::bindSDK(lua_State* state){
@@ -261,8 +129,8 @@ void ZSENSDK::bindSDK(lua_State* state){
 
         .addFunction("transform", &ZSENSDK::ZSENGmObject::transform)
         .addFunction("audio", &ZSENSDK::ZSENGmObject::audio)
+        .addFunction("light", &ZSENSDK::ZSENGmObject::light)
         .addFunction("tile", &ZSENSDK::ZSENGmObject::tile)
-        .addFunction("prikol", &ZSENSDK::ZSENGmObject::prikol)
         .addFunction("script", &ZSENSDK::ZSENGmObject::script)
 
         .endClass()
@@ -291,51 +159,49 @@ void ZSENSDK::bindSDK(lua_State* state){
         .addFunction("onStart", &ObjectScript::_callStart)
         .addFunction("onFrame", &ObjectScript::_callDraw)
         .addFunction("func", &ObjectScript::func)
+        .addFunction("funcA", &ObjectScript::_func)
         .endClass()
 
-        .beginClass <ZSENObjectProperty>("ObjectProperty")
-        .addFunction("setActive", &ZSENSDK::ZSENObjectProperty::setActive)
+        .beginClass <GameObjectProperty>("ObjectProperty")
+        .addFunction("setActive", &GameObjectProperty::setActive)
         .endClass()
 
-        .deriveClass <ZSENLightSourceProperty, ZSENObjectProperty>("LightSource")
-        .addFunction("setIntensity", &ZSENSDK::ZSENLightSourceProperty::setIntesity)
-        .addFunction("setRange", &ZSENSDK::ZSENLightSourceProperty::setRange)
-        .addFunction("setColor", &ZSENSDK::ZSENLightSourceProperty::setLightColor)
-        .addFunction("getIntensity", &ZSENSDK::ZSENLightSourceProperty::getIntensity)
-        .addFunction("getRange", &ZSENSDK::ZSENLightSourceProperty::getRange)
-        .addFunction("getColor", &ZSENSDK::ZSENLightSourceProperty::getColor)
+        .deriveClass <LightsourceProperty, GameObjectProperty>("LightSource")
+        .addData("intensity", &LightsourceProperty::intensity)
+        .addData("range", &LightsourceProperty::range)
+        .addData("color", &LightsourceProperty::color)
+
         .endClass()
 
-        .deriveClass <ZSENTransformProperty, ZSENObjectProperty>("Transform")
-        .addFunction("getPosition", &ZSENSDK::ZSENTransformProperty::getPosition)
-        .addFunction("getScale", &ZSENSDK::ZSENTransformProperty::getScale)
-        .addFunction("getRotation", &ZSENSDK::ZSENTransformProperty::getRotation)
-        .addFunction("setPosition", &ZSENSDK::ZSENTransformProperty::setPosition)
-        .addFunction("setScale", &ZSENSDK::ZSENTransformProperty::setScale)
-        .addFunction("setRotation", &ZSENSDK::ZSENTransformProperty::setRotation)
+        .deriveClass <TransformProperty, GameObjectProperty>("Transform")
+        .addData("translation", &TransformProperty::translation, false)
+        .addData("scale", &TransformProperty::scale, false)
+        .addData("rotation", &TransformProperty::rotation, false)
+        .addFunction("setPosition", &TransformProperty::setTranslation)
+        .addFunction("setScale", &TransformProperty::setScale)
+        .addFunction("setRotation", &TransformProperty::setRotation)
         .endClass()
 
 
-        .deriveClass <ZSENAudSourceProperty, ZSENObjectProperty>("AudioSource")
-        .addFunction("setAudioFile", &ZSENSDK::ZSENAudSourceProperty::setAudioFile)
-        .addFunction("Play", &ZSENSDK::ZSENAudSourceProperty::Play)
-        .addFunction("Stop", &ZSENSDK::ZSENAudSourceProperty::Stop)
-        .addFunction("Pause", &ZSENSDK::ZSENAudSourceProperty::Pause)
-        .addFunction("getGain", &ZSENSDK::ZSENAudSourceProperty::getGain)
-        .addFunction("getPitch", &ZSENSDK::ZSENAudSourceProperty::getPitch)
-        .addFunction("setGain", &ZSENSDK::ZSENAudSourceProperty::setGain)
-        .addFunction("setPitch", &ZSENSDK::ZSENAudSourceProperty::setPitch)
+        .deriveClass <AudioSourceProperty, GameObjectProperty>("AudioSource")
+        .addFunction("setAudioFile", &AudioSourceProperty::setAudioFile)
+        .addFunction("Play", &AudioSourceProperty::audio_start)
+        .addFunction("Stop", &AudioSourceProperty::audio_stop)
+        .addFunction("Pause", &AudioSourceProperty::audio_pause)
+        .addFunction("getGain", &AudioSourceProperty::getGain)
+        .addFunction("getPitch", &AudioSourceProperty::getPitch)
+        .addFunction("setGain", &AudioSourceProperty::setGain)
+        .addFunction("setPitch", &AudioSourceProperty::setPitch)
         .endClass()
 
-        .deriveClass <ZSENTileProperty, ZSENObjectProperty>("Tile2D")
-        .addFunction("playAnim", &ZSENSDK::ZSENTileProperty::playAnim)
-        .addFunction("setDiffuseTexture", &ZSENSDK::ZSENTileProperty::setDiffuseTexture)
-        .addFunction("stopAnim", &ZSENSDK::ZSENTileProperty::stopAnim)
+        .deriveClass <TileProperty, GameObjectProperty>("Tile2D")
+        .addFunction("playAnim", &TileProperty::playAnim)
+        .addFunction("setDiffuseTexture", &TileProperty::setDiffuseTexture)
+        .addFunction("stopAnim", &TileProperty::stopAnim)
         .endClass()
 
-        .deriveClass <ZSENScriptGroupProperty, ZSENObjectProperty>("ScriptGroup")
-        .addFunction("getScript", &ZSENSDK::ZSENScriptGroupProperty::getScriptByName)
-
+        .deriveClass <ScriptGroupProperty, GameObjectProperty>("ScriptGroup")
+        .addFunction("getScript", &ScriptGroupProperty::getScriptByName)
         .endClass()
 
         .endNamespace();

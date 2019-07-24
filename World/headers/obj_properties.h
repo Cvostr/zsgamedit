@@ -27,6 +27,8 @@ public:
     void onUpdate(float deltaTime); //calls update in scripts
     void copyTo(GameObjectProperty* dest);
 
+    ObjectScript* getScriptByName(std::string name);
+
     ScriptGroupProperty();
 };
 
@@ -44,10 +46,16 @@ public:
     void onObjectDeleted();
     void copyTo(GameObjectProperty* dest);
 
+    void setAudioFile(std::string relpath);
     void updateAudioPtr();
     void audio_start();
     void audio_pause();
     void audio_stop();
+
+    float getGain();
+    float getPitch();
+    void setGain(float gain);
+    void setPitch(float pitch);
 
     AudioSourceProperty();
 };

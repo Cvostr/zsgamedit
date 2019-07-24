@@ -15,7 +15,9 @@ GameObjectProperty::GameObjectProperty(){
 GameObjectProperty::~GameObjectProperty(){
 
 }
-
+void GameObjectProperty::setActive(bool active){
+    this->active = active;
+}
 void GameObjectProperty::copyTo(GameObjectProperty* dest){
     dest->active = this->active;
     dest->world_ptr = this->world_ptr;
@@ -215,6 +217,15 @@ void TransformProperty::setTranslation(ZSVECTOR3 new_translation){
         updateMat(); //Update matrix again
         return;
     }
+}
+
+void TransformProperty::setScale(ZSVECTOR3 new_scale){
+    this->scale = new_scale;
+    updateMat();
+}
+void TransformProperty::setRotation(ZSVECTOR3 new_rotation){
+    this->rotation = new_rotation;
+    updateMat();
 }
 
 void TransformProperty::updateMat(){
@@ -550,7 +561,10 @@ void AudioSourceProperty::copyTo(GameObjectProperty* dest){
     _dest->buffer_ptr = this->buffer_ptr;
     //_dest->source.setAlBuffer(this->buffer_ptr);
 }
-
+void AudioSourceProperty::setAudioFile(std::string relpath){
+    this->resource_relpath = QString::fromStdString(relpath);
+    this->updateAudioPtr();
+}
 void AudioSourceProperty::audio_start(){
     this->source.play();
 }
@@ -561,6 +575,21 @@ void AudioSourceProperty::audio_stop(){
 
 void AudioSourceProperty::audio_pause(){
     this->source.pause();
+}
+
+float AudioSourceProperty::getGain(){
+    return source.source_gain;
+}
+float AudioSourceProperty::getPitch(){
+    return source.source_pitch;
+}
+void AudioSourceProperty::setGain(float gain){
+    source.source_gain = gain;
+    source.apply_settings();
+}
+void AudioSourceProperty::setPitch(float pitch){
+    source.source_pitch = pitch;
+    source.apply_settings();
 }
 
 void AudioSourceProperty::onObjectDeleted(){
@@ -858,7 +887,6 @@ void ScriptGroupProperty::onValueChanged(){
         scripts_attached[script_i].name = path_names[script_i].toStdString();
     }
 
-
 }
 
 void ScriptGroupProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
@@ -922,6 +950,12 @@ void ScriptGroupProperty::shutdown(){
     }
 }
 
+ObjectScript* ScriptGroupProperty::getScriptByName(std::string name){
+    for(unsigned int script_i = 0; script_i < scr_num; script_i ++){
+        if(!name.compare(scripts_attached[script_i].name))
+            return &scripts_attached[script_i];
+    }
+}
 ScriptGroupProperty::ScriptGroupProperty(){
     type = GO_PROPERTY_TYPE_SCRIPTGROUP;
 

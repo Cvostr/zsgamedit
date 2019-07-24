@@ -88,6 +88,10 @@ public:
     void onUpdate(float deltaTime);
     void onRender(RenderPipeline* pipeline);
 
+    void playAnim();
+    void stopAnim();
+    void setDiffuseTexture(std::string texture);
+
     TileProperty();
 };
 

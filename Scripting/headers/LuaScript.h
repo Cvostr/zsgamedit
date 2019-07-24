@@ -12,6 +12,7 @@ extern "C" {
 #include "../../World/headers/World.h"
 
 
+
 class ObjectScript {
 
 private:
@@ -28,7 +29,11 @@ public:
     void _callDraw(float deltaTime);
     void callDrawUI();
     void onTrigger();
-    void func(std::string func_name);
+
+    unsigned int getArgCount(lua_State *_L);
+
+    void func(lua_State *L);
+    void _func(std::string func_name, luabridge::LuaRef arg_table);
 
 };
 #endif
