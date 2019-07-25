@@ -6,11 +6,19 @@
 #include "../ProjEd/headers/ProjectEdit.h"
 #include <QString>
 #include <iostream>
+#include <functional>
 #include <SDL2/SDL.h>
 
 unsigned int mode_fullscreen = SDL_WINDOW_FULLSCREEN;
 unsigned int mode_borderless = SDL_WINDOW_FULLSCREEN_DESKTOP;
 unsigned int mode_windowed = 0;
+
+unsigned int prop_transform = GO_PROPERTY_TYPE_TRANSFORM;
+unsigned int prop_mesh = GO_PROPERTY_TYPE_MESH;
+unsigned int prop_audio = GO_PROPERTY_TYPE_AUDSOURCE;
+unsigned int prop_light = GO_PROPERTY_TYPE_LIGHTSOURCE;
+unsigned int prop_script = GO_PROPERTY_TYPE_SCRIPTGROUP;
+unsigned int prop_tile = GO_PROPERTY_TYPE_TILE;
 
 extern EditWindow* _editor_win;
 
@@ -29,23 +37,9 @@ ZSVECTOR3 ZSENSDK::Math::vadd(ZSVECTOR3 v1, ZSVECTOR3 v2){
     return v1 + v2;
 }
 
-TransformProperty* ZSENSDK::ZSENGmObject::transform(){
-    return static_cast<TransformProperty*>(this->updPtr()->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
-}
-AudioSourceProperty* ZSENSDK::ZSENGmObject::audio(){
-    return static_cast<AudioSourceProperty*>(this->updPtr()->getPropertyPtrByType(GO_PROPERTY_TYPE_AUDSOURCE));
-}
-TileProperty* ZSENSDK::ZSENGmObject::tile(){
-    return static_cast<TileProperty*>(this->updPtr()->getPropertyPtrByType(GO_PROPERTY_TYPE_TILE));
-}
-LightsourceProperty* ZSENSDK::ZSENGmObject::light(){
-    return static_cast<LightsourceProperty*>(this->updPtr()->getPropertyPtrByType(GO_PROPERTY_TYPE_LIGHTSOURCE));
-}
-ScriptGroupProperty* ZSENSDK::ZSENGmObject::script(){
-    return static_cast<ScriptGroupProperty*>(this->updPtr()->getPropertyPtrByType(GO_PROPERTY_TYPE_SCRIPTGROUP));
-}
-
 void ZSENSDK::bindSDK(lua_State* state){
+
+
     luabridge::getGlobalNamespace(state)
         .beginNamespace("window")
         .addVariable("MODE_WINDOWED", &mode_windowed, false)
@@ -121,40 +115,51 @@ void ZSENSDK::bindSDK(lua_State* state){
 
     luabridge::getGlobalNamespace(state)
         .beginNamespace("engine")
-        .beginClass <ZSENGmObject>("GameObject")
 
-        .addFunction("getLabel", &ZSENSDK::ZSENGmObject::getLabel)
-        .addFunction("setLabel", &ZSENSDK::ZSENGmObject::setLabel)
-        .addFunction("setActive", &ZSENSDK::ZSENGmObject::setActive)
 
-        .addFunction("transform", &ZSENSDK::ZSENGmObject::transform)
-        .addFunction("audio", &ZSENSDK::ZSENGmObject::audio)
-        .addFunction("light", &ZSENSDK::ZSENGmObject::light)
-        .addFunction("tile", &ZSENSDK::ZSENGmObject::tile)
-        .addFunction("script", &ZSENSDK::ZSENGmObject::script)
+        .addVariable("PROPERTY_SCRIPT", &prop_script)
+        .addVariable("PROPERTY_TRANSFORM", &prop_transform)
+        .addVariable("PROPERTY_MESH", &prop_mesh)
+        .addVariable("PROPERTY_AUDIOSOURCE", &prop_audio)
+        .addVariable("PROPERTY_LIGHTSOURCE", &prop_light)
+        .addVariable("PROPERTY_TILE", &prop_tile)
 
+        .beginClass <GameObjectProperty>("ObjectProperty")
+        .addFunction("setActive", &GameObjectProperty::setActive)
+        .addData("active", &GameObjectProperty::active, false)
+        .addData("type", &GameObjectProperty::type, false)
         .endClass()
-        .endNamespace();
 
-    luabridge::getGlobalNamespace(state)
-        .beginNamespace("engine")
+
+        .beginClass <GameObject>("GameObject")
+        .addFunction("getLabel", &GameObject::getLabel)
+        .addFunction("setLabel", &GameObject::setLabel)
+        .addFunction("setActive", &GameObject::setActive)
+        .addData("active", &GameObject::active, false)
+        .addData("propsNum", &GameObject::props_num, false)
+        .addFunction("getProperty", &GameObject::getPropertyPtrByTypeI)
+        .addFunction("addProperty", &GameObject::addProperty)
+        .addFunction("removeProperty", &GameObject::removeProperty)
+
+        .addFunction("transform", &GameObject::getPropertyPtr<TransformProperty>)
+        .addFunction("mesh", &GameObject::getPropertyPtr<MeshProperty>)
+        .addFunction("audio", &GameObject::getPropertyPtr<AudioSourceProperty>)
+        .addFunction("light", &GameObject::getPropertyPtr<LightsourceProperty>)
+        .addFunction("tile", &GameObject::getPropertyPtr<TileProperty>)
+        .addFunction("script", &GameObject::getPropertyPtr<ScriptGroupProperty>)
+        .endClass()
+
         .beginClass <ZSEN_World>("World")
-
         .addFunction("findObject", &ZSENSDK::ZSEN_World::getObjectSDK)
         .addFunction("removeObject", &ZSENSDK::ZSEN_World::removeObject)
         .addFunction("setCamera", &ZSENSDK::ZSEN_World::setCamera)
         .addFunction("getCamera", &ZSENSDK::ZSEN_World::getCamera)
-
         .addFunction("loadSceneFromFile", &ZSENSDK::ZSEN_World::loadWorldFromFile)
         .addFunction("instantiate", &ZSENSDK::ZSEN_World::Instantiate)
         .addFunction("addFromPrefab", &ZSENSDK::ZSEN_World::addPrefab)
-
         .endClass()
-        .endNamespace();
 
-    luabridge::getGlobalNamespace(state)
-        .beginNamespace("engine")
-
+         //Usual script
         .beginClass <ObjectScript>("Script")
         .addFunction("onStart", &ObjectScript::_callStart)
         .addFunction("onFrame", &ObjectScript::_callDraw)
@@ -162,15 +167,11 @@ void ZSENSDK::bindSDK(lua_State* state){
         .addFunction("funcA", &ObjectScript::_func)
         .endClass()
 
-        .beginClass <GameObjectProperty>("ObjectProperty")
-        .addFunction("setActive", &GameObjectProperty::setActive)
-        .endClass()
 
         .deriveClass <LightsourceProperty, GameObjectProperty>("LightSource")
         .addData("intensity", &LightsourceProperty::intensity)
         .addData("range", &LightsourceProperty::range)
         .addData("color", &LightsourceProperty::color)
-
         .endClass()
 
         .deriveClass <TransformProperty, GameObjectProperty>("Transform")

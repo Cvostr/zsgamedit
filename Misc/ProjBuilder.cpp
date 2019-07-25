@@ -27,6 +27,10 @@ void ProjBuilder::start(){
                 break;
             case RESOURCE_TYPE_AUDIO : type_str = "AUDIO";
                 break;
+            case RESOURCE_TYPE_SCRIPT : type_str = "SCRIPT";
+                break;
+            case RESOURCE_TYPE_MATERIAL : type_str = "MATERIAL";
+                break;
         }
         window->addToOutput("Resource #" + QString::number(res_i) + " type: " + type_str + " " + res_ptr->rel_path);
         writer->writeToBlob((proj_ptr->root_path + "/" + res_ptr->rel_path).toStdString(), res_ptr->rel_path.toStdString(), res_ptr);

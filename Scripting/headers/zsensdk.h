@@ -17,37 +17,17 @@ extern "C" {
 
 namespace ZSENSDK {
 
-class ZSENGmObject{
-public:
-    std::string str_id;
-    World* world_ptr;
-    GameObject* object_ptr;
-
-    GameObject* updPtr();
-
-    std::string getLabel();
-    void setLabel(std::string label);
-    void setActive(bool active);
-
-    TransformProperty* transform();
-    AudioSourceProperty* audio();
-    TileProperty* tile();
-    LightsourceProperty* light();
-    ScriptGroupProperty* script();
-
-};
-
 class ZSEN_World{
 public:
     World* world_ptr;
 
-    ZSENGmObject getObjectSDK(std::string name);
-    void removeObject(ZSENGmObject obj);
+    GameObject* getObjectSDK(std::string name);
+    void removeObject(GameObject* obj);
     void setCamera(ZSPIRE::Camera cam);
     ZSPIRE::Camera getCamera();
     void loadWorldFromFile(std::string file);
     void addPrefab(std::string prefab);
-    void Instantiate(ZSENGmObject obj);
+    void Instantiate(GameObject* obj);
 };
 namespace Debug{
     void Log(std::string text);

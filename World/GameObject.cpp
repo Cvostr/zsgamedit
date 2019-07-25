@@ -84,8 +84,31 @@ bool GameObject::hasMesh(){
     }
     return false;
 }
-
+/*
+template<typename T>
+T* GameObject::getPropertyPtr(){
+    unsigned int props = static_cast<unsigned int>(this->props_num);
+    for(unsigned int prop_i = 0; prop_i < props; prop_i ++){
+        GameObjectProperty* property_ptr = this->properties[prop_i];
+        if(typeid ( property_ptr) == typeid(T)){ //If object already has one
+            return static_cast<T*>(property_ptr); //return it
+        }
+    }
+    return nullptr;
+}
+*/
 GameObjectProperty* GameObject::getPropertyPtrByType(PROPERTY_TYPE property){
+    unsigned int props = static_cast<unsigned int>(this->props_num);
+    for(unsigned int prop_i = 0; prop_i < props; prop_i ++){
+        GameObjectProperty* property_ptr = this->properties[prop_i];
+        if(property_ptr->type == property){ //If object already has one
+            return property_ptr; //return it
+        }
+    }
+    return nullptr;
+}
+
+GameObjectProperty* GameObject::getPropertyPtrByTypeI(int property){
     unsigned int props = static_cast<unsigned int>(this->props_num);
     for(unsigned int prop_i = 0; prop_i < props; prop_i ++){
         GameObjectProperty* property_ptr = this->properties[prop_i];
@@ -369,6 +392,10 @@ void GameObject::setActive(bool active){
 void GameObject::setLabel(std::string label){
     this->getLabelProperty()->label = QString::fromStdString(label);
     this->getLabelProperty()->onValueChanged();
+}
+
+std::string GameObject::getLabel(){
+    return this->label->toStdString();
 }
 
 void GameObject::copyTo(GameObject* dest){

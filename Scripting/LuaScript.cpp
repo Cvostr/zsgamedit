@@ -14,7 +14,7 @@ void ObjectScript::_InitScript() {
     int start_result = luaL_dofile(L, fpath.toStdString().c_str());
 
     if(start_result == 1){ //if error in script
-        std::cout << "SCRIPT" << name << " error loading occured!" << std::endl;
+        SCRIPT_LOG << name << " error loading occured!" << std::endl;
         std::cout << "ERROR: " << lua_tostring(L, -1) << std::endl;
     }
 
@@ -36,16 +36,11 @@ void ObjectScript::_callStart() {
     ZSENSDK::ZSEN_World world;
     world.world_ptr = link.world_ptr;
 
-    ZSENSDK::ZSENGmObject gm_obj;
-    gm_obj.str_id = this->link.updLinkPtr()->str_id;
-    gm_obj.world_ptr = this->link.world_ptr;
-    gm_obj.updPtr();
-
     luabridge::LuaRef start = luabridge::getGlobal(L, "onStart");
     int result = 0;
     if (start.isFunction() == true) { //If function found
         try {
-            result = start(gm_obj, world); //Call script onStart()
+            result = start(this->link.updLinkPtr(), world); //Call script onStart()
         }
         catch (luabridge::LuaException e) {
            SCRIPT_LOG << "Error occured in script (onStart) " << name << " " << e.what() << std::endl;

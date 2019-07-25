@@ -10,36 +10,14 @@
 
 extern EditWindow* _editor_win;
 
-GameObject* ZSENSDK::ZSENGmObject::updPtr(){
-    this->object_ptr = world_ptr->getObjectByStringId(this->str_id);
-    return object_ptr;
+GameObject* ZSENSDK::ZSEN_World::getObjectSDK(std::string name){
+    GameObject* obj_ptr = this->world_ptr->getObjectByLabel(QString::fromStdString(name));
+
+    return obj_ptr;
 }
 
-std::string ZSENSDK::ZSENGmObject::getLabel(){
-    return this->updPtr()->label->toStdString();
-}
-void ZSENSDK::ZSENGmObject::setLabel(std::string label){
-    this->updPtr()->setLabel(label);
-}
-void ZSENSDK::ZSENGmObject::setActive(bool active){
-    this->updPtr()->setActive(active);
-}
-
-
-
-ZSENSDK::ZSENGmObject ZSENSDK::ZSEN_World::getObjectSDK(std::string name){
-    ZSENGmObject result;
-
-    GameObject* common_obj_ptr = this->world_ptr->getObjectByLabel(QString::fromStdString(name));
-    result.str_id = common_obj_ptr->str_id;
-    result.world_ptr = this->world_ptr;
-    result.updPtr();
-
-    return result;
-}
-
-void ZSENSDK::ZSEN_World::removeObject(ZSENGmObject obj){
-    world_ptr->removeObj(obj.updPtr()->getLinkToThisObject());
+void ZSENSDK::ZSEN_World::removeObject(GameObject* obj){
+    world_ptr->removeObj(obj->getLinkToThisObject());
 }
 void ZSENSDK::ZSEN_World::setCamera(ZSPIRE::Camera cam){
     cam.setViewport(world_ptr->world_camera.getViewport());
@@ -55,8 +33,8 @@ void ZSENSDK::ZSEN_World::loadWorldFromFile(std::string file){
 
    _editor_win->sheduleWorldLoad(load);
 }
-void ZSENSDK::ZSEN_World::Instantiate(ZSENGmObject obj){
-    GameObjectLink link = obj.updPtr()->getLinkToThisObject();
+void ZSENSDK::ZSEN_World::Instantiate(GameObject* obj){
+    GameObjectLink link = obj->getLinkToThisObject();
     GameObject* result = this->world_ptr->dublicateObject(link.ptr);
 
     if(result->hasParent){ //if object parented

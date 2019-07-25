@@ -741,6 +741,16 @@ void EditWindow::lookForResources(QString path){
                 loadResource(&resource); //Perform mesh processing & loading to OpenGL
                 this->project.resources.push_back(resource);
             }
+            if(name.endsWith(".lua") || name.endsWith(".LUA") || name.endsWith(".ZSCR") || name.endsWith(".zscr")){ //If its an mesh
+                Resource resource;
+                resource.file_path = fileInfo.absoluteFilePath();
+                resource.rel_path = resource.file_path; //Preparing to get relative path
+                resource.rel_path.remove(0, project.root_path.size() + 1); //Get relative path by removing length of project root from start
+                resource.resource_label = resource.rel_path.toStdString();
+                resource.type = RESOURCE_TYPE_SCRIPT; //Type of resource is mesh
+                loadResource(&resource); //Perform mesh processing & loading to OpenGL
+                this->project.resources.push_back(resource);
+            }
         }
 
         if(fileInfo.isDir() == true){ //If it is directory

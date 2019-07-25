@@ -145,28 +145,28 @@ bool SoundBuffer::loadFileWAV(const char* file_path){
     while(data_buffer[0] != 'd' || data_buffer[1] != 'a' || data_buffer[2] != 't' || data_buffer[3] != 'a')
         audio_stream.read(reinterpret_cast<char*>(data_buffer), 4);
         //Read size
-        audio_stream.read(reinterpret_cast<char*>(data_buffer), 4);
-        //Calculate size
-        int _size = data_buffer[3] << 24; //Getting size, 32 bit value
-        _size |= data_buffer[2] << 16;
-        _size |= data_buffer[1] << 8;
-        _size |= data_buffer[0];
-        //read data
-        audio_stream.read(reinterpret_cast<char*>(data_buffer), _size);
-        //Send data to OpenAL
-        alBufferData(this->al_buffer_id, format, static_cast<void*>((data_buffer)), size, static_cast<int>(freq));
-        int err = alGetError();
-        if (err != AL_NO_ERROR)
-        {
-            std::cout << "Error loading " << err << std::endl;
-            delete [] data_buffer; //Free heap
-            audio_stream.close();
-            return false;
-        }
-
+    audio_stream.read(reinterpret_cast<char*>(data_buffer), 4);
+    //Calculate size
+    int _size = data_buffer[3] << 24; //Getting size, 32 bit value
+    _size |= data_buffer[2] << 16;
+    _size |= data_buffer[1] << 8;
+    _size |= data_buffer[0];
+    //read data
+    audio_stream.read(reinterpret_cast<char*>(data_buffer), _size);
+    //Send data to OpenAL
+    alBufferData(this->al_buffer_id, format, static_cast<void*>((data_buffer)), _size, static_cast<int>(freq));
+    int err = alGetError();
+    if (err != AL_NO_ERROR)
+    {
+        std::cout << "Error loading " << err << std::endl;
         delete [] data_buffer; //Free heap
         audio_stream.close();
-        return true;
+        return false;
+    }
+
+    delete [] data_buffer; //Free heap
+    audio_stream.close();
+    return true;
 }
 void SoundBuffer::Destroy(){
     alDeleteBuffers(1, &this->al_buffer_id);

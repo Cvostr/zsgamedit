@@ -136,9 +136,12 @@ public:
 
 class GameObject{
 public:
-    int array_index; //Index in objects vector
-    QString* label; //Pointer to string label in property
-    std::string str_id; //String, gameobject identified by
+    //Index in objects vector
+    int array_index;
+    //Pointer to string label in property
+    QString* label;
+    //String, gameobject identified by
+    std::string str_id;
     bool hasParent; //If object has a parent
     bool alive; //if object marked as removed
     bool isPicked; //if user selected this object to edit it
@@ -155,21 +158,37 @@ public:
 
     void setActive(bool active); //toggle gameobject active property
     void setLabel(std::string label);
+    std::string getLabel();
 
     bool addProperty(PROPERTY_TYPE property); //Adds property with property ID
     bool addTransformProperty();
     bool addLabelProperty();
 
-    GameObjectProperty* getPropertyPtrByType(PROPERTY_TYPE property); //returns pointer to property by property type
+    template<typename T>
+    T* getPropertyPtr(){
+        unsigned int props = static_cast<unsigned int>(this->props_num);
+        for(unsigned int prop_i = 0; prop_i < props; prop_i ++){
+            auto property_ptr = this->properties[prop_i];
+            if(typeid ( *property_ptr) == typeid(T)){ //If object already has one
+                return static_cast<T*>(property_ptr); //return it
+            }
+        }
+        return nullptr;
+    }
+
+    //returns pointer to property by property type
+    GameObjectProperty* getPropertyPtrByType(PROPERTY_TYPE property);
+    GameObjectProperty* getPropertyPtrByTypeI(int property);
     LabelProperty* getLabelProperty();
     TransformProperty* getTransformProperty();
     GameObjectLink getLinkToThisObject();
-    void trimChildrenArray(); //remove deleted children from vector
+    //remove deleted children from vector
+    void trimChildrenArray();
 
     void addChildObject(GameObjectLink link);
     void removeChildObject(GameObjectLink link);
-
-    void removeProperty(int index); //Remove property with type
+    //Remove property with type
+    void removeProperty(int index);
 
     void saveProperties(std::ofstream* stream); //Writes properties content at end of stream
     void loadProperty(std::ifstream* world_stream); //Loads one property from stream
@@ -179,15 +198,17 @@ public:
     void Draw(RenderPipeline* pipeline); //On render pipeline wish to draw the object
     bool hasMesh(); //Check if gameobject has mesh property and mesh inside
     void onUpdate(int deltaTime); //calls onUpdate on all properties
-    void onPreRender(RenderPipeline* pipeline); //calls onPreRender on all properties
+    //calls onPreRender on all properties
+    void onPreRender(RenderPipeline* pipeline);
     void onRender(RenderPipeline* pipeline);
     void onTrigger(GameObject* obj);
-    bool isRigidbody(); //true, if object has rigidbody component
+     //true, if object has rigidbody component
+    bool isRigidbody();
 
     void putToSnapshot(GameObjectSnapshot* snapshot);
     void recoverFromSnapshot(GameObjectSnapshot* snapshot);
-
-    void uncheckInactive(); //if user unchecked active checkbox
+    //if user unchecked active checkbox
+    void uncheckInactive();
 
     GameObject(); //Default constructor
     ~GameObject();

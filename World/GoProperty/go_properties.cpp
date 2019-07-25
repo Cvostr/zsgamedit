@@ -454,7 +454,6 @@ void LightsourceProperty::updTransformPtr(){
 }
 
 void LightsourceProperty::onObjectDeleted(){
-  //  deffered_shader_ptr->unsetLight(this->id);
 }
 
 void LightsourceProperty::onPreRender(RenderPipeline* pipeline){
