@@ -938,7 +938,7 @@ void EditWindow::onMouseMotion(int relX, int relY){
 
     }
     //We are in 2D project, move camera by the mouse
-    if(project.perspective == 2){ //Only affective in 2D
+    if(project.perspective == 2 && !isSceneRun){ //Only affective in 2D
         //If middle button of mouse pressed
         if(input_state.isMidBtnHold == true){ //we just move on map
             //Stop camera moving
@@ -952,7 +952,7 @@ void EditWindow::onMouseMotion(int relX, int relY){
     }
 
     //We are in 2D project, move camera by the mouse and rotate it
-    if(project.perspective == 3){//Only affective in 3D
+    if(project.perspective == 3 && !isSceneRun){//Only affective in 3D
 
         if(input_state.isMidBtnHold == true){
             this->cam_yaw += relX * 0.16f;
@@ -1037,22 +1037,22 @@ void EditWindow::keyPressEvent(QKeyEvent* ke){
 
 void EditWindow::onKeyDown(SDL_Keysym sym){
 
-    if(sym.sym == SDLK_a){
+    if(sym.sym == SDLK_a && !isSceneRun){
         ZSVECTOR3 pos = edit_camera.getCameraPosition(); //obtain position
         pos = pos + edit_camera.getCameraRightVec() * -2.2f * deltaTime;
         edit_camera.setPosition(pos);
     }
-    if(sym.sym == SDLK_d){
+    if(sym.sym == SDLK_d && !isSceneRun){
         ZSVECTOR3 pos = edit_camera.getCameraPosition(); //obtain position
         pos = pos + edit_camera.getCameraRightVec() * 2.2f * deltaTime;
         edit_camera.setPosition(pos);
     }
-    if(sym.sym == SDLK_w){
+    if(sym.sym == SDLK_w && !isSceneRun){
         ZSVECTOR3 pos = edit_camera.getCameraPosition(); //obtain position
         pos.Y += 2.2f * deltaTime;
         edit_camera.setPosition(pos);
     }
-    if(sym.sym == SDLK_s){
+    if(sym.sym == SDLK_s && !isSceneRun){
         ZSVECTOR3 pos = edit_camera.getCameraPosition(); //obtain position
         pos.Y -= 2.2f * deltaTime;
         edit_camera.setPosition(pos);

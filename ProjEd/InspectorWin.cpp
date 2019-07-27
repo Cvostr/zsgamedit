@@ -22,6 +22,7 @@ InspectorWin::InspectorWin(QWidget *parent) :
      managePropButton = nullptr;
      line = nullptr;
      this->addObjComponentBtn = nullptr;
+     gameobject_ptr = nullptr;
 
      QWidget* widget = new QWidget;
      widget->setLayout(getContentLayout());
@@ -146,7 +147,8 @@ void InspectorWin::ShowObjectProperties(void* object_ptr){
 }
 
 void InspectorWin::updateObjectProperties(){
-    ShowObjectProperties(gameobject_ptr);
+    if(gameobject_ptr != nullptr) //if gameobject_ptr is not nullptr
+        ShowObjectProperties(gameobject_ptr); //Show properties
 }
 
 void InspectorWin::onPropertyEdited(){

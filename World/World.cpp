@@ -96,6 +96,18 @@ GameObject* World::dublicateObject(GameObject* original, bool parent){
     return new_obj;
 }
 
+GameObject* World::Instantiate(GameObject* original){
+    GameObjectLink link = original->getLinkToThisObject();
+    GameObject* result = this->dublicateObject(link.ptr);
+
+    if(result->hasParent){ //if object parented
+        result->parent.ptr->item_ptr->addChild(result->item_ptr);
+    }else{
+        obj_widget_ptr->addTopLevelItem(result->item_ptr);
+    }
+    return result;
+}
+
 GameObject* World::newObject(){
     GameObject obj; //Creating base gameobject
     int add_num = 0; //Declaration of addititonal integer
@@ -120,6 +132,10 @@ GameObject* World::getObjectByLabel(QString label){
             return obj_ptr; //Return founded object
     }
     return nullptr; //if we haven't found one
+}
+
+GameObject* World::getObjectByLabelStr(std::string label){
+    return getObjectByLabel(QString::fromStdString(label));
 }
 
 GameObject* World::getObjectByStringId(std::string id){
@@ -190,6 +206,9 @@ void World::removeObj(GameObjectLink link){
     }
 }
 
+void World::removeObjPtr(GameObject* obj){
+    removeObj(obj->getLinkToThisObject());
+}
 void World::trimObjectsList(){
     for (unsigned int i = 0; i < objects.size(); i ++) { //Iterating over all objects
         if(objects[i].alive == false){ //If object marked as deleted
@@ -451,6 +470,10 @@ void World::addObjectsFromPrefab(QString file){
         object_ptr->parent.world_ptr = this;
         object_ptr->parent.updLinkPtr()->item_ptr->addChild(object_ptr->item_ptr);
     }
+}
+
+void World::addObjectsFromPrefabStr(std::string file){
+    addObjectsFromPrefab(QString::fromStdString(file));
 }
 
 void World::addMeshGroup(std::string file_path){

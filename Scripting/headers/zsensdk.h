@@ -3,8 +3,6 @@
 
 #include <string>
 #include "../../World/headers/World.h"
-#include "../../World/headers/obj_properties.h"
-#include "../../World/headers/2dtileproperties.h"
 
 extern "C" {
 #include <lua5.3/lua.h>
@@ -17,18 +15,10 @@ extern "C" {
 
 namespace ZSENSDK {
 
-class ZSEN_World{
-public:
-    World* world_ptr;
-
-    GameObject* getObjectSDK(std::string name);
-    void removeObject(GameObject* obj);
-    void setCamera(ZSPIRE::Camera cam);
-    ZSPIRE::Camera getCamera();
+namespace Engine {
     void loadWorldFromFile(std::string file);
-    void addPrefab(std::string prefab);
-    void Instantiate(GameObject* obj);
-};
+}
+
 namespace Debug{
     void Log(std::string text);
 }

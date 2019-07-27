@@ -33,14 +33,12 @@ void ObjectScript::_DestroyScript(){
 }
 
 void ObjectScript::_callStart() {
-    ZSENSDK::ZSEN_World world;
-    world.world_ptr = link.world_ptr;
 
     luabridge::LuaRef start = luabridge::getGlobal(L, "onStart");
     int result = 0;
     if (start.isFunction() == true) { //If function found
         try {
-            result = start(this->link.updLinkPtr(), world); //Call script onStart()
+            result = start(this->link.updLinkPtr(), link.world_ptr); //Call script onStart()
         }
         catch (luabridge::LuaException e) {
            SCRIPT_LOG << "Error occured in script (onStart) " << name << " " << e.what() << std::endl;

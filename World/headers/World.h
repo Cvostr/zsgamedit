@@ -252,11 +252,14 @@ public:
     GameObject* addObject(GameObject obj);
     GameObject* newObject(); //Add new object to world
     GameObject* getObjectByLabel(QString label);
+    GameObject* getObjectByLabelStr(std::string label);
     GameObject* getObjectByStringId(std::string id);
     int getFreeObjectSpaceIndex();
     bool isObjectLabelUnique(QString label); //Get amount of objects with this label
     void removeObj(GameObjectLink link); //Remove object from world
+    void removeObjPtr(GameObject* obj); //Remove object from world
     GameObject* dublicateObject(GameObject* original, bool parent = true);
+    GameObject* Instantiate(GameObject* original);
     void trimObjectsList();
     void unpickObject();
 
@@ -273,6 +276,7 @@ public:
     void storeObjectToPrefab(GameObject* object_ptr, QString file);
     void writeObjectToPrefab(GameObject* object_ptr, std::ofstream* stream);
     void addObjectsFromPrefab(QString file);
+    void addObjectsFromPrefabStr(std::string file);
     void processPrefabObject(GameObject* object_ptr, std::vector<GameObject>* objects_array);
 
     void addMeshGroup(std::string file_path);

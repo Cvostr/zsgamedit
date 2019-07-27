@@ -26,7 +26,6 @@ void ZSENSDK::Debug::Log(std::string text){
     std::cout << "SCRIPT: " << text << std::endl;
 }
 
-
 ZSVECTOR3 ZSENSDK::Math::vnormalize(ZSVECTOR3 vec){
     ZSVECTOR3 result = vec;
     vNormalize(&result);
@@ -37,8 +36,15 @@ ZSVECTOR3 ZSENSDK::Math::vadd(ZSVECTOR3 v1, ZSVECTOR3 v2){
     return v1 + v2;
 }
 
-void ZSENSDK::bindSDK(lua_State* state){
+void ZSENSDK::Engine::loadWorldFromFile(std::string file){
+    Project* proj_ptr = static_cast<Project*>(_editor_win->world.proj_ptr);
 
+    QString load = proj_ptr->root_path + "/" + QString::fromStdString(file);
+
+   _editor_win->sheduleWorldLoad(load);
+}
+
+void ZSENSDK::bindSDK(lua_State* state){
 
     luabridge::getGlobalNamespace(state)
         .beginNamespace("window")
@@ -58,6 +64,7 @@ void ZSENSDK::bindSDK(lua_State* state){
         .beginNamespace("input")
         .addFunction("isKeyPressed", &ZSENSDK::Input::isKeyPressed)
         .addFunction("isKeyHold", &ZSENSDK::Input::isKeyHold)
+        .addFunction("getMouseState", &ZSENSDK::Input::getMouseState)
         //Add mouse state class
         .beginClass <Input::MouseState>("MouseState")
         .addData("cursorX", &Input::MouseState::mouseX)
@@ -67,8 +74,6 @@ void ZSENSDK::bindSDK(lua_State* state){
         .addData("isLButtonDown", &Input::MouseState::isLButtonDown)
         .addData("isRButtonDown", &Input::MouseState::isRButtonDown)
         .endClass()
-
-        .addFunction("getMouseState", &ZSENSDK::Input::getMouseState)
 
         .endNamespace();
 
@@ -95,15 +100,17 @@ void ZSENSDK::bindSDK(lua_State* state){
         .endClass();
 
     luabridge::getGlobalNamespace(state).beginClass <ZSPIRE::Camera>("Camera")
-        .addFunction("setPosition", &ZSPIRE::Camera::setPosition)
-        .addFunction("setFront", &ZSPIRE::Camera::setFront)
-        .addFunction("getPosition", &ZSPIRE::Camera::getCameraPosition)
-        .addFunction("getFront", &ZSPIRE::Camera::getCameraFrontVec)
-        .addFunction("setProjection", &ZSPIRE::Camera::setProjectionType)
-        .addFunction("setZplanes", &ZSPIRE::Camera::setZplanes)
-        .addFunction("setViewport", &ZSPIRE::Camera::setViewport)
-        .addFunction("getViewport", &ZSPIRE::Camera::getViewport)
-
+            .addFunction("setPosition", &ZSPIRE::Camera::setPosition)
+            .addFunction("setFront", &ZSPIRE::Camera::setFront)
+            .addData("pos", &ZSPIRE::Camera::camera_pos, false)
+            .addData("front", &ZSPIRE::Camera::camera_front, false)
+            .addFunction("setProjection", &ZSPIRE::Camera::setProjectionType)
+            .addFunction("setZplanes", &ZSPIRE::Camera::setZplanes)
+            .addFunction("setViewport", &ZSPIRE::Camera::setViewport)
+            .addData("viewport", &ZSPIRE::Camera::viewport, false)
+            .addData("Fov", &ZSPIRE::Camera::FOV, false)
+            .addData("nearZ", &ZSPIRE::Camera::nearZ, false)
+            .addData("farZ", &ZSPIRE::Camera::farZ, false)
         .endClass();
 
     luabridge::getGlobalNamespace(state).beginClass <ZSRGBCOLOR>("RGBColor")
@@ -116,6 +123,7 @@ void ZSENSDK::bindSDK(lua_State* state){
     luabridge::getGlobalNamespace(state)
         .beginNamespace("engine")
 
+        .addFunction("loadWorld", &Engine::loadWorldFromFile)
 
         .addVariable("PROPERTY_SCRIPT", &prop_script)
         .addVariable("PROPERTY_TRANSFORM", &prop_transform)
@@ -149,14 +157,12 @@ void ZSENSDK::bindSDK(lua_State* state){
         .addFunction("script", &GameObject::getPropertyPtr<ScriptGroupProperty>)
         .endClass()
 
-        .beginClass <ZSEN_World>("World")
-        .addFunction("findObject", &ZSENSDK::ZSEN_World::getObjectSDK)
-        .addFunction("removeObject", &ZSENSDK::ZSEN_World::removeObject)
-        .addFunction("setCamera", &ZSENSDK::ZSEN_World::setCamera)
-        .addFunction("getCamera", &ZSENSDK::ZSEN_World::getCamera)
-        .addFunction("loadSceneFromFile", &ZSENSDK::ZSEN_World::loadWorldFromFile)
-        .addFunction("instantiate", &ZSENSDK::ZSEN_World::Instantiate)
-        .addFunction("addFromPrefab", &ZSENSDK::ZSEN_World::addPrefab)
+        .beginClass <World>("World")
+        .addFunction("findObject", &World::getObjectByLabelStr)
+        .addFunction("instantiate", &World::Instantiate)
+        .addFunction("addFromPrefab", &World::addObjectsFromPrefabStr)
+        .addFunction("removeObject", &World::removeObjPtr)
+        .addData("camera", &World::world_camera, true)
         .endClass()
 
          //Usual script

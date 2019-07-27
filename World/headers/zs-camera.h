@@ -29,6 +29,15 @@ typedef struct ZSVIEWPORT{
 namespace ZSPIRE{
     class Camera{
         protected:
+            ZSMATRIX4x4 proj; //Calculated Projection matrix
+            ZSMATRIX4x4 ui_proj;
+            ZSMATRIX4x4 view; //Calculated View matrix
+
+            ZSCAMERAPROJECTIONTYPE proj_type;
+
+            bool isMoving;
+
+        public:
             ZSVECTOR3 camera_pos; //Camera position vector
             ZSVECTOR3 camera_up; //Camera up direction vector
             ZSVECTOR3 camera_front; //Camera front direction vector
@@ -39,15 +48,6 @@ namespace ZSPIRE{
 
             ZSVIEWPORT viewport;
 
-            ZSMATRIX4x4 proj; //Calculated Projection matrix
-            ZSMATRIX4x4 ui_proj;
-            ZSMATRIX4x4 view; //Calculated View matrix
-
-            ZSCAMERAPROJECTIONTYPE proj_type;
-
-            bool isMoving;
-
-        public:
             bool isAlListenerCamera;
             ZSVECTOR3 _dest_pos;
 
