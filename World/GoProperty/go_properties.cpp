@@ -909,6 +909,12 @@ void ScriptGroupProperty::addPropertyInterfaceToInspector(InspectorWin* inspecto
 void ScriptGroupProperty::onUpdate(float deltaTime){
     for(unsigned int script_i = 0; script_i < this->scripts_attached.size(); script_i ++){
         ObjectScript* script_ptr = &this->scripts_attached[script_i]; //Obtain pointer to script
+
+        if(!script_ptr->created){
+            script_ptr->_InitScript();
+            script_ptr->_callStart(this->go_link.updLinkPtr(), go_link.world_ptr);
+        }
+
         script_ptr->_callDraw(deltaTime); //Run onDraw() function in script
     }
 }
@@ -933,18 +939,11 @@ void ScriptGroupProperty::copyTo(GameObjectProperty* dest){
 }
 
 void ScriptGroupProperty::wakeUp(){
-    for(unsigned int script_i = 0; script_i < static_cast<unsigned int>(scr_num); script_i ++){
-        this->scripts_attached[script_i].link = this->go_link;
 
-        this->scripts_attached[script_i]._InitScript();
-        this->scripts_attached[script_i]._callStart();
-    }
 }
 
 void ScriptGroupProperty::shutdown(){
     for(unsigned int script_i = 0; script_i < static_cast<unsigned int>(scr_num); script_i ++){
-        this->scripts_attached[script_i].link = this->go_link;
-
         this->scripts_attached[script_i]._DestroyScript();
     }
 }

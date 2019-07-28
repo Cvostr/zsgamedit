@@ -463,9 +463,9 @@ void EditWindow::runWorld(){
         //If object removed or ineactive, then ignore it
         if(!object_ptr->active || !object_ptr->alive) continue;
         //Obtain script
-        ScriptGroupProperty* script_ptr = static_cast<ScriptGroupProperty*>(object_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_SCRIPTGROUP));
-        if(script_ptr != nullptr)
-            script_ptr->wakeUp(); //start all scripts
+        //ScriptGroupProperty* script_ptr = static_cast<ScriptGroupProperty*>(object_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_SCRIPTGROUP));
+        //if(script_ptr != nullptr)
+        //    script_ptr->wakeUp(); //start all scripts
     }
 
     _ed_actions_container->setStoreActions(false);

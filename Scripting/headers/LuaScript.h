@@ -18,14 +18,14 @@ class ObjectScript {
 private:
     lua_State* L;
 public:
-    GameObjectLink link;
+    bool created;
     QString fpath; //path to file
     std::string name;
 
     void _InitScript();
     void _DestroyScript();
 
-    void _callStart();
+    void _callStart(GameObject* obj, World* world);
     void _callDraw(float deltaTime);
     void callDrawUI();
     void onTrigger();
@@ -34,6 +34,8 @@ public:
 
     void func(lua_State *L);
     void _func(std::string func_name, luabridge::LuaRef arg_table);
+
+    ObjectScript();
 
 };
 #endif

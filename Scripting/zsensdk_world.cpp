@@ -1,9 +1,0 @@
-#include "headers/LuaScript.h"
-#include "headers/zsensdk.h"
-#include "../World/headers/obj_properties.h"
-#include "../World/headers/2dtileproperties.h"
-#include "../Render/headers/zs-math.h"
-#include "../ProjEd/headers/ProjectEdit.h"
-#include <QString>
-#include <iostream>
-#include <SDL2/SDL.h>

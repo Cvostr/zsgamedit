@@ -9,7 +9,7 @@ void ObjectScript::_InitScript() {
 
     luaL_openlibs(L);
 
-
+    created = true;
 
     int start_result = luaL_dofile(L, fpath.toStdString().c_str());
 
@@ -28,17 +28,23 @@ void ObjectScript::_InitScript() {
 
 }
 
-void ObjectScript::_DestroyScript(){
-    lua_close(L);
+ObjectScript::ObjectScript(){
+    created = false;
 }
 
-void ObjectScript::_callStart() {
+void ObjectScript::_DestroyScript(){
+    if(!created) return; //if script wasn't called, then return
+    lua_close(L);
+    created = false;
+}
+
+void ObjectScript::_callStart(GameObject* obj, World* world) {
 
     luabridge::LuaRef start = luabridge::getGlobal(L, "onStart");
     int result = 0;
     if (start.isFunction() == true) { //If function found
         try {
-            result = start(this->link.updLinkPtr(), link.world_ptr); //Call script onStart()
+            result = start(obj, world); //Call script onStart()
         }
         catch (luabridge::LuaException e) {
            SCRIPT_LOG << "Error occured in script (onStart) " << name << " " << e.what() << std::endl;

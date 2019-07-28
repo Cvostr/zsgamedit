@@ -55,8 +55,7 @@ SOURCES += \
     Misc/GlyphManager.cpp \
     Misc/EditorManager.cpp \
     Scripting/zsensdk_input.cpp \
-    ProjEd/EditorSettings.cpp \
-    Scripting/zsensdk_world.cpp
+    ProjEd/EditorSettings.cpp
 
 HEADERS += \
         mainwin.h \

@@ -234,7 +234,7 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr)
 
     this->ui_shader.Use();
     GlyphFontContainer* c = editwin_ptr->getFontContainer("LiberationMono-Regular.ttf");
-    int f[11];
+    int f[12];
     f[0] = static_cast<int>(L'H');
     f[1] = static_cast<int>(L'e');
     f[2] = static_cast<int>(L'l');
@@ -245,7 +245,8 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr)
     f[7] = static_cast<int>(L'o');
     f[8] = static_cast<int>(L'r');
     f[9] = static_cast<int>(L'l');
-    //c->DrawString(f, 10, ZSVECTOR2(10,10));
+    f[10] = static_cast<int>(L'd');
+    //c->DrawString(f, 11, ZSVECTOR2(10,10));
 
     //std::cout << static_cast<int>(deltaTime) << std::endl;
 
