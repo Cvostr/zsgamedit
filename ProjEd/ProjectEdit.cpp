@@ -1,5 +1,6 @@
 ﻿#include "headers/ProjectEdit.h"
 #include "headers/InspectorWin.h"
+#include "headers/InspEditAreas.h"
 #include "../World/headers/obj_properties.h"
 #include "../World/headers/2dtileproperties.h"
 #include "../Misc/headers/AssimpMeshLoader.h"
@@ -75,7 +76,7 @@ EditWindow::EditWindow(QWidget *parent) :
 
     ui->objsList->world_ptr = &world;
 
-    world.proj_ptr = static_cast<void*>(&project); //Assigning project pointer into world's variable
+    world.proj_ptr = &project; //Assigning project pointer into world's variable
     world.obj_widget_ptr = ui->objsList;
 
     ui->fileList->setViewMode(QListView::IconMode);
@@ -166,7 +167,7 @@ void EditWindow::init(){
             this->edit_camera.setProjectionType(ZSCAMERA_PROJECTION_PERSPECTIVE);
             edit_camera.setPosition(ZSVECTOR3(0,0,0));
             edit_camera.setFront(ZSVECTOR3(0,0,1));
-            edit_camera.setZplanes(1, 2000);
+            edit_camera.setZplanes(0.1, 2000);
             break;
         }
     }
@@ -457,17 +458,6 @@ void EditWindow::onBuildProject(){
 }
 
 void EditWindow::runWorld(){
-    //Prepare world for running
-    for(unsigned int object_i = 0; object_i < world.objects.size(); object_i ++){
-        GameObject* object_ptr = &world.objects[object_i];
-        //If object removed or ineactive, then ignore it
-        if(!object_ptr->active || !object_ptr->alive) continue;
-        //Obtain script
-        //ScriptGroupProperty* script_ptr = static_cast<ScriptGroupProperty*>(object_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_SCRIPTGROUP));
-        //if(script_ptr != nullptr)
-        //    script_ptr->wakeUp(); //start all scripts
-    }
-
     _ed_actions_container->setStoreActions(false);
     isSceneRun = true; //set toggle to true
     isWorldCamera = true;

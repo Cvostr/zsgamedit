@@ -7,7 +7,6 @@
 #include "zs-texture.h"
 #include "GizmosRenderer.h"
 #include "../../Misc/headers/EditorManager.h"
-
 #include <QMainWindow>
 #include <SDL2/SDL.h>
 
@@ -35,6 +34,7 @@ protected:
     unsigned int tNormal; //To store normal coordinate
     unsigned int tPos; //To store position coordinate
     unsigned int tTransparent; //To store color with alpha
+    unsigned int tBackground;
 public:
     G_BUFFER_GL();
     void create(int width, int height);
@@ -56,8 +56,8 @@ private:
     ZSPIRE::Shader obj_mark_shader; //Shader to draw mark of selected objects
     ZSPIRE::Shader ui_shader;
     ZSPIRE::Shader deffered_light;
+    ZSPIRE::Shader skybox;
     std::vector<void*> lights_ptr;
-
 
     RenderSettings render_settings;
 public:
@@ -77,6 +77,7 @@ public:
     void removeLights();
     ZSPIRE::Camera* cam;
     void* win_ptr;
+    void* skybox_ptr;
 
     RenderSettings* getRenderSettings();
     GizmosRenderer* getGizmosRenderer();

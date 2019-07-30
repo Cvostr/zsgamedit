@@ -12,7 +12,8 @@ enum MATSHPROP_TYPE{
     MATSHPROP_TYPE_INTEGER,
     MATSHPROP_TYPE_FLOAT,
     MATSHPROP_TYPE_FVEC3,
-    MATSHPROP_TYPE_COLOR
+    MATSHPROP_TYPE_COLOR,
+    MATSHPROP_TYPE_TEXTURE3
 };
 
 class MaterialShaderProperty{
@@ -65,7 +66,7 @@ namespace MtShProps {
     MaterialShaderProperty* allocateProperty(int type);
     MaterialShaderPropertyConf* allocatePropertyConf(int type);
 
-    MtShaderPropertiesGroup* genDefaultMtShGroup(ZSPIRE::Shader* shader3d);
+    MtShaderPropertiesGroup* genDefaultMtShGroup(ZSPIRE::Shader* shader3d, ZSPIRE::Shader* skybox);
     MtShaderPropertiesGroup* getDefaultMtShGroup();
 
     void addMtShaderPropertyGroup(MtShaderPropertiesGroup* group);
@@ -110,6 +111,13 @@ public:
 
     ColorMaterialShaderProperty();
 };
+class Texture3MaterialShaderProperty : public MaterialShaderProperty{
+public:
+    int slotToBind; //Slot to texture
+    std::string ToggleUniform; //Uniform to set to 1
+
+    Texture3MaterialShaderProperty();
+};
 
 //Property configurations
 class TextureMtShPropConf : public MaterialShaderPropertyConf{
@@ -143,5 +151,14 @@ public:
 
     ColorMtShPropConf();
 };
+class Texture3MtShPropConf : public MaterialShaderPropertyConf{
+public:
+    int texture_count;
+    QString texture_str[6];
+    QString rel_path;
 
+    ZSPIRE::Texture3D* texture3D;
+
+     Texture3MtShPropConf();
+};
 #endif

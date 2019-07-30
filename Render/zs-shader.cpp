@@ -110,6 +110,7 @@ bool ZSPIRE::Shader::compileFromFile(const char* VSpath, const char* FSpath){
 	glDeleteShader(FS);
 
 	Use();
+    setGLuniformInt("skybox", 0);
 	setGLuniformInt("diffuse", 0);
     setGLuniformInt("normal_map", 1);
     setGLuniformInt("specular_map", 2);
@@ -123,6 +124,7 @@ bool ZSPIRE::Shader::compileFromFile(const char* VSpath, const char* FSpath){
     setGLuniformInt("tNormal", 11);
     setGLuniformInt("tPos", 12);
     setGLuniformInt("tTransparent", 13);
+    setGLuniformInt("tBackground", 14);
 
     this->isCreated = true; //Shader created & compiled now
 	return true;

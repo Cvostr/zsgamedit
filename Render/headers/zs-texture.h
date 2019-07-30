@@ -1,9 +1,7 @@
-#ifdef _WIN32
-#include <cstring>
-#endif
-
 #ifndef zs_texture
 #define zs_texture
+
+#include <string>
 
 namespace ZSPIRE {
 	class Texture {
@@ -23,6 +21,20 @@ namespace ZSPIRE {
 		void Destroy();
 
 	};
+
+    class Texture3D{
+    public:
+        Texture3D();
+
+        bool created;
+        unsigned int TEXTURE_ID;
+
+        void Init();
+        bool pushTextureBuffer(int index, unsigned char* data);
+        bool pushTexture(int index, std::string path);
+        //Use in rendering pipeline
+        void Use(int slot);
+    };
 }
 
 

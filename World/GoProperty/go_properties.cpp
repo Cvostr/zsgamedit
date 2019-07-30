@@ -131,6 +131,11 @@ GameObjectProperty* allocProperty(int type){
             _ptr = static_cast<GameObjectProperty*>(ptr);
             break;
         }
+        case GO_PROPERTY_TYPE_SKYBOX:{
+            SkyboxProperty* ptr = new SkyboxProperty;
+            _ptr = static_cast<GameObjectProperty*>(ptr);
+            break;
+        }
         case GO_PROPERTY_TYPE_TILE_GROUP:{
             TileGroupProperty* ptr = new TileGroupProperty;
             _ptr = static_cast<GameObjectProperty*>(ptr);
@@ -702,6 +707,29 @@ void MaterialProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
 
                 break;
             }
+            case MATSHPROP_TYPE_TEXTURE3:{
+                //Cast pointer
+                Texture3MaterialShaderProperty* texture_p = static_cast<Texture3MaterialShaderProperty*>(prop_ptr);
+                Texture3MtShPropConf* texture_conf = static_cast<Texture3MtShPropConf*>(conf_ptr);
+
+                IntPropertyArea* integer_area = new IntPropertyArea;
+                integer_area->setLabel("Textures count"); //Its label
+                integer_area->value = &texture_conf->texture_count;
+                integer_area->go_property = static_cast<void*>(this);
+                inspector->addPropertyArea(integer_area);
+
+                for(int i = 0; i < texture_conf->texture_count; i ++){
+                    PickResourceArea* area = new PickResourceArea;
+                    area->setLabel(texture_p->prop_caption);
+                    area->go_property = static_cast<void*>(this);
+                    area->rel_path = &texture_conf->texture_str[i];
+                    area->isShowNoneItem = true;
+                    area->resource_type = RESOURCE_TYPE_TEXTURE; //It should load textures only
+                    inspector->addPropertyArea(area);
+                }
+
+                break;
+            }
         }
     }
 }
@@ -714,8 +742,7 @@ void MaterialProperty::onValueChanged(){
         //this->group_ptr = newmat_ptr->group_ptr;
         this->group_label = material_ptr->group_ptr->groupCaption;
 
-        //if available, update window
-        //if(insp_win != nullptr)
+        //update window
         _inspector_win->updateRequired = true;
     }
 
@@ -725,6 +752,7 @@ void MaterialProperty::onValueChanged(){
         if(MtShProps::getMtShaderPropertyGroupByLabel(this->group_label) != nullptr){
             //then apply that group
             material_ptr->setPropertyGroup(MtShProps::getMtShaderPropertyGroupByLabel(this->group_label));
+          //  this->group_label = material_ptr->group_ptr->groupCaption;
             //group_ptr = MtShProps::getMtShaderPropertyGroupByLabel(this->group_label);
         }else { //user haven't specified
             return; //go out
@@ -733,6 +761,8 @@ void MaterialProperty::onValueChanged(){
         if(MtShProps::getMtShaderPropertyGroupByLabel(this->group_label) != this->material_ptr->group_ptr){
             //Apply changing
             this->material_ptr->setPropertyGroup(MtShProps::getMtShaderPropertyGroupByLabel(this->group_label));
+           // this->group_label = material_ptr->group_ptr->groupCaption;
+            _inspector_win->updateRequired = true;
         }
     }
 
@@ -745,6 +775,18 @@ void MaterialProperty::onValueChanged(){
                 TextureMtShPropConf* texture_conf = static_cast<TextureMtShPropConf*>(conf_ptr);
 
                 texture_conf->texture = go_link.world_ptr->getTexturePtrByRelPath(texture_conf->path);
+
+                break;
+            }
+            case MATSHPROP_TYPE_TEXTURE3:{
+                //Cast pointer
+                Texture3MtShPropConf* texture_conf = static_cast<Texture3MtShPropConf*>(conf_ptr);
+
+                if(texture_conf->texture_count > 6)
+                    texture_conf->texture_count = 6;
+                texture_conf->rel_path = this->world_ptr->proj_ptr->root_path;
+                texture_conf->texture3D->created = false;
+                _inspector_win->updateRequired = true;
 
                 break;
             }
@@ -949,7 +991,7 @@ void ScriptGroupProperty::shutdown(){
 }
 
 ObjectScript* ScriptGroupProperty::getScriptByName(std::string name){
-    for(unsigned int script_i = 0; script_i < scr_num; script_i ++){
+    for(unsigned int script_i = 0; script_i < static_cast<unsigned int>(scr_num); script_i ++){
         if(!name.compare(scripts_attached[script_i].name))
             return &scripts_attached[script_i];
     }
@@ -959,4 +1001,9 @@ ScriptGroupProperty::ScriptGroupProperty(){
 
     scr_num = 0;
     this->scripts_attached.resize(static_cast<unsigned int>(this->scr_num));
+}
+
+
+SkyboxProperty::SkyboxProperty(){
+    type = GO_PROPERTY_TYPE_SKYBOX;
 }

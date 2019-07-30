@@ -133,4 +133,10 @@ public:
     RigidbodyProperty();
 };
 
+class SkyboxProperty : public GameObjectProperty{
+public:
+    void onPreRender(RenderPipeline* pipeline);
+    SkyboxProperty();
+};
+
 #endif // OBJ_PROPERTIES_H

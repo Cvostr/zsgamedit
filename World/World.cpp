@@ -57,11 +57,14 @@ GameObject* World::dublicateObject(GameObject* original, bool parent){
 
     //Copying properties data
     for(unsigned int prop_i = 0; prop_i < original->props_num; prop_i ++){
+        //Get pointer to original property
         auto prop_ptr = original->properties[prop_i];
+        //register new property in new object
         new_obj->addProperty(prop_ptr->type);
+        //Get created property
         auto new_prop = new_obj->getPropertyPtrByType(prop_ptr->type);
-
-        prop_ptr->copyTo(new_prop); //start property copying
+        //start property copying
+        prop_ptr->copyTo(new_prop);
     }
 
     if(original->hasParent){ //if original has parent
@@ -86,10 +89,15 @@ GameObject* World::dublicateObject(GameObject* original, bool parent){
     new_obj->item_ptr->setText(0, label_prop->label);
     //Dublicate chilldren object
     unsigned int children_amount = static_cast<unsigned int>(original->children.size());
+    //Iterate over all children
     for(unsigned int child_i = 0; child_i < children_amount; child_i ++){
+        //Get pointer to original child object
         GameObjectLink link = original->children[child_i];
+        //create new child obect by dublication of original
         GameObject* new_child = dublicateObject(link.ptr, false);
+        //parenting
         new_obj->addChildObject(new_child->getLinkToThisObject());
+        //UI parenting
         new_obj->item_ptr->addChild(new_child->item_ptr);
     }
 
@@ -556,9 +564,6 @@ GameObject* World::addMeshNode(MeshNode* node){
                 mat_prop_ptr->onValueChanged();
             }
         }
-        //mat_prop_ptr->material_path = ZSPIRE
-
-
 
     }
 

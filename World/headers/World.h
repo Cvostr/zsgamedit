@@ -17,6 +17,7 @@
 #include "../../Misc/headers/oal_manager.h"
 
 #include "../../Misc/headers/AssimpMeshLoader.h"
+#include "../../Misc/headers/zs_types.h"
 
 #define OBJ_PROPS_SIZE 11
 #define MAX_OBJS 12000
@@ -34,6 +35,7 @@ enum PROPERTY_TYPE{
     GO_PROPERTY_TYPE_SCRIPTGROUP,
     GO_PROPERTY_TYPE_COLLIDER,
     GO_PROPERTY_TYPE_RIGIDBODY,
+    GO_PROPERTY_TYPE_SKYBOX,
     GO_PROPERTY_TYPE_TILE_GROUP = 1000,
     GO_PROPERTY_TYPE_TILE = 1001
 };
@@ -243,7 +245,7 @@ public:
 class World{
 public:
     QTreeWidget* obj_widget_ptr;
-    void* proj_ptr; //Pointer to Project structure
+    Project* proj_ptr; //Pointer to Project structure
     ZSPIRE::Camera world_camera;
 
     std::vector<GameObject> objects; //Vector, containing all gameobjects

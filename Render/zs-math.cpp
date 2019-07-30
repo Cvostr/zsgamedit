@@ -131,6 +131,10 @@ ZSMATRIX4x4 removeTranslationFromViewMat(ZSMATRIX4x4 viewMat){
     result.m[3][0] = 0;
     result.m[3][1] = 0;
     result.m[3][2] = 0;
+    result.m[3][3] = 1;
+    result.m[0][3] = 0;
+    result.m[1][3] = 0;
+    result.m[2][3] = 0;
 
     return result;
 }

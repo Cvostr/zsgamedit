@@ -84,19 +84,7 @@ bool GameObject::hasMesh(){
     }
     return false;
 }
-/*
-template<typename T>
-T* GameObject::getPropertyPtr(){
-    unsigned int props = static_cast<unsigned int>(this->props_num);
-    for(unsigned int prop_i = 0; prop_i < props; prop_i ++){
-        GameObjectProperty* property_ptr = this->properties[prop_i];
-        if(typeid ( property_ptr) == typeid(T)){ //If object already has one
-            return static_cast<T*>(property_ptr); //return it
-        }
-    }
-    return nullptr;
-}
-*/
+
 GameObjectProperty* GameObject::getPropertyPtrByType(PROPERTY_TYPE property){
     unsigned int props = static_cast<unsigned int>(this->props_num);
     for(unsigned int prop_i = 0; prop_i < props; prop_i ++){
@@ -207,7 +195,7 @@ void GameObject::trimChildrenArray(){
             for (unsigned int obj_i = i + 1; obj_i < children.size(); obj_i ++) { //Iterate over all next chidren
                 children[obj_i - 1] = children[obj_i]; //Move it to previous place
             }
-            children.resize(children.size() - 1);
+            children.resize(children.size() - 1); //Reduce vector length
         }
     }
 }

@@ -345,6 +345,7 @@ PickResourceArea::PickResourceArea(){
 
     respick_btn = new QPushButton; //Allocation of QPushButton
     relpath_label = new QLabel; //Allocation of resource relpath text
+    relpath_label->setAcceptDrops(true);
     elem_layout->addWidget(relpath_label);
     //Space between text and button
     elem_layout->addSpacing(6);
@@ -354,6 +355,8 @@ PickResourceArea::PickResourceArea(){
     this->dialog = new ResourcePickDialog; //Allocation of dialog
     dialog->area = this;
     dialog->resource_text = this->relpath_label;
+
+
 
 }
 PickResourceArea::~PickResourceArea(){
@@ -510,7 +513,8 @@ void ResourcePickDialog::findFiles(QString directory){
     }
 }
 
-ResourcePickDialog::ResourcePickDialog(QWidget* parent) : QDialog (parent){
+ResourcePickDialog::ResourcePickDialog(QWidget* parent) :
+    QDialog (parent, Qt::WindowTitleHint | Qt::WindowSystemMenuHint){
     contentLayout = new QGridLayout(); // Alocation of layout
     list = new QListWidget;
     this->setWindowTitle("Select Resource");
@@ -520,6 +524,7 @@ ResourcePickDialog::ResourcePickDialog(QWidget* parent) : QDialog (parent){
     setLayout(contentLayout);
 
 }
+
 ResourcePickDialog::~ResourcePickDialog(){
     delete list;
 }
@@ -531,6 +536,11 @@ ColorDialogArea::ColorDialogArea(){
     dialog.area_ptr = this; //setting area pointer
     this->color = nullptr;
 }
+
+ColorDialogArea::~ColorDialogArea(){
+
+}
+
 void ColorDialogArea::addToInspector(InspectorWin* win){
     win->getContentLayout()->addLayout(this->elem_layout);
     QObject::connect(&this->pick_button, SIGNAL(clicked()), &dialog, SLOT(onNeedToShow()));
@@ -617,10 +627,11 @@ ComboBoxArea::ComboBoxArea(){
     elem_layout->addWidget(&this->widget);
 }
 void ComboBoxArea::setup(){ //Virtual
-
+    widget.setCurrentText(*this->result_string);
 }
 void ComboBoxArea::addToInspector(InspectorWin* win){
     win->getContentLayout()->addLayout(this->elem_layout);
+    win->connect(&this->widget, SIGNAL(currentIndexChanged(int)), win, SLOT(onPropertyChange()));
 }
 void ComboBoxArea::writeNewValues(){ //Virtual, to check widget state
     if(result_string == nullptr) return; //pointer not set, exiting

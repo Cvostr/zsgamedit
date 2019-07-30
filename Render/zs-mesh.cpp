@@ -30,50 +30,94 @@ static ZSVERTEX iso_tile_vertices[] = {
 	ZSVERTEX(ZSVECTOR3(-1.0f,  -0.1f, 0.0f),	ZSVECTOR2(0.0f, 0.45f)),
 	ZSVERTEX(ZSVECTOR3(-1.0f,  0.1f, 0.0f),	ZSVECTOR2(0.0f, 0.55f))   // top left 
 };
+static float cube_vertices[] = {
+    // back face
+    -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f, // bottom-left
+    1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f, // top-right
+    1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 1.0f, 0.0f, // bottom-right
+    1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f, // top-right
+    -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f, // bottom-left
+    -1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 0.0f, 1.0f, // top-left
+    // front face
+    -1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f, // bottom-left
+    1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f, 0.0f, // bottom-right
+    1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f, // top-right
+    1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f, // top-right
+    -1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, 1.0f, // top-left
+    -1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f, // bottom-left
+    // left face
+    -1.0f,  1.0f,  1.0f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-right
+    -1.0f,  1.0f, -1.0f, -1.0f,  0.0f,  0.0f, 1.0f, 1.0f, // top-left
+    -1.0f, -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-left
+    -1.0f, -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-left
+    -1.0f, -1.0f,  1.0f, -1.0f,  0.0f,  0.0f, 0.0f, 0.0f, // bottom-right
+    -1.0f,  1.0f,  1.0f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-right
+    // right face
+    1.0f,  1.0f,  1.0f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-left
+    1.0f, -1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-right
+    1.0f,  1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 1.0f, 1.0f, // top-right
+    1.0f, -1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-right
+    1.0f,  1.0f,  1.0f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-left
+    1.0f, -1.0f,  1.0f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f, // bottom-left
+    // bottom face
+    -1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f, // top-right
+    1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f, 1.0f, 1.0f, // top-left
+    1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f, 1.0f, 0.0f, // bottom-left
+    1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f, 1.0f, 0.0f, // bottom-left
+    -1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f, 0.0f, 0.0f, // bottom-right
+    -1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f, // top-right
+    // top face
+    -1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f, // top-left
+    1.0f,  1.0f , 1.0f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f, // bottom-right
+    1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f, 1.0f, 1.0f, // top-right
+    1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f, // bottom-right
+    -1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f, // top-left
+    -1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f, 0.0f, 0.0f  // bottom-left
+};
 
-static ZSVERTEX cube_vertices[] = {
-        // positions          // normals           // texture coords
-        ZSVERTEX(ZSVECTOR3(-0.5f, -0.5f, -0.5f), ZSVECTOR2(0.0f, 0.0f), ZSVECTOR3(0.0f,  0.0f,  -1.0f)),
-        ZSVERTEX(ZSVECTOR3(0.5f, -0.5f, -0.5f), ZSVECTOR2(1.0f, 0.0f), ZSVECTOR3(0.0f,  0.0f,  -1.0f)),
-        ZSVERTEX(ZSVECTOR3(0.5f,  0.5f, -0.5f), ZSVECTOR2(1.0f, 1.0f), ZSVECTOR3(0.0f,  0.0f,  -1.0f)),
-        ZSVERTEX(ZSVECTOR3(0.5f,  0.5f, -0.5f), ZSVECTOR2(1.0f, 1.0f), ZSVECTOR3(0.0f,  0.0f,  -1.0f)),
-        ZSVERTEX(ZSVECTOR3(-0.5f,  0.5f, -0.5f), ZSVECTOR2(0.0f, 1.0f), ZSVECTOR3(0.0f,  0.0f,  -1.0f)),
-        ZSVERTEX(ZSVECTOR3(-0.5f, -0.5f, -0.5f), ZSVECTOR2(0.0f, 0.0f), ZSVECTOR3(0.0f,  0.0f,  -1.0f)),
+float skyboxVertices[] = {
+    // positions
+    -1.0f,  1.0f, -1.0f,
+    -1.0f, -1.0f, -1.0f,
+    1.0f, -1.0f, -1.0f,
+    1.0f, -1.0f, -1.0f,
+    1.0f,  1.0f, -1.0f,
+    -1.0f,  1.0f, -1.0f,
 
-        ZSVERTEX(ZSVECTOR3(-0.5f, -0.5f,  0.5f), ZSVECTOR2(0.0f, 0.0f), ZSVECTOR3(0.0f,  0.0f,  1.0f)),
-        ZSVERTEX(ZSVECTOR3(0.5f, -0.5f,  0.5f), ZSVECTOR2(1.0f, 0.0f), ZSVECTOR3(0.0f,  0.0f,  1.0f)),
-        ZSVERTEX(ZSVECTOR3(0.5f,  0.5f,  0.5f), ZSVECTOR2(1.0f, 1.0f), ZSVECTOR3(0.0f,  0.0f,  1.0f)),
-        ZSVERTEX(ZSVECTOR3(0.5f,  0.5f,  0.5f), ZSVECTOR2(1.0f, 1.0f), ZSVECTOR3(0.0f,  0.0f,  1.0f)),
-        ZSVERTEX(ZSVECTOR3(-0.5f,  0.5f,  0.5f), ZSVECTOR2(0.0f, 1.0f), ZSVECTOR3(0.0f,  0.0f,  1.0f)),
-        ZSVERTEX(ZSVECTOR3(-0.5f, -0.5f,  0.5f), ZSVECTOR2(0.0f, 0.0f), ZSVECTOR3(0.0f,  0.0f,  1.0f)),
+    -1.0f, -1.0f,  1.0f,
+    -1.0f, -1.0f, -1.0f,
+    -1.0f,  1.0f, -1.0f,
+    -1.0f,  1.0f, -1.0f,
+    -1.0f,  1.0f,  1.0f,
+    -1.0f, -1.0f,  1.0f,
 
-        ZSVERTEX(ZSVECTOR3(-0.5f,  0.5f,  0.5f), ZSVECTOR2(1.0f, 0.0f), ZSVECTOR3(-1.0f,  0.0f,  0.0f)),
-        ZSVERTEX(ZSVECTOR3(-0.5f,  0.5f, -0.5f), ZSVECTOR2(1.0f, 1.0f), ZSVECTOR3(-1.0f,  0.0f,  0.0f)),
-        ZSVERTEX(ZSVECTOR3(-0.5f, -0.5f, -0.5f), ZSVECTOR2(0.0f, 1.0f), ZSVECTOR3(-1.0f,  0.0f,  0.0f)),
-        ZSVERTEX(ZSVECTOR3(-0.5f, -0.5f, -0.5f), ZSVECTOR2(0.0f, 1.0f), ZSVECTOR3(-1.0f,  0.0f,  0.0f)),
-        ZSVERTEX(ZSVECTOR3(-0.5f, -0.5f,  0.5f), ZSVECTOR2(0.0f, 0.0f), ZSVECTOR3(-1.0f,  0.0f,  0.0f)),
-        ZSVERTEX(ZSVECTOR3(-0.5f,  0.5f,  0.5f), ZSVECTOR2(1.0f, 0.0f), ZSVECTOR3(-1.0f,  0.0f,  0.0f)),
+    1.0f, -1.0f, -1.0f,
+    1.0f, -1.0f,  1.0f,
+    1.0f,  1.0f,  1.0f,
+    1.0f,  1.0f,  1.0f,
+    1.0f,  1.0f, -1.0f,
+    1.0f, -1.0f, -1.0f,
 
-        ZSVERTEX(ZSVECTOR3(0.5f,  0.5f,  0.5f), ZSVECTOR2(1.0f,  0.0f), ZSVECTOR3(1.0f,  0.0f,  0.0f)),
-        ZSVERTEX(ZSVECTOR3(0.5f,  0.5f, -0.5f), ZSVECTOR2(1.0f,  1.0f), ZSVECTOR3(1.0f,  0.0f,  0.0f)),
-        ZSVERTEX(ZSVECTOR3(0.5f, -0.5f, -0.5f), ZSVECTOR2(0.0f,  1.0f), ZSVECTOR3(1.0f,  0.0f,  0.0f)),
-        ZSVERTEX(ZSVECTOR3(0.5f, -0.5f, -0.5f), ZSVECTOR2(0.0f,  1.0f), ZSVECTOR3(1.0f,  0.0f,  0.0f)),
-        ZSVERTEX(ZSVECTOR3(0.5f, -0.5f,  0.5f), ZSVECTOR2(0.0f,  0.0f), ZSVECTOR3(1.0f,  0.0f,  0.0f)),
-        ZSVERTEX(ZSVECTOR3(0.5f,  0.5f,  0.5f), ZSVECTOR2(1.0f,  0.0f), ZSVECTOR3(1.0f,  0.0f,  0.0f)),
+    -1.0f, -1.0f,  1.0f,
+    -1.0f,  1.0f,  1.0f,
+    1.0f,  1.0f,  1.0f,
+    1.0f,  1.0f,  1.0f,
+    1.0f, -1.0f,  1.0f,
+    -1.0f, -1.0f,  1.0f,
 
-        ZSVERTEX(ZSVECTOR3(-0.5f, -0.5f, -0.5f), ZSVECTOR2(0.0f, 1.0f), ZSVECTOR3(0.0f,  -1.0f,  0.0f)),
-        ZSVERTEX(ZSVECTOR3(0.5f, -0.5f, -0.5f), ZSVECTOR2(1.0f, 1.0f), ZSVECTOR3(0.0f,  -1.0f,  0.0f)),
-        ZSVERTEX(ZSVECTOR3(0.5f, -0.5f,  0.5f), ZSVECTOR2(1.0f, 0.0f), ZSVECTOR3(0.0f,  -1.0f,  0.0f)),
-        ZSVERTEX(ZSVECTOR3(0.5f, -0.5f,  0.5f), ZSVECTOR2(1.0f, 0.0f), ZSVECTOR3(0.0f,  -1.0f,  0.0f)),
-        ZSVERTEX(ZSVECTOR3(-0.5f, -0.5f,  0.5f), ZSVECTOR2(0.0f, 0.0f), ZSVECTOR3(0.0f,  -1.0f,  0.0f)),
-        ZSVERTEX(ZSVECTOR3(-0.5f, -0.5f, -0.5f), ZSVECTOR2(0.0f, 1.0f), ZSVECTOR3(0.0f,  -1.0f,  0.0f)),
+    -1.0f,  1.0f, -1.0f,
+    1.0f,  1.0f, -1.0f,
+    1.0f,  1.0f,  1.0f,
+    1.0f,  1.0f,  1.0f,
+    -1.0f,  1.0f,  1.0f,
+    -1.0f,  1.0f, -1.0f,
 
-        ZSVERTEX(ZSVECTOR3(-0.5f,  0.5f, -0.5f), ZSVECTOR2(0.0f,  1.0f), ZSVECTOR3(0.0f,  1.0f,  0.0f)),
-        ZSVERTEX(ZSVECTOR3(0.5f,  0.5f, -0.5f), ZSVECTOR2(1.0f,  1.0f), ZSVECTOR3(0.0f,  1.0f,  0.0f)),
-        ZSVERTEX(ZSVECTOR3(0.5f,  0.5f,  0.5f), ZSVECTOR2(1.0f,  0.0f), ZSVECTOR3(0.0f,  1.0f,  0.0f)),
-        ZSVERTEX(ZSVECTOR3(0.5f,  0.5f,  0.5f), ZSVECTOR2(1.0f,  0.0f), ZSVECTOR3(0.0f,  1.0f,  0.0f)),
-        ZSVERTEX(ZSVECTOR3(-0.5f,  0.5f,  0.5f), ZSVECTOR2(0.0f,  0.0f), ZSVECTOR3(0.0f,  1.0f,  0.0f)),
-        ZSVERTEX(ZSVECTOR3(-0.5f,  0.5f, -0.5f), ZSVECTOR2(0.0f,  1.0f), ZSVECTOR3(0.0f,  1.0f,  0.0f))
+    -1.0f, -1.0f, -1.0f,
+    -1.0f, -1.0f,  1.0f,
+    1.0f, -1.0f, -1.0f,
+    1.0f, -1.0f, -1.0f,
+    -1.0f, -1.0f,  1.0f,
+    1.0f, -1.0f,  1.0f
 };
 
 static unsigned int plane_inds[] = { 0,1,2, 0,2,3 };
@@ -83,6 +127,7 @@ static ZSPIRE::Mesh plane2Dmesh;
 static ZSPIRE::Mesh uiSprite2Dmesh;
 static ZSPIRE::Mesh iso_tile2Dmesh;
 static ZSPIRE::Mesh cube3Dmesh;
+static ZSPIRE::Mesh skyboxMesh;
 
 ZSPIRE::Mesh::Mesh() {
 	this->alive = false;
@@ -97,12 +142,6 @@ void ZSPIRE::Mesh::Init() {
 void ZSPIRE::setupDefaultMeshes() {
     picked_mesh = nullptr;
 
-    processTangentSpace(&cube_vertices[0], nullptr, 0, 36);
-
-    for(unsigned int cube_v = 0; cube_v < 36; cube_v ++){
-        cube_vertices[cube_v].pos.X *= -1;
-    }
-
     plane2Dmesh.Init(); //Initialize mesh for GL
     plane2Dmesh.setMeshData(plane_verts, plane_inds, 4, 6); //Send plane data
 
@@ -113,7 +152,27 @@ void ZSPIRE::setupDefaultMeshes() {
     iso_tile2Dmesh.setMeshData(iso_tile_vertices, isotile_ind, 6, 12);
 
     cube3Dmesh.Init();
-    cube3Dmesh.setMeshData(cube_vertices, 36);
+    cube3Dmesh.vertices_num = 36;
+    cube3Dmesh.indices_num = 0;
+    glBindBuffer(GL_ARRAY_BUFFER, cube3Dmesh.meshVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(cube_vertices), cube_vertices, GL_STATIC_DRAW);
+
+    glBindVertexArray(cube3Dmesh.meshVAO);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+    skyboxMesh.Init();
+    skyboxMesh.vertices_num = 36;
+    skyboxMesh.indices_num = 0;
+    glBindVertexArray(skyboxMesh.meshVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, skyboxMesh.meshVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 }
 
 void ZSPIRE::freeDefaultMeshes(){
@@ -136,6 +195,9 @@ ZSPIRE::Mesh* ZSPIRE::getIsoTileMesh2D(){
 }
 ZSPIRE::Mesh* ZSPIRE::getCubeMesh3D(){
     return &cube3Dmesh;
+}
+ZSPIRE::Mesh* ZSPIRE::getSkyboxMesh(){
+    return &skyboxMesh;
 }
 void ZSPIRE::Mesh::Destroy() {
 	this->alive = false;

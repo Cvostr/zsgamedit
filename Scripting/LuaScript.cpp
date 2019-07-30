@@ -11,6 +11,10 @@ void ObjectScript::_InitScript() {
 
     created = true;
 
+    //Bind DSDK to script
+    ZSENSDK::bindSDK(L);
+    ZSENSDK::bindKeyCodesSDK(L);
+
     int start_result = luaL_dofile(L, fpath.toStdString().c_str());
 
     if(start_result == 1){ //if error in script
@@ -18,14 +22,7 @@ void ObjectScript::_InitScript() {
         std::cout << "ERROR: " << lua_tostring(L, -1) << std::endl;
     }
 
-
-    //Bind DSDK to script
-    ZSENSDK::bindSDK(L);
-    ZSENSDK::bindKeyCodesSDK(L);
-
-
     lua_pcall(L, 0, 0, 0);
-
 }
 
 ObjectScript::ObjectScript(){

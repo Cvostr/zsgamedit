@@ -81,6 +81,10 @@ ZSVECTOR3 ZSPIRE::Camera::getCameraRightVec(){
     return vCross(camera_front, camera_up);
 }
 
+ZSVECTOR3 ZSPIRE::Camera::getCameraUpVec(){
+    return camera_up;
+}
+
 ZSVECTOR3 ZSPIRE::Camera::getCameraViewCenterPos(){
     if(this->proj_type == ZSCAMERA_PROJECTION_ORTHOGONAL){
 

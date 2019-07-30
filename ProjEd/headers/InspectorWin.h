@@ -24,7 +24,6 @@ enum EDITAREA_TYPE {PEA_TYPE_NONE, PEA_TYPE_STRING, PEA_TYPE_FLOAT, PEA_TYPE_FLO
 
 
 class InspectorWin;
-class ResourcePickDialog;
 
 class AreaPropertyTitle : public QObject{
     Q_OBJECT
@@ -98,25 +97,6 @@ public:
     void setLabel(QString label);
 };
 
-class PickResourceArea : public PropertyEditArea{
-public:
-    ResourcePickDialog* dialog; //dialog shown after button press
-
-    bool isShowNoneItem; //If enabled, @none will be added to list
-    QString extension_mask; //Extension mask to show needed files
-    RESOURCE_TYPE resource_type; //flag of resource type
-    QString* rel_path; //Pointer to store result
-
-    QPushButton* respick_btn; //button to press
-    QLabel* relpath_label;
-    PickResourceArea();
-    ~PickResourceArea();
-
-    void destroyContent(); //destroy content, created by this class
-    void setup(); //Virtual, to prepare base values
-    void addToInspector(InspectorWin* win);
-    void updateValues();
-};
 
 namespace Ui {
 class InspectorWin;
@@ -227,50 +207,5 @@ public:
     ManageComponentDialog(InspectorWin* win, void* g_object_ptr, QWidget* parent = nullptr);
     ~ManageComponentDialog();
 };
-
-class ResourcePickDialog : public QDialog{
-    Q_OBJECT
-public slots:
-    void onNeedToShow();
-    void onResourceSelected();
-private:
-    QGridLayout* contentLayout; //Layout to contain everything
-    void findFiles(QString directory);
-public:
-    QString extension_mask; //Extension mask to show needed files
-    QListWidget* list;
-    PickResourceArea* area; //Pointer to area, that invoked this object
-    QLabel* resource_text; //Pointer to label in area to write resource label
-
-    ResourcePickDialog(QWidget* parent = nullptr);
-    ~ResourcePickDialog();
-};
-
-class ColorDialogArea;
-
-class ZSColorPickDialog : public QColorDialog{
-    Q_OBJECT
-public slots:
-    void onNeedToShow();
-
-public:
-    ZSRGBCOLOR* color_ptr; //Pointer to write color
-    ColorDialogArea* area_ptr;
-    ZSColorPickDialog(QWidget* parent = nullptr);
-};
-
-class ColorDialogArea : public PropertyEditArea{
-
-public:
-    QLabel digit_str;
-    ZSRGBCOLOR* color; //output value
-    ZSColorPickDialog dialog; //Dialog pointer
-    QPushButton pick_button; //button to show color pick dialog
-    ColorDialogArea();
-
-    void updText(); //updates text value
-    void addToInspector(InspectorWin* win);
-};
-
 
 #endif // INSPECTORWIN_H

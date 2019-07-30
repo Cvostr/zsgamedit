@@ -68,7 +68,20 @@ ColorMaterialShaderProperty::ColorMaterialShaderProperty(){
 ColorMtShPropConf::ColorMtShPropConf(){
     type = MATSHPROP_TYPE_COLOR;
 }
+//Textures3D stuff
+Texture3MaterialShaderProperty::Texture3MaterialShaderProperty(){
+    type = MATSHPROP_TYPE_TEXTURE3;
 
+    this->slotToBind = 0;
+}
+//Configuration class
+Texture3MtShPropConf::Texture3MtShPropConf(){
+    this->type = MATSHPROP_TYPE_TEXTURE3;
+
+    texture3D = new ZSPIRE::Texture3D;
+    texture_count = 0;
+
+}
 void MtShaderPropertiesGroup::loadFromFile(const char* fpath){
     std::ifstream mat_shader_group;
     mat_shader_group.open(fpath);
@@ -77,7 +90,7 @@ MtShaderPropertiesGroup::MtShaderPropertiesGroup(){
     properties.resize(0);
 }
 
-MtShaderPropertiesGroup* MtShProps::genDefaultMtShGroup(ZSPIRE::Shader* shader3d){
+MtShaderPropertiesGroup* MtShProps::genDefaultMtShGroup(ZSPIRE::Shader* shader3d, ZSPIRE::Shader* skybox){
 
     MtShaderPropertiesGroup* default_group = new MtShaderPropertiesGroup;
 
@@ -119,6 +132,21 @@ MtShaderPropertiesGroup* MtShProps::genDefaultMtShGroup(ZSPIRE::Shader* shader3d
     shininess_factor_prop->prop_identifier = "f_shininess"; //Identifier to save
 
     MtShProps::addMtShaderPropertyGroup(default_group);
+
+
+
+    MtShaderPropertiesGroup* default_sky_group = new MtShaderPropertiesGroup;
+    default_sky_group->str_path = "@skybox";
+    default_sky_group->groupCaption = "Default Skybox";
+    default_sky_group->render_shader = skybox;
+    Texture3MaterialShaderProperty* sky_texture =
+            static_cast<Texture3MaterialShaderProperty*>(default_sky_group->addProperty(MATSHPROP_TYPE_TEXTURE3));
+    sky_texture->slotToBind = 0;
+    sky_texture->prop_caption = "Sky";
+    sky_texture->ToggleUniform = "hasSpecularMap";
+    sky_texture->prop_identifier = "skytexture3"; //Identifier to save
+
+    MtShProps::addMtShaderPropertyGroup(default_sky_group);
 
     return default_group;
 }
@@ -183,6 +211,10 @@ MaterialShaderProperty* MtShProps::allocateProperty(int type){
             _ptr = static_cast<MaterialShaderProperty*>(new ColorMaterialShaderProperty); //Allocation of transform in heap
             break;
         }
+        case MATSHPROP_TYPE_TEXTURE3:{ //If type is transfrom
+            _ptr = static_cast<MaterialShaderProperty*>(new Texture3MaterialShaderProperty); //Allocation of transform in heap
+            break;
+        }
 
     }
     return _ptr;
@@ -208,6 +240,10 @@ MaterialShaderPropertyConf* MtShProps::allocatePropertyConf(int type){
         }
         case MATSHPROP_TYPE_COLOR:{ //If type is transfrom
             _ptr = static_cast<MaterialShaderPropertyConf*>(new ColorMtShPropConf); //Allocation of transform in heap
+            break;
+        }
+        case MATSHPROP_TYPE_TEXTURE3:{ //If type is transfrom
+            _ptr = static_cast<MaterialShaderPropertyConf*>(new Texture3MtShPropConf); //Allocation of transform in heap
             break;
         }
     }
@@ -267,6 +303,16 @@ void Material::saveToFile(){
                 mat_stream << fvec3_conf->value.X << " " << fvec3_conf->value.Y << " " << fvec3_conf->value.Z;
                 break;
             }
+            case MATSHPROP_TYPE_TEXTURE3:{
+                //Cast pointer
+                Texture3MtShPropConf* tex3_conf = static_cast<Texture3MtShPropConf*>(conf_ptr);
+                mat_stream << tex3_conf->texture_count << " ";
+                //Write value
+                for(int i = 0; i < tex3_conf->texture_count; i ++)
+                    mat_stream << tex3_conf->texture_str[i].toStdString() << " ";
+
+                break;
+            }
         }
     mat_stream << "\n"; //Write divider
     }
@@ -294,7 +340,8 @@ void Material::loadFromFile(std::string fpath){
         if(prefix.compare("GROUP") == 0){ //if it is game object
             mat_stream >> this->group_str; //Read identifier
 
-            this->group_ptr = MtShProps::getMtShaderPropertyGroup(group_str);
+            setPropertyGroup(MtShProps::getMtShaderPropertyGroup(group_str));
+            //this->group_ptr = ;
         }
 
         if(prefix.compare("ENTRY") == 0){ //if it is game object
@@ -353,6 +400,20 @@ void Material::loadFromFile(std::string fpath){
                             Float3MtShPropConf* fvec3_conf = static_cast<Float3MtShPropConf*>(conf_ptr);
                             //Write value
                             mat_stream >> fvec3_conf->value.X >> fvec3_conf->value.Y >> fvec3_conf->value.Z;
+                            break;
+                        }
+                        case MATSHPROP_TYPE_TEXTURE3:{
+                            //Cast pointer
+                            Texture3MtShPropConf* texture3_conf = static_cast<Texture3MtShPropConf*>(conf_ptr);
+
+                            mat_stream >> texture3_conf->texture_count;
+
+                            for(int i = 0; i < texture3_conf->texture_count; i ++){
+                                std::string path;
+                                mat_stream >> path;
+                                texture3_conf->texture_str[i] = QString::fromStdString(path);
+                            }
+
                             break;
                         }
                    }

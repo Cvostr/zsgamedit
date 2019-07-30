@@ -29,13 +29,14 @@ void RenderPipeline::setup(int bufWidth, int bufHeight){
     this->deffered_light.compileFromFile("Shaders/postprocess/deffered_light/deffered.vs", "Shaders/postprocess/deffered_light/deffered.fs");
     this->diffuse3d_shader.compileFromFile("Shaders/3d/3d.vs", "Shaders/3d/3d.fs");
     this->ui_shader.compileFromFile("Shaders/ui/ui.vs", "Shaders/ui/ui.fs");
+    skybox.compileFromFile("Shaders/skybox/skybox.vs", "Shaders/skybox/skybox.fs");
 
     ZSPIRE::setupDefaultMeshes();
 
     this->gbuffer.create(bufWidth, bufHeight);
     removeLights();
 
-    MtShProps::genDefaultMtShGroup(&diffuse3d_shader);
+    MtShProps::genDefaultMtShGroup(&diffuse3d_shader, &skybox);
 }
 
 void RenderPipeline::initGizmos(int projectPespective){
@@ -227,6 +228,8 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr)
                                                                render_settings.ambient_light_color.g / 255.0f,
                                                                render_settings.ambient_light_color.b / 255.0f));
 
+    //SkyboxProperty* sky = static_cast<SkyboxProperty*>(this->skybox_ptr);
+
     ZSPIRE::getPlaneMesh2D()->Draw(); //Draw screen
 
     glEnable(GL_BLEND);
@@ -397,6 +400,22 @@ void MaterialProperty::onRender(RenderPipeline* pipeline){
                 shader->setGLuniformVec3(fvec3_p->floatUniform.c_str(), fvec3_conf->value);
                 break;
             }
+            case MATSHPROP_TYPE_TEXTURE3:{
+                //Cast pointer
+                Texture3MaterialShaderProperty* texture_p = static_cast<Texture3MaterialShaderProperty*>(prop_ptr);
+                Texture3MtShPropConf* texture_conf = static_cast<Texture3MtShPropConf*>(conf_ptr);
+
+                if(!texture_conf->texture3D->created){
+                    texture_conf->texture3D->Init();
+                    for(int i = 0; i < texture_conf->texture_count; i ++){
+                        texture_conf->texture3D->pushTexture(i, texture_conf->rel_path.toStdString() + "/" + texture_conf->texture_str[i].toStdString());
+                    }
+                    texture_conf->texture3D->created = true;
+                }else{
+                    texture_conf->texture3D->Use(texture_p->slotToBind);
+                }
+                break;
+            }
         }
     }
 }
@@ -441,6 +460,18 @@ void TileProperty::onRender(RenderPipeline* pipeline){
     }
 }
 
+void SkyboxProperty::onPreRender(RenderPipeline* pipeline){
+
+    MaterialProperty* mat = this->go_link.updLinkPtr()->getPropertyPtr<MaterialProperty>();
+    if(mat == nullptr) return;
+    mat->onRender(pipeline);
+    glDepthFunc(GL_GEQUAL);
+    glDisable(GL_DEPTH_TEST);
+    //glDisable(GL_CULL_FACE);
+    ZSPIRE::getSkyboxMesh()->Draw();
+    //glDepthFunc(GL_LESS);
+}
+
 void RenderPipeline::updateShadersCameraInfo(ZSPIRE::Camera* cam_ptr){
     if(diffuse3d_shader.isCreated == true){
         diffuse3d_shader.Use();
@@ -462,6 +493,12 @@ void RenderPipeline::updateShadersCameraInfo(ZSPIRE::Camera* cam_ptr){
         ui_shader.Use();
         ui_shader.setCameraUiProjMatrix(cam_ptr);
     }
+
+    skybox.Use();
+    this->skybox.setGLuniformMat4x4("projection", cam_ptr->getProjMatrix());
+    ZSMATRIX4x4 viewmat = cam_ptr->getViewMatrix();
+    viewmat = removeTranslationFromViewMat(viewmat);
+    this->skybox.setGLuniformMat4x4("view", viewmat);
 }
 
 void RenderPipeline::addLight(void* light_ptr){
@@ -508,8 +545,15 @@ void G_BUFFER_GL::create(int width, int height){
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, tTransparent, 0);
 
-    unsigned int attachments[4] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3};
-    glDrawBuffers(4, attachments);
+    glGenTextures(1, &tBackground);
+    glBindTexture(GL_TEXTURE_2D, tBackground);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_FLOAT, nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT4, GL_TEXTURE_2D, tBackground, 0);
+
+    unsigned int attachments[5] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4};
+    glDrawBuffers(5, attachments);
 
     glGenRenderbuffers(1, &depthBuffer);
     glBindRenderbuffer(GL_RENDERBUFFER, depthBuffer);
@@ -533,6 +577,9 @@ void G_BUFFER_GL::bindTextures(){
 
     glActiveTexture(GL_TEXTURE13);
     glBindTexture(GL_TEXTURE_2D, tTransparent);
+
+    glActiveTexture(GL_TEXTURE14);
+    glBindTexture(GL_TEXTURE_2D, tBackground);
 }
 
 void G_BUFFER_GL::Destroy(){
@@ -541,6 +588,7 @@ void G_BUFFER_GL::Destroy(){
     glDeleteTextures(1, &tNormal);
     glDeleteTextures(1, &tPos);
     glDeleteTextures(1, &tTransparent);
+    glDeleteTextures(1, &tBackground);
 
     //delete framebuffer & renderbuffer
     glDeleteRenderbuffers(1, &this->depthBuffer);
