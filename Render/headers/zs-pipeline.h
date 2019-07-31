@@ -13,11 +13,14 @@
 enum PIPELINE_STATE {
     PIPELINE_STATE_DEFAULT,
     PIPELINE_STATE_PICKING,
-    PIPELINE_STATE_MARKED
+    PIPELINE_STATE_MARKED,
+    PIPELINE_STATE_SHADOWDEPTH
 };
 
 struct RenderSettings {
     ZSRGBCOLOR ambient_light_color;
+    void* skybox_ptr;
+    void* shadowcaster_ptr;
 
     void defaults();
 
@@ -57,6 +60,8 @@ private:
     ZSPIRE::Shader ui_shader;
     ZSPIRE::Shader deffered_light;
     ZSPIRE::Shader skybox;
+    ZSPIRE::Shader shadowMap;
+
     std::vector<void*> lights_ptr;
 
     RenderSettings render_settings;
@@ -69,6 +74,7 @@ public:
     void initGizmos(int projectPespective);
 
     void render(SDL_Window* w, void* projectedit_ptr);
+    void renderDepth(void* world_ptr);
     unsigned int render_getpickedObj(void* projectedit_ptr, int mouseX, int mouseY);
     ZSRGBCOLOR getColorOfPickedTransformControl(ZSVECTOR3 translation, int mouseX, int mouseY);
 
@@ -77,7 +83,6 @@ public:
     void removeLights();
     ZSPIRE::Camera* cam;
     void* win_ptr;
-    void* skybox_ptr;
 
     RenderSettings* getRenderSettings();
     GizmosRenderer* getGizmosRenderer();
@@ -92,6 +97,7 @@ public:
 
     ZSPIRE::Shader* getTileShader();
     ZSPIRE::Shader* getPickingShader();
+    ZSPIRE::Shader* getShadowmapShader();
 
     RenderPipeline();
     ~RenderPipeline();

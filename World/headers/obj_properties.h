@@ -136,7 +136,23 @@ public:
 class SkyboxProperty : public GameObjectProperty{
 public:
     void onPreRender(RenderPipeline* pipeline);
+    void DrawSky(RenderPipeline* pipeline);
     SkyboxProperty();
+};
+
+class ShadowCasterProperty : public GameObjectProperty{
+private:
+    bool initialized;
+    unsigned int shadowBuffer;
+    unsigned int shadowDepthTexture;
+public:
+    int TextureWidth;
+    int TextureHeight;
+
+    void onPreRender(RenderPipeline* pipeline);
+    void init();
+    void Draw(ZSPIRE::Camera* cam, RenderPipeline* pipeline);
+    ShadowCasterProperty();
 };
 
 #endif // OBJ_PROPERTIES_H

@@ -80,6 +80,9 @@ QString getPropertyString(int type){
         case GO_PROPERTY_TYPE_TILE:{
             return QString("Tile");
         }
+        case GO_PROPERTY_TYPE_SKYBOX:{
+            return QString("Skybox");
+        }
     }
     return QString("NONE");
 }
@@ -133,6 +136,11 @@ GameObjectProperty* allocProperty(int type){
         }
         case GO_PROPERTY_TYPE_SKYBOX:{
             SkyboxProperty* ptr = new SkyboxProperty;
+            _ptr = static_cast<GameObjectProperty*>(ptr);
+            break;
+        }
+        case GO_PROPERTY_TYPE_SHADOWCASTER:{
+            ShadowCasterProperty* ptr = new ShadowCasterProperty;
             _ptr = static_cast<GameObjectProperty*>(ptr);
             break;
         }
@@ -752,8 +760,7 @@ void MaterialProperty::onValueChanged(){
         if(MtShProps::getMtShaderPropertyGroupByLabel(this->group_label) != nullptr){
             //then apply that group
             material_ptr->setPropertyGroup(MtShProps::getMtShaderPropertyGroupByLabel(this->group_label));
-          //  this->group_label = material_ptr->group_ptr->groupCaption;
-            //group_ptr = MtShProps::getMtShaderPropertyGroupByLabel(this->group_label);
+
         }else { //user haven't specified
             return; //go out
         }
@@ -1006,4 +1013,13 @@ ScriptGroupProperty::ScriptGroupProperty(){
 
 SkyboxProperty::SkyboxProperty(){
     type = GO_PROPERTY_TYPE_SKYBOX;
+}
+
+ShadowCasterProperty::ShadowCasterProperty(){
+    type = GO_PROPERTY_TYPE_SHADOWCASTER;
+
+    initialized = false;
+
+    TextureWidth = 2048;
+    TextureHeight = 2048;
 }

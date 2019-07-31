@@ -20,6 +20,9 @@ GizmosRenderer* RenderPipeline::getGizmosRenderer(){
 
 void RenderSettings::defaults(){
     ambient_light_color = ZSRGBCOLOR(255, 255, 255, 255);
+
+    this->skybox_ptr = nullptr;
+    this->shadowcaster_ptr = nullptr;
 }
 
 void RenderPipeline::setup(int bufWidth, int bufHeight){
@@ -30,6 +33,7 @@ void RenderPipeline::setup(int bufWidth, int bufHeight){
     this->diffuse3d_shader.compileFromFile("Shaders/3d/3d.vs", "Shaders/3d/3d.fs");
     this->ui_shader.compileFromFile("Shaders/ui/ui.vs", "Shaders/ui/ui.fs");
     skybox.compileFromFile("Shaders/skybox/skybox.vs", "Shaders/skybox/skybox.fs");
+    shadowMap.compileFromFile("Shaders/shadowmap/shadowmap.vs", "Shaders/shadowmap/shadowmap.fs");
 
     ZSPIRE::setupDefaultMeshes();
 
@@ -176,13 +180,24 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr)
 
     this->cam = cam_ptr;
     this->win_ptr = editwin_ptr;
+
+    ShadowCasterProperty* shadowcast = static_cast<ShadowCasterProperty*>(this->render_settings.shadowcaster_ptr);
+    if(shadowcast != nullptr){
+        shadowcast->Draw(cam_ptr, this);
+    }
+
     //Active Geometry framebuffer
     gbuffer.bindFramebuffer();
     glClearColor(0,0,0,1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glDisable(GL_BLEND);
+    glViewport(0, 0, this->WIDTH, this->HEIGHT);
 
     this->updateShadersCameraInfo(cam_ptr); //Send camera properties to all drawing shaders
+
+    SkyboxProperty* skybox = static_cast<SkyboxProperty*>(this->render_settings.skybox_ptr);
+    if(skybox != nullptr)
+        skybox->DrawSky(this);
 
     if(depthTest == true) //if depth is enabled
         glEnable(GL_DEPTH_TEST);
@@ -228,8 +243,6 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr)
                                                                render_settings.ambient_light_color.g / 255.0f,
                                                                render_settings.ambient_light_color.b / 255.0f));
 
-    //SkyboxProperty* sky = static_cast<SkyboxProperty*>(this->skybox_ptr);
-
     ZSPIRE::getPlaneMesh2D()->Draw(); //Draw screen
 
     glEnable(GL_BLEND);
@@ -256,6 +269,18 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr)
     SDL_GL_SwapWindow(w); //Send rendered frame
 }
 
+void RenderPipeline::renderDepth(void* world_ptr){
+    World* _world_ptr = static_cast<World*>(world_ptr);
+    this->current_state = PIPELINE_STATE_SHADOWDEPTH;
+    //Iterate over all objects in the world
+    for(unsigned int obj_i = 0; obj_i < _world_ptr->objects.size(); obj_i ++){
+        GameObject* obj_ptr = &_world_ptr->objects[obj_i];
+        if(!obj_ptr->hasParent) //if it is a root object
+            obj_ptr->processObject(this); //Draw object
+    }
+    this->current_state = PIPELINE_STATE_DEFAULT;
+}
+
 void GameObject::Draw(RenderPipeline* pipeline){
     //Call prerender on each property in object
     if(pipeline->current_state == PIPELINE_STATE_DEFAULT)
@@ -277,6 +302,11 @@ void GameObject::Draw(RenderPipeline* pipeline){
             float a = static_cast<float>(to_send[3]);
             pipeline->getPickingShader()->setTransform(transform_ptr->transform_mat);
             pipeline->getPickingShader()->setGLuniformVec4("color", ZSVECTOR4(r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f));
+        }
+        if(pipeline->current_state == PIPELINE_STATE_SHADOWDEPTH) {
+            TransformProperty* transform_ptr = static_cast<TransformProperty*>(getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
+            pipeline->getPickingShader()->Use();
+            pipeline->getPickingShader()->setTransform(transform_ptr->transform_mat);
         }
         //Draw default mesh
         mesh_prop->mesh_ptr->Draw();
@@ -461,15 +491,73 @@ void TileProperty::onRender(RenderPipeline* pipeline){
 }
 
 void SkyboxProperty::onPreRender(RenderPipeline* pipeline){
+    pipeline->getRenderSettings()->skybox_ptr = static_cast<void*>(this);
+}
 
+void SkyboxProperty::DrawSky(RenderPipeline* pipeline){
+    if(!this->active) return;
+    //Get pointer to Material property
     MaterialProperty* mat = this->go_link.updLinkPtr()->getPropertyPtr<MaterialProperty>();
     if(mat == nullptr) return;
+    //Apply material shader
     mat->onRender(pipeline);
-    glDepthFunc(GL_GEQUAL);
-    glDisable(GL_DEPTH_TEST);
-    //glDisable(GL_CULL_FACE);
+    //Draw skybox cube
     ZSPIRE::getSkyboxMesh()->Draw();
-    //glDepthFunc(GL_LESS);
+}
+
+void ShadowCasterProperty::onPreRender(RenderPipeline* pipeline){
+    pipeline->getRenderSettings()->shadowcaster_ptr = static_cast<void*>(this);
+}
+
+void ShadowCasterProperty::Draw(ZSPIRE::Camera* cam, RenderPipeline* pipeline){
+    if(!this->initialized) init();
+
+    LightsourceProperty* light = this->go_link.updLinkPtr()->getPropertyPtr<LightsourceProperty>();
+
+    ZSVECTOR3 cam_pos = cam->getCameraPosition() + cam->getCameraFrontVec() * 25;
+    ZSMATRIX4x4 proj = getOrthogonal(-10, 10, -10, 10, 1, 75);
+    ZSMATRIX4x4 view = matrixLookAt(cam_pos, cam_pos + light->direction, ZSVECTOR3(0,1,0));
+
+    glViewport(0, 0, TextureWidth, TextureHeight); //Changing viewport
+    glEnable(GL_DEPTH_TEST);
+    glDisable(GL_CULL_FACE);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, shadowBuffer); //Bind framebuffer
+    glClear(GL_DEPTH_BUFFER_BIT);
+
+    pipeline->getShadowmapShader()->Use();
+    pipeline->getShadowmapShader()->setGLuniformMat4x4("cam_projection", proj);
+    pipeline->getShadowmapShader()->setGLuniformMat4x4("cam_view", view);
+
+    pipeline->renderDepth(this->go_link.world_ptr);
+
+}
+
+void ShadowCasterProperty::init(){
+    glGenFramebuffers(1, &this->shadowBuffer);//Generate framebuffer for texture
+    glGenTextures(1, &this->shadowDepthTexture); //Generate texture
+
+    glBindTexture(GL_TEXTURE_2D, shadowDepthTexture);
+    //Configuring texture
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, this->TextureWidth, this->TextureHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+
+    //Binding framebuffer
+    glBindFramebuffer(GL_FRAMEBUFFER, shadowBuffer);
+    //Connecting depth texture to framebuffer
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, this->shadowDepthTexture, 0);
+    //We won't render color
+    glDrawBuffer(false);
+    glReadBuffer(false);
+    //Unbind framebuffer
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    this->initialized = true;
 }
 
 void RenderPipeline::updateShadersCameraInfo(ZSPIRE::Camera* cam_ptr){
@@ -647,4 +735,8 @@ ZSPIRE::Shader* RenderPipeline::getTileShader(){
 
 ZSPIRE::Shader* RenderPipeline::getPickingShader(){
     return &this->pick_shader;
+}
+
+ZSPIRE::Shader* RenderPipeline::getShadowmapShader(){
+    return &this->shadowMap;
 }

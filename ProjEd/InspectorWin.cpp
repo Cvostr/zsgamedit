@@ -330,7 +330,7 @@ AddGoComponentDialog::AddGoComponentDialog(QWidget* parent)
 
     contentLayout->addWidget(&property_list, 0, 0);
     //Iterate over all base properties and add them to list
-    for(int i = 1; i <= 10; i ++){
+    for(int i = 1; i <= 11; i ++){
         new QListWidgetItem(getPropertyString(i), &this->property_list);
     }
     new QListWidgetItem(getPropertyString(1000), &this->property_list);
