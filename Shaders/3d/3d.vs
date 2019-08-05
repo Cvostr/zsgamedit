@@ -12,11 +12,15 @@ out vec3 FragPos;
 out vec3 InNormal;
 out vec2 UVCoord;
 out mat3 TBN;
+out vec3 ShadowProjection;
 
 uniform mat4 cam_projection;
 uniform mat4 cam_view;
 uniform mat4 object_transform;
-
+//Shadowmapping stuff
+uniform mat4 LightProjectionMat;
+uniform mat4 LightViewMat;
+uniform bool hasShadowMap;
 
 void main(){
 	UVCoord = uv;
@@ -28,7 +32,12 @@ void main(){
 	vec3 BiTangentVec = normalize(vec3(object_transform * vec4(bitangent, 0)));
 	vec3 NormalVec = normalize(vec3(object_transform * vec4(normal, 0)));
 	TBN = transpose(mat3(TangentVec, BiTangentVec, NormalVec));
-
+    //Enabled shadows
+	if(hasShadowMap){
+        vec4 objPosLightSpace = LightProjectionMat * LightViewMat * vec4(FragPos, 1.0);
+        ShadowProjection = (objPosLightSpace.xyz / objPosLightSpace.w) * 0.5 + 0.5;
+	}
+	
 	gl_Position =  cam_projection * cam_view * vec4(FragPos, 1.0);
 	
 }

@@ -74,6 +74,9 @@ QString getPropertyString(int type){
         case GO_PROPERTY_TYPE_RIGIDBODY:{
             return QString("Rigidbody");
         }
+        case GO_PROPERTY_TYPE_SHADOWCASTER:{
+            return QString("Shadow Caster");
+        }
         case GO_PROPERTY_TYPE_TILE_GROUP:{
             return QString("Tile Group");
         }
@@ -1022,4 +1025,27 @@ ShadowCasterProperty::ShadowCasterProperty(){
 
     TextureWidth = 2048;
     TextureHeight = 2048;
+
+    shadow_bias = 0.005f;
+}
+
+void ShadowCasterProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
+
+    IntPropertyArea* textureW = new IntPropertyArea; //New property area
+    textureW->setLabel("Texture Width"); //Its label
+    textureW->value = &this->TextureWidth; //Ptr to our vector
+    textureW->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
+    inspector->addPropertyArea(textureW);
+
+    IntPropertyArea* textureH = new IntPropertyArea; //New property area
+    textureH->setLabel("Texture Height"); //Its label
+    textureH->value = &this->TextureHeight; //Ptr to our vector
+    textureH->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
+    inspector->addPropertyArea(textureH);
+
+    FloatPropertyArea* bias = new FloatPropertyArea; //New property area
+    bias->setLabel("Shadow bias"); //Its label
+    bias->value = &this->shadow_bias; //Ptr to our vector
+    bias->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
+    inspector->addPropertyArea(bias);
 }

@@ -375,6 +375,11 @@ void MaterialProperty::onRender(RenderPipeline* pipeline){
     shader = group_ptr->render_shader;
     shader->Use();
 
+    ShadowCasterProperty* shadowcast = static_cast<ShadowCasterProperty*>(pipeline->getRenderSettings()->shadowcaster_ptr);
+    if(shadowcast != nullptr){
+        shadowcast->sendData(shader);
+    }
+
     shader->setTransform(transform_ptr->transform_mat);
 
     //iterate over all properties, send them all!
@@ -502,6 +507,7 @@ void SkyboxProperty::DrawSky(RenderPipeline* pipeline){
     //Apply material shader
     mat->onRender(pipeline);
     //Draw skybox cube
+    glDisable(GL_DEPTH_TEST);
     ZSPIRE::getSkyboxMesh()->Draw();
 }
 
@@ -515,8 +521,8 @@ void ShadowCasterProperty::Draw(ZSPIRE::Camera* cam, RenderPipeline* pipeline){
     LightsourceProperty* light = this->go_link.updLinkPtr()->getPropertyPtr<LightsourceProperty>();
 
     ZSVECTOR3 cam_pos = cam->getCameraPosition() + cam->getCameraFrontVec() * 25;
-    ZSMATRIX4x4 proj = getOrthogonal(-10, 10, -10, 10, 1, 75);
-    ZSMATRIX4x4 view = matrixLookAt(cam_pos, cam_pos + light->direction, ZSVECTOR3(0,1,0));
+    this->LightProjectionMat = getOrthogonal(-10, 10, -10, 10, 1, 75);
+    this->LightViewMat = matrixLookAt(cam_pos, cam_pos + light->direction, ZSVECTOR3(0,1,0));
 
     glViewport(0, 0, TextureWidth, TextureHeight); //Changing viewport
     glEnable(GL_DEPTH_TEST);
@@ -526,11 +532,13 @@ void ShadowCasterProperty::Draw(ZSPIRE::Camera* cam, RenderPipeline* pipeline){
     glClear(GL_DEPTH_BUFFER_BIT);
 
     pipeline->getShadowmapShader()->Use();
-    pipeline->getShadowmapShader()->setGLuniformMat4x4("cam_projection", proj);
-    pipeline->getShadowmapShader()->setGLuniformMat4x4("cam_view", view);
+    pipeline->getShadowmapShader()->setGLuniformMat4x4("cam_projection", LightProjectionMat);
+    pipeline->getShadowmapShader()->setGLuniformMat4x4("cam_view", LightViewMat);
 
     pipeline->renderDepth(this->go_link.world_ptr);
 
+    glActiveTexture(GL_TEXTURE6);
+    glBindTexture(GL_TEXTURE_2D, this->shadowDepthTexture);
 }
 
 void ShadowCasterProperty::init(){
@@ -558,6 +566,16 @@ void ShadowCasterProperty::init(){
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     this->initialized = true;
+}
+
+void ShadowCasterProperty::sendData(ZSPIRE::Shader* shader){
+    glActiveTexture(GL_TEXTURE6);
+    glBindTexture(GL_TEXTURE_2D, this->shadowDepthTexture);
+
+    shader->setGLuniformMat4x4("LightProjectionMat", this->LightProjectionMat);
+    shader->setGLuniformMat4x4("LightViewMat", this->LightViewMat);
+    shader->setGLuniformFloat("shadow_bias", this->shadow_bias);
+    shader->setGLuniformInt("hasShadowMap", 1);
 }
 
 void RenderPipeline::updateShadersCameraInfo(ZSPIRE::Camera* cam_ptr){
@@ -633,12 +651,12 @@ void G_BUFFER_GL::create(int width, int height){
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, tTransparent, 0);
 
-    glGenTextures(1, &tBackground);
-    glBindTexture(GL_TEXTURE_2D, tBackground);
+    glGenTextures(1, &tMasks);
+    glBindTexture(GL_TEXTURE_2D, tMasks);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_FLOAT, nullptr);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT4, GL_TEXTURE_2D, tBackground, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT4, GL_TEXTURE_2D, tMasks, 0);
 
     unsigned int attachments[5] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4};
     glDrawBuffers(5, attachments);
@@ -667,7 +685,7 @@ void G_BUFFER_GL::bindTextures(){
     glBindTexture(GL_TEXTURE_2D, tTransparent);
 
     glActiveTexture(GL_TEXTURE14);
-    glBindTexture(GL_TEXTURE_2D, tBackground);
+    glBindTexture(GL_TEXTURE_2D, tMasks);
 }
 
 void G_BUFFER_GL::Destroy(){
@@ -676,7 +694,7 @@ void G_BUFFER_GL::Destroy(){
     glDeleteTextures(1, &tNormal);
     glDeleteTextures(1, &tPos);
     glDeleteTextures(1, &tTransparent);
-    glDeleteTextures(1, &tBackground);
+    glDeleteTextures(1, &tMasks);
 
     //delete framebuffer & renderbuffer
     glDeleteRenderbuffers(1, &this->depthBuffer);

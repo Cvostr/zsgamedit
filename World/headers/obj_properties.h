@@ -145,13 +145,19 @@ private:
     bool initialized;
     unsigned int shadowBuffer;
     unsigned int shadowDepthTexture;
+
+    ZSMATRIX4x4 LightProjectionMat;
+    ZSMATRIX4x4 LightViewMat;
 public:
     int TextureWidth;
     int TextureHeight;
+    float shadow_bias;
 
+    void addPropertyInterfaceToInspector(InspectorWin* inspector);
     void onPreRender(RenderPipeline* pipeline);
     void init();
     void Draw(ZSPIRE::Camera* cam, RenderPipeline* pipeline);
+    void sendData(ZSPIRE::Shader* shader);
     ShadowCasterProperty();
 };
 

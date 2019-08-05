@@ -27,6 +27,7 @@ uniform sampler2D tDiffuse;
 uniform sampler2D tNormal;
 uniform sampler2D tPos;
 uniform sampler2D tTransparent;
+uniform sampler2D tMasks;
 
 uniform int lights_amount;
 uniform Light lights[100];
@@ -36,33 +37,40 @@ uniform vec3 ambient_color;
 uniform vec3 cam_position;
 
 void main(){
+	
+		
+
     vec4 Diffuse = texture(tDiffuse, UVCoord);
     vec3 FragPos = texture(tPos, UVCoord).rgb;
-    vec3 Normal = texture(tNormal, UVCoord).rgb;
-    
-    vec3 result = Diffuse.xyz * ambient_color;
+	vec3 Normal = texture(tNormal, UVCoord).rgb;
+	vec4 Masks = texture(tMasks, UVCoord);   	
 
-    float specularFactor = Diffuse.w; //Get factor in A channel
-    vec3 camToFragDirection = normalize(cam_position - FragPos);
+    vec3 result = Diffuse.xyz;
+    //Check, if fragment isn't skybox
+    if(Masks.r == 1){
+        result *= ambient_color;
+        result *= (1 - Masks.g);
+        float specularFactor = Diffuse.w; //Get factor in A channel
+        vec3 camToFragDirection = normalize(cam_position - FragPos);
     
-    for(int lg = 0; lg < lights_amount; lg ++){
-		if(lights[lg].type == LIGHTSOURCE_DIR){
-			float lightcoeff = max(dot(Normal, normalize(lights[lg].dir)), 0.0) * lights[lg].intensity;
-			vec3 rlight = lightcoeff * lights[lg].color;
+        for(int lg = 0; lg < lights_amount; lg ++){
+            if(lights[lg].type == LIGHTSOURCE_DIR){
+                float lightcoeff = max(dot(Normal, normalize(lights[lg].dir)), 0.0) * lights[lg].intensity;
+                vec3 rlight = lightcoeff * lights[lg].color;
 			
-			//Specular calculation
-            vec3 lightDirReflected = reflect(normalize(-lights[lg].dir), Normal);
-            float angle = max(dot(camToFragDirection, lightDirReflected), 0.0);
-            rlight += pow(angle, 32) * specularFactor * lights[lg].color;
+                //Specular calculation
+                vec3 lightDirReflected = reflect(normalize(-lights[lg].dir), Normal);
+                float angle = max(dot(camToFragDirection, lightDirReflected), 0.0);
+                rlight += pow(angle, 32) * specularFactor * lights[lg].color;
 			
-			result += rlight;
-		}
-		if(lights[lg].type == LIGHTSOURCE_POINT){
-			float dist = length(lights[lg].pos - FragPos);
-			float factor = 1.0 / ( 1.0 + 1.0 / lights[lg].range * dist + 1.0 / lights[lg].range * dist * dist) * lights[lg].intensity;
-			result += lights[lg].color * factor;
-		}
+                result += rlight;
+            }
+            if(lights[lg].type == LIGHTSOURCE_POINT){
+                float dist = length(lights[lg].pos - FragPos);
+                float factor = 1.0 / ( 1.0 + 1.0 / lights[lg].range * dist + 1.0 / lights[lg].range * dist * dist) * lights[lg].intensity;
+                result += lights[lg].color * factor;
+            }
+        }
 	}
-		
 	FragColor = vec4(result, 1);
 }

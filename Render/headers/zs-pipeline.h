@@ -37,7 +37,7 @@ protected:
     unsigned int tNormal; //To store normal coordinate
     unsigned int tPos; //To store position coordinate
     unsigned int tTransparent; //To store color with alpha
-    unsigned int tBackground;
+    unsigned int tMasks;
 public:
     G_BUFFER_GL();
     void create(int width, int height);
