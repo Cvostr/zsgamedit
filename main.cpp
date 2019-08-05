@@ -67,6 +67,7 @@ int main(int argc, char *argv[])
                         }
                         if (event.button.button == SDL_BUTTON_MIDDLE) {
                             w.edit_win_ptr->input_state.isMidBtnHold = false;
+                            mstate->isMidBtnDown = false;
                         }
                     }
                     if (event.type == SDL_MOUSEWHEEL) {
@@ -109,6 +110,7 @@ int main(int argc, char *argv[])
 
                         if (event.button.button == SDL_BUTTON_MIDDLE) {
                             w.edit_win_ptr->input_state.isMidBtnHold = true;
+                            mstate->isMidBtnDown = true;
                         }
                     }
                     if (event.type == SDL_MOUSEMOTION) { //If user moved mouse

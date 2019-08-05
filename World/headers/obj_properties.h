@@ -145,6 +145,8 @@ private:
     bool initialized;
     unsigned int shadowBuffer;
     unsigned int shadowDepthTexture;
+    float nearPlane;
+    float farPlane;
 
     ZSMATRIX4x4 LightProjectionMat;
     ZSMATRIX4x4 LightViewMat;

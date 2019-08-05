@@ -1027,6 +1027,9 @@ ShadowCasterProperty::ShadowCasterProperty(){
     TextureHeight = 2048;
 
     shadow_bias = 0.005f;
+
+    nearPlane = 1.0f;
+    farPlane = 75.0f;
 }
 
 void ShadowCasterProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
@@ -1048,4 +1051,15 @@ void ShadowCasterProperty::addPropertyInterfaceToInspector(InspectorWin* inspect
     bias->value = &this->shadow_bias; //Ptr to our vector
     bias->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
     inspector->addPropertyArea(bias);
+
+    FloatPropertyArea* _nearPlane = new FloatPropertyArea; //New property area
+    _nearPlane->setLabel("Near plane"); //Its label
+    _nearPlane->value = &this->nearPlane; //Ptr to our vector
+    _nearPlane->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
+    inspector->addPropertyArea(_nearPlane);
+    FloatPropertyArea* _farPlane = new FloatPropertyArea; //New property area
+    _farPlane->setLabel("Far plane"); //Its label
+    _farPlane->value = &this->farPlane; //Ptr to our vector
+    _farPlane->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
+    inspector->addPropertyArea(_farPlane);
 }

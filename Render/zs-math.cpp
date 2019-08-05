@@ -288,17 +288,17 @@ void ZSRGBCOLOR::updateGL() {
 ZSVECTOR3 _getDirection(float pitch, float yaw, float roll) {
 	ZSVECTOR3 q;
 
-	double cy = cos(DegToRad(yaw * 0.5f));
-	double sy = sin(DegToRad(yaw * 0.5f));
-	double cr = cos(DegToRad(roll * 0.5f));
-	double sr = sin(DegToRad(roll * 0.5f));
-	double cp = cos(DegToRad(pitch * 0.5f));
-	double sp = sin(DegToRad(pitch * 0.5f));
+    float cy = cos(DegToRad(yaw * 0.5f));
+    float sy = sin(DegToRad(yaw * 0.5f));
+    float cr = cos(DegToRad(roll * 0.5f));
+    float sr = sin(DegToRad(roll * 0.5f));
+    float cp = cos(DegToRad(pitch * 0.5f));
+    float sp = sin(DegToRad(pitch * 0.5f));
 
 
-	q.Z = (float)(cy * sr * cp - sy * cr * sp);
-	q.X = (float)(cy * cr * sp + sy * sr * cp);
-	q.Y = (float)(sy * cr * cp - cy * sr * sp);
+    q.Z = (cy * sr * cp - sy * cr * sp);
+    q.X = (cy * cr * sp + sy * sr * cp);
+    q.Y = (sy * cr * cp - cy * sr * sp);
 
 
 	return q;

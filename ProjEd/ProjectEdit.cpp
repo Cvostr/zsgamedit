@@ -1027,22 +1027,22 @@ void EditWindow::keyPressEvent(QKeyEvent* ke){
 
 void EditWindow::onKeyDown(SDL_Keysym sym){
 
-    if(sym.sym == SDLK_a && !isSceneRun){
+    if(sym.sym == SDLK_a && !isSceneRun && !input_state.isLCtrlHold){
         ZSVECTOR3 pos = edit_camera.getCameraPosition(); //obtain position
         pos = pos + edit_camera.getCameraRightVec() * -2.2f * deltaTime;
         edit_camera.setPosition(pos);
     }
-    if(sym.sym == SDLK_d && !isSceneRun){
+    if(sym.sym == SDLK_d && !isSceneRun && !input_state.isLCtrlHold){
         ZSVECTOR3 pos = edit_camera.getCameraPosition(); //obtain position
         pos = pos + edit_camera.getCameraRightVec() * 2.2f * deltaTime;
         edit_camera.setPosition(pos);
     }
-    if(sym.sym == SDLK_w && !isSceneRun){
+    if(sym.sym == SDLK_w && !isSceneRun && !input_state.isLCtrlHold){
         ZSVECTOR3 pos = edit_camera.getCameraPosition(); //obtain position
         pos.Y += 2.2f * deltaTime;
         edit_camera.setPosition(pos);
     }
-    if(sym.sym == SDLK_s && !isSceneRun){
+    if(sym.sym == SDLK_s && !isSceneRun && !input_state.isLCtrlHold){
         ZSVECTOR3 pos = edit_camera.getCameraPosition(); //obtain position
         pos.Y -= 2.2f * deltaTime;
         edit_camera.setPosition(pos);

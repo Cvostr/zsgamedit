@@ -521,7 +521,7 @@ void ShadowCasterProperty::Draw(ZSPIRE::Camera* cam, RenderPipeline* pipeline){
     LightsourceProperty* light = this->go_link.updLinkPtr()->getPropertyPtr<LightsourceProperty>();
 
     ZSVECTOR3 cam_pos = cam->getCameraPosition() + cam->getCameraFrontVec() * 25;
-    this->LightProjectionMat = getOrthogonal(-10, 10, -10, 10, 1, 75);
+    this->LightProjectionMat = getOrthogonal(-10, 10, -10, 10, nearPlane, farPlane);
     this->LightViewMat = matrixLookAt(cam_pos, cam_pos + light->direction, ZSVECTOR3(0,1,0));
 
     glViewport(0, 0, TextureWidth, TextureHeight); //Changing viewport
@@ -536,9 +536,6 @@ void ShadowCasterProperty::Draw(ZSPIRE::Camera* cam, RenderPipeline* pipeline){
     pipeline->getShadowmapShader()->setGLuniformMat4x4("cam_view", LightViewMat);
 
     pipeline->renderDepth(this->go_link.world_ptr);
-
-    glActiveTexture(GL_TEXTURE6);
-    glBindTexture(GL_TEXTURE_2D, this->shadowDepthTexture);
 }
 
 void ShadowCasterProperty::init(){
