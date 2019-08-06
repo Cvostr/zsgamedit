@@ -305,8 +305,8 @@ void GameObject::Draw(RenderPipeline* pipeline){
         }
         if(pipeline->current_state == PIPELINE_STATE_SHADOWDEPTH) {
             TransformProperty* transform_ptr = static_cast<TransformProperty*>(getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
-            pipeline->getPickingShader()->Use();
-            pipeline->getPickingShader()->setTransform(transform_ptr->transform_mat);
+            pipeline->getShadowmapShader()->Use();
+            pipeline->getShadowmapShader()->setTransform(transform_ptr->transform_mat);
         }
         //Draw default mesh
         mesh_prop->mesh_ptr->Draw();
@@ -516,26 +516,30 @@ void ShadowCasterProperty::onPreRender(RenderPipeline* pipeline){
 }
 
 void ShadowCasterProperty::Draw(ZSPIRE::Camera* cam, RenderPipeline* pipeline){
+    if(!this->active) return;
     if(!this->initialized) init();
 
     LightsourceProperty* light = this->go_link.updLinkPtr()->getPropertyPtr<LightsourceProperty>();
 
-    ZSVECTOR3 cam_pos = cam->getCameraPosition() + cam->getCameraFrontVec() * 25;
-    this->LightProjectionMat = getOrthogonal(-10, 10, -10, 10, nearPlane, farPlane);
-    this->LightViewMat = matrixLookAt(cam_pos, cam_pos + light->direction, ZSVECTOR3(0,1,0));
+    ZSVECTOR3 cam_pos = cam->getCameraPosition() + cam->getCameraFrontVec() * 20;
+    this->LightProjectionMat = getOrthogonal(-projection_viewport, projection_viewport, -projection_viewport, projection_viewport, nearPlane, farPlane);
+    this->LightViewMat = matrixLookAt(cam_pos, cam_pos + light->direction * -1, ZSVECTOR3(0,1,0));
 
     glViewport(0, 0, TextureWidth, TextureHeight); //Changing viewport
-    glEnable(GL_DEPTH_TEST);
-    glDisable(GL_CULL_FACE);
 
     glBindFramebuffer(GL_FRAMEBUFFER, shadowBuffer); //Bind framebuffer
     glClear(GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_DEPTH_TEST);
+    glFrontFace(GL_CW);
+    glDisable(GL_CULL_FACE);
 
     pipeline->getShadowmapShader()->Use();
     pipeline->getShadowmapShader()->setGLuniformMat4x4("cam_projection", LightProjectionMat);
     pipeline->getShadowmapShader()->setGLuniformMat4x4("cam_view", LightViewMat);
 
     pipeline->renderDepth(this->go_link.world_ptr);
+
+    glFrontFace(GL_CCW);
 }
 
 void ShadowCasterProperty::init(){

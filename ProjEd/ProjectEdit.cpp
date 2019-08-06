@@ -823,7 +823,6 @@ EditWindow* ZSEditor::openEditor(){
     _ed_actions_container = new EdActions; //Allocating EdActions
     _ed_actions_container->world_ptr = &_editor_win->world; //Put world pointer
     _ed_actions_container->insp_win = _inspector_win; //Put inspector win pointer
-//std::cout << _editor_win->pos().x() << std::endl;
 
     return _editor_win;
 }

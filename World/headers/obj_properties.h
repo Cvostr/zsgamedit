@@ -145,8 +145,8 @@ private:
     bool initialized;
     unsigned int shadowBuffer;
     unsigned int shadowDepthTexture;
-    float nearPlane;
-    float farPlane;
+
+    int projection_viewport;
 
     ZSMATRIX4x4 LightProjectionMat;
     ZSMATRIX4x4 LightViewMat;
@@ -154,6 +154,8 @@ public:
     int TextureWidth;
     int TextureHeight;
     float shadow_bias;
+    float nearPlane;
+    float farPlane;
 
     void addPropertyInterfaceToInspector(InspectorWin* inspector);
     void onPreRender(RenderPipeline* pipeline);

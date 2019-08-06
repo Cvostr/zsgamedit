@@ -1030,6 +1030,8 @@ ShadowCasterProperty::ShadowCasterProperty(){
 
     nearPlane = 1.0f;
     farPlane = 75.0f;
+
+    projection_viewport = 20;
 }
 
 void ShadowCasterProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){

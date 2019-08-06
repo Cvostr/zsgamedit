@@ -130,6 +130,16 @@ void GameObject::saveProperties(std::ofstream* stream){
 
             break;
         }
+        case GO_PROPERTY_TYPE_SHADOWCASTER:{
+            ShadowCasterProperty* ptr = static_cast<ShadowCasterProperty*>(property_ptr);
+            //write collider type
+            stream->write(reinterpret_cast<char*>(&ptr->TextureWidth), sizeof(int));
+            stream->write(reinterpret_cast<char*>(&ptr->TextureHeight), sizeof(int));
+            stream->write(reinterpret_cast<char*>(&ptr->shadow_bias), sizeof(float));
+            stream->write(reinterpret_cast<char*>(&ptr->nearPlane), sizeof(float));
+            stream->write(reinterpret_cast<char*>(&ptr->farPlane), sizeof(float));
+            break;
+        }
         case GO_PROPERTY_TYPE_TILE_GROUP:{
             TileGroupProperty* ptr = static_cast<TileGroupProperty*>(property_ptr);
             int isCreated = static_cast<int>(ptr->isCreated);
@@ -262,9 +272,6 @@ void GameObject::loadProperty(std::ifstream* world_stream){
             ptr->scripts_attached[script_w_i].fpath = project_ptr->root_path + "/" + ptr->path_names[script_w_i];
             ptr->scripts_attached[script_w_i].name = ptr->path_names[script_w_i].toStdString();
         }
-
-        //ptr->onValueChanged();
-
         break;
     }
     case GO_PROPERTY_TYPE_AUDSOURCE:{
@@ -317,6 +324,17 @@ void GameObject::loadProperty(std::ifstream* world_stream){
         //read isTrigger boolean
         world_stream->read(reinterpret_cast<char*>(&ptr->mass), sizeof(float));
 
+        break;
+    }
+    case GO_PROPERTY_TYPE_SHADOWCASTER:{
+        ShadowCasterProperty* ptr = static_cast<ShadowCasterProperty*>(prop_ptr);
+        world_stream->seekg(1, std::ofstream::cur);
+        //write collider type
+        world_stream->read(reinterpret_cast<char*>(&ptr->TextureWidth), sizeof(int));
+        world_stream->read(reinterpret_cast<char*>(&ptr->TextureHeight), sizeof(int));
+        world_stream->read(reinterpret_cast<char*>(&ptr->shadow_bias), sizeof(float));
+        world_stream->read(reinterpret_cast<char*>(&ptr->nearPlane), sizeof(float));
+        world_stream->read(reinterpret_cast<char*>(&ptr->farPlane), sizeof(float));
         break;
     }
     case GO_PROPERTY_TYPE_TILE_GROUP :{

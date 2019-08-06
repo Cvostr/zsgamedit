@@ -73,6 +73,7 @@ void ZSENSDK::bindSDK(lua_State* state){
         .addData("relY", &Input::MouseState::mouseRelY)
         .addData("isLButtonDown", &Input::MouseState::isLButtonDown)
         .addData("isRButtonDown", &Input::MouseState::isRButtonDown)
+        .addData("isMidButtonDown", &Input::MouseState::isMidBtnDown)
         .endClass()
 
         .endNamespace();
