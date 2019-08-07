@@ -187,7 +187,7 @@ void EdActions::putNewAction(EdAction* action){
 
     //if we have some positions left in vector
     if(this->current_pos < this->end_pos){
-        this->action_list[current_pos] = action;
+        this->action_list[static_cast<unsigned int>(current_pos)] = action;
 
         current_pos += 1;
     }else{ //Allocate new space in vector

@@ -53,15 +53,19 @@ struct EditorInputState{
 };
 
 struct ObjectTransformState{
-    bool isTransforming;
+    bool isTransforming; //To draw controls or not
+    bool isModifying;
     GameObject* obj_ptr;
     TransformProperty* tprop_ptr; //Pointer to transform property of obj_ptr
     GO_TRANSFORM_MODE transformMode;
+
+    int Xcf = 0, Ycf = 0, Zcf = 0;
 
     void setTransformOnObject(GO_TRANSFORM_MODE transformMode);
 
     ObjectTransformState(){ //Default construct
         isTransforming = false;
+        isModifying = false;
         obj_ptr = nullptr;
         tprop_ptr = nullptr;
         transformMode = GO_TRANSFORM_MODE_NONE;

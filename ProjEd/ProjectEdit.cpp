@@ -843,7 +843,7 @@ EditWindow* ZSEditor::openEditor(){
     _ed_actions_container = new EdActions; //Allocating EdActions
     _ed_actions_container->world_ptr = &_editor_win->world; //Put world pointer
     _ed_actions_container->insp_win = _inspector_win; //Put inspector win pointer
-
+    _ed_actions_container->setStoreActions(true);
     return _editor_win;
 }
 
@@ -980,16 +980,27 @@ void EditWindow::onMouseMotion(int relX, int relY){
             edit_camera.setFront(front);
         }
     }
+    if(obj_trstate.isModifying && input_state.isLeftBtnHold == false){
+        obj_trstate.isModifying = false;
+
+
+    }
     //Visual transform control
     if(obj_trstate.isTransforming == true && input_state.isLeftBtnHold == true){ //Only affective if object is transforming
         ZSRGBCOLOR color = render->getColorOfPickedTransformControl(obj_trstate.tprop_ptr->_last_translation, this->input_state.mouseX, this->input_state.mouseY);
+        //If transformation method isn't set
+        if(obj_trstate.isModifying == false){
+            //Set all coordinates to 0
+            obj_trstate.Xcf = 0;
+            obj_trstate.Ycf = 0;
+            obj_trstate.Zcf = 0;
 
-        if(color.r == 255) color.r = 1; else
-            color.r = 0;
-        if(color.g == 255) color.g = 1; else
-            color.g = 0;
-        if(color.b == 255) color.b = 1; else
-            color.b = 0;
+            if(color.r == 255) obj_trstate.Xcf = 1; else obj_trstate.Xcf = 0;
+            if(color.g == 255) obj_trstate.Ycf = 1; else obj_trstate.Ycf = 0;
+            if(color.b == 255) obj_trstate.Zcf = 1; else obj_trstate.Zcf = 0;
+        }
+
+        obj_trstate.isModifying = true;
 
         ZSVECTOR3* vec_ptr = nullptr; //pointer to modifying vector
         if(obj_trstate.transformMode == GO_TRANSFORM_MODE_TRANSLATE){
@@ -1004,7 +1015,7 @@ void EditWindow::onMouseMotion(int relX, int relY){
             vec_ptr = &obj_trstate.tprop_ptr->rotation;
         }
 
-        *vec_ptr = *vec_ptr + ZSVECTOR3(-relX, -relY,relX) * ZSVECTOR3(color.r, color.g, color.b);
+        *vec_ptr = *vec_ptr + ZSVECTOR3(-relX, -relY,relX) * ZSVECTOR3(obj_trstate.Xcf, obj_trstate.Ycf, obj_trstate.Zcf);
     }
 }
 
@@ -1129,7 +1140,7 @@ void ObjectTransformState::setTransformOnObject(GO_TRANSFORM_MODE transformMode)
     this->isTransforming = true;
     //Add property action
     GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(obj_ptr->getTransformProperty());
-    getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
+    getActionManager()->newPropertyAction(prop_ptr->go_link, GO_PROPERTY_TYPE_TRANSFORM);
 }
 
 void EditWindow::startManager(EditorComponentManager* manager){

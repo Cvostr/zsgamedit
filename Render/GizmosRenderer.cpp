@@ -43,15 +43,15 @@ void GizmosRenderer::drawTransformControls(ZSVECTOR3 position, int tall, int dim
 
     //X control
     ZSVECTOR3 rotation = ZSVECTOR3(0,0,90);
-    transform = scale_mat * getRotationMat(rotation) * getTranslationMat(ZSVECTOR3(position.X + tall / 2, position.Y, position.Z));
+    transform = scale_mat * getRotationMat(rotation) * getTranslationMat(ZSVECTOR3(position.X + tall, position.Y, position.Z));
     drawCube(transform, ZSRGBCOLOR(255,0,0));
     //Y control
     rotation = ZSVECTOR3(0,0,0);
-    transform = scale_mat * getRotationMat(rotation) * getTranslationMat(ZSVECTOR3(position.X, position.Y + tall / 2, position.Z));
+    transform = scale_mat * getRotationMat(rotation) * getTranslationMat(ZSVECTOR3(position.X, position.Y + tall, position.Z));
     drawCube(transform, ZSRGBCOLOR(0,255,0));
     //Z control
     rotation = ZSVECTOR3(90,0,0);
-    transform = scale_mat * getRotationMat(rotation) * getTranslationMat(ZSVECTOR3(position.X, position.Y, position.Z + tall /2));
+    transform = scale_mat * getRotationMat(rotation) * getTranslationMat(ZSVECTOR3(position.X, position.Y, position.Z + tall));
     drawCube(transform, ZSRGBCOLOR(0,0,255));
 
     glFeaturesOn();
