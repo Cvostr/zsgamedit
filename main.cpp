@@ -20,8 +20,10 @@ int main(int argc, char *argv[])
     while (working) {
         //Time calculation
         last = NOW;
-        NOW = SDL_GetPerformanceCounter();
-        deltaTime = (NOW - last) * 1000 / SDL_GetPerformanceFrequency();
+        if(w.edit_win_ptr != nullptr){
+            NOW = SDL_GetPerformanceCounter();
+            deltaTime = (NOW - last) * 1000 / SDL_GetPerformanceFrequency();
+        }
 
         a.processEvents();
 

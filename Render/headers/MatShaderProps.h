@@ -36,6 +36,7 @@ class MtShaderPropertiesGroup{
 public:
     std::string str_path;
     QString groupCaption;
+    bool acceptShadows;
 
     ZSPIRE::Shader* render_shader; //Pointer to shader, that binds on object render
     std::vector<MaterialShaderProperty*> properties;

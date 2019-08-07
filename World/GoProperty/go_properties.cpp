@@ -191,6 +191,8 @@ MeshProperty::MeshProperty(){
 
     mesh_ptr = nullptr; //set it to 0x0 to check later
     this->resource_relpath = "@none";
+
+    castShadows = true;
 }
 //Transform property functions
 void TransformProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
@@ -378,6 +380,12 @@ void MeshProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
     area->rel_path = &resource_relpath;
     area->resource_type = RESOURCE_TYPE_MESH; //It should load meshes only
     inspector->addPropertyArea(area);
+
+    BoolCheckboxArea* IsCastShadows = new BoolCheckboxArea;
+    IsCastShadows->setLabel("Cast shadows ");
+    IsCastShadows->go_property = static_cast<void*>(this);
+    IsCastShadows->bool_ptr = &this->castShadows;
+    inspector->addPropertyArea(IsCastShadows);
 }
 void MeshProperty::updateMeshPtr(){
     if(resource_relpath.length() < 1) return;
@@ -555,7 +563,7 @@ void AudioSourceProperty::onUpdate(float deltaTime){
     TransformProperty* transform = go_link.updLinkPtr()->getTransformProperty();
 
     //if(transform->translation != this->last_pos){
-        this->source.setPosition(transform->translation);
+    this->source.setPosition(transform->translation);
       //  this->last_pos = transform->translation;
     //}
 }
@@ -1005,6 +1013,7 @@ ObjectScript* ScriptGroupProperty::getScriptByName(std::string name){
         if(!name.compare(scripts_attached[script_i].name))
             return &scripts_attached[script_i];
     }
+    return nullptr;
 }
 ScriptGroupProperty::ScriptGroupProperty(){
     type = GO_PROPERTY_TYPE_SCRIPTGROUP;
@@ -1064,4 +1073,8 @@ void ShadowCasterProperty::addPropertyInterfaceToInspector(InspectorWin* inspect
     _farPlane->value = &this->farPlane; //Ptr to our vector
     _farPlane->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
     inspector->addPropertyArea(_farPlane);
+}
+
+TerrainProperty::TerrainProperty(){
+
 }

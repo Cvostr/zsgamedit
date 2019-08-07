@@ -87,13 +87,14 @@ void MtShaderPropertiesGroup::loadFromFile(const char* fpath){
     mat_shader_group.open(fpath);
 }
 MtShaderPropertiesGroup::MtShaderPropertiesGroup(){
+    acceptShadows = false;
     properties.resize(0);
 }
 
 MtShaderPropertiesGroup* MtShProps::genDefaultMtShGroup(ZSPIRE::Shader* shader3d, ZSPIRE::Shader* skybox){
 
     MtShaderPropertiesGroup* default_group = new MtShaderPropertiesGroup;
-
+    default_group->acceptShadows = true;
     default_group->str_path = "@default";
     default_group->groupCaption = "Default 3D";
     default_group->render_shader = shader3d;

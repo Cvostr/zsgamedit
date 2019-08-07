@@ -289,8 +289,10 @@ void GameObject::Draw(RenderPipeline* pipeline){
     MeshProperty* mesh_prop = static_cast<MeshProperty*>(this->getPropertyPtrByType(GO_PROPERTY_TYPE_MESH));
     if(hasMesh()){// if object has mesh
         //If we are in default draw mode
-        if(pipeline->current_state == PIPELINE_STATE_DEFAULT)
+        if(pipeline->current_state == PIPELINE_STATE_DEFAULT){
             this->onRender(pipeline);
+            DrawMesh();
+        }
         //If we picking object
         if(pipeline->current_state == PIPELINE_STATE_PICKING) {
             TransformProperty* transform_ptr = static_cast<TransformProperty*>(getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
@@ -302,16 +304,18 @@ void GameObject::Draw(RenderPipeline* pipeline){
             float a = static_cast<float>(to_send[3]);
             pipeline->getPickingShader()->setTransform(transform_ptr->transform_mat);
             pipeline->getPickingShader()->setGLuniformVec4("color", ZSVECTOR4(r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f));
+            DrawMesh();
         }
         if(pipeline->current_state == PIPELINE_STATE_SHADOWDEPTH) {
             TransformProperty* transform_ptr = static_cast<TransformProperty*>(getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
             pipeline->getShadowmapShader()->Use();
             pipeline->getShadowmapShader()->setTransform(transform_ptr->transform_mat);
+            if(mesh_prop->castShadows)
+                DrawMesh();
         }
-        //Draw default mesh
-        mesh_prop->mesh_ptr->Draw();
 
-        if(this->isPicked == true && pipeline->current_state != PIPELINE_STATE_PICKING){
+
+        if(this->isPicked == true && pipeline->current_state != PIPELINE_STATE_PICKING && pipeline->current_state != PIPELINE_STATE_SHADOWDEPTH){
             EditWindow* editwin_ptr = static_cast<EditWindow*>(pipeline->win_ptr);
             TransformProperty* transform_ptr = static_cast<TransformProperty*>(getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
             ZSRGBCOLOR color = ZSRGBCOLOR(static_cast<int>(0.23f * 255.0f),
@@ -376,7 +380,7 @@ void MaterialProperty::onRender(RenderPipeline* pipeline){
     shader->Use();
 
     ShadowCasterProperty* shadowcast = static_cast<ShadowCasterProperty*>(pipeline->getRenderSettings()->shadowcaster_ptr);
-    if(shadowcast != nullptr){
+    if(shadowcast != nullptr && this->material_ptr->group_ptr->acceptShadows){
         shadowcast->sendData(shader);
     }
 

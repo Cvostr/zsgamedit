@@ -122,6 +122,9 @@ public slots:
     void onUndoPressed();
     void onRedoPressed();
 
+    void onObjectCopy();
+    void onObjectPaste();
+
     void toggleCameras();
 
     void openRenderSettings();
@@ -147,6 +150,8 @@ private:
 
     QString sheduled_world;
     bool hasSheduledWorld;
+
+    GameObject* object_buffer;
 public:
     float deltaTime;
     bool ready; //Is everything loaded?
@@ -237,6 +242,9 @@ private:
     QAction* action_move;
     QAction* action_scale;
     QAction* action_rotate;
+
+    QAction* actionCopy;
+    QAction* actionPaste;
 
     QAction* store_to_prefab;
 

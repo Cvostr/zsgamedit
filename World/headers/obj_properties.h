@@ -83,6 +83,7 @@ class MeshProperty : public GameObjectProperty{
 public:
     QString resource_relpath; //Relative path to resource
     ZSPIRE::Mesh* mesh_ptr; //Pointer to mesh
+    bool castShadows;
 
     void addPropertyInterfaceToInspector(InspectorWin* inspector);
     void updateMeshPtr(); //Updates pointer according to resource_relpath
@@ -146,8 +147,6 @@ private:
     unsigned int shadowBuffer;
     unsigned int shadowDepthTexture;
 
-    int projection_viewport;
-
     ZSMATRIX4x4 LightProjectionMat;
     ZSMATRIX4x4 LightViewMat;
 public:
@@ -156,6 +155,7 @@ public:
     float shadow_bias;
     float nearPlane;
     float farPlane;
+    int projection_viewport;
 
     void addPropertyInterfaceToInspector(InspectorWin* inspector);
     void onPreRender(RenderPipeline* pipeline);
@@ -163,6 +163,10 @@ public:
     void Draw(ZSPIRE::Camera* cam, RenderPipeline* pipeline);
     void sendData(ZSPIRE::Shader* shader);
     ShadowCasterProperty();
+};
+
+class TerrainProperty : GameObjectProperty{
+    TerrainProperty();
 };
 
 #endif // OBJ_PROPERTIES_H

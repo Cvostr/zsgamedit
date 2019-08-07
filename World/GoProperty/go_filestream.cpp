@@ -138,6 +138,7 @@ void GameObject::saveProperties(std::ofstream* stream){
             stream->write(reinterpret_cast<char*>(&ptr->shadow_bias), sizeof(float));
             stream->write(reinterpret_cast<char*>(&ptr->nearPlane), sizeof(float));
             stream->write(reinterpret_cast<char*>(&ptr->farPlane), sizeof(float));
+            stream->write(reinterpret_cast<char*>(&ptr->projection_viewport), sizeof(float));
             break;
         }
         case GO_PROPERTY_TYPE_TILE_GROUP:{
@@ -220,8 +221,6 @@ void GameObject::loadProperty(std::ifstream* world_stream){
             world_stream->read(reinterpret_cast<char*>(&t_ptr->rotation.X), sizeof(float));
             world_stream->read(reinterpret_cast<char*>(&t_ptr->rotation.Y), sizeof(float));
             world_stream->read(reinterpret_cast<char*>(&t_ptr->rotation.Z), sizeof(float));
-
-            //t_ptr->updateMat(); //After everything is loaded, update matrices
 
         break;
     }
@@ -335,6 +334,7 @@ void GameObject::loadProperty(std::ifstream* world_stream){
         world_stream->read(reinterpret_cast<char*>(&ptr->shadow_bias), sizeof(float));
         world_stream->read(reinterpret_cast<char*>(&ptr->nearPlane), sizeof(float));
         world_stream->read(reinterpret_cast<char*>(&ptr->farPlane), sizeof(float));
+        world_stream->read(reinterpret_cast<char*>(&ptr->projection_viewport), sizeof(float));
         break;
     }
     case GO_PROPERTY_TYPE_TILE_GROUP :{

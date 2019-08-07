@@ -46,6 +46,9 @@ EditWindow::EditWindow(QWidget *parent) :
     QObject::connect(ui->actionUndo, SIGNAL(triggered()), this, SLOT(onUndoPressed()));
     QObject::connect(ui->actionRedo, SIGNAL(triggered()), this, SLOT(onRedoPressed()));
 
+    QObject::connect(ui->actionCopy, SIGNAL(triggered()), this, SLOT(onObjectCopy()));
+    QObject::connect(ui->actionPaste, SIGNAL(triggered()), this, SLOT(onObjectPaste()));
+
     QObject::connect(ui->objsList, SIGNAL(itemClicked(QTreeWidgetItem*,int)),
                 this, SLOT(onObjectListItemClicked())); //Signal comes, when user clicks on File->Save As
 
@@ -63,6 +66,7 @@ EditWindow::EditWindow(QWidget *parent) :
     hasSceneFile = false; //No scene loaded by default
     isSceneRun = false; //Not running by default
     isWorldCamera = false;
+    object_buffer = nullptr;
 
     setupObjectsHieList();
     //Drag & drop in objects tree
@@ -87,6 +91,9 @@ EditWindow::EditWindow(QWidget *parent) :
 
     this->ui->objsList->win_ptr = this; //putting pointer to window to custom tree view
     this->ui->fileList->win_ptr = this;
+
+    ui->actionCopy->setShortcut(Qt::Key_C | Qt::CTRL);
+    ui->actionPaste->setShortcut(Qt::Key_V | Qt::CTRL);
 
     ui->actionOpen->setShortcut(Qt::Key_O | Qt::CTRL);
     ui->actionSave->setShortcut(Qt::Key_S | Qt::CTRL);
@@ -215,6 +222,7 @@ void EditWindow::openFile(QString file_path){
 
         obj_trstate.isTransforming = false;
         ppaint_state.enabled = false;
+        object_buffer = nullptr;
         //Back render settings to defaults
         this->render->getRenderSettings()->defaults();
 
@@ -625,6 +633,18 @@ void EditWindow::onUndoPressed(){
 }
 void EditWindow::onRedoPressed(){
     _ed_actions_container->redo();
+}
+
+void EditWindow::onObjectCopy(){
+    QTreeWidgetItem* selected_item = ui->objsList->currentItem(); //Obtain pointer to clicked obj item
+    QString obj_name = selected_item->text(0); //Get label of clicked obj
+    GameObject* obj_ptr = world.getObjectByLabel(obj_name); //Obtain pointer to selected object by label
+
+    this->object_buffer = obj_ptr;
+}
+void EditWindow::onObjectPaste(){
+    if(object_buffer != nullptr)
+        this->world.Instantiate(object_buffer);
 }
 
 void EditWindow::toggleCameras(){
@@ -1079,6 +1099,12 @@ void EditWindow::onKeyDown(SDL_Keysym sym){
     }
     if(input_state.isLCtrlHold && sym.sym == SDLK_n){
         emit onAddNewGameObject();
+    }
+    if(input_state.isLCtrlHold && sym.sym == SDLK_c){
+        emit onObjectCopy();
+    }
+    if(input_state.isLCtrlHold && sym.sym == SDLK_v){
+        emit onObjectPaste();
     }
 }
 

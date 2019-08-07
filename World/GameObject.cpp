@@ -80,6 +80,7 @@ bool GameObject::addLabelProperty(){
 bool GameObject::hasMesh(){
     MeshProperty* mesh_prop = static_cast<MeshProperty*>(this->getPropertyPtrByType(GO_PROPERTY_TYPE_MESH));
     if(mesh_prop != nullptr){
+        if(!mesh_prop->active) return false;
         if(mesh_prop->mesh_ptr != nullptr) return true;
     }
     return false;
@@ -393,4 +394,10 @@ void GameObject::copyTo(GameObject* dest){
     dest->hasParent = this->hasParent;
     dest->parent = this->parent;
     dest->str_id = this->str_id;
+}
+
+void GameObject::DrawMesh(){
+    MeshProperty* mesh_prop = static_cast<MeshProperty*>(this->getPropertyPtrByType(GO_PROPERTY_TYPE_MESH));
+    //Draw default mesh
+    mesh_prop->mesh_ptr->Draw();
 }
