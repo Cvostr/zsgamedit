@@ -86,6 +86,9 @@ QString getPropertyString(int type){
         case GO_PROPERTY_TYPE_SKYBOX:{
             return QString("Skybox");
         }
+        case GO_PROPERTY_TYPE_TERRAIN:{
+            return QString("Terrain");
+        }
     }
     return QString("NONE");
 }
@@ -144,6 +147,11 @@ GameObjectProperty* allocProperty(int type){
         }
         case GO_PROPERTY_TYPE_SHADOWCASTER:{
             ShadowCasterProperty* ptr = new ShadowCasterProperty;
+            _ptr = static_cast<GameObjectProperty*>(ptr);
+            break;
+        }
+        case GO_PROPERTY_TYPE_TERRAIN:{
+            TerrainProperty* ptr = new TerrainProperty;
             _ptr = static_cast<GameObjectProperty*>(ptr);
             break;
         }
@@ -1075,6 +1083,46 @@ void ShadowCasterProperty::addPropertyInterfaceToInspector(InspectorWin* inspect
     inspector->addPropertyArea(_farPlane);
 }
 
-TerrainProperty::TerrainProperty(){
+void ShadowCasterProperty::copyTo(GameObjectProperty* dest){
+    if(dest->type != this->type) return; //if it isn't script group
 
+    //Do base things
+    GameObjectProperty::copyTo(dest);
+
+    ShadowCasterProperty* _dest = static_cast<ShadowCasterProperty*>(dest);
+    _dest->farPlane = this->farPlane;
+    _dest->nearPlane = this->nearPlane;
+    _dest->shadow_bias = this->shadow_bias;
+    _dest->TextureWidth = this->TextureWidth;
+    _dest->TextureHeight = this->TextureHeight;
+    _dest->projection_viewport = this->projection_viewport;
+}
+
+TerrainProperty::TerrainProperty(){
+    type = GO_PROPERTY_TYPE_TERRAIN;
+
+    this->Width = 500;
+    this->Length = 500;
+    this->MaxHeight = 500;
+}
+
+void TerrainProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
+    IntPropertyArea* HWidth = new IntPropertyArea; //New property area
+    HWidth->setLabel("Heightmap Width"); //Its label
+    HWidth->value = &this->Width; //Ptr to our vector
+    HWidth->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
+    inspector->addPropertyArea(HWidth);
+
+    IntPropertyArea* HLength = new IntPropertyArea; //New property area
+    HLength->setLabel("Heightmap Length"); //Its label
+    HLength->value = &this->Length; //Ptr to our vector
+    HLength->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
+    inspector->addPropertyArea(HLength);
+}
+
+void TerrainProperty::onPreRender(RenderPipeline* pipeline){
+    data.Draw();
+}
+void TerrainProperty::onValueChanged(){
+    data.alloc(this->Width, this->Length);
 }

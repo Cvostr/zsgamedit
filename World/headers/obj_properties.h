@@ -4,6 +4,7 @@
 #include "World.h"
 #include "../../Scripting/headers/LuaScript.h"
 #include "../../Render/headers/MatShaderProps.h"
+#include "../../World/headers/terrain.h"
 
 enum LIGHTSOURCE_TYPE {
     LIGHTSOURCE_TYPE_NONE,
@@ -159,14 +160,26 @@ public:
 
     void addPropertyInterfaceToInspector(InspectorWin* inspector);
     void onPreRender(RenderPipeline* pipeline);
+    void copyTo(GameObjectProperty* dest);
     void init();
     void Draw(ZSPIRE::Camera* cam, RenderPipeline* pipeline);
     void sendData(ZSPIRE::Shader* shader);
     ShadowCasterProperty();
 };
 
-class TerrainProperty : GameObjectProperty{
+class TerrainProperty : public GameObjectProperty{
+private:
+    TerrainData data;
+public:
+    int Width;
+    int Length;
+    int MaxHeight;
+
+    void addPropertyInterfaceToInspector(InspectorWin* inspector);
+    void onPreRender(RenderPipeline* pipeline);
+    void onValueChanged();
     TerrainProperty();
+
 };
 
 #endif // OBJ_PROPERTIES_H

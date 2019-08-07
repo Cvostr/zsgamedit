@@ -87,7 +87,8 @@ HEADERS += \
     Render/headers/GizmosRenderer.h \
     Misc/headers/GlyphManager.h \
     Misc/headers/EditorManager.h \
-    ProjEd/headers/EditorSettings.h
+    ProjEd/headers/EditorSettings.h \
+    World/headers/terrain.h
 
 
 FORMS += \

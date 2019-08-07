@@ -33,3 +33,8 @@ void genRandomString(std::string* result, unsigned int len){
         result->push_back(rstring_palette[v]); //Push symbol at random value
      }
 }
+
+int randomNumber(){
+    srand (SDL_GetPerformanceCounter());
+    return rand();
+}

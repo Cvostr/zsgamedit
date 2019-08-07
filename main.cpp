@@ -18,16 +18,16 @@ int main(int argc, char *argv[])
     w.show();
 
     while (working) {
-        //Time calculation
-        last = NOW;
-        if(w.edit_win_ptr != nullptr){
-            NOW = SDL_GetPerformanceCounter();
-            deltaTime = (NOW - last) * 1000 / SDL_GetPerformanceFrequency();
-        }
-
         a.processEvents();
 
         if(w.edit_win_ptr != nullptr){ //Check if project editor window is created
+            //Time calculation
+            if(w.edit_win_ptr->ready){
+                last = NOW;
+                NOW = SDL_GetPerformanceCounter();
+                deltaTime = (NOW - last) * 1000 / SDL_GetPerformanceFrequency();
+            }
+
             //Close checks
             if(w.edit_win_ptr->close_reason == EW_CLOSE_REASON_PROJLIST){
                 w.edit_win_ptr->close_reason = EW_CLOSE_REASON_UNCLOSED;
