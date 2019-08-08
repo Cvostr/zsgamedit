@@ -61,6 +61,7 @@ private:
     ZSPIRE::Shader deffered_light;
     ZSPIRE::Shader skybox;
     ZSPIRE::Shader shadowMap;
+    ZSPIRE::Shader heightmap;
 
     std::vector<void*> lights_ptr;
 

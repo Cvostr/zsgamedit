@@ -137,7 +137,7 @@ void ZSPIRE::Shader::Destroy() {
 }
 
 void ZSPIRE::Shader::Use() {
-    if(cur_shader_gl_id == this->SHADER_ID) return;
+    //if(cur_shader_gl_id == this->SHADER_ID) return;
 
 	glUseProgram(this->SHADER_ID);
     cur_shader_gl_id = this->SHADER_ID;

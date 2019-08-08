@@ -631,7 +631,7 @@ void AudioSourceProperty::onObjectDeleted(){
 MaterialProperty::MaterialProperty(){
     type = GO_PROPERTY_TYPE_MATERIAL;
 
-    //this->group_ptr = nullptr;
+    receiveShadows = true;
     this->material_ptr = nullptr;
 }
 
@@ -643,6 +643,12 @@ void MaterialProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
     area->rel_path = &material_path;
     area->resource_type = RESOURCE_TYPE_MATERIAL; //It should load meshes only
     inspector->addPropertyArea(area);
+
+    BoolCheckboxArea* receiveShdws = new BoolCheckboxArea;
+    receiveShdws->setLabel("Receive Shadows ");
+    receiveShdws->go_property = static_cast<void*>(this);
+    receiveShdws->bool_ptr = &this->receiveShadows;
+    inspector->addPropertyArea(receiveShdws);
 
     if(material_ptr == nullptr) return;
 
@@ -1121,6 +1127,10 @@ void TerrainProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
 }
 
 void TerrainProperty::onPreRender(RenderPipeline* pipeline){
+    MaterialProperty* mat = this->go_link.updLinkPtr()->getPropertyPtr<MaterialProperty>();
+    if(mat == nullptr) return;
+    //Apply material shader
+    mat->onRender(pipeline);
     data.Draw();
 }
 void TerrainProperty::onValueChanged(){

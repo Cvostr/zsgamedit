@@ -34,13 +34,14 @@ void RenderPipeline::setup(int bufWidth, int bufHeight){
     this->ui_shader.compileFromFile("Shaders/ui/ui.vs", "Shaders/ui/ui.fs");
     skybox.compileFromFile("Shaders/skybox/skybox.vs", "Shaders/skybox/skybox.fs");
     shadowMap.compileFromFile("Shaders/shadowmap/shadowmap.vs", "Shaders/shadowmap/shadowmap.fs");
+    heightmap.compileFromFile("Shaders/heightmap/heightmap.vs", "Shaders/heightmap/heightmap.fs");
 
     ZSPIRE::setupDefaultMeshes();
 
     this->gbuffer.create(bufWidth, bufHeight);
     removeLights();
 
-    MtShProps::genDefaultMtShGroup(&diffuse3d_shader, &skybox);
+    MtShProps::genDefaultMtShGroup(&diffuse3d_shader, &skybox, &heightmap);
 }
 
 void RenderPipeline::initGizmos(int projectPespective){
@@ -54,6 +55,8 @@ RenderPipeline::~RenderPipeline(){
     this->deffered_light.Destroy();
     this->diffuse3d_shader.Destroy();
     ui_shader.Destroy();
+    skybox.Destroy();
+    shadowMap.Destroy();
     ZSPIRE::freeDefaultMeshes();
 
     this->gbuffer.Destroy();
@@ -378,10 +381,13 @@ void MaterialProperty::onRender(RenderPipeline* pipeline){
     //Work with shader
     shader = group_ptr->render_shader;
     shader->Use();
-
+    //Get pointer to shadowcaster
     ShadowCasterProperty* shadowcast = static_cast<ShadowCasterProperty*>(pipeline->getRenderSettings()->shadowcaster_ptr);
-    if(shadowcast != nullptr && this->material_ptr->group_ptr->acceptShadows){
+    if(shadowcast != nullptr && this->material_ptr->group_ptr->acceptShadows && this->receiveShadows){
         shadowcast->sendData(shader);
+    }
+    if(!this->receiveShadows || shadowcast == nullptr || !shadowcast->active){
+        shader->setGLuniformInt("hasShadowMap", 0);
     }
 
     shader->setTransform(transform_ptr->transform_mat);
@@ -603,6 +609,11 @@ void RenderPipeline::updateShadersCameraInfo(ZSPIRE::Camera* cam_ptr){
     if(ui_shader.isCreated == true){
         ui_shader.Use();
         ui_shader.setCameraUiProjMatrix(cam_ptr);
+    }
+
+    if(heightmap.isCreated == true){
+        heightmap.Use();
+        heightmap.setCameraUiProjMatrix(cam_ptr);
     }
 
     skybox.Use();

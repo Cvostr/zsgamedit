@@ -91,7 +91,8 @@ MtShaderPropertiesGroup::MtShaderPropertiesGroup(){
     properties.resize(0);
 }
 
-MtShaderPropertiesGroup* MtShProps::genDefaultMtShGroup(ZSPIRE::Shader* shader3d, ZSPIRE::Shader* skybox){
+MtShaderPropertiesGroup* MtShProps::genDefaultMtShGroup(ZSPIRE::Shader* shader3d, ZSPIRE::Shader* skybox,
+                                                        ZSPIRE::Shader* heightmap){
 
     MtShaderPropertiesGroup* default_group = new MtShaderPropertiesGroup;
     default_group->acceptShadows = true;
@@ -134,8 +135,7 @@ MtShaderPropertiesGroup* MtShProps::genDefaultMtShGroup(ZSPIRE::Shader* shader3d
 
     MtShProps::addMtShaderPropertyGroup(default_group);
 
-
-
+//Default skybox material
     MtShaderPropertiesGroup* default_sky_group = new MtShaderPropertiesGroup;
     default_sky_group->str_path = "@skybox";
     default_sky_group->groupCaption = "Default Skybox";
@@ -148,6 +148,21 @@ MtShaderPropertiesGroup* MtShProps::genDefaultMtShGroup(ZSPIRE::Shader* shader3d
     sky_texture->prop_identifier = "skytexture3"; //Identifier to save
 
     MtShProps::addMtShaderPropertyGroup(default_sky_group);
+
+//Default skybox material
+    MtShaderPropertiesGroup* default_heightmap_group = new MtShaderPropertiesGroup;
+    default_heightmap_group->str_path = "@heightmap";
+    default_heightmap_group->groupCaption = "Default Heightmap";
+    default_heightmap_group->render_shader = heightmap;
+
+    TextureMaterialShaderProperty* _texture_prop =
+            static_cast<TextureMaterialShaderProperty*>(default_heightmap_group->addProperty(MATSHPROP_TYPE_TEXTURE));
+    _texture_prop->slotToBind = 0;
+    _texture_prop->prop_caption = "Normal";
+    _texture_prop->ToggleUniform = "hasDiffuseMap";
+    _texture_prop->prop_identifier = "t_normal"; //Identifier to save
+
+    MtShProps::addMtShaderPropertyGroup(default_heightmap_group);
 
     return default_group;
 }
@@ -435,6 +450,7 @@ void Material::setPropertyGroup(MtShaderPropertiesGroup* group_ptr){
         this->addPropertyConf(prop_ptr->type);
     }
     this->group_ptr = group_ptr;
+    this->group_str = group_ptr->str_path;
 }
 
 Material::Material(){

@@ -67,7 +67,8 @@ namespace MtShProps {
     MaterialShaderProperty* allocateProperty(int type);
     MaterialShaderPropertyConf* allocatePropertyConf(int type);
 
-    MtShaderPropertiesGroup* genDefaultMtShGroup(ZSPIRE::Shader* shader3d, ZSPIRE::Shader* skybox);
+    MtShaderPropertiesGroup* genDefaultMtShGroup(ZSPIRE::Shader* shader3d, ZSPIRE::Shader* skybox,
+                                                 ZSPIRE::Shader* heightmap);
     MtShaderPropertiesGroup* getDefaultMtShGroup();
 
     void addMtShaderPropertyGroup(MtShaderPropertiesGroup* group);

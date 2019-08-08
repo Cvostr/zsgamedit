@@ -240,8 +240,9 @@ void World::unpickObject(){
 void World::writeGameObject(GameObject* object_ptr, std::ofstream* world_stream){
     if(object_ptr->alive == true){
         *world_stream << "\nG_OBJECT " << object_ptr->str_id << " ";
-        //world_stream->write(reinterpret_cast<char*>(&object_ptr->render_type), sizeof(int));
+
         world_stream->write(reinterpret_cast<char*>(&object_ptr->active), sizeof(bool));
+        world_stream->write(reinterpret_cast<char*>(&object_ptr->IsStatic), sizeof(bool));
 
         if(object_ptr->children.size() > 0){ //If object has at least one child object
             int children_num = object_ptr->getAliveChildrenAmount();
@@ -270,8 +271,9 @@ void World::loadGameObject(GameObject* object_ptr, std::ifstream* world_stream){
     *world_stream >> object_ptr->str_id;
 
     world_stream->seekg(1, std::ofstream::cur);
-    //world_stream->read(reinterpret_cast<char*>(&object_ptr->render_type), sizeof(GO_RENDER_TYPE));
+
     world_stream->read(reinterpret_cast<char*>(&object_ptr->active), sizeof(bool));
+    world_stream->read(reinterpret_cast<char*>(&object_ptr->IsStatic), sizeof(bool));
 
     //Then do the same sh*t, iterate until "G_END" came up
     while(true){

@@ -54,7 +54,8 @@ void GameObject::saveProperties(std::ofstream* stream){
         }
         case GO_PROPERTY_TYPE_MESH:{
             MeshProperty* ptr = static_cast<MeshProperty*>(property_ptr);
-            *stream << ptr->resource_relpath.toStdString();
+            *stream << ptr->resource_relpath.toStdString() << "\n";
+            stream->write(reinterpret_cast<char*>(&ptr->castShadows), sizeof(bool));
             break;
         }
         case GO_PROPERTY_TYPE_LIGHTSOURCE:{
@@ -79,7 +80,7 @@ void GameObject::saveProperties(std::ofstream* stream){
         }
         case GO_PROPERTY_TYPE_AUDSOURCE:{
             AudioSourceProperty* ptr = static_cast<AudioSourceProperty*>(property_ptr);
-            if(ptr->resource_relpath.isEmpty()) //check if object has no texture
+            if(ptr->resource_relpath.isEmpty()) //check if object has no audioclip
                 *stream << "@none";
             else
                 *stream << ptr->resource_relpath.toStdString() << "\n";
@@ -93,9 +94,11 @@ void GameObject::saveProperties(std::ofstream* stream){
             MaterialProperty* ptr = static_cast<MaterialProperty*>(property_ptr);
             //Write path to material string
             if(ptr->material_ptr != nullptr)
-                *stream << ptr->material_path.toStdString(); //Write material relpath
+                *stream << ptr->material_path.toStdString() << "\n"; //Write material relpath
             else
-                *stream << "@none";
+                *stream << "@none" << "\n";
+
+            stream->write(reinterpret_cast<char*>(&ptr->receiveShadows), sizeof(bool));
 
             break;
         }
@@ -231,6 +234,9 @@ void GameObject::loadProperty(std::ifstream* world_stream){
         lptr->resource_relpath = QString::fromStdString(rel_path); //Write loaded mesh relative path
         lptr->updateMeshPtr(); //Pointer will now point to mesh resource
 
+        world_stream->seekg(1, std::ofstream::cur);
+        world_stream->read(reinterpret_cast<char*>(&lptr->castShadows), sizeof(bool));
+
         break;
     }
     case GO_PROPERTY_TYPE_LIGHTSOURCE:{
@@ -298,8 +304,11 @@ void GameObject::loadProperty(std::ifstream* world_stream){
         *world_stream >> path;
         //Assigning path
         ptr->material_path = QString::fromStdString(path);
-        if(path.compare("@none"))
-            ptr->onValueChanged();
+        if(path.compare("@none")) //if user specified material
+            ptr->onValueChanged(); //find it and process
+
+        world_stream->seekg(1, std::ofstream::cur);
+        world_stream->read(reinterpret_cast<char*>(&ptr->receiveShadows), sizeof(bool));
 
         break;
     }

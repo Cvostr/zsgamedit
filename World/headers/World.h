@@ -150,6 +150,7 @@ public:
     bool alive; //if object marked as removed
     bool isPicked; //if user selected this object to edit it
     bool active; //if true, object will be active in scene
+    bool IsStatic;
     World* world_ptr; //pointer to world, when object placed
     GameObjectLink parent; //Link to object's parent
 

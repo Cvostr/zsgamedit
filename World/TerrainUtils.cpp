@@ -47,22 +47,37 @@ void TerrainData::generateGLMesh(){
     for(int x = 0; x < W; x ++){
         for(int y = 0; y < H; y ++){
             vertices[x + y * H].pos = ZSVECTOR3(x, data[x + y * H].height, y);
+            vertices[x + y * H].uv = ZSVECTOR2(static_cast<float>(x) / W, static_cast<float>(y) / H);
+
+            //int _id = ;
+            vertices[x + y * H].id = x + y * H;
+            //vertices[x + y * H].id = ZSVECTOR3(*(int8_t*)(&_id), *(int8_t*)((&_id)[1]), *(int8_t*)((&_id)[2]));
         }
     }
     int inds = 0;
     for(int x = 0; x < W - 1; x ++){
         for(int y = 0; y < H - 1; y ++){
-            indices[inds] = y * H + x;
-            indices[inds + 1] = y * H + H + x;
-            indices[inds + 2] = y * H + H + x + 1;
+            indices[inds] = static_cast<unsigned int>(y * H + x);
+            indices[inds + 1] = static_cast<unsigned int>(y * H + H + x);
+            indices[inds + 2] = static_cast<unsigned int>(y * H + H + x + 1);
 
-            indices[inds + 3] = y * H + x;
-            indices[inds + 4] = y * H + H + x + 1;
-            indices[inds + 5] = y * H + x + 1;
+            indices[inds + 3] = static_cast<unsigned int>(y * H + x);
+            indices[inds + 4] = static_cast<unsigned int>(y * H + H + x + 1);
+            indices[inds + 5] = static_cast<unsigned int>(y * H + x + 1);
 
 
             inds += 6;
         }
+    }
+    for(unsigned int i = 0; i < inds; i ++){
+        HeightmapVertex* v1 = &vertices[indices[i]];
+        HeightmapVertex* v2 = &vertices[indices[i + 1]];
+        HeightmapVertex* v3 = &vertices[indices[i + 2]];
+
+        ZSVECTOR3 v12 = v1->pos - v2->pos;
+        ZSVECTOR3 v13 = v1->pos - v3->pos;
+
+        v1->normal = vCross(v12, v13);
     }
 
     glBindVertexArray(this->VAO); //Bind vertex array
@@ -75,19 +90,15 @@ void TerrainData::generateGLMesh(){
     //Vertex pos 3 floats
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(HeightmapVertex), nullptr);
     glEnableVertexAttribArray(0);
-    /*//Vertex UV 2 floats
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(ZSVERTEX), reinterpret_cast<void*>(sizeof(float) * 3));
-    glEnableVertexAttribArray(1);*/
+    //Vertex UV 2 floats
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(HeightmapVertex), reinterpret_cast<void*>(sizeof(float) * 3));
+    glEnableVertexAttribArray(1);
     //Vertex Normals 3 floats
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(ZSVERTEX), reinterpret_cast<void*>(sizeof(float) * 3));
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(HeightmapVertex), reinterpret_cast<void*>(sizeof(float) * 5));
     glEnableVertexAttribArray(2);
-/*
-    //Vertex Tangents 3 floats
-    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(ZSVERTEX), reinterpret_cast<void*>(sizeof(float) * 8));
+
+    glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(HeightmapVertex), reinterpret_cast<void*>(sizeof(float) * 8));
     glEnableVertexAttribArray(3);
-    //Vertex Bitangents 3 floats
-    glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(ZSVERTEX), reinterpret_cast<void*>(sizeof(float) * 11));
-    glEnableVertexAttribArray(4);*/
 
     created = true;
 }

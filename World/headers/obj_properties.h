@@ -64,11 +64,14 @@ public:
 class MaterialProperty : public GameObjectProperty{
 private:
     QString group_label;
+
 public:
     //Pointer to picked material
     Material* material_ptr;
     //Path to material fil
     QString material_path;
+
+    bool receiveShadows;
 
     void addPropertyInterfaceToInspector(InspectorWin* inspector);
     void onValueChanged();
