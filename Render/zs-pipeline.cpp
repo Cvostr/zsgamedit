@@ -352,10 +352,10 @@ void GameObject::processObject(RenderPipeline* pipeline){
     //Obtain camera viewport
     ZSVIEWPORT cam_viewport = pipeline->cam->getViewport();
     //Distance limit
-    int max_dist = static_cast<int>(cam_viewport.endX - cam_viewport.startX);
-    bool difts = isDistanceFits(pipeline->cam->getCameraViewCenterPos(), transform_prop->_last_translation, max_dist);
+    //int max_dist = static_cast<int>(cam_viewport.endX - cam_viewport.startX);
+    //bool difts = isDistanceFits(pipeline->cam->getCameraViewCenterPos(), transform_prop->_last_translation, max_dist);
 
-    if(difts)
+    //if(difts)
         this->Draw(pipeline);
 
     for(unsigned int obj_i = 0; obj_i < this->children.size(); obj_i ++){
@@ -613,7 +613,7 @@ void RenderPipeline::updateShadersCameraInfo(ZSPIRE::Camera* cam_ptr){
 
     if(heightmap.isCreated == true){
         heightmap.Use();
-        heightmap.setCameraUiProjMatrix(cam_ptr);
+        heightmap.setCamera(cam_ptr);
     }
 
     skybox.Use();

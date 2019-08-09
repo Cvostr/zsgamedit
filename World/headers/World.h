@@ -75,6 +75,7 @@ public:
     virtual void addPropertyInterfaceToInspector(InspectorWin* inspector);
     virtual void onValueChanged();
     virtual void copyTo(GameObjectProperty* dest);
+    //On object first add
     virtual void onAddToObject();
     virtual void onObjectDeleted();
     virtual void onUpdate(float deltaTime);

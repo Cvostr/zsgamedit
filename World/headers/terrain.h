@@ -11,7 +11,6 @@ typedef struct HeightmapVertex{
     ZSVECTOR3 pos;
     ZSVECTOR2 uv;
     ZSVECTOR3 normal;
-    float id;
 }HeightmapVertex;
 
 class TerrainData{
@@ -32,6 +31,8 @@ public:
     void destroyGL();
     void Draw();
     void generateGLMesh();
+    void saveToFile(const char* file_path);
+    void loadFromFile(const char* file_path);
 
     TerrainData();
 };

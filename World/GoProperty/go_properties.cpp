@@ -1124,6 +1124,12 @@ void TerrainProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
     HLength->value = &this->Length; //Ptr to our vector
     HLength->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
     inspector->addPropertyArea(HLength);
+
+    IntPropertyArea* MHeight = new IntPropertyArea; //New property area
+    MHeight->setLabel("Max Height"); //Its label
+    MHeight->value = &this->MaxHeight; //Ptr to our vector
+    MHeight->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
+    inspector->addPropertyArea(MHeight);
 }
 
 void TerrainProperty::onPreRender(RenderPipeline* pipeline){
@@ -1135,4 +1141,17 @@ void TerrainProperty::onPreRender(RenderPipeline* pipeline){
 }
 void TerrainProperty::onValueChanged(){
     data.alloc(this->Width, this->Length);
+}
+
+void TerrainProperty::onAddToObject(){
+    this->file_label = *this->go_link.updLinkPtr()->label + ".terrain";
+    data.alloc(this->Width, this->Length);
+
+    std::string fpath = this->go_link.world_ptr->proj_ptr->root_path.toStdString() + "/" + this->file_label.toStdString();
+
+    data.saveToFile(fpath.c_str());
+}
+
+TerrainData* TerrainProperty::getTerrainData(){
+    return &data;
 }

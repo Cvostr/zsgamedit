@@ -144,6 +144,16 @@ void GameObject::saveProperties(std::ofstream* stream){
             stream->write(reinterpret_cast<char*>(&ptr->projection_viewport), sizeof(float));
             break;
         }
+        case GO_PROPERTY_TYPE_TERRAIN:{
+            TerrainProperty* ptr = static_cast<TerrainProperty*>(property_ptr);
+            *stream << ptr->file_label.toStdString() << "\n"; //Write material relpath
+            //write dimensions
+            stream->write(reinterpret_cast<char*>(&ptr->Width), sizeof(float));
+            stream->write(reinterpret_cast<char*>(&ptr->Length), sizeof(float));
+            stream->write(reinterpret_cast<char*>(&ptr->MaxHeight), sizeof(float));
+
+            break;
+        }
         case GO_PROPERTY_TYPE_TILE_GROUP:{
             TileGroupProperty* ptr = static_cast<TileGroupProperty*>(property_ptr);
             int isCreated = static_cast<int>(ptr->isCreated);
@@ -344,6 +354,23 @@ void GameObject::loadProperty(std::ifstream* world_stream){
         world_stream->read(reinterpret_cast<char*>(&ptr->nearPlane), sizeof(float));
         world_stream->read(reinterpret_cast<char*>(&ptr->farPlane), sizeof(float));
         world_stream->read(reinterpret_cast<char*>(&ptr->projection_viewport), sizeof(float));
+        break;
+    }
+    case GO_PROPERTY_TYPE_TERRAIN:{
+        TerrainProperty* ptr = static_cast<TerrainProperty*>(prop_ptr);
+        std::string file_path;
+        *world_stream >> file_path; //Write material relpath
+        world_stream->seekg(1, std::ofstream::cur);
+        //write dimensions
+        world_stream->read(reinterpret_cast<char*>(&ptr->Width), sizeof(float));
+        world_stream->read(reinterpret_cast<char*>(&ptr->Length), sizeof(float));
+        world_stream->read(reinterpret_cast<char*>(&ptr->MaxHeight), sizeof(float));
+
+        std::string fpath = ptr->go_link.world_ptr->proj_ptr->root_path.toStdString() + "/" + ptr->file_label.toStdString();
+        ptr->getTerrainData()->alloc(ptr->Width, ptr->Length);
+        ptr->getTerrainData()->loadFromFile(fpath.c_str());
+        ptr->getTerrainData()->generateGLMesh();
+
         break;
     }
     case GO_PROPERTY_TYPE_TILE_GROUP :{

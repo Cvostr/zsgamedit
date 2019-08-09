@@ -174,6 +174,7 @@ class TerrainProperty : public GameObjectProperty{
 private:
     TerrainData data;
 public:
+    QString file_label;
     int Width;
     int Length;
     int MaxHeight;
@@ -181,7 +182,10 @@ public:
     void addPropertyInterfaceToInspector(InspectorWin* inspector);
     void onPreRender(RenderPipeline* pipeline);
     void onValueChanged();
+    void onAddToObject();
     TerrainProperty();
+
+    TerrainData* getTerrainData();
 
 };
 
