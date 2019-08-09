@@ -11,6 +11,7 @@ typedef struct HeightmapVertex{
     ZSVECTOR3 pos;
     ZSVECTOR2 uv;
     ZSVECTOR3 normal;
+    //ZSVECTOR4 id;
 }HeightmapVertex;
 
 class TerrainData{

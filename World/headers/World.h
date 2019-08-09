@@ -19,6 +19,10 @@
 #include "../../Misc/headers/AssimpMeshLoader.h"
 #include "../../Misc/headers/zs_types.h"
 
+#include <BulletDynamics/Dynamics/btDiscreteDynamicsWorld.h>
+#include <BulletCollision/CollisionDispatch/btDefaultCollisionConfiguration.h>
+#include <BulletDynamics/ConstraintSolver/btSequentialImpulseConstraintSolver.h>
+
 #define OBJ_PROPS_SIZE 11
 #define MAX_OBJS 12000
 
@@ -40,6 +44,27 @@ enum PROPERTY_TYPE{
     GO_PROPERTY_TYPE_TERRAIN,
     GO_PROPERTY_TYPE_TILE_GROUP = 1000,
     GO_PROPERTY_TYPE_TILE = 1001
+};
+
+typedef struct PhysicalWorldSettings{
+    ZSVECTOR3 gravity;
+
+    PhysicalWorldSettings(){
+        gravity = ZSVECTOR3(0, -10.0f, 0);
+    }
+}PhysicalWorldSettings;
+
+class PhysicalWorld{
+private:
+    btDefaultCollisionConfiguration* collisionConfiguraton;
+    btCollisionDispatcher* dispatcher;
+    btBroadphaseInterface* broadphase;
+    btSequentialImpulseConstraintSolver* solver;
+
+    btDiscreteDynamicsWorld* physic_world;
+public:
+
+    PhysicalWorld(PhysicalWorldSettings* settings);
 };
 
 class GameObject;
@@ -251,6 +276,7 @@ class World{
 public:
     QTreeWidget* obj_widget_ptr;
     Project* proj_ptr; //Pointer to Project structure
+    PhysicalWorldSettings* physics_settings;
     ZSPIRE::Camera world_camera;
 
     std::vector<GameObject> objects; //Vector, containing all gameobjects

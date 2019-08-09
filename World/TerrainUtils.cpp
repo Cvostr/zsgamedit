@@ -4,12 +4,12 @@
 #include <fstream>
 
 void TerrainData::alloc(int W, int H){
+    if(created)
+        delete[] data;
     this->W = W;
     this->H = H;
     this->data = new HeightmapTexel[W * H];
     flatTerrain(0);
-
-    generateGLMesh();
 }
 void TerrainData::flatTerrain(int height){
     for(int i = 0; i < W * H; i ++){
@@ -45,10 +45,23 @@ void TerrainData::generateGLMesh(){
     HeightmapVertex* vertices = new HeightmapVertex[W * H];
     unsigned int* indices = new unsigned int[(W - 1) * (H - 1) * 2 * 3];
 
+    int ik = 0;
+
     for(int x = 0; x < W; x ++){
         for(int y = 0; y < H; y ++){
             vertices[x + y * H].pos = ZSVECTOR3(x, data[x + y * H].height, y);
             vertices[x + y * H].uv = ZSVECTOR2(static_cast<float>(x) / W, static_cast<float>(y) / H);
+
+            /*ik += 1;
+
+            unsigned int _id = static_cast<unsigned int>(ik);
+
+            float f1 = (_id >> 24) & 0xFF;
+            float f2 = (_id >> 16) & 0xFF;
+            float f3 = (_id >> 8) & 0xFF;
+            float f4 = (_id) & 0xFF;
+            //store vertex ID
+            vertices[ik].id = ZSVECTOR4(f1, f2, f3, f4);*/
         }
     }
     unsigned int inds = 0;
@@ -93,6 +106,9 @@ void TerrainData::generateGLMesh(){
     glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(HeightmapVertex), reinterpret_cast<void*>(sizeof(float) * 5));
     glEnableVertexAttribArray(2);
 
+    delete[] vertices;
+    delete[] indices;
+
     created = true;
 }
 
@@ -113,7 +129,7 @@ void TerrainData::saveToFile(const char* file_path){
 
 void TerrainData::loadFromFile(const char* file_path){
     std::ifstream world_stream;
-    world_stream.open(file_path, std::ofstream::binary);
+    world_stream.open(file_path, std::ifstream::binary);
 
     for(int i = 0; i < W * H; i ++){
         world_stream.read(reinterpret_cast<char*>(&data[i]), sizeof(HeightmapTexel));

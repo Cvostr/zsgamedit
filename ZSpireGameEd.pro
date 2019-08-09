@@ -5,8 +5,9 @@
 #-------------------------------------------------
 
 QT       += core gui widgets
-unix:LIBS += -lGLEW -lSDL2 -lopenal -llua5.3 -lassimp -lvulkan -lfreetype
+unix:LIBS += -lGLEW -lSDL2 -lopenal -llua5.3 -lassimp -lvulkan -lfreetype -lBulletSoftBody -lBulletDynamics -lBulletCollision
 unix:INCLUDEPATH += /usr/include/freetype2/
+unix:INCLUDEPATH += /usr/include/bullet/
 
 TARGET = ZSpireGameEd
 TEMPLATE = app

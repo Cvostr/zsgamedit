@@ -189,7 +189,7 @@
 
 
 	float getDistance(ZSVECTOR3 p1, ZSVECTOR3 p2);
-    float length(ZSVECTOR3 vec); //Calculates module length of vector
+    float getLength(ZSVECTOR3 vec); //Calculates module length of vector
 	ZSVECTOR3 _getDirection(float pitch, float yaw, float roll);
 
 	inline ZSMATRIX4x4 operator*(const ZSMATRIX4x4& l, const ZSMATRIX4x4& r)

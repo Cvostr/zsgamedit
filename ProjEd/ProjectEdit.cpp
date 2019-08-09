@@ -914,6 +914,15 @@ void EditWindow::onMouseWheel(int x, int y){
     }
 }
 void EditWindow::onMouseMotion(int relX, int relY){
+    //Terrain painting
+    if(_inspector_win->gameobject_ptr != nullptr){
+        GameObject* obj = static_cast<GameObject*>(_inspector_win->gameobject_ptr);
+        TerrainProperty* terrain = obj->getPropertyPtr<TerrainProperty>();
+
+        if(terrain != nullptr)
+            terrain->updateMouse(this->input_state.mouseX, input_state.mouseY, relX, relY,  settings.gameViewWin_Height, this->input_state.isLeftBtnHold);
+    }
+
     //Property painting
     if(this->ppaint_state.enabled && input_state.isLeftBtnHold == true){ //we just move on map
         if(ppaint_state.time == 0.0f && !isSceneRun){

@@ -173,6 +173,7 @@ public:
 class TerrainProperty : public GameObjectProperty{
 private:
     TerrainData data;
+    bool hasChanged;
 public:
     QString file_label;
     int Width;
@@ -184,6 +185,7 @@ public:
     void onValueChanged();
     void onAddToObject();
     TerrainProperty();
+    void updateMouse(int posX, int posY, int relX, int relY, int screenY, bool isLeftButtonHold);
 
     TerrainData* getTerrainData();
 

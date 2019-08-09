@@ -152,6 +152,8 @@ void GameObject::saveProperties(std::ofstream* stream){
             stream->write(reinterpret_cast<char*>(&ptr->Length), sizeof(float));
             stream->write(reinterpret_cast<char*>(&ptr->MaxHeight), sizeof(float));
 
+            ptr->getTerrainData()->saveToFile(ptr->file_label.toStdString().c_str());
+
             break;
         }
         case GO_PROPERTY_TYPE_TILE_GROUP:{
@@ -360,8 +362,10 @@ void GameObject::loadProperty(std::ifstream* world_stream){
         TerrainProperty* ptr = static_cast<TerrainProperty*>(prop_ptr);
         std::string file_path;
         *world_stream >> file_path; //Write material relpath
+        ptr->file_label = QString::fromStdString(file_path);
         world_stream->seekg(1, std::ofstream::cur);
         //write dimensions
+
         world_stream->read(reinterpret_cast<char*>(&ptr->Width), sizeof(float));
         world_stream->read(reinterpret_cast<char*>(&ptr->Length), sizeof(float));
         world_stream->read(reinterpret_cast<char*>(&ptr->MaxHeight), sizeof(float));

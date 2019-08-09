@@ -1110,6 +1110,8 @@ TerrainProperty::TerrainProperty(){
     this->Width = 500;
     this->Length = 500;
     this->MaxHeight = 500;
+
+    hasChanged = false;
 }
 
 void TerrainProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
@@ -1133,6 +1135,11 @@ void TerrainProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
 }
 
 void TerrainProperty::onPreRender(RenderPipeline* pipeline){
+    if(hasChanged){
+        this->data.generateGLMesh();
+        hasChanged = false;
+    }
+
     MaterialProperty* mat = this->go_link.updLinkPtr()->getPropertyPtr<MaterialProperty>();
     if(mat == nullptr) return;
     //Apply material shader
@@ -1141,15 +1148,48 @@ void TerrainProperty::onPreRender(RenderPipeline* pipeline){
 }
 void TerrainProperty::onValueChanged(){
     data.alloc(this->Width, this->Length);
+    data.generateGLMesh();
 }
 
 void TerrainProperty::onAddToObject(){
     this->file_label = *this->go_link.updLinkPtr()->label + ".terrain";
     data.alloc(this->Width, this->Length);
+    data.generateGLMesh();
 
     std::string fpath = this->go_link.world_ptr->proj_ptr->root_path.toStdString() + "/" + this->file_label.toStdString();
 
     data.saveToFile(fpath.c_str());
+}
+
+void TerrainProperty::updateMouse(int posX, int posY, int relX, int relY, int screenY, bool isLeftButtonHold){
+    if(isLeftButtonHold){
+        unsigned char _data[4];
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+
+        MaterialProperty* mat = this->go_link.updLinkPtr()->getPropertyPtr<MaterialProperty>();
+        if(mat == nullptr) return;
+        //Apply material shader
+        mat->material_ptr->group_ptr->render_shader->Use();
+        mat->material_ptr->group_ptr->render_shader->setGLuniformInt("isPicking", 1);
+        data.Draw();
+
+        glReadPixels(posX, screenY - posY, 1,1, GL_RGBA, GL_UNSIGNED_BYTE, _data);
+
+        for(unsigned int i = 0; i < Width; i ++){
+            for(unsigned int y = 0; y < Width; y ++){
+                if(y == _data[0] * 2 && i == _data[2] * 2){
+                    this->data.data[i * Width + y].height = 10;
+                    hasChanged = true;
+                    return;
+                }
+            }
+        }
+
+
+
+
+    }
 }
 
 TerrainData* TerrainProperty::getTerrainData(){
