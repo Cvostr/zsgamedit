@@ -21,6 +21,7 @@
 
 #include <BulletDynamics/Dynamics/btDiscreteDynamicsWorld.h>
 #include <BulletCollision/CollisionDispatch/btDefaultCollisionConfiguration.h>
+#include <BulletCollision/BroadphaseCollision/btDbvtBroadphase.h>
 #include <BulletDynamics/ConstraintSolver/btSequentialImpulseConstraintSolver.h>
 
 #define OBJ_PROPS_SIZE 11
@@ -276,7 +277,8 @@ class World{
 public:
     QTreeWidget* obj_widget_ptr;
     Project* proj_ptr; //Pointer to Project structure
-    PhysicalWorldSettings* physics_settings;
+    PhysicalWorldSettings phys_settngs;
+    PhysicalWorld* physical_world;
     ZSPIRE::Camera world_camera;
 
     std::vector<GameObject> objects; //Vector, containing all gameobjects

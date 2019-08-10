@@ -1173,21 +1173,19 @@ void TerrainProperty::updateMouse(int posX, int posY, int relX, int relY, int sc
         mat->material_ptr->group_ptr->render_shader->Use();
         mat->material_ptr->group_ptr->render_shader->setGLuniformInt("isPicking", 1);
         data.Draw();
-
+        //read picked pixel
         glReadPixels(posX, screenY - posY, 1,1, GL_RGBA, GL_UNSIGNED_BYTE, _data);
 
         for(unsigned int i = 0; i < Width; i ++){
-            for(unsigned int y = 0; y < Width; y ++){
+            for(unsigned int y = 0; y < Length; y ++){
                 if(y == _data[0] * 2 && i == _data[2] * 2){
-                    this->data.data[i * Width + y].height = 10;
+                    //this->data.data[i * Width + y].height = 10;
+                    this->data.modifyHeight(y, i, 5, 20);
                     hasChanged = true;
                     return;
                 }
             }
         }
-
-
-
 
     }
 }

@@ -37,10 +37,8 @@ void TerrainData::Draw(){
 }
 
 void TerrainData::generateGLMesh(){
-    if(created)
-        destroyGL();
-
-    initGL();
+    if(!created)
+        initGL();
 
     HeightmapVertex* vertices = new HeightmapVertex[W * H];
     unsigned int* indices = new unsigned int[(W - 1) * (H - 1) * 2 * 3];
@@ -51,17 +49,6 @@ void TerrainData::generateGLMesh(){
         for(int y = 0; y < H; y ++){
             vertices[x + y * H].pos = ZSVECTOR3(x, data[x + y * H].height, y);
             vertices[x + y * H].uv = ZSVECTOR2(static_cast<float>(x) / W, static_cast<float>(y) / H);
-
-            /*ik += 1;
-
-            unsigned int _id = static_cast<unsigned int>(ik);
-
-            float f1 = (_id >> 24) & 0xFF;
-            float f2 = (_id >> 16) & 0xFF;
-            float f3 = (_id >> 8) & 0xFF;
-            float f4 = (_id) & 0xFF;
-            //store vertex ID
-            vertices[ik].id = ZSVECTOR4(f1, f2, f3, f4);*/
         }
     }
     unsigned int inds = 0;
@@ -78,7 +65,7 @@ void TerrainData::generateGLMesh(){
             inds += 6;
         }
     }
-    for(unsigned int i = 0; i < inds - 2; i ++){
+    for(unsigned int i = 0; i < inds - 3; i ++){
         HeightmapVertex* v1 = &vertices[indices[i]];
         HeightmapVertex* v2 = &vertices[indices[i + 1]];
         HeightmapVertex* v3 = &vertices[indices[i + 2]];
@@ -119,9 +106,13 @@ TerrainData::TerrainData(){
 void TerrainData::saveToFile(const char* file_path){
     std::ofstream world_stream;
     world_stream.open(file_path, std::ofstream::binary);
+    //write dimensions
+    world_stream.write(reinterpret_cast<char*>(&this->W), sizeof(int));
+    world_stream.write(reinterpret_cast<char*>(&this->H), sizeof(int));
 
     for(int i = 0; i < W * H; i ++){
-        world_stream.write(reinterpret_cast<char*>(&data[i]), sizeof(HeightmapTexel));
+        float height = data[i].height;
+        world_stream.write(reinterpret_cast<char*>(&height), sizeof(float));
     }
 
     world_stream.close();
@@ -130,10 +121,31 @@ void TerrainData::saveToFile(const char* file_path){
 void TerrainData::loadFromFile(const char* file_path){
     std::ifstream world_stream;
     world_stream.open(file_path, std::ifstream::binary);
+    //read dimensions
+    world_stream.read(reinterpret_cast<char*>(&this->W), sizeof(int));
+    world_stream.read(reinterpret_cast<char*>(&this->H), sizeof(int));
+    //allocate memory
+    alloc(W, H);
 
     for(int i = 0; i < W * H; i ++){
-        world_stream.read(reinterpret_cast<char*>(&data[i]), sizeof(HeightmapTexel));
+        world_stream.read(reinterpret_cast<char*>(&data[i].height), sizeof(float));
     }
 
     world_stream.close();
+}
+
+void TerrainData::modifyHeight(int originX, int originY, int originHeight, int range){
+        //Iterate over all pixels
+        for(int y = 0; y < W; y ++){
+            for(int x = 0; x < H; x ++){
+                //if pixel is in circle
+                float dist = getDistance(ZSVECTOR3(x, y, 0), ZSVECTOR3(originX, originY, 0));
+                if(dist <= range){
+                    //calculate modifier
+                    float toApply = static_cast<float>(originHeight) - (dist * dist) / static_cast<float>(range);
+                    if(toApply > 0)
+                        data[y * H + x].height += (toApply);
+                }
+            }
+        }
 }

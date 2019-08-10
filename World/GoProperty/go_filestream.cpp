@@ -152,7 +152,8 @@ void GameObject::saveProperties(std::ofstream* stream){
             stream->write(reinterpret_cast<char*>(&ptr->Length), sizeof(float));
             stream->write(reinterpret_cast<char*>(&ptr->MaxHeight), sizeof(float));
 
-            ptr->getTerrainData()->saveToFile(ptr->file_label.toStdString().c_str());
+            std::string fpath = ptr->go_link.world_ptr->proj_ptr->root_path.toStdString() + "/" + ptr->file_label.toStdString();
+            ptr->getTerrainData()->saveToFile(fpath.c_str());
 
             break;
         }
@@ -371,7 +372,6 @@ void GameObject::loadProperty(std::ifstream* world_stream){
         world_stream->read(reinterpret_cast<char*>(&ptr->MaxHeight), sizeof(float));
 
         std::string fpath = ptr->go_link.world_ptr->proj_ptr->root_path.toStdString() + "/" + ptr->file_label.toStdString();
-        ptr->getTerrainData()->alloc(ptr->Width, ptr->Length);
         ptr->getTerrainData()->loadFromFile(fpath.c_str());
         ptr->getTerrainData()->generateGLMesh();
 

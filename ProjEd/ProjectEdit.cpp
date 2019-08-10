@@ -469,6 +469,8 @@ void EditWindow::runWorld(){
     _ed_actions_container->setStoreActions(false);
     isSceneRun = true; //set toggle to true
     isWorldCamera = true;
+
+    world.physical_world = new PhysicalWorld(&world.phys_settngs);
 }
 void EditWindow::stopWorld(){
     //Prepare world for stopping
@@ -853,6 +855,15 @@ InspectorWin* EditWindow::getInspector(){
 
 
 void EditWindow::onLeftBtnClicked(int X, int Y){
+    //Terrain painting
+    if(_inspector_win->gameobject_ptr != nullptr){
+        GameObject* obj = static_cast<GameObject*>(_inspector_win->gameobject_ptr);
+        TerrainProperty* terrain = obj->getPropertyPtr<TerrainProperty>();
+
+        if(terrain != nullptr)
+            terrain->updateMouse(this->input_state.mouseX, input_state.mouseY, 0, 0,  settings.gameViewWin_Height, this->input_state.isLeftBtnHold);
+    }
+
     //Stop camera moving
     this->edit_camera.stopMoving();
     this->obj_ctx_menu->close(); //Close ctx menu
@@ -914,14 +925,7 @@ void EditWindow::onMouseWheel(int x, int y){
     }
 }
 void EditWindow::onMouseMotion(int relX, int relY){
-    //Terrain painting
-    if(_inspector_win->gameobject_ptr != nullptr){
-        GameObject* obj = static_cast<GameObject*>(_inspector_win->gameobject_ptr);
-        TerrainProperty* terrain = obj->getPropertyPtr<TerrainProperty>();
 
-        if(terrain != nullptr)
-            terrain->updateMouse(this->input_state.mouseX, input_state.mouseY, relX, relY,  settings.gameViewWin_Height, this->input_state.isLeftBtnHold);
-    }
 
     //Property painting
     if(this->ppaint_state.enabled && input_state.isLeftBtnHold == true){ //we just move on map

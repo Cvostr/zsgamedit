@@ -9,11 +9,11 @@ layout (location = 4) out vec4 tMasks;
 
 out vec4 FragColor;
 
-in vec3 ModelPos;
 in vec3 FragPos;
 in vec3 InNormal;
 in vec2 UVCoord;
 in mat3 TBN;
+in vec3 _id;
 
 //textures
 uniform sampler2D diffuse;
@@ -25,10 +25,7 @@ uniform float material_shininess;
 
 uniform vec3 diffuse_color = vec3(1.0, 0.078, 0.574);
 
-//Shadowmapping stuff
-uniform mat4 LightProjectionMat;
-uniform mat4 LightViewMat;
-uniform float shadow_bias;
+uniform bool isPicking = true;
 
 void main(){
 
@@ -44,12 +41,16 @@ void main(){
 		
 	//result *= diffuse_color;
 	    
-	result = ModelPos;
+	//result = vec3(_id.w, _id.z, _id.y);
             
-	tDiffuse = vec4(result, result_shininess);
+	//tDiffuse = vec4(result, result_shininess);
 	tPos = FragPos;
 	tNormal = Normal;
 
 	tMasks = vec4(1.0, 0, 0, 0);
+
+	//if(isPicking){
+	FragColor = vec4(_id / (256 * 2), 1);
+	//}
 	
 }

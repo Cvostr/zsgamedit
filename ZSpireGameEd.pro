@@ -5,7 +5,7 @@
 #-------------------------------------------------
 
 QT       += core gui widgets
-unix:LIBS += -lGLEW -lSDL2 -lopenal -llua5.3 -lassimp -lvulkan -lfreetype -lBulletSoftBody -lBulletDynamics -lBulletCollision
+unix:LIBS += -lGLEW -lSDL2 -lopenal -llua5.3 -lassimp -lvulkan -lfreetype -lBulletSoftBody -lBulletDynamics -lBulletCollision -lLinearMath
 unix:INCLUDEPATH += /usr/include/freetype2/
 unix:INCLUDEPATH += /usr/include/bullet/
 
@@ -57,7 +57,8 @@ SOURCES += \
     Misc/EditorManager.cpp \
     Scripting/zsensdk_input.cpp \
     ProjEd/EditorSettings.cpp \
-    World/TerrainUtils.cpp
+    World/TerrainUtils.cpp \
+    World/Physics.cpp
 
 HEADERS += \
         mainwin.h \
