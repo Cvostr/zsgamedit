@@ -14,6 +14,7 @@ void TerrainData::alloc(int W, int H){
 void TerrainData::flatTerrain(int height){
     for(int i = 0; i < W * H; i ++){
         data[i].height = height;
+        data[i].textureID = 0;
     }
 }
 
@@ -29,6 +30,9 @@ void TerrainData::destroyGL(){
 }
 
 void TerrainData::Draw(){
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture);
+
     //if opengl data not generated, exit function
     if(!created) return;
     glBindVertexArray(VAO);
@@ -37,30 +41,57 @@ void TerrainData::Draw(){
 }
 
 void TerrainData::generateGLMesh(){
+
+    unsigned char* _texture = new unsigned char[W * H];
+    for(int i = 0; i < W * H; i ++){
+
+        char val = data[i].textureID;
+
+        _texture[i] = val;
+    }
+
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+
+    glTexImage2D(
+            GL_TEXTURE_2D,
+            0,
+            GL_RED,
+            static_cast<int>(W),
+            static_cast<int>(H),
+            0,
+            GL_RED,
+            GL_UNSIGNED_BYTE,
+            _texture
+        );
+    // Set texture options
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
     if(!created)
         initGL();
 
     HeightmapVertex* vertices = new HeightmapVertex[W * H];
     unsigned int* indices = new unsigned int[(W - 1) * (H - 1) * 2 * 3];
 
-    int ik = 0;
-
-    for(int x = 0; x < W; x ++){
-        for(int y = 0; y < H; y ++){
-            vertices[x + y * H].pos = ZSVECTOR3(x, data[x + y * H].height, y);
-            vertices[x + y * H].uv = ZSVECTOR2(static_cast<float>(x) / W, static_cast<float>(y) / H);
+    for(int y = 0; y < H; y ++){
+        for(int x = 0; x < W; x ++){
+            vertices[x * H + y].pos = ZSVECTOR3(x, data[x * H + y].height, y);
+            vertices[x * H + y].uv = ZSVECTOR2(static_cast<float>(x) / W, static_cast<float>(y) / H);
         }
     }
     unsigned int inds = 0;
-    for(int x = 0; x < W - 1; x ++){
-        for(int y = 0; y < H - 1; y ++){
-            indices[inds] = static_cast<unsigned int>(y * H + x);
-            indices[inds + 1] = static_cast<unsigned int>(y * H + H + x);
-            indices[inds + 2] = static_cast<unsigned int>(y * H + H + x + 1);
+    for(int y = 0; y < H - 1; y ++){
+        for(int x = 0; x < W - 1; x ++){
+            indices[inds] = static_cast<unsigned int>(x * H + y);
+            indices[inds + 2] = static_cast<unsigned int>(x * H + H + y);
+            indices[inds + 1] = static_cast<unsigned int>(x * H + H + y + 1);
 
-            indices[inds + 3] = static_cast<unsigned int>(y * H + x);
-            indices[inds + 4] = static_cast<unsigned int>(y * H + H + x + 1);
-            indices[inds + 5] = static_cast<unsigned int>(y * H + x + 1);
+            indices[inds + 3] = static_cast<unsigned int>(x * H + y);
+            indices[inds + 5] = static_cast<unsigned int>(x * H + H + y + 1);
+            indices[inds + 4] = static_cast<unsigned int>(x * H + y + 1);
 
             inds += 6;
         }
@@ -134,18 +165,32 @@ void TerrainData::loadFromFile(const char* file_path){
     world_stream.close();
 }
 
-void TerrainData::modifyHeight(int originX, int originY, int originHeight, int range){
-        //Iterate over all pixels
-        for(int y = 0; y < W; y ++){
-            for(int x = 0; x < H; x ++){
-                //if pixel is in circle
-                float dist = getDistance(ZSVECTOR3(x, y, 0), ZSVECTOR3(originX, originY, 0));
-                if(dist <= range){
-                    //calculate modifier
-                    float toApply = static_cast<float>(originHeight) - (dist * dist) / static_cast<float>(range);
-                    if(toApply > 0)
-                        data[y * H + x].height += (toApply);
-                }
+void TerrainData::modifyHeight(int originX, int originY, int originHeight, int range, int multiplyer){
+    //Iterate over all pixels
+    for(int y = 0; y < W; y ++){
+        for(int x = 0; x < H; x ++){
+            //if pixel is in circle
+            float dist = getDistance(ZSVECTOR3(x, y, 0), ZSVECTOR3(originX, originY, 0));
+            if(dist <= range){
+                //calculate modifier
+                float toApply = static_cast<float>(originHeight) - (dist * dist) / static_cast<float>(range);
+                if(toApply > 0)
+                    data[y * H + x].height += (toApply * multiplyer);
             }
         }
+    }
+}
+
+void TerrainData::modifyTexture(int originX, int originY, int range, char texture){
+    //Iterate over all pixels
+    for(int y = 0; y < W; y ++){
+        for(int x = 0; x < H; x ++){
+            //if pixel is in circle
+            float dist = getDistance(ZSVECTOR3(x, y, 0), ZSVECTOR3(originX, originY, 0));
+            if(dist <= range){
+                //calculate modifier
+                data[y * H + x].textureID = texture;
+            }
+        }
+    }
 }

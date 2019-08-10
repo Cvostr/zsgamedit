@@ -124,6 +124,8 @@ public:
 };
 
 class RigidbodyProperty : public GameObjectProperty{
+private:
+    btRigidBody* rigidBody;
 public:
 
     ZSVECTOR3 speed;
@@ -174,18 +176,22 @@ class TerrainProperty : public GameObjectProperty{
 private:
     TerrainData data;
     bool hasChanged;
+    char edit_mode;
 public:
     QString file_label;
     int Width;
     int Length;
     int MaxHeight;
 
+    int range;
+    int editHeight;
+
     void addPropertyInterfaceToInspector(InspectorWin* inspector);
     void onPreRender(RenderPipeline* pipeline);
     void onValueChanged();
     void onAddToObject();
     TerrainProperty();
-    void updateMouse(int posX, int posY, int relX, int relY, int screenY, bool isLeftButtonHold);
+    void updateMouse(int posX, int posY, int relX, int relY, int screenY, bool isLeftButtonHold, bool isCtrlHold);
 
     TerrainData* getTerrainData();
 

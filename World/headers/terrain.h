@@ -5,6 +5,7 @@
 
 typedef struct HeightmapTexel{
     float height;
+    char textureID;
 }HeightmapTexel;
 
 typedef struct HeightmapVertex{
@@ -16,6 +17,7 @@ typedef struct HeightmapVertex{
 class TerrainData{
 private:
     bool created;
+    unsigned int texture;
     int W, H;
 public:
     unsigned int VAO;
@@ -34,7 +36,8 @@ public:
     void saveToFile(const char* file_path);
     void loadFromFile(const char* file_path);
 
-    void modifyHeight(int originX, int originY, int originHeight, int range);
+    void modifyHeight(int originX, int originY, int originHeight, int range, int multiplyer);
+    void modifyTexture(int originX, int originY, int range, char texture);
 
     TerrainData();
 };

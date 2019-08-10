@@ -25,7 +25,7 @@ uniform float material_shininess;
 
 uniform vec3 diffuse_color = vec3(1.0, 0.078, 0.574);
 
-uniform bool isPicking = true;
+uniform bool isPicking = false;
 
 void main(){
 
@@ -49,8 +49,10 @@ void main(){
 
 	tMasks = vec4(1.0, 0, 0, 0);
 
-	//if(isPicking){
-	FragColor = vec4(_id / (256 * 2), 1);
-	//}
+	if(isPicking){
+		FragColor = vec4(_id / (256 * 2), 1);
+	}else{
+		FragColor = vec4(texture(diffuse, uv));
+	}	
 	
 }

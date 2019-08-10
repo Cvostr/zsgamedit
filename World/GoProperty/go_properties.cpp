@@ -6,6 +6,8 @@
 #include "../../ProjEd/headers/InspEditAreas.h"
 
 extern InspectorWin* _inspector_win;
+//selected terrain
+static TerrainProperty* current_terrain_prop;
 
 GameObjectProperty::GameObjectProperty(){
     type = GO_PROPERTY_TYPE_NONE;
@@ -1111,10 +1113,22 @@ TerrainProperty::TerrainProperty(){
     this->Length = 500;
     this->MaxHeight = 500;
 
+    this->range = 15;
+    this->editHeight = 10;
+
+    edit_mode = 1;
+
     hasChanged = false;
 }
 
+void onClearTerrain(){
+    current_terrain_prop->getTerrainData()->alloc(current_terrain_prop->Width, current_terrain_prop->Length);
+    current_terrain_prop->getTerrainData()->generateGLMesh();
+}
+
 void TerrainProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
+    current_terrain_prop = this;
+
     IntPropertyArea* HWidth = new IntPropertyArea; //New property area
     HWidth->setLabel("Heightmap Width"); //Its label
     HWidth->value = &this->Width; //Ptr to our vector
@@ -1132,6 +1146,49 @@ void TerrainProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
     MHeight->value = &this->MaxHeight; //Ptr to our vector
     MHeight->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
     inspector->addPropertyArea(MHeight);
+
+    //Add button to add objects
+    AreaButton* clear_btn = new AreaButton;
+    clear_btn->onPressFuncPtr = &onClearTerrain;
+    clear_btn->button->setText("Clear"); //Setting text to qt button
+    inspector->getContentLayout()->addWidget(clear_btn->button);
+    clear_btn->insp_ptr = inspector; //Setting inspector pointer
+    inspector->registerUiObject(clear_btn);
+
+    AreaRadioGroup* group = new AreaRadioGroup; //allocate button layout
+    group->value_ptr = reinterpret_cast<uint8_t*>(&this->edit_mode);
+    group->go_property = static_cast<void*>(this);
+
+    QRadioButton* directional_radio = new QRadioButton; //allocate first radio
+    directional_radio->setText("Map");
+    QRadioButton* point_radio = new QRadioButton;
+    point_radio->setText("Texture");
+
+    group->addRadioButton(directional_radio);
+    group->addRadioButton(point_radio);
+    inspector->registerUiObject(group);
+    inspector->getContentLayout()->addLayout(group->btn_layout);
+    if(edit_mode == 1){
+        IntPropertyArea* EditRange = new IntPropertyArea; //New property area
+        EditRange->setLabel("brush range"); //Its label
+        EditRange->value = &this->range; //Ptr to our vector
+        EditRange->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
+        inspector->addPropertyArea(EditRange);
+
+        IntPropertyArea* EditHeight = new IntPropertyArea; //New property area
+        EditHeight->setLabel("brush height"); //Its label
+        EditHeight->value = &this->editHeight; //Ptr to our vector
+        EditHeight->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
+        inspector->addPropertyArea(EditHeight);
+    }
+    if(edit_mode == 2){
+        IntPropertyArea* EditRange = new IntPropertyArea; //New property area
+        EditRange->setLabel("brush range"); //Its label
+        EditRange->value = &this->range; //Ptr to our vector
+        EditRange->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
+        inspector->addPropertyArea(EditRange);
+    }
+
 }
 
 void TerrainProperty::onPreRender(RenderPipeline* pipeline){
@@ -1147,8 +1204,7 @@ void TerrainProperty::onPreRender(RenderPipeline* pipeline){
     data.Draw();
 }
 void TerrainProperty::onValueChanged(){
-    data.alloc(this->Width, this->Length);
-    data.generateGLMesh();
+    _inspector_win->updateRequired = true;
 }
 
 void TerrainProperty::onAddToObject(){
@@ -1161,7 +1217,7 @@ void TerrainProperty::onAddToObject(){
     data.saveToFile(fpath.c_str());
 }
 
-void TerrainProperty::updateMouse(int posX, int posY, int relX, int relY, int screenY, bool isLeftButtonHold){
+void TerrainProperty::updateMouse(int posX, int posY, int relX, int relY, int screenY, bool isLeftButtonHold, bool isCtrlHold){
     if(isLeftButtonHold){
         unsigned char _data[4];
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -1175,18 +1231,24 @@ void TerrainProperty::updateMouse(int posX, int posY, int relX, int relY, int sc
         data.Draw();
         //read picked pixel
         glReadPixels(posX, screenY - posY, 1,1, GL_RGBA, GL_UNSIGNED_BYTE, _data);
-
-        for(unsigned int i = 0; i < Width; i ++){
-            for(unsigned int y = 0; y < Length; y ++){
-                if(y == _data[0] * 2 && i == _data[2] * 2){
-                    //this->data.data[i * Width + y].height = 10;
-                    this->data.modifyHeight(y, i, 5, 20);
+        //find picked texel
+        for(int i = 0; i < Width; i ++){
+            for(int y = 0; y < Length; y ++){
+                if(i == _data[0] * 2 && y == _data[2] * 2){
+                    int mul = 1;
+                    if(isCtrlHold)
+                        mul *= -1;
+                    //apply change
+                    if(edit_mode == 1)
+                        this->data.modifyHeight(y, i, editHeight, range, mul);
+                    else
+                        this->data.modifyTexture(y, i, range, 1);
                     hasChanged = true;
                     return;
                 }
             }
         }
-
+        mat->material_ptr->group_ptr->render_shader->setGLuniformInt("isPicking", 0);
     }
 }
 

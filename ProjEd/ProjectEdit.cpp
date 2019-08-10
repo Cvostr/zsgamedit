@@ -861,7 +861,8 @@ void EditWindow::onLeftBtnClicked(int X, int Y){
         TerrainProperty* terrain = obj->getPropertyPtr<TerrainProperty>();
 
         if(terrain != nullptr)
-            terrain->updateMouse(this->input_state.mouseX, input_state.mouseY, 0, 0,  settings.gameViewWin_Height, this->input_state.isLeftBtnHold);
+            terrain->updateMouse(this->input_state.mouseX, input_state.mouseY, 0, 0,  settings.gameViewWin_Height, this->input_state.isLeftBtnHold,
+                                 this->input_state.isLCtrlHold);
     }
 
     //Stop camera moving
