@@ -16,16 +16,28 @@ in mat3 TBN;
 in vec3 _id;
 
 //textures
-uniform sampler2D diffuse;
-uniform sampler2D normal_map;
+uniform sampler2D diffuse0;
+uniform sampler2D diffuse1;
+uniform sampler2D diffuse2;
 
-uniform bool hasDiffuseMap;
+uniform sampler2D texture_mask;
 
-uniform float material_shininess;
+uniform int isPicking;
 
-uniform vec3 diffuse_color = vec3(1.0, 0.078, 0.574);
+vec3 getFragment(vec2 uv, int multiplyer){
+    float mask = texture(texture_mask, uv).r;
+    vec3 result;
 
-uniform bool isPicking = false;
+    if(mask == 0.0)
+        result = texture(diffuse0, uv * multiplyer).xyz;
+    if(mask == 2.0 / 255)
+        result = texture(diffuse1, uv * multiplyer).xyz;
+    if(mask < 2.0 / 255 && mask > 0){
+        result = mix(texture(diffuse0, uv * multiplyer).xyz, result = texture(diffuse1, uv * multiplyer).xyz, mask / 2 * 255);
+    }
+        
+    return result;
+}
 
 void main(){
 
@@ -33,26 +45,18 @@ void main(){
 	
 	vec3 result = vec3(1.0, 1.0, 1.0); //Default value
 	vec3 Normal = InNormal; //defaultly, use normals from mesh
-	float result_shininess = material_shininess;
-	
-
-	if(hasDiffuseMap)
-	//	result = texture(diffuse, uv).xyz ;
-		
-	//result *= diffuse_color;
-	    
-	//result = vec3(_id.w, _id.z, _id.y);
+	   
             
 	//tDiffuse = vec4(result, result_shininess);
 	tPos = FragPos;
 	tNormal = Normal;
-
 	tMasks = vec4(1.0, 0, 0, 0);
 
-	if(isPicking){
-		FragColor = vec4(_id / (256 * 2), 1);
-	}else{
-		FragColor = vec4(texture(diffuse, uv));
+	if(isPicking == 1){
+		FragColor = vec4(_id / (255 * 2), 1);
+	}
+    if(isPicking == 0){
+		FragColor = vec4(getFragment(uv, 4), 0);
 	}	
 	
 }

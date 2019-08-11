@@ -155,12 +155,19 @@ MtShaderPropertiesGroup* MtShProps::genDefaultMtShGroup(ZSPIRE::Shader* shader3d
     default_heightmap_group->groupCaption = "Default Heightmap";
     default_heightmap_group->render_shader = heightmap;
 
-    TextureMaterialShaderProperty* _texture_prop =
+    TextureMaterialShaderProperty* terrain_diffuse1 =
             static_cast<TextureMaterialShaderProperty*>(default_heightmap_group->addProperty(MATSHPROP_TYPE_TEXTURE));
-    _texture_prop->slotToBind = 0;
-    _texture_prop->prop_caption = "Normal";
-    _texture_prop->ToggleUniform = "hasDiffuseMap";
-    _texture_prop->prop_identifier = "t_normal"; //Identifier to save
+    terrain_diffuse1->slotToBind = 0;
+    terrain_diffuse1->prop_caption = "Diffuse 1";
+    terrain_diffuse1->ToggleUniform = "hasDiffuseMap";
+    terrain_diffuse1->prop_identifier = "diff1"; //Identifier to save
+
+    TextureMaterialShaderProperty* terrain_diffuse2 =
+            static_cast<TextureMaterialShaderProperty*>(default_heightmap_group->addProperty(MATSHPROP_TYPE_TEXTURE));
+    terrain_diffuse2->slotToBind = 1;
+    terrain_diffuse2->prop_caption = "Diffuse 2";
+    terrain_diffuse2->ToggleUniform = "hasDiffuseMap";
+    terrain_diffuse2->prop_identifier = "diff2"; //Identifier to save
 
     MtShProps::addMtShaderPropertyGroup(default_heightmap_group);
 

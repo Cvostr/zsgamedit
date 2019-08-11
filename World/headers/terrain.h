@@ -5,7 +5,7 @@
 
 typedef struct HeightmapTexel{
     float height;
-    char textureID;
+    unsigned char textureID;
 }HeightmapTexel;
 
 typedef struct HeightmapVertex{
@@ -37,7 +37,7 @@ public:
     void loadFromFile(const char* file_path);
 
     void modifyHeight(int originX, int originY, int originHeight, int range, int multiplyer);
-    void modifyTexture(int originX, int originY, int range, char texture);
+    void modifyTexture(int originX, int originY, int range, unsigned char texture);
 
     TerrainData();
 };

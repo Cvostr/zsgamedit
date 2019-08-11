@@ -22,6 +22,14 @@ void TerrainData::initGL(){
     glGenVertexArrays(1, &this->VAO);
     glGenBuffers(1, &this->VBO);
     glGenBuffers(1, &this->EBO);
+
+    glGenTextures(1, &this->texture);
+    glBindTexture(GL_TEXTURE_2D, this->texture);
+    // Set texture options
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }
 void TerrainData::destroyGL(){
     glDeleteVertexArrays(1, &this->VAO);
@@ -30,7 +38,7 @@ void TerrainData::destroyGL(){
 }
 
 void TerrainData::Draw(){
-    glActiveTexture(GL_TEXTURE0);
+    glActiveTexture(GL_TEXTURE5);
     glBindTexture(GL_TEXTURE_2D, texture);
 
     //if opengl data not generated, exit function
@@ -41,34 +49,15 @@ void TerrainData::Draw(){
 }
 
 void TerrainData::generateGLMesh(){
-
+    //write temporary array to store texture ids
     unsigned char* _texture = new unsigned char[W * H];
-    for(int i = 0; i < W * H; i ++){
+    for(int y = 0; y < H; y ++){
+        for(int x = 0; x < W; x ++){
+            unsigned char val = data[x * H + y].textureID;
 
-        char val = data[i].textureID;
-
-        _texture[i] = val;
+            _texture[x * H + y] = val;
+        }
     }
-
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
-
-    glTexImage2D(
-            GL_TEXTURE_2D,
-            0,
-            GL_RED,
-            static_cast<int>(W),
-            static_cast<int>(H),
-            0,
-            GL_RED,
-            GL_UNSIGNED_BYTE,
-            _texture
-        );
-    // Set texture options
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     if(!created)
         initGL();
@@ -96,7 +85,7 @@ void TerrainData::generateGLMesh(){
             inds += 6;
         }
     }
-    for(unsigned int i = 0; i < inds - 3; i ++){
+    for(unsigned int i = 0; i < inds - 2; i ++){
         HeightmapVertex* v1 = &vertices[indices[i]];
         HeightmapVertex* v2 = &vertices[indices[i + 1]];
         HeightmapVertex* v3 = &vertices[indices[i + 2]];
@@ -126,6 +115,21 @@ void TerrainData::generateGLMesh(){
 
     delete[] vertices;
     delete[] indices;
+    //Create texture masks texture
+    glBindTexture(GL_TEXTURE_2D, this->texture);
+    glTexImage2D(
+            GL_TEXTURE_2D,
+            0,
+            GL_RED,
+            static_cast<int>(W),
+            static_cast<int>(H),
+            0,
+            GL_RED,
+            GL_UNSIGNED_BYTE,
+            _texture
+        );
+
+    delete [] _texture;
 
     created = true;
 }
@@ -142,8 +146,8 @@ void TerrainData::saveToFile(const char* file_path){
     world_stream.write(reinterpret_cast<char*>(&this->H), sizeof(int));
 
     for(int i = 0; i < W * H; i ++){
-        float height = data[i].height;
-        world_stream.write(reinterpret_cast<char*>(&height), sizeof(float));
+        world_stream.write(reinterpret_cast<char*>(&data[i].height), sizeof(float));
+        world_stream.write(reinterpret_cast<char*>(&data[i].textureID), sizeof(unsigned char));
     }
 
     world_stream.close();
@@ -160,6 +164,7 @@ void TerrainData::loadFromFile(const char* file_path){
 
     for(int i = 0; i < W * H; i ++){
         world_stream.read(reinterpret_cast<char*>(&data[i].height), sizeof(float));
+        world_stream.read(reinterpret_cast<char*>(&data[i].textureID), sizeof(unsigned char));
     }
 
     world_stream.close();
@@ -181,7 +186,7 @@ void TerrainData::modifyHeight(int originX, int originY, int originHeight, int r
     }
 }
 
-void TerrainData::modifyTexture(int originX, int originY, int range, char texture){
+void TerrainData::modifyTexture(int originX, int originY, int range, unsigned char texture){
     //Iterate over all pixels
     for(int y = 0; y < W; y ++){
         for(int x = 0; x < H; x ++){
@@ -191,6 +196,7 @@ void TerrainData::modifyTexture(int originX, int originY, int range, char textur
                 //calculate modifier
                 data[y * H + x].textureID = texture;
             }
+
         }
     }
 }

@@ -1217,7 +1217,7 @@ void TerrainProperty::onAddToObject(){
     data.saveToFile(fpath.c_str());
 }
 
-void TerrainProperty::updateMouse(int posX, int posY, int relX, int relY, int screenY, bool isLeftButtonHold, bool isCtrlHold){
+void TerrainProperty::onMouseClick(int posX, int posY, int screenY, bool isLeftButtonHold, bool isCtrlHold){
     if(isLeftButtonHold){
         unsigned char _data[4];
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -1231,6 +1231,7 @@ void TerrainProperty::updateMouse(int posX, int posY, int relX, int relY, int sc
         data.Draw();
         //read picked pixel
         glReadPixels(posX, screenY - posY, 1,1, GL_RGBA, GL_UNSIGNED_BYTE, _data);
+        mat->material_ptr->group_ptr->render_shader->setGLuniformInt("isPicking", 0);
         //find picked texel
         for(int i = 0; i < Width; i ++){
             for(int y = 0; y < Length; y ++){
@@ -1242,13 +1243,47 @@ void TerrainProperty::updateMouse(int posX, int posY, int relX, int relY, int sc
                     if(edit_mode == 1)
                         this->data.modifyHeight(y, i, editHeight, range, mul);
                     else
-                        this->data.modifyTexture(y, i, range, 1);
+                        this->data.modifyTexture(i, y, range, 2);
                     hasChanged = true;
                     return;
                 }
             }
         }
+    }
+}
+
+void TerrainProperty::onMouseMotion(int posX, int posY, int relX, int relY, int screenY, bool isLeftButtonHold, bool isCtrlHold){
+    if(isLeftButtonHold){
+        unsigned char _data[4];
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+
+        MaterialProperty* mat = this->go_link.updLinkPtr()->getPropertyPtr<MaterialProperty>();
+        if(mat == nullptr) return;
+        //Apply material shader
+        mat->material_ptr->group_ptr->render_shader->Use();
+        mat->material_ptr->group_ptr->render_shader->setGLuniformInt("isPicking", 1);
+        data.Draw();
+        //read picked pixel
+        glReadPixels(posX, screenY - posY, 1,1, GL_RGBA, GL_UNSIGNED_BYTE, _data);
         mat->material_ptr->group_ptr->render_shader->setGLuniformInt("isPicking", 0);
+        //find picked texel
+        for(int i = 0; i < Width; i ++){
+            for(int y = 0; y < Length; y ++){
+                if(i == _data[0] * 2 && y == _data[2] * 2){
+                    int mul = 1;
+                    if(isCtrlHold)
+                        mul *= -1;
+                    //apply change
+                    if(edit_mode == 1){
+                       // this->data.modifyHeight(y, i, editHeight, range, mul);
+                    }else
+                        this->data.modifyTexture(i, y, range, 2);
+                    hasChanged = true;
+                    return;
+                }
+            }
+        }
     }
 }
 

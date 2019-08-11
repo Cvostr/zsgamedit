@@ -191,7 +191,8 @@ public:
     void onValueChanged();
     void onAddToObject();
     TerrainProperty();
-    void updateMouse(int posX, int posY, int relX, int relY, int screenY, bool isLeftButtonHold, bool isCtrlHold);
+    void onMouseClick(int posX, int posY, int screenY, bool isLeftButtonHold, bool isCtrlHold);
+    void onMouseMotion(int posX, int posY, int relX, int relY, int screenY, bool isLeftButtonHold, bool isCtrlHold);
 
     TerrainData* getTerrainData();
 
