@@ -127,6 +127,13 @@ MtShaderPropertiesGroup* MtShProps::genDefaultMtShGroup(ZSPIRE::Shader* shader3d
     specular_texture_prop->ToggleUniform = "hasSpecularMap";
     specular_texture_prop->prop_identifier = "t_specular"; //Identifier to save
 
+    TextureMaterialShaderProperty* height_texture_prop =
+            static_cast<TextureMaterialShaderProperty*>(default_group->addProperty(MATSHPROP_TYPE_TEXTURE));
+    height_texture_prop->slotToBind = 3;
+    height_texture_prop->prop_caption = "Height";
+    height_texture_prop->ToggleUniform = "hasHeightMap";
+    height_texture_prop->prop_identifier = "t_height"; //Identifier to save
+
     FloatMaterialShaderProperty* shininess_factor_prop =
             static_cast<FloatMaterialShaderProperty*>(default_group->addProperty(MATSHPROP_TYPE_FLOAT));
     shininess_factor_prop->floatUniform = "material_shininess";
@@ -168,6 +175,13 @@ MtShaderPropertiesGroup* MtShProps::genDefaultMtShGroup(ZSPIRE::Shader* shader3d
     terrain_diffuse2->prop_caption = "Diffuse 2";
     terrain_diffuse2->ToggleUniform = "hasDiffuseMap";
     terrain_diffuse2->prop_identifier = "diff2"; //Identifier to save
+
+    TextureMaterialShaderProperty* terrain_diffuse3 =
+            static_cast<TextureMaterialShaderProperty*>(default_heightmap_group->addProperty(MATSHPROP_TYPE_TEXTURE));
+    terrain_diffuse3->slotToBind = 2;
+    terrain_diffuse3->prop_caption = "Diffuse 3";
+    terrain_diffuse3->ToggleUniform = "hasDiffuseMap";
+    terrain_diffuse3->prop_identifier = "diff3"; //Identifier to save
 
     MtShProps::addMtShaderPropertyGroup(default_heightmap_group);
 

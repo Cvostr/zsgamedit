@@ -2,7 +2,7 @@
 
 PhysicalWorld::PhysicalWorld(PhysicalWorldSettings* settings){
             this->collisionConfiguraton = new btDefaultCollisionConfiguration();
-            //m_collisionConfiguration->setConvexConvexMultipointIterations();
+            collisionConfiguraton->setConvexConvexMultipointIterations();
 
             ///use the default collision dispatcher. For parallel processing you can use a diffent dispatcher (see Extras/BulletMultiThreaded)
             this->dispatcher = new btCollisionDispatcher(this->collisionConfiguraton);
@@ -17,4 +17,12 @@ PhysicalWorld::PhysicalWorld(PhysicalWorldSettings* settings){
             this->physic_world->setGravity(btVector3(settings->gravity.X,
                                                      settings->gravity.Y,
                                                      settings->gravity.Z));
+}
+
+void PhysicalWorld::addRidigbodyToWorld(btRigidBody* body){
+    this->physic_world->addRigidBody(body);
+}
+
+void PhysicalWorld::stepSimulation(float stepSimulation){
+    this->physic_world->stepSimulation(stepSimulation);
 }

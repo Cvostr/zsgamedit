@@ -1,11 +1,13 @@
 #ifndef TERRAIN_H
 #define TERRAIN_H
 
+#define TEXTURES_AMOUNT 8
+
 #include "../../Render/headers/zs-math.h"
 
 typedef struct HeightmapTexel{
     float height;
-    unsigned char textureID;
+    unsigned char texture_factors[TEXTURES_AMOUNT];
 }HeightmapTexel;
 
 typedef struct HeightmapVertex{
@@ -17,8 +19,10 @@ typedef struct HeightmapVertex{
 class TerrainData{
 private:
     bool created;
-    unsigned int texture;
     int W, H;
+
+    unsigned int texture_mask1;
+    unsigned int texture_mask2;
 public:
     unsigned int VAO;
     unsigned int VBO;
@@ -36,8 +40,10 @@ public:
     void saveToFile(const char* file_path);
     void loadFromFile(const char* file_path);
 
-    void modifyHeight(int originX, int originY, int originHeight, int range, int multiplyer);
+    void modifyHeight(int originX, int originY, float originHeight, int range, int multiplyer);
     void modifyTexture(int originX, int originY, int range, unsigned char texture);
+
+    void sum(unsigned char* ptr, int val);
 
     TerrainData();
 };

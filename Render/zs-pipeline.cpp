@@ -528,6 +528,7 @@ void ShadowCasterProperty::onPreRender(RenderPipeline* pipeline){
 void ShadowCasterProperty::Draw(ZSPIRE::Camera* cam, RenderPipeline* pipeline){
     if(!this->active) return;
     if(!this->initialized) init();
+    if(this->go_link.updLinkPtr() == nullptr) return;
 
     LightsourceProperty* light = this->go_link.updLinkPtr()->getPropertyPtr<LightsourceProperty>();
 

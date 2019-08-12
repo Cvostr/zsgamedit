@@ -126,11 +126,14 @@ bool ZSPIRE::Shader::compileFromFile(const char* VSpath, const char* FSpath){
     setGLuniformInt("tTransparent", 13);
     setGLuniformInt("tMasks", 14);
     //Terrain shader
-    setGLuniformInt("diffuse0", 0);
-    setGLuniformInt("diffuse1", 1);
-    setGLuniformInt("diffuse2", 2);
+    setGLuniformInt("diffuse[0]", 0);
+    setGLuniformInt("diffuse[1]", 1);
+    setGLuniformInt("diffuse[2]", 2);
+    setGLuniformInt("diffuse[3]", 3);
+    setGLuniformInt("diffuse[4]", 4);
 
-    setGLuniformInt("texture_mask", 5);
+    setGLuniformInt("texture_mask", 16);
+    setGLuniformInt("texture_mask1", 17);
 
     this->isCreated = true; //Shader created & compiled now
 	return true;

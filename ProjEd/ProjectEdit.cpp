@@ -662,6 +662,10 @@ void EditWindow::glRender(){
     this->settings.inspector_win_pos_X = _inspector_win->pos().x();
     this->settings.inspector_win_pos_Y = _inspector_win->pos().y();
 
+    if(isSceneRun){
+        world.physical_world->stepSimulation(deltaTime);
+    }
+
     if(hasSheduledWorld){
         stopWorld(); //firstly, stop world
         //load world

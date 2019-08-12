@@ -897,12 +897,12 @@ ColliderProperty::ColliderProperty(){
 
 RigidbodyProperty::RigidbodyProperty(){
 
-    speed = ZSVECTOR3(0.0f, 0.0f, 0.0f);
-
     mass = 1.0f;
     hasGravity = true;
 
     type = GO_PROPERTY_TYPE_RIGIDBODY;
+
+    created = false;
 }
 
 bool GameObject::isRigidbody(){
@@ -926,10 +926,55 @@ void RigidbodyProperty::addPropertyInterfaceToInspector(InspectorWin* inspector)
     inspector->addPropertyArea(mass_area);
 }
 
-void RigidbodyProperty::onUpdate(float deltaTime){
-    //Obtain pointer to transform property
-    TransformProperty* transform_ptr = go_link.updLinkPtr()->getTransformProperty();
+void RigidbodyProperty::init(){
+    TransformProperty* transform = this->go_link.updLinkPtr()->getPropertyPtr<TransformProperty>();
+
+    shape = new btBoxShape(btVector3(btScalar(transform->_last_scale.X),
+                                     btScalar(transform->_last_scale.Y),
+                                     btScalar(transform->_last_scale.Z)));
+
+
+    bool isDynamic = (mass != 0.f);
+
+    btVector3 localInertia(0, 0, 0);
+    if (isDynamic)
+        shape->calculateLocalInertia(mass, localInertia);
+
+    btTransform startTransform;
+    startTransform.setIdentity();
+    startTransform.setOrigin(btVector3( btScalar(transform->_last_translation.X),
+                                                btScalar(transform->_last_translation.Y),
+                                                btScalar(transform->_last_translation.Z)));
+
+     //using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
+     btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
+
+     btRigidBody::btRigidBodyConstructionInfo cInfo(mass, myMotionState, shape, localInertia);
+
+     rigidBody = new btRigidBody(cInfo);
+     rigidBody->setUserIndex(go_link.updLinkPtr()->array_index);
+     //add rigidbody to world
+     go_link.world_ptr->physical_world->addRidigbodyToWorld(rigidBody);
+
+     created = true;
 }
+
+void RigidbodyProperty::onUpdate(float deltaTime){
+    if(!created)
+        init();
+    else{
+        TransformProperty* transform = this->go_link.updLinkPtr()->getPropertyPtr<TransformProperty>();
+        btVector3 current_pos = rigidBody->getCenterOfMassPosition();
+
+        float curX = current_pos.getX();
+        float curY = current_pos.getY();
+        float curZ = current_pos.getZ();
+
+        transform->translation = ZSVECTOR3(curX, curY, curZ);
+        transform->updateMat();
+    }
+}
+
 
 void RigidbodyProperty::copyTo(GameObjectProperty* dest){
     if(dest->type != GO_PROPERTY_TYPE_RIGIDBODY) return;
@@ -1175,7 +1220,7 @@ void TerrainProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
         EditRange->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
         inspector->addPropertyArea(EditRange);
 
-        IntPropertyArea* EditHeight = new IntPropertyArea; //New property area
+        FloatPropertyArea* EditHeight = new FloatPropertyArea; //New property area
         EditHeight->setLabel("brush height"); //Its label
         EditHeight->value = &this->editHeight; //Ptr to our vector
         EditHeight->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
@@ -1187,6 +1232,12 @@ void TerrainProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
         EditRange->value = &this->range; //Ptr to our vector
         EditRange->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
         inspector->addPropertyArea(EditRange);
+
+        IntPropertyArea* EditTex = new IntPropertyArea; //New property area
+        EditTex->setLabel("Texture"); //Its label
+        EditTex->value = &this->textureid; //Ptr to our vector
+        EditTex->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
+        inspector->addPropertyArea(EditTex);
     }
 
 }
@@ -1243,7 +1294,7 @@ void TerrainProperty::onMouseClick(int posX, int posY, int screenY, bool isLeftB
                     if(edit_mode == 1)
                         this->data.modifyHeight(y, i, editHeight, range, mul);
                     else
-                        this->data.modifyTexture(i, y, range, 2);
+                        this->data.modifyTexture(i, y, range, static_cast<unsigned char>(textureid));
                     hasChanged = true;
                     return;
                 }
@@ -1256,7 +1307,6 @@ void TerrainProperty::onMouseMotion(int posX, int posY, int relX, int relY, int 
     if(isLeftButtonHold){
         unsigned char _data[4];
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 
         MaterialProperty* mat = this->go_link.updLinkPtr()->getPropertyPtr<MaterialProperty>();
         if(mat == nullptr) return;
@@ -1278,7 +1328,7 @@ void TerrainProperty::onMouseMotion(int posX, int posY, int relX, int relY, int 
                     if(edit_mode == 1){
                        // this->data.modifyHeight(y, i, editHeight, range, mul);
                     }else
-                        this->data.modifyTexture(i, y, range, 2);
+                        this->data.modifyTexture(i, y, range, static_cast<unsigned char>(textureid));
                     hasChanged = true;
                     return;
                 }

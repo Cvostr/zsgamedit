@@ -125,13 +125,16 @@ public:
 
 class RigidbodyProperty : public GameObjectProperty{
 private:
+    bool created;
     btRigidBody* rigidBody;
-public:
+    btCollisionShape* shape;
 
-    ZSVECTOR3 speed;
+    void init();
+public:
 
     float mass;
     bool hasGravity;
+    COLLIDER_TYPE coll_type;
 
     void addPropertyInterfaceToInspector(InspectorWin* inspector);
     void onUpdate(float deltaTime);
@@ -184,7 +187,8 @@ public:
     int MaxHeight;
 
     int range;
-    int editHeight;
+    float editHeight;
+    int textureid;
 
     void addPropertyInterfaceToInspector(InspectorWin* inspector);
     void onPreRender(RenderPipeline* pipeline);

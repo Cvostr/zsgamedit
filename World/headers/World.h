@@ -25,6 +25,8 @@
 #include <BulletDynamics/ConstraintSolver/btSequentialImpulseConstraintSolver.h>
 #include <BulletCollision/CollisionShapes/btBoxShape.h>
 #include <BulletCollision/CollisionShapes/btBox2dShape.h>
+#include <BulletCollision/CollisionShapes/btSphereShape.h>
+#include <LinearMath/btDefaultMotionState.h>
 
 #define OBJ_PROPS_SIZE 11
 #define MAX_OBJS 12000
@@ -63,10 +65,11 @@ private:
     btCollisionDispatcher* dispatcher;
     btBroadphaseInterface* broadphase;
     btSequentialImpulseConstraintSolver* solver;
-
     btDiscreteDynamicsWorld* physic_world;
-public:
 
+public:
+    void stepSimulation(float stepSimulation);
+    void addRidigbodyToWorld(btRigidBody* body);
     PhysicalWorld(PhysicalWorldSettings* settings);
 };
 
