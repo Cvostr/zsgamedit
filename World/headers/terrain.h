@@ -23,6 +23,7 @@ private:
 
     unsigned int texture_mask1;
     unsigned int texture_mask2;
+    unsigned int texture_mask3;
 public:
     unsigned int VAO;
     unsigned int VBO;

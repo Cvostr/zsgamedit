@@ -130,6 +130,14 @@ void GameObject::saveProperties(std::ofstream* stream){
             stream->write(reinterpret_cast<char*>(&ptr->coll_type), sizeof(COLLIDER_TYPE));
             //write isTrigger boolean
             stream->write(reinterpret_cast<char*>(&ptr->mass), sizeof(float));
+            //write gravity
+            stream->write(reinterpret_cast<char*>(&ptr->gravity.X), sizeof(float));
+            stream->write(reinterpret_cast<char*>(&ptr->gravity.Y), sizeof(float));
+            stream->write(reinterpret_cast<char*>(&ptr->gravity.Z), sizeof(float));
+            //write linear velocity
+            stream->write(reinterpret_cast<char*>(&ptr->linearVel.X), sizeof(float));
+            stream->write(reinterpret_cast<char*>(&ptr->linearVel.Y), sizeof(float));
+            stream->write(reinterpret_cast<char*>(&ptr->linearVel.Z), sizeof(float));
 
             break;
         }
@@ -151,6 +159,7 @@ void GameObject::saveProperties(std::ofstream* stream){
             stream->write(reinterpret_cast<char*>(&ptr->Width), sizeof(float));
             stream->write(reinterpret_cast<char*>(&ptr->Length), sizeof(float));
             stream->write(reinterpret_cast<char*>(&ptr->MaxHeight), sizeof(float));
+            stream->write(reinterpret_cast<char*>(&ptr->castShadows), sizeof(bool));
 
             std::string fpath = ptr->go_link.world_ptr->proj_ptr->root_path.toStdString() + "/" + ptr->file_label.toStdString();
             ptr->getTerrainData()->saveToFile(fpath.c_str());
@@ -343,6 +352,13 @@ void GameObject::loadProperty(std::ifstream* world_stream){
         //read collider type
         world_stream->read(reinterpret_cast<char*>(&ptr->coll_type), sizeof(COLLIDER_TYPE));
         world_stream->read(reinterpret_cast<char*>(&ptr->mass), sizeof(float));
+        world_stream->read(reinterpret_cast<char*>(&ptr->gravity.X), sizeof(float));
+        world_stream->read(reinterpret_cast<char*>(&ptr->gravity.Y), sizeof(float));
+        world_stream->read(reinterpret_cast<char*>(&ptr->gravity.Z), sizeof(float));
+        //read linear velocity
+        world_stream->read(reinterpret_cast<char*>(&ptr->linearVel.X), sizeof(float));
+        world_stream->read(reinterpret_cast<char*>(&ptr->linearVel.Y), sizeof(float));
+        world_stream->read(reinterpret_cast<char*>(&ptr->linearVel.Z), sizeof(float));
 
         break;
     }
@@ -368,6 +384,7 @@ void GameObject::loadProperty(std::ifstream* world_stream){
         world_stream->read(reinterpret_cast<char*>(&ptr->Width), sizeof(float));
         world_stream->read(reinterpret_cast<char*>(&ptr->Length), sizeof(float));
         world_stream->read(reinterpret_cast<char*>(&ptr->MaxHeight), sizeof(float));
+        world_stream->read(reinterpret_cast<char*>(&ptr->castShadows), sizeof(bool));
 
         std::string fpath = ptr->go_link.world_ptr->proj_ptr->root_path.toStdString() + "/" + ptr->file_label.toStdString();
         ptr->getTerrainData()->loadFromFile(fpath.c_str());

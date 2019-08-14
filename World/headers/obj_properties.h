@@ -164,6 +164,7 @@ class RigidbodyProperty : public PhysicalProperty{
 public:
     ZSVECTOR3 gravity;
     ZSVECTOR3 linearVel;
+    ZSVECTOR3 angularVel;
 
     void addPropertyInterfaceToInspector(InspectorWin* inspector);
     void onUpdate(float deltaTime);
@@ -215,13 +216,15 @@ public:
     int Width;
     int Length;
     int MaxHeight;
+    bool castShadows;
 
     int range;
     float editHeight;
     int textureid;
 
     void addPropertyInterfaceToInspector(InspectorWin* inspector);
-    void onPreRender(RenderPipeline* pipeline);
+    void onRender(RenderPipeline* pipeline);
+    void DrawMesh();
     void onValueChanged();
     void onAddToObject();
     TerrainProperty();

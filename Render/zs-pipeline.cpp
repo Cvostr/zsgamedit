@@ -290,7 +290,7 @@ void GameObject::Draw(RenderPipeline* pipeline){
         this->onPreRender(pipeline);
     //Getting pointer to mesh
     MeshProperty* mesh_prop = static_cast<MeshProperty*>(this->getPropertyPtrByType(GO_PROPERTY_TYPE_MESH));
-    if(hasMesh()){// if object has mesh
+    if(hasMesh() || hasTerrain()){// if object has mesh
         //If we are in default draw mode
         if(pipeline->current_state == PIPELINE_STATE_DEFAULT){
             this->onRender(pipeline);
@@ -313,7 +313,10 @@ void GameObject::Draw(RenderPipeline* pipeline){
             TransformProperty* transform_ptr = static_cast<TransformProperty*>(getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
             pipeline->getShadowmapShader()->Use();
             pipeline->getShadowmapShader()->setTransform(transform_ptr->transform_mat);
-            if(mesh_prop->castShadows)
+
+            bool castShadows = (hasTerrain()) ? getPropertyPtr<TerrainProperty>()->castShadows : mesh_prop->castShadows;
+
+            if(castShadows)
                 DrawMesh();
         }
 
@@ -327,7 +330,7 @@ void GameObject::Draw(RenderPipeline* pipeline){
             if(editwin_ptr->obj_trstate.isTransforming == true)
                 color = ZSRGBCOLOR(255.0f, 255.0f, 0.0f);
             //draw wireframe mesh for picked object
-            if(!editwin_ptr->isWorldCamera) //avoid drawing gizmos during playtime
+            if(!editwin_ptr->isWorldCamera && hasMesh()) //avoid drawing gizmos during playtime
                 pipeline->getGizmosRenderer()->drawPickedMeshWireframe(mesh_prop->mesh_ptr, transform_ptr->transform_mat, color);
         }
     }

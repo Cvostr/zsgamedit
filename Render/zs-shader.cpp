@@ -134,6 +134,7 @@ bool ZSPIRE::Shader::compileFromFile(const char* VSpath, const char* FSpath){
 
     setGLuniformInt("texture_mask", 16);
     setGLuniformInt("texture_mask1", 17);
+    setGLuniformInt("texture_mask2", 18);
 
     this->isCreated = true; //Shader created & compiled now
 	return true;

@@ -222,6 +222,7 @@ public:
     void Draw(RenderPipeline* pipeline); //On render pipeline wish to draw the object
     void DrawMesh();
     bool hasMesh(); //Check if gameobject has mesh property and mesh inside
+    bool hasTerrain(); //Check if gameobject has terrain inside
     void onUpdate(int deltaTime); //calls onUpdate on all properties
     //calls onPreRender on all properties
     void onPreRender(RenderPipeline* pipeline);

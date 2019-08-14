@@ -56,6 +56,14 @@ void TerrainData::initGL(){
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glGenTextures(1, &this->texture_mask3);
+    glBindTexture(GL_TEXTURE_2D, this->texture_mask3);
+    // Set texture options
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }
 void TerrainData::destroyGL(){
     glDeleteVertexArrays(1, &this->VAO);
@@ -68,6 +76,8 @@ void TerrainData::Draw(){
     glBindTexture(GL_TEXTURE_2D, texture_mask1);
     glActiveTexture(GL_TEXTURE17);
     glBindTexture(GL_TEXTURE_2D, texture_mask2);
+    glActiveTexture(GL_TEXTURE18);
+    glBindTexture(GL_TEXTURE_2D, texture_mask3);
 
     //if opengl data not generated, exit function
     if(!created) return;
@@ -83,6 +93,7 @@ void TerrainData::generateGLMesh(){
     //write temporary array to store texture ids
     unsigned char* _texture = new unsigned char[W * H * 4];
     unsigned char* _texture1 = new unsigned char[W * H * 4];
+    unsigned char* _texture2 = new unsigned char[W * H * 4];
     for(int y = 0; y < H; y ++){
         for(int x = 0; x < W; x ++){
            _texture[(x * H + y) * 4] = data[x * H + y].texture_factors[0];
@@ -94,6 +105,11 @@ void TerrainData::generateGLMesh(){
            _texture1[(x * H + y) * 4 + 1] = data[x * H + y].texture_factors[5];
            _texture1[(x * H + y) * 4 + 2] = data[x * H + y].texture_factors[6];
            _texture1[(x * H + y) * 4 + 3] = data[x * H + y].texture_factors[7];
+
+           _texture2[(x * H + y) * 4] = data[x * H + y].texture_factors[4];
+           _texture2[(x * H + y) * 4 + 1] = data[x * H + y].texture_factors[5];
+           _texture2[(x * H + y) * 4 + 2] = data[x * H + y].texture_factors[6];
+           _texture2[(x * H + y) * 4 + 3] = data[x * H + y].texture_factors[7];
         }
     }
 
@@ -125,6 +141,7 @@ void TerrainData::generateGLMesh(){
 
     delete [] _texture;
     delete [] _texture1;
+    delete [] _texture2;
 
 
     HeightmapVertex* vertices = new HeightmapVertex[W * H];

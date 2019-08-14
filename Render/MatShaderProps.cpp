@@ -160,6 +160,7 @@ MtShaderPropertiesGroup* MtShProps::genDefaultMtShGroup(ZSPIRE::Shader* shader3d
     MtShaderPropertiesGroup* default_heightmap_group = new MtShaderPropertiesGroup;
     default_heightmap_group->str_path = "@heightmap";
     default_heightmap_group->groupCaption = "Default Heightmap";
+    default_heightmap_group->acceptShadows = true;
     default_heightmap_group->render_shader = heightmap;
 
     TextureMaterialShaderProperty* terrain_diffuse1 =

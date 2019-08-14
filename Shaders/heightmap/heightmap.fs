@@ -2,6 +2,8 @@
 #extension GL_ARB_explicit_attrib_location : require
 #extension GL_ARB_explicit_uniform_location : require
 
+#define TEXTURES_AMOUNT 8
+
 layout (location = 0) out vec4 tDiffuse;
 layout (location = 1) out vec3 tNormal;
 layout (location = 2) out vec3 tPos;
@@ -16,20 +18,39 @@ in mat3 TBN;
 in vec3 _id;
 
 //textures
-uniform sampler2D diffuse[8];
+uniform sampler2D diffuse[TEXTURES_AMOUNT];
 
 uniform sampler2D texture_mask;
 uniform sampler2D texture_mask1;
+uniform sampler2D texture_mask2;
 
 uniform int isPicking;
+uniform bool hasShadowMap = false;
+
+//Shadowmapping stuff
+uniform sampler2D shadow_map;
+uniform mat4 LightProjectionMat;
+uniform mat4 LightViewMat;
+uniform float shadow_bias;
 
 float getFactor(int id, vec2 uv){
     vec4 mask;
 	int maskid = id / 4;
-	if(maskid == 0)
-        mask = texture(texture_mask, uv);
-    if(maskid == 1)
-        mask = texture(texture_mask1, uv);
+	
+	switch(maskid){
+        case 0:{
+            mask = texture(texture_mask, uv);
+            break;
+        }
+        case 1:{
+            mask = texture(texture_mask1, uv);
+            break;
+        }
+        case 2:{
+            mask = texture(texture_mask2, uv);
+            break;
+        }
+	}
     
     float factor = 0;
     int factorid = id % 4;
@@ -75,6 +96,22 @@ vec3 getDiffuse(int id, vec2 uv, int multiplyer){
             return texture(diffuse[3], uv * multiplyer).xyz;
             break;
         }
+        case 4:{
+            return texture(diffuse[4], uv * multiplyer).xyz;
+            break;
+        }
+        case 5:{
+            return texture(diffuse[5], uv * multiplyer).xyz;
+            break;
+        }
+        case 6:{
+            return texture(diffuse[6], uv * multiplyer).xyz;
+            break;
+        }
+        case 7:{
+            return texture(diffuse[7], uv * multiplyer).xyz;
+            break;
+        }
         
     }
 }
@@ -82,7 +119,7 @@ vec3 getDiffuse(int id, vec2 uv, int multiplyer){
 vec3 getFragment(vec2 uv, int multiplyer){
     vec3 result = vec3(0,0,0);
 
-    for(int i = 0; i < 8; i ++){
+    for(int i = 0; i < TEXTURES_AMOUNT; i ++){
         float factor = getFactor(i, uv);
         vec3 diffuse = getDiffuse(i, uv, multiplyer);
         
@@ -90,6 +127,28 @@ vec3 getFragment(vec2 uv, int multiplyer){
     }
         
     return result;
+}
+
+void _shadow(){
+    if(hasShadowMap){
+        vec4 objPosLightSpace = LightProjectionMat * LightViewMat * vec4(FragPos, 1.0);
+        vec3 ShadowProjection = (objPosLightSpace.xyz / objPosLightSpace.w) / 2.0 + 0.5;
+	
+        float real_depth = ShadowProjection.z;
+
+        for(int x = 0; x < 8; x ++){
+            for(int y = 0; y < 8; y ++){
+                vec2 _offset = vec2(x, y);
+            
+                vec4 shadowmap = texture(shadow_map, ShadowProjection.xy + _offset / 2048);
+                float texture_depth = shadowmap.r;
+                tMasks.g += (real_depth - shadow_bias > texture_depth) ? 0.01 : 0.0;
+            }
+        }
+        
+        if(real_depth > 1.0) tMasks.g = 0.0;
+        
+	}
 }
 
 void main(){
@@ -103,10 +162,13 @@ void main(){
 	tNormal = Normal;
 	tMasks = vec4(1.0, 0, 0, 0);
 
+	
+	
 	if(isPicking == 1){
 		FragColor = vec4(_id / (255 * 2), 1);
 	}
     if(isPicking == 0){
+        _shadow();
 		FragColor = vec4(getFragment(uv, 8), 0);
 	}	
 	

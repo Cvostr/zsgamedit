@@ -78,15 +78,6 @@ bool GameObject::addLabelProperty(){
     return addProperty(GO_PROPERTY_TYPE_LABEL);
 }
 
-bool GameObject::hasMesh(){
-    MeshProperty* mesh_prop = static_cast<MeshProperty*>(this->getPropertyPtrByType(GO_PROPERTY_TYPE_MESH));
-    if(mesh_prop != nullptr){
-        if(!mesh_prop->active) return false;
-        if(mesh_prop->mesh_ptr != nullptr) return true;
-    }
-    return false;
-}
-
 GameObjectProperty* GameObject::getPropertyPtrByType(PROPERTY_TYPE property){
     unsigned int props = static_cast<unsigned int>(this->props_num);
     for(unsigned int prop_i = 0; prop_i < props; prop_i ++){
@@ -397,8 +388,28 @@ void GameObject::copyTo(GameObject* dest){
     dest->str_id = this->str_id;
 }
 
+bool GameObject::hasMesh(){
+    MeshProperty* mesh_prop = static_cast<MeshProperty*>(this->getPropertyPtrByType(GO_PROPERTY_TYPE_MESH));
+    if(mesh_prop != nullptr){
+        if(!mesh_prop->active) return false;
+        if(mesh_prop->mesh_ptr != nullptr) return true;
+    }
+    return false;
+}
+
+bool GameObject::hasTerrain(){
+    TerrainProperty* terrain = getPropertyPtr<TerrainProperty>();
+    if(terrain != nullptr){
+        if(!terrain->active) return false;
+        return true;
+    }
+    return false;
+}
+
 void GameObject::DrawMesh(){
     MeshProperty* mesh_prop = static_cast<MeshProperty*>(this->getPropertyPtrByType(GO_PROPERTY_TYPE_MESH));
+    TerrainProperty* terrain_prop = getPropertyPtr<TerrainProperty>();
     //Draw default mesh
-    mesh_prop->mesh_ptr->Draw();
+    if(mesh_prop != nullptr) mesh_prop->mesh_ptr->Draw();
+    if(terrain_prop != nullptr) terrain_prop->DrawMesh();
 }

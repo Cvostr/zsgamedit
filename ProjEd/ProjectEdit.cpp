@@ -303,6 +303,7 @@ void EditWindow::onSceneSave(){
     if(hasSceneFile == false){ //If new created scene without file
         onSceneSaveAs(); //Show dialog and save
     }else{
+        _ed_actions_container->hasChangesUnsaved = false;
         world.saveToFile(this->scene_path, render->getRenderSettings());
     }
 }

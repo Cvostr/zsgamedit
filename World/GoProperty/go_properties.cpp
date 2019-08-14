@@ -267,24 +267,17 @@ void TransformProperty::onPreRender(RenderPipeline* pipeline){
 }
 
 void TransformProperty::setTranslation(ZSVECTOR3 new_translation){
-
     this->translation = new_translation;
-    updateMat();
-/*
-    if(go_link.world_ptr->isCollide(this) && go_link.ptr->isRigidbody()){ //if really collides
-        this->translation = temp_pos; //Set temporary value
-        updateMat(); //Update matrix again
-        return;
-    }*/
+    onValueChanged();
 }
 
 void TransformProperty::setScale(ZSVECTOR3 new_scale){
     this->scale = new_scale;
-    updateMat();
+    onValueChanged();
 }
 void TransformProperty::setRotation(ZSVECTOR3 new_rotation){
     this->rotation = new_rotation;
-    updateMat();
+    onValueChanged();
 }
 
 void TransformProperty::updateMat(){
@@ -399,7 +392,6 @@ void LabelProperty::onValueChanged(){
     }
 
     this->list_item_ptr->setText(0, this->label);
-    //this->go_link.updLinkPtr()->active = isActiveToggle;
 }
 
 void LabelProperty::copyTo(GameObjectProperty* dest){
@@ -676,13 +668,13 @@ void MaterialProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
     area->rel_path = &material_path;
     area->resource_type = RESOURCE_TYPE_MATERIAL; //It should load meshes only
     inspector->addPropertyArea(area);
-
-    BoolCheckboxArea* receiveShdws = new BoolCheckboxArea;
-    receiveShdws->setLabel("Receive Shadows ");
-    receiveShdws->go_property = static_cast<void*>(this);
-    receiveShdws->bool_ptr = &this->receiveShadows;
-    inspector->addPropertyArea(receiveShdws);
-
+    if(material_ptr->group_ptr->acceptShadows){
+        BoolCheckboxArea* receiveShdws = new BoolCheckboxArea;
+        receiveShdws->setLabel("Receive Shadows ");
+        receiveShdws->go_property = static_cast<void*>(this);
+        receiveShdws->bool_ptr = &this->receiveShadows;
+        inspector->addPropertyArea(receiveShdws);
+    }
     if(material_ptr == nullptr) return;
 
     ComboBoxArea* mt_shader_group_area = new ComboBoxArea;
@@ -1017,6 +1009,7 @@ void RigidbodyProperty::copyTo(GameObjectProperty* dest){
     rigi_prop->gravity = this->gravity;
     rigi_prop->linearVel = this->linearVel;
     rigi_prop->coll_type = this->coll_type;
+    rigi_prop->angularVel = this->angularVel;
 }
 
 void ScriptGroupProperty::onValueChanged(){
@@ -1189,6 +1182,7 @@ TerrainProperty::TerrainProperty(){
     this->Width = 500;
     this->Length = 500;
     this->MaxHeight = 500;
+    castShadows = true;
 
     this->range = 15;
     this->editHeight = 10;
@@ -1224,6 +1218,12 @@ void TerrainProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
     MHeight->value = &this->MaxHeight; //Ptr to our vector
     MHeight->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
     inspector->addPropertyArea(MHeight);
+
+    BoolCheckboxArea* castShdws = new BoolCheckboxArea;
+    castShdws->setLabel("Cast Shadows ");
+    castShdws->go_property = static_cast<void*>(this);
+    castShdws->bool_ptr = &this->castShadows;
+    inspector->addPropertyArea(castShdws);
 
     //Add button to add objects
     AreaButton* clear_btn = new AreaButton;
@@ -1275,7 +1275,7 @@ void TerrainProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
 
 }
 
-void TerrainProperty::onPreRender(RenderPipeline* pipeline){
+void TerrainProperty::onRender(RenderPipeline* pipeline){
     if(hasChanged){
         this->data.generateGLMesh();
         hasChanged = false;
@@ -1285,19 +1285,26 @@ void TerrainProperty::onPreRender(RenderPipeline* pipeline){
     if(mat == nullptr) return;
     //Apply material shader
     mat->onRender(pipeline);
+}
+
+void TerrainProperty::DrawMesh(){
     data.Draw();
 }
+
 void TerrainProperty::onValueChanged(){
     _inspector_win->updateRequired = true;
 }
 
 void TerrainProperty::onAddToObject(){
+    //relative path to terrain file
     this->file_label = *this->go_link.updLinkPtr()->label + ".terrain";
+    //Allocate terrain
     data.alloc(this->Width, this->Length);
+    //Generate opengl mesh to draw
     data.generateGLMesh();
-
+    //absolute path to terrain file
     std::string fpath = this->go_link.world_ptr->proj_ptr->root_path.toStdString() + "/" + this->file_label.toStdString();
-
+    //Create and save file
     data.saveToFile(fpath.c_str());
 }
 
