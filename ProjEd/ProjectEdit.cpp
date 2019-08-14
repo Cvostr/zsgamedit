@@ -59,6 +59,8 @@ EditWindow::EditWindow(QWidget *parent) :
     QObject::connect(ui->actionNew_Cube, SIGNAL(triggered()), this, SLOT(addNewCube()));
     QObject::connect(ui->actionNew_Light, SIGNAL(triggered()), this, SLOT(addNewLight()));
     QObject::connect(ui->actionNew_Tile, SIGNAL(triggered()), this, SLOT(addNewTile()));
+    QObject::connect(ui->actionNew_Terrain, SIGNAL(triggered()), this, SLOT(addNewTerrain()));
+
 
     QObject::connect(ui->actionRender_settings, SIGNAL(triggered()), this, SLOT(openRenderSettings()));
 
@@ -296,6 +298,8 @@ void EditWindow::onOpenScene(){
 }
 
 void EditWindow::onSceneSave(){
+    if(isSceneRun) return; //No save during scene run
+
     if(hasSceneFile == false){ //If new created scene without file
         onSceneSaveAs(); //Show dialog and save
     }else{
@@ -421,7 +425,23 @@ void EditWindow::addNewTile(){
     transform->scale = ZSVECTOR3(100, 100, 1);
     transform->updateMat();
 }
+void EditWindow::addNewTerrain(){
+    GameObject* obj = onAddNewGameObject();
 
+    obj->addProperty(GO_PROPERTY_TYPE_MATERIAL); //Creates material inside
+
+    //Set new name to object
+    int add_num = 0; //Declaration of addititonal integer
+    world.getAvailableNumObjLabel("Terrain_", &add_num);
+    *obj->label = "Terrain_" + QString::number(add_num);
+    obj->item_ptr->setText(0, *obj->label);
+    //Add terrain property
+    obj->addProperty(GO_PROPERTY_TYPE_TERRAIN); //Creates terrain inside
+    obj->getPropertyPtr<TerrainProperty>()->onAddToObject();
+
+    updateFileList();
+
+}
 void EditWindow::setupObjectsHieList(){
     QTreeWidget* w_ptr = ui->objsList; //Getting pointer to objects list widget
     w_ptr->clear(); //Clears widget
@@ -987,7 +1007,7 @@ void EditWindow::onMouseMotion(int relX, int relY){
     }
 
     //We are in 2D project, move camera by the mouse and rotate it
-    if(project.perspective == 3 && !isSceneRun){//Only affective in 3D
+    if(project.perspective == 3 && !isWorldCamera){//Only affective in 3D
 
         if(input_state.isMidBtnHold == true){
             this->cam_yaw += relX * 0.16f;

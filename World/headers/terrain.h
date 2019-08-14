@@ -44,6 +44,7 @@ public:
     void modifyTexture(int originX, int originY, int range, unsigned char texture);
 
     void sum(unsigned char* ptr, int val);
+    void reduce(unsigned char* ptr, int val);
 
     TerrainData();
 };

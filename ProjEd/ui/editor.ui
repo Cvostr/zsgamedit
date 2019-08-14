@@ -133,9 +133,11 @@
     <addaction name="actionNew_Cube"/>
     <addaction name="actionNew_Light"/>
     <addaction name="actionNew_Tile"/>
+    <addaction name="actionNew_Terrain"/>
     <addaction name="separator"/>
     <addaction name="actionToggle_Cameras"/>
     <addaction name="actionRender_settings"/>
+    <addaction name="actionPhysics_Settings"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -236,6 +238,16 @@
   <action name="actionPaste">
    <property name="text">
     <string>Paste</string>
+   </property>
+  </action>
+  <action name="actionNew_Terrain">
+   <property name="text">
+    <string>New Terrain</string>
+   </property>
+  </action>
+  <action name="actionPhysics_Settings">
+   <property name="text">
+    <string>Physics Settings</string>
    </property>
   </action>
  </widget>

@@ -33,16 +33,50 @@ float getFactor(int id, vec2 uv){
     
     float factor = 0;
     int factorid = id % 4;
-    if(factorid == 0)
-        factor = mask.r;
-    if(factorid == 1)
-        factor = mask.g;
-    if(factorid == 2)
-        factor = mask.b;
-    if(factorid == 3)
-        factor = mask.a;
     
+    switch(factorid){
+        case 0:{
+            factor = mask.r;
+            break;
+        }
+        case 1:{
+            factor = mask.g;
+            break;
+        }
+        case 2:{
+            factor = mask.b;
+            break;
+        }
+        case 3:{
+            factor = mask.a;
+            break;
+        }
+    
+    }
+
     return factor;
+}
+
+vec3 getDiffuse(int id, vec2 uv, int multiplyer){
+    switch(id){
+        case 0:{
+            return texture(diffuse[0], uv * multiplyer).xyz;
+            break;
+        }
+        case 1:{
+            return texture(diffuse[1], uv * multiplyer).xyz;
+            break;
+        }
+        case 2:{
+            return texture(diffuse[2], uv * multiplyer).xyz;
+            break;
+        }
+        case 3:{
+            return texture(diffuse[3], uv * multiplyer).xyz;
+            break;
+        }
+        
+    }
 }
 
 vec3 getFragment(vec2 uv, int multiplyer){
@@ -50,7 +84,7 @@ vec3 getFragment(vec2 uv, int multiplyer){
 
     for(int i = 0; i < 8; i ++){
         float factor = getFactor(i, uv);
-        vec3 diffuse = texture(diffuse[i], uv * multiplyer).xyz;
+        vec3 diffuse = getDiffuse(i, uv, multiplyer);
         
         result = mix(result, diffuse, factor);
     }

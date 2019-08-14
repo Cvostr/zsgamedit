@@ -28,6 +28,14 @@ void TerrainData::sum(unsigned char* ptr, int val){
     }
 }
 
+void TerrainData::reduce(unsigned char* ptr, int val){
+    if(static_cast<int>(*ptr) - val >= 0)
+        *ptr -= val;
+    else {
+        *ptr = 0;
+    }
+}
+
 void TerrainData::initGL(){
     glGenVertexArrays(1, &this->VAO);
     glGenBuffers(1, &this->VBO);
@@ -190,7 +198,7 @@ void TerrainData::saveToFile(const char* file_path){
 
     for(int i = 0; i < W * H; i ++){
         world_stream.write(reinterpret_cast<char*>(&data[i].height), sizeof(float));
-        for(int tex_factor = 0; tex_factor < 8; tex_factor ++)
+        for(int tex_factor = 0; tex_factor < TEXTURES_AMOUNT; tex_factor ++)
             world_stream.write(reinterpret_cast<char*>(&data[i].texture_factors[tex_factor]), sizeof(unsigned char));
     }
 
@@ -208,7 +216,7 @@ void TerrainData::loadFromFile(const char* file_path){
 
     for(int i = 0; i < W * H; i ++){
         world_stream.read(reinterpret_cast<char*>(&data[i].height), sizeof(float));
-        for(int tex_factor = 0; tex_factor < 8; tex_factor ++)
+        for(int tex_factor = 0; tex_factor < TEXTURES_AMOUNT; tex_factor ++)
             world_stream.read(reinterpret_cast<char*>(&data[i].texture_factors[tex_factor]), sizeof(unsigned char));
     }
 
@@ -239,11 +247,20 @@ void TerrainData::modifyTexture(int originX, int originY, int range, unsigned ch
             //if pixel is in circle
             float dist = getDistance(ZSVECTOR3(x, y, 0), ZSVECTOR3(originX, originY, 0));
             if(dist <= range - modif){
+                for(unsigned char texture_f = 0; texture_f < TEXTURES_AMOUNT; texture_f ++){
+                    if(texture_f != texture)
+                        reduce(&data[y * H + x].texture_factors[texture_f], 25);
+                }
                 sum(&data[y * H + x].texture_factors[texture], 25);
             }
             for(int i = 0; i < modif / 2; i ++){
                 if(dist > range - modif + (i) * 2 && dist <= range - modif + (i + 1) * 2){
-                    sum(&data[y * H + x].texture_factors[texture], 25 / ((i + 1) * 2));
+                    int mod = 25 / ((i + 1) * 2);
+                    for(unsigned char texture_f = 0; texture_f < TEXTURES_AMOUNT; texture_f ++){
+                        if(texture_f != texture)
+                            reduce(&data[y * H + x].texture_factors[texture_f], mod);
+                    }
+                    sum(&data[y * H + x].texture_factors[texture], mod);
                 }
             }
         }

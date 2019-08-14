@@ -127,7 +127,7 @@ void GameObject::saveProperties(std::ofstream* stream){
         case GO_PROPERTY_TYPE_RIGIDBODY:{
             RigidbodyProperty* ptr = static_cast<RigidbodyProperty*>(property_ptr);
             //write collider type
-            stream->write(reinterpret_cast<char*>(&ptr->hasGravity), sizeof(bool));
+            stream->write(reinterpret_cast<char*>(&ptr->coll_type), sizeof(COLLIDER_TYPE));
             //write isTrigger boolean
             stream->write(reinterpret_cast<char*>(&ptr->mass), sizeof(float));
 
@@ -333,7 +333,7 @@ void GameObject::loadProperty(std::ifstream* world_stream){
         //read isTrigger boolean
         world_stream->read(reinterpret_cast<char*>(&ptr->isTrigger), sizeof(bool));
 
-        world_ptr->pushCollider(ptr); //send collider to world
+        //world_ptr->pushCollider(ptr); //send collider to world
 
         break;
     }
@@ -341,8 +341,7 @@ void GameObject::loadProperty(std::ifstream* world_stream){
         RigidbodyProperty* ptr = static_cast<RigidbodyProperty*>(prop_ptr);
         world_stream->seekg(1, std::ofstream::cur);
         //read collider type
-        world_stream->read(reinterpret_cast<char*>(&ptr->hasGravity), sizeof(bool));
-        //read isTrigger boolean
+        world_stream->read(reinterpret_cast<char*>(&ptr->coll_type), sizeof(COLLIDER_TYPE));
         world_stream->read(reinterpret_cast<char*>(&ptr->mass), sizeof(float));
 
         break;
@@ -365,8 +364,7 @@ void GameObject::loadProperty(std::ifstream* world_stream){
         *world_stream >> file_path; //Write material relpath
         ptr->file_label = QString::fromStdString(file_path);
         world_stream->seekg(1, std::ofstream::cur);
-        //write dimensions
-
+        //read dimensions
         world_stream->read(reinterpret_cast<char*>(&ptr->Width), sizeof(float));
         world_stream->read(reinterpret_cast<char*>(&ptr->Length), sizeof(float));
         world_stream->read(reinterpret_cast<char*>(&ptr->MaxHeight), sizeof(float));

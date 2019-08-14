@@ -228,6 +228,38 @@ void TransformProperty::addPropertyInterfaceToInspector(InspectorWin* inspector)
 
 void TransformProperty::onValueChanged(){
     updateMat();
+
+    ColliderProperty* coll = this->go_link.updLinkPtr()->getPropertyPtr<ColliderProperty>();
+    RigidbodyProperty* rigid = this->go_link.updLinkPtr()->getPropertyPtr<RigidbodyProperty>();
+
+    PhysicalProperty* phys = nullptr;
+
+    if(coll == nullptr)
+        phys = rigid;
+    else {
+        phys = coll;
+    }
+
+    if(go_link.updLinkPtr()->isRigidbody()){
+        if(!phys->created) return;
+        btTransform startTransform;
+        startTransform.setIdentity();
+        startTransform.setOrigin(btVector3( btScalar(_last_translation.X),
+                                                    btScalar(_last_translation.Y),
+                                                    btScalar(_last_translation.Z)));
+
+        startTransform.setRotation(btQuaternion(_last_rotation.X, _last_rotation.Y, _last_rotation.Z));
+
+
+        phys->rigidBody->setWorldTransform(startTransform);
+        phys->rigidBody->getMotionState()->setWorldTransform(startTransform);
+        phys->rigidBody->activate(true);
+
+        phys->shape->setLocalScaling(btVector3(btScalar(_last_scale.X),
+                                               btScalar(_last_scale.Y),
+                                               btScalar(_last_scale.Z)));
+
+    }
 }
 
 void TransformProperty::onPreRender(RenderPipeline* pipeline){
@@ -235,16 +267,15 @@ void TransformProperty::onPreRender(RenderPipeline* pipeline){
 }
 
 void TransformProperty::setTranslation(ZSVECTOR3 new_translation){
-    ZSVECTOR3 temp_pos = this->translation;
 
     this->translation = new_translation;
     updateMat();
-
+/*
     if(go_link.world_ptr->isCollide(this) && go_link.ptr->isRigidbody()){ //if really collides
         this->translation = temp_pos; //Set temporary value
         updateMat(); //Update matrix again
         return;
-    }
+    }*/
 }
 
 void TransformProperty::setScale(ZSVECTOR3 new_scale){
@@ -781,7 +812,7 @@ void MaterialProperty::onValueChanged(){
         _inspector_win->updateRequired = true;
     }
 
-
+    if(material_ptr == nullptr) return;
     if(material_ptr->group_ptr == nullptr) { //if material has no MaterialShaderPropertyGroup
         //if user specified group first time
         if(MtShProps::getMtShaderPropertyGroupByLabel(this->group_label) != nullptr){
@@ -840,33 +871,22 @@ void MaterialProperty::copyTo(GameObjectProperty* dest){
     MaterialProperty* mat_prop = static_cast<MaterialProperty*>(dest);
     mat_prop->material_path = this->material_path;
     mat_prop->material_ptr = this->material_ptr;
+    mat_prop->group_label = this->group_label;
 }
 
 void MaterialProperty::onAddToObject(){
-    //go_link.updLinkPtr()->render_type = GO_RENDER_TYPE_MATERIAL; //set flag to MATERIAL
-}
 
+}
+/*
 void ColliderProperty::onAddToObject(){
     this->go_link.world_ptr->pushCollider(this);
 } //will register in world
 void ColliderProperty::onObjectDeleted(){
     this->go_link.world_ptr->removeCollider(this);
 } //unregister in world
+*/
 void ColliderProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
-    AreaRadioGroup* group = new AreaRadioGroup; //allocate button layout
-    group->value_ptr = reinterpret_cast<uint8_t*>(&this->coll_type);
-    group->go_property = static_cast<void*>(this);
-
-    QRadioButton* box_radio = new QRadioButton; //allocate first radio
-    box_radio->setText("Box");
-    QRadioButton* cube_radio = new QRadioButton;
-    cube_radio->setText("Cube");
-    //add created radio buttons
-    group->addRadioButton(box_radio);
-    group->addRadioButton(cube_radio);
-    //Register in Inspector
-    inspector->registerUiObject(group);
-    inspector->getContentLayout()->addLayout(group->btn_layout);
+    addColliderRadio(inspector);
 
     //isTrigger checkbox
     BoolCheckboxArea* istrigger = new BoolCheckboxArea;
@@ -874,6 +894,11 @@ void ColliderProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
     istrigger->go_property = static_cast<void*>(this);
     istrigger->bool_ptr = &this->isTrigger;
     inspector->addPropertyArea(istrigger);
+}
+
+void ColliderProperty::onUpdate(float deltaTime){
+    if(!created)
+        init();
 }
 
 void ColliderProperty::copyTo(GameObjectProperty* dest){
@@ -892,89 +917,94 @@ ColliderProperty::ColliderProperty(){
     type = GO_PROPERTY_TYPE_COLLIDER;
 
     isTrigger = false;
-    coll_type = COLLIDER_TYPE_BOX;
+    coll_type = COLLIDER_TYPE_CUBE;
+    created = false;
+    mass = 0.0f; //collider is static
 }
 
 RigidbodyProperty::RigidbodyProperty(){
 
     mass = 1.0f;
-    hasGravity = true;
-
-    type = GO_PROPERTY_TYPE_RIGIDBODY;
-
     created = false;
+    type = GO_PROPERTY_TYPE_RIGIDBODY;
+    coll_type = COLLIDER_TYPE_CUBE;
+
+    gravity = ZSVECTOR3(0.f, -10.f, 0.f);
+    linearVel = ZSVECTOR3(0.f, 0.f, 0.f);
 }
 
 bool GameObject::isRigidbody(){
-    if(getPropertyPtrByType(GO_PROPERTY_TYPE_RIGIDBODY) != nullptr)
+    if(getPropertyPtrByType(GO_PROPERTY_TYPE_RIGIDBODY) != nullptr || getPropertyPtrByType(GO_PROPERTY_TYPE_COLLIDER) != nullptr)
         return true;
 
     return false;
 }
 
 void RigidbodyProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
-    BoolCheckboxArea* grav = new BoolCheckboxArea;
-    grav->setLabel("has gravity ");
-    grav->go_property = static_cast<void*>(this);
-    grav->bool_ptr = &this->hasGravity;
-    inspector->addPropertyArea(grav);
+    PhysicalProperty::addColliderRadio(inspector);
+    PhysicalProperty::addMassField(inspector);
 
-    FloatPropertyArea* mass_area = new FloatPropertyArea;
-    mass_area->setLabel("Mass"); //Its label
-    mass_area->value = &this->mass;
-    mass_area->go_property = static_cast<void*>(this);
-    inspector->addPropertyArea(mass_area);
+    Float3PropertyArea* gravityE = new Float3PropertyArea; //New property area
+    gravityE->setLabel("Gravity"); //Its label
+    gravityE->vector = &this->gravity; //Ptr to our vector
+    gravityE->go_property = static_cast<void*>(this);
+    inspector->addPropertyArea(gravityE);
+
+    Float3PropertyArea* linearE = new Float3PropertyArea; //New property area
+    linearE->setLabel("Linear"); //Its label
+    linearE->vector = &this->linearVel; //Ptr to our vector
+    linearE->go_property = static_cast<void*>(this);
+    inspector->addPropertyArea(linearE);
 }
 
-void RigidbodyProperty::init(){
-    TransformProperty* transform = this->go_link.updLinkPtr()->getPropertyPtr<TransformProperty>();
+void RigidbodyProperty::onUpdate(float deltaTime){
+    if(!created){
+        //if uninitialized
+        init();
 
-    shape = new btBoxShape(btVector3(btScalar(transform->_last_scale.X),
-                                     btScalar(transform->_last_scale.Y),
-                                     btScalar(transform->_last_scale.Z)));
+        this->rigidBody->setGravity(btVector3(gravity.X, gravity.Y, gravity.Z));
+        this->rigidBody->setLinearVelocity(btVector3(linearVel.X, linearVel.Y, linearVel.Z));
+    }
+    else{
+        TransformProperty* transform = this->go_link.updLinkPtr()->getPropertyPtr<TransformProperty>();
+        btVector3 current_pos = rigidBody->getCenterOfMassPosition();
+        btQuaternion current_rot = rigidBody->getWorldTransform().getRotation();
+        //get current position
+        float curX = current_pos.getX();
+        float curY = current_pos.getY();
+        float curZ = current_pos.getZ();
 
+        float rotX = 0, rotY = 0, rotZ = 0;
+        //Convert quaternion to euler
+        current_rot.getEulerZYX(rotZ, rotY, rotX);
+        //Convert radians to degrees
+        rotX = rotX / ZS_PI * 180.0f;
+        rotY = rotY / ZS_PI * 180.0f;
+        rotZ = rotZ / ZS_PI * 180.0f;
 
+        //if(transform->translation != ZSVECTOR3(curX, curY, curZ))
+            transform->translation = ZSVECTOR3(curX, curY, curZ);
+        //if(transform->_last_rotation != ZSVECTOR3(rotX, rotY, rotZ))
+            transform->rotation = ZSVECTOR3(rotX, rotY, rotZ);
+    }
+}
+
+void RigidbodyProperty::onValueChanged(){
+    if(!created) return;
     bool isDynamic = (mass != 0.f);
 
     btVector3 localInertia(0, 0, 0);
     if (isDynamic)
         shape->calculateLocalInertia(mass, localInertia);
+    //SET mass to bullet rigidbody
+    this->rigidBody->setMassProps(mass, localInertia);
+    this->rigidBody->setGravity(btVector3(gravity.X, gravity.Y, gravity.Z));
+    this->rigidBody->setLinearVelocity(btVector3(linearVel.X, linearVel.Y, linearVel.Z));
 
-    btTransform startTransform;
-    startTransform.setIdentity();
-    startTransform.setOrigin(btVector3( btScalar(transform->_last_translation.X),
-                                                btScalar(transform->_last_translation.Y),
-                                                btScalar(transform->_last_translation.Z)));
-
-     //using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
-     btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
-
-     btRigidBody::btRigidBodyConstructionInfo cInfo(mass, myMotionState, shape, localInertia);
-
-     rigidBody = new btRigidBody(cInfo);
-     rigidBody->setUserIndex(go_link.updLinkPtr()->array_index);
-     //add rigidbody to world
-     go_link.world_ptr->physical_world->addRidigbodyToWorld(rigidBody);
-
-     created = true;
+    delete shape;
+    updateCollisionShape();
+    this->rigidBody->setCollisionShape(shape);
 }
-
-void RigidbodyProperty::onUpdate(float deltaTime){
-    if(!created)
-        init();
-    else{
-        TransformProperty* transform = this->go_link.updLinkPtr()->getPropertyPtr<TransformProperty>();
-        btVector3 current_pos = rigidBody->getCenterOfMassPosition();
-
-        float curX = current_pos.getX();
-        float curY = current_pos.getY();
-        float curZ = current_pos.getZ();
-
-        transform->translation = ZSVECTOR3(curX, curY, curZ);
-        transform->updateMat();
-    }
-}
-
 
 void RigidbodyProperty::copyTo(GameObjectProperty* dest){
     if(dest->type != GO_PROPERTY_TYPE_RIGIDBODY) return;
@@ -983,8 +1013,10 @@ void RigidbodyProperty::copyTo(GameObjectProperty* dest){
     GameObjectProperty::copyTo(dest);
 
     RigidbodyProperty* rigi_prop = static_cast<RigidbodyProperty*>(dest);
-    rigi_prop->hasGravity = this->hasGravity;
     rigi_prop->mass = this->mass;
+    rigi_prop->gravity = this->gravity;
+    rigi_prop->linearVel = this->linearVel;
+    rigi_prop->coll_type = this->coll_type;
 }
 
 void ScriptGroupProperty::onValueChanged(){
@@ -1160,6 +1192,7 @@ TerrainProperty::TerrainProperty(){
 
     this->range = 15;
     this->editHeight = 10;
+    this->textureid = 0;
 
     edit_mode = 1;
 
@@ -1272,10 +1305,9 @@ void TerrainProperty::onMouseClick(int posX, int posY, int screenY, bool isLeftB
     if(isLeftButtonHold){
         unsigned char _data[4];
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-
+        //get pointer to material property
         MaterialProperty* mat = this->go_link.updLinkPtr()->getPropertyPtr<MaterialProperty>();
-        if(mat == nullptr) return;
+        if(mat == nullptr || mat->material_ptr == nullptr) return;
         //Apply material shader
         mat->material_ptr->group_ptr->render_shader->Use();
         mat->material_ptr->group_ptr->render_shader->setGLuniformInt("isPicking", 1);
@@ -1309,7 +1341,7 @@ void TerrainProperty::onMouseMotion(int posX, int posY, int relX, int relY, int 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         MaterialProperty* mat = this->go_link.updLinkPtr()->getPropertyPtr<MaterialProperty>();
-        if(mat == nullptr) return;
+        if(mat == nullptr || mat->material_ptr == nullptr) return;
         //Apply material shader
         mat->material_ptr->group_ptr->render_shader->Use();
         mat->material_ptr->group_ptr->render_shader->setGLuniformInt("isPicking", 1);

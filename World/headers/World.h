@@ -31,7 +31,7 @@
 #define OBJ_PROPS_SIZE 11
 #define MAX_OBJS 12000
 
-enum COLLIDER_TYPE {COLLIDER_TYPE_NONE, COLLIDER_TYPE_BOX, COLLIDER_TYPE_CUBE};
+
 
 enum PROPERTY_TYPE{
     GO_PROPERTY_TYPE_NONE,
@@ -70,6 +70,7 @@ private:
 public:
     void stepSimulation(float stepSimulation);
     void addRidigbodyToWorld(btRigidBody* body);
+    void removeRidigbodyFromWorld(btRigidBody* body);
     PhysicalWorld(PhysicalWorldSettings* settings);
 };
 
@@ -155,20 +156,6 @@ public:
     TransformProperty();
 };
 
-class ColliderProperty : public GameObjectProperty{
-public:
-    void onAddToObject(); //will register in world
-    void onObjectDeleted(); //unregister in world
-    void addPropertyInterfaceToInspector(InspectorWin* inspector);
-    void copyTo(GameObjectProperty* dest);
-
-    TransformProperty* getTransformProperty();
-
-    bool isTrigger;
-    COLLIDER_TYPE coll_type;
-
-    ColliderProperty();
-};
 
 class GameObject{
 public:
@@ -287,7 +274,7 @@ public:
     ZSPIRE::Camera world_camera;
 
     std::vector<GameObject> objects; //Vector, containing all gameobjects
-    std::list<ColliderProperty*> colliders; //Vector, containing all collider properties;
+    //std::list<ColliderProperty*> colliders; //Vector, containing all collider properties;
 
     GameObject* addObject(GameObject obj);
     GameObject* newObject(); //Add new object to world
@@ -329,9 +316,9 @@ public:
 
     void getAvailableNumObjLabel(QString label, int* result);
 
-    void pushCollider(ColliderProperty* property);
-    void removeCollider(ColliderProperty* property);
-    bool isCollide(TransformProperty* prop);
+   // void pushCollider(ColliderProperty* property);
+   // void removeCollider(ColliderProperty* property);
+    //bool isCollide(TransformProperty* prop);
 
     World();
 

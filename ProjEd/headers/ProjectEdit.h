@@ -110,6 +110,7 @@ public slots:
     void addNewCube();
     void addNewLight();
     void addNewTile();
+    void addNewTerrain();
 
     void onSceneSave();
     void onSceneSaveAs();

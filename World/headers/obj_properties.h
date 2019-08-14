@@ -12,6 +12,11 @@ enum LIGHTSOURCE_TYPE {
     LIGHTSOURCE_TYPE_POINT
 };
 
+enum COLLIDER_TYPE {COLLIDER_TYPE_NONE,
+                    COLLIDER_TYPE_BOX,
+                    COLLIDER_TYPE_CUBE,
+                    COLLIDER_TYPE_SPHERE};
+
 typedef uint8_t ZSLIGHTSOURCE_GL_ID;
 
 class ScriptGroupProperty : public GameObjectProperty {
@@ -123,22 +128,47 @@ public:
     LightsourceProperty();
 };
 
-class RigidbodyProperty : public GameObjectProperty{
-private:
-    bool created;
-    btRigidBody* rigidBody;
-    btCollisionShape* shape;
+class PhysicalProperty : public GameObjectProperty{
+    protected:
 
     void init();
+    void updateCollisionShape();
 public:
+        bool created;
+        btRigidBody* rigidBody;
+        btCollisionShape* shape;
+        COLLIDER_TYPE coll_type;
+        float mass;
+        void addColliderRadio(InspectorWin* inspector);
+        void addMassField(InspectorWin* inspector);
+        PhysicalProperty();
+};
 
-    float mass;
-    bool hasGravity;
-    COLLIDER_TYPE coll_type;
+class ColliderProperty : public PhysicalProperty{
+public:
+    //void onAddToObject(); //will register in world
+   // void onObjectDeleted(); //unregister in world
+    void addPropertyInterfaceToInspector(InspectorWin* inspector);
+    void copyTo(GameObjectProperty* dest);
+    void onUpdate(float deltaTime);
+    TransformProperty* getTransformProperty();
+
+    bool isTrigger;
+
+
+    ColliderProperty();
+};
+
+
+class RigidbodyProperty : public PhysicalProperty{
+public:
+    ZSVECTOR3 gravity;
+    ZSVECTOR3 linearVel;
 
     void addPropertyInterfaceToInspector(InspectorWin* inspector);
     void onUpdate(float deltaTime);
     void copyTo(GameObjectProperty* dest);
+    void onValueChanged();
 
     RigidbodyProperty();
 };

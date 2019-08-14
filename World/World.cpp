@@ -581,7 +581,7 @@ void World::storeObjectToPrefab(GameObject* object_ptr, QString file){
     //Call first object writing
     writeObjectToPrefab(object_ptr, &prefab_stream);
 }
-
+/*
 void World::pushCollider(ColliderProperty* property){
     this->colliders.push_back(property);
 }
@@ -636,7 +636,7 @@ bool World::isCollide(TransformProperty* prop){
     return false;
 }
 
-
+*/
 void World::clear(){
     //iterate over all objects and purge them all
     for(unsigned int objs_i = 0; objs_i < objects.size(); objs_i ++){
@@ -645,7 +645,7 @@ void World::clear(){
         obj_ptr->clearAll(false);
     }
     objects.clear();
-    colliders.clear();
+    //colliders.clear();
 }
 
 void World::putToShapshot(WorldSnapshot* snapshot){
@@ -700,7 +700,7 @@ void World::recoverFromSnapshot(WorldSnapshot* snapshot){
         }
         if(prop_ptr->type == GO_PROPERTY_TYPE_COLLIDER){ //If it is collider, we need to push it
             ColliderProperty* collider_p = static_cast<ColliderProperty*>(new_prop);
-            this->pushCollider(collider_p); //push collider
+            //this->pushCollider(collider_p); //push collider
         }
 
     }
