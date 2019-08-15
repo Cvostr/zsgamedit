@@ -289,6 +289,7 @@ void ZSPIRE::Mesh::DrawLines(){
     if(picked_mesh != this){ //if this mesh wasn't picked
         picked_mesh = this; //Setting pointer of this obj
         glBindVertexArray(this->meshVAO);
+        glBindBuffer(GL_ARRAY_BUFFER, this->meshVBO);
         if(this->indices_num != NO_INDICES) //if object uses indices
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->meshEBO);
     }

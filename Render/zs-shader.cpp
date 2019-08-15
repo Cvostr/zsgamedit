@@ -115,8 +115,10 @@ bool ZSPIRE::Shader::compileFromFile(const char* VSpath, const char* FSpath){
 	setGLuniformInt("diffuse", 0);
     setGLuniformInt("normal_map", 1);
     setGLuniformInt("specular_map", 2);
-    setGLuniformInt("transparent", 5);
+    setGLuniformInt("height_map", 3);
+    setGLuniformInt("diffuse2", 5);
     setGLuniformInt("shadow_map", 6);
+
     //UI shader
 	setGLuniformInt("sprite_map", 0);
     //Deffered shader
@@ -131,6 +133,8 @@ bool ZSPIRE::Shader::compileFromFile(const char* VSpath, const char* FSpath){
     setGLuniformInt("diffuse[2]", 2);
     setGLuniformInt("diffuse[3]", 3);
     setGLuniformInt("diffuse[4]", 4);
+    setGLuniformInt("diffuse[5]", 5);
+    setGLuniformInt("diffuse[6]", 6);
 
     setGLuniformInt("texture_mask", 16);
     setGLuniformInt("texture_mask1", 17);
@@ -243,19 +247,15 @@ void ZSPIRE::Shader::sendLight(unsigned int index, void* _light){
         std::string intensity;
         intensity = "lights[" + id_s + "].intensity";
 
-        //std::string spot_angle;
-        //spot_angle = "lights[" + std::to_string(index) + "].spot_angle";
-
-        //std::string spot_oangle;
-        //spot_oangle = "lights[" + std::to_string(index) + "].spot_out_angle";
+        std::string spot_angle;
+        spot_angle = "lights[" + std::to_string(index) + "].spot_angle";
 
         setGLuniformInt(type.c_str(), static_cast<int>(light->light_type));
         setGLuniformVec3(pos.c_str(), light->transform->_last_translation);
         setGLuniformVec3(dir.c_str(), light->direction);
         setGLuniformFloat(range.c_str(), light->range);
         setGLuniformFloat(intensity.c_str(), light->intensity);
-        //setGLuniformFloat(spot_angle.c_str(), light->spot_angle_rad);
-        //setGLuniformFloat(spot_oangle.c_str(), light->outrad);
+        setGLuniformFloat(spot_angle.c_str(), DegToRad(light->spot_angle));
         setGLuniformColor(color.c_str(), light->color);
     }
 }

@@ -26,21 +26,22 @@ void RenderSettings::defaults(){
 }
 
 void RenderPipeline::setup(int bufWidth, int bufHeight){
-    this->tile_shader.compileFromFile("Shaders/2d_tile/tile2d.vs", "Shaders/2d_tile/tile2d.fs");
+    if(this->project_struct_ptr->perspective == 2){
+        this->tile_shader.compileFromFile("Shaders/2d_tile/tile2d.vs", "Shaders/2d_tile/tile2d.fs");
+    }
     this->pick_shader.compileFromFile("Shaders/pick/pick.vs", "Shaders/pick/pick.fs");
     this->obj_mark_shader.compileFromFile("Shaders/mark/mark.vs", "Shaders/mark/mark.fs");
-    this->deffered_light.compileFromFile("Shaders/postprocess/deffered_light/deffered.vs", "Shaders/postprocess/deffered_light/deffered.fs");
-    this->diffuse3d_shader.compileFromFile("Shaders/3d/3d.vs", "Shaders/3d/3d.fs");
     this->ui_shader.compileFromFile("Shaders/ui/ui.vs", "Shaders/ui/ui.fs");
-    skybox.compileFromFile("Shaders/skybox/skybox.vs", "Shaders/skybox/skybox.fs");
-    shadowMap.compileFromFile("Shaders/shadowmap/shadowmap.vs", "Shaders/shadowmap/shadowmap.fs");
-    heightmap.compileFromFile("Shaders/heightmap/heightmap.vs", "Shaders/heightmap/heightmap.fs");
-
+    if(this->project_struct_ptr->perspective == 3){
+        this->deffered_light.compileFromFile("Shaders/postprocess/deffered_light/deffered.vs", "Shaders/postprocess/deffered_light/deffered.fs");
+        this->diffuse3d_shader.compileFromFile("Shaders/3d/3d.vs", "Shaders/3d/3d.fs");
+        skybox.compileFromFile("Shaders/skybox/skybox.vs", "Shaders/skybox/skybox.fs");
+        shadowMap.compileFromFile("Shaders/shadowmap/shadowmap.vs", "Shaders/shadowmap/shadowmap.fs");
+        heightmap.compileFromFile("Shaders/heightmap/heightmap.vs", "Shaders/heightmap/heightmap.fs");
+        this->gbuffer.create(bufWidth, bufHeight);
+    }
     ZSPIRE::setupDefaultMeshes();
-
-    this->gbuffer.create(bufWidth, bufHeight);
     removeLights();
-
     MtShProps::genDefaultMtShGroup(&diffuse3d_shader, &skybox, &heightmap);
 }
 
@@ -166,8 +167,71 @@ unsigned int RenderPipeline::render_getpickedObj(void* projectedit_ptr, int mous
 
     return pr_data;
 }
+void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr){
+    switch(this->project_struct_ptr->perspective){
+    case 2:{
+        render2D(w, projectedit_ptr);
+        break;
+    }
+    case 3:{
+        render3D(w, projectedit_ptr);
+        break;
+    }
+    }
+}
+void RenderPipeline::render2D(SDL_Window* w, void* projectedit_ptr){
+    EditWindow* editwin_ptr = static_cast<EditWindow*>(projectedit_ptr);
+    World* world_ptr = &editwin_ptr->world;
+    ZSPIRE::Camera* cam_ptr = nullptr; //We'll set it next
 
-void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr)
+    this->deltaTime = editwin_ptr->deltaTime;
+
+    if(editwin_ptr->isWorldCamera){
+        cam_ptr = &world_ptr->world_camera;
+    }else{
+        cam_ptr = &editwin_ptr->edit_camera;
+    }
+
+    this->cam = cam_ptr;
+    this->win_ptr = editwin_ptr;
+
+    glClearColor(0,0,0,1);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_BLEND); //Disable blending to render Skybox and shadows
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glViewport(0, 0, this->WIDTH, this->HEIGHT);
+
+    this->updateShadersCameraInfo(cam_ptr); //Send camera properties to all drawing shaders
+
+
+    //Iterate over all objects in the world
+    for(unsigned int obj_i = 0; obj_i < world_ptr->objects.size(); obj_i ++){
+        GameObject* obj_ptr = &world_ptr->objects[obj_i];
+        if(!obj_ptr->hasParent) //if it is a root object
+            obj_ptr->processObject(this); //Draw object
+    }
+
+    //compare pointers
+    if(editwin_ptr->obj_trstate.isTransforming == true && !editwin_ptr->isWorldCamera)
+        getGizmosRenderer()->drawTransformControls(editwin_ptr->obj_trstate.obj_ptr->getTransformProperty()->_last_translation, 100, 10);
+
+
+    for(unsigned int light_i = 0; light_i < this->lights_ptr.size(); light_i ++){
+        LightsourceProperty* _light_ptr = static_cast<LightsourceProperty*>(lights_ptr[light_i]);
+
+        this->tile_shader.sendLight(light_i, _light_ptr);
+    }
+    //send amount of lights to deffered shader
+    this->tile_shader.setGLuniformInt("lights_amount", static_cast<int>(lights_ptr.size()));
+    //free lights array
+    this->removeLights();
+
+
+    ZSPIRE::getPlaneMesh2D()->Draw(); //Draw screen
+
+    SDL_GL_SwapWindow(w); //Send rendered frame
+}
+void RenderPipeline::render3D(SDL_Window* w, void* projectedit_ptr)
 {
     EditWindow* editwin_ptr = static_cast<EditWindow*>(projectedit_ptr);
     World* world_ptr = &editwin_ptr->world;
@@ -193,7 +257,7 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr)
     gbuffer.bindFramebuffer();
     glClearColor(0,0,0,1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glDisable(GL_BLEND);
+    glDisable(GL_BLEND); //Disable blending to render Skybox and shadows
     glViewport(0, 0, this->WIDTH, this->HEIGHT);
 
     this->updateShadersCameraInfo(cam_ptr); //Send camera properties to all drawing shaders
@@ -247,7 +311,7 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr)
                                                                render_settings.ambient_light_color.b / 255.0f));
 
     ZSPIRE::getPlaneMesh2D()->Draw(); //Draw screen
-
+    /*
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -268,7 +332,7 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr)
     //c->DrawString(f, 11, ZSVECTOR2(10,10));
 
     //std::cout << static_cast<int>(deltaTime) << std::endl;
-
+    */
     SDL_GL_SwapWindow(w); //Send rendered frame
 }
 
@@ -313,7 +377,7 @@ void GameObject::Draw(RenderPipeline* pipeline){
             TransformProperty* transform_ptr = static_cast<TransformProperty*>(getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
             pipeline->getShadowmapShader()->Use();
             pipeline->getShadowmapShader()->setTransform(transform_ptr->transform_mat);
-
+            //Get castShadows boolean from several properties
             bool castShadows = (hasTerrain()) ? getPropertyPtr<TerrainProperty>()->castShadows : mesh_prop->castShadows;
 
             if(castShadows)
@@ -489,10 +553,10 @@ void TileProperty::onRender(RenderPipeline* pipeline){
     //Checking for transparent texture
     if(texture_transparent != nullptr){
         texture_transparent->Use(5); //Use this texture
-        tile_shader->setGLuniformInt("hasTransparentMap", 1); //Shader will use picked transparent texture
+        tile_shader->setGLuniformInt("hasDiffuseMap2", 1); //Shader will use picked transparent texture
 
     }else{
-        tile_shader->setGLuniformInt("hasTransparentMap", 0); //Shader will not use transparent texture
+        tile_shader->setGLuniformInt("hasDiffuseMap2", 0); //Shader will not use transparent texture
     }
     //Sending animation info
     if(anim_property.isAnimated && anim_state.playing == true){ //If tile animated, then send anim state to shader
@@ -609,9 +673,10 @@ void RenderPipeline::updateShadersCameraInfo(ZSPIRE::Camera* cam_ptr){
         obj_mark_shader.Use();
         obj_mark_shader.setCamera(cam_ptr);
     }
-
-    deffered_light.Use();
-    deffered_light.setCamera(cam_ptr, true);
+    if(deffered_light.isCreated == true){
+        deffered_light.Use();
+        deffered_light.setCamera(cam_ptr, true);
+    }
 
     if(ui_shader.isCreated == true){
         ui_shader.Use();
@@ -622,12 +687,13 @@ void RenderPipeline::updateShadersCameraInfo(ZSPIRE::Camera* cam_ptr){
         heightmap.Use();
         heightmap.setCamera(cam_ptr);
     }
-
-    skybox.Use();
-    this->skybox.setGLuniformMat4x4("projection", cam_ptr->getProjMatrix());
-    ZSMATRIX4x4 viewmat = cam_ptr->getViewMatrix();
-    viewmat = removeTranslationFromViewMat(viewmat);
-    this->skybox.setGLuniformMat4x4("view", viewmat);
+    if(skybox.isCreated == true){
+        skybox.Use();
+        this->skybox.setGLuniformMat4x4("projection", cam_ptr->getProjMatrix());
+        ZSMATRIX4x4 viewmat = cam_ptr->getViewMatrix();
+        viewmat = removeTranslationFromViewMat(viewmat);
+        this->skybox.setGLuniformMat4x4("view", viewmat);
+    }
 }
 
 void RenderPipeline::addLight(void* light_ptr){

@@ -9,7 +9,8 @@
 enum LIGHTSOURCE_TYPE {
     LIGHTSOURCE_TYPE_NONE,
     LIGHTSOURCE_TYPE_DIRECTIONAL,
-    LIGHTSOURCE_TYPE_POINT
+    LIGHTSOURCE_TYPE_POINT,
+    LIGHTSOURCE_TYPE_SPOT
 };
 
 enum COLLIDER_TYPE {COLLIDER_TYPE_NONE,
@@ -115,6 +116,7 @@ public:
     ZSRGBCOLOR color; //Color of light
     float intensity; //Light's intensity
     float range; //Light's range
+    float spot_angle;
 
     ZSLIGHTSOURCE_GL_ID id; //glsl uniform index
 

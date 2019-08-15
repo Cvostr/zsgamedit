@@ -14,8 +14,7 @@ struct Light{
 	vec3 color;
 	float range;
 	float intensity;
-	//float spot_angle;
-	//float spot_out_angle;
+	float spot_angle;
 };
 
 out vec4 FragColor;
@@ -37,19 +36,18 @@ uniform vec3 ambient_color;
 uniform vec3 cam_position;
 
 void main(){
-	
-		
 
     vec4 Diffuse = texture(tDiffuse, UVCoord);
     vec3 FragPos = texture(tPos, UVCoord).rgb;
 	vec3 Normal = texture(tNormal, UVCoord).rgb;
+	vec4 Transparent = texture(tTransparent, UVCoord);
 	vec4 Masks = texture(tMasks, UVCoord);   	
 
     vec3 result = Diffuse.xyz;
 
     //Check, if fragment isn't skybox
     if(Masks.r == 1){
-	result *= (1 - Masks.g);
+        result *= (1 - Masks.g);
         result *= ambient_color;
         
         float specularFactor = Diffuse.w; //Get factor in A channel
@@ -72,8 +70,25 @@ void main(){
                 float factor = 1.0 / ( 1.0 + 1.0 / lights[lg].range * dist + 1.0 / lights[lg].range * dist * dist) * lights[lg].intensity;
                 result += lights[lg].color * factor;
             }
+            if(lights[lg].type == LIGHTSOURCE_SPOT){
+                
+                vec3 vec_dir = normalize(lights[lg].dir);
+                vec3 vec_frag_light = (lights[lg].pos - FragPos);
+                
+                float vangle = dot(vec_dir, normalize(vec_frag_light));
+                
+                float spot_angle = cos(lights[lg].spot_angle);
+                float spot_out_angle = cos(spot_angle + 0.2);
+                
+                
+                float epsilon   = spot_angle - spot_out_angle;
+                float intensity = clamp((vangle - spot_out_angle) / epsilon, 0.0, 1.0);
+                intensity = intensity;
+                result += lights[lg].color * intensity * lights[lg].intensity * (lights[lg].range / length(vec_frag_light));
+                
+            }
         }
 	}
-	//result = vec3(Masks.g, Masks.g, Masks.g);
+
 	FragColor = vec4(result, 1);
 }

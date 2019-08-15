@@ -72,6 +72,9 @@ void TerrainData::destroyGL(){
 }
 
 void TerrainData::Draw(){
+    //if opengl data not generated, exit function
+    if(!created) return;
+
     glActiveTexture(GL_TEXTURE16);
     glBindTexture(GL_TEXTURE_2D, texture_mask1);
     glActiveTexture(GL_TEXTURE17);
@@ -79,10 +82,9 @@ void TerrainData::Draw(){
     glActiveTexture(GL_TEXTURE18);
     glBindTexture(GL_TEXTURE_2D, texture_mask3);
 
-    //if opengl data not generated, exit function
-    if(!created) return;
     glBindVertexArray(VAO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->EBO);
+    glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
     glDrawElements(GL_TRIANGLES, (W - 1) * (H - 1) * 2 * 3, GL_UNSIGNED_INT, 0);
 }
 
@@ -137,6 +139,18 @@ void TerrainData::generateGLMesh(){
             GL_RGBA,
             GL_UNSIGNED_BYTE,
             _texture1
+     );
+    glBindTexture(GL_TEXTURE_2D, this->texture_mask3);
+    glTexImage2D(
+            GL_TEXTURE_2D,
+            0,
+            GL_RGBA,
+            static_cast<int>(W),
+            static_cast<int>(H),
+            0,
+            GL_RGBA,
+            GL_UNSIGNED_BYTE,
+            _texture2
      );
 
     delete [] _texture;

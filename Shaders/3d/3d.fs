@@ -13,17 +13,20 @@ in vec3 FragPos;
 in vec3 InNormal;
 in vec2 UVCoord;
 in mat3 TBN;
-//in vec3 ShadowProjection;
+//Camera position
+uniform vec3 cam_position;
 
 //textures
 uniform sampler2D diffuse;
 uniform sampler2D normal_map;
 uniform sampler2D specular_map;
+uniform sampler2D height_map;
 uniform sampler2D shadow_map;
 
 uniform bool hasDiffuseMap;
 uniform bool hasNormalMap;
 uniform bool hasSpecularMap;
+uniform bool hasHeightMap;
 uniform bool hasShadowMap = false;
 
 uniform float material_shininess;
@@ -35,6 +38,16 @@ uniform mat4 LightProjectionMat;
 uniform mat4 LightViewMat;
 uniform float shadow_bias;
 
+vec2 processParallaxMapUv(vec2 uv){
+    if(!hasHeightMap) return uv;
+    
+    float height = texture(height_map, uv).r;
+    vec3 camera_dir = normalize(TBN * FragPos - TBN * cam_position);
+    
+    vec2 uv_offset = camera_dir.xy / camera_dir.z * (height);
+    return uv - uv_offset;
+}
+
 void main(){
 
 	vec2 uv = UVCoord;
@@ -44,7 +57,7 @@ void main(){
 	float result_shininess = material_shininess;
 	
 	if(hasDiffuseMap)
-		result = texture(diffuse, uv).xyz ;
+		result = texture(diffuse, processParallaxMapUv(uv)).xyz ;
 		
 	result *= diffuse_color;
 	

@@ -460,24 +460,36 @@ void LightsourceProperty::addPropertyInterfaceToInspector(InspectorWin* inspecto
     directional_radio->setText("Directional");
     QRadioButton* point_radio = new QRadioButton;
     point_radio->setText("Point");
+    QRadioButton* spot_radio = new QRadioButton;
+    spot_radio->setText("Spot");
 
     //add created radio buttons
     group->addRadioButton(directional_radio);
     group->addRadioButton(point_radio);
+    group->addRadioButton(spot_radio);
     inspector->registerUiObject(group);
     inspector->getContentLayout()->addLayout(group->btn_layout);
 
     FloatPropertyArea* intensity_area = new FloatPropertyArea;
-    intensity_area->setLabel("Intensity"); //Its label
+    intensity_area->setLabel("Intensity"); //Its intensity
     intensity_area->value = &this->intensity;
     intensity_area->go_property = static_cast<void*>(this);
     inspector->addPropertyArea(intensity_area);
+    if(this->light_type > LIGHTSOURCE_TYPE_DIRECTIONAL){
 
-    FloatPropertyArea* range_area = new FloatPropertyArea;
-    range_area->setLabel("Range"); //Its label
-    range_area->value = &this->range;
-    range_area->go_property = static_cast<void*>(this);
-    inspector->addPropertyArea(range_area);
+        FloatPropertyArea* range_area = new FloatPropertyArea;
+        range_area->setLabel("Range"); //Its range
+        range_area->value = &this->range;
+        range_area->go_property = static_cast<void*>(this);
+        inspector->addPropertyArea(range_area);
+        if(this->light_type == LIGHTSOURCE_TYPE_SPOT){
+            FloatPropertyArea* spotangle_area = new FloatPropertyArea;
+            spotangle_area->setLabel("Spot Angle"); //Its range
+            spotangle_area->value = &this->spot_angle;
+            spotangle_area->go_property = static_cast<void*>(this);
+            inspector->addPropertyArea(spotangle_area);
+        }
+    }
 
     ColorDialogArea* lcolor = new ColorDialogArea;
     lcolor->setLabel("Light color");
@@ -536,6 +548,7 @@ LightsourceProperty::LightsourceProperty(){
 
     intensity = 1.0f; //base light instensity is 1
     range = 10.0f;
+    spot_angle = 12.5f;
     transform = nullptr;
 }
 
@@ -1159,6 +1172,12 @@ void ShadowCasterProperty::addPropertyInterfaceToInspector(InspectorWin* inspect
     _farPlane->value = &this->farPlane; //Ptr to our vector
     _farPlane->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
     inspector->addPropertyArea(_farPlane);
+
+    IntPropertyArea* _viewport = new IntPropertyArea; //New property area
+    _viewport->setLabel("Shadow viewport"); //Its label
+    _viewport->value = &this->projection_viewport; //Ptr to our vector
+    _viewport->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
+    inspector->addPropertyArea(_viewport);
 }
 
 void ShadowCasterProperty::copyTo(GameObjectProperty* dest){

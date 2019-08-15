@@ -75,6 +75,8 @@ public:
     void initGizmos(int projectPespective);
 
     void render(SDL_Window* w, void* projectedit_ptr);
+    void render2D(SDL_Window* w, void* projectedit_ptr);
+    void render3D(SDL_Window* w, void* projectedit_ptr);
     void renderDepth(void* world_ptr);
     unsigned int render_getpickedObj(void* projectedit_ptr, int mouseX, int mouseY);
     ZSRGBCOLOR getColorOfPickedTransformControl(ZSVECTOR3 translation, int mouseX, int mouseY);
