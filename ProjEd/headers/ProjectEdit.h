@@ -309,6 +309,8 @@ public:
 class FileRenameDialog : public QDialog{
     Q_OBJECT
 private:
+    //pointer to window
+    EditWindow* win_ptr;
     QPushButton del_btn;
     QPushButton close_btn;
 
@@ -322,7 +324,7 @@ public:
     QString file_path;
     QString file_name;
 
-    FileRenameDialog(QString file_path, QString file_name, QWidget* parent = nullptr);
+    FileRenameDialog(QString file_path, QString file_name, EditWindow* win_ptr, QWidget* parent = nullptr);
 };
 
 

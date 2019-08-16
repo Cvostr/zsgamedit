@@ -98,10 +98,11 @@ void RenderPipeline::init(){
         cullFaces = false;
         glDisable(GL_CULL_FACE);
     }
+
+    //setup GBUFFER and shaders
+    setup(this->WIDTH, this->HEIGHT);
     //initialize gizmos component
     initGizmos(this->project_struct_ptr->perspective);
-    //setup GBUFFER
-    setup(this->WIDTH, this->HEIGHT);
 }
 
 ZSRGBCOLOR RenderPipeline::getColorOfPickedTransformControl(ZSVECTOR3 translation, int mouseX, int mouseY){
@@ -279,9 +280,6 @@ void RenderPipeline::render3D(SDL_Window* w, void* projectedit_ptr)
             obj_ptr->processObject(this); //Draw object
     }
 
-    //compare pointers
-    if(editwin_ptr->obj_trstate.isTransforming == true && !editwin_ptr->isWorldCamera)
-        getGizmosRenderer()->drawTransformControls(editwin_ptr->obj_trstate.obj_ptr->getTransformProperty()->_last_translation, 100, 10);
 
 
     //Turn everything off to draw deffered plane correctly
@@ -311,6 +309,11 @@ void RenderPipeline::render3D(SDL_Window* w, void* projectedit_ptr)
                                                                render_settings.ambient_light_color.b / 255.0f));
 
     ZSPIRE::getPlaneMesh2D()->Draw(); //Draw screen
+
+    //if we control this object
+    if(editwin_ptr->obj_trstate.isTransforming == true && !editwin_ptr->isWorldCamera)
+        getGizmosRenderer()->drawTransformControls(editwin_ptr->obj_trstate.obj_ptr->getTransformProperty()->_last_translation, 100, 10);
+
     /*
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

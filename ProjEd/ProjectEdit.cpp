@@ -1087,7 +1087,7 @@ void EditWindow::keyPressEvent(QKeyEvent* ke){
     if(ke->key() == Qt::Key_F2){ //User pressed f2 key
         QListWidgetItem* item_toRename = this->ui->fileList->currentItem();
         if(item_toRename != nullptr && ui->fileList->hasFocus()){
-            FileRenameDialog* dialog = new FileRenameDialog(this->current_dir + "/" + item_toRename->text(), item_toRename->text());
+            FileRenameDialog* dialog = new FileRenameDialog(this->current_dir + "/" + item_toRename->text(), item_toRename->text(), this);
             dialog->exec();
             delete dialog;
             updateFileList();

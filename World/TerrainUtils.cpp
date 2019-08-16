@@ -185,11 +185,13 @@ void TerrainData::generateGLMesh(){
         HeightmapVertex* v1 = &vertices[indices[i]];
         HeightmapVertex* v2 = &vertices[indices[i + 1]];
         HeightmapVertex* v3 = &vertices[indices[i + 2]];
-
+        //Get two sides of triangle
         ZSVECTOR3 v12 = v1->pos - v2->pos;
         ZSVECTOR3 v13 = v1->pos - v3->pos;
-
+        //Calculate normal
         v1->normal = vCross(v12, v13);
+        //Normalize vector
+        vNormalize(&v1->normal);
     }
 
     glBindVertexArray(this->VAO); //Bind vertex array

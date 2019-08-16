@@ -31,6 +31,7 @@ struct Project{
     std::string startup_scene;
 
     std::vector<Resource> resources;
+    Resource* getResource(QString rel_path);
 };
 
 #endif // ZS_TYPES_H

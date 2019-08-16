@@ -681,6 +681,9 @@ void MaterialProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
     area->rel_path = &material_path;
     area->resource_type = RESOURCE_TYPE_MATERIAL; //It should load meshes only
     inspector->addPropertyArea(area);
+    //No material, exiting
+    if(material_ptr == nullptr) return;
+
     if(material_ptr->group_ptr->acceptShadows){
         BoolCheckboxArea* receiveShdws = new BoolCheckboxArea;
         receiveShdws->setLabel("Receive Shadows ");

@@ -222,8 +222,7 @@ void FileCtxMenu::onDeleteClicked(){
     this->win_ptr->updateFileList();
 }
 void FileCtxMenu::onRename(){
-    FileRenameDialog* dialog = new FileRenameDialog(file_path, file_name);
-    //dialog->file_name = file_name;
+    FileRenameDialog* dialog = new FileRenameDialog(file_path, file_name, win_ptr);
     dialog->exec();
     delete dialog;
     this->win_ptr->updateFileList();
@@ -253,7 +252,7 @@ void FileDeleteDialog::onDelButtonPressed(){
     accept();
 }
 
-FileRenameDialog::FileRenameDialog(QString file_path, QString file_name, QWidget* parent) : QDialog(parent){
+FileRenameDialog::FileRenameDialog(QString file_path, QString file_name, EditWindow* win_ptr, QWidget* parent) : QDialog(parent){
     QFile file(file_path);
     rename_message.setText("Rename file  " + file_name + " to ");
     this->file_path = file_path;
@@ -270,16 +269,42 @@ FileRenameDialog::FileRenameDialog(QString file_path, QString file_name, QWidget
     setLayout(&contentLayout);
 
     this->setWindowTitle("File rename");
-
+    //Connect signals to slots
     QObject::connect(&this->del_btn, SIGNAL(clicked()), this, SLOT(onRenameButtonPressed()));
     QObject::connect(&this->close_btn, SIGNAL(clicked()), this, SLOT(reject()));
+    //Set window pointer
+    this->win_ptr = win_ptr;
 }
 
 void FileRenameDialog::onRenameButtonPressed(){
+    //Old file path
     QString cur_path = this->file_path;
     cur_path.resize(cur_path.size() - file_name.size()); //Calculate current directory path
 
     QFile file(file_path);
     file.rename(cur_path + edit_field.text()); //remove it!
     accept();
+
+    QString rel_path = file_path;
+    rel_path = file_path.remove(0, this->win_ptr->project.root_path.size() + 1);
+
+    Resource* res = this->win_ptr->project.getResource(rel_path);
+    if(res != nullptr){ //if resource found
+        //No need to do that with mesh resources
+        if(res->type == RESOURCE_TYPE_MESH) return;
+        QString new_relpath = cur_path + edit_field.text();
+        res->rel_path = new_relpath.remove(0, this->win_ptr->project.root_path.size() + 1);
+        res->resource_label = res->rel_path.toStdString();
+        res->file_path = cur_path + edit_field.text();
+    }
+}
+
+Resource* Project::getResource(QString rel_path){
+    for(unsigned int i = 0; i < resources.size(); i ++){
+        Resource* res_ptr = &this->resources[i];
+        if(res_ptr->rel_path.compare(rel_path) == false){
+            return res_ptr;
+        }
+    }
+    return nullptr;
 }
