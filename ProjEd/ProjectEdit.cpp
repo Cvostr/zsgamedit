@@ -418,7 +418,7 @@ void EditWindow::addNewTile(){
     obj->item_ptr->setText(0, *obj->label);
     //Assign @mesh
     MeshProperty* mesh = static_cast<MeshProperty*>(obj->getPropertyPtrByType(GO_PROPERTY_TYPE_MESH));
-    mesh->resource_relpath = "@cube";
+    mesh->resource_relpath = "@plane";
     mesh->updateMeshPtr();
     //Assign new scale
     TransformProperty* transform =
@@ -932,6 +932,7 @@ void EditWindow::onRightBtnClicked(int X, int Y){
 
 }
 void EditWindow::onMouseWheel(int x, int y){
+    if(isWorldCamera) return;
     //Stop camera moving
     this->edit_camera.stopMoving();
     //If we are in 3D project
@@ -942,12 +943,11 @@ void EditWindow::onMouseWheel(int x, int y){
         edit_camera.setPosition(pos + front * y);
     }
     //2D project
-    if(project.perspective == 2){
-        ZSVECTOR3 pos = edit_camera.getCameraPosition(); //obtain position
-        pos.Y += y * 5;
-        pos.X += x * 5;
-
-        edit_camera.setPosition(pos);
+    if(project.perspective == 2 &&
+            edit_camera.orthogonal_factor + static_cast<float>(y) / 50.F >= 0.2f &&
+            edit_camera.orthogonal_factor + static_cast<float>(y) / 50.F <= 1.7f){
+        edit_camera.orthogonal_factor += static_cast<float>(y) / 50.F;
+        edit_camera.updateProjectionMat();
     }
 }
 void EditWindow::onMouseMotion(int relX, int relY){

@@ -498,6 +498,12 @@ void LightsourceProperty::addPropertyInterfaceToInspector(InspectorWin* inspecto
     inspector->addPropertyArea(lcolor);
 }
 void LightsourceProperty::onValueChanged(){
+    if(this->_last_light_type != this->light_type){
+        //We need to change UI
+        _inspector_win->updateRequired = true;
+        this->_last_light_type = this->light_type;
+    }
+
     ZSVECTOR3* rot_vec_ptr = &transform->rotation;
     this->direction = _getDirection(rot_vec_ptr->X, rot_vec_ptr->Y, rot_vec_ptr->Z);
 
@@ -1314,7 +1320,10 @@ void TerrainProperty::DrawMesh(){
 }
 
 void TerrainProperty::onValueChanged(){
-    _inspector_win->updateRequired = true;
+    if(_last_edit_mode != edit_mode){
+        _last_edit_mode = edit_mode;
+        _inspector_win->updateRequired = true;
+    }
 }
 
 void TerrainProperty::onAddToObject(){

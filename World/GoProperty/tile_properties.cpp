@@ -234,7 +234,7 @@ void TileProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
     inspector->addPropertyArea(area);
 
     PickResourceArea* transparent_area = new PickResourceArea;
-    transparent_area->setLabel("Transparent Texture");
+    transparent_area->setLabel("Secondary Diffuse");
     transparent_area->go_property = static_cast<void*>(this);
     transparent_area->rel_path = &transparent_relpath;
     transparent_area->resource_type = RESOURCE_TYPE_TEXTURE; //It should load textures only

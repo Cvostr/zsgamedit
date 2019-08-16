@@ -104,6 +104,8 @@ public:
 
 
 class LightsourceProperty : public GameObjectProperty{
+private:
+    LIGHTSOURCE_TYPE _last_light_type;
 public:
     LIGHTSOURCE_TYPE light_type; //type of lightsource
     TransformProperty* transform; //pointer to object's transform
@@ -212,6 +214,7 @@ class TerrainProperty : public GameObjectProperty{
 private:
     TerrainData data;
     bool hasChanged;
+    char _last_edit_mode;
     char edit_mode;
 public:
     QString file_label;

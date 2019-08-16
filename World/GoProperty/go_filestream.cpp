@@ -71,6 +71,7 @@ void GameObject::saveProperties(std::ofstream* stream){
             stream->write(reinterpret_cast<char*>(&type), sizeof(LIGHTSOURCE_TYPE));
             stream->write(reinterpret_cast<char*>(&intensity), sizeof(float));
             stream->write(reinterpret_cast<char*>(&range), sizeof(float));
+            stream->write(reinterpret_cast<char*>(&ptr->spot_angle), sizeof(float));
 
             stream->write(reinterpret_cast<char*>(&color_r), sizeof(float));
             stream->write(reinterpret_cast<char*>(&color_g), sizeof(float));
@@ -268,6 +269,7 @@ void GameObject::loadProperty(std::ifstream* world_stream){
         world_stream->read(reinterpret_cast<char*>(&ptr->light_type), sizeof(LIGHTSOURCE_TYPE));
         world_stream->read(reinterpret_cast<char*>(&ptr->intensity), sizeof(float));
         world_stream->read(reinterpret_cast<char*>(&ptr->range), sizeof(float));
+        world_stream->read(reinterpret_cast<char*>(&ptr->spot_angle), sizeof(float));
 
         float cl_r;
         float cl_g;

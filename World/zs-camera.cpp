@@ -26,9 +26,12 @@ void ZSPIRE::Camera::updateProjectionMat(){
         float aspect = static_cast<float>((viewport.endX - viewport.startX)) / static_cast<float>(viewport.endY - viewport.startY);
         proj = getPerspective(FOV, aspect, nearZ, farZ);
     }else{
-        proj = getOrthogonal(0, static_cast<float>(viewport.endX - viewport.startX), 0, static_cast<float>(viewport.endY - viewport.startY), nearZ, farZ);
+        proj = getOrthogonal(0, static_cast<float>(viewport.endX - viewport.startX) * orthogonal_factor,
+                             0, static_cast<float>(viewport.endY - viewport.startY) * orthogonal_factor,
+                             nearZ, farZ);
     }
-    ui_proj = getOrthogonal(0, static_cast<float>(viewport.endX - viewport.startX), 0, static_cast<float>(viewport.endY - viewport.startY));
+    ui_proj = getOrthogonal(0, static_cast<float>(viewport.endX - viewport.startX),
+                            0, static_cast<float>(viewport.endY - viewport.startY));
 }
 
 void ZSPIRE::Camera::updateViewMat(){
@@ -108,6 +111,7 @@ ZSPIRE::Camera::Camera(){
     farZ = 100.0f;
     FOV = 45;
     viewport = ZSVIEWPORT(0,0, 640, 480);
+    orthogonal_factor = 1.f;
 
     updateProjectionMat();
     updateViewMat();

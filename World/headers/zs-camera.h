@@ -45,6 +45,7 @@ namespace ZSPIRE{
             float FOV; //Field of view
             float nearZ; //Nearest Z occlusion plane
             float farZ;
+            float orthogonal_factor;
 
             ZSVIEWPORT viewport;
 
