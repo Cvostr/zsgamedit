@@ -101,6 +101,7 @@ public:
     ZSPIRE::Shader* getTileShader();
     ZSPIRE::Shader* getPickingShader();
     ZSPIRE::Shader* getShadowmapShader();
+    ZSPIRE::Shader* getUiShader();
 
     RenderPipeline();
     ~RenderPipeline();

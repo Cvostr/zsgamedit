@@ -83,8 +83,8 @@ bool ZSPIRE::Shader::compileFromFile(const char* VSpath, const char* FSpath){
 	int VS = glCreateShader(GL_VERTEX_SHADER);
 	int FS = glCreateShader(GL_FRAGMENT_SHADER);
 
-    GLchar vs_data[8192];
-    GLchar fs_data[8192];
+    GLchar vs_data[8192 * 2];
+    GLchar fs_data[8192 * 2];
 
 	const GLchar* vs = &vs_data[0];
 	const GLchar* fs = &fs_data[0];
@@ -143,6 +143,76 @@ bool ZSPIRE::Shader::compileFromFile(const char* VSpath, const char* FSpath){
     this->isCreated = true; //Shader created & compiled now
 	return true;
 
+}
+
+bool ZSPIRE::Shader::compileFromStr(const char* _VS, const char* _FS){
+    std::cout << "OGL: Compiling shader " << std::endl;
+
+    Init();
+
+    int VS = glCreateShader(GL_VERTEX_SHADER);
+    int FS = glCreateShader(GL_FRAGMENT_SHADER);
+
+    GLchar vs_data[8192 * 2];
+    GLchar fs_data[8192 * 2];
+
+    strcpy(vs_data, _VS);
+    strcpy(fs_data, _FS);
+
+    const GLchar* vs = &vs_data[0];
+    const GLchar* fs = &fs_data[0];
+
+
+    glShaderSource(VS, 1, &vs, NULL); //Setting shader code text on vs
+    glShaderSource(FS, 1, &fs, NULL); //Setting shader code text on fs
+
+    glCompileShader(VS); //Compile VS shader code
+    GLcheckCompileErrors(VS, "VERTEX", "VSpath"); //Check vertex errors
+    glCompileShader(FS); //Compile FS shader code
+    GLcheckCompileErrors(FS, "FRAGMENT", "FSpath"); //Check fragment compile errors
+
+    glAttachShader(this->SHADER_ID, VS);
+    glAttachShader(this->SHADER_ID, FS);
+
+    glLinkProgram(this->SHADER_ID);
+    GLcheckCompileErrors(SHADER_ID, "PROGRAM");
+    //Clear shaders, we don't need them anymore
+    glDeleteShader(VS);
+    glDeleteShader(FS);
+
+    Use();
+    //For common shaders
+    setGLuniformInt("skybox", 0);
+    setGLuniformInt("diffuse", 0);
+    setGLuniformInt("normal_map", 1);
+    setGLuniformInt("specular_map", 2);
+    setGLuniformInt("height_map", 3);
+    setGLuniformInt("diffuse2", 5);
+    setGLuniformInt("shadow_map", 6);
+
+    //UI shader
+    setGLuniformInt("sprite_map", 0);
+    //Deffered shader
+    setGLuniformInt("tDiffuse", 10);
+    setGLuniformInt("tNormal", 11);
+    setGLuniformInt("tPos", 12);
+    setGLuniformInt("tTransparent", 13);
+    setGLuniformInt("tMasks", 14);
+    //Terrain shader
+    setGLuniformInt("diffuse[0]", 0);
+    setGLuniformInt("diffuse[1]", 1);
+    setGLuniformInt("diffuse[2]", 2);
+    setGLuniformInt("diffuse[3]", 3);
+    setGLuniformInt("diffuse[4]", 4);
+    setGLuniformInt("diffuse[5]", 5);
+    setGLuniformInt("diffuse[6]", 6);
+
+    setGLuniformInt("texture_mask", 16);
+    setGLuniformInt("texture_mask1", 17);
+    setGLuniformInt("texture_mask2", 18);
+
+    this->isCreated = true; //Shader created & compiled now
+    return true;
 }
 
 void ZSPIRE::Shader::Destroy() {

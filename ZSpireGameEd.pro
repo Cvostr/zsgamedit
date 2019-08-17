@@ -58,7 +58,8 @@ SOURCES += \
     Scripting/zsensdk_input.cpp \
     ProjEd/EditorSettings.cpp \
     World/TerrainUtils.cpp \
-    World/Physics.cpp
+    World/Physics.cpp \
+    Misc/ThumbnailsMaster.cpp
 
 HEADERS += \
         mainwin.h \
@@ -90,7 +91,8 @@ HEADERS += \
     Misc/headers/GlyphManager.h \
     Misc/headers/EditorManager.h \
     ProjEd/headers/EditorSettings.h \
-    World/headers/terrain.h
+    World/headers/terrain.h \
+    Misc/headers/ThumbnailsMaster.h
 
 
 FORMS += \

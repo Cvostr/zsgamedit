@@ -21,6 +21,7 @@ struct Project;
 #include "../../Misc/headers/ProjBuilder.h"
 #include "../../Misc/headers/zs_types.h"
 #include "../../Misc/headers/GlyphManager.h"
+#include "../../Misc/headers/ThumbnailsMaster.h"
 
 enum GO_TRANSFORM_MODE{
     GO_TRANSFORM_MODE_NONE,
@@ -142,7 +143,7 @@ private:
 
     SDL_Window* window; //Editor preview sdl2 window
     SDL_GLContext glcontext; //Editor preview window opengl context
-
+    //Render pipeline manager
     RenderPipeline* render;
 
     ObjectCtxMenu* obj_ctx_menu; //Context menu on object right click
@@ -171,6 +172,9 @@ public:
     ObjectTransformState obj_trstate; //Describes object transform
     PropertyPaintState ppaint_state; //Describes property painting feature state
     WorldSnapshot run_world_snapshot; //useful to recover world state after running
+
+    //Thumbnails master
+    ThumbnailsMaster* thumb_master;
 
     EditorSettings settings; //seetings for editor
 

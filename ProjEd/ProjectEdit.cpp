@@ -160,6 +160,9 @@ void EditWindow::init(){
     glyph_manager->pipeline_ptr = render;
     this->startManager(glyph_manager);
 
+    this->thumb_master = new ThumbnailsMaster;
+    this->startManager(thumb_master);
+
     ready = true;//Everything is ready
 
     ZSPIRE::SFX::initAL();
@@ -193,7 +196,9 @@ void EditWindow::assignIconFile(QListWidgetItem* item){
         item->setIcon(QIcon::fromTheme("text-x-generic"));
     }
     if(item->text().endsWith(".dds") || item->text().endsWith(".DDS")){
-        item->setIcon(QIcon::fromTheme("image-x-generic"));
+        QString path = this->current_dir + "/" + item->text();
+        QImage* img = thumb_master->texture_thumbnails.at(path.toStdString());
+        item->setIcon(QIcon(QPixmap::fromImage(*img)));
     }
     if(item->text().endsWith(".fbx") || item->text().endsWith(".FBX")){
         item->setIcon(QIcon::fromTheme("applications-graphics"));
@@ -842,9 +847,11 @@ EditWindow* ZSEditor::openProject(Project& project){
     //Send project datas to editor window class
     _editor_win->project = project;
     //Update widget content
-    _editor_win->setViewDirectory(_editor_win->project.root_path);
+
 
     return openEditor(); //Return pointer to edit window
+
+
 }
 EditWindow* ZSEditor::openEditor(){
     EditorSettingsManager* settings_manager = new EditorSettingsManager(&_editor_win->settings);
@@ -871,6 +878,10 @@ EditWindow* ZSEditor::openEditor(){
     _ed_actions_container->world_ptr = &_editor_win->world; //Put world pointer
     _ed_actions_container->insp_win = _inspector_win; //Put inspector win pointer
     _ed_actions_container->setStoreActions(true);
+
+    _editor_win->thumb_master->createTexturesThumbnails();
+
+    _editor_win->setViewDirectory(_editor_win->project.root_path);
     return _editor_win;
 }
 

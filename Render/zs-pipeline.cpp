@@ -850,3 +850,7 @@ ZSPIRE::Shader* RenderPipeline::getPickingShader(){
 ZSPIRE::Shader* RenderPipeline::getShadowmapShader(){
     return &this->shadowMap;
 }
+
+ZSPIRE::Shader* RenderPipeline::getUiShader(){
+    return &this->ui_shader;
+}
