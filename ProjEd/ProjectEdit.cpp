@@ -478,7 +478,9 @@ bool EditWindow::onCloseProject(){
 
         this->ready = false; //won't render anymore
         this->close_reason = EW_CLOSE_REASON_PROJLIST;
-        QApplication::quit();
+
+        _editor_win->close();
+        _inspector_win->close();
         return true;
     }
     return false;
@@ -878,7 +880,7 @@ EditWindow* ZSEditor::openEditor(){
     _ed_actions_container->world_ptr = &_editor_win->world; //Put world pointer
     _ed_actions_container->insp_win = _inspector_win; //Put inspector win pointer
     _ed_actions_container->setStoreActions(true);
-
+    //Create thumbnails
     _editor_win->thumb_master->createTexturesThumbnails();
 
     _editor_win->setViewDirectory(_editor_win->project.root_path);

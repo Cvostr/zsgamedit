@@ -14,6 +14,7 @@ namespace ZSPIRE {
 		void Init();
         bool compileFromFile(const char* VSpath, const char* FSpath);
         bool compileFromStr(const char* _VS, const char* _FS);
+        void applyBaseSamplerUniforms();
 		void Use();
 		void Destroy();
 

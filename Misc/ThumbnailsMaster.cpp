@@ -13,8 +13,8 @@ const char texture_shaderFS[310] = "#version 150 core\n\
         void main(){\n\
         FragColor = texture(texturem, _UV);\n\
         }\n";
-//FragColor = texture(texturem, _UV);
-        const char texture_shaderVS[343] = "#version 150 core\n\
+
+const char texture_shaderVS[343] = "#version 150 core\n\
         #extension GL_ARB_explicit_attrib_location : require\n\
         #extension GL_ARB_explicit_uniform_location : require\n\
         layout (location = 0) in vec3 pos;\n\
@@ -29,9 +29,11 @@ ThumbnailsMaster::ThumbnailsMaster(){
 
 }
 
-        ThumbnailsMaster::~ThumbnailsMaster(){
-
-        }
+ThumbnailsMaster::~ThumbnailsMaster(){
+    //interate over all textures and clear them
+    this->texture_thumbnails.clear();
+    texture_shader.Destroy();
+}
 
 void ThumbnailsMaster::initShader(){
     texture_shader.compileFromStr(&texture_shaderVS[0], &texture_shaderFS[0]);
@@ -48,6 +50,7 @@ void ThumbnailsMaster::createTexturesThumbnails(){
 
     for(unsigned int res_i = 0; res_i < project_struct_ptr->resources.size(); res_i ++){
         Resource* resource_ptr = &this->project_struct_ptr->resources[res_i];
+        if(resource_ptr->type != RESOURCE_TYPE_TEXTURE) continue;
         ZSPIRE::Texture* texture_ptr = static_cast<ZSPIRE::Texture*>(resource_ptr->class_ptr);
 
         glClear(GL_COLOR_BUFFER_BIT);

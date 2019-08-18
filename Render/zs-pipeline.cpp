@@ -58,6 +58,7 @@ RenderPipeline::~RenderPipeline(){
     ui_shader.Destroy();
     skybox.Destroy();
     shadowMap.Destroy();
+    heightmap.Destroy();
     ZSPIRE::freeDefaultMeshes();
 
     this->gbuffer.Destroy();
@@ -169,18 +170,27 @@ unsigned int RenderPipeline::render_getpickedObj(void* projectedit_ptr, int mous
     return pr_data;
 }
 void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr){
+    EditWindow* editwin_ptr = static_cast<EditWindow*>(projectedit_ptr);
     switch(this->project_struct_ptr->perspective){
     case 2:{
-        render2D(w, projectedit_ptr);
+        render2D(projectedit_ptr);
         break;
     }
     case 3:{
-        render3D(w, projectedit_ptr);
+        render3D(projectedit_ptr);
         break;
     }
     }
+
+    //if we control this object
+    if(editwin_ptr->obj_trstate.isTransforming == true && !editwin_ptr->isWorldCamera)
+        getGizmosRenderer()->drawTransformControls(editwin_ptr->obj_trstate.obj_ptr->getTransformProperty()->_last_translation, 100, 10);
+
+    ZSPIRE::getPlaneMesh2D()->Draw(); //Draw screen
+
+    SDL_GL_SwapWindow(w); //Send rendered frame
 }
-void RenderPipeline::render2D(SDL_Window* w, void* projectedit_ptr){
+void RenderPipeline::render2D(void* projectedit_ptr){
     EditWindow* editwin_ptr = static_cast<EditWindow*>(projectedit_ptr);
     World* world_ptr = &editwin_ptr->world;
     ZSPIRE::Camera* cam_ptr = nullptr; //We'll set it next
@@ -212,11 +222,6 @@ void RenderPipeline::render2D(SDL_Window* w, void* projectedit_ptr){
             obj_ptr->processObject(this); //Draw object
     }
 
-    //compare pointers
-    if(editwin_ptr->obj_trstate.isTransforming == true && !editwin_ptr->isWorldCamera)
-        getGizmosRenderer()->drawTransformControls(editwin_ptr->obj_trstate.obj_ptr->getTransformProperty()->_last_translation, 100, 10);
-
-
     for(unsigned int light_i = 0; light_i < this->lights_ptr.size(); light_i ++){
         LightsourceProperty* _light_ptr = static_cast<LightsourceProperty*>(lights_ptr[light_i]);
 
@@ -227,12 +232,8 @@ void RenderPipeline::render2D(SDL_Window* w, void* projectedit_ptr){
     //free lights array
     this->removeLights();
 
-
-    ZSPIRE::getPlaneMesh2D()->Draw(); //Draw screen
-
-    SDL_GL_SwapWindow(w); //Send rendered frame
 }
-void RenderPipeline::render3D(SDL_Window* w, void* projectedit_ptr)
+void RenderPipeline::render3D(void* projectedit_ptr)
 {
     EditWindow* editwin_ptr = static_cast<EditWindow*>(projectedit_ptr);
     World* world_ptr = &editwin_ptr->world;
@@ -308,11 +309,6 @@ void RenderPipeline::render3D(SDL_Window* w, void* projectedit_ptr)
                                                                render_settings.ambient_light_color.g / 255.0f,
                                                                render_settings.ambient_light_color.b / 255.0f));
 
-    ZSPIRE::getPlaneMesh2D()->Draw(); //Draw screen
-
-    //if we control this object
-    if(editwin_ptr->obj_trstate.isTransforming == true && !editwin_ptr->isWorldCamera)
-        getGizmosRenderer()->drawTransformControls(editwin_ptr->obj_trstate.obj_ptr->getTransformProperty()->_last_translation, 100, 10);
 
     /*
     glEnable(GL_BLEND);
@@ -336,7 +332,7 @@ void RenderPipeline::render3D(SDL_Window* w, void* projectedit_ptr)
 
     //std::cout << static_cast<int>(deltaTime) << std::endl;
     */
-    SDL_GL_SwapWindow(w); //Send rendered frame
+
 }
 
 void RenderPipeline::renderDepth(void* world_ptr){

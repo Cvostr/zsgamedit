@@ -108,37 +108,8 @@ bool ZSPIRE::Shader::compileFromFile(const char* VSpath, const char* FSpath){
 	//Clear shaders, we don't need them anymore
 	glDeleteShader(VS);
 	glDeleteShader(FS);
-
-	Use();
-    //For common shaders
-    setGLuniformInt("skybox", 0);
-	setGLuniformInt("diffuse", 0);
-    setGLuniformInt("normal_map", 1);
-    setGLuniformInt("specular_map", 2);
-    setGLuniformInt("height_map", 3);
-    setGLuniformInt("diffuse2", 5);
-    setGLuniformInt("shadow_map", 6);
-
-    //UI shader
-	setGLuniformInt("sprite_map", 0);
-    //Deffered shader
-    setGLuniformInt("tDiffuse", 10);
-    setGLuniformInt("tNormal", 11);
-    setGLuniformInt("tPos", 12);
-    setGLuniformInt("tTransparent", 13);
-    setGLuniformInt("tMasks", 14);
-    //Terrain shader
-    setGLuniformInt("diffuse[0]", 0);
-    setGLuniformInt("diffuse[1]", 1);
-    setGLuniformInt("diffuse[2]", 2);
-    setGLuniformInt("diffuse[3]", 3);
-    setGLuniformInt("diffuse[4]", 4);
-    setGLuniformInt("diffuse[5]", 5);
-    setGLuniformInt("diffuse[6]", 6);
-
-    setGLuniformInt("texture_mask", 16);
-    setGLuniformInt("texture_mask1", 17);
-    setGLuniformInt("texture_mask2", 18);
+    //Set texture sampler uniforms
+    applyBaseSamplerUniforms();
 
     this->isCreated = true; //Shader created & compiled now
 	return true;
@@ -179,7 +150,14 @@ bool ZSPIRE::Shader::compileFromStr(const char* _VS, const char* _FS){
     //Clear shaders, we don't need them anymore
     glDeleteShader(VS);
     glDeleteShader(FS);
+    //Set texture sampler uniforms
+    applyBaseSamplerUniforms();
 
+    this->isCreated = true; //Shader created & compiled now
+    return true;
+}
+
+void ZSPIRE::Shader::applyBaseSamplerUniforms(){
     Use();
     //For common shaders
     setGLuniformInt("skybox", 0);
@@ -210,9 +188,6 @@ bool ZSPIRE::Shader::compileFromStr(const char* _VS, const char* _FS){
     setGLuniformInt("texture_mask", 16);
     setGLuniformInt("texture_mask1", 17);
     setGLuniformInt("texture_mask2", 18);
-
-    this->isCreated = true; //Shader created & compiled now
-    return true;
 }
 
 void ZSPIRE::Shader::Destroy() {
