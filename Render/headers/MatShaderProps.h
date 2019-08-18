@@ -13,7 +13,9 @@ enum MATSHPROP_TYPE{
     MATSHPROP_TYPE_FLOAT,
     MATSHPROP_TYPE_FVEC3,
     MATSHPROP_TYPE_COLOR,
-    MATSHPROP_TYPE_TEXTURE3
+    MATSHPROP_TYPE_TEXTURE3,
+    MATSHPROP_TYPE_IVEC2,
+    MATSHPROP_TYPE_FVEC2
 };
 
 class MaterialShaderProperty{
@@ -48,9 +50,12 @@ public:
 
 class Material{
 private:
-    std::string file_path; //path to material file
+
     std::string group_str;
 public:
+    //path to material file
+    std::string file_path;
+    //Pointer to shader group
     MtShaderPropertiesGroup* group_ptr;
     std::vector<MaterialShaderPropertyConf*> confs;
 
@@ -107,6 +112,18 @@ public:
     //Construct
     Float3MaterialShaderProperty();
 };
+class Float2MaterialShaderProperty : public MaterialShaderProperty{
+public:
+    std::string floatUniform;
+    //Construct
+    Float2MaterialShaderProperty();
+};
+class Int2MaterialShaderProperty : public MaterialShaderProperty{
+public:
+    std::string floatUniform;
+    //Construct
+    Int2MaterialShaderProperty();
+};
 class ColorMaterialShaderProperty : public MaterialShaderProperty{
 public:
     std::string colorUniform;
@@ -146,6 +163,18 @@ public:
     ZSVECTOR3 value;
     //Construct
     Float3MtShPropConf();
+};
+class Float2MtShPropConf : public MaterialShaderPropertyConf{
+public:
+    ZSVECTOR2 value;
+    //Construct
+    Float2MtShPropConf();
+};
+class Int2MtShPropConf : public MaterialShaderPropertyConf{
+public:
+    ZSVECTOR3 value;
+    //Construct
+    Int2MtShPropConf();
 };
 class ColorMtShPropConf : public MaterialShaderPropertyConf{
 public:

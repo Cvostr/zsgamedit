@@ -296,6 +296,12 @@ void FileRenameDialog::onRenameButtonPressed(){
         res->rel_path = new_relpath.remove(0, this->win_ptr->project.root_path.size() + 1);
         res->resource_label = res->rel_path.toStdString();
         res->file_path = cur_path + edit_field.text();
+
+        if(res->type == RESOURCE_TYPE_MATERIAL){
+            //if we renamed material, update its file path
+            Material* mat = static_cast<Material*>(res->class_ptr);
+            mat->file_path = res->file_path.toStdString();
+        }
     }
 }
 

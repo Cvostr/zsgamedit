@@ -7,6 +7,8 @@
 #include <QDir>
 #include <iostream>
 
+extern EditWindow* _editor_win;
+
 AreaPropertyTitle::AreaPropertyTitle(){
     this->layout.addWidget(&this->line);
     this->layout.addWidget(&this->prop_title);
@@ -344,6 +346,7 @@ PickResourceArea::PickResourceArea(){
     isShowNoneItem = false;
 
     respick_btn = new QPushButton; //Allocation of QPushButton
+    elem_layout->addSpacing(6);
     relpath_label = new QLabel; //Allocation of resource relpath text
     relpath_label->setAcceptDrops(true);
     elem_layout->addWidget(relpath_label);
@@ -355,8 +358,6 @@ PickResourceArea::PickResourceArea(){
     this->dialog = new ResourcePickDialog; //Allocation of dialog
     dialog->area = this;
     dialog->resource_text = this->relpath_label;
-
-
 
 }
 PickResourceArea::~PickResourceArea(){
@@ -375,8 +376,8 @@ void PickResourceArea::addToInspector(InspectorWin* win){
 }
 
 void PickResourceArea::setup(){
-    QString resource_relpath = *this->rel_path;
-    relpath_label->setText(resource_relpath);
+   // QString resource_relpath = *this->rel_path;
+
 
 }
 
@@ -387,7 +388,17 @@ void PickResourceArea::updateValues(){
     QString cur = this->relpath_label->text();
 
     if(*rel_path != cur){
-        this->relpath_label->setText(*rel_path);
+        if(this->resource_type == RESOURCE_TYPE_TEXTURE && *rel_path != "@none"){
+            std::string fpath = _editor_win->project.root_path.toStdString() + "/" + rel_path->toStdString();
+            QImage* img = _editor_win->thumb_master->texture_thumbnails.at(fpath);
+            relpath_label->setPixmap(QPixmap::fromImage(*img));
+            relpath_label->setScaledContents(true);
+
+            relpath_label->setMinimumSize(QSize(50, 50));
+            relpath_label->setMaximumSize(QSize(50, 50));
+        }else{
+            relpath_label->setText(*rel_path);
+        }
     }
 }
 
@@ -455,6 +466,11 @@ void ResourcePickDialog::onResourceSelected(){
 }
 
 void ResourcePickDialog::onNeedToShow(){
+    if(this->area->resource_type == RESOURCE_TYPE_TEXTURE){
+        this->list->setViewMode(QListView::IconMode);
+
+    }
+
     this->extension_mask = area->extension_mask; //send extension mask
     this->list->clear();
     //Receiving pointer to project
@@ -476,7 +492,13 @@ void ResourcePickDialog::onNeedToShow(){
         for(unsigned int res_i = 0; res_i < resources_num; res_i ++){
             Resource* resource_ptr = &project_ptr->resources[res_i];
             if(resource_ptr->type == area->resource_type){ //if type is the same
-                new QListWidgetItem(QString::fromStdString(resource_ptr->resource_label), this->list); //add resource to list
+                QListWidgetItem* item = new QListWidgetItem(QString::fromStdString(resource_ptr->resource_label), this->list); //add resource to list
+                if(this->area->resource_type == RESOURCE_TYPE_TEXTURE){
+                    std::string fpath = _editor_win->project.root_path.toStdString() + "/" + resource_ptr->resource_label;
+                    QImage* img = _editor_win->thumb_master->texture_thumbnails.at(fpath);
+                    item->setIcon(QIcon(QPixmap::fromImage(*img)));
+                    //item->setText("");
+                }
             }
         }
     }else{ //we want to pick common file
@@ -515,6 +537,7 @@ void ResourcePickDialog::findFiles(QString directory){
 
 ResourcePickDialog::ResourcePickDialog(QWidget* parent) :
     QDialog (parent, Qt::WindowTitleHint | Qt::WindowSystemMenuHint){
+    resize(500, 400);
     contentLayout = new QGridLayout(); // Alocation of layout
     list = new QListWidget;
     this->setWindowTitle("Select Resource");
