@@ -1272,9 +1272,12 @@ void TerrainProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
     directional_radio->setText("Map");
     QRadioButton* point_radio = new QRadioButton;
     point_radio->setText("Texture");
+    QRadioButton* veg_radio = new QRadioButton;
+    veg_radio->setText("Vegetables");
 
     group->addRadioButton(directional_radio);
     group->addRadioButton(point_radio);
+    group->addRadioButton(veg_radio);
     inspector->registerUiObject(group);
     inspector->getContentLayout()->addLayout(group->btn_layout);
     if(edit_mode == 1){

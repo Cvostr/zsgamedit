@@ -1,13 +1,13 @@
 #version 420 core
 
-#define TEXTURES_AMOUNT 8
+#define TEXTURES_AMOUNT 12
 
 layout (location = 0) out vec4 tDiffuse;
 layout (location = 1) out vec3 tNormal;
 layout (location = 2) out vec3 tPos;
 layout (location = 4) out vec4 tMasks;
 
-out vec4 FragColor;
+layout(location = 0) out vec4 FragColor;
 
 in vec3 FragPos;
 in vec3 InNormal;

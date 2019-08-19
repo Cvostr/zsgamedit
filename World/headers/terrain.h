@@ -31,6 +31,11 @@ typedef struct HeightmapTexturePair{
     }
 }HeightmapTexturePair;
 
+typedef struct HeightmapGrass{
+    QString diffuse_relpath;
+    ZSPIRE::Texture* diffuse;
+}HeightmapGrass;
+
 class TerrainData{
 private:
     bool created;

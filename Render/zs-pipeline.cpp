@@ -4,6 +4,8 @@
 #include "../ProjEd/headers/ProjectEdit.h"
 #include <iostream>
 
+#define MAX_LIGHTS_AMOUNT 150
+
 RenderPipeline::RenderPipeline(){
     this->current_state = PIPELINE_STATE_DEFAULT;
 
@@ -44,6 +46,21 @@ void RenderPipeline::setup(int bufWidth, int bufHeight){
     ZSPIRE::setupDefaultMeshes();
     removeLights();
     MtShProps::genDefaultMtShGroup(&diffuse3d_shader, &skybox, &heightmap);
+
+
+    glGenBuffers(1, &camBuffer);
+    glBindBuffer(GL_UNIFORM_BUFFER, camBuffer);
+    glBufferData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 3, NULL, GL_STATIC_DRAW);
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    //Connect to point 0 (zero)
+    glBindBufferBase(GL_UNIFORM_BUFFER, 0, camBuffer);
+
+    glGenBuffers(1, &lightsBuffer);
+    glBindBuffer(GL_UNIFORM_BUFFER, lightsBuffer);
+    glBufferData(GL_UNIFORM_BUFFER, 64 * MAX_LIGHTS_AMOUNT + 4, NULL, GL_STATIC_DRAW);
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    //Connect to point 0 (zero)
+    glBindBufferBase(GL_UNIFORM_BUFFER, 1, lightsBuffer);
 }
 
 void RenderPipeline::initGizmos(int projectPespective){
@@ -170,6 +187,30 @@ unsigned int RenderPipeline::render_getpickedObj(void* projectedit_ptr, int mous
 
     return pr_data;
 }
+
+void RenderPipeline::setLightsToBuffer(){
+    glBindBuffer(GL_UNIFORM_BUFFER, lightsBuffer);
+    for(unsigned int light_i = 0; light_i < this->lights_ptr.size(); light_i ++){
+        LightsourceProperty* _light_ptr = static_cast<LightsourceProperty*>(lights_ptr[light_i]);
+
+        glBufferSubData(GL_UNIFORM_BUFFER, 64 * light_i, sizeof (int), &_light_ptr->light_type);
+        glBufferSubData(GL_UNIFORM_BUFFER, 64 * light_i + 4, sizeof (float), &_light_ptr->range);
+        glBufferSubData(GL_UNIFORM_BUFFER, 64 * light_i + 8, sizeof (float), &_light_ptr->intensity);
+        glBufferSubData(GL_UNIFORM_BUFFER, 64 * light_i + 12, sizeof (float), &_light_ptr->spot_angle);
+        glBufferSubData(GL_UNIFORM_BUFFER, 64 * light_i + 16, 12, &_light_ptr->last_pos);
+        glBufferSubData(GL_UNIFORM_BUFFER, 64 * light_i + 32, 12, &_light_ptr->direction);
+        glBufferSubData(GL_UNIFORM_BUFFER, 64 * light_i + 48, 4, &_light_ptr->color.gl_r);
+        glBufferSubData(GL_UNIFORM_BUFFER, 64 * light_i + 52, 4, &_light_ptr->color.gl_g);
+        glBufferSubData(GL_UNIFORM_BUFFER, 64 * light_i + 56, 4, &_light_ptr->color.gl_b);
+    }
+
+    int ls = static_cast<int>(lights_ptr.size());
+    glBufferSubData(GL_UNIFORM_BUFFER, 64 * MAX_LIGHTS_AMOUNT, 4, &ls);
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    //free lights array
+    this->removeLights();
+}
+
 void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr){
     EditWindow* editwin_ptr = static_cast<EditWindow*>(projectedit_ptr);
     switch(this->project_struct_ptr->perspective){
@@ -224,16 +265,7 @@ void RenderPipeline::render2D(void* projectedit_ptr){
         if(!obj_ptr->hasParent) //if it is a root object
             obj_ptr->processObject(this); //Draw object
     }
-
-    for(unsigned int light_i = 0; light_i < this->lights_ptr.size(); light_i ++){
-        LightsourceProperty* _light_ptr = static_cast<LightsourceProperty*>(lights_ptr[light_i]);
-
-        this->tile_shader.sendLight(light_i, _light_ptr);
-    }
-    //send amount of lights to deffered shader
-    this->tile_shader.setGLuniformInt("lights_amount", static_cast<int>(lights_ptr.size()));
-    //free lights array
-    this->removeLights();
+    setLightsToBuffer();
 
 }
 void RenderPipeline::render3D(void* projectedit_ptr)
@@ -284,8 +316,6 @@ void RenderPipeline::render3D(void* projectedit_ptr)
             obj_ptr->processObject(this); //Draw object
     }
 
-
-
     //Turn everything off to draw deffered plane correctly
     if(depthTest == true) //if depth is enabled
         glDisable(GL_DEPTH_TEST);
@@ -298,17 +328,9 @@ void RenderPipeline::render3D(void* projectedit_ptr)
     gbuffer.bindTextures(); //Bind gBuffer textures
     deffered_light.Use(); //use deffered shader
 
-    for(unsigned int light_i = 0; light_i < this->lights_ptr.size(); light_i ++){
-        LightsourceProperty* _light_ptr = static_cast<LightsourceProperty*>(lights_ptr[light_i]);
+    setLightsToBuffer();
 
-        this->deffered_light.sendLight(light_i, _light_ptr);
-    }
-    //send amount of lights to deffered shader
-    this->deffered_light.setGLuniformInt("lights_amount", static_cast<int>(lights_ptr.size()));
-    //free lights array
-    this->removeLights();
-
-    deffered_light.setGLuniformVec3("ambient_color", ZSVECTOR3(render_settings.ambient_light_color.r / 255.0f,
+    deffered_light.setGLuniformVec3("ambient_light_color", ZSVECTOR3(render_settings.ambient_light_color.r / 255.0f,
                                                                render_settings.ambient_light_color.g / 255.0f,
                                                                render_settings.ambient_light_color.b / 255.0f));
 
@@ -421,10 +443,10 @@ void GameObject::processObject(RenderPipeline* pipeline){
     //Obtain camera viewport
     ZSVIEWPORT cam_viewport = pipeline->cam->getViewport();
     //Distance limit
-    //int max_dist = static_cast<int>(cam_viewport.endX - cam_viewport.startX);
-    //bool difts = isDistanceFits(pipeline->cam->getCameraViewCenterPos(), transform_prop->_last_translation, max_dist);
+    int max_dist = static_cast<int>(cam_viewport.endX - cam_viewport.startX);
+    bool difts = isDistanceFits(pipeline->cam->getCameraViewCenterPos(), transform_prop->_last_translation, max_dist);
 
-    //if(difts)
+    if(difts)
         this->Draw(pipeline);
 
     for(unsigned int obj_i = 0; obj_i < this->children.size(); obj_i ++){
@@ -459,7 +481,8 @@ void MaterialProperty::onRender(RenderPipeline* pipeline){
         shader->setGLuniformInt("hasShadowMap", 0);
     }
 
-    shader->setTransform(transform_ptr->transform_mat);
+    glBindBuffer(GL_UNIFORM_BUFFER, pipeline->camBuffer);
+    glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 2, sizeof (ZSMATRIX4x4), &transform_ptr->transform_mat);
 
     //iterate over all properties, send them all!
     for(unsigned int prop_i = 0; prop_i < group_ptr->properties.size(); prop_i ++){
@@ -541,8 +564,11 @@ void TileProperty::onRender(RenderPipeline* pipeline){
 
     if(transform_ptr == nullptr) return;
 
+    glBindBuffer(GL_UNIFORM_BUFFER, pipeline->camBuffer);
+    glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 2, sizeof (ZSMATRIX4x4), &transform_ptr->transform_mat);
+
     tile_shader->Use();
-    tile_shader->setTransform(transform_ptr->transform_mat);
+    //tile_shader->setTransform(transform_ptr->transform_mat);
 
     //Checking for diffuse texture
     if(texture_diffuse != nullptr){
@@ -663,20 +689,13 @@ void ShadowCasterProperty::sendData(ZSPIRE::Shader* shader){
 }
 
 void RenderPipeline::updateShadersCameraInfo(ZSPIRE::Camera* cam_ptr){
-    /*unsigned int camBuffer;
-    glGenBuffers(1, &camBuffer);
-    glBindBuffer(GL_UNIFORM_BUFFER, uboExampleBlock);
-    glBufferData(GL_UNIFORM_BUFFER, 152, NULL, GL_STATIC_DRAW); // выделяем 150 байт памяти
+    glBindBuffer(GL_UNIFORM_BUFFER, camBuffer);
+    ZSMATRIX4x4 proj = cam_ptr->getProjMatrix();
+    ZSMATRIX4x4 view = cam_ptr->getViewMatrix();
+    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof (ZSMATRIX4x4), &proj);
+    glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4), sizeof (ZSMATRIX4x4), &view);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
-    */
-    if(diffuse3d_shader.isCreated == true){
-        diffuse3d_shader.Use();
-        diffuse3d_shader.setCamera(cam_ptr);
-    }
-    if(tile_shader.isCreated == true){
-        tile_shader.Use();
-        tile_shader.setCamera(cam_ptr);
-    }
+
     if(obj_mark_shader.isCreated == true){
         obj_mark_shader.Use();
         obj_mark_shader.setCamera(cam_ptr);
@@ -691,10 +710,6 @@ void RenderPipeline::updateShadersCameraInfo(ZSPIRE::Camera* cam_ptr){
         ui_shader.setCameraUiProjMatrix(cam_ptr);
     }
 
-    if(heightmap.isCreated == true){
-        heightmap.Use();
-        heightmap.setCamera(cam_ptr);
-    }
     if(skybox.isCreated == true){
         skybox.Use();
         this->skybox.setGLuniformMat4x4("projection", cam_ptr->getProjMatrix());

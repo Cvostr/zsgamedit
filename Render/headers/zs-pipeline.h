@@ -48,7 +48,6 @@ public:
 
 class RenderPipeline : public EditorComponentManager{
 private:
-
     GizmosRenderer* gizmos;
 
     G_BUFFER_GL gbuffer;
@@ -67,6 +66,8 @@ private:
 
     RenderSettings render_settings;
 public:
+    unsigned int camBuffer;
+    unsigned int lightsBuffer;
     bool depthTest; //if enabled, GL will do depth testing
     bool cullFaces; //if enabled, GL will cull faces
     PIPELINE_STATE current_state;
@@ -84,6 +85,7 @@ public:
     void updateShadersCameraInfo(ZSPIRE::Camera* cam_ptr);
     void addLight(void* light_ptr);
     void removeLights();
+    void setLightsToBuffer();
     ZSPIRE::Camera* cam;
     void* win_ptr;
 

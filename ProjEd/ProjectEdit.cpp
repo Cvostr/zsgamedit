@@ -1197,6 +1197,8 @@ EdActions* getActionManager(){
 void ObjectTransformState::setTransformOnObject(GO_TRANSFORM_MODE transformMode){
     //Calculate pointer to transform property
     this->tprop_ptr = static_cast<TransformProperty*>(obj_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
+    //We haven't found transform property
+    if(tprop_ptr == nullptr) return;
 
     this->transformMode = transformMode;
     this->isTransforming = true;

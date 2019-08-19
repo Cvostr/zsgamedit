@@ -6,19 +6,16 @@ layout (location = 2) in vec3 normal;
 layout (location = 3) in vec3 tangent;
 layout (location = 4) in vec3 bitangent;
 
-out vec3 FragPos;
-out vec3 InNormal;
-out vec2 UVCoord;
-out mat3 TBN;
+layout(location = 0) out vec3 FragPos;
+layout(location = 1) out vec3 InNormal;
+layout(location = 2) out vec2 UVCoord;
+layout(location = 3) out mat3 TBN;
 
-//layout (std140) uniform CamTransform
-//{
+layout (std140, binding = 0) uniform CamMatrices{
 uniform mat4 cam_projection;
 uniform mat4 cam_view;
-//uniform mat4 cam_pos;
-//};
 uniform mat4 object_transform;
-
+};
 
 void main(){
 	UVCoord = uv;

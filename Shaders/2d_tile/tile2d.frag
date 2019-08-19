@@ -5,14 +5,16 @@
 #define LIGHTSOURCE_POINT 2
 #define LIGHTSOURCE_SPOT 3
 
-struct Light{
-	int type;
-	vec3 pos;
-	vec3 dir;
-	vec3 color;
-	float range;
-	float intensity;
-	float spot_angle;
+#define MAX_LIGHTS_NUM 150
+
+struct Light{ //size = 64
+	int type; //size = 4, offset = 0
+    float range; // size = 4, offset = 4
+	float intensity; //size = 4, offset = 8
+	float spot_angle; //size = 4, offset = 12
+	vec3 pos; //size = 16, offset = 16 
+	vec3 dir; //size = 16, offset = 32
+	vec3 color; //size = 16, offset = 48
 };
 //Output Vec
 layout(location = 0) out vec4 FragColor;
@@ -34,8 +36,10 @@ uniform bool animated;
 uniform bool hasDiffuseMap;
 uniform bool hasDiffuseMap2;
 
-uniform int lights_amount;
-uniform Light lights[100];
+layout (std140, binding = 1) uniform Lights{
+    uniform Light lights[MAX_LIGHTS_NUM];
+    uniform int lights_amount;
+};
 
 void main(){
 
