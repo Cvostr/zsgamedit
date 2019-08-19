@@ -13,6 +13,7 @@
 #include <QShortcut>
 #include <QDesktopServices>
 #include <QMessageBox>
+#include <mainwin.h>
 
 EditWindow* _editor_win;
 InspectorWin* _inspector_win;
@@ -135,7 +136,7 @@ void EditWindow::init(){
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
     SDL_DisplayMode current;
     SDL_GetCurrentDisplayMode(0, &current);
@@ -467,6 +468,9 @@ bool EditWindow::onCloseProject(){
 
         this->project.resources.clear(); //Clear resources list
 
+        MainWin* win = static_cast<MainWin*>(this->mainwin_ptr);
+        win->show();
+
         //Close Qt windows
         _editor_win->close();
         _inspector_win->close();
@@ -477,10 +481,7 @@ bool EditWindow::onCloseProject(){
         ZSPIRE::SFX::destroyAL();
 
         this->ready = false; //won't render anymore
-        this->close_reason = EW_CLOSE_REASON_PROJLIST;
 
-        _editor_win->close();
-        _inspector_win->close();
         return true;
     }
     return false;
@@ -884,6 +885,7 @@ EditWindow* ZSEditor::openEditor(){
     _editor_win->thumb_master->createTexturesThumbnails();
 
     _editor_win->setViewDirectory(_editor_win->project.root_path);
+
     return _editor_win;
 }
 

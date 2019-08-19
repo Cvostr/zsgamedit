@@ -161,9 +161,17 @@ void GameObject::saveProperties(std::ofstream* stream){
             stream->write(reinterpret_cast<char*>(&ptr->Length), sizeof(float));
             stream->write(reinterpret_cast<char*>(&ptr->MaxHeight), sizeof(float));
             stream->write(reinterpret_cast<char*>(&ptr->castShadows), sizeof(bool));
+            stream->write(reinterpret_cast<char*>(&ptr->textures_size), sizeof(int));
+
+            *stream << "\n";
 
             std::string fpath = ptr->go_link.world_ptr->proj_ptr->root_path.toStdString() + "/" + ptr->file_label.toStdString();
             ptr->getTerrainData()->saveToFile(fpath.c_str());
+            //Write textures relative pathes
+            for(int texture_i = 0; texture_i < ptr->textures_size; texture_i ++){
+                HeightmapTexturePair* texture_pair = &ptr->textures[texture_i];
+                *stream << texture_pair->diffuse_relpath.toStdString() << " " << texture_pair->normal_relpath.toStdString() << "\n"; //Write material relpath
+            }
 
             break;
         }
@@ -387,10 +395,31 @@ void GameObject::loadProperty(std::ifstream* world_stream){
         world_stream->read(reinterpret_cast<char*>(&ptr->Length), sizeof(float));
         world_stream->read(reinterpret_cast<char*>(&ptr->MaxHeight), sizeof(float));
         world_stream->read(reinterpret_cast<char*>(&ptr->castShadows), sizeof(bool));
+        world_stream->read(reinterpret_cast<char*>(&ptr->textures_size), sizeof(int));
 
         std::string fpath = ptr->go_link.world_ptr->proj_ptr->root_path.toStdString() + "/" + ptr->file_label.toStdString();
-        ptr->getTerrainData()->loadFromFile(fpath.c_str());
-        ptr->getTerrainData()->generateGLMesh();
+        bool result = ptr->getTerrainData()->loadFromFile(fpath.c_str());
+        if(result) //if loading sucess
+            ptr->getTerrainData()->generateGLMesh();
+
+        world_stream->seekg(1, std::ofstream::cur);
+
+        //Read textures relative pathes
+        for(int texture_i = 0; texture_i < ptr->textures_size; texture_i ++){
+            HeightmapTexturePair texture_pair;
+
+            std::string diffuse_relpath;
+            std::string normal_relpath;
+
+            *world_stream >> diffuse_relpath >> normal_relpath; //Write material relpath
+
+            texture_pair.diffuse_relpath = QString::fromStdString(diffuse_relpath);
+            texture_pair.normal_relpath = QString::fromStdString(normal_relpath);
+
+            ptr->textures.push_back(texture_pair);
+            //texture_pair.diffuse
+        }
+        ptr->onValueChanged();
 
         break;
     }

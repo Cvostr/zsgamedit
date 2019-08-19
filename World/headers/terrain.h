@@ -1,13 +1,15 @@
 #ifndef TERRAIN_H
 #define TERRAIN_H
 
-#define TEXTURES_AMOUNT 8
+#define TERRAIN_TEXTURES_AMOUNT 12
 
+#include <QString>
+#include "../../Render/headers/zs-texture.h"
 #include "../../Render/headers/zs-math.h"
 
 typedef struct HeightmapTexel{
     float height;
-    unsigned char texture_factors[TEXTURES_AMOUNT];
+    unsigned char texture_factors[TERRAIN_TEXTURES_AMOUNT];
 }HeightmapTexel;
 
 typedef struct HeightmapVertex{
@@ -15,6 +17,19 @@ typedef struct HeightmapVertex{
     ZSVECTOR2 uv;
     ZSVECTOR3 normal;
 }HeightmapVertex;
+
+typedef struct HeightmapTexturePair{
+    QString diffuse_relpath;
+    QString normal_relpath;
+
+    ZSPIRE::Texture* diffuse;
+    ZSPIRE::Texture* normal;
+
+    HeightmapTexturePair(){
+        diffuse_relpath = normal_relpath = "@none";
+        diffuse = normal = nullptr;
+    }
+}HeightmapTexturePair;
 
 class TerrainData{
 private:
@@ -39,7 +54,7 @@ public:
     void Draw();
     void generateGLMesh();
     void saveToFile(const char* file_path);
-    void loadFromFile(const char* file_path);
+    bool loadFromFile(const char* file_path);
 
     void modifyHeight(int originX, int originY, float originHeight, int range, int multiplyer);
     void modifyTexture(int originX, int originY, int range, unsigned char texture);
@@ -48,6 +63,7 @@ public:
     void reduce(unsigned char* ptr, int val);
 
     TerrainData();
+    ~TerrainData();
 };
 
 #endif // TERRAIN_H

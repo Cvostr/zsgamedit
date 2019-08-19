@@ -27,17 +27,18 @@ void RenderSettings::defaults(){
 
 void RenderPipeline::setup(int bufWidth, int bufHeight){
     if(this->project_struct_ptr->perspective == 2){
-        this->tile_shader.compileFromFile("Shaders/2d_tile/tile2d.vs", "Shaders/2d_tile/tile2d.fs");
+        this->tile_shader.compileFromFile("Shaders/2d_tile/tile2d.vert", "Shaders/2d_tile/tile2d.frag");
     }
     this->pick_shader.compileFromFile("Shaders/pick/pick.vs", "Shaders/pick/pick.fs");
-    this->obj_mark_shader.compileFromFile("Shaders/mark/mark.vs", "Shaders/mark/mark.fs");
+    this->obj_mark_shader.compileFromFile("Shaders/mark/mark.vert", "Shaders/mark/mark.frag");
     this->ui_shader.compileFromFile("Shaders/ui/ui.vs", "Shaders/ui/ui.fs");
     if(this->project_struct_ptr->perspective == 3){
-        this->deffered_light.compileFromFile("Shaders/postprocess/deffered_light/deffered.vs", "Shaders/postprocess/deffered_light/deffered.fs");
-        this->diffuse3d_shader.compileFromFile("Shaders/3d/3d.vs", "Shaders/3d/3d.fs");
-        skybox.compileFromFile("Shaders/skybox/skybox.vs", "Shaders/skybox/skybox.fs");
-        shadowMap.compileFromFile("Shaders/shadowmap/shadowmap.vs", "Shaders/shadowmap/shadowmap.fs");
-        heightmap.compileFromFile("Shaders/heightmap/heightmap.vs", "Shaders/heightmap/heightmap.fs");
+        this->deffered_light.compileFromFile("Shaders/postprocess/deffered_light/deffered.vert",
+                                             "Shaders/postprocess/deffered_light/deffered.frag");
+        this->diffuse3d_shader.compileFromFile("Shaders/3d/3d.vert", "Shaders/3d/3d.frag");
+        skybox.compileFromFile("Shaders/skybox/skybox.vert", "Shaders/skybox/skybox.frag");
+        shadowMap.compileFromFile("Shaders/shadowmap/shadowmap.vert", "Shaders/shadowmap/shadowmap.frag");
+        heightmap.compileFromFile("Shaders/heightmap/heightmap.vert", "Shaders/heightmap/heightmap.frag");
         this->gbuffer.create(bufWidth, bufHeight);
     }
     ZSPIRE::setupDefaultMeshes();
@@ -182,11 +183,13 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr){
     }
     }
 
+
+    ZSPIRE::getPlaneMesh2D()->Draw(); //Draw screen
+
     //if we control this object
     if(editwin_ptr->obj_trstate.isTransforming == true && !editwin_ptr->isWorldCamera)
         getGizmosRenderer()->drawTransformControls(editwin_ptr->obj_trstate.obj_ptr->getTransformProperty()->_last_translation, 100, 10);
 
-    ZSPIRE::getPlaneMesh2D()->Draw(); //Draw screen
 
     SDL_GL_SwapWindow(w); //Send rendered frame
 }
@@ -660,6 +663,12 @@ void ShadowCasterProperty::sendData(ZSPIRE::Shader* shader){
 }
 
 void RenderPipeline::updateShadersCameraInfo(ZSPIRE::Camera* cam_ptr){
+    /*unsigned int camBuffer;
+    glGenBuffers(1, &camBuffer);
+    glBindBuffer(GL_UNIFORM_BUFFER, uboExampleBlock);
+    glBufferData(GL_UNIFORM_BUFFER, 152, NULL, GL_STATIC_DRAW); // выделяем 150 байт памяти
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    */
     if(diffuse3d_shader.isCreated == true){
         diffuse3d_shader.Use();
         diffuse3d_shader.setCamera(cam_ptr);

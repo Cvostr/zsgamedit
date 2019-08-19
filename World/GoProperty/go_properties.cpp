@@ -429,6 +429,8 @@ void MeshProperty::updateMeshPtr(){
         this->mesh_ptr = ZSPIRE::getIsoTileMesh2D();
     }else if(resource_relpath.compare("@cube") == false){
         this->mesh_ptr = ZSPIRE::getCubeMesh3D();
+    }else if(resource_relpath.compare("@sphere") == false){
+        this->mesh_ptr = ZSPIRE::getSphereMesh();
     }
     else //If it isn't built in mesh
     {
@@ -1211,6 +1213,7 @@ TerrainProperty::TerrainProperty(){
     this->Length = 500;
     this->MaxHeight = 500;
     castShadows = true;
+    textures_size = 0;
 
     this->range = 15;
     this->editHeight = 10;
@@ -1299,6 +1302,28 @@ void TerrainProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
         EditTex->value = &this->textureid; //Ptr to our vector
         EditTex->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
         inspector->addPropertyArea(EditTex);
+
+        IntPropertyArea* tSize = new IntPropertyArea; //New property area
+        tSize->setLabel("Textures"); //Its label
+        tSize->value = &this->textures_size; //Ptr to our vector
+        tSize->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
+        inspector->addPropertyArea(tSize);
+
+        for(int i = 0; i < this->textures_size; i ++){
+            PickResourceArea* diffuse_area = new PickResourceArea;
+            diffuse_area->setLabel("Diffuse");
+            diffuse_area->go_property = static_cast<void*>(this);
+            diffuse_area->rel_path = &textures[i].diffuse_relpath;
+            diffuse_area->resource_type = RESOURCE_TYPE_TEXTURE; //It should load textures only
+            inspector->addPropertyArea(diffuse_area);
+
+            PickResourceArea* normal_area = new PickResourceArea;
+            normal_area->setLabel("Normal");
+            normal_area->go_property = static_cast<void*>(this);
+            normal_area->rel_path = &textures[i].normal_relpath;
+            normal_area->resource_type = RESOURCE_TYPE_TEXTURE; //It should load textures only
+            inspector->addPropertyArea(normal_area);
+        }
     }
 
 }
@@ -1311,6 +1336,17 @@ void TerrainProperty::onRender(RenderPipeline* pipeline){
 
     MaterialProperty* mat = this->go_link.updLinkPtr()->getPropertyPtr<MaterialProperty>();
     if(mat == nullptr) return;
+    //Iterate over all textures to use them
+    for(unsigned int i = 0; i < static_cast<unsigned int>(this->textures_size); i ++){
+        HeightmapTexturePair* pair = &this->textures[i];
+        if(pair->diffuse != nullptr){
+            pair->diffuse->Use(static_cast<int>(i));
+        }
+        if(pair->normal != nullptr){
+            pair->normal->Use(static_cast<int>(12 + i));
+        }
+    }
+
     //Apply material shader
     mat->onRender(pipeline);
 }
@@ -1323,6 +1359,17 @@ void TerrainProperty::onValueChanged(){
     if(_last_edit_mode != edit_mode){
         _last_edit_mode = edit_mode;
         _inspector_win->updateRequired = true;
+    }
+    //if amount of texture pairs changed
+    if(static_cast<unsigned int>(this->textures_size) != textures.size()){
+        textures.resize(static_cast<unsigned int>(this->textures_size));
+        _inspector_win->updateRequired = true;
+    }
+
+    for(unsigned int i = 0; i < static_cast<unsigned int>(this->textures_size); i ++){
+        HeightmapTexturePair* pair = &this->textures[i];
+        pair->diffuse = world_ptr->getTexturePtrByRelPath(pair->diffuse_relpath);
+        pair->normal = world_ptr->getTexturePtrByRelPath(pair->normal_relpath);
     }
 }
 
@@ -1409,4 +1456,18 @@ void TerrainProperty::onMouseMotion(int posX, int posY, int relX, int relY, int 
 
 TerrainData* TerrainProperty::getTerrainData(){
     return &data;
+}
+
+void TerrainProperty::copyTo(GameObjectProperty* dest){
+    if(dest->type != this->type) return; //if it isn't script group
+
+    //Do base things
+    GameObjectProperty::copyTo(dest);
+
+    TerrainProperty* _dest = static_cast<TerrainProperty*>(dest);
+    _dest->Width = this->Width;
+    _dest->Length = this->Length;
+    _dest->MaxHeight = this->MaxHeight;
+    _dest->file_label = this->file_label;
+    _dest->castShadows = this->castShadows;
 }

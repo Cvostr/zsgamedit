@@ -15,7 +15,7 @@ void TerrainData::flatTerrain(int height){
     for(int i = 0; i < W * H; i ++){
         data[i].height = height;
         this->data[i].texture_factors[0] = 255;
-        for(int t = 1; t < TEXTURES_AMOUNT; t++)
+        for(int t = 1; t < TERRAIN_TEXTURES_AMOUNT; t++)
             this->data[i].texture_factors[t] = 0;
     }
 }
@@ -75,11 +75,11 @@ void TerrainData::Draw(){
     //if opengl data not generated, exit function
     if(!created) return;
 
-    glActiveTexture(GL_TEXTURE16);
+    glActiveTexture(GL_TEXTURE24);
     glBindTexture(GL_TEXTURE_2D, texture_mask1);
-    glActiveTexture(GL_TEXTURE17);
+    glActiveTexture(GL_TEXTURE25);
     glBindTexture(GL_TEXTURE_2D, texture_mask2);
-    glActiveTexture(GL_TEXTURE18);
+    glActiveTexture(GL_TEXTURE26);
     glBindTexture(GL_TEXTURE_2D, texture_mask3);
 
     glBindVertexArray(VAO);
@@ -108,10 +108,10 @@ void TerrainData::generateGLMesh(){
            _texture1[(x * H + y) * 4 + 2] = data[x * H + y].texture_factors[6];
            _texture1[(x * H + y) * 4 + 3] = data[x * H + y].texture_factors[7];
 
-           _texture2[(x * H + y) * 4] = data[x * H + y].texture_factors[4];
-           _texture2[(x * H + y) * 4 + 1] = data[x * H + y].texture_factors[5];
-           _texture2[(x * H + y) * 4 + 2] = data[x * H + y].texture_factors[6];
-           _texture2[(x * H + y) * 4 + 3] = data[x * H + y].texture_factors[7];
+           _texture2[(x * H + y) * 4] = data[x * H + y].texture_factors[8];
+           _texture2[(x * H + y) * 4 + 1] = data[x * H + y].texture_factors[9];
+           _texture2[(x * H + y) * 4 + 2] = data[x * H + y].texture_factors[10];
+           _texture2[(x * H + y) * 4 + 3] = data[x * H + y].texture_factors[11];
         }
     }
 
@@ -222,6 +222,11 @@ TerrainData::TerrainData(){
     created = false;
 }
 
+TerrainData::~TerrainData(){
+    if(created)
+        delete[] data;
+}
+
 void TerrainData::saveToFile(const char* file_path){
     std::ofstream world_stream;
     world_stream.open(file_path, std::ofstream::binary);
@@ -231,16 +236,22 @@ void TerrainData::saveToFile(const char* file_path){
 
     for(int i = 0; i < W * H; i ++){
         world_stream.write(reinterpret_cast<char*>(&data[i].height), sizeof(float));
-        for(int tex_factor = 0; tex_factor < TEXTURES_AMOUNT; tex_factor ++)
+        for(int tex_factor = 0; tex_factor < TERRAIN_TEXTURES_AMOUNT; tex_factor ++)
             world_stream.write(reinterpret_cast<char*>(&data[i].texture_factors[tex_factor]), sizeof(unsigned char));
     }
 
     world_stream.close();
 }
 
-void TerrainData::loadFromFile(const char* file_path){
+bool TerrainData::loadFromFile(const char* file_path){
     std::ifstream world_stream;
     world_stream.open(file_path, std::ifstream::binary);
+
+    if(world_stream.fail()){ //Probably, no file
+        std::cout << "Terrain : Probably, missing terrain file" << file_path;
+        return false;
+    }
+
     //read dimensions
     world_stream.read(reinterpret_cast<char*>(&this->W), sizeof(int));
     world_stream.read(reinterpret_cast<char*>(&this->H), sizeof(int));
@@ -249,11 +260,12 @@ void TerrainData::loadFromFile(const char* file_path){
 
     for(int i = 0; i < W * H; i ++){
         world_stream.read(reinterpret_cast<char*>(&data[i].height), sizeof(float));
-        for(int tex_factor = 0; tex_factor < TEXTURES_AMOUNT; tex_factor ++)
+        for(int tex_factor = 0; tex_factor < TERRAIN_TEXTURES_AMOUNT; tex_factor ++)
             world_stream.read(reinterpret_cast<char*>(&data[i].texture_factors[tex_factor]), sizeof(unsigned char));
     }
 
     world_stream.close();
+    return true;
 }
 
 void TerrainData::modifyHeight(int originX, int originY, float originHeight, int range, int multiplyer){
@@ -280,7 +292,7 @@ void TerrainData::modifyTexture(int originX, int originY, int range, unsigned ch
             //if pixel is in circle
             float dist = getDistance(ZSVECTOR3(x, y, 0), ZSVECTOR3(originX, originY, 0));
             if(dist <= range - modif){
-                for(unsigned char texture_f = 0; texture_f < TEXTURES_AMOUNT; texture_f ++){
+                for(unsigned char texture_f = 0; texture_f < TERRAIN_TEXTURES_AMOUNT; texture_f ++){
                     if(texture_f != texture)
                         reduce(&data[y * H + x].texture_factors[texture_f], 25);
                 }
@@ -289,7 +301,7 @@ void TerrainData::modifyTexture(int originX, int originY, int range, unsigned ch
             for(int i = 0; i < modif / 2; i ++){
                 if(dist > range - modif + (i) * 2 && dist <= range - modif + (i + 1) * 2){
                     int mod = 25 / ((i + 1) * 2);
-                    for(unsigned char texture_f = 0; texture_f < TEXTURES_AMOUNT; texture_f ++){
+                    for(unsigned char texture_f = 0; texture_f < TERRAIN_TEXTURES_AMOUNT; texture_f ++){
                         if(texture_f != texture)
                             reduce(&data[y * H + x].texture_factors[texture_f], mod);
                     }

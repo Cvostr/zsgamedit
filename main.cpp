@@ -28,12 +28,6 @@ int main(int argc, char *argv[])
                 deltaTime = (NOW - last) * 1000 / SDL_GetPerformanceFrequency();
             }
 
-            //Close checks
-            if(w.edit_win_ptr->close_reason == EW_CLOSE_REASON_PROJLIST){
-                w.edit_win_ptr->close_reason = EW_CLOSE_REASON_UNCLOSED;
-                w.show();
-            }
-
             w.edit_win_ptr->updateDeltaTime(deltaTime);
             SDL_Event event;
             ZSENSDK::Input::MouseState* mstate = ZSENSDK::Input::getMouseStatePtr();

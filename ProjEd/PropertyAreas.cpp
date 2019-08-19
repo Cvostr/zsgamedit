@@ -377,8 +377,20 @@ void PickResourceArea::addToInspector(InspectorWin* win){
 
 void PickResourceArea::setup(){
    // QString resource_relpath = *this->rel_path;
+}
 
+void PickResourceArea::updateLabel(){
+    if(this->resource_type == RESOURCE_TYPE_TEXTURE && *rel_path != "@none"){
+        std::string fpath = _editor_win->project.root_path.toStdString() + "/" + rel_path->toStdString();
+        QImage* img = _editor_win->thumb_master->texture_thumbnails.at(fpath);
+        relpath_label->setPixmap(QPixmap::fromImage(*img));
+        relpath_label->setScaledContents(true);
 
+        relpath_label->setMinimumSize(QSize(50, 50));
+        relpath_label->setMaximumSize(QSize(50, 50));
+    }else{
+        relpath_label->setText(*rel_path);
+    }
 }
 
 void PickResourceArea::updateValues(){
@@ -388,17 +400,7 @@ void PickResourceArea::updateValues(){
     QString cur = this->relpath_label->text();
 
     if(*rel_path != cur){
-        if(this->resource_type == RESOURCE_TYPE_TEXTURE && *rel_path != "@none"){
-            std::string fpath = _editor_win->project.root_path.toStdString() + "/" + rel_path->toStdString();
-            QImage* img = _editor_win->thumb_master->texture_thumbnails.at(fpath);
-            relpath_label->setPixmap(QPixmap::fromImage(*img));
-            relpath_label->setScaledContents(true);
-
-            relpath_label->setMinimumSize(QSize(50, 50));
-            relpath_label->setMaximumSize(QSize(50, 50));
-        }else{
-            relpath_label->setText(*rel_path);
-        }
+        updateLabel();
     }
 }
 
@@ -485,6 +487,7 @@ void ResourcePickDialog::onNeedToShow(){
         new QListWidgetItem("@plane", this->list);
         new QListWidgetItem("@isotile", this->list);
         new QListWidgetItem("@cube", this->list);
+        new QListWidgetItem("@sphere", this->list);
     }
 
     if(area->resource_type < RESOURCE_TYPE_FILE){ // if it is an resource
@@ -505,6 +508,8 @@ void ResourcePickDialog::onNeedToShow(){
         findFiles(project_ptr->root_path);
     }
     this->exec();
+    //update label content
+    area->updateLabel();
 }
 
 void ResourcePickDialog::findFiles(QString directory){
@@ -602,6 +607,7 @@ void ZSColorPickDialog::onNeedToShow(){
     *color_ptr = _color;
     area_ptr->updText();
     area_ptr->PropertyEditArea::callPropertyUpdate();
+
 }
 
 BoolCheckboxArea::BoolCheckboxArea(){

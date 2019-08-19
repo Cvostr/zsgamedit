@@ -211,17 +211,21 @@ public:
 };
 
 class TerrainProperty : public GameObjectProperty{
+
 private:
     TerrainData data;
     bool hasChanged;
     char _last_edit_mode;
     char edit_mode;
 public:
+    std::vector<HeightmapTexturePair> textures;
+
     QString file_label;
     int Width;
     int Length;
     int MaxHeight;
     bool castShadows;
+    int textures_size;
 
     int range;
     float editHeight;
@@ -232,6 +236,7 @@ public:
     void DrawMesh();
     void onValueChanged();
     void onAddToObject();
+    void copyTo(GameObjectProperty* dest);
     TerrainProperty();
     void onMouseClick(int posX, int posY, int screenY, bool isLeftButtonHold, bool isCtrlHold);
     void onMouseMotion(int posX, int posY, int relX, int relY, int screenY, bool isLeftButtonHold, bool isCtrlHold);

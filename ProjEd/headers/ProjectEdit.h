@@ -165,6 +165,7 @@ public:
     bool isSceneRun; //Is scene running right now
     bool isWorldCamera; //Use World's camera to render world?
 
+    void* mainwin_ptr;
     World world;
     ZSPIRE::Camera edit_camera; //Camera to show editing scene
     Project project; //info about current project

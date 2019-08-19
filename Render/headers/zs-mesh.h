@@ -40,6 +40,7 @@ namespace ZSPIRE {
 	Mesh* getUiSpriteMesh2D();
 	Mesh* getIsoTileMesh2D();
     Mesh* getCubeMesh3D();
+    Mesh* getSphereMesh();
     Mesh* getSkyboxMesh();
 
     void processTangentSpace(ZSVERTEX* vert_array, unsigned int* indices_array, int indices_num, int vertex_num);

@@ -193,6 +193,7 @@ void MainWin::onSelectProjectToOpen(){
             this->hide(); //Close project selection window
 
             this->edit_win_ptr = ZSEditor::openProject(conf_ptr->editwin_proj); //Call project opening
+            this->edit_win_ptr->mainwin_ptr = static_cast<void*>(this);
         }
     }
 

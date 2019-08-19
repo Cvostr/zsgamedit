@@ -2,6 +2,10 @@
 
 #include <iostream>
 #include <GL/glew.h>
+#include <math.h>
+
+#define SPHERE_SECTORS 36
+#define SPHERE_STACKS 18
 
 static ZSPIRE::Mesh* picked_mesh = nullptr;
 
@@ -128,6 +132,7 @@ static ZSPIRE::Mesh uiSprite2Dmesh;
 static ZSPIRE::Mesh iso_tile2Dmesh;
 static ZSPIRE::Mesh cube3Dmesh;
 static ZSPIRE::Mesh skyboxMesh;
+static ZSPIRE::Mesh sphereMesh;
 
 ZSPIRE::Mesh::Mesh() {
 	this->alive = false;
@@ -173,6 +178,77 @@ void ZSPIRE::setupDefaultMeshes() {
     glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+
+    sphereMesh.Init();
+    std::vector<ZSVERTEX> sphere_v;
+    std::vector<unsigned int> sphere_indices;
+    float radius = 1.f;
+    float x, y, z, xy;                              // vertex position
+    float nx, ny, nz, lengthInv = 1.0f / radius;    // vertex normal
+    float s, t;                                     // vertex texCoord
+
+    float sectorStep = 2 * ZS_PI / SPHERE_SECTORS;
+    float stackStep = ZS_PI / SPHERE_STACKS;
+    float sectorAngle, stackAngle;
+
+    for(int i = 0; i <= SPHERE_STACKS; ++i)
+    {
+        stackAngle = ZS_PI / 2 - i * stackStep;        // starting from pi/2 to -pi/2
+        xy = radius * cosf(stackAngle);             // r * cos(u)
+        z = radius * sinf(stackAngle);              // r * sin(u)
+
+        // add (sectorCount+1) vertices per stack
+        // the first and last vertices have same position and normal, but different tex coords
+        for(int j = 0; j <= SPHERE_SECTORS; ++j)
+        {
+            sectorAngle = j * sectorStep;           // starting from 0 to 2pi
+            ZSVERTEX v;
+
+            // vertex position (x, y, z)
+            x = xy * cosf(sectorAngle);             // r * cos(u) * cos(v)
+            y = xy * sinf(sectorAngle);             // r * cos(u) * sin(v)
+            v.pos = ZSVECTOR3(x, y, z);
+
+            // normalized vertex normal (nx, ny, nz)
+            nx = x * lengthInv;
+            ny = y * lengthInv;
+            nz = z * lengthInv;
+            v.normal = ZSVECTOR3(nx, ny, nz);
+
+            // vertex tex coord (s, t) range between [0, 1]
+            s = static_cast<float>(j) / SPHERE_SECTORS;
+            t = static_cast<float>(i) / SPHERE_STACKS;
+            v.uv = ZSVECTOR2(s, t);
+            sphere_v.push_back(v);
+        }
+    }
+    unsigned int k1, k2;
+    for(unsigned int i = 0; i < SPHERE_STACKS; ++i)
+    {
+        k1 = i * (SPHERE_SECTORS + 1);     // beginning of current stack
+        k2 = k1 + SPHERE_SECTORS + 1;      // beginning of next stack
+
+        for(int j = 0; j < SPHERE_SECTORS; ++j, ++k1, ++k2)
+        {
+            // 2 triangles per sector excluding first and last stacks
+            // k1 => k2 => k1+1
+            if(i != 0)
+            {
+                sphere_indices.push_back(k1);
+                sphere_indices.push_back(k2);
+                sphere_indices.push_back(k1 + 1);
+            }
+
+            // k1+1 => k2 => k2+1
+            if(i != (SPHERE_STACKS-1))
+            {
+                sphere_indices.push_back(k1 + 1);
+                sphere_indices.push_back(k2);
+                sphere_indices.push_back(k2 + 1);
+            }
+        }
+    }
+    sphereMesh.setMeshData(sphere_v.data(), sphere_indices.data(), static_cast<uint>(sphere_v.size()), static_cast<uint>(sphere_indices.size())); //Send plane data
 }
 
 void ZSPIRE::freeDefaultMeshes(){
@@ -180,6 +256,8 @@ void ZSPIRE::freeDefaultMeshes(){
     uiSprite2Dmesh.Destroy();
     iso_tile2Dmesh.Destroy();
     cube3Dmesh.Destroy();
+    skyboxMesh.Destroy();
+    sphereMesh.Destroy();
 }
 
 ZSPIRE::Mesh* ZSPIRE::getPlaneMesh2D() {
@@ -189,7 +267,9 @@ ZSPIRE::Mesh* ZSPIRE::getPlaneMesh2D() {
 ZSPIRE::Mesh* ZSPIRE::getUiSpriteMesh2D() {
 	return &uiSprite2Dmesh;
 }
-
+ZSPIRE::Mesh* ZSPIRE::getSphereMesh(){
+    return &sphereMesh;
+}
 ZSPIRE::Mesh* ZSPIRE::getIsoTileMesh2D(){
 	return &iso_tile2Dmesh;
 }

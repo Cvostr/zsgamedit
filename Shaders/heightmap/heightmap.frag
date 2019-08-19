@@ -1,6 +1,4 @@
-#version 150 core
-#extension GL_ARB_explicit_attrib_location : require
-#extension GL_ARB_explicit_uniform_location : require
+#version 420 core
 
 #define TEXTURES_AMOUNT 8
 
@@ -161,8 +159,6 @@ void main(){
 	tPos = FragPos;
 	tNormal = Normal;
 	tMasks = vec4(1.0, 0, 0, 0);
-
-	
 	
 	if(isPicking == 1){
 		FragColor = vec4(_id / (255 * 2), 1);

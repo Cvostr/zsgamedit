@@ -40,6 +40,7 @@ void ThumbnailsMaster::initShader(){
 }
 
 void ThumbnailsMaster::createTexturesThumbnails(){
+    //Compile texture shader
     initShader();
     glViewport(0, 0, 512, 512);
     texture_shader.Use();
@@ -47,15 +48,16 @@ void ThumbnailsMaster::createTexturesThumbnails(){
 
     glDisable(GL_CULL_FACE);
     glDisable(GL_DEPTH_TEST);
-
+    glClear(GL_COLOR_BUFFER_BIT);
+    //Iterate over all resources
     for(unsigned int res_i = 0; res_i < project_struct_ptr->resources.size(); res_i ++){
         Resource* resource_ptr = &this->project_struct_ptr->resources[res_i];
         if(resource_ptr->type != RESOURCE_TYPE_TEXTURE) continue;
         ZSPIRE::Texture* texture_ptr = static_cast<ZSPIRE::Texture*>(resource_ptr->class_ptr);
 
-        glClear(GL_COLOR_BUFFER_BIT);
-
+        //use texture
         texture_ptr->Use(0);
+        //draw plane
         ZSPIRE::getPlaneMesh2D()->Draw();
 
         unsigned char* texture_data = new unsigned char[512 * 512 * 4];

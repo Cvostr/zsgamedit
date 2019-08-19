@@ -119,6 +119,7 @@ public:
     void setup(); //Virtual, to prepare base values
     void addToInspector(InspectorWin* win);
     void updateValues();
+    void updateLabel();
 };
 
 class ResourcePickDialog : public QDialog{
