@@ -2,6 +2,9 @@
 #define THUMBNAILSMASTER_H
 
 #include "../../Render/headers/zs-shader.h"
+#include "../../Render/headers/zs-texture.h"
+#include "../../Render/headers/zs-mesh.h"
+#include "../../Render/headers/MatShaderProps.h"
 #include "EditorManager.h"
 #include <map>
 #include <QPixmap>
@@ -17,6 +20,9 @@ public:
 
     void initShader();
     void createTexturesThumbnails();
+
+    void DrawTexture(ZSPIRE::Texture* texture);
+    void DrawMaterial(Material* material);
 
     ThumbnailsMaster();
     ~ThumbnailsMaster();

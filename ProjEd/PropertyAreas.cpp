@@ -153,6 +153,10 @@ Float3PropertyArea::Float3PropertyArea(){
     x_label.setText(QString("X"));
     y_label.setText(QString("Y"));
     z_label.setText(QString("Z"));
+    //Set specific styles to labels
+    x_label.setStyleSheet("QLabel { color : white; background-color: red }");
+    y_label.setStyleSheet("QLabel { color : white; background-color: green }");
+    z_label.setStyleSheet("QLabel { color : white; background-color: blue }");
 
     label_widget->setFixedWidth(100);
 
@@ -582,7 +586,7 @@ void ColorDialogArea::updText(){
     int blue = color->b;
 
     QString _text = QString::number(red) + ", " + QString::number(green) + ", " + QString::number(blue);
-
+    //set digits values
     digit_str.setText(_text);
 }
 

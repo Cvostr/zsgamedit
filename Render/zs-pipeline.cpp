@@ -50,7 +50,7 @@ void RenderPipeline::setup(int bufWidth, int bufHeight){
 
     glGenBuffers(1, &camBuffer);
     glBindBuffer(GL_UNIFORM_BUFFER, camBuffer);
-    glBufferData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 3, NULL, GL_STATIC_DRAW);
+    glBufferData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 3 + 16, NULL, GL_STATIC_DRAW);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
     //Connect to point 0 (zero)
     glBindBufferBase(GL_UNIFORM_BUFFER, 0, camBuffer);
@@ -557,6 +557,29 @@ void MaterialProperty::onRender(RenderPipeline* pipeline){
     }
 }
 
+void TerrainProperty::onRender(RenderPipeline* pipeline){
+    if(hasChanged){
+        this->data.generateGLMesh();
+        hasChanged = false;
+    }
+
+    MaterialProperty* mat = this->go_link.updLinkPtr()->getPropertyPtr<MaterialProperty>();
+    if(mat == nullptr) return;
+    //Iterate over all textures to use them
+    for(unsigned int i = 0; i < static_cast<unsigned int>(this->textures_size); i ++){
+        HeightmapTexturePair* pair = &this->textures[i];
+        if(pair->diffuse != nullptr){
+            pair->diffuse->Use(static_cast<int>(i));
+        }
+        if(pair->normal != nullptr){
+            pair->normal->Use(static_cast<int>(12 + i));
+        }
+    }
+
+    //Apply material shader
+    mat->onRender(pipeline);
+}
+
 void TileProperty::onRender(RenderPipeline* pipeline){
     ZSPIRE::Shader* tile_shader = pipeline->getTileShader();
     //Receive pointer to tile information
@@ -692,8 +715,10 @@ void RenderPipeline::updateShadersCameraInfo(ZSPIRE::Camera* cam_ptr){
     glBindBuffer(GL_UNIFORM_BUFFER, camBuffer);
     ZSMATRIX4x4 proj = cam_ptr->getProjMatrix();
     ZSMATRIX4x4 view = cam_ptr->getViewMatrix();
+    ZSVECTOR3 cam_pos = cam_ptr->getCameraPosition();
     glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof (ZSMATRIX4x4), &proj);
     glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4), sizeof (ZSMATRIX4x4), &view);
+    glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 3, sizeof(ZSVECTOR3), &cam_pos);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
     if(obj_mark_shader.isCreated == true){
@@ -728,7 +753,7 @@ void RenderPipeline::removeLights(){
 }
 
 G_BUFFER_GL::G_BUFFER_GL(){
-
+    created = false;
 }
 
 void G_BUFFER_GL::create(int width, int height){
@@ -779,6 +804,7 @@ void G_BUFFER_GL::create(int width, int height){
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuffer);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0); //return back to default
+    created = true;
 }
 void G_BUFFER_GL::bindFramebuffer(){
     glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
@@ -855,8 +881,10 @@ void RenderPipeline::renderGlyph(unsigned int texture_id, int X, int Y, int scal
 void RenderPipeline::updateWindowSize(int W, int H){
      glViewport(0, 0, W, H);
 
-     this->gbuffer.Destroy();
-     this->gbuffer.create(W, H);
+    if(gbuffer.created){
+        this->gbuffer.Destroy();
+        this->gbuffer.create(W, H);
+    }
 }
 
 ZSPIRE::Shader* RenderPipeline::getTileShader(){

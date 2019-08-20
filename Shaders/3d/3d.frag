@@ -11,15 +11,13 @@ layout(location = 0) in vec3 FragPos;
 layout(location = 1) in vec3 InNormal;
 layout(location = 2) in vec2 UVCoord;
 layout(location = 3) in mat3 TBN;
-//Camera position
-uniform vec3 cam_position;
 
 //textures
-uniform sampler2D diffuse;
-uniform sampler2D normal_map;
-uniform sampler2D specular_map;
-uniform sampler2D height_map;
-uniform sampler2D shadow_map;
+layout(binding = 0) uniform sampler2D diffuse;
+layout(binding = 1) uniform sampler2D normal_map;
+layout(binding = 2) uniform sampler2D specular_map;
+layout(binding = 3) uniform sampler2D height_map;
+layout(binding = 6) uniform sampler2D shadow_map;
 
 uniform bool hasDiffuseMap;
 uniform bool hasNormalMap;
@@ -35,6 +33,14 @@ uniform vec3 diffuse_color = vec3(1.0, 0.078, 0.574);
 uniform mat4 LightProjectionMat;
 uniform mat4 LightViewMat;
 uniform float shadow_bias;
+
+layout (std140, binding = 0) uniform CamMatrices{
+    uniform mat4 cam_projection;
+    uniform mat4 cam_view;
+    uniform mat4 object_transform;
+    //Camera position
+    uniform vec3 cam_position;
+};
 
 vec2 processParallaxMapUv(vec2 uv){
     if(!hasHeightMap) return uv;

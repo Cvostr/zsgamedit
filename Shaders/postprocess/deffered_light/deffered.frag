@@ -21,19 +21,19 @@ layout(location = 0) out vec4 FragColor;
 layout(location = 0) in vec2 UVCoord;
 
 //textures
-uniform sampler2D tDiffuse;
-uniform sampler2D tNormal;
-uniform sampler2D tPos;
-uniform sampler2D tTransparent;
-uniform sampler2D tMasks;
+layout(binding = 10) uniform sampler2D tDiffuse;
+layout(binding = 11) uniform sampler2D tNormal;
+layout(binding = 12) uniform sampler2D tPos;
+layout(binding = 13) uniform sampler2D tTransparent;
+layout(binding = 14) uniform sampler2D tMasks;
 
 layout (std140, binding = 1) uniform Lights{
     uniform Light lights[MAX_LIGHTS_NUM];
     uniform int lights_amount;
 };
-uniform vec3 ambient_light_color;
 
 uniform vec3 cam_position;
+uniform vec3 ambient_light_color;
 
 void main(){
 

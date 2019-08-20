@@ -7,6 +7,11 @@
 #include "../../Render/headers/zs-texture.h"
 #include "../../Render/headers/zs-math.h"
 
+typedef struct HeightmapGrass{
+    QString diffuse_relpath;
+    ZSPIRE::Texture* diffuse;
+}HeightmapGrass;
+
 typedef struct HeightmapTexel{
     float height;
     unsigned char texture_factors[TERRAIN_TEXTURES_AMOUNT];
@@ -31,10 +36,6 @@ typedef struct HeightmapTexturePair{
     }
 }HeightmapTexturePair;
 
-typedef struct HeightmapGrass{
-    QString diffuse_relpath;
-    ZSPIRE::Texture* diffuse;
-}HeightmapGrass;
 
 class TerrainData{
 private:

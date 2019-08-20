@@ -7,9 +7,9 @@ layout(location = 0) out vec3 FragPos;
 layout(location = 1) out vec2 UVCoord;
 
 layout (std140, binding = 0) uniform CamMatrices{
-uniform mat4 cam_projection;
-uniform mat4 cam_view;
-uniform mat4 object_transform;
+    uniform mat4 cam_projection;
+    uniform mat4 cam_view;
+    uniform mat4 object_transform;
 };
 
 void main(){

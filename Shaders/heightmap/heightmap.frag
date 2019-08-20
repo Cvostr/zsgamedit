@@ -18,15 +18,15 @@ in vec3 _id;
 //textures
 uniform sampler2D diffuse[TEXTURES_AMOUNT];
 
-uniform sampler2D texture_mask;
-uniform sampler2D texture_mask1;
-uniform sampler2D texture_mask2;
+layout(binding = 24) uniform sampler2D texture_mask;
+layout(binding = 25) uniform sampler2D texture_mask1;
+layout(binding = 26) uniform sampler2D texture_mask2;
 
 uniform int isPicking;
 uniform bool hasShadowMap = false;
 
 //Shadowmapping stuff
-uniform sampler2D shadow_map;
+layout(binding = 6) uniform sampler2D shadow_map;
 uniform mat4 LightProjectionMat;
 uniform mat4 LightViewMat;
 uniform float shadow_bias;

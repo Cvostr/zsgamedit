@@ -133,19 +133,19 @@ public:
 };
 
 class PhysicalProperty : public GameObjectProperty{
-    protected:
+protected:
 
     void init();
     void updateCollisionShape();
 public:
-        bool created;
-        btRigidBody* rigidBody;
-        btCollisionShape* shape;
-        COLLIDER_TYPE coll_type;
-        float mass;
-        void addColliderRadio(InspectorWin* inspector);
-        void addMassField(InspectorWin* inspector);
-        PhysicalProperty();
+    bool created;
+    btRigidBody* rigidBody;
+    btCollisionShape* shape;
+    COLLIDER_TYPE coll_type;
+    float mass;
+    void addColliderRadio(InspectorWin* inspector);
+    void addMassField(InspectorWin* inspector);
+    PhysicalProperty();
 };
 
 class ColliderProperty : public PhysicalProperty{
@@ -159,10 +159,21 @@ public:
 
     bool isTrigger;
 
-
     ColliderProperty();
 };
 
+class CharacterControllerProperty : public PhysicalProperty{
+public:
+    ZSVECTOR3 gravity;
+    ZSVECTOR3 linearVel;
+    ZSVECTOR3 angularVel;
+
+    void addPropertyInterfaceToInspector(InspectorWin* inspector);
+    void copyTo(GameObjectProperty* dest);
+    void onUpdate(float deltaTime);
+
+    CharacterControllerProperty();
+};
 
 class RigidbodyProperty : public PhysicalProperty{
 public:
@@ -240,6 +251,7 @@ public:
     TerrainProperty();
     void onMouseClick(int posX, int posY, int screenY, bool isLeftButtonHold, bool isCtrlHold);
     void onMouseMotion(int posX, int posY, int relX, int relY, int screenY, bool isLeftButtonHold, bool isCtrlHold);
+    void getPickedVertexId(int posX, int posY, int screenY, unsigned char* data);
 
     TerrainData* getTerrainData();
 

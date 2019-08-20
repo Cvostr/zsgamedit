@@ -134,6 +134,7 @@ public slots:
     void toggleCameras();
 
     void openRenderSettings();
+    void openPhysicsSettings();
 private:
     std::vector<EditorComponentManager*> managers;
 

@@ -1,7 +1,6 @@
 #include "headers/ThumbnailsMaster.h"
 #include <GL/glew.h>
-#include "../Render/headers/zs-texture.h"
-#include "../Render/headers/zs-mesh.h"
+
 #include <iostream>
 
 const char texture_shaderFS[310] = "#version 150 core\n\
@@ -52,13 +51,15 @@ void ThumbnailsMaster::createTexturesThumbnails(){
     //Iterate over all resources
     for(unsigned int res_i = 0; res_i < project_struct_ptr->resources.size(); res_i ++){
         Resource* resource_ptr = &this->project_struct_ptr->resources[res_i];
-        if(resource_ptr->type != RESOURCE_TYPE_TEXTURE) continue;
-        ZSPIRE::Texture* texture_ptr = static_cast<ZSPIRE::Texture*>(resource_ptr->class_ptr);
+        if(resource_ptr->type != RESOURCE_TYPE_TEXTURE && resource_ptr->type != RESOURCE_TYPE_MATERIAL) continue;
 
-        //use texture
-        texture_ptr->Use(0);
-        //draw plane
-        ZSPIRE::getPlaneMesh2D()->Draw();
+        if(resource_ptr->type == RESOURCE_TYPE_TEXTURE){
+            ZSPIRE::Texture* texture_ptr = static_cast<ZSPIRE::Texture*>(resource_ptr->class_ptr);
+            DrawTexture(texture_ptr);
+        }else if(resource_ptr->type == RESOURCE_TYPE_MATERIAL){
+            Material* mat_ptr = static_cast<Material*>(resource_ptr->class_ptr);
+            DrawMaterial(mat_ptr);
+        }
 
         unsigned char* texture_data = new unsigned char[512 * 512 * 4];
 
@@ -68,4 +69,15 @@ void ThumbnailsMaster::createTexturesThumbnails(){
         texture_thumbnails.insert(std::pair<std::string, QImage*>(resource_ptr->file_path.toStdString(), image));
         //delete[] texture_data;
     }
+}
+
+void ThumbnailsMaster::DrawTexture(ZSPIRE::Texture* texture){
+    //use texture
+    texture->Use(0);
+    //draw plane
+    ZSPIRE::getPlaneMesh2D()->Draw();
+}
+
+void ThumbnailsMaster::DrawMaterial(Material* material){
+
 }

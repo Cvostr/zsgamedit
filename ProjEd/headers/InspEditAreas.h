@@ -168,5 +168,17 @@ public:
     void addToInspector(InspectorWin* win);
 };
 
+template<typename T>
+class PropertyPickArea : public PropertyEditArea{
+
+public:
+    T* color; //output value
+    ZSColorPickDialog dialog; //Dialog pointer
+    QPushButton pick_button; //button to show color pick dialog
+    PropertyPickArea();
+    ~PropertyPickArea();
+
+    void addToInspector(InspectorWin* win);
+};
 
 #endif // INSPEDITAREAS_H

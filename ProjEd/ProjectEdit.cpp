@@ -62,8 +62,8 @@ EditWindow::EditWindow(QWidget *parent) :
     QObject::connect(ui->actionNew_Tile, SIGNAL(triggered()), this, SLOT(addNewTile()));
     QObject::connect(ui->actionNew_Terrain, SIGNAL(triggered()), this, SLOT(addNewTerrain()));
 
-
     QObject::connect(ui->actionRender_settings, SIGNAL(triggered()), this, SLOT(openRenderSettings()));
+    QObject::connect(ui->actionPhysics_Settings, SIGNAL(triggered()), this, SLOT(openPhysicsSettings()));
 
     ready = false; //Firstly set it to 0
     hasSceneFile = false; //No scene loaded by default
@@ -366,6 +366,13 @@ void EditWindow::openRenderSettings(){
     _inspector_win->addPropertyArea(lcolor);
 }
 
+void EditWindow::openPhysicsSettings(){
+    _inspector_win->clearContentLayout(); //clear everything, that was before
+
+    RenderSettings* ptr = this->render->getRenderSettings();
+
+}
+
 GameObject* EditWindow::onAddNewGameObject(){
     //get free index in array
     int free_ind = world.getFreeObjectSpaceIndex();
@@ -465,9 +472,9 @@ bool EditWindow::onCloseProject(){
         SDL_GL_DeleteContext(glcontext);
 
         MtShProps::clearMtShaderGroups();
-
+        //clear all resources
         this->project.resources.clear(); //Clear resources list
-
+        //Show main menu window to avoid crash
         MainWin* win = static_cast<MainWin*>(this->mainwin_ptr);
         win->show();
 
@@ -760,7 +767,6 @@ void EditWindow::lookForResources(QString path){
 
                     resource.class_ptr = static_cast<void*>(new ZSPIRE::Mesh);
 
-                    //loadResource(&resource); //Perform mesh processing & loading to OpenGL
                     this->project.resources.push_back(resource);
                     Engine::loadMesh(fileInfo.absoluteFilePath().toStdString(), static_cast<ZSPIRE::Mesh*>(this->project.resources.back().class_ptr), static_cast<int>(mesh_i));
                     this->project.resources.back().resource_label = static_cast<ZSPIRE::Mesh*>(this->project.resources.back().class_ptr)->mesh_label;
@@ -807,6 +813,9 @@ void EditWindow::lookForResources(QString path){
 
 void EditWindow::loadResource(Resource* resource){
     switch(resource->type){
+        case RESOURCE_TYPE_SCRIPT : {
+            break;
+        }
         case RESOURCE_TYPE_NONE:{
             break;
         }
@@ -821,10 +830,7 @@ void EditWindow::loadResource(Resource* resource){
             break;
         }
         case RESOURCE_TYPE_MESH:{
-            //resource->class_ptr = static_cast<void*>(new ZSPIRE::Mesh); //Initialize pointer to mesh
-            //ZSPIRE::Mesh* mesh_ptr = static_cast<ZSPIRE::Mesh*>(resource->class_ptr); //Aquire casted pointer
-            //std::string str = resource->file_path.toStdString();
-            //mesh_ptr->LoadMeshesFromFileASSIMP(str.c_str());
+
             break;
         }
         case RESOURCE_TYPE_AUDIO:{
@@ -1009,7 +1015,7 @@ void EditWindow::onMouseMotion(int relX, int relY){
 
     }
     //We are in 2D project, move camera by the mouse
-    if(project.perspective == 2 && !isSceneRun){ //Only affective in 2D
+    if(project.perspective == 2 && !isWorldCamera){ //Only affective in 2D
         //If middle button of mouse pressed
         if(input_state.isMidBtnHold == true){ //we just move on map
             //Stop camera moving

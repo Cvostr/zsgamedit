@@ -161,21 +161,11 @@ void ZSPIRE::Shader::applyBaseSamplerUniforms(){
     Use();
     //For common shaders
     setGLuniformInt("skybox", 0);
-    setGLuniformInt("diffuse", 0);
-    setGLuniformInt("normal_map", 1);
-    setGLuniformInt("specular_map", 2);
-    setGLuniformInt("height_map", 3);
     setGLuniformInt("diffuse2", 5);
-    setGLuniformInt("shadow_map", 6);
 
     //UI shader
     setGLuniformInt("sprite_map", 0);
-    //Deffered shader
-    setGLuniformInt("tDiffuse", 10);
-    setGLuniformInt("tNormal", 11);
-    setGLuniformInt("tPos", 12);
-    setGLuniformInt("tTransparent", 13);
-    setGLuniformInt("tMasks", 14);
+
     //Terrain shader
     for(int i = 0; i < 12; i ++){
         std::string uniform_name = "diffuse[" + std::to_string(i) + "]";
@@ -186,10 +176,6 @@ void ZSPIRE::Shader::applyBaseSamplerUniforms(){
         setGLuniformInt(uniform_name.c_str(), 12 + i);
     }
 
-
-    setGLuniformInt("texture_mask", 24);
-    setGLuniformInt("texture_mask1", 25);
-    setGLuniformInt("texture_mask2", 26);
 }
 
 void ZSPIRE::Shader::Destroy() {

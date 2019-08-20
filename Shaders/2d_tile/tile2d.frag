@@ -26,12 +26,12 @@ layout(location = 1) in vec2 UVCoord;
 uniform sampler2D diffuse;
 uniform sampler2D diffuse2;
 
-uniform int total_rows; //rows in texture atlas
-uniform int total_cols; //columns in texture atlas
-uniform int selected_row; //current row
-uniform int selected_col; //current column
-//Animation toggler
-uniform bool animated;
+    uniform int total_rows; //rows in texture atlas
+    uniform int total_cols; //columns in texture atlas
+    uniform int selected_row; //current row
+    uniform int selected_col; //current column
+    //Animation toggler
+    uniform bool animated;
 
 uniform bool hasDiffuseMap;
 uniform bool hasDiffuseMap2;

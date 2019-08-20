@@ -12,9 +12,10 @@ layout(location = 2) out vec2 UVCoord;
 layout(location = 3) out mat3 TBN;
 
 layout (std140, binding = 0) uniform CamMatrices{
-uniform mat4 cam_projection;
-uniform mat4 cam_view;
-uniform mat4 object_transform;
+    uniform mat4 cam_projection;
+    uniform mat4 cam_view;
+    uniform mat4 object_transform;
+    uniform vec3 cam_position;
 };
 
 void main(){

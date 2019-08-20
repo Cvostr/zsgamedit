@@ -157,6 +157,11 @@ GameObjectProperty* allocProperty(int type){
             _ptr = static_cast<GameObjectProperty*>(ptr);
             break;
         }
+        case GO_PROPERTY_TYPE_CHARACTER_CONTROLLER:{
+            CharacterControllerProperty* ptr = new CharacterControllerProperty;
+            _ptr = static_cast<GameObjectProperty*>(ptr);
+            break;
+        }
         case GO_PROPERTY_TYPE_TILE_GROUP:{
             TileGroupProperty* ptr = new TileGroupProperty;
             _ptr = static_cast<GameObjectProperty*>(ptr);
@@ -372,13 +377,6 @@ void LabelProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
     area->value_ptr = &this->label;
     area->go_property = static_cast<void*>(this);
     inspector->addPropertyArea(area);
-
-   /* BoolCheckboxArea* isActive = new BoolCheckboxArea;
-    isActive->setLabel("Active ");
-    isActive->go_property = static_cast<void*>(this);
-    isActive->bool_ptr = &this->isActiveToggle;
-    inspector->addPropertyArea(isActive);
-*/
 }
 
 void LabelProperty::onValueChanged(){
@@ -1036,6 +1034,26 @@ void RigidbodyProperty::copyTo(GameObjectProperty* dest){
     rigi_prop->angularVel = this->angularVel;
 }
 
+CharacterControllerProperty::CharacterControllerProperty(){
+    type = GO_PROPERTY_TYPE_CHARACTER_CONTROLLER;
+}
+
+void CharacterControllerProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
+
+}
+void CharacterControllerProperty::copyTo(GameObjectProperty* dest){
+
+}
+void CharacterControllerProperty::onUpdate(float deltaTime){
+    if(!created){
+        //if uninitialized
+        init(); //REWRITE IT!!!
+
+        this->rigidBody->setGravity(btVector3(gravity.X, gravity.Y, gravity.Z));
+        this->rigidBody->setLinearVelocity(btVector3(linearVel.X, linearVel.Y, linearVel.Z));
+    }
+}
+
 void ScriptGroupProperty::onValueChanged(){
     Project* project_ptr = static_cast<Project*>(this->world_ptr->proj_ptr);
     //if size changed
@@ -1048,14 +1066,12 @@ void ScriptGroupProperty::onValueChanged(){
     if(static_cast<int>(scripts_attached.size()) != this->scr_num){ //if size changed
         this->scripts_attached.resize(static_cast<unsigned int>(this->scr_num));
         //Iterate over all scripts and use absolute path
-
     }
     for(unsigned int script_i = 0; script_i < static_cast<unsigned int>(scr_num); script_i ++){
         //Set absolute path to script object
         scripts_attached[script_i].fpath = project_ptr->root_path + "/" + path_names[script_i];
         scripts_attached[script_i].name = path_names[script_i].toStdString();
     }
-
 }
 
 void ScriptGroupProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
@@ -1280,12 +1296,14 @@ void TerrainProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
     group->addRadioButton(veg_radio);
     inspector->registerUiObject(group);
     inspector->getContentLayout()->addLayout(group->btn_layout);
+
+    IntPropertyArea* EditRange = new IntPropertyArea; //New property area
+    EditRange->setLabel("brush range"); //Its label
+    EditRange->value = &this->range; //Ptr to our vector
+    EditRange->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
+    inspector->addPropertyArea(EditRange);
+    //If selected mode is Height paint
     if(edit_mode == 1){
-        IntPropertyArea* EditRange = new IntPropertyArea; //New property area
-        EditRange->setLabel("brush range"); //Its label
-        EditRange->value = &this->range; //Ptr to our vector
-        EditRange->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
-        inspector->addPropertyArea(EditRange);
 
         FloatPropertyArea* EditHeight = new FloatPropertyArea; //New property area
         EditHeight->setLabel("brush height"); //Its label
@@ -1293,12 +1311,8 @@ void TerrainProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
         EditHeight->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
         inspector->addPropertyArea(EditHeight);
     }
+    //if selected mode is texture paint
     if(edit_mode == 2){
-        IntPropertyArea* EditRange = new IntPropertyArea; //New property area
-        EditRange->setLabel("brush range"); //Its label
-        EditRange->value = &this->range; //Ptr to our vector
-        EditRange->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
-        inspector->addPropertyArea(EditRange);
 
         IntPropertyArea* EditTex = new IntPropertyArea; //New property area
         EditTex->setLabel("Texture"); //Its label
@@ -1328,30 +1342,6 @@ void TerrainProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
             inspector->addPropertyArea(normal_area);
         }
     }
-
-}
-
-void TerrainProperty::onRender(RenderPipeline* pipeline){
-    if(hasChanged){
-        this->data.generateGLMesh();
-        hasChanged = false;
-    }
-
-    MaterialProperty* mat = this->go_link.updLinkPtr()->getPropertyPtr<MaterialProperty>();
-    if(mat == nullptr) return;
-    //Iterate over all textures to use them
-    for(unsigned int i = 0; i < static_cast<unsigned int>(this->textures_size); i ++){
-        HeightmapTexturePair* pair = &this->textures[i];
-        if(pair->diffuse != nullptr){
-            pair->diffuse->Use(static_cast<int>(i));
-        }
-        if(pair->normal != nullptr){
-            pair->normal->Use(static_cast<int>(12 + i));
-        }
-    }
-
-    //Apply material shader
-    mat->onRender(pipeline);
 }
 
 void TerrainProperty::DrawMesh(){
@@ -1389,20 +1379,26 @@ void TerrainProperty::onAddToObject(){
     data.saveToFile(fpath.c_str());
 }
 
+void TerrainProperty::getPickedVertexId(int posX, int posY, int screenY, unsigned char* data){
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    //get pointer to material property
+    MaterialProperty* mat = this->go_link.updLinkPtr()->getPropertyPtr<MaterialProperty>();
+    if(mat == nullptr || mat->material_ptr == nullptr) return;
+    //Apply material shader
+    mat->material_ptr->group_ptr->render_shader->Use();
+    mat->material_ptr->group_ptr->render_shader->setGLuniformInt("isPicking", 1);
+    this->data.Draw();
+    //read picked pixel
+    glReadPixels(posX, screenY - posY, 1,1, GL_RGBA, GL_UNSIGNED_BYTE, data);
+    mat->material_ptr->group_ptr->render_shader->setGLuniformInt("isPicking", 0);
+}
+
 void TerrainProperty::onMouseClick(int posX, int posY, int screenY, bool isLeftButtonHold, bool isCtrlHold){
     if(isLeftButtonHold){
         unsigned char _data[4];
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        //get pointer to material property
-        MaterialProperty* mat = this->go_link.updLinkPtr()->getPropertyPtr<MaterialProperty>();
-        if(mat == nullptr || mat->material_ptr == nullptr) return;
-        //Apply material shader
-        mat->material_ptr->group_ptr->render_shader->Use();
-        mat->material_ptr->group_ptr->render_shader->setGLuniformInt("isPicking", 1);
-        data.Draw();
-        //read picked pixel
-        glReadPixels(posX, screenY - posY, 1,1, GL_RGBA, GL_UNSIGNED_BYTE, _data);
-        mat->material_ptr->group_ptr->render_shader->setGLuniformInt("isPicking", 0);
+
+        getPickedVertexId(posX, posY, screenY, &_data[0]);
+
         //find picked texel
         for(int i = 0; i < Width; i ++){
             for(int y = 0; y < Length; y ++){
@@ -1426,17 +1422,7 @@ void TerrainProperty::onMouseClick(int posX, int posY, int screenY, bool isLeftB
 void TerrainProperty::onMouseMotion(int posX, int posY, int relX, int relY, int screenY, bool isLeftButtonHold, bool isCtrlHold){
     if(isLeftButtonHold){
         unsigned char _data[4];
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        MaterialProperty* mat = this->go_link.updLinkPtr()->getPropertyPtr<MaterialProperty>();
-        if(mat == nullptr || mat->material_ptr == nullptr) return;
-        //Apply material shader
-        mat->material_ptr->group_ptr->render_shader->Use();
-        mat->material_ptr->group_ptr->render_shader->setGLuniformInt("isPicking", 1);
-        data.Draw();
-        //read picked pixel
-        glReadPixels(posX, screenY - posY, 1,1, GL_RGBA, GL_UNSIGNED_BYTE, _data);
-        mat->material_ptr->group_ptr->render_shader->setGLuniformInt("isPicking", 0);
+        getPickedVertexId(posX, posY, screenY, &_data[0]);
         //find picked texel
         for(int i = 0; i < Width; i ++){
             for(int y = 0; y < Length; y ++){

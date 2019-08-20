@@ -39,6 +39,7 @@ protected:
     unsigned int tTransparent; //To store color with alpha
     unsigned int tMasks;
 public:
+    bool created;
     G_BUFFER_GL();
     void create(int width, int height);
     void bindFramebuffer();
