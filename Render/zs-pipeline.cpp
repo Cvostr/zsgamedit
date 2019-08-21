@@ -31,9 +31,9 @@ void RenderPipeline::setup(int bufWidth, int bufHeight){
     if(this->project_struct_ptr->perspective == 2){
         this->tile_shader.compileFromFile("Shaders/2d_tile/tile2d.vert", "Shaders/2d_tile/tile2d.frag");
     }
-    this->pick_shader.compileFromFile("Shaders/pick/pick.vs", "Shaders/pick/pick.fs");
+    this->pick_shader.compileFromFile("Shaders/pick/pick.vert", "Shaders/pick/pick.frag");
     this->obj_mark_shader.compileFromFile("Shaders/mark/mark.vert", "Shaders/mark/mark.frag");
-    this->ui_shader.compileFromFile("Shaders/ui/ui.vs", "Shaders/ui/ui.fs");
+    this->ui_shader.compileFromFile("Shaders/ui/ui.vert", "Shaders/ui/ui.frag");
     if(this->project_struct_ptr->perspective == 3){
         this->deffered_light.compileFromFile("Shaders/postprocess/deffered_light/deffered.vert",
                                              "Shaders/postprocess/deffered_light/deffered.frag");
@@ -50,14 +50,14 @@ void RenderPipeline::setup(int bufWidth, int bufHeight){
 
     glGenBuffers(1, &camBuffer);
     glBindBuffer(GL_UNIFORM_BUFFER, camBuffer);
-    glBufferData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 3 + 16, NULL, GL_STATIC_DRAW);
+    glBufferData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 3 + 16 * 2, NULL, GL_STATIC_DRAW);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
     //Connect to point 0 (zero)
     glBindBufferBase(GL_UNIFORM_BUFFER, 0, camBuffer);
 
     glGenBuffers(1, &lightsBuffer);
     glBindBuffer(GL_UNIFORM_BUFFER, lightsBuffer);
-    glBufferData(GL_UNIFORM_BUFFER, 64 * MAX_LIGHTS_AMOUNT + 4, NULL, GL_STATIC_DRAW);
+    glBufferData(GL_UNIFORM_BUFFER, 64 * MAX_LIGHTS_AMOUNT + 16 * 2, NULL, GL_STATIC_DRAW);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
     //Connect to point 0 (zero)
     glBindBufferBase(GL_UNIFORM_BUFFER, 1, lightsBuffer);
@@ -206,6 +206,10 @@ void RenderPipeline::setLightsToBuffer(){
 
     int ls = static_cast<int>(lights_ptr.size());
     glBufferSubData(GL_UNIFORM_BUFFER, 64 * MAX_LIGHTS_AMOUNT, 4, &ls);
+
+    ZSVECTOR3 ambient_L = ZSVECTOR3(render_settings.ambient_light_color.r / 255.0f,render_settings.ambient_light_color.g / 255.0f, render_settings.ambient_light_color.b / 255.0f);
+    glBufferSubData(GL_UNIFORM_BUFFER, 64 * MAX_LIGHTS_AMOUNT + 16, 12, &ambient_L);
+
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
     //free lights array
     this->removeLights();
@@ -330,11 +334,6 @@ void RenderPipeline::render3D(void* projectedit_ptr)
 
     setLightsToBuffer();
 
-    deffered_light.setGLuniformVec3("ambient_light_color", ZSVECTOR3(render_settings.ambient_light_color.r / 255.0f,
-                                                               render_settings.ambient_light_color.g / 255.0f,
-                                                               render_settings.ambient_light_color.b / 255.0f));
-
-
     /*
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -393,6 +392,7 @@ void GameObject::Draw(RenderPipeline* pipeline){
             float g = static_cast<float>(to_send[1]);
             float b = static_cast<float>(to_send[2]);
             float a = static_cast<float>(to_send[3]);
+
             pipeline->getPickingShader()->setTransform(transform_ptr->transform_mat);
             pipeline->getPickingShader()->setGLuniformVec4("color", ZSVECTOR4(r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f));
             DrawMesh();
@@ -544,7 +544,7 @@ void MaterialProperty::onRender(RenderPipeline* pipeline){
 
                 if(!texture_conf->texture3D->created){
                     texture_conf->texture3D->Init();
-                    for(int i = 0; i < texture_conf->texture_count; i ++){
+                    for(int i = 0; i < 6; i ++){
                         texture_conf->texture3D->pushTexture(i, texture_conf->rel_path.toStdString() + "/" + texture_conf->texture_str[i].toStdString());
                     }
                     texture_conf->texture3D->created = true;
@@ -591,7 +591,6 @@ void TileProperty::onRender(RenderPipeline* pipeline){
     glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 2, sizeof (ZSMATRIX4x4), &transform_ptr->transform_mat);
 
     tile_shader->Use();
-    //tile_shader->setTransform(transform_ptr->transform_mat);
 
     //Checking for diffuse texture
     if(texture_diffuse != nullptr){
@@ -720,15 +719,6 @@ void RenderPipeline::updateShadersCameraInfo(ZSPIRE::Camera* cam_ptr){
     glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4), sizeof (ZSMATRIX4x4), &view);
     glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 3, sizeof(ZSVECTOR3), &cam_pos);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
-    if(obj_mark_shader.isCreated == true){
-        obj_mark_shader.Use();
-        obj_mark_shader.setCamera(cam_ptr);
-    }
-    if(deffered_light.isCreated == true){
-        deffered_light.Use();
-        deffered_light.setCamera(cam_ptr, true);
-    }
 
     if(ui_shader.isCreated == true){
         ui_shader.Use();

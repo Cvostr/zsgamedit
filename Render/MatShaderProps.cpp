@@ -86,7 +86,10 @@ Texture3MtShPropConf::Texture3MtShPropConf(){
     this->type = MATSHPROP_TYPE_TEXTURE3;
 
     texture3D = new ZSPIRE::Texture3D;
-    texture_count = 0;
+
+    for(int i = 0; i < 6; i ++){
+        this->texture_str[i] = "@none";
+    }
 
 }
 void MtShaderPropertiesGroup::loadFromFile(const char* fpath){
@@ -338,9 +341,8 @@ void Material::saveToFile(){
             case MATSHPROP_TYPE_TEXTURE3:{
                 //Cast pointer
                 Texture3MtShPropConf* tex3_conf = static_cast<Texture3MtShPropConf*>(conf_ptr);
-                mat_stream << tex3_conf->texture_count << " ";
                 //Write value
-                for(int i = 0; i < tex3_conf->texture_count; i ++)
+                for(int i = 0; i < 6; i ++)
                     mat_stream << tex3_conf->texture_str[i].toStdString() << " ";
 
                 break;
@@ -438,9 +440,7 @@ void Material::loadFromFile(std::string fpath){
                             //Cast pointer
                             Texture3MtShPropConf* texture3_conf = static_cast<Texture3MtShPropConf*>(conf_ptr);
 
-                            mat_stream >> texture3_conf->texture_count;
-
-                            for(int i = 0; i < texture3_conf->texture_count; i ++){
+                            for(int i = 0; i < 6; i ++){
                                 std::string path;
                                 mat_stream >> path;
                                 texture3_conf->texture_str[i] = QString::fromStdString(path);

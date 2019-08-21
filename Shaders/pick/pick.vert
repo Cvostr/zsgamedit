@@ -4,10 +4,9 @@
 
 layout (location = 0) in vec3 position;
 
-
-uniform mat4 cam_projection;
-uniform mat4 cam_view;
-uniform mat4 object_transform;
+    uniform mat4 cam_projection;
+    uniform mat4 cam_view;
+    uniform mat4 object_transform;
 
 
 void main(){

@@ -30,10 +30,16 @@ layout(binding = 14) uniform sampler2D tMasks;
 layout (std140, binding = 1) uniform Lights{
     uniform Light lights[MAX_LIGHTS_NUM];
     uniform int lights_amount;
+    uniform vec3 ambient_light_color;
 };
 
-uniform vec3 cam_position;
-uniform vec3 ambient_light_color;
+layout (std140, binding = 0) uniform CamMatrices{
+    uniform mat4 cam_projection;
+    uniform mat4 cam_view;
+    uniform mat4 object_transform;
+    //Camera position
+    uniform vec3 cam_position;
+};
 
 void main(){
 

@@ -26,7 +26,6 @@ uniform bool hasHeightMap;
 uniform bool hasShadowMap = false;
 
 uniform float material_shininess;
-
 uniform vec3 diffuse_color = vec3(1.0, 0.078, 0.574);
 
 //Shadowmapping stuff

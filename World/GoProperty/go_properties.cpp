@@ -91,6 +91,9 @@ QString getPropertyString(int type){
         case GO_PROPERTY_TYPE_TERRAIN:{
             return QString("Terrain");
         }
+        case GO_PROPERTY_TYPE_CHARACTER_CONTROLLER:{
+            return QString("Character Controller");
+        }
     }
     return QString("NONE");
 }
@@ -792,15 +795,11 @@ void MaterialProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
                 Texture3MaterialShaderProperty* texture_p = static_cast<Texture3MaterialShaderProperty*>(prop_ptr);
                 Texture3MtShPropConf* texture_conf = static_cast<Texture3MtShPropConf*>(conf_ptr);
 
-                IntPropertyArea* integer_area = new IntPropertyArea;
-                integer_area->setLabel("Textures count"); //Its label
-                integer_area->value = &texture_conf->texture_count;
-                integer_area->go_property = static_cast<void*>(this);
-                inspector->addPropertyArea(integer_area);
+                QString captions[6] = {"Right", "Left", "Top", "Bottom", "Back", "Front"};
 
-                for(int i = 0; i < texture_conf->texture_count; i ++){
+                for(int i = 0; i < 6; i ++){
                     PickResourceArea* area = new PickResourceArea;
-                    area->setLabel(texture_p->prop_caption);
+                    area->setLabel(captions[i]);
                     area->go_property = static_cast<void*>(this);
                     area->rel_path = &texture_conf->texture_str[i];
                     area->isShowNoneItem = true;
@@ -861,8 +860,8 @@ void MaterialProperty::onValueChanged(){
                 //Cast pointer
                 Texture3MtShPropConf* texture_conf = static_cast<Texture3MtShPropConf*>(conf_ptr);
 
-                if(texture_conf->texture_count > 6)
-                    texture_conf->texture_count = 6;
+                //if(texture_conf->texture_count > 6)
+                 //   texture_conf->texture_count = 6;
                 texture_conf->rel_path = this->world_ptr->proj_ptr->root_path;
                 texture_conf->texture3D->created = false;
                 _inspector_win->updateRequired = true;
@@ -996,9 +995,9 @@ void RigidbodyProperty::onUpdate(float deltaTime){
         rotY = rotY / ZS_PI * 180.0f;
         rotZ = rotZ / ZS_PI * 180.0f;
 
-        //if(transform->translation != ZSVECTOR3(curX, curY, curZ))
+        if(transform->translation != ZSVECTOR3(curX, curY, curZ))
             transform->translation = ZSVECTOR3(curX, curY, curZ);
-        //if(transform->_last_rotation != ZSVECTOR3(rotX, rotY, rotZ))
+        if(transform->rotation != ZSVECTOR3(rotX, rotY, rotZ))
             transform->rotation = ZSVECTOR3(rotX, rotY, rotZ);
     }
 }
@@ -1020,6 +1019,12 @@ void RigidbodyProperty::onValueChanged(){
     this->rigidBody->setCollisionShape(shape);
 }
 
+void RigidbodyProperty::setLinearVelocity(ZSVECTOR3 lvel){
+    if(!created) return;
+    this->linearVel = lvel;
+    this->rigidBody->setLinearVelocity(btVector3(linearVel.X, linearVel.Y, linearVel.Z));
+}
+
 void RigidbodyProperty::copyTo(GameObjectProperty* dest){
     if(dest->type != GO_PROPERTY_TYPE_RIGIDBODY) return;
 
@@ -1036,6 +1041,18 @@ void RigidbodyProperty::copyTo(GameObjectProperty* dest){
 
 CharacterControllerProperty::CharacterControllerProperty(){
     type = GO_PROPERTY_TYPE_CHARACTER_CONTROLLER;
+    created = false;
+
+    gravity = ZSVECTOR3(0.f, -10.f, 0.f);
+    linearVel = ZSVECTOR3(0.f, -10.f, 0.f);
+
+    mass = 10;
+}
+
+void CharacterControllerProperty::setLinearVelocity(ZSVECTOR3 lvel){
+    if(!created) return;
+    this->linearVel = lvel;
+    this->rigidBody->setLinearVelocity(btVector3(linearVel.X, linearVel.Y, linearVel.Z));
 }
 
 void CharacterControllerProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
@@ -1046,11 +1063,50 @@ void CharacterControllerProperty::copyTo(GameObjectProperty* dest){
 }
 void CharacterControllerProperty::onUpdate(float deltaTime){
     if(!created){
+        TransformProperty* transform = this->go_link.updLinkPtr()->getPropertyPtr<TransformProperty>();
         //if uninitialized
-        init(); //REWRITE IT!!!
+        this->shape = new btCapsuleShape(transform->_last_scale.X, transform->_last_scale.Y);
 
+        btVector3 localInertia(0, 0, 0);
+
+        //shape->calculateLocalInertia(mass, localInertia);
+        //Declare start transform
+        btTransform startTransform;
+        startTransform.setIdentity();
+        //Set start transform
+        startTransform.setOrigin(btVector3( btScalar(transform->_last_translation.X),
+                                                    btScalar(transform->_last_translation.Y),
+                                                    btScalar(transform->_last_translation.Z)));
+
+        startTransform.setRotation(btQuaternion(transform->_last_rotation.X, transform->_last_rotation.Y, transform->_last_rotation.Z));
+
+         //using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
+         btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
+
+         btRigidBody::btRigidBodyConstructionInfo cInfo(mass, myMotionState, shape, localInertia);
+
+         rigidBody = new btRigidBody(cInfo);
+
+         rigidBody->setUserIndex(go_link.updLinkPtr()->array_index);
+         //add rigidbody to world
+         go_link.world_ptr->physical_world->addRidigbodyToWorld(rigidBody);
+        //Set zero values
         this->rigidBody->setGravity(btVector3(gravity.X, gravity.Y, gravity.Z));
         this->rigidBody->setLinearVelocity(btVector3(linearVel.X, linearVel.Y, linearVel.Z));
+
+         created = true;
+    }else{
+        TransformProperty* transform = this->go_link.updLinkPtr()->getPropertyPtr<TransformProperty>();
+        btVector3 current_pos = rigidBody->getCenterOfMassPosition();
+
+        //get current position
+        float curX = current_pos.getX();
+        float curY = current_pos.getY();
+        float curZ = current_pos.getZ();
+
+        if(transform->translation != ZSVECTOR3(curX, curY, curZ))
+            transform->translation = ZSVECTOR3(curX, curY, curZ);
+
     }
 }
 

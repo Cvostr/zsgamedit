@@ -1,9 +1,10 @@
 #ifndef ZSMATH
 #define ZSMATH
 
-
+#include "math.h"
 #define ZS_PI 3.14159265f
 #define REAL_NUM_EQ(x, y) (fabs((x) - (y)) < 0.000001)
+
 
 
 	typedef struct ZSVECTOR2 {
@@ -254,7 +255,7 @@
     inline bool operator!=(const ZSVECTOR3& l, const ZSVECTOR3& r)
     {
         bool result = false;
-        if(l.X != r.X || l.Y != r.Y|| l.Z != r.Z) result = true;
+        if(!REAL_NUM_EQ(l.X , r.X) || !REAL_NUM_EQ(l.Y, r.Y) || !REAL_NUM_EQ(l.Z, r.Z)) result = true;
 
         return result;
     }

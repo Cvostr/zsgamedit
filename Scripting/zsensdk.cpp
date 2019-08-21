@@ -156,6 +156,8 @@ void ZSENSDK::bindSDK(lua_State* state){
         .addFunction("light", &GameObject::getPropertyPtr<LightsourceProperty>)
         .addFunction("tile", &GameObject::getPropertyPtr<TileProperty>)
         .addFunction("script", &GameObject::getPropertyPtr<ScriptGroupProperty>)
+        .addFunction("rigidbody", &GameObject::getPropertyPtr<RigidbodyProperty>)
+        .addFunction("character", &GameObject::getPropertyPtr<CharacterControllerProperty>)
         .endClass()
 
         .beginClass <World>("World")
@@ -179,6 +181,7 @@ void ZSENSDK::bindSDK(lua_State* state){
         .addData("intensity", &LightsourceProperty::intensity)
         .addData("range", &LightsourceProperty::range)
         .addData("color", &LightsourceProperty::color)
+        .addData("spot_angle", &LightsourceProperty::spot_angle)
         .endClass()
 
         .deriveClass <TransformProperty, GameObjectProperty>("Transform")
@@ -201,6 +204,22 @@ void ZSENSDK::bindSDK(lua_State* state){
         .addFunction("setGain", &AudioSourceProperty::setGain)
         .addFunction("setPitch", &AudioSourceProperty::setPitch)
         .endClass()
+
+        .deriveClass <PhysicalProperty, GameObjectProperty>("Physical")
+        .addData("mass", &PhysicalProperty::mass, false)
+        .endClass()
+
+        .deriveClass <RigidbodyProperty, PhysicalProperty>("Rigidbody")
+        .addData("gravity", &RigidbodyProperty::gravity, false)
+        .addData("linearVelocity", &RigidbodyProperty::linearVel, false)
+        .addFunction("setLinearVelocity", &RigidbodyProperty::setLinearVelocity)
+        .endClass()
+
+         .deriveClass <CharacterControllerProperty, PhysicalProperty>("CharacterController")
+         .addData("gravity", &CharacterControllerProperty::gravity, false)
+         .addData("linearVelocity", &CharacterControllerProperty::linearVel, false)
+         .addFunction("setLinearVelocity", &CharacterControllerProperty::setLinearVelocity)
+         .endClass()
 
         .deriveClass <TileProperty, GameObjectProperty>("Tile2D")
         .addFunction("playAnim", &TileProperty::playAnim)

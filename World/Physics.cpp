@@ -51,7 +51,11 @@ void PhysicalProperty::init(){
                                                 btScalar(transform->_last_translation.Y),
                                                 btScalar(transform->_last_translation.Z)));
 
+    btQuaternion b;
+    b.setEuler(transform->_last_rotation.Z, transform->_last_rotation.Y, transform->_last_rotation.X);
+
     startTransform.setRotation(btQuaternion(transform->_last_rotation.X, transform->_last_rotation.Y, transform->_last_rotation.Z));
+    //startTransform.setRotation(b);
 
      //using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
      btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
@@ -120,4 +124,6 @@ void PhysicalProperty::addMassField(InspectorWin* inspector){
 }
 PhysicalProperty::PhysicalProperty(){
     created = false;
+
+    rigidBody = nullptr;
 }

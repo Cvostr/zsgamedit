@@ -172,6 +172,8 @@ public:
     void copyTo(GameObjectProperty* dest);
     void onUpdate(float deltaTime);
 
+    void setLinearVelocity(ZSVECTOR3 lvel);
+
     CharacterControllerProperty();
 };
 
@@ -185,6 +187,8 @@ public:
     void onUpdate(float deltaTime);
     void copyTo(GameObjectProperty* dest);
     void onValueChanged();
+
+    void setLinearVelocity(ZSVECTOR3 lvel);
 
     RigidbodyProperty();
 };
