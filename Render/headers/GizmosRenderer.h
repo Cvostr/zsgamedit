@@ -10,6 +10,7 @@ class GizmosRenderer{
 private:
     //pointer to mark shader
     ZSPIRE::Shader* mark_shader_ptr;
+    unsigned int camBuffer;
     bool depthTestEnabled;
     bool cullFaceEnabled;
     int projectPerspective;
@@ -22,7 +23,7 @@ public:
     void glFeaturesOff();
     void glFeaturesOn();
 
-    GizmosRenderer(ZSPIRE::Shader* mark_shader, bool depthTestEnabled, bool cullFaceEnabled, int projectPerspective);
+    GizmosRenderer(ZSPIRE::Shader* mark_shader, bool depthTestEnabled, bool cullFaceEnabled, int projectPerspective, uint camBuffer);
 };
 
 

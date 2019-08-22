@@ -50,21 +50,31 @@ void RenderPipeline::setup(int bufWidth, int bufHeight){
 
     glGenBuffers(1, &camBuffer);
     glBindBuffer(GL_UNIFORM_BUFFER, camBuffer);
-    glBufferData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 3 + 16 * 2, NULL, GL_STATIC_DRAW);
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    glBufferData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 3 + 16 * 2, nullptr, GL_STATIC_DRAW);
     //Connect to point 0 (zero)
     glBindBufferBase(GL_UNIFORM_BUFFER, 0, camBuffer);
 
     glGenBuffers(1, &lightsBuffer);
     glBindBuffer(GL_UNIFORM_BUFFER, lightsBuffer);
-    glBufferData(GL_UNIFORM_BUFFER, 64 * MAX_LIGHTS_AMOUNT + 16 * 2, NULL, GL_STATIC_DRAW);
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
-    //Connect to point 0 (zero)
+    glBufferData(GL_UNIFORM_BUFFER, 64 * MAX_LIGHTS_AMOUNT + 16 * 2, nullptr, GL_STATIC_DRAW);
+    //Connect to point 1 (one)
     glBindBufferBase(GL_UNIFORM_BUFFER, 1, lightsBuffer);
+
+    glGenBuffers(1, &shadowBuffer);
+    glBindBuffer(GL_UNIFORM_BUFFER, shadowBuffer);
+    glBufferData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 2 + 8, nullptr, GL_STATIC_DRAW);
+    //Connect to point 2 (two)
+    glBindBufferBase(GL_UNIFORM_BUFFER, 2, shadowBuffer);
+
+    glGenBuffers(1, &terrainUniformBuffer);
+    glBindBuffer(GL_UNIFORM_BUFFER, terrainUniformBuffer);
+    glBufferData(GL_UNIFORM_BUFFER, 12 * 16 * 2 + 4, nullptr, GL_STATIC_DRAW);
+    //Connect to point 2 (two)
+    glBindBufferBase(GL_UNIFORM_BUFFER, 3, terrainUniformBuffer);
 }
 
 void RenderPipeline::initGizmos(int projectPespective){
-    gizmos = new GizmosRenderer(&obj_mark_shader, this->depthTest, this->cullFaces, projectPespective);
+    gizmos = new GizmosRenderer(&obj_mark_shader, this->depthTest, this->cullFaces, projectPespective, camBuffer);
 }
 
 RenderPipeline::~RenderPipeline(){
@@ -476,108 +486,67 @@ void MaterialProperty::onRender(RenderPipeline* pipeline){
     ShadowCasterProperty* shadowcast = static_cast<ShadowCasterProperty*>(pipeline->getRenderSettings()->shadowcaster_ptr);
     if(shadowcast != nullptr && this->material_ptr->group_ptr->acceptShadows && this->receiveShadows){
         shadowcast->sendData(shader);
+        glBindBuffer(GL_UNIFORM_BUFFER, pipeline->shadowBuffer);
+        //In GLSL we should use Integer instead of bool
+        int recShadows = static_cast<int>(this->receiveShadows);
+        glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 2 + 4, 4, &recShadows);
     }
     if(!this->receiveShadows || shadowcast == nullptr || !shadowcast->active){
-        shader->setGLuniformInt("hasShadowMap", 0);
+        glBindBuffer(GL_UNIFORM_BUFFER, pipeline->shadowBuffer);
+        //In GLSL we should use Integer instead of bool
+        int recShadows = 0;
+        glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 2 + 4, 4, &recShadows);
     }
+
+
+
 
     glBindBuffer(GL_UNIFORM_BUFFER, pipeline->camBuffer);
     glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 2, sizeof (ZSMATRIX4x4), &transform_ptr->transform_mat);
 
-    //iterate over all properties, send them all!
-    for(unsigned int prop_i = 0; prop_i < group_ptr->properties.size(); prop_i ++){
-        MaterialShaderProperty* prop_ptr = group_ptr->properties[prop_i];
-        MaterialShaderPropertyConf* conf_ptr = material_ptr->material_ptr->confs[prop_i];
-        switch(prop_ptr->type){
-            case MATSHPROP_TYPE_NONE:{
-                break;
-            }
-            case MATSHPROP_TYPE_TEXTURE:{
-                //Cast pointer
-                TextureMaterialShaderProperty* texture_p = static_cast<TextureMaterialShaderProperty*>(prop_ptr);
-                TextureMtShPropConf* texture_conf = static_cast<TextureMtShPropConf*>(conf_ptr);
-
-                if(texture_conf->texture != nullptr){
-                    shader->setGLuniformInt(texture_p->ToggleUniform.c_str(), 1); //Set texture uniform toggle
-                    texture_conf->texture->Use(texture_p->slotToBind); //Use texture
-                }else{
-                    shader->setGLuniformInt(texture_p->ToggleUniform.c_str(), 0);
-                }
-                break;
-            }
-            case MATSHPROP_TYPE_FLOAT:{
-                //Cast pointer
-                FloatMaterialShaderProperty* float_p = static_cast<FloatMaterialShaderProperty*>(prop_ptr);
-                FloatMtShPropConf* float_conf = static_cast<FloatMtShPropConf*>(conf_ptr);
-
-                shader->setGLuniformFloat(float_p->floatUniform.c_str(), float_conf->value);
-                break;
-            }
-            case MATSHPROP_TYPE_INTEGER:{
-                //Cast pointer
-                IntegerMaterialShaderProperty* int_p = static_cast<IntegerMaterialShaderProperty*>(prop_ptr);
-                IntegerMtShPropConf* int_conf = static_cast<IntegerMtShPropConf*>(conf_ptr);
-
-                shader->setGLuniformInt(int_p->integerUniform.c_str(), int_conf->value);
-                break;
-            }
-            case MATSHPROP_TYPE_COLOR:{
-                //Cast pointer
-                ColorMaterialShaderProperty* color_p = static_cast<ColorMaterialShaderProperty*>(prop_ptr);
-                ColorMtShPropConf* color_conf = static_cast<ColorMtShPropConf*>(conf_ptr);
-
-                shader->setGLuniformColor(color_p->colorUniform.c_str(), color_conf->color);
-                break;
-            }
-            case MATSHPROP_TYPE_FVEC3:{
-                //Cast pointer
-                Float3MaterialShaderProperty* fvec3_p = static_cast<Float3MaterialShaderProperty*>(prop_ptr);
-                Float3MtShPropConf* fvec3_conf = static_cast<Float3MtShPropConf*>(conf_ptr);
-
-                shader->setGLuniformVec3(fvec3_p->floatUniform.c_str(), fvec3_conf->value);
-                break;
-            }
-            case MATSHPROP_TYPE_TEXTURE3:{
-                //Cast pointer
-                Texture3MaterialShaderProperty* texture_p = static_cast<Texture3MaterialShaderProperty*>(prop_ptr);
-                Texture3MtShPropConf* texture_conf = static_cast<Texture3MtShPropConf*>(conf_ptr);
-
-                if(!texture_conf->texture3D->created){
-                    texture_conf->texture3D->Init();
-                    for(int i = 0; i < 6; i ++){
-                        texture_conf->texture3D->pushTexture(i, texture_conf->rel_path.toStdString() + "/" + texture_conf->texture_str[i].toStdString());
-                    }
-                    texture_conf->texture3D->created = true;
-                }else{
-                    texture_conf->texture3D->Use(texture_p->slotToBind);
-                }
-                break;
-            }
-        }
-    }
+    material_ptr->material_ptr->applyMatToPipeline();
 }
 
 void TerrainProperty::onRender(RenderPipeline* pipeline){
+    terrainUniformBuffer = pipeline->terrainUniformBuffer;
+
     if(hasChanged){
         this->data.generateGLMesh();
         hasChanged = false;
     }
 
+    glBindBuffer(GL_UNIFORM_BUFFER, pipeline->terrainUniformBuffer);
+
     MaterialProperty* mat = this->go_link.updLinkPtr()->getPropertyPtr<MaterialProperty>();
     if(mat == nullptr) return;
+
+    int dtrue = 1;
+    int dfalse = 0;
+
     //Iterate over all textures to use them
     for(unsigned int i = 0; i < static_cast<unsigned int>(this->textures_size); i ++){
         HeightmapTexturePair* pair = &this->textures[i];
         if(pair->diffuse != nullptr){
             pair->diffuse->Use(static_cast<int>(i));
+            glBufferSubData(GL_UNIFORM_BUFFER, 16 * i, 4, &dtrue);
+        }else{
+            glBufferSubData(GL_UNIFORM_BUFFER, 16 * i, 4, &dfalse);
         }
+
         if(pair->normal != nullptr){
             pair->normal->Use(static_cast<int>(12 + i));
+            glBufferSubData(GL_UNIFORM_BUFFER, 16 * 12 + 16 * i, 4, &dtrue);
+        }else{
+            glBufferSubData(GL_UNIFORM_BUFFER, 16 * 12 + 16 * i, 4, &dfalse);
         }
     }
 
+    glBufferSubData(GL_UNIFORM_BUFFER, 16 * 12 * 2, 4, &dfalse);
+
     //Apply material shader
     mat->onRender(pipeline);
+
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
 void TileProperty::onRender(RenderPipeline* pipeline){
@@ -664,9 +633,15 @@ void ShadowCasterProperty::Draw(ZSPIRE::Camera* cam, RenderPipeline* pipeline){
     glFrontFace(GL_CW);
     glDisable(GL_CULL_FACE);
 
+    glBindBuffer(GL_UNIFORM_BUFFER, pipeline->shadowBuffer);
+    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof (ZSMATRIX4x4), &LightProjectionMat);
+    glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4), sizeof (ZSMATRIX4x4), &LightViewMat);
+    glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 2, 4, &shadow_bias);
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
     pipeline->getShadowmapShader()->Use();
-    pipeline->getShadowmapShader()->setGLuniformMat4x4("cam_projection", LightProjectionMat);
-    pipeline->getShadowmapShader()->setGLuniformMat4x4("cam_view", LightViewMat);
+    pipeline->getShadowmapShader()->setGLuniformMat4x4("LightProjectionMat", LightProjectionMat);
+    pipeline->getShadowmapShader()->setGLuniformMat4x4("LightViewMat", LightViewMat);
 
     pipeline->renderDepth(this->go_link.world_ptr);
 
@@ -703,11 +678,6 @@ void ShadowCasterProperty::init(){
 void ShadowCasterProperty::sendData(ZSPIRE::Shader* shader){
     glActiveTexture(GL_TEXTURE6);
     glBindTexture(GL_TEXTURE_2D, this->shadowDepthTexture);
-
-    shader->setGLuniformMat4x4("LightProjectionMat", this->LightProjectionMat);
-    shader->setGLuniformMat4x4("LightViewMat", this->LightViewMat);
-    shader->setGLuniformFloat("shadow_bias", this->shadow_bias);
-    shader->setGLuniformInt("hasShadowMap", 1);
 }
 
 void RenderPipeline::updateShadersCameraInfo(ZSPIRE::Camera* cam_ptr){

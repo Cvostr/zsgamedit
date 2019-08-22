@@ -221,7 +221,8 @@ void EditWindow::setViewDirectory(QString dir_path){
 void EditWindow::openFile(QString file_path){
 
     if(file_path.endsWith(".scn")){ //If it is scene
-
+        //Unpick object first
+        world.unpickObject();
         QString gl_win_title = "Game View - " + file_path;
         SDL_SetWindowTitle(window, gl_win_title.toUtf8());
 
@@ -1237,9 +1238,9 @@ void EditWindow::destroyAllManagers(){
 
 void EditWindow::setGameViewWindowSize(int W, int H){
     if(W < 1 && H < 1) return;
-
+    //Set SDL window size
     SDL_SetWindowSize(this->window, W, H);
-
+    //Apply new viewport to cameras
     ZSVIEWPORT viewport = ZSVIEWPORT(0,0,static_cast<unsigned int>(W),static_cast<unsigned int>(H));
     edit_camera.setViewport(viewport);
     world.world_camera.setViewport(viewport);

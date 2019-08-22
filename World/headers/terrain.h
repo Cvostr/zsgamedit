@@ -21,6 +21,8 @@ typedef struct HeightmapVertex{
     ZSVECTOR3 pos;
     ZSVECTOR2 uv;
     ZSVECTOR3 normal;
+    ZSVECTOR3 tangent;
+    ZSVECTOR3 bitangent;
 }HeightmapVertex;
 
 typedef struct HeightmapTexturePair{
@@ -59,6 +61,7 @@ public:
     void destroyGL();
     void Draw();
     void generateGLMesh();
+    void processTangentSpace(HeightmapVertex* vert_array, unsigned int* indices_array, int indices_num, int vertex_num);
     void saveToFile(const char* file_path);
     bool loadFromFile(const char* file_path);
 

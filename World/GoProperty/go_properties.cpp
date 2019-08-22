@@ -1442,11 +1442,14 @@ void TerrainProperty::getPickedVertexId(int posX, int posY, int screenY, unsigne
     if(mat == nullptr || mat->material_ptr == nullptr) return;
     //Apply material shader
     mat->material_ptr->group_ptr->render_shader->Use();
-    mat->material_ptr->group_ptr->render_shader->setGLuniformInt("isPicking", 1);
+
+    glBindBuffer(GL_UNIFORM_BUFFER, terrainUniformBuffer);
+    int dtrue = 1;
+    glBufferSubData(GL_UNIFORM_BUFFER, 16 * 12 * 2, 4, &dtrue);
+
     this->data.Draw();
     //read picked pixel
     glReadPixels(posX, screenY - posY, 1,1, GL_RGBA, GL_UNSIGNED_BYTE, data);
-    mat->material_ptr->group_ptr->render_shader->setGLuniformInt("isPicking", 0);
 }
 
 void TerrainProperty::onMouseClick(int posX, int posY, int screenY, bool isLeftButtonHold, bool isCtrlHold){

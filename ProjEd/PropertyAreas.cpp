@@ -197,7 +197,7 @@ void Float3PropertyArea::writeNewValues(){
     float vY = this->y_field.text().toFloat();
     float vZ = this->z_field.text().toFloat();
 
-    if(vector->X != vX || vector->Y != vY || vector->Z != vZ){
+    if(!REAL_NUM_EQ(vector->X, vX) || !REAL_NUM_EQ(vector->Y, vY) || !REAL_NUM_EQ(vector->Z, vZ)){
         //Store old values
         GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(this->go_property);
         getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
@@ -218,7 +218,7 @@ void Float3PropertyArea::updateValues(){
     float vY = this->y_field.text().toFloat();
     float vZ = this->z_field.text().toFloat();
     //if variables content changed
-    if(vector->X != vX || vector->Y != vY || vector->Z != vZ){
+    if(!REAL_NUM_EQ(vector->X, vX) || !REAL_NUM_EQ(vector->Y, vY) || !REAL_NUM_EQ(vector->Z, vZ)){
         this->x_field.setText(QString::number(static_cast<double>(vector->X)));
         this->y_field.setText(QString::number(static_cast<double>(vector->Y)));
         this->z_field.setText(QString::number(static_cast<double>(vector->Z)));
@@ -320,7 +320,7 @@ void FloatPropertyArea::writeNewValues(){
     //Get current values in text fields
     float value = this->float_field.text().toFloat();
 
-    if(*this->value != value){ //if value changed, then make Action
+    if(!REAL_NUM_EQ(*this->value, value)){ //if value changed, then make Action
         //Store old values
         GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(this->go_property);
         getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
@@ -336,7 +336,7 @@ void FloatPropertyArea::updateValues(){
     //Get current values in textt fields
     float vX = this->float_field.text().toFloat();
 
-    if(*value != vX){
+    if(!REAL_NUM_EQ(*value, vX)){
         this->float_field.setText(QString::number(static_cast<double>(*value)));
     }
 }
@@ -472,9 +472,8 @@ void ResourcePickDialog::onResourceSelected(){
 }
 
 void ResourcePickDialog::onNeedToShow(){
-    if(this->area->resource_type == RESOURCE_TYPE_TEXTURE){
+    if(this->area->resource_type == RESOURCE_TYPE_TEXTURE || this->area->resource_type == RESOURCE_TYPE_MESH){
         this->list->setViewMode(QListView::IconMode);
-
     }
 
     this->extension_mask = area->extension_mask; //send extension mask
@@ -486,7 +485,7 @@ void ResourcePickDialog::onNeedToShow(){
     if(area->isShowNoneItem){
         new QListWidgetItem("@none", this->list);
     }
-
+    //Add default meshes
     if(area->resource_type == RESOURCE_TYPE_MESH){
         new QListWidgetItem("@plane", this->list);
         new QListWidgetItem("@isotile", this->list);
@@ -503,7 +502,8 @@ void ResourcePickDialog::onNeedToShow(){
                 if(this->area->resource_type == RESOURCE_TYPE_TEXTURE){
                     std::string fpath = _editor_win->project.root_path.toStdString() + "/" + resource_ptr->resource_label;
                     QImage* img = _editor_win->thumb_master->texture_thumbnails.at(fpath);
-                    item->setIcon(QIcon(QPixmap::fromImage(*img)));
+                    if(img)
+                        item->setIcon(QIcon(QPixmap::fromImage(*img)));
                     //item->setText("");
                 }
             }

@@ -172,8 +172,7 @@ template<typename T>
 class PropertyPickArea : public PropertyEditArea{
 
 public:
-    T* color; //output value
-    ZSColorPickDialog dialog; //Dialog pointer
+    T** property_ptr_ptr; //output value
     QPushButton pick_button; //button to show color pick dialog
     PropertyPickArea();
     ~PropertyPickArea();

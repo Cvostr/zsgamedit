@@ -51,24 +51,23 @@ void ThumbnailsMaster::createTexturesThumbnails(){
     //Iterate over all resources
     for(unsigned int res_i = 0; res_i < project_struct_ptr->resources.size(); res_i ++){
         Resource* resource_ptr = &this->project_struct_ptr->resources[res_i];
-        if(resource_ptr->type != RESOURCE_TYPE_TEXTURE && resource_ptr->type != RESOURCE_TYPE_MATERIAL) continue;
+        if(resource_ptr->type != RESOURCE_TYPE_TEXTURE) continue;
 
-        if(resource_ptr->type == RESOURCE_TYPE_TEXTURE){
-            ZSPIRE::Texture* texture_ptr = static_cast<ZSPIRE::Texture*>(resource_ptr->class_ptr);
-            DrawTexture(texture_ptr);
-        }else if(resource_ptr->type == RESOURCE_TYPE_MATERIAL){
-            Material* mat_ptr = static_cast<Material*>(resource_ptr->class_ptr);
-            DrawMaterial(mat_ptr);
-        }
-
+        ZSPIRE::Texture* texture_ptr = static_cast<ZSPIRE::Texture*>(resource_ptr->class_ptr);
+        DrawTexture(texture_ptr);
+        //Allocate image buffer
         unsigned char* texture_data = new unsigned char[512 * 512 * 4];
-
+        //Read image to buffer from GL buffer
         glReadPixels(0, 0, 512, 512, GL_RGBA, GL_UNSIGNED_BYTE, &texture_data[0]);
 
         QImage* image = new QImage(texture_data, 512, 512, QImage::Format_RGBA8888);
         texture_thumbnails.insert(std::pair<std::string, QImage*>(resource_ptr->file_path.toStdString(), image));
         //delete[] texture_data;
     }
+}
+
+void ThumbnailsMaster::createMaterialThumbnails(){
+
 }
 
 void ThumbnailsMaster::DrawTexture(ZSPIRE::Texture* texture){
@@ -80,4 +79,10 @@ void ThumbnailsMaster::DrawTexture(ZSPIRE::Texture* texture){
 
 void ThumbnailsMaster::DrawMaterial(Material* material){
 
+}
+
+
+
+void ThumbnailsMaster::DrawMesh(ZSPIRE::Mesh* mesh){
+    mesh->Draw();
 }

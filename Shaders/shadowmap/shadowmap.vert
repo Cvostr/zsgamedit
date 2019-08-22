@@ -8,12 +8,13 @@ layout (location = 2) in vec3 normal;
 layout (location = 3) in vec3 tangent;
 layout (location = 4) in vec3 bitangent;
 
-uniform mat4 cam_projection;
-uniform mat4 cam_view;
+
+uniform mat4 LightProjectionMat;
+uniform mat4 LightViewMat;
 uniform mat4 object_transform;
 
 void main(){
 	
-	gl_Position = cam_projection * cam_view * object_transform * vec4(position, 1.0);
+	gl_Position = LightProjectionMat * LightViewMat * object_transform * vec4(position, 1.0);
 	
 }

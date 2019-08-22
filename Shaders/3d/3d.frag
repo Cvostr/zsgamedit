@@ -23,15 +23,9 @@ uniform bool hasDiffuseMap;
 uniform bool hasNormalMap;
 uniform bool hasSpecularMap;
 uniform bool hasHeightMap;
-uniform bool hasShadowMap = false;
 
 uniform float material_shininess;
 uniform vec3 diffuse_color = vec3(1.0, 0.078, 0.574);
-
-//Shadowmapping stuff
-uniform mat4 LightProjectionMat;
-uniform mat4 LightViewMat;
-uniform float shadow_bias;
 
 layout (std140, binding = 0) uniform CamMatrices{
     uniform mat4 cam_projection;
@@ -39,6 +33,15 @@ layout (std140, binding = 0) uniform CamMatrices{
     uniform mat4 object_transform;
     //Camera position
     uniform vec3 cam_position;
+};
+
+layout (std140, binding = 2) uniform ShadowData{
+//Shadowmapping stuff
+    uniform mat4 LightProjectionMat; // 16 * 4
+    uniform mat4 LightViewMat; 
+     // 16 * 4
+    uniform float shadow_bias; //4
+    uniform bool hasShadowMap; //4
 };
 
 vec2 processParallaxMapUv(vec2 uv){

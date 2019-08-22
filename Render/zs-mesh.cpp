@@ -386,9 +386,9 @@ void ZSPIRE::Mesh::DrawLines(){
 
 void ZSPIRE::processTangentSpace(ZSVERTEX* vert_array, unsigned int* indices_array, int indices_num, int vertex_num){
     for(int ind_i = 0; ind_i < indices_num; ind_i += 3){
-        ZSVERTEX v1 = vert_array[ind_i];
-        ZSVERTEX v2 = vert_array[ind_i + 1];
-        ZSVERTEX v3 = vert_array[ind_i + 2];
+        ZSVERTEX v1 = vert_array[indices_array[ind_i]];
+        ZSVERTEX v2 = vert_array[indices_array[ind_i + 1]];
+        ZSVERTEX v3 = vert_array[indices_array[ind_i + 2]];
 
         ZSVECTOR3 edge1 = v2.pos - v1.pos;
         ZSVECTOR3 edge2 = v3.pos - v1.pos;
@@ -408,36 +408,8 @@ void ZSPIRE::processTangentSpace(ZSVERTEX* vert_array, unsigned int* indices_arr
         bitangent.Z = f * (-deltaUV2.X * edge1.Z + deltaUV1.X * edge2.Z);
         vNormalize(&bitangent);
         for(int i = 0; i < 3; i ++){
-            vert_array[ind_i + i].tangent = tangent;
-            vert_array[ind_i + i].bitangent = bitangent;
-        }
-    }
-
-    for(int ind_i = 0; ind_i < vertex_num; ind_i += 3){
-        ZSVERTEX v1 = vert_array[ind_i];
-        ZSVERTEX v2 = vert_array[ind_i + 1];
-        ZSVERTEX v3 = vert_array[ind_i + 2];
-
-        ZSVECTOR3 edge1 = v2.pos - v1.pos;
-        ZSVECTOR3 edge2 = v3.pos - v1.pos;
-        ZSVECTOR2 deltaUV1 = v2.uv - v1.uv;
-        ZSVECTOR2 deltaUV2 = v3.uv - v1.uv;
-
-        float f = 1.0f / (deltaUV1.X * deltaUV2.Y - deltaUV2.X * deltaUV1.Y);
-
-        ZSVECTOR3 tangent, bitangent;
-        tangent.X = f * (deltaUV2.Y * edge1.X - deltaUV1.Y * edge2.X);
-        tangent.Y = f * (deltaUV2.Y * edge1.Y - deltaUV1.Y * edge2.Y);
-        tangent.Z = f * (deltaUV2.Y * edge1.Z - deltaUV1.Y * edge2.Z);
-        vNormalize(&tangent);
-
-        bitangent.X = f * (-deltaUV2.X * edge1.X + deltaUV1.X * edge2.X);
-        bitangent.Y = f * (-deltaUV2.X * edge1.Y + deltaUV1.X * edge2.Y);
-        bitangent.Z = f * (-deltaUV2.X * edge1.Z + deltaUV1.X * edge2.Z);
-        vNormalize(&bitangent);
-        for(int i = 0; i < 3; i ++){
-            vert_array[ind_i + i].tangent = tangent;
-            vert_array[ind_i + i].bitangent = bitangent;
+            vert_array[indices_array[ind_i + i]].tangent = tangent;
+            vert_array[indices_array[ind_i + i]].bitangent = bitangent;
         }
     }
 }

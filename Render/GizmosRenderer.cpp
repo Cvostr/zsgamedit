@@ -1,19 +1,24 @@
 #include "headers/GizmosRenderer.h"
 
-GizmosRenderer::GizmosRenderer(ZSPIRE::Shader* mark_shader, bool depthTestEnabled, bool cullFaceEnabled, int projectPerspective){
+GizmosRenderer::GizmosRenderer(ZSPIRE::Shader* mark_shader, bool depthTestEnabled, bool cullFaceEnabled, int projectPerspective, uint camBuffer){
     //set shader pointer
     this->mark_shader_ptr = mark_shader;
 
     this->cullFaceEnabled = cullFaceEnabled;
     this->depthTestEnabled = depthTestEnabled;
     this->projectPerspective = projectPerspective;
+
+    this->camBuffer = camBuffer;
 }
 
 void GizmosRenderer::drawPickedMeshWireframe(ZSPIRE::Mesh *mesh_ptr, ZSMATRIX4x4 transform, ZSRGBCOLOR color){
     glFeaturesOff();
 
     this->mark_shader_ptr->Use();
-    this->mark_shader_ptr->setTransform(transform);
+
+    glBindBuffer(GL_UNIFORM_BUFFER, camBuffer);
+    glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 2, sizeof (ZSMATRIX4x4), &transform);
+
     this->mark_shader_ptr->setGLuniformColor("color", color);
 
     mesh_ptr->DrawLines();
@@ -23,7 +28,8 @@ void GizmosRenderer::drawPickedMeshWireframe(ZSPIRE::Mesh *mesh_ptr, ZSMATRIX4x4
 
 void GizmosRenderer::drawCube(ZSMATRIX4x4 transform, ZSRGBCOLOR color){
     this->mark_shader_ptr->Use();
-    this->mark_shader_ptr->setTransform(transform);
+    glBindBuffer(GL_UNIFORM_BUFFER, camBuffer);
+    glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 2, sizeof (ZSMATRIX4x4), &transform);
     this->mark_shader_ptr->setGLuniformColor("color", color);
 
     ZSPIRE::getCubeMesh3D()->Draw();

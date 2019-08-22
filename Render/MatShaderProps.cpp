@@ -469,6 +469,81 @@ void Material::setPropertyGroup(MtShaderPropertiesGroup* group_ptr){
     this->group_str = group_ptr->str_path;
 }
 
+void Material::applyMatToPipeline(){
+    ZSPIRE::Shader* shader = this->group_ptr->render_shader;
+    //iterate over all properties, send them all!
+    for(unsigned int prop_i = 0; prop_i < group_ptr->properties.size(); prop_i ++){
+        MaterialShaderProperty* prop_ptr = group_ptr->properties[prop_i];
+        MaterialShaderPropertyConf* conf_ptr = confs[prop_i];
+        switch(prop_ptr->type){
+            case MATSHPROP_TYPE_NONE:{
+                break;
+            }
+            case MATSHPROP_TYPE_TEXTURE:{
+                //Cast pointer
+                TextureMaterialShaderProperty* texture_p = static_cast<TextureMaterialShaderProperty*>(prop_ptr);
+                TextureMtShPropConf* texture_conf = static_cast<TextureMtShPropConf*>(conf_ptr);
+
+                if(texture_conf->texture != nullptr){
+                    shader->setGLuniformInt(texture_p->ToggleUniform.c_str(), 1); //Set texture uniform toggle
+                    texture_conf->texture->Use(texture_p->slotToBind); //Use texture
+                }else{
+                    shader->setGLuniformInt(texture_p->ToggleUniform.c_str(), 0);
+                }
+                break;
+            }
+            case MATSHPROP_TYPE_FLOAT:{
+                //Cast pointer
+                FloatMaterialShaderProperty* float_p = static_cast<FloatMaterialShaderProperty*>(prop_ptr);
+                FloatMtShPropConf* float_conf = static_cast<FloatMtShPropConf*>(conf_ptr);
+
+                shader->setGLuniformFloat(float_p->floatUniform.c_str(), float_conf->value);
+                break;
+            }
+            case MATSHPROP_TYPE_INTEGER:{
+                //Cast pointer
+                IntegerMaterialShaderProperty* int_p = static_cast<IntegerMaterialShaderProperty*>(prop_ptr);
+                IntegerMtShPropConf* int_conf = static_cast<IntegerMtShPropConf*>(conf_ptr);
+
+                shader->setGLuniformInt(int_p->integerUniform.c_str(), int_conf->value);
+                break;
+            }
+            case MATSHPROP_TYPE_COLOR:{
+                //Cast pointer
+                ColorMaterialShaderProperty* color_p = static_cast<ColorMaterialShaderProperty*>(prop_ptr);
+                ColorMtShPropConf* color_conf = static_cast<ColorMtShPropConf*>(conf_ptr);
+
+                shader->setGLuniformColor(color_p->colorUniform.c_str(), color_conf->color);
+                break;
+            }
+            case MATSHPROP_TYPE_FVEC3:{
+                //Cast pointer
+                Float3MaterialShaderProperty* fvec3_p = static_cast<Float3MaterialShaderProperty*>(prop_ptr);
+                Float3MtShPropConf* fvec3_conf = static_cast<Float3MtShPropConf*>(conf_ptr);
+
+                shader->setGLuniformVec3(fvec3_p->floatUniform.c_str(), fvec3_conf->value);
+                break;
+            }
+            case MATSHPROP_TYPE_TEXTURE3:{
+                //Cast pointer
+                Texture3MaterialShaderProperty* texture_p = static_cast<Texture3MaterialShaderProperty*>(prop_ptr);
+                Texture3MtShPropConf* texture_conf = static_cast<Texture3MtShPropConf*>(conf_ptr);
+
+                if(!texture_conf->texture3D->created){
+                    texture_conf->texture3D->Init();
+                    for(int i = 0; i < 6; i ++){
+                        texture_conf->texture3D->pushTexture(i, texture_conf->rel_path.toStdString() + "/" + texture_conf->texture_str[i].toStdString());
+                    }
+                    texture_conf->texture3D->created = true;
+                }else{
+                    texture_conf->texture3D->Use(texture_p->slotToBind);
+                }
+                break;
+            }
+        }
+    }
+}
+
 Material::Material(){
     setPropertyGroup(MtShProps::getDefaultMtShGroup());
     group_str = "@default";

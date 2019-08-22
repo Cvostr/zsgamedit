@@ -16,20 +16,54 @@ in mat3 TBN;
 in vec3 _id;
 
 //textures
-uniform sampler2D diffuse[TEXTURES_AMOUNT];
+layout(binding = 0) uniform sampler2D diffuse0;
+layout(binding = 1) uniform sampler2D diffuse1;
+layout(binding = 2) uniform sampler2D diffuse2;
+layout(binding = 3) uniform sampler2D diffuse3;
+layout(binding = 4) uniform sampler2D diffuse4;
+layout(binding = 5) uniform sampler2D diffuse5;
+layout(binding = 6) uniform sampler2D diffuse6;
+layout(binding = 7) uniform sampler2D diffuse7;
+layout(binding = 8) uniform sampler2D diffuse8;
+layout(binding = 9) uniform sampler2D diffuse9;
+layout(binding = 10) uniform sampler2D diffuse10;
+layout(binding = 11) uniform sampler2D diffuse11;
+
+layout(binding = 12) uniform sampler2D normal0;
+layout(binding = 13) uniform sampler2D normal1;
+layout(binding = 14) uniform sampler2D normal2;
+layout(binding = 15) uniform sampler2D normal3;
+layout(binding = 16) uniform sampler2D normal4;
+layout(binding = 17) uniform sampler2D normal5;
+layout(binding = 18) uniform sampler2D normal6;
+layout(binding = 19) uniform sampler2D normal7;
+layout(binding = 20) uniform sampler2D normal8;
+layout(binding = 21) uniform sampler2D normal9;
+layout(binding = 22) uniform sampler2D normal10;
+layout(binding = 23) uniform sampler2D normal11;
 
 layout(binding = 24) uniform sampler2D texture_mask;
 layout(binding = 25) uniform sampler2D texture_mask1;
 layout(binding = 26) uniform sampler2D texture_mask2;
 
-uniform int isPicking;
-uniform bool hasShadowMap = false;
-
 //Shadowmapping stuff
 layout(binding = 6) uniform sampler2D shadow_map;
-uniform mat4 LightProjectionMat;
-uniform mat4 LightViewMat;
-uniform float shadow_bias;
+
+layout (std140, binding = 3) uniform TerrainData{
+//Shadowmapping stuff
+    bool hasDiffuse[12];
+    bool hasNormal[12];
+    uniform int isPicking;
+};
+
+layout (std140, binding = 2) uniform ShadowData{
+//Shadowmapping stuff
+    uniform mat4 LightProjectionMat; // 16 * 4
+    uniform mat4 LightViewMat; 
+     // 16 * 4
+    uniform float shadow_bias; //4
+    uniform bool hasShadowMap; //4
+};
 
 float getFactor(int id, vec2 uv){
     vec4 mask;
@@ -79,35 +113,103 @@ float getFactor(int id, vec2 uv){
 vec3 getDiffuse(int id, vec2 uv, int multiplyer){
     switch(id){
         case 0:{
-            return texture(diffuse[0], uv * multiplyer).xyz;
+            return texture(diffuse0, uv * multiplyer).xyz;
             break;
         }
         case 1:{
-            return texture(diffuse[1], uv * multiplyer).xyz;
+            return texture(diffuse1, uv * multiplyer).xyz;
             break;
         }
         case 2:{
-            return texture(diffuse[2], uv * multiplyer).xyz;
+            return texture(diffuse2, uv * multiplyer).xyz;
             break;
         }
         case 3:{
-            return texture(diffuse[3], uv * multiplyer).xyz;
+            return texture(diffuse3, uv * multiplyer).xyz;
             break;
         }
         case 4:{
-            return texture(diffuse[4], uv * multiplyer).xyz;
+            return texture(diffuse4, uv * multiplyer).xyz;
             break;
         }
         case 5:{
-            return texture(diffuse[5], uv * multiplyer).xyz;
+            return texture(diffuse5, uv * multiplyer).xyz;
             break;
         }
         case 6:{
-            return texture(diffuse[6], uv * multiplyer).xyz;
+            return texture(diffuse6, uv * multiplyer).xyz;
             break;
         }
         case 7:{
-            return texture(diffuse[7], uv * multiplyer).xyz;
+            return texture(diffuse7, uv * multiplyer).xyz;
+            break;
+        }case 8:{
+            return texture(diffuse8, uv * multiplyer).xyz;
+            break;
+        }case 9:{
+            return texture(diffuse9, uv * multiplyer).xyz;
+            break;
+        }
+        case 10:{
+            return texture(diffuse10, uv * multiplyer).xyz;
+            break;
+        }
+        case 11:{
+            return texture(diffuse11, uv * multiplyer).xyz;
+            break;
+        }
+        
+    }
+}
+
+vec3 getNormal(int id, vec2 uv, int multiplyer){
+    switch(id){
+        case 0:{
+            return texture(normal0, uv * multiplyer).xyz;
+            break;
+        }
+        case 1:{
+            return texture(normal1, uv * multiplyer).xyz;
+            break;
+        }
+        case 2:{
+            return texture(normal2, uv * multiplyer).xyz;
+            break;
+        }
+        case 3:{
+            return texture(normal3, uv * multiplyer).xyz;
+            break;
+        }
+        case 4:{
+            return texture(normal4, uv * multiplyer).xyz;
+            break;
+        }
+        case 5:{
+            return texture(normal5, uv * multiplyer).xyz;
+            break;
+        }
+        case 6:{
+            return texture(normal6, uv * multiplyer).xyz;
+            break;
+        }
+        case 7:{
+            return texture(normal7, uv * multiplyer).xyz;
+            break;
+        }
+        case 8:{
+            return texture(normal8, uv * multiplyer).xyz;
+            break;
+        }
+        case 9:{
+            return texture(normal9, uv * multiplyer).xyz;
+            break;
+        }
+        case 10:{
+            return texture(normal10, uv * multiplyer).xyz;
+            break;
+        }
+        case 11:{
+            return texture(normal11, uv * multiplyer).xyz;
             break;
         }
         
@@ -118,6 +220,8 @@ vec3 getFragment(vec2 uv, int multiplyer){
     vec3 result = vec3(0,0,0);
 
     for(int i = 0; i < TEXTURES_AMOUNT; i ++){
+        if(hasDiffuse[i] == false) continue;
+    
         float factor = getFactor(i, uv);
         vec3 diffuse = getDiffuse(i, uv, multiplyer);
         
@@ -126,6 +230,24 @@ vec3 getFragment(vec2 uv, int multiplyer){
         
     return result;
 }
+
+vec3 getFragmentNormal(vec2 uv, int multiplyer){
+    vec3 result = InNormal;
+
+    for(int i = 0; i < TEXTURES_AMOUNT; i ++){
+        if(hasNormal[i] == false) continue;
+        float factor = getFactor(i, uv);
+        vec3 normal = getNormal(i, uv, multiplyer);
+        
+        normal = normalize(normal * 2 - 1);
+		normal = normalize(TBN * normal);
+        
+        result = mix(result, normal, factor);
+    }
+        
+    return result;
+}
+
 
 void _shadow(){
     if(hasShadowMap){
@@ -155,6 +277,8 @@ void main(){
 	
 	vec3 result = vec3(1.0, 1.0, 1.0); //Default value
 	vec3 Normal = InNormal; //defaultly, use normals from mesh
+	   
+	Normal = getFragmentNormal(uv, 8);   
 	   
 	tPos = FragPos;
 	tNormal = Normal;

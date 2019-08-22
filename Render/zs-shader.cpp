@@ -165,12 +165,6 @@ void ZSPIRE::Shader::applyBaseSamplerUniforms(){
 
     //UI shader
     setGLuniformInt("sprite_map", 0);
-
-    //Terrain shader
-    for(int i = 0; i < 12; i ++){
-        std::string uniform_name = "diffuse[" + std::to_string(i) + "]";
-        setGLuniformInt(uniform_name.c_str(), i);
-    }
     for(int i = 0; i < 12; i ++){
         std::string uniform_name = "normal[" + std::to_string(i) + "]";
         setGLuniformInt(uniform_name.c_str(), 12 + i);

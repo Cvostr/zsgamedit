@@ -69,6 +69,9 @@ private:
 public:
     unsigned int camBuffer;
     unsigned int lightsBuffer;
+    unsigned int shadowBuffer;
+    unsigned int terrainUniformBuffer;
+
     bool depthTest; //if enabled, GL will do depth testing
     bool cullFaces; //if enabled, GL will cull faces
     PIPELINE_STATE current_state;

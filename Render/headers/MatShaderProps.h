@@ -65,6 +65,8 @@ public:
     void setPropertyGroup(MtShaderPropertiesGroup* group_ptr);
     void clear();
 
+    void applyMatToPipeline();
+
     Material();
 };
 

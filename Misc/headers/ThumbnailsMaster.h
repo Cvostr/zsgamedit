@@ -20,9 +20,11 @@ public:
 
     void initShader();
     void createTexturesThumbnails();
+    void createMaterialThumbnails();
 
     void DrawTexture(ZSPIRE::Texture* texture);
     void DrawMaterial(Material* material);
+    void DrawMesh(ZSPIRE::Mesh* mesh);
 
     ThumbnailsMaster();
     ~ThumbnailsMaster();

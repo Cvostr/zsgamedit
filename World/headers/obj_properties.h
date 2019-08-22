@@ -233,6 +233,8 @@ private:
     char _last_edit_mode;
     char edit_mode;
 public:
+    unsigned int terrainUniformBuffer;
+
     std::vector<HeightmapTexturePair> textures;
 
     QString file_label;
