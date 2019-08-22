@@ -499,8 +499,6 @@ void MaterialProperty::onRender(RenderPipeline* pipeline){
     }
 
 
-
-
     glBindBuffer(GL_UNIFORM_BUFFER, pipeline->camBuffer);
     glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 2, sizeof (ZSMATRIX4x4), &transform_ptr->transform_mat);
 

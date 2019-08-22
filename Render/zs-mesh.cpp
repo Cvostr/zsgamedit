@@ -248,6 +248,8 @@ void ZSPIRE::setupDefaultMeshes() {
             }
         }
     }
+
+    processTangentSpace(sphere_v.data(), sphere_indices.data(), static_cast<int>(sphere_indices.size()), static_cast<int>(sphere_v.size()));
     sphereMesh.setMeshData(sphere_v.data(), sphere_indices.data(), static_cast<uint>(sphere_v.size()), static_cast<uint>(sphere_indices.size())); //Send plane data
 }
 

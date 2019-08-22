@@ -399,7 +399,7 @@ void GameObject::loadProperty(std::ifstream* world_stream){
 
         std::string fpath = ptr->go_link.world_ptr->proj_ptr->root_path.toStdString() + "/" + ptr->file_label.toStdString();
         bool result = ptr->getTerrainData()->loadFromFile(fpath.c_str());
-        if(result) //if loading sucess
+        if(result) //if loading sucessstd::cout << "Terrain : Probably, missing terrain file" << file_path;
             ptr->getTerrainData()->generateGLMesh();
 
         world_stream->seekg(1, std::ofstream::cur);

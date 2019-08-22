@@ -100,6 +100,17 @@ public:
 };
 
 class ResourcePickDialog;
+class PickResourceArea;
+class QLabelResourcePickWgt : public QLabel{
+    Q_OBJECT
+private:
+    PickResourceArea* area_ptr;
+protected:
+    void dragEnterEvent( QDragEnterEvent* event );
+    void dropEvent( QDropEvent* event );
+public:
+    QLabelResourcePickWgt(PickResourceArea* area_ptr, QWidget* parent = nullptr);
+};
 
 class PickResourceArea : public PropertyEditArea{
 public:
@@ -111,7 +122,7 @@ public:
     QString* rel_path; //Pointer to store result
 
     QPushButton* respick_btn; //button to press
-    QLabel* relpath_label;
+    QLabelResourcePickWgt* relpath_label;
     PickResourceArea();
     ~PickResourceArea();
 

@@ -3,6 +3,7 @@
 #include "headers/ProjectEdit.h"
 #include "../World/headers/World.h"
 #include <QDoubleValidator>
+#include <QDragEnterEvent>
 #include <QObject>
 #include <QDir>
 #include <iostream>
@@ -351,8 +352,7 @@ PickResourceArea::PickResourceArea(){
 
     respick_btn = new QPushButton; //Allocation of QPushButton
     elem_layout->addSpacing(6);
-    relpath_label = new QLabel; //Allocation of resource relpath text
-    relpath_label->setAcceptDrops(true);
+    relpath_label = new QLabelResourcePickWgt(this); //Allocation of resource relpath text
     elem_layout->addWidget(relpath_label);
     //Space between text and button
     elem_layout->addSpacing(6);
@@ -387,7 +387,8 @@ void PickResourceArea::updateLabel(){
     if(this->resource_type == RESOURCE_TYPE_TEXTURE && *rel_path != "@none"){
         std::string fpath = _editor_win->project.root_path.toStdString() + "/" + rel_path->toStdString();
         QImage* img = _editor_win->thumb_master->texture_thumbnails.at(fpath);
-        relpath_label->setPixmap(QPixmap::fromImage(*img));
+        if(img)
+            relpath_label->setPixmap(QPixmap::fromImage(*img));
         relpath_label->setScaledContents(true);
 
         relpath_label->setMinimumSize(QSize(50, 50));
@@ -673,4 +674,26 @@ void ComboBoxArea::writeNewValues(){ //Virtual, to check widget state
     *this->result_string = selected;
 
     PropertyEditArea::callPropertyUpdate();
+}
+
+QLabelResourcePickWgt::QLabelResourcePickWgt(PickResourceArea* area_ptr, QWidget* parent) : QLabel (parent){
+    setAcceptDrops(true);
+    this->area_ptr = area_ptr;
+}
+
+void QLabelResourcePickWgt::dragEnterEvent( QDragEnterEvent* event ){
+    event->acceptProposedAction();
+}
+void QLabelResourcePickWgt::dropEvent( QDropEvent* event ){
+    QList<QListWidgetItem*> file_dropped = _editor_win->getFilesListWidget()->selectedItems();
+
+    if(file_dropped.length() > 0 && (file_dropped[0]->text().endsWith(".dds") || file_dropped[0]->text().endsWith(".DDS"))){
+        *this->area_ptr->rel_path = _editor_win->getCurrentDirectory() + "/" + file_dropped[0]->text();
+        this->area_ptr->rel_path->remove(0, _editor_win->project.root_path.size() + 1);
+
+        GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(area_ptr->go_property);
+        getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
+        //Apply resource change
+        area_ptr->PropertyEditArea::callPropertyUpdate();
+    }
 }

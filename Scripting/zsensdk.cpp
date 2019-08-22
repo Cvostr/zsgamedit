@@ -36,6 +36,10 @@ ZSVECTOR3 ZSENSDK::Math::vadd(ZSVECTOR3 v1, ZSVECTOR3 v2){
     return v1 + v2;
 }
 
+ZSVECTOR3 ZSENSDK::Math::vmul(ZSVECTOR3 v1, float m){
+    return v1 * m;
+}
+
 void ZSENSDK::Engine::loadWorldFromFile(std::string file){
     Project* proj_ptr = static_cast<Project*>(_editor_win->world.proj_ptr);
 
@@ -90,6 +94,8 @@ void ZSENSDK::bindSDK(lua_State* state){
         .addFunction("distance", &getDistance)
         .addFunction("normalize", &ZSENSDK::Math::vnormalize)
         .addFunction("v_add", &ZSENSDK::Math::vadd)
+        .addFunction("sum", &ZSENSDK::Math::vadd)
+        .addFunction("mul", &ZSENSDK::Math::vmul)
         .addFunction("v_cross", &vCross);
 
     luabridge::getGlobalNamespace(state).beginClass <ZSVIEWPORT>("CmViewport")
@@ -105,6 +111,7 @@ void ZSENSDK::bindSDK(lua_State* state){
             .addFunction("setFront", &ZSPIRE::Camera::setFront)
             .addData("pos", &ZSPIRE::Camera::camera_pos, false)
             .addData("front", &ZSPIRE::Camera::camera_front, false)
+            .addData("up", &ZSPIRE::Camera::camera_up, false)
             .addFunction("setProjection", &ZSPIRE::Camera::setProjectionType)
             .addFunction("setZplanes", &ZSPIRE::Camera::setZplanes)
             .addFunction("setViewport", &ZSPIRE::Camera::setViewport)

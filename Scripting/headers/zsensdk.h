@@ -26,6 +26,7 @@ namespace Debug{
 namespace Math{
     ZSVECTOR3 vnormalize(ZSVECTOR3 vec);
     ZSVECTOR3 vadd(ZSVECTOR3 v1, ZSVECTOR3 v2);
+    ZSVECTOR3 vmul(ZSVECTOR3 v1, float m);
 }
 
 namespace Window {

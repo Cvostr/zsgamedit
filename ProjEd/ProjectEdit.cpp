@@ -210,6 +210,11 @@ void EditWindow::assignIconFile(QListWidgetItem* item){
     if(item->text().endsWith(".lua")){
         item->setIcon(QIcon::fromTheme("text-x-script"));
     }
+    if(item->text().endsWith(".zsmat") || item->text().endsWith(".ZSMAT")){
+        //QString path = this->current_dir + "/" + item->text();
+        //QImage* img = thumb_master->texture_thumbnails.at(path.toStdString());
+        //item->setIcon(QIcon(QPixmap::fromImage(*img)));
+    }
 }
 
 void EditWindow::setViewDirectory(QString dir_path){
@@ -890,6 +895,7 @@ EditWindow* ZSEditor::openEditor(){
     _ed_actions_container->setStoreActions(true);
     //Create thumbnails
     _editor_win->thumb_master->createTexturesThumbnails();
+    //_editor_win->thumb_master->createMaterialThumbnails();
 
     _editor_win->setViewDirectory(_editor_win->project.root_path);
 

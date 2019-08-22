@@ -89,6 +89,8 @@ void TerrainData::Draw(){
 }
 
 void TerrainData::generateGLMesh(){
+    if(W < 1 || H < 1)
+        return;
     if(!created)
         initGL();
 
@@ -193,7 +195,7 @@ void TerrainData::generateGLMesh(){
         //Normalize vector
         vNormalize(&v1->normal);
     }
-
+    //generate tangent, bitangent
     processTangentSpace(vertices, indices, (W - 1) * (H - 1) * 2 * 3, W * H);
 
     glBindVertexArray(this->VAO); //Bind vertex array
@@ -255,13 +257,19 @@ bool TerrainData::loadFromFile(const char* file_path){
     world_stream.open(file_path, std::ifstream::binary);
 
     if(world_stream.fail()){ //Probably, no file
-        std::cout << "Terrain : Probably, missing terrain file" << file_path;
+        std::cout << "Terrain : Probably, missing terrain file" << file_path << std::endl;
         return false;
     }
 
     //read dimensions
     world_stream.read(reinterpret_cast<char*>(&this->W), sizeof(int));
     world_stream.read(reinterpret_cast<char*>(&this->H), sizeof(int));
+
+    if(W < 1 || H < 1){
+        std::cout << "Terrain : Can't load terrain dimensions from file " << file_path << ", it's probably corrupted!" << std::endl;
+        return false;
+    }
+
     //allocate memory
     alloc(W, H);
 

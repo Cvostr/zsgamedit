@@ -989,7 +989,7 @@ void RigidbodyProperty::onUpdate(float deltaTime){
 
         float rotX = 0, rotY = 0, rotZ = 0;
         //Convert quaternion to euler
-        current_rot.getEulerZYX(rotZ, rotY, rotX);
+        current_rot.getEulerZYX(rotX, rotY, rotZ);
         //Convert radians to degrees
         rotX = rotX / ZS_PI * 180.0f;
         rotY = rotY / ZS_PI * 180.0f;
@@ -1053,6 +1053,7 @@ void CharacterControllerProperty::setLinearVelocity(ZSVECTOR3 lvel){
     if(!created) return;
     this->linearVel = lvel;
     this->rigidBody->setLinearVelocity(btVector3(linearVel.X, linearVel.Y, linearVel.Z));
+    rigidBody->activate();
 }
 
 void CharacterControllerProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){

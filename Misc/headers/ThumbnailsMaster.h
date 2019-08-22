@@ -5,6 +5,7 @@
 #include "../../Render/headers/zs-texture.h"
 #include "../../Render/headers/zs-mesh.h"
 #include "../../Render/headers/MatShaderProps.h"
+#include "../../Render/headers/zs-pipeline.h"
 #include "EditorManager.h"
 #include <map>
 #include <QPixmap>
