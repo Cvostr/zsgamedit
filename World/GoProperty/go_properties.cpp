@@ -237,6 +237,8 @@ void TransformProperty::addPropertyInterfaceToInspector(InspectorWin* inspector)
 void TransformProperty::onValueChanged(){
     updateMat();
 
+    if(go_link.updLinkPtr() == nullptr) return;
+
     ColliderProperty* coll = this->go_link.updLinkPtr()->getPropertyPtr<ColliderProperty>();
     RigidbodyProperty* rigid = this->go_link.updLinkPtr()->getPropertyPtr<RigidbodyProperty>();
 
@@ -1387,14 +1389,14 @@ void TerrainProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
             PickResourceArea* diffuse_area = new PickResourceArea;
             diffuse_area->setLabel("Diffuse");
             diffuse_area->go_property = static_cast<void*>(this);
-            diffuse_area->rel_path = &textures[i].diffuse_relpath;
+            diffuse_area->rel_path = &textures[static_cast<uint>(i)].diffuse_relpath;
             diffuse_area->resource_type = RESOURCE_TYPE_TEXTURE; //It should load textures only
             inspector->addPropertyArea(diffuse_area);
 
             PickResourceArea* normal_area = new PickResourceArea;
             normal_area->setLabel("Normal");
             normal_area->go_property = static_cast<void*>(this);
-            normal_area->rel_path = &textures[i].normal_relpath;
+            normal_area->rel_path = &textures[static_cast<uint>(i)].normal_relpath;
             normal_area->resource_type = RESOURCE_TYPE_TEXTURE; //It should load textures only
             inspector->addPropertyArea(normal_area);
         }

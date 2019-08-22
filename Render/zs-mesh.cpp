@@ -415,3 +415,9 @@ void ZSPIRE::processTangentSpace(ZSVERTEX* vert_array, unsigned int* indices_arr
         }
     }
 }
+
+
+ZSPIRE::Bone::Bone(std::string name, uint vertices){
+    this->bone_name = name;
+    this->vertices_affected = vertices;
+}

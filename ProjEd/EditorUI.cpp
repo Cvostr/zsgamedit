@@ -13,7 +13,6 @@ ObjTreeWgt::ObjTreeWgt(QWidget* parent) : QTreeWidget (parent){
     this->world_ptr = nullptr; //Not assigned by default
 }
 
-
 void ObjTreeWgt::dropEvent(QDropEvent* event){
     _ed_actions_container->newSnapshotAction(&win_ptr->world); //Add new snapshot action
     _inspector_win->clearContentLayout(); //Prevent variable conflicts

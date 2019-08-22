@@ -5,10 +5,21 @@
 
 #define NO_INDICES 0
 
+
+
 #ifndef zs_mesh
 #define zs_mesh
 
 namespace ZSPIRE {
+
+    class Bone{
+    public:
+        std::string bone_name;
+        ZSMATRIX4x4 offset;
+        uint vertices_affected;
+
+        Bone(std::string name, uint vertices);
+    };
 
 	class Mesh {
 	public:
@@ -21,6 +32,8 @@ namespace ZSPIRE {
 
 		unsigned int vertices_num;
 		unsigned int indices_num;
+
+        std::vector<Bone> bones;
 
         void Init();
         void setMeshData(ZSVERTEX* vertices, unsigned int* indices, unsigned int vertices_num, unsigned int indices_num);

@@ -5,7 +5,7 @@
 #define ZS_PI 3.14159265f
 #define REAL_NUM_EQ(x, y) (fabs((x) - (y)) < 0.000001f)
 
-
+#define MAX_BONE_PER_VERTEX 8
 
 	typedef struct ZSVECTOR2 {
 		float X;
@@ -82,6 +82,10 @@
 		ZSVECTOR3 tangent;
 
 		ZSVECTOR3 bitangent;
+
+        unsigned int ids[MAX_BONE_PER_VERTEX];
+        float weights[MAX_BONE_PER_VERTEX];
+        unsigned int bones_num;
 
 		ZSVERTEX() {}
 		ZSVERTEX(ZSVECTOR3 npos, ZSVECTOR2 nuv) : pos(npos.X, npos.Y, npos.Z), uv(nuv.X, nuv.Y) {}

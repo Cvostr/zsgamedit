@@ -44,6 +44,7 @@ void Engine::processMesh(aiMesh* mesh, const aiScene* scene, ZSPIRE::Mesh* mesh_
 
     unsigned int vertices = mesh->mNumVertices;
     unsigned int faces = mesh->mNumFaces;
+    unsigned int bones = mesh->mNumBones;
 
     ZSVERTEX* vertices_arr = new ZSVERTEX[vertices];
     unsigned int* indices = new unsigned int[faces * 3];
@@ -62,8 +63,38 @@ void Engine::processMesh(aiMesh* mesh, const aiScene* scene, ZSPIRE::Mesh* mesh_
             ZSVECTOR3(vertex_bitangent.x, vertex_bitangent.y, vertex_bitangent.z)
         );
 
+        vertices_arr[v].bones_num = 0;
+        for(unsigned int vw_i = 0; vw_i < MAX_BONE_PER_VERTEX; vw_i ++){
+            vertices_arr[v].ids[vw_i] = 0;
+            vertices_arr[v].weights[vw_i] = 0.f;
+        }
+
         vNormalize(&vertices_arr[v].normal);
 
+    }
+
+    for(unsigned int bone_i = 0; bone_i < bones; bone_i ++){
+        aiBone* bone_ptr = mesh->mBones[bone_i];
+        ZSPIRE::Bone bone(bone_ptr->mName.C_Str(), bone_ptr->mNumWeights);
+        cmat(bone_ptr->mOffsetMatrix, &bone.offset);
+        //Iterate over all weights to set them to vertices
+        for(unsigned int vw_i = 0; vw_i < bone.vertices_affected; vw_i ++){
+            aiVertexWeight* vw = &bone_ptr->mWeights[vw_i];
+            ZSVERTEX* vertex = &vertices_arr[vw->mVertexId];
+            //Add bone ID
+            vertex->ids[vertex->bones_num] = bone_i;
+            //Set bone weight
+            vertex->weights[vertex->bones_num] = vw->mWeight;
+            //Increase bones amount
+            vertex->bones_num += 1;
+
+            if(vertex->bones_num > MAX_BONE_PER_VERTEX)
+                //Its better way to crash here
+                assert(0);
+        }
+
+        //Push bone back
+        mesh_ptr->bones.push_back(bone);
     }
 
     for (unsigned int i = 0; i < faces; i++)
