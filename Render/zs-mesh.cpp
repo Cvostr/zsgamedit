@@ -311,7 +311,6 @@ void ZSPIRE::Mesh::setMeshData(ZSVERTEX* vertices, unsigned int* indices, unsign
 	//Vertex Normals 3 floats
     glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(ZSVERTEX), reinterpret_cast<void*>(sizeof(float) * 5));
     glEnableVertexAttribArray(2);
-
 	//Vertex Tangents 3 floats
     glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(ZSVERTEX), reinterpret_cast<void*>(sizeof(float) * 8));
     glEnableVertexAttribArray(3);
@@ -319,6 +318,19 @@ void ZSPIRE::Mesh::setMeshData(ZSVERTEX* vertices, unsigned int* indices, unsign
     glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(ZSVERTEX), reinterpret_cast<void*>(sizeof(float) * 11));
     glEnableVertexAttribArray(4);
 
+    //Skinning data
+    glVertexAttribIPointer(5, 4, GL_UNSIGNED_INT, sizeof(ZSVERTEX), reinterpret_cast<void*>(sizeof(float) * 14));
+    glEnableVertexAttribArray(5);
+    glVertexAttribIPointer(6, 4, GL_UNSIGNED_INT, sizeof(ZSVERTEX), reinterpret_cast<void*>(sizeof(float) * 18));
+    glEnableVertexAttribArray(6);
+    //Weights
+    glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, sizeof(ZSVERTEX), reinterpret_cast<void*>(sizeof(float) * 22));
+    glEnableVertexAttribArray(7);
+    glVertexAttribPointer(8, 4, GL_FLOAT, GL_FALSE, sizeof(ZSVERTEX), reinterpret_cast<void*>(sizeof(float) * 26));
+    glEnableVertexAttribArray(8);
+    //Bones num
+    glVertexAttribIPointer(9, 1, GL_UNSIGNED_INT, sizeof(ZSVERTEX), reinterpret_cast<void*>(sizeof(float) * 30));
+    glEnableVertexAttribArray(9);
 }
 void ZSPIRE::Mesh::setMeshData(ZSVERTEX* vertices, unsigned int vertices_num) {
 	this->vertices_num = vertices_num;
