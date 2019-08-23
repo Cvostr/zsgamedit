@@ -410,11 +410,10 @@ void LabelProperty::copyTo(GameObjectProperty* dest){
 
 //Mesh property functions
 void MeshProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
-    PickResourceArea* area = new PickResourceArea;
+    PickResourceArea* area = new PickResourceArea(RESOURCE_TYPE_MESH);
     area->setLabel("Mesh");
     area->go_property = static_cast<void*>(this);
     area->rel_path = &resource_relpath;
-    area->resource_type = RESOURCE_TYPE_MESH; //It should load meshes only
     inspector->addPropertyArea(area);
 
     BoolCheckboxArea* IsCastShadows = new BoolCheckboxArea;
@@ -576,11 +575,10 @@ AudioSourceProperty::AudioSourceProperty(){
 }
 
 void AudioSourceProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
-    PickResourceArea* area = new PickResourceArea;
+    PickResourceArea* area = new PickResourceArea(RESOURCE_TYPE_AUDIO);
     area->setLabel("Sound");
     area->go_property = static_cast<void*>(this);
     area->rel_path = &resource_relpath;
-    area->resource_type = RESOURCE_TYPE_AUDIO; //It should load meshes only
     inspector->addPropertyArea(area);
 
     BoolCheckboxArea* isLooped = new BoolCheckboxArea;
@@ -686,11 +684,10 @@ MaterialProperty::MaterialProperty(){
 
 void MaterialProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
     //Add area to pick material file
-    PickResourceArea* area = new PickResourceArea;
+    PickResourceArea* area = new PickResourceArea(RESOURCE_TYPE_MATERIAL);
     area->setLabel("Material");
     area->go_property = static_cast<void*>(this);
     area->rel_path = &material_path;
-    area->resource_type = RESOURCE_TYPE_MATERIAL; //It should load meshes only
     inspector->addPropertyArea(area);
     //No material, exiting
     if(material_ptr == nullptr) return;
@@ -730,12 +727,11 @@ void MaterialProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
                 TextureMaterialShaderProperty* texture_p = static_cast<TextureMaterialShaderProperty*>(prop_ptr);
                 TextureMtShPropConf* texture_conf = static_cast<TextureMtShPropConf*>(conf_ptr);
 
-                PickResourceArea* area = new PickResourceArea;
+                PickResourceArea* area = new PickResourceArea(RESOURCE_TYPE_TEXTURE);
                 area->setLabel(texture_p->prop_caption);
                 area->go_property = static_cast<void*>(this);
                 area->rel_path = &texture_conf->path;
                 area->isShowNoneItem = true;
-                area->resource_type = RESOURCE_TYPE_TEXTURE; //It should load textures only
                 inspector->addPropertyArea(area);
 
                 break;
@@ -800,12 +796,11 @@ void MaterialProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
                 QString captions[6] = {"Right", "Left", "Top", "Bottom", "Back", "Front"};
 
                 for(int i = 0; i < 6; i ++){
-                    PickResourceArea* area = new PickResourceArea;
+                    PickResourceArea* area = new PickResourceArea(RESOURCE_TYPE_TEXTURE);
                     area->setLabel(captions[i]);
                     area->go_property = static_cast<void*>(this);
                     area->rel_path = &texture_conf->texture_str[i];
                     area->isShowNoneItem = true;
-                    area->resource_type = RESOURCE_TYPE_TEXTURE; //It should load textures only
                     inspector->addPropertyArea(area);
                 }
 
@@ -1142,12 +1137,11 @@ void ScriptGroupProperty::addPropertyInterfaceToInspector(InspectorWin* inspecto
     inspector->addPropertyArea(scriptnum_area);
 
     for(int script_i = 0; script_i < scr_num; script_i ++){
-        PickResourceArea* area = new PickResourceArea;
+        PickResourceArea* area = new PickResourceArea(RESOURCE_TYPE_FILE);
         area->setLabel("Lua Script");
         area->go_property = static_cast<void*>(this);
         area->rel_path = &path_names[static_cast<unsigned int>(script_i)];
         area->extension_mask = ".lua";
-        area->resource_type = RESOURCE_TYPE_FILE; //It should load meshes only
         inspector->addPropertyArea(area);
     }
 }
@@ -1386,18 +1380,16 @@ void TerrainProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
         inspector->addPropertyArea(tSize);
 
         for(int i = 0; i < this->textures_size; i ++){
-            PickResourceArea* diffuse_area = new PickResourceArea;
+            PickResourceArea* diffuse_area = new PickResourceArea(RESOURCE_TYPE_TEXTURE);
             diffuse_area->setLabel("Diffuse");
             diffuse_area->go_property = static_cast<void*>(this);
             diffuse_area->rel_path = &textures[static_cast<uint>(i)].diffuse_relpath;
-            diffuse_area->resource_type = RESOURCE_TYPE_TEXTURE; //It should load textures only
             inspector->addPropertyArea(diffuse_area);
 
-            PickResourceArea* normal_area = new PickResourceArea;
+            PickResourceArea* normal_area = new PickResourceArea(RESOURCE_TYPE_TEXTURE);
             normal_area->setLabel("Normal");
             normal_area->go_property = static_cast<void*>(this);
             normal_area->rel_path = &textures[static_cast<uint>(i)].normal_relpath;
-            normal_area->resource_type = RESOURCE_TYPE_TEXTURE; //It should load textures only
             inspector->addPropertyArea(normal_area);
         }
     }

@@ -370,12 +370,22 @@ void EditWindow::openRenderSettings(){
     lcolor->setLabel("Ambient light color");
     lcolor->color = &ptr->ambient_light_color;
     _inspector_win->addPropertyArea(lcolor);
+
+    PropertyPickArea* sky_ppickarea = new PropertyPickArea(GO_PROPERTY_TYPE_SKYBOX);
+    sky_ppickarea->property_ptr_ptr = reinterpret_cast<GameObjectProperty**>(&ptr->skybox_ptr);
+    sky_ppickarea->setLabel("Skybox");
+    _inspector_win->addPropertyArea(sky_ppickarea);
+
+    PropertyPickArea* shadow_ppickarea = new PropertyPickArea(GO_PROPERTY_TYPE_SHADOWCASTER);
+    shadow_ppickarea->property_ptr_ptr = reinterpret_cast<GameObjectProperty**>(&ptr->shadowcaster_ptr);
+    shadow_ppickarea->setLabel("Shadowcaster");
+    _inspector_win->addPropertyArea(shadow_ppickarea);
 }
 
 void EditWindow::openPhysicsSettings(){
     _inspector_win->clearContentLayout(); //clear everything, that was before
 
-    RenderSettings* ptr = this->render->getRenderSettings();
+    PhysicalWorldSettings* ptr = &this->world.phys_settngs;
 
 }
 
@@ -862,7 +872,6 @@ EditWindow* ZSEditor::openProject(Project& project){
     //Send project datas to editor window class
     _editor_win->project = project;
     //Update widget content
-
 
     return openEditor(); //Return pointer to edit window
 

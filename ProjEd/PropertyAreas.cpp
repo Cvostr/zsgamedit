@@ -343,10 +343,10 @@ void FloatPropertyArea::updateValues(){
 }
 
 //Pick resoource area stuff
-PickResourceArea::PickResourceArea(){
+PickResourceArea::PickResourceArea(RESOURCE_TYPE resource_type){
     type = PEA_TYPE_RESPICK;
     this->rel_path = nullptr;
-    this->resource_type = RESOURCE_TYPE_TEXTURE; //Default type is texture
+    this->resource_type = resource_type; //Default type is texture
 
     isShowNoneItem = false;
 
@@ -676,7 +676,7 @@ void ComboBoxArea::writeNewValues(){ //Virtual, to check widget state
     PropertyEditArea::callPropertyUpdate();
 }
 
-QLabelResourcePickWgt::QLabelResourcePickWgt(PickResourceArea* area_ptr, QWidget* parent) : QLabel (parent){
+QLabelResourcePickWgt::QLabelResourcePickWgt(PropertyEditArea* area_ptr, QWidget* parent) : QLabel (parent){
     setAcceptDrops(true);
     this->area_ptr = area_ptr;
 }
@@ -686,14 +686,67 @@ void QLabelResourcePickWgt::dragEnterEvent( QDragEnterEvent* event ){
 }
 void QLabelResourcePickWgt::dropEvent( QDropEvent* event ){
     QList<QListWidgetItem*> file_dropped = _editor_win->getFilesListWidget()->selectedItems();
+    QList<QTreeWidgetItem*> object_dropped = _editor_win->getObjectListWidget()->selectedItems();
 
     if(file_dropped.length() > 0 && (file_dropped[0]->text().endsWith(".dds") || file_dropped[0]->text().endsWith(".DDS"))){
-        *this->area_ptr->rel_path = _editor_win->getCurrentDirectory() + "/" + file_dropped[0]->text();
-        this->area_ptr->rel_path->remove(0, _editor_win->project.root_path.size() + 1);
+        PickResourceArea* resource_area = static_cast<PickResourceArea*>(area_ptr);
+
+        *resource_area->rel_path = _editor_win->getCurrentDirectory() + "/" + file_dropped[0]->text();
+        resource_area->rel_path->remove(0, _editor_win->project.root_path.size() + 1);
 
         GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(area_ptr->go_property);
         getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
         //Apply resource change
         area_ptr->PropertyEditArea::callPropertyUpdate();
     }
+
+    if(object_dropped.length() > 0){
+        PropertyPickArea* _area_ptr = static_cast<PropertyPickArea*>(area_ptr);
+        GameObject* obj = _editor_win->world.getObjectByLabel(object_dropped[0]->text(0));
+
+        GameObjectProperty* prop = obj->getPropertyPtrByType(_area_ptr->prop_type);
+        if(prop != nullptr){ //Property with that type exist
+            *_area_ptr->property_ptr_ptr = prop;
+        }
+
+        _area_ptr->setup();
+    }
+}
+
+PropertyPickArea::PropertyPickArea(PROPERTY_TYPE type){
+    this->prop_type = type;
+
+    this->type = PEA_TYPE_PROPPICK;
+
+    //respick_btn = new QPushButton; //Allocation of QPushButton
+    //elem_layout->addSpacing(6);
+    this->property_label = new QLabelResourcePickWgt(this); //Allocation of resource relpath text
+    elem_layout->addWidget(property_label);
+    //Space between text and button
+    //elem_layout->addSpacing(6);
+    //elem_layout->addWidget(respick_btn);
+    //respick_btn->setText("Select...");
+
+    //this->dialog = new ResourcePickDialog; //Allocation of dialog
+    //dialog->area = this;
+   // dialog->resource_text = this->relpath_label;
+}
+PropertyPickArea::~PropertyPickArea(){
+    delete property_label;
+}
+
+void PropertyPickArea::setup(){
+    if(this->property_ptr_ptr == nullptr) return;
+
+    GameObjectProperty* property = *property_ptr_ptr;
+    if(property != nullptr){
+        GameObject* obj = property->go_link.updLinkPtr();
+        property_label->setText(*obj->label + "<" +getPropertyString(this->prop_type) + ">");
+    }else {
+        property_label->setText("<none>");
+    }
+}
+
+void PropertyPickArea::addToInspector(InspectorWin* win){
+    win->getContentLayout()->addLayout(this->elem_layout);
 }

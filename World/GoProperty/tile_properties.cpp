@@ -74,20 +74,18 @@ void TileGroupProperty::addPropertyInterfaceToInspector(InspectorWin* inspector)
         tilesAmountY->value = &this->tiles_amount_Y;
         inspector->addPropertyArea(tilesAmountY);
         //Resources pick
-        PickResourceArea* mesh_area = new PickResourceArea;
+        PickResourceArea* mesh_area = new PickResourceArea(RESOURCE_TYPE_MESH);
         mesh_area->setLabel("Tiles Mesh");
         mesh_area->go_property = static_cast<void*>(this);
         mesh_area->rel_path = &this->mesh_string;
         mesh_area->isShowNoneItem = false;
-        mesh_area->resource_type = RESOURCE_TYPE_MESH; //It should load textures only
         inspector->addPropertyArea(mesh_area);
 
-        PickResourceArea* diffuse_area = new PickResourceArea;
+        PickResourceArea* diffuse_area = new PickResourceArea(RESOURCE_TYPE_TEXTURE);
         diffuse_area->setLabel("Tiles Diffuse");
         diffuse_area->go_property = static_cast<void*>(this);
         diffuse_area->rel_path = &this->diffuse_relpath;
         diffuse_area->isShowNoneItem = true;
-        diffuse_area->resource_type = RESOURCE_TYPE_TEXTURE; //It should load textures only
         inspector->addPropertyArea(diffuse_area);
 
         //Add button to add objects
@@ -226,18 +224,16 @@ void TileProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
         inspector->addPropertyArea(frameTime);
     }
 
-    PickResourceArea* area = new PickResourceArea;
+    PickResourceArea* area = new PickResourceArea(RESOURCE_TYPE_TEXTURE);
     area->setLabel("Texture");
     area->go_property = static_cast<void*>(this);
     area->rel_path = &diffuse_relpath;
-    area->resource_type = RESOURCE_TYPE_TEXTURE; //It should load textures only
     inspector->addPropertyArea(area);
 
-    PickResourceArea* transparent_area = new PickResourceArea;
+    PickResourceArea* transparent_area = new PickResourceArea(RESOURCE_TYPE_TEXTURE);
     transparent_area->setLabel("Secondary Diffuse");
     transparent_area->go_property = static_cast<void*>(this);
     transparent_area->rel_path = &transparent_relpath;
-    transparent_area->resource_type = RESOURCE_TYPE_TEXTURE; //It should load textures only
     inspector->addPropertyArea(transparent_area);
 }
 

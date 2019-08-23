@@ -276,7 +276,6 @@ public:
     ZSPIRE::Camera world_camera;
 
     std::vector<GameObject> objects; //Vector, containing all gameobjects
-    //std::list<ColliderProperty*> colliders; //Vector, containing all collider properties;
 
     GameObject* addObject(GameObject obj);
     GameObject* newObject(); //Add new object to world
@@ -317,10 +316,6 @@ public:
     void recoverFromSnapshot(WorldSnapshot* snapshot);
 
     void getAvailableNumObjLabel(QString label, int* result);
-
-   // void pushCollider(ColliderProperty* property);
-   // void removeCollider(ColliderProperty* property);
-    //bool isCollide(TransformProperty* prop);
 
     World();
 

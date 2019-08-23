@@ -1,6 +1,7 @@
 #ifndef INSPEDITAREAS_H
 #define INSPEDITAREAS_H
 
+#include "../../World/headers/World.h"
 #include "InspectorWin.h"
 
 class StringPropertyArea : public PropertyEditArea{
@@ -104,12 +105,12 @@ class PickResourceArea;
 class QLabelResourcePickWgt : public QLabel{
     Q_OBJECT
 private:
-    PickResourceArea* area_ptr;
+    PropertyEditArea* area_ptr;
 protected:
     void dragEnterEvent( QDragEnterEvent* event );
     void dropEvent( QDropEvent* event );
 public:
-    QLabelResourcePickWgt(PickResourceArea* area_ptr, QWidget* parent = nullptr);
+    QLabelResourcePickWgt(PropertyEditArea* area_ptr, QWidget* parent = nullptr);
 };
 
 class PickResourceArea : public PropertyEditArea{
@@ -123,7 +124,7 @@ public:
 
     QPushButton* respick_btn; //button to press
     QLabelResourcePickWgt* relpath_label;
-    PickResourceArea();
+    PickResourceArea(RESOURCE_TYPE resource_type);
     ~PickResourceArea();
 
     void destroyContent(); //destroy content, created by this class
@@ -179,15 +180,19 @@ public:
     void addToInspector(InspectorWin* win);
 };
 
-template<typename T>
+
 class PropertyPickArea : public PropertyEditArea{
 
 public:
-    T** property_ptr_ptr; //output value
+    PROPERTY_TYPE prop_type;
+
+    GameObjectProperty** property_ptr_ptr; //output value
     QPushButton pick_button; //button to show color pick dialog
-    PropertyPickArea();
+    QLabelResourcePickWgt* property_label;
+    PropertyPickArea(PROPERTY_TYPE type);
     ~PropertyPickArea();
 
+    void setup();
     void addToInspector(InspectorWin* win);
 };
 

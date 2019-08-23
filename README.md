@@ -22,6 +22,8 @@ Lua 5.3 (+LuaBridge)
 
 FreeType
 
+Bullet (Physics Library)
+
 ## Building on linux
 ```
 sudo apt install qt5-default
@@ -32,6 +34,7 @@ sudo apt install libsdl2-dev
 sudo apt install libassimp-dev
 sudo apt install liblua5.3-dev
 sudo apt install libfreetype6-dev
+sudo apt install libbullet-dev
 ```
 Next go to root of project and invoke
 ```
@@ -45,6 +48,6 @@ You can do it!
 
 Install Visual Studio (installs compiler)
 
-You can also find QtCreator for Windows. This IDE will find installed MSVC compiler
+You can also find QtCreator for Windows. This IDE will find previously installed MSVC compiler
 
 Of course, you have to manually search and build dependencies (Windows is a "best" OS ever xDD)
