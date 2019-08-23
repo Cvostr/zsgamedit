@@ -77,6 +77,20 @@ void Engine::processMesh(aiMesh* mesh, const aiScene* scene, ZSPIRE::Mesh* mesh_
         aiBone* bone_ptr = mesh->mBones[bone_i];
         ZSPIRE::Bone bone(bone_ptr->mName.C_Str(), bone_ptr->mNumWeights);
         cmat(bone_ptr->mOffsetMatrix, &bone.offset);
+
+        aiVector3t<float> node_scale;
+        aiVector3t<float> node_translation;
+        aiVector3t<float> node_rotation;
+        //Decompose them!
+        bone_ptr->mOffsetMatrix.Decompose(node_scale, node_rotation, node_translation);
+        //Store them in engine node
+        bone.pos = ZSVECTOR3(node_translation.x, node_translation.y, node_translation.z);
+        bone.scale = ZSVECTOR3(node_scale.x, node_scale.y, node_scale.z);
+        //This f%cking rotation is in radians, blyat
+        bone.rot = ZSVECTOR3(node_rotation.x * 180.f / ZS_PI,
+                                   node_rotation.y * 180.f / ZS_PI,
+                                   node_rotation.z * 180.f / ZS_PI);
+
         //Iterate over all weights to set them to vertices
         for(unsigned int vw_i = 0; vw_i < bone.vertices_affected; vw_i ++){
             aiVertexWeight* vw = &bone_ptr->mWeights[vw_i];
@@ -145,26 +159,46 @@ void Engine::loadNodeTree(std::string file_path, MeshNode* node){
     const aiScene* scene = importer.ReadFile(file_path, loadflags);
 
     MeshNode* root_node = new MeshNode;
-    processNodeForTree(root_node, scene->mRootNode, scene);
+    processNodeForTree(root_node, scene->mRootNode, scene, aiVector3t<float>(1,1,1), aiVector3t<float>(0,0,0), aiVector3t<float>(0,0,0));
 
     *node = *root_node;
 }
 
 
-void Engine::processNodeForTree(MeshNode* node, aiNode* node_assimp, const aiScene* scene){
+void Engine::processNodeForTree(MeshNode* node, aiNode* node_assimp, const aiScene* scene, aiVector3t<float> _node_scale,
+                                                                                            aiVector3t<float> _node_translation,
+                                                                                            aiVector3t<float> _node_rotation){
     node->node_label = node_assimp->mName.C_Str(); //assigning node name
     //Store transform matrix
-    cmat(node_assimp->mTransformation, &node->node_transform);
+    //cmat(node_assimp->mTransformation, &node->node_transform);
     //Declare vectors to store decomposed transform components
     aiVector3t<float> node_scale;
     aiVector3t<float> node_translation;
     aiVector3t<float> node_rotation;
     //Decompose them!
-    node_assimp->mTransformation.Decompose(node_scale, node_rotation, node_translation);
+    aiMatrix4x4 result_mat = node_assimp->mTransformation;
+
+    result_mat.Decompose(node_scale, node_rotation, node_translation);
+
+    node_scale.x *= _node_scale.x;
+    node_scale.y *= _node_scale.y;
+    node_scale.z *= _node_scale.z;
+
+    node_rotation.x += _node_rotation.x;
+    node_rotation.y += _node_rotation.y;
+    node_rotation.z += _node_rotation.z;
+
+    node_translation.x += _node_translation.x;
+    node_translation.y += _node_translation.y;
+    node_translation.z += _node_translation.z;
+
     //Store them in engine node
     node->translation = ZSVECTOR3(node_translation.x, node_translation.y, node_translation.z);
     node->scale = ZSVECTOR3(node_scale.x, node_scale.y, node_scale.z);
-    node->rotation = ZSVECTOR3(node_rotation.x, node_rotation.y, node_rotation.z);
+    //This f%cking rotation is in radians, blyat
+    node->rotation = ZSVECTOR3(node_rotation.x * 180.f / ZS_PI,
+                               node_rotation.y * 180.f / ZS_PI,
+                               node_rotation.z * 180.f / ZS_PI);
     //iterate over all meshes in this node
     unsigned int meshes_num = node_assimp->mNumMeshes;
     for(unsigned int ch_i = 0; ch_i < meshes_num; ch_i ++){
@@ -178,7 +212,7 @@ void Engine::processNodeForTree(MeshNode* node, aiNode* node_assimp, const aiSce
         MeshNode mNode;
         mNode.node_label = child->mName.C_Str();
 
-        processNodeForTree(&mNode, child, scene);
+        processNodeForTree(&mNode, child, scene, node_scale, node_translation, node_rotation);
         node->children.push_back(mNode);
     }
 }

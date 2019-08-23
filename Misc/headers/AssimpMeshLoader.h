@@ -28,7 +28,9 @@ public:
 
 namespace Engine {
 
-void processNodeForTree(MeshNode* node, aiNode* node_assimp, const aiScene* scene);
+void processNodeForTree(MeshNode* node, aiNode* node_assimp, const aiScene* scene, aiVector3t<float> _node_scale,
+                                                                                   aiVector3t<float> _node_translation,
+                                                                                   aiVector3t<float> _node_rotation);
 void loadNodeTree(std::string file_path, MeshNode* node);
 unsigned int getMeshesAmount(std::string file_path);
 void loadMeshes(std::string file_path, ZSPIRE::Mesh* meshes_array);

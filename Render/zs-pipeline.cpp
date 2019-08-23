@@ -69,8 +69,14 @@ void RenderPipeline::setup(int bufWidth, int bufHeight){
     glGenBuffers(1, &terrainUniformBuffer);
     glBindBuffer(GL_UNIFORM_BUFFER, terrainUniformBuffer);
     glBufferData(GL_UNIFORM_BUFFER, 12 * 16 * 2 + 4, nullptr, GL_STATIC_DRAW);
-    //Connect to point 2 (two)
+    //Connect to point 3 (three)
     glBindBufferBase(GL_UNIFORM_BUFFER, 3, terrainUniformBuffer);
+
+    glGenBuffers(1, &skinningUniformBuffer);
+    glBindBuffer(GL_UNIFORM_BUFFER, skinningUniformBuffer);
+    glBufferData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 120, nullptr, GL_STATIC_DRAW);
+    //Connect to point 4 (four)
+    glBindBufferBase(GL_UNIFORM_BUFFER, 4, skinningUniformBuffer);
 }
 
 void RenderPipeline::initGizmos(int projectPespective){

@@ -71,6 +71,7 @@ public:
     unsigned int lightsBuffer;
     unsigned int shadowBuffer;
     unsigned int terrainUniformBuffer;
+    unsigned int skinningUniformBuffer;
 
     bool depthTest; //if enabled, GL will do depth testing
     bool cullFaces; //if enabled, GL will cull faces

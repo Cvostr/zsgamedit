@@ -16,6 +16,11 @@ namespace ZSPIRE {
     public:
         std::string bone_name;
         ZSMATRIX4x4 offset;
+
+        ZSVECTOR3 pos;
+        ZSVECTOR3 scale;
+        ZSVECTOR3 rot;
+
         uint vertices_affected;
 
         Bone(std::string name, uint vertices);
