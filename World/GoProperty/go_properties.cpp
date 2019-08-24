@@ -211,6 +211,8 @@ MeshProperty::MeshProperty(){
     this->resource_relpath = "@none";
 
     castShadows = true;
+
+    this->skinning_root_node = nullptr;
 }
 //Transform property functions
 void TransformProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
@@ -421,6 +423,13 @@ void MeshProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
     IsCastShadows->go_property = static_cast<void*>(this);
     IsCastShadows->bool_ptr = &this->castShadows;
     inspector->addPropertyArea(IsCastShadows);
+
+    if(mesh_ptr->hasBones()){
+        GameobjectPickArea* rtnode = new GameobjectPickArea;
+        rtnode->gameobject_ptr_ptr = &this->skinning_root_node;
+        rtnode->setLabel("Root Node");
+        inspector->addPropertyArea(rtnode);
+    }
 }
 void MeshProperty::updateMeshPtr(){
     if(resource_relpath.length() < 1) return;

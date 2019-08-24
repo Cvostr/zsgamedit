@@ -397,6 +397,23 @@ void GameObject::Draw(RenderPipeline* pipeline){
         //If we are in default draw mode
         if(pipeline->current_state == PIPELINE_STATE_DEFAULT){
             this->onRender(pipeline);
+            if(hasMesh()){
+                for(unsigned int bone_i = 0; bone_i < mesh_prop->mesh_ptr->bones.size(); bone_i ++){
+                    ZSPIRE::Bone* b = &mesh_prop->mesh_ptr->bones[bone_i];
+
+                    GameObject* node = nullptr;
+                    GameObject* RootNode = mesh_prop->skinning_root_node;
+                    if(RootNode != nullptr)
+                        node = mesh_prop->skinning_root_node->getChildObjectWithLabelStartsWith(QString::fromStdString(b->bone_name));
+
+                    if(node != nullptr){
+                        TransformProperty* transform = node->getPropertyPtr<TransformProperty>();
+                        glBindBuffer(GL_UNIFORM_BUFFER, pipeline->skinningUniformBuffer);
+                        glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * bone_i, sizeof (ZSMATRIX4x4), &transform->transform_mat);
+                    }
+                }
+            }
+
             DrawMesh();
         }
         //If we picking object
@@ -509,6 +526,8 @@ void MaterialProperty::onRender(RenderPipeline* pipeline){
     glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 2, sizeof (ZSMATRIX4x4), &transform_ptr->transform_mat);
 
     material_ptr->material_ptr->applyMatToPipeline();
+
+
 }
 
 void TerrainProperty::onRender(RenderPipeline* pipeline){

@@ -39,6 +39,7 @@ namespace ZSPIRE {
 		unsigned int indices_num;
 
         std::vector<Bone> bones;
+        bool hasBones();
 
         void Init();
         void setMeshData(ZSVERTEX* vertices, unsigned int* indices, unsigned int vertices_num, unsigned int indices_num);

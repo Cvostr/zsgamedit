@@ -180,17 +180,14 @@ void Engine::processNodeForTree(MeshNode* node, aiNode* node_assimp, const aiSce
 
     result_mat.Decompose(node_scale, node_rotation, node_translation);
 
-    node_scale.x *= _node_scale.x;
-    node_scale.y *= _node_scale.y;
-    node_scale.z *= _node_scale.z;
+    //node_scale.x *= _node_scale.x;
+    //node_scale.y *= _node_scale.y;
+    //node_scale.z *= _node_scale.z;
 
-    node_rotation.x += _node_rotation.x;
-    node_rotation.y += _node_rotation.y;
-    node_rotation.z += _node_rotation.z;
+   // node_rotation += _node_rotation;
 
-    node_translation.x += _node_translation.x;
-    node_translation.y += _node_translation.y;
-    node_translation.z += _node_translation.z;
+   // node_translation += _node_translation;
+
 
     //Store them in engine node
     node->translation = ZSVECTOR3(node_translation.x, node_translation.y, node_translation.z);

@@ -433,3 +433,7 @@ ZSPIRE::Bone::Bone(std::string name, uint vertices){
     this->bone_name = name;
     this->vertices_affected = vertices;
 }
+
+bool ZSPIRE::Mesh::hasBones(){
+    return !(bones.size() == 0);
+}

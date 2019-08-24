@@ -74,6 +74,6 @@ void main(){
 	
 	mat4 bone_t = getBoneTransform();
 	
-	gl_Position = cam_projection * cam_view * vec4(FragPos, 1.0);
+	gl_Position = cam_projection * cam_view * bone_t * vec4(FragPos, 1.0);
 	
 }

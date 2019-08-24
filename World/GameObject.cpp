@@ -182,6 +182,18 @@ void GameObject::removeChildObject(GameObjectLink link){
     trimChildrenArray(); //Remove broken link from vector
 }
 
+GameObject* GameObject::getChildObjectWithLabelStartsWith(QString label){
+    for (unsigned int i = 0; i < this->children.size(); i ++) {
+        GameObjectLink* l = &this->children[i];
+        if(l->updLinkPtr()->label->startsWith(label)) return l->updLinkPtr();
+
+        GameObject* obj_ch = l->updLinkPtr()->getChildObjectWithLabelStartsWith(label);
+        if(obj_ch != nullptr) return obj_ch;
+
+    }
+    return nullptr;
+}
+
 void GameObject::trimChildrenArray(){
     for (unsigned int i = 0; i < children.size(); i ++) { //Iterating over all objects
         if(children[i].isEmpty() == true){ //If object marked as deleted

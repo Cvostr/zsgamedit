@@ -23,6 +23,7 @@ public:
 
     std::vector<MeshNode> children;
     std::vector<std::string> mesh_names;
+
     MeshNode() {}
 };
 

@@ -701,15 +701,22 @@ void QLabelResourcePickWgt::dropEvent( QDropEvent* event ){
     }
 
     if(object_dropped.length() > 0){
-        PropertyPickArea* _area_ptr = static_cast<PropertyPickArea*>(area_ptr);
         GameObject* obj = _editor_win->world.getObjectByLabel(object_dropped[0]->text(0));
 
-        GameObjectProperty* prop = obj->getPropertyPtrByType(_area_ptr->prop_type);
-        if(prop != nullptr){ //Property with that type exist
-            *_area_ptr->property_ptr_ptr = prop;
+        if(area_ptr->type == PEA_TYPE_PROPPICK){
+            PropertyPickArea* _area_ptr = static_cast<PropertyPickArea*>(area_ptr);
+            GameObjectProperty* prop = obj->getPropertyPtrByType(_area_ptr->prop_type);
+            if(prop != nullptr){ //Property with that type exist
+                *_area_ptr->property_ptr_ptr = prop;
+            }
+            _area_ptr->setup();
         }
 
-        _area_ptr->setup();
+        if(area_ptr->type == PEA_TYPE_GOBJECT_PICK){
+            GameobjectPickArea* _area_ptr = static_cast<GameobjectPickArea*>(area_ptr);
+            *_area_ptr->gameobject_ptr_ptr = obj;
+            _area_ptr->setup();
+        }
     }
 }
 
@@ -748,5 +755,28 @@ void PropertyPickArea::setup(){
 }
 
 void PropertyPickArea::addToInspector(InspectorWin* win){
+    win->getContentLayout()->addLayout(this->elem_layout);
+}
+
+GameobjectPickArea::GameobjectPickArea(){
+    this->type = PEA_TYPE_GOBJECT_PICK;
+
+    this->property_label = new QLabelResourcePickWgt(this); //Allocation of resource relpath text
+    elem_layout->addWidget(property_label);
+}
+GameobjectPickArea::~GameobjectPickArea(){
+    delete property_label;
+}
+
+void GameobjectPickArea::setup(){
+    GameObject* obj_ptr = *this->gameobject_ptr_ptr;
+
+    if(obj_ptr != nullptr){
+        property_label->setText(*obj_ptr->label);
+    }else {
+        property_label->setText("<none>");
+    }
+}
+void GameobjectPickArea::addToInspector(InspectorWin* win){
     win->getContentLayout()->addLayout(this->elem_layout);
 }

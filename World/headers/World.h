@@ -212,6 +212,9 @@ public:
 
     void addChildObject(GameObjectLink link);
     void removeChildObject(GameObjectLink link);
+
+    GameObject* getChildObjectWithLabelStartsWith(QString label);
+
     //Remove property with type
     void removeProperty(int index);
 

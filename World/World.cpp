@@ -528,9 +528,11 @@ GameObject* World::addMeshNode(MeshNode* node){
         ZSPIRE::Mesh* mesh_ptr = this->getMeshPtrByRelPath(QString::fromStdString(mesh_label));
 
         GameObject* mesh_obj = nullptr;
+        //if found mesh with name as node, create mesh inside the node
         if(mesh_label.compare(node->node_label) == false){
             mesh_obj = node_object;
         }else {
+            //We should create new mesh
             mesh_obj = new GameObject;
 
             int add_num = 0; //Declaration of addititonal integer
@@ -555,6 +557,11 @@ GameObject* World::addMeshNode(MeshNode* node){
         //configure mesh
         MeshProperty* mesh_prop_ptr = static_cast<MeshProperty*>(mesh_obj->getPropertyPtrByType(GO_PROPERTY_TYPE_MESH));
         mesh_prop_ptr->resource_relpath = QString::fromStdString(mesh_label);
+
+        //if(mesh_ptr->hasBones()){
+        //    mesh_prop_ptr->node_transforms.resize(mesh_ptr->bones.size());
+        //}
+
         mesh_prop_ptr->updateMeshPtr();
         //configure material
         MaterialProperty* mat_prop_ptr = static_cast<MaterialProperty*>(mesh_obj->getPropertyPtrByType(GO_PROPERTY_TYPE_MATERIAL));
