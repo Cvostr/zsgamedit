@@ -9,7 +9,7 @@
 
 struct Light{ //size = 64
 	int type; //size = 4, offset = 0
-    float range; // size = 4, offset = 4
+    	float range; // size = 4, offset = 4
 	float intensity; //size = 4, offset = 8
 	float spot_angle; //size = 4, offset = 12
 	vec3 pos; //size = 16, offset = 16 
@@ -23,18 +23,20 @@ layout(location = 0) in vec3 FragPos;
 layout(location = 1) in vec2 UVCoord;
 
 //textures
-uniform sampler2D diffuse;
-uniform sampler2D diffuse2;
+layout(binding = 0) uniform sampler2D diffuse;
+layout(binding = 1) uniform sampler2D diffuse2;
 
-    uniform int total_rows; //rows in texture atlas
-    uniform int total_cols; //columns in texture atlas
-    uniform int selected_row; //current row
-    uniform int selected_col; //current column
+layout (std140, binding = 5) uniform Tile{
+    uniform int total_rows; //rows in texture atlas, 4 bytes, offset = 0
+    uniform int total_cols; //columns in texture atlas, 4 bytes, offset = 4
+    uniform int selected_row; //current row, 4 bytes, offset = 8
+    uniform int selected_col; //current column, 4 bytes, offset = 12
     //Animation toggler
-    uniform bool animated;
+    uniform bool animated; //Scale image? , 4 bytes, offset = 16
+	uniform bool hasDiffuseMap;
+	uniform bool hasDiffuseMap2;
 
-uniform bool hasDiffuseMap;
-uniform bool hasDiffuseMap2;
+};
 
 layout (std140, binding = 1) uniform Lights{
     uniform Light lights[MAX_LIGHTS_NUM];

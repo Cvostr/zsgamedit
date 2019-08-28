@@ -64,7 +64,7 @@ bool GameObject::addProperty(PROPERTY_TYPE property){
 
     _ptr->go_link = this->getLinkToThisObject();
     _ptr->go_link.updLinkPtr();
-    _ptr->world_ptr = this->world_ptr; //Assign pointer to world
+    _ptr->world_ptr = static_cast<World*>(this->world_ptr); //Assign pointer to world
     this->properties[props_num] = _ptr; //Store property in gameobject
     this->props_num += 1;
     return true;
@@ -103,9 +103,9 @@ GameObjectProperty* GameObject::getPropertyPtrByTypeI(int property){
 GameObjectLink GameObject::getLinkToThisObject(){
     GameObjectLink link; //Definition of result link
     link.obj_str_id = this->str_id; //Placing string id
-    link.world_ptr = this->world_ptr; //Placing world pointer
+    link.world_ptr = static_cast<World*>(this->world_ptr); //Placing world pointer
 
-    link.ptr = world_ptr->getObjectByStringId(link.obj_str_id);
+    link.ptr = static_cast<World*>(world_ptr)->getObjectByStringId(link.obj_str_id);
     return link;
 }
 
@@ -326,7 +326,7 @@ void GameObject::recoverFromSnapshot(GameObjectSnapshot* snapshot){
 
         parent.updLinkPtr()->item_ptr->addChild(this->item_ptr);
     }else{
-        this->world_ptr->obj_widget_ptr->addTopLevelItem(this->item_ptr);
+        static_cast<World*>(this->world_ptr)->obj_widget_ptr->addTopLevelItem(this->item_ptr);
     }
 
 

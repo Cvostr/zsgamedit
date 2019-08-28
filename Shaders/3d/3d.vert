@@ -52,7 +52,7 @@ mat4 getBoneTransform(){
     _weights[6] = Weights1.z;
     _weights[7] = Weights1.w;
     
-    mat4 result;
+    mat4 result = mat4(0.0);
     
     for(int i = 0; i < 8; i++){
         result += bone_transform[_ids[i]] * _weights[i];
@@ -72,7 +72,10 @@ void main(){
 	vec3 NormalVec = normalize(vec3(object_transform * vec4(normal, 0)));
 	TBN = transpose(mat3(TangentVec, BiTangentVec, NormalVec));
 	
-	mat4 bone_t = getBoneTransform();
+	mat4 bone_t = mat4(1.0);
+
+	if(bones > 0)
+		bone_t = getBoneTransform();
 	
 	gl_Position = cam_projection * cam_view * bone_t * vec4(FragPos, 1.0);
 	

@@ -96,7 +96,6 @@ public:
     bool castShadows;
 
     GameObject* skinning_root_node;
-    //std::vector<TransformProperty*> node_transforms;
 
     void addPropertyInterfaceToInspector(InspectorWin* inspector);
     void updateMeshPtr(); //Updates pointer according to resource_relpath

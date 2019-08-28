@@ -9,6 +9,15 @@ extern InspectorWin* _inspector_win;
 //selected terrain
 static TerrainProperty* current_terrain_prop;
 
+GameObjectProperty* ObjectPropertyLink::updLinkPtr(){
+    ptr = this->object.updLinkPtr()->getPropertyPtrByType(this->prop_type);
+
+    return ptr;
+}
+ObjectPropertyLink::ObjectPropertyLink(){
+
+}
+
 GameObjectProperty::GameObjectProperty(){
     type = GO_PROPERTY_TYPE_NONE;
     active = true; //Inactive by default
@@ -234,6 +243,7 @@ void TransformProperty::addPropertyInterfaceToInspector(InspectorWin* inspector)
     area_rotation->vector = &this->rotation; //Ptr to our vector
     area_rotation->go_property = static_cast<void*>(this);
     inspector->addPropertyArea(area_rotation);
+
 }
 
 void TransformProperty::onValueChanged(){
@@ -824,9 +834,7 @@ void MaterialProperty::onValueChanged(){
     //Check, if material file has changed
     if(newmat_ptr != this->material_ptr){
         this->material_ptr = newmat_ptr;
-        //this->group_ptr = newmat_ptr->group_ptr;
         this->group_label = material_ptr->group_ptr->groupCaption;
-
         //update window
         _inspector_win->updateRequired = true;
     }
@@ -857,7 +865,6 @@ void MaterialProperty::onValueChanged(){
             case MATSHPROP_TYPE_TEXTURE:{
                 //Cast pointer
                 TextureMtShPropConf* texture_conf = static_cast<TextureMtShPropConf*>(conf_ptr);
-
                 texture_conf->texture = go_link.world_ptr->getTexturePtrByRelPath(texture_conf->path);
 
                 break;
@@ -865,9 +872,6 @@ void MaterialProperty::onValueChanged(){
             case MATSHPROP_TYPE_TEXTURE3:{
                 //Cast pointer
                 Texture3MtShPropConf* texture_conf = static_cast<Texture3MtShPropConf*>(conf_ptr);
-
-                //if(texture_conf->texture_count > 6)
-                 //   texture_conf->texture_count = 6;
                 texture_conf->rel_path = this->world_ptr->proj_ptr->root_path;
                 texture_conf->texture3D->created = false;
                 _inspector_win->updateRequired = true;

@@ -117,7 +117,10 @@ void InspectorWin::addPropButtons(){
 void InspectorWin::ShowObjectProperties(void* object_ptr){
     clearContentLayout(); //Clears everything in content layout
     GameObject* obj_ptr = static_cast<GameObject*>(object_ptr);
-    obj_ptr->world_ptr->unpickObject();
+
+    EditWindow* editwin = static_cast<EditWindow*>(editwindow_ptr);
+    editwin->world.unpickObject();
+
     obj_ptr->pick(); //Object is picked now
     //Add setActive() checkbox
     BoolCheckboxArea* isActive = new BoolCheckboxArea;

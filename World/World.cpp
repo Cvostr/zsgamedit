@@ -319,12 +319,20 @@ void World::saveToFile(QString file, RenderSettings* settings_ptr){
     world_stream.write(reinterpret_cast<char*>(&settings_ptr->ambient_light_color.g), sizeof(int)); //Writing G component of amb color
     world_stream.write(reinterpret_cast<char*>(&settings_ptr->ambient_light_color.b), sizeof(int)); //Writing B component of amb color
     world_stream << "\n_END\n";
+
+
+
     //Iterate over all objects and write them
     for(unsigned int obj_i = 0; obj_i < static_cast<unsigned int>(obj_num); obj_i ++){ //Iterate over all game objects
         GameObject* object_ptr = static_cast<GameObject*>(&this->objects[obj_i]);
         //Write GameObject
         writeGameObject(object_ptr, &world_stream);
     }
+
+    world_stream << "\nRENDER_SETTINGS_SKYOBJ\n";
+    SkyboxProperty* skyb = static_cast<SkyboxProperty*>(settings_ptr->skybox_ptr);
+    world_stream << skyb->go_link.updLinkPtr()->str_id;
+    world_stream << "\n_END\n";
 
     world_stream.close();
 
@@ -359,6 +367,14 @@ void World::openFromFile(QString file, QTreeWidget* w_ptr, RenderSettings* setti
             world_stream.read(reinterpret_cast<char*>(&settings_ptr->ambient_light_color.r), sizeof(int)); //Writing R component of amb color
             world_stream.read(reinterpret_cast<char*>(&settings_ptr->ambient_light_color.g), sizeof(int)); //Writing G component of amb color
             world_stream.read(reinterpret_cast<char*>(&settings_ptr->ambient_light_color.b), sizeof(int)); //Writing B component of amb color
+        }
+
+        if(prefix.compare("RENDER_SETTINGS_SKYOBJ") == 0){ //if it is render setting of skybox object
+            std::string obj_label;
+            world_stream >> obj_label;
+            //find object
+            GameObject* obj_ptr = this->getObjectByStringId(obj_label);
+            settings_ptr->skybox_ptr = obj_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_SKYBOX);
         }
 
         if(prefix.compare("G_OBJECT") == 0){ //if it is game object
@@ -588,62 +604,7 @@ void World::storeObjectToPrefab(GameObject* object_ptr, QString file){
     //Call first object writing
     writeObjectToPrefab(object_ptr, &prefab_stream);
 }
-/*
-void World::pushCollider(ColliderProperty* property){
-    this->colliders.push_back(property);
-}
 
-void World::removeCollider(ColliderProperty* property){
-    this->colliders.remove(property);
-}
-
-bool World::isCollide(TransformProperty* prop){
-
-    ZSVECTOR3 object_pos = prop->_last_translation; //last translation is absolute
-    ZSVECTOR3 object_size = prop->_last_scale;
-
-    std::list <ColliderProperty*> :: iterator it;
-    for(it = colliders.begin(); it != colliders.end(); it ++){
-        ColliderProperty* coll_prop_ptr = static_cast<ColliderProperty*>((*it));
-        //Obtain pointer to Collider's transform property
-        TransformProperty* coll_transform_ptr = coll_prop_ptr->getTransformProperty();
-        GameObject* obj_ptr = coll_prop_ptr->go_link.updLinkPtr();
-        //if object is inactive, we have nothing to check
-        if(!obj_ptr->active) continue;
-
-        //Get Collider's position and scale
-        ZSVECTOR3 collider_pos = coll_transform_ptr->_last_translation;
-        ZSVECTOR3 collider_size = coll_transform_ptr->_last_scale;
-
-        //Perform AABB with X and Y
-        bool CollideX = fabs(object_pos.X - collider_pos.X) < fabs(object_size.X + collider_size.X);
-        bool CollideY = fabs(object_pos.Y - collider_pos.Y) < fabs(object_size.Y + collider_size.Y);
-
-        if(!coll_prop_ptr->isTrigger){ //Non triggerble
-            //Checking for type
-            if(coll_prop_ptr->coll_type == COLLIDER_TYPE_BOX){
-                if(CollideX && CollideY) return true;
-            }
-            else if(coll_prop_ptr->coll_type == COLLIDER_TYPE_CUBE){
-                bool CollideZ = fabs(object_pos.Z - collider_pos.Z) < fabs(object_size.Z + collider_size.Z);
-                if(CollideX && CollideY && CollideZ) return true;
-            }
-        }else{ //Triggerable object
-            //Checking for type
-            if(coll_prop_ptr->coll_type == COLLIDER_TYPE_BOX){
-                if(CollideX && CollideY) coll_prop_ptr->go_link.updLinkPtr()->onTrigger(prop->go_link.updLinkPtr());
-            }
-            else if(coll_prop_ptr->coll_type == COLLIDER_TYPE_CUBE){
-                bool CollideZ = fabs(object_pos.Z - collider_pos.Z) < fabs(object_size.Z + collider_size.Z);
-                if(CollideX && CollideY && CollideZ)
-                    coll_prop_ptr->go_link.updLinkPtr()->onTrigger(prop->go_link.updLinkPtr());
-            }
-        }
-    }
-    return false;
-}
-
-*/
 void World::clear(){
     //iterate over all objects and purge them all
     for(unsigned int objs_i = 0; objs_i < objects.size(); objs_i ++){
@@ -652,7 +613,6 @@ void World::clear(){
         obj_ptr->clearAll(false);
     }
     objects.clear();
-    //colliders.clear();
 }
 
 void World::putToShapshot(WorldSnapshot* snapshot){

@@ -300,7 +300,7 @@ void GameObject::loadProperty(std::ifstream* world_stream){
         ptr->path_names.resize(static_cast<unsigned int>(ptr->scr_num));
         ptr->scripts_attached.resize(static_cast<unsigned int>(ptr->scr_num));
         //iterate over all scripts and read their path
-        Project* project_ptr = static_cast<Project*>(this->world_ptr->proj_ptr);
+        Project* project_ptr = static_cast<Project*>(static_cast<World*>(this->world_ptr)->proj_ptr);
         for(unsigned int script_w_i = 0; script_w_i < static_cast<unsigned int>(ptr->scr_num); script_w_i ++){
             std::string scr_path;
             *world_stream >> scr_path;

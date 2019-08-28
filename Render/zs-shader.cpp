@@ -159,17 +159,9 @@ bool ZSPIRE::Shader::compileFromStr(const char* _VS, const char* _FS){
 
 void ZSPIRE::Shader::applyBaseSamplerUniforms(){
     Use();
-    //For common shaders
-    setGLuniformInt("skybox", 0);
-    setGLuniformInt("diffuse2", 5);
 
     //UI shader
     setGLuniformInt("sprite_map", 0);
-    for(int i = 0; i < 12; i ++){
-        std::string uniform_name = "normal[" + std::to_string(i) + "]";
-        setGLuniformInt(uniform_name.c_str(), 12 + i);
-    }
-
 }
 
 void ZSPIRE::Shader::Destroy() {

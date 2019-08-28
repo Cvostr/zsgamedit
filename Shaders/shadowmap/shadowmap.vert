@@ -1,4 +1,4 @@
-#version 150 core
+#version 420 core
 #extension GL_ARB_explicit_attrib_location : require
 #extension GL_ARB_explicit_uniform_location : require
 
@@ -9,9 +9,21 @@ layout (location = 3) in vec3 tangent;
 layout (location = 4) in vec3 bitangent;
 
 
-uniform mat4 LightProjectionMat;
-uniform mat4 LightViewMat;
-uniform mat4 object_transform;
+layout (std140, binding = 2) uniform ShadowData{
+//Shadowmapping stuff
+    uniform mat4 LightProjectionMat; // 16 * 4
+    uniform mat4 LightViewMat; 
+     // 16 * 4
+    uniform float shadow_bias; //4
+    uniform bool hasShadowMap; //4
+};
+
+layout (std140, binding = 0) uniform CamMatrices{
+    uniform mat4 cam_projection;
+    uniform mat4 cam_view;
+    uniform mat4 object_transform;
+    uniform vec3 cam_position;
+};
 
 void main(){
 	

@@ -66,7 +66,7 @@ void Engine::processMesh(aiMesh* mesh, const aiScene* scene, ZSPIRE::Mesh* mesh_
         vertices_arr[v].bones_num = 0;
         for(unsigned int vw_i = 0; vw_i < MAX_BONE_PER_VERTEX; vw_i ++){
             vertices_arr[v].ids[vw_i] = 0;
-            vertices_arr[v].weights[vw_i] = 0.f;
+            vertices_arr[v].weights[vw_i] = 1.f;
         }
 
         vNormalize(&vertices_arr[v].normal);
@@ -169,8 +169,6 @@ void Engine::processNodeForTree(MeshNode* node, aiNode* node_assimp, const aiSce
                                                                                             aiVector3t<float> _node_translation,
                                                                                             aiVector3t<float> _node_rotation){
     node->node_label = node_assimp->mName.C_Str(); //assigning node name
-    //Store transform matrix
-    //cmat(node_assimp->mTransformation, &node->node_transform);
     //Declare vectors to store decomposed transform components
     aiVector3t<float> node_scale;
     aiVector3t<float> node_translation;
@@ -180,22 +178,20 @@ void Engine::processNodeForTree(MeshNode* node, aiNode* node_assimp, const aiSce
 
     result_mat.Decompose(node_scale, node_rotation, node_translation);
 
-    //node_scale.x *= _node_scale.x;
-    //node_scale.y *= _node_scale.y;
-    //node_scale.z *= _node_scale.z;
+    node_scale.x *= _node_scale.x;
+    node_scale.y *= _node_scale.y;
+    node_scale.z *= _node_scale.z;
 
-   // node_rotation += _node_rotation;
-
-   // node_translation += _node_translation;
-
+    node_rotation += _node_rotation;
+    node_translation += _node_translation;
 
     //Store them in engine node
     node->translation = ZSVECTOR3(node_translation.x, node_translation.y, node_translation.z);
     node->scale = ZSVECTOR3(node_scale.x, node_scale.y, node_scale.z);
     //This f%cking rotation is in radians, blyat
     node->rotation = ZSVECTOR3(node_rotation.x * 180.f / ZS_PI,
-                               node_rotation.y * 180.f / ZS_PI,
-                               node_rotation.z * 180.f / ZS_PI);
+                                   node_rotation.y * 180.f / ZS_PI,
+                                   node_rotation.z * 180.f / ZS_PI);
     //iterate over all meshes in this node
     unsigned int meshes_num = node_assimp->mNumMeshes;
     for(unsigned int ch_i = 0; ch_i < meshes_num; ch_i ++){

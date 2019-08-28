@@ -161,8 +161,8 @@ win32:DEPENDPATH += $$PWD/../../LIBS/LUABRIDGE
 
 unix: LIBS += -L$$PWD/../build-ZSpireEngine-Desktop-Debug/ -lzsengine -lvulkan
 
-INCLUDEPATH += $$PWD/../ENGINE/headers
-DEPENDPATH += $$PWD/../ENGINE/headers
+INCLUDEPATH += $$PWD/../Engine/headers
+DEPENDPATH += $$PWD/../Engine/headers
 
 #win32:!win32-g++: PRE_TARGETDEPS += $$PWD/../build-ZSpireEngine-Desktop-Debug/zsengine.lib
 unix: PRE_TARGETDEPS += $$PWD/../build-ZSpireEngine-Desktop-Debug/libzsengine.a

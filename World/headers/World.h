@@ -93,6 +93,16 @@ public:
     GameObjectLink();
 };
 
+class ObjectPropertyLink{
+public:
+    GameObjectLink object;
+    PROPERTY_TYPE prop_type;
+    GameObjectProperty* ptr;
+
+    GameObjectProperty* updLinkPtr();
+    ObjectPropertyLink();
+};
+
 class GameObjectProperty{
 public:
     PROPERTY_TYPE type; //Describe TYPE of property
@@ -171,7 +181,7 @@ public:
     bool isPicked; //if user selected this object to edit it
     bool active; //if true, object will be active in scene
     bool IsStatic;
-    World* world_ptr; //pointer to world, when object placed
+    void* world_ptr; //pointer to world, when object placed
     GameObjectLink parent; //Link to object's parent
 
     unsigned int props_num; //Count of created props

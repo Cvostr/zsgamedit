@@ -77,6 +77,18 @@ void RenderPipeline::setup(int bufWidth, int bufHeight){
     glBufferData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 120, nullptr, GL_STATIC_DRAW);
     //Connect to point 4 (four)
     glBindBufferBase(GL_UNIFORM_BUFFER, 4, skinningUniformBuffer);
+
+    glGenBuffers(1, &tileMaterialUniformBuffer);
+    glBindBuffer(GL_UNIFORM_BUFFER, tileMaterialUniformBuffer);
+    glBufferData(GL_UNIFORM_BUFFER, 28, nullptr, GL_STATIC_DRAW);
+    //Connect to point 5
+    glBindBufferBase(GL_UNIFORM_BUFFER, 5, tileMaterialUniformBuffer);
+
+    glGenBuffers(1, &skyboxTransformUniformBuffer);
+    glBindBuffer(GL_UNIFORM_BUFFER, skyboxTransformUniformBuffer);
+    glBufferData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 2, nullptr, GL_STATIC_DRAW);
+    //Connect to point 5
+    glBindBufferBase(GL_UNIFORM_BUFFER, 6, skyboxTransformUniformBuffer);
 }
 
 void RenderPipeline::initGizmos(int projectPespective){
@@ -398,6 +410,14 @@ void GameObject::Draw(RenderPipeline* pipeline){
         if(pipeline->current_state == PIPELINE_STATE_DEFAULT){
             this->onRender(pipeline);
             if(hasMesh()){
+                if(mesh_prop->mesh_ptr->bones.size() < 1){
+                    for(unsigned int bone_i = 0; bone_i < 8; bone_i ++){
+                        ZSMATRIX4x4 id = getIdentity();
+                        glBindBuffer(GL_UNIFORM_BUFFER, pipeline->skinningUniformBuffer);
+                        glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * bone_i, sizeof (ZSMATRIX4x4), &id);
+                    }
+
+                }
                 for(unsigned int bone_i = 0; bone_i < mesh_prop->mesh_ptr->bones.size(); bone_i ++){
                     ZSPIRE::Bone* b = &mesh_prop->mesh_ptr->bones[bone_i];
 
@@ -408,8 +428,9 @@ void GameObject::Draw(RenderPipeline* pipeline){
 
                     if(node != nullptr){
                         TransformProperty* transform = node->getPropertyPtr<TransformProperty>();
+                        ZSMATRIX4x4 matrix = transform->transform_mat;
                         glBindBuffer(GL_UNIFORM_BUFFER, pipeline->skinningUniformBuffer);
-                        glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * bone_i, sizeof (ZSMATRIX4x4), &transform->transform_mat);
+                        glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * bone_i, sizeof (ZSMATRIX4x4), &matrix);
                     }
                 }
             }
@@ -432,8 +453,10 @@ void GameObject::Draw(RenderPipeline* pipeline){
         }
         if(pipeline->current_state == PIPELINE_STATE_SHADOWDEPTH) {
             TransformProperty* transform_ptr = static_cast<TransformProperty*>(getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
-            pipeline->getShadowmapShader()->Use();
-            pipeline->getShadowmapShader()->setTransform(transform_ptr->transform_mat);
+            //set transform to camera buffer
+            glBindBuffer(GL_UNIFORM_BUFFER, pipeline->camBuffer);
+            glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 2, sizeof (ZSMATRIX4x4), &transform_ptr->transform_mat);
+
             //Get castShadows boolean from several properties
             bool castShadows = (hasTerrain()) ? getPropertyPtr<TerrainProperty>()->castShadows : mesh_prop->castShadows;
 
@@ -584,38 +607,37 @@ void TileProperty::onRender(RenderPipeline* pipeline){
 
     tile_shader->Use();
 
+    glBindBuffer(GL_UNIFORM_BUFFER, pipeline->tileMaterialUniformBuffer);
+
     //Checking for diffuse texture
     if(texture_diffuse != nullptr){
         texture_diffuse->Use(0); //Use this texture
-        tile_shader->setHasDiffuseTextureProperty(true); //Shader will use picked diffuse texture
-
-    }else{
-        tile_shader->setHasDiffuseTextureProperty(false); //Shader will not use diffuse texture
     }
+
+    int diffuse1_ = texture_diffuse != nullptr;
+    glBufferSubData(GL_UNIFORM_BUFFER, 20, 4, &diffuse1_);
+
     //Checking for transparent texture
     if(texture_transparent != nullptr){
-        texture_transparent->Use(5); //Use this texture
-        tile_shader->setGLuniformInt("hasDiffuseMap2", 1); //Shader will use picked transparent texture
-
-    }else{
-        tile_shader->setGLuniformInt("hasDiffuseMap2", 0); //Shader will not use transparent texture
+        texture_transparent->Use(1); //Use this texture
     }
+    int diffuse2_ = texture_transparent != nullptr;
+    glBufferSubData(GL_UNIFORM_BUFFER, 24, 4, &diffuse2_);
+    //calculate animation state
+    int anim_state_i = anim_property.isAnimated && anim_state.playing;
     //Sending animation info
     if(anim_property.isAnimated && anim_state.playing == true){ //If tile animated, then send anim state to shader
-        tile_shader->setGLuniformInt("animated", 1); //Send as animated shader
-        //Send current animation state
-        tile_shader->setGLuniformInt("total_rows", anim_property.framesX);
-        tile_shader->setGLuniformInt("total_cols", anim_property.framesY);
-
-        tile_shader->setGLuniformInt("selected_row", anim_state.cur_frameX);
-        tile_shader->setGLuniformInt("selected_col", anim_state.cur_frameY);
+        glBufferSubData(GL_UNIFORM_BUFFER, 16, 4, &anim_state_i);
+        glBufferSubData(GL_UNIFORM_BUFFER, 0, 4, &anim_property.framesX);
+        glBufferSubData(GL_UNIFORM_BUFFER, 4, 4, &anim_property.framesY);
+        glBufferSubData(GL_UNIFORM_BUFFER, 8, 4, &anim_state.cur_frameX);
+        glBufferSubData(GL_UNIFORM_BUFFER, 12, 4, &anim_state.cur_frameY);
     }else{ //No animation or unplayed
-         tile_shader->setGLuniformInt("animated", 0);
+         glBufferSubData(GL_UNIFORM_BUFFER, 16, 4, &anim_state_i);
     }
 }
 
 void SkyboxProperty::onPreRender(RenderPipeline* pipeline){
-    pipeline->getRenderSettings()->skybox_ptr = static_cast<void*>(this);
 }
 
 void SkyboxProperty::DrawSky(RenderPipeline* pipeline){
@@ -663,8 +685,6 @@ void ShadowCasterProperty::Draw(ZSPIRE::Camera* cam, RenderPipeline* pipeline){
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
     pipeline->getShadowmapShader()->Use();
-    pipeline->getShadowmapShader()->setGLuniformMat4x4("LightProjectionMat", LightProjectionMat);
-    pipeline->getShadowmapShader()->setGLuniformMat4x4("LightViewMat", LightViewMat);
 
     pipeline->renderDepth(this->go_link.world_ptr);
 
@@ -719,11 +739,13 @@ void RenderPipeline::updateShadersCameraInfo(ZSPIRE::Camera* cam_ptr){
     }
 
     if(skybox.isCreated == true){
-        skybox.Use();
-        this->skybox.setGLuniformMat4x4("projection", cam_ptr->getProjMatrix());
+        ZSMATRIX4x4 proj = cam_ptr->getProjMatrix();
         ZSMATRIX4x4 viewmat = cam_ptr->getViewMatrix();
         viewmat = removeTranslationFromViewMat(viewmat);
-        this->skybox.setGLuniformMat4x4("view", viewmat);
+
+        glBindBuffer(GL_UNIFORM_BUFFER, skyboxTransformUniformBuffer);
+        glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof (ZSMATRIX4x4), &proj);
+        glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4), sizeof (ZSMATRIX4x4), &viewmat);
     }
 }
 
