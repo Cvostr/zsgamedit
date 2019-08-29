@@ -147,13 +147,13 @@ public:
     float mass;
     void addColliderRadio(InspectorWin* inspector);
     void addMassField(InspectorWin* inspector);
+    void onUpdate(float deltaTime);
     PhysicalProperty();
 };
 
 class ColliderProperty : public PhysicalProperty{
 public:
-    //void onAddToObject(); //will register in world
-   // void onObjectDeleted(); //unregister in world
+    void onObjectDeleted(); //unregister in world
     void addPropertyInterfaceToInspector(InspectorWin* inspector);
     void copyTo(GameObjectProperty* dest);
     void onUpdate(float deltaTime);

@@ -1,4 +1,4 @@
-#version 150 core
+#version 420 core
 #extension GL_ARB_explicit_attrib_location : require
 #extension GL_ARB_explicit_uniform_location : require
 

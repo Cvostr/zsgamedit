@@ -702,12 +702,15 @@ void QLabelResourcePickWgt::dropEvent( QDropEvent* event ){
 
     if(object_dropped.length() > 0){
         GameObject* obj = _editor_win->world.getObjectByLabel(object_dropped[0]->text(0));
-
+        //if we picking property
         if(area_ptr->type == PEA_TYPE_PROPPICK){
             PropertyPickArea* _area_ptr = static_cast<PropertyPickArea*>(area_ptr);
             GameObjectProperty* prop = obj->getPropertyPtrByType(_area_ptr->prop_type);
             if(prop != nullptr){ //Property with that type exist
+                //Writing pointer
                 *_area_ptr->property_ptr_ptr = prop;
+                //Assigning object string ID
+                *(_area_ptr->oj_label_ptr) = prop->go_link.updLinkPtr()->str_id;
             }
             _area_ptr->setup();
         }
@@ -725,21 +728,19 @@ PropertyPickArea::PropertyPickArea(PROPERTY_TYPE type){
 
     this->type = PEA_TYPE_PROPPICK;
 
-    //respick_btn = new QPushButton; //Allocation of QPushButton
-    //elem_layout->addSpacing(6);
     this->property_label = new QLabelResourcePickWgt(this); //Allocation of resource relpath text
     elem_layout->addWidget(property_label);
-    //Space between text and button
-    //elem_layout->addSpacing(6);
-    //elem_layout->addWidget(respick_btn);
-    //respick_btn->setText("Select...");
 
-    //this->dialog = new ResourcePickDialog; //Allocation of dialog
-    //dialog->area = this;
-   // dialog->resource_text = this->relpath_label;
+    this->oj_label_ptr = nullptr;
+    this->property_ptr_ptr = nullptr;
+
 }
 PropertyPickArea::~PropertyPickArea(){
     delete property_label;
+}
+
+void PropertyPickArea::setPropertyLink(ObjectPropertyLink* link){
+
 }
 
 void PropertyPickArea::setup(){

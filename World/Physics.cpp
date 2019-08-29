@@ -127,3 +127,8 @@ PhysicalProperty::PhysicalProperty(){
 
     rigidBody = nullptr;
 }
+
+void PhysicalProperty::onUpdate(float deltaTime){
+    if(!rigidBody->isActive())
+        rigidBody->activate();
+}

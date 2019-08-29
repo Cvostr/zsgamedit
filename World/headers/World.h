@@ -103,6 +103,16 @@ public:
     ObjectPropertyLink();
 };
 
+typedef struct WRenderSettings{
+    ZSRGBCOLOR ambient_color;
+    ObjectPropertyLink skybox_prop_link;
+
+    WRenderSettings(){
+        ambient_color = ZSRGBCOLOR(255, 255, 255, 255);
+    }
+
+}WRenderSettings;
+
 class GameObjectProperty{
 public:
     PROPERTY_TYPE type; //Describe TYPE of property
@@ -309,8 +319,8 @@ public:
     SoundBuffer* getSoundPtrByName(QString label);
     Material* getMaterialPtrByName(QString label);
 
-    void saveToFile(QString file, RenderSettings* settings_ptr);
-    void openFromFile(QString file, QTreeWidget* w_ptr, RenderSettings* settings_ptr);
+    void saveToFile(QString file);
+    void openFromFile(QString file, QTreeWidget* w_ptr);
     void writeGameObject(GameObject* object_ptr, std::ofstream* world_stream);
     void loadGameObject(GameObject* object_ptr, std::ifstream* world_stream);
 

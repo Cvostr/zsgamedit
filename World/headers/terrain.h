@@ -59,7 +59,7 @@ public:
 
     void initGL();
     void destroyGL();
-    void Draw();
+    void Draw(bool picking = false);
     void generateGLMesh();
     void processTangentSpace(HeightmapVertex* vert_array, unsigned int* indices_array, int indices_num, int vertex_num);
     void saveToFile(const char* file_path);
@@ -70,6 +70,8 @@ public:
 
     void sum(unsigned char* ptr, int val);
     void reduce(unsigned char* ptr, int val);
+
+    void copyTo(TerrainData* dest);
 
     TerrainData();
     ~TerrainData();

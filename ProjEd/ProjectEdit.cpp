@@ -19,6 +19,8 @@ EditWindow* _editor_win;
 InspectorWin* _inspector_win;
 EdActions* _ed_actions_container;
 
+RenderPipeline* renderer;
+
 EditWindow::EditWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::EditWindow)
@@ -156,6 +158,7 @@ void EditWindow::init(){
     //init render
     render = new RenderPipeline;
     this->startManager(render);
+    renderer = render;
     //init glyph manager
     this->glyph_manager = new GlyphManager;
     glyph_manager->pipeline_ptr = render;
@@ -242,7 +245,7 @@ void EditWindow::openFile(QString file_path){
 
         _ed_actions_container->clear();
         setupObjectsHieList(); //Clear everything, at first
-        world.openFromFile(file_path, ui->objsList, render->getRenderSettings()); //Open this scene
+        world.openFromFile(file_path, ui->objsList); //Open this scene
 
         scene_path = file_path; //Assign scene path
         hasSceneFile = true; //Scene is saved
@@ -294,7 +297,7 @@ void EditWindow::onSceneSaveAs(){
     QString filename = QFileDialog::getSaveFileName(this, tr("Save scene file"), project.root_path, "*.scn");
     if(!filename.endsWith(".scn")) //If filename doesn't end with ".scn"
         filename.append(".scn"); //Add this extension
-    world.saveToFile(filename, render->getRenderSettings()); //Save to picked file
+    world.saveToFile(filename); //Save to picked file
     scene_path = filename; //Assign scene path
     hasSceneFile = true; //Scene is saved
 
@@ -316,7 +319,7 @@ void EditWindow::onSceneSave(){
         onSceneSaveAs(); //Show dialog and save
     }else{
         _ed_actions_container->hasChangesUnsaved = false;
-        world.saveToFile(this->scene_path, render->getRenderSettings());
+        world.saveToFile(this->scene_path);
     }
 }
 
@@ -386,6 +389,12 @@ void EditWindow::openPhysicsSettings(){
     _inspector_win->clearContentLayout(); //clear everything, that was before
 
     PhysicalWorldSettings* ptr = &this->world.phys_settngs;
+
+    Float3PropertyArea* float3_area = new Float3PropertyArea;
+    float3_area->setLabel("Gravity"); //Its label
+    float3_area->vector = &ptr->gravity;
+    float3_area->go_property = static_cast<void*>(this);
+    _inspector_win->addPropertyArea(float3_area);
 
 }
 
@@ -722,7 +731,7 @@ void EditWindow::glRender(){
         stopWorld(); //firstly, stop world
         //load world
         ui->objsList->clear();
-        world.openFromFile(this->sheduled_world, world.obj_widget_ptr, _editor_win->getRenderPipeline()->getRenderSettings());
+        world.openFromFile(this->sheduled_world, world.obj_widget_ptr);
         //run loaded world
         runWorld();
 

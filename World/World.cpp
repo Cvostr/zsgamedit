@@ -4,6 +4,7 @@
 #include <QLineEdit>
 #include "headers/obj_properties.h"
 
+extern RenderPipeline* renderer;
 
 World::World(){
     objects.reserve(MAX_OBJS);
@@ -303,7 +304,9 @@ void World::loadGameObject(GameObject* object_ptr, std::ifstream* world_stream){
     }
 }
 
-void World::saveToFile(QString file, RenderSettings* settings_ptr){
+void World::saveToFile(QString file){
+    RenderSettings* settings_ptr = renderer->getRenderSettings();
+
     std::string fpath = file.toStdString();
 
     std::ofstream world_stream;
@@ -329,17 +332,18 @@ void World::saveToFile(QString file, RenderSettings* settings_ptr){
         writeGameObject(object_ptr, &world_stream);
     }
 
-    world_stream << "\nRENDER_SETTINGS_SKYOBJ\n";
-    SkyboxProperty* skyb = static_cast<SkyboxProperty*>(settings_ptr->skybox_ptr);
-    world_stream << skyb->go_link.updLinkPtr()->str_id;
-    world_stream << "\n_END\n";
+    //world_stream << "\nRENDER_SETTINGS_SKYOBJ\n";
+    //SkyboxProperty* skyb = static_cast<SkyboxProperty*>(settings_ptr->skybox_ptr);
+    //world_stream << skyb->go_link.updLinkPtr()->str_id;
+    //world_stream << "\n_END\n";
 
     world_stream.close();
 
 }
 
 
-void World::openFromFile(QString file, QTreeWidget* w_ptr, RenderSettings* settings_ptr){
+void World::openFromFile(QString file, QTreeWidget* w_ptr){
+    RenderSettings* settings_ptr = renderer->getRenderSettings();
     this->obj_widget_ptr = w_ptr;
 
     clear(); //Clear all objects
@@ -508,6 +512,18 @@ void World::addMeshGroup(std::string file_path){
 
     GameObject* rootobj = addMeshNode(&node);
     this->obj_widget_ptr->addTopLevelItem(rootobj->item_ptr);
+
+    for(unsigned int m_i = 0; m_i < rootobj->children.size(); m_i ++){
+        GameObject* objm = rootobj->children[m_i].updLinkPtr();
+        MeshProperty* mesh_prop_ptr = (objm->getPropertyPtr<MeshProperty>());
+
+        if(mesh_prop_ptr == nullptr) continue;
+        if(mesh_prop_ptr->mesh_ptr == nullptr) continue;
+
+        if(mesh_prop_ptr->mesh_ptr->hasBones()){
+            mesh_prop_ptr->skinning_root_node = rootobj;
+        }
+    }
 }
 
 GameObject* World::addMeshNode(MeshNode* node){
@@ -573,10 +589,6 @@ GameObject* World::addMeshNode(MeshNode* node){
         //configure mesh
         MeshProperty* mesh_prop_ptr = static_cast<MeshProperty*>(mesh_obj->getPropertyPtrByType(GO_PROPERTY_TYPE_MESH));
         mesh_prop_ptr->resource_relpath = QString::fromStdString(mesh_label);
-
-        //if(mesh_ptr->hasBones()){
-        //    mesh_prop_ptr->node_transforms.resize(mesh_ptr->bones.size());
-        //}
 
         mesh_prop_ptr->updateMeshPtr();
         //configure material
@@ -664,10 +676,6 @@ void World::recoverFromSnapshot(WorldSnapshot* snapshot){
             obj_ptr->label = &label_p->label;
             obj_ptr->item_ptr->setText(0, *obj_ptr->label); //set text to qt widget
             label_p->list_item_ptr = obj_ptr->item_ptr; //send item to LabelProperty
-        }
-        if(prop_ptr->type == GO_PROPERTY_TYPE_COLLIDER){ //If it is collider, we need to push it
-            ColliderProperty* collider_p = static_cast<ColliderProperty*>(new_prop);
-            //this->pushCollider(collider_p); //push collider
         }
 
     }

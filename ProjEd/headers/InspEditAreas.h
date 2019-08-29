@@ -187,8 +187,13 @@ public:
     PROPERTY_TYPE prop_type;
 
     GameObjectProperty** property_ptr_ptr; //output value
+    std::string* oj_label_ptr;
+
     QPushButton pick_button; //button to show color pick dialog
     QLabelResourcePickWgt* property_label;
+
+    void setPropertyLink(ObjectPropertyLink* link);
+
     PropertyPickArea(PROPERTY_TYPE type);
     ~PropertyPickArea();
 

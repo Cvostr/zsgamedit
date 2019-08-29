@@ -71,17 +71,18 @@ void TerrainData::destroyGL(){
     glDeleteBuffers(1, &this->EBO);
 }
 
-void TerrainData::Draw(){
+void TerrainData::Draw(bool picking){
     //if opengl data not generated, exit function
     if(!created) return;
-
-    glActiveTexture(GL_TEXTURE24);
-    glBindTexture(GL_TEXTURE_2D, texture_mask1);
-    glActiveTexture(GL_TEXTURE25);
-    glBindTexture(GL_TEXTURE_2D, texture_mask2);
-    glActiveTexture(GL_TEXTURE26);
-    glBindTexture(GL_TEXTURE_2D, texture_mask3);
-
+    //small optimization in terrain painting
+    if(!picking){
+        glActiveTexture(GL_TEXTURE24);
+        glBindTexture(GL_TEXTURE_2D, texture_mask1);
+        glActiveTexture(GL_TEXTURE25);
+        glBindTexture(GL_TEXTURE_2D, texture_mask2);
+        glActiveTexture(GL_TEXTURE26);
+        glBindTexture(GL_TEXTURE_2D, texture_mask3);
+    }
     glBindVertexArray(VAO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->EBO);
     glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
@@ -228,6 +229,7 @@ void TerrainData::generateGLMesh(){
 }
 
 TerrainData::TerrainData(){
+    W = 0; H = 0;
     created = false;
 }
 
@@ -355,4 +357,10 @@ void TerrainData::processTangentSpace(HeightmapVertex* vert_array, unsigned int*
             vert_array[indices_array[ind_i + i]].bitangent = bitangent;
         }
     }
+}
+
+void TerrainData::copyTo(TerrainData* dest){
+    dest->alloc(W, H);
+    memcpy(dest->data, data, static_cast<unsigned int>(W * H) * sizeof (HeightmapTexel));
+    dest->generateGLMesh();
 }

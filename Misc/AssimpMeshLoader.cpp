@@ -169,6 +169,7 @@ void Engine::processNodeForTree(MeshNode* node, aiNode* node_assimp, const aiSce
                                                                                             aiVector3t<float> _node_translation,
                                                                                             aiVector3t<float> _node_rotation){
     node->node_label = node_assimp->mName.C_Str(); //assigning node name
+
     //Declare vectors to store decomposed transform components
     aiVector3t<float> node_scale;
     aiVector3t<float> node_translation;
@@ -192,6 +193,13 @@ void Engine::processNodeForTree(MeshNode* node, aiNode* node_assimp, const aiSce
     node->rotation = ZSVECTOR3(node_rotation.x * 180.f / ZS_PI,
                                    node_rotation.y * 180.f / ZS_PI,
                                    node_rotation.z * 180.f / ZS_PI);
+
+
+    /*node->translation = ZSVECTOR3(0, 0, 0);
+    node->scale = ZSVECTOR3(1, 1, 1);
+    //This f%cking rotation is in radians, blyat
+    node->rotation = ZSVECTOR3(0, 0, 0);*/
+
     //iterate over all meshes in this node
     unsigned int meshes_num = node_assimp->mNumMeshes;
     for(unsigned int ch_i = 0; ch_i < meshes_num; ch_i ++){

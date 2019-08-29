@@ -447,7 +447,10 @@ void GameObject::Draw(RenderPipeline* pipeline){
             float b = static_cast<float>(to_send[2]);
             float a = static_cast<float>(to_send[3]);
 
-            pipeline->getPickingShader()->setTransform(transform_ptr->transform_mat);
+            //set transform to camera buffer
+            glBindBuffer(GL_UNIFORM_BUFFER, pipeline->camBuffer);
+            glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 2, sizeof (ZSMATRIX4x4), &transform_ptr->transform_mat);
+
             pipeline->getPickingShader()->setGLuniformVec4("color", ZSVECTOR4(r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f));
             DrawMesh();
         }
@@ -638,6 +641,7 @@ void TileProperty::onRender(RenderPipeline* pipeline){
 }
 
 void SkyboxProperty::onPreRender(RenderPipeline* pipeline){
+    pipeline->getRenderSettings()->skybox_ptr = static_cast<void*>(this);
 }
 
 void SkyboxProperty::DrawSky(RenderPipeline* pipeline){

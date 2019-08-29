@@ -275,7 +275,7 @@ void TransformProperty::onValueChanged(){
 
         phys->rigidBody->setWorldTransform(startTransform);
         phys->rigidBody->getMotionState()->setWorldTransform(startTransform);
-        phys->rigidBody->activate(true);
+        //phys->rigidBody->activate(true);
 
         phys->shape->setLocalScaling(btVector3(btScalar(_last_scale.X),
                                                btScalar(_last_scale.Y),
@@ -900,14 +900,12 @@ void MaterialProperty::copyTo(GameObjectProperty* dest){
 void MaterialProperty::onAddToObject(){
 
 }
-/*
-void ColliderProperty::onAddToObject(){
-    this->go_link.world_ptr->pushCollider(this);
-} //will register in world
+
 void ColliderProperty::onObjectDeleted(){
-    this->go_link.world_ptr->removeCollider(this);
+    if(created)
+        this->go_link.world_ptr->physical_world->removeRidigbodyFromWorld(this->rigidBody);
 } //unregister in world
-*/
+
 void ColliderProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
     addColliderRadio(inspector);
 
@@ -989,6 +987,8 @@ void RigidbodyProperty::onUpdate(float deltaTime){
         this->rigidBody->setLinearVelocity(btVector3(linearVel.X, linearVel.Y, linearVel.Z));
     }
     else{
+        PhysicalProperty::onUpdate(deltaTime);
+
         TransformProperty* transform = this->go_link.updLinkPtr()->getPropertyPtr<TransformProperty>();
         btVector3 current_pos = rigidBody->getCenterOfMassPosition();
         btQuaternion current_rot = rigidBody->getWorldTransform().getRotation();
@@ -1455,7 +1455,7 @@ void TerrainProperty::getPickedVertexId(int posX, int posY, int screenY, unsigne
     int dtrue = 1;
     glBufferSubData(GL_UNIFORM_BUFFER, 16 * 12 * 2, 4, &dtrue);
 
-    this->data.Draw();
+    this->data.Draw(true);
     //read picked pixel
     glReadPixels(posX, screenY - posY, 1,1, GL_RGBA, GL_UNSIGNED_BYTE, data);
 }
@@ -1526,4 +1526,11 @@ void TerrainProperty::copyTo(GameObjectProperty* dest){
     _dest->MaxHeight = this->MaxHeight;
     _dest->file_label = this->file_label;
     _dest->castShadows = this->castShadows;
+    _dest->textures_size = this->textures_size;
+    //Copying terrain data
+    data.copyTo(&_dest->data);
+    //Copy textures data
+    for(unsigned int t_i = 0; t_i < this->textures.size(); t_i ++){
+        _dest->textures.push_back(textures[t_i]);
+    }
 }
