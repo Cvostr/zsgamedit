@@ -132,6 +132,9 @@ public:
     void updateAreasChanges();
     void ShowObjectProperties(void* object_ptr);
     void updateObjectProperties();
+
+    void resizeEvent(QResizeEvent* event);
+
     void* gameobject_ptr;
     void* editwindow_ptr;
 private:

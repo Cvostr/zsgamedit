@@ -6,15 +6,19 @@
 struct EditorSettings{
     bool isFirstSetup; //false, if editor runs not first time
 
-    int gameViewWin_Width;
-    int gameViewWin_Height;
 
+    int editor_win_width;
+    int editor_win_height;
     int editor_win_pos_X;
     int editor_win_pos_Y;
 
+    int gameViewWin_Width;
+    int gameViewWin_Height;
     int gameView_win_pos_x;
     int gameView_win_pos_y;
 
+    int inspector_win_width;
+    int inspector_win_height;
     int inspector_win_pos_X;
     int inspector_win_pos_Y;
     //Maximum size of one blob

@@ -245,15 +245,28 @@ void RenderPipeline::setLightsToBuffer(){
 
 void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr){
     EditWindow* editwin_ptr = static_cast<EditWindow*>(projectedit_ptr);
+    ZSPIRE::Camera* cam_ptr = nullptr; //We'll set it next
+    World* world_ptr = &editwin_ptr->world;
+
+    if(editwin_ptr->isWorldCamera){
+        cam_ptr = &world_ptr->world_camera;
+    }else{
+        cam_ptr = &editwin_ptr->edit_camera;
+    }
+
+    this->cam = cam_ptr;
+    this->win_ptr = editwin_ptr;
+    this->updateShadersCameraInfo(cam_ptr); //Send camera properties to all drawing shaders
+
     switch(this->project_struct_ptr->perspective){
-    case 2:{
-        render2D(projectedit_ptr);
-        break;
-    }
-    case 3:{
-        render3D(projectedit_ptr);
-        break;
-    }
+        case 2:{
+            render2D(projectedit_ptr);
+            break;
+        }
+        case 3:{
+            render3D(projectedit_ptr);
+            break;
+        }
     }
 
 
@@ -269,26 +282,13 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr){
 void RenderPipeline::render2D(void* projectedit_ptr){
     EditWindow* editwin_ptr = static_cast<EditWindow*>(projectedit_ptr);
     World* world_ptr = &editwin_ptr->world;
-    ZSPIRE::Camera* cam_ptr = nullptr; //We'll set it next
-
     this->deltaTime = editwin_ptr->deltaTime;
-
-    if(editwin_ptr->isWorldCamera){
-        cam_ptr = &world_ptr->world_camera;
-    }else{
-        cam_ptr = &editwin_ptr->edit_camera;
-    }
-
-    this->cam = cam_ptr;
-    this->win_ptr = editwin_ptr;
 
     glClearColor(0,0,0,1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_BLEND); //Disable blending to render Skybox and shadows
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glViewport(0, 0, this->WIDTH, this->HEIGHT);
-
-    this->updateShadersCameraInfo(cam_ptr); //Send camera properties to all drawing shaders
 
 
     //Iterate over all objects in the world
@@ -308,15 +308,6 @@ void RenderPipeline::render3D(void* projectedit_ptr)
 
     this->deltaTime = editwin_ptr->deltaTime;
 
-    if(editwin_ptr->isWorldCamera){
-        cam_ptr = &world_ptr->world_camera;
-    }else{
-        cam_ptr = &editwin_ptr->edit_camera;
-    }
-
-    this->cam = cam_ptr;
-    this->win_ptr = editwin_ptr;
-
     ShadowCasterProperty* shadowcast = static_cast<ShadowCasterProperty*>(this->render_settings.shadowcaster_ptr);
     if(shadowcast != nullptr){
         shadowcast->Draw(cam_ptr, this);
@@ -329,7 +320,6 @@ void RenderPipeline::render3D(void* projectedit_ptr)
     glDisable(GL_BLEND); //Disable blending to render Skybox and shadows
     glViewport(0, 0, this->WIDTH, this->HEIGHT);
 
-    this->updateShadersCameraInfo(cam_ptr); //Send camera properties to all drawing shaders
 
     SkyboxProperty* skybox = static_cast<SkyboxProperty*>(this->render_settings.skybox_ptr);
     if(skybox != nullptr)

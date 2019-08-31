@@ -210,6 +210,8 @@ public:
     void onMouseWheel(int x, int y);
     void onKeyDown(SDL_Keysym sym);
 
+    void resizeEvent(QResizeEvent* event);
+
     void startManager(EditorComponentManager* manager);
     void updateDeltaTime(float deltaTime);
     void destroyAllManagers();

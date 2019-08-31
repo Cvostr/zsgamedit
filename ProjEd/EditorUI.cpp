@@ -4,6 +4,9 @@
 #include <QMouseEvent>
 #include <QDesktopServices>
 
+#include "ui_editor.h"
+#include "ui_inspector_win.h"
+
 extern EditWindow* _editor_win;
 extern InspectorWin* _inspector_win;
 extern EdActions* _ed_actions_container;
@@ -312,4 +315,33 @@ Resource* Project::getResource(QString rel_path){
         }
     }
     return nullptr;
+}
+
+void EditWindow::resizeEvent(QResizeEvent* event){
+    QMainWindow::resizeEvent(event);
+
+    int new_width = event->size().width();
+    int new_height = event->size().height();
+
+    QTreeWidget* objs = this->ui->objsList;
+    objs->resize(new_width, (new_height / 3) * 2);
+
+    QListWidget* file_list = this->ui->fileList;
+    file_list->move(0, (new_height / 3) * 2);
+    file_list->resize(new_width, (new_height / 3));
+
+    this->settings.editor_win_width = new_width;
+    this->settings.editor_win_height = new_height;
+}
+
+void InspectorWin::resizeEvent(QResizeEvent* event){
+    QMainWindow::resizeEvent(event);
+
+    int new_width = event->size().width();
+    int new_height = event->size().height();
+
+    ui->scrollArea->resize(new_width, new_height - 40);
+
+    _editor_win->settings.inspector_win_width = new_width;
+    _editor_win->settings.inspector_win_height = new_height;
 }

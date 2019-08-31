@@ -147,6 +147,12 @@ void EditWindow::init(){
     if(this->settings.isFirstSetup){
         this->settings.gameView_win_pos_x = this->width();
         this->settings.gameView_win_pos_y = 0;
+
+        this->settings.editor_win_width = this->width();
+        this->settings.editor_win_height = this->height();
+
+        this->settings.inspector_win_width = _inspector_win->width();
+        this->settings.inspector_win_height = _inspector_win->height();
     }
 
     this->window = SDL_CreateWindow("Game View", this->settings.gameView_win_pos_x, this->settings.gameView_win_pos_y, settings.gameViewWin_Width, settings.gameViewWin_Height, SDL_WINDOW_OPENGL); //Create window
@@ -895,15 +901,19 @@ EditWindow* ZSEditor::openEditor(){
     _editor_win->close_reason = EW_CLOSE_REASON_UNCLOSED;
     _editor_win->lookForResources(_editor_win->project.root_path); //Make a vector of all resource files
     _editor_win->move(0,0); //Editor base win would be in the left part of screen
+    //resize editor window
+    _editor_win->resize(_editor_win->settings.editor_win_width, _editor_win->settings.editor_win_height);
     _editor_win->show(); //Show editor window
     //If no settings, then set to defaults
     if(_editor_win->settings.isFirstSetup){
         _editor_win->settings.inspector_win_pos_X = _editor_win->width() + _editor_win->settings.gameViewWin_Width;
         _editor_win->settings.inspector_win_pos_Y = 0;
     }
-    _inspector_win->show();
+
     //Move window
     _inspector_win->move(_editor_win->settings.inspector_win_pos_X, _editor_win->settings.inspector_win_pos_Y);
+    _inspector_win->resize(_editor_win->settings.inspector_win_width, _editor_win->settings.inspector_win_height);
+    _inspector_win->show();
 
     _inspector_win->editwindow_ptr = static_cast<void*>(_editor_win);
 
