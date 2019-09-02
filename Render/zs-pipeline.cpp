@@ -74,7 +74,7 @@ void RenderPipeline::setup(int bufWidth, int bufHeight){
 
     glGenBuffers(1, &skinningUniformBuffer);
     glBindBuffer(GL_UNIFORM_BUFFER, skinningUniformBuffer);
-    glBufferData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 120, nullptr, GL_STATIC_DRAW);
+    glBufferData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 150, nullptr, GL_STATIC_DRAW);
     //Connect to point 4 (four)
     glBindBufferBase(GL_UNIFORM_BUFFER, 4, skinningUniformBuffer);
 
@@ -282,7 +282,6 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr){
 void RenderPipeline::render2D(void* projectedit_ptr){
     EditWindow* editwin_ptr = static_cast<EditWindow*>(projectedit_ptr);
     World* world_ptr = &editwin_ptr->world;
-    this->deltaTime = editwin_ptr->deltaTime;
 
     glClearColor(0,0,0,1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -305,8 +304,6 @@ void RenderPipeline::render3D(void* projectedit_ptr)
     EditWindow* editwin_ptr = static_cast<EditWindow*>(projectedit_ptr);
     World* world_ptr = &editwin_ptr->world;
     ZSPIRE::Camera* cam_ptr = nullptr; //We'll set it next
-
-    this->deltaTime = editwin_ptr->deltaTime;
 
     ShadowCasterProperty* shadowcast = static_cast<ShadowCasterProperty*>(this->render_settings.shadowcaster_ptr);
     if(shadowcast != nullptr){
@@ -400,15 +397,9 @@ void GameObject::Draw(RenderPipeline* pipeline){
         if(pipeline->current_state == PIPELINE_STATE_DEFAULT){
             this->onRender(pipeline);
             if(hasMesh()){
-                if(mesh_prop->mesh_ptr->bones.size() < 1){
-                    for(unsigned int bone_i = 0; bone_i < 8; bone_i ++){
-                        ZSMATRIX4x4 id = getIdentity();
-                        glBindBuffer(GL_UNIFORM_BUFFER, pipeline->skinningUniformBuffer);
-                        glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * bone_i, sizeof (ZSMATRIX4x4), &id);
-                    }
-
-                }
+                //Iterate over all bones
                 for(unsigned int bone_i = 0; bone_i < mesh_prop->mesh_ptr->bones.size(); bone_i ++){
+                    //Obtain bone by pointer
                     ZSPIRE::Bone* b = &mesh_prop->mesh_ptr->bones[bone_i];
 
                     GameObject* node = nullptr;
@@ -416,9 +407,14 @@ void GameObject::Draw(RenderPipeline* pipeline){
                     if(RootNode != nullptr)
                         node = mesh_prop->skinning_root_node->getChildObjectWithLabelStartsWith(QString::fromStdString(b->bone_name));
 
+
                     if(node != nullptr){
                         TransformProperty* transform = node->getPropertyPtr<TransformProperty>();
-                        ZSMATRIX4x4 matrix = transform->transform_mat;
+                        NodeProperty* nd = node->getPropertyPtr<NodeProperty>();
+                        //Calculate result matrix
+                        ZSMATRIX4x4 matrix = mesh_prop->inverse * nd->abs;
+                        matrix = matrix * b->offset;
+
                         glBindBuffer(GL_UNIFORM_BUFFER, pipeline->skinningUniformBuffer);
                         glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * bone_i, sizeof (ZSMATRIX4x4), &matrix);
                     }
@@ -495,7 +491,7 @@ void GameObject::processObject(RenderPipeline* pipeline){
     int max_dist = static_cast<int>(cam_viewport.endX - cam_viewport.startX);
     bool difts = isDistanceFits(pipeline->cam->getCameraViewCenterPos(), transform_prop->_last_translation, max_dist);
 
-    if(difts)
+    //if(difts)
         this->Draw(pipeline);
 
     for(unsigned int obj_i = 0; obj_i < this->children.size(); obj_i ++){

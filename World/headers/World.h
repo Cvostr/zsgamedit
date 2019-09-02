@@ -48,6 +48,7 @@ enum PROPERTY_TYPE{
     GO_PROPERTY_TYPE_SHADOWCASTER,
     GO_PROPERTY_TYPE_TERRAIN,
     GO_PROPERTY_TYPE_CHARACTER_CONTROLLER,
+    GO_PROPERTY_TYPE_NODE,
     GO_PROPERTY_TYPE_TILE_GROUP = 1000,
     GO_PROPERTY_TYPE_TILE = 1001
 };
@@ -162,6 +163,8 @@ public:
     ZSVECTOR3 _last_scale;
     ZSVECTOR3 _last_rotation;
 
+    bool boneNode;
+
     void updateMat();
     void addPropertyInterfaceToInspector(InspectorWin* inspector);
     void onValueChanged();
@@ -230,7 +233,7 @@ public:
     //remove deleted children from vector
     void trimChildrenArray();
 
-    void addChildObject(GameObjectLink link);
+    void addChildObject(GameObjectLink link, bool updTransform = true);
     void removeChildObject(GameObjectLink link);
 
     GameObject* getChildObjectWithLabelStartsWith(QString label);

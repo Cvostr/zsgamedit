@@ -9,26 +9,13 @@ static unsigned int loadflags = aiProcess_CalcTangentSpace | aiProcess_Triangula
 
 void cmat(aiMatrix4x4 matin, ZSMATRIX4x4* matout){
 
-        matout->m[0][0] = matin.a1;
-        matout->m[0][1] = matin.b1;
-        matout->m[0][2] = matin.c1;
-        matout->m[0][3] = matin.d1;
+    matout->m[0][0] = matin.a1; matout->m[0][1] = matin.b1;  matout->m[0][2] = matin.c1; matout->m[0][3] = matin.d1;
+    matout->m[1][0] = matin.a2; matout->m[1][1] = matin.b2;  matout->m[1][2] = matin.c2; matout->m[1][3] = matin.d2;
+    matout->m[2][0] = matin.a3; matout->m[2][1] = matin.b3;  matout->m[2][2] = matin.c3; matout->m[2][3] = matin.d3;
+    matout->m[3][0] = matin.a4; matout->m[3][1] = matin.b4;  matout->m[3][2] = matin.c4; matout->m[3][3] = matin.d4;
 
-        matout->m[1][0] = matin.a2;
-        matout->m[1][1] = matin.b2;
-        matout->m[1][2] = matin.c2;
-        matout->m[1][3] = matin.d2;
+    *matout = transpose(*matout);
 
-        matout->m[2][0] = matin.a3;
-        matout->m[2][1] = matin.b3;
-        matout->m[2][2] = matin.c3;
-        matout->m[2][3] = matin.d3;
-
-        matout->m[3][0] = matin.a4;
-        matout->m[3][1] = matin.b4;
-        matout->m[3][2] = matin.c4;
-        matout->m[3][3] = matin.d4;
-    //*matout = transpose(*matout);
 }
 
 unsigned int Engine::getMeshesAmount(std::string file_path){
@@ -66,7 +53,7 @@ void Engine::processMesh(aiMesh* mesh, const aiScene* scene, ZSPIRE::Mesh* mesh_
         vertices_arr[v].bones_num = 0;
         for(unsigned int vw_i = 0; vw_i < MAX_BONE_PER_VERTEX; vw_i ++){
             vertices_arr[v].ids[vw_i] = 0;
-            vertices_arr[v].weights[vw_i] = 1.f;
+            vertices_arr[v].weights[vw_i] = 0.f;
         }
 
         vNormalize(&vertices_arr[v].normal);
@@ -95,6 +82,11 @@ void Engine::processMesh(aiMesh* mesh, const aiScene* scene, ZSPIRE::Mesh* mesh_
         for(unsigned int vw_i = 0; vw_i < bone.vertices_affected; vw_i ++){
             aiVertexWeight* vw = &bone_ptr->mWeights[vw_i];
             ZSVERTEX* vertex = &vertices_arr[vw->mVertexId];
+
+            if(vertex->bones_num + 1> MAX_BONE_PER_VERTEX)
+                //Its better way to crash here
+                assert(0);
+
             //Add bone ID
             vertex->ids[vertex->bones_num] = bone_i;
             //Set bone weight
@@ -102,9 +94,7 @@ void Engine::processMesh(aiMesh* mesh, const aiScene* scene, ZSPIRE::Mesh* mesh_
             //Increase bones amount
             vertex->bones_num += 1;
 
-            if(vertex->bones_num > MAX_BONE_PER_VERTEX)
-                //Its better way to crash here
-                assert(0);
+
         }
 
         //Push bone back
@@ -159,7 +149,9 @@ void Engine::loadNodeTree(std::string file_path, MeshNode* node){
     const aiScene* scene = importer.ReadFile(file_path, loadflags);
 
     MeshNode* root_node = new MeshNode;
-    processNodeForTree(root_node, scene->mRootNode, scene, aiVector3t<float>(1,1,1), aiVector3t<float>(0,0,0), aiVector3t<float>(0,0,0));
+    aiMatrix4x4 id ;
+
+    processNodeForTree(root_node, scene->mRootNode, scene, aiVector3t<float>(1,1,1), aiVector3t<float>(0,0,0), aiVector3t<float>(0,0,0), id);
 
     *node = *root_node;
 }
@@ -167,24 +159,30 @@ void Engine::loadNodeTree(std::string file_path, MeshNode* node){
 
 void Engine::processNodeForTree(MeshNode* node, aiNode* node_assimp, const aiScene* scene, aiVector3t<float> _node_scale,
                                                                                             aiVector3t<float> _node_translation,
-                                                                                            aiVector3t<float> _node_rotation){
+                                                                                            aiVector3t<float> _node_rotation,
+                                                                                            aiMatrix4x4 parent ){
     node->node_label = node_assimp->mName.C_Str(); //assigning node name
 
     //Declare vectors to store decomposed transform components
     aiVector3t<float> node_scale;
     aiVector3t<float> node_translation;
     aiVector3t<float> node_rotation;
+
+    aiMatrix4x4 result_mat;
+
+    bool isBone = isBoneAvailable(node->node_label, scene);
+    if(isBone)
+        node->hasBone = true;
+
+    aiMatrix4x4 inv_transform = node_assimp->mTransformation;
+    inv_transform = inv_transform.Inverse();
+    cmat(inv_transform, &node->node_inverse_transform);
+
+    //if(!isBone){
+    result_mat = node_assimp->mTransformation;
+    cmat(result_mat, &node->node_transform);
     //Decompose them!
-    aiMatrix4x4 result_mat = node_assimp->mTransformation;
-
     result_mat.Decompose(node_scale, node_rotation, node_translation);
-
-    node_scale.x *= _node_scale.x;
-    node_scale.y *= _node_scale.y;
-    node_scale.z *= _node_scale.z;
-
-    node_rotation += _node_rotation;
-    node_translation += _node_translation;
 
     //Store them in engine node
     node->translation = ZSVECTOR3(node_translation.x, node_translation.y, node_translation.z);
@@ -193,12 +191,6 @@ void Engine::processNodeForTree(MeshNode* node, aiNode* node_assimp, const aiSce
     node->rotation = ZSVECTOR3(node_rotation.x * 180.f / ZS_PI,
                                    node_rotation.y * 180.f / ZS_PI,
                                    node_rotation.z * 180.f / ZS_PI);
-
-
-    /*node->translation = ZSVECTOR3(0, 0, 0);
-    node->scale = ZSVECTOR3(1, 1, 1);
-    //This f%cking rotation is in radians, blyat
-    node->rotation = ZSVECTOR3(0, 0, 0);*/
 
     //iterate over all meshes in this node
     unsigned int meshes_num = node_assimp->mNumMeshes;
@@ -213,7 +205,21 @@ void Engine::processNodeForTree(MeshNode* node, aiNode* node_assimp, const aiSce
         MeshNode mNode;
         mNode.node_label = child->mName.C_Str();
 
-        processNodeForTree(&mNode, child, scene, node_scale, node_translation, node_rotation);
+        processNodeForTree(&mNode, child, scene, node_scale, node_translation, node_rotation, result_mat);
         node->children.push_back(mNode);
     }
+}
+
+bool Engine::isBoneAvailable(std::string bone_label, const aiScene* scene){
+    unsigned int mesh_num = scene->mNumMeshes;
+    for(unsigned int i = 0; i < mesh_num; i ++){
+        aiMesh* mesh = scene->mMeshes[i];
+        unsigned int bones_num = mesh->mNumBones;
+        for(unsigned int b_i = 0; b_i < bones_num; b_i ++){
+            aiBone* bn = mesh->mBones[b_i];
+            if(bone_label.compare(bn->mName.C_Str()) == false)
+                return true;
+        }
+    }
+    return false;
 }

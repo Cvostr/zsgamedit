@@ -55,7 +55,7 @@ private:
     G_BUFFER_GL gbuffer;
 
     ZSPIRE::Shader tile_shader; //Shader to draw tiles
-    ZSPIRE::Shader diffuse3d_shader;
+
     ZSPIRE::Shader pick_shader; //Shader to draw & pick objects
     ZSPIRE::Shader obj_mark_shader; //Shader to draw mark of selected objects
     ZSPIRE::Shader ui_shader;
@@ -68,6 +68,8 @@ private:
 
     RenderSettings render_settings;
 public:
+    ZSPIRE::Shader diffuse3d_shader;
+
     unsigned int camBuffer;
     unsigned int lightsBuffer;
     unsigned int shadowBuffer;

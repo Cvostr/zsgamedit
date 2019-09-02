@@ -120,7 +120,7 @@ TransformProperty* GameObject::getTransformProperty(){
     return static_cast<TransformProperty*>(getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
 }
 
-void GameObject::addChildObject(GameObjectLink link){
+void GameObject::addChildObject(GameObjectLink link, bool updTransform){
     GameObjectLink _link = link;
     _link.updLinkPtr(); //Calculating object pointer
     _link.ptr->hasParent = true; //Object now has a parent (if it has't before)
@@ -133,13 +133,13 @@ void GameObject::addChildObject(GameObjectLink link){
     TransformProperty* Pobj_transform = static_cast<TransformProperty*>(getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
     TransformProperty* Cobj_transform = static_cast<TransformProperty*>(link.ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
 
-    if(Pobj_transform != nullptr && Cobj_transform != nullptr){ //If both objects have mesh property
+    if(updTransform && Pobj_transform != nullptr && Cobj_transform != nullptr){ //If both objects have transform property
 
         ZSVECTOR3 p_translation = ZSVECTOR3(0,0,0);
         ZSVECTOR3 p_scale = ZSVECTOR3(1,1,1);
         ZSVECTOR3 p_rotation = ZSVECTOR3(0,0,0);
         Pobj_transform->getAbsoluteParentTransform(p_translation, p_scale, p_rotation); //Collecting transforms
-
+        //Change transform
         Cobj_transform->translation = Cobj_transform->translation - p_translation;
         Cobj_transform->scale = Cobj_transform->scale / p_scale;
         Cobj_transform->rotation = Cobj_transform->rotation - p_rotation;

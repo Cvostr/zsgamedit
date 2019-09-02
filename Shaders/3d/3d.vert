@@ -27,7 +27,7 @@ layout (std140, binding = 0) uniform CamMatrices{
 };
 
 layout (std140, binding = 4) uniform BonesData{
-    uniform mat4 bone_transform[120];
+    uniform mat4 bone_transform[150];
 };
 
 mat4 getBoneTransform(){

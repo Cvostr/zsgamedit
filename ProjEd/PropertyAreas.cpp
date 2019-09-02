@@ -27,6 +27,7 @@ AreaPropertyTitle::AreaPropertyTitle(){
 
 AreaButton::AreaButton(){
     this->button = new QPushButton;
+    onPressFuncPtr = nullptr;
     connect(this->button, SIGNAL(clicked()), this, SLOT(onButtonPressed()));
 }
 
@@ -76,7 +77,8 @@ AreaButton::~AreaButton(){
 }
 
 void AreaButton::onButtonPressed(){
-    this->onPressFuncPtr();
+    if(onPressFuncPtr != nullptr)
+        this->onPressFuncPtr();
     insp_ptr->updateObjectProperties();
 }
 

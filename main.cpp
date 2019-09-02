@@ -27,7 +27,7 @@ int main(int argc, char *argv[])
                 NOW = SDL_GetPerformanceCounter();
                 deltaTime = (NOW - last) * 1000 / SDL_GetPerformanceFrequency();
             }
-
+            //Send delta time to all editor managers
             w.edit_win_ptr->updateDeltaTime(deltaTime);
             SDL_Event event;
             ZSENSDK::Input::MouseState* mstate = ZSENSDK::Input::getMouseStatePtr();

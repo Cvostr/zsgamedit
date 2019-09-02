@@ -19,19 +19,26 @@ public:
     ZSVECTOR3 translation;
     ZSVECTOR3 scale;
     ZSVECTOR3 rotation;
+
     ZSMATRIX4x4 node_transform;
+    ZSMATRIX4x4 node_inverse_transform;
+
+    bool hasBone;
 
     std::vector<MeshNode> children;
     std::vector<std::string> mesh_names;
 
-    MeshNode() {}
+    MeshNode() {
+        hasBone = false;
+    }
 };
 
 namespace Engine {
 
 void processNodeForTree(MeshNode* node, aiNode* node_assimp, const aiScene* scene, aiVector3t<float> _node_scale,
                                                                                    aiVector3t<float> _node_translation,
-                                                                                   aiVector3t<float> _node_rotation);
+                                                                                   aiVector3t<float> _node_rotation,
+                                                                                   aiMatrix4x4 parent                                 );
 void loadNodeTree(std::string file_path, MeshNode* node);
 unsigned int getMeshesAmount(std::string file_path);
 void loadMeshes(std::string file_path, ZSPIRE::Mesh* meshes_array);
@@ -39,6 +46,8 @@ void loadMesh(std::string file_path, ZSPIRE::Mesh* mesh_ptr, int index);
 
 void processMesh(aiMesh* mesh, const aiScene* scene, ZSPIRE::Mesh* mesh_ptr);
 void processNode(aiNode* node, const aiScene* scene);
+
+bool isBoneAvailable(std::string bone_label, const aiScene* scene);
 }
 
 #endif

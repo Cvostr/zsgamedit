@@ -114,6 +114,10 @@ GameObjectProperty* allocProperty(int type){
             _ptr = static_cast<GameObjectProperty*>(new TransformProperty); //Allocation of transform in heap
             break;
         }
+    case GO_PROPERTY_TYPE_NODE:{ //If type is transfrom
+        _ptr = static_cast<GameObjectProperty*>(new NodeProperty); //Allocation of transform in heap
+        break;
+    }
         case GO_PROPERTY_TYPE_LABEL:{
             LabelProperty* ptr = new LabelProperty;
             _ptr = static_cast<GameObjectProperty*>(ptr);
@@ -275,7 +279,6 @@ void TransformProperty::onValueChanged(){
 
         phys->rigidBody->setWorldTransform(startTransform);
         phys->rigidBody->getMotionState()->setWorldTransform(startTransform);
-        //phys->rigidBody->activate(true);
 
         phys->shape->setLocalScaling(btVector3(btScalar(_last_scale.X),
                                                btScalar(_last_scale.Y),
@@ -1533,4 +1536,52 @@ void TerrainProperty::copyTo(GameObjectProperty* dest){
     for(unsigned int t_i = 0; t_i < this->textures.size(); t_i ++){
         _dest->textures.push_back(textures[t_i]);
     }
+}
+
+NodeProperty::NodeProperty(){
+    type = GO_PROPERTY_TYPE_NODE;
+    hasBone = false;
+    local_transform_mat = getIdentity();
+}
+
+void NodeProperty::onPreRender(RenderPipeline* pipeline){
+
+    if(hasBone){
+        ZSMATRIX4x4 pos_m = getTranslationMat(this->translation);
+        ZSMATRIX4x4 rot_m = getRotationMat(this->rotation);
+
+        local_transform_mat = pos_m * rot_m;
+        local_transform_mat = (local_transform_mat);
+    }
+
+    abs = transform_mat;
+
+
+    if(!go_link.updLinkPtr()->hasParent) return;
+
+    GameObject* parent = go_link.updLinkPtr()->parent.updLinkPtr();
+    NodeProperty* nd = parent->getPropertyPtr<NodeProperty>();
+
+    if(nd == nullptr) return;
+
+    this->abs = nd->abs * transform_mat;
+
+}
+
+void NodeProperty::updateChildren(){
+
+}
+
+void NodeProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
+    Float3PropertyArea* area_pos = new Float3PropertyArea; //New property area
+    area_pos->setLabel("Position"); //Its label
+    area_pos->vector = &this->translation; //Ptr to our vector
+    area_pos->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
+    inspector->addPropertyArea(area_pos);
+
+    Float3PropertyArea* area_rotation = new Float3PropertyArea; //New property area
+    area_rotation->setLabel("Rotation"); //Its label
+    area_rotation->vector = &this->rotation; //Ptr to our vector
+    area_rotation->go_property = static_cast<void*>(this);
+    inspector->addPropertyArea(area_rotation);
 }

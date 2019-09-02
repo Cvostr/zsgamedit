@@ -31,8 +31,6 @@ namespace ZSPIRE {
 		void setTransform(ZSMATRIX4x4 transform);
         void setCamera(Camera* cam, bool sendPos = false);
         void setCameraUiProjMatrix(Camera* cam);
-        void sendLight(unsigned int index, void* _light);
-        void unsetLight(unsigned int index);
 
         bool isCreated;
 

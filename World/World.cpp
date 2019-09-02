@@ -522,6 +522,7 @@ void World::addMeshGroup(std::string file_path){
 
         if(mesh_prop_ptr->mesh_ptr->hasBones()){
             mesh_prop_ptr->skinning_root_node = rootobj;
+            mesh_prop_ptr->inverse = node.node_inverse_transform;
         }
     }
 }
@@ -533,15 +534,26 @@ GameObject* World::addMeshNode(MeshNode* node){
     //Setting base variables
     obj.world_ptr = this;
     obj.addLabelProperty();
+
     obj.addProperty(GO_PROPERTY_TYPE_TRANSFORM);
+    obj.addProperty(GO_PROPERTY_TYPE_NODE);
+
     obj.label = &obj.getLabelProperty()->label;
     *obj.label = QString::fromStdString(node->node_label) + QString::number(add_num); //Assigning label to object
     obj.item_ptr->setText(0, *obj.label);
 
     TransformProperty* transform_prop = static_cast<TransformProperty*>(obj.getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
-    transform_prop->setTranslation(node->translation);
+    transform_prop->translation = (node->translation);
     transform_prop->scale = node->scale;
     transform_prop->rotation = node->rotation;
+    transform_prop->updateMat();
+
+    NodeProperty* node_prop = static_cast<NodeProperty*>(obj.getPropertyPtrByType(GO_PROPERTY_TYPE_NODE));
+    node_prop->transform_mat = node->node_transform;
+    if(node->hasBone){
+        node_prop->hasBone = true;
+    }
+
 
     //Add node to world
     GameObject* node_object = this->addObject(obj);
@@ -554,6 +566,7 @@ GameObject* World::addMeshNode(MeshNode* node){
         node_object->item_ptr->addChild(newobj->item_ptr);
 
     }
+
     //Iterate over all meshes, that inside of node
     for(unsigned int mesh_i = 0; mesh_i < node->mesh_names.size(); mesh_i ++){
         std::string mesh_label = node->mesh_names[mesh_i];
@@ -579,7 +592,7 @@ GameObject* World::addMeshNode(MeshNode* node){
             mesh_obj->item_ptr->setText(0, *mesh_obj->label);
             //Add to world object and parent it
             mesh_obj = this->addObject(*mesh_obj);
-            node_object->addChildObject(mesh_obj->getLinkToThisObject());
+            node_object->addChildObject(mesh_obj->getLinkToThisObject(), false);
             node_object->item_ptr->addChild(mesh_obj->item_ptr);
         }
 
