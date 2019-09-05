@@ -92,7 +92,8 @@ HEADERS += \
     Misc/headers/EditorManager.h \
     ProjEd/headers/EditorSettings.h \
     World/headers/terrain.h \
-    Misc/headers/ThumbnailsMaster.h
+    Misc/headers/ThumbnailsMaster.h \
+    Render/headers/zs-animation.h
 
 
 FORMS += \

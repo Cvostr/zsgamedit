@@ -3,6 +3,7 @@
 
 #include "../../triggers.h"
 #include "../../Render/headers/zs-mesh.h"
+#include "../../Render/headers/zs-animation.h"
 #include "zs_types.h"
 
 #ifdef USE_ASSIMP
@@ -18,7 +19,7 @@ public:
 
     ZSVECTOR3 translation;
     ZSVECTOR3 scale;
-    ZSVECTOR3 rotation;
+    ZSQUATERNION rotation;
 
     ZSMATRIX4x4 node_transform;
     ZSMATRIX4x4 node_inverse_transform;
@@ -35,14 +36,18 @@ public:
 
 namespace Engine {
 
-void processNodeForTree(MeshNode* node, aiNode* node_assimp, const aiScene* scene, aiVector3t<float> _node_scale,
-                                                                                   aiVector3t<float> _node_translation,
-                                                                                   aiVector3t<float> _node_rotation,
-                                                                                   aiMatrix4x4 parent                                 );
+void cmat(aiMatrix4x4 matin, ZSMATRIX4x4* matout);
+
+void processNodeForTree(MeshNode* node, aiNode* node_assimp, const aiScene* scene);
 void loadNodeTree(std::string file_path, MeshNode* node);
+
 unsigned int getMeshesAmount(std::string file_path);
+unsigned int getAnimsAmount(std::string file_path);
+
 void loadMeshes(std::string file_path, ZSPIRE::Mesh* meshes_array);
 void loadMesh(std::string file_path, ZSPIRE::Mesh* mesh_ptr, int index);
+
+void loadAnimation(std::string file_path, ZSPIRE::Animation* anim, int index);
 
 void processMesh(aiMesh* mesh, const aiScene* scene, ZSPIRE::Mesh* mesh_ptr);
 void processNode(aiNode* node, const aiScene* scene);

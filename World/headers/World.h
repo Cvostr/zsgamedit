@@ -49,6 +49,7 @@ enum PROPERTY_TYPE{
     GO_PROPERTY_TYPE_TERRAIN,
     GO_PROPERTY_TYPE_CHARACTER_CONTROLLER,
     GO_PROPERTY_TYPE_NODE,
+    GO_PROPERTY_TYPE_ANIMATION,
     GO_PROPERTY_TYPE_TILE_GROUP = 1000,
     GO_PROPERTY_TYPE_TILE = 1001
 };
@@ -237,6 +238,7 @@ public:
     void removeChildObject(GameObjectLink link);
 
     GameObject* getChildObjectWithLabelStartsWith(QString label);
+    GameObject* getChildObjectWithNodeLabel(QString label);
 
     //Remove property with type
     void removeProperty(int index);
@@ -318,6 +320,7 @@ public:
     void unpickObject();
 
     ZSPIRE::Mesh* getMeshPtrByRelPath(QString label); //look through all meshes in project ptr
+    ZSPIRE::Animation* getAnimationPtrByRelPath(QString label);
     ZSPIRE::Texture* getTexturePtrByRelPath(QString label); //look through all meshes in project ptr
     SoundBuffer* getSoundPtrByName(QString label);
     Material* getMaterialPtrByName(QString label);

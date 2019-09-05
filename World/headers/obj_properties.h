@@ -95,8 +95,6 @@ public:
     ZSPIRE::Mesh* mesh_ptr; //Pointer to mesh
     bool castShadows;
 
-    ZSMATRIX4x4 inverse;
-
     GameObject* skinning_root_node;
 
     void addPropertyInterfaceToInspector(InspectorWin* inspector);
@@ -231,8 +229,11 @@ public:
 
 class NodeProperty : public GameObjectProperty {
 public:
+    QString node_label;
+
     ZSVECTOR3 translation;
-    ZSVECTOR3 rotation;
+    ZSVECTOR3 scale;
+    ZSQUATERNION rotation;
 
     ZSMATRIX4x4 local_transform_mat;
     ZSMATRIX4x4 transform_mat;
@@ -248,6 +249,21 @@ public:
     //void copyTo(GameObjectProperty* dest);
 
     NodeProperty();
+};
+
+class AnimationProperty : public GameObjectProperty {
+public:
+    int curFrame;
+
+    ZSPIRE::Animation* anim_prop_ptr;
+    QString anim_label;
+
+    void addPropertyInterfaceToInspector(InspectorWin* inspector);
+    void onPreRender(RenderPipeline* pipeline);
+    void onValueChanged();
+    //void copyTo(GameObjectProperty* dest);
+
+    AnimationProperty();
 };
 
 class TerrainProperty : public GameObjectProperty{

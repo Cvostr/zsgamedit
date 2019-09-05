@@ -194,6 +194,19 @@ GameObject* GameObject::getChildObjectWithLabelStartsWith(QString label){
     return nullptr;
 }
 
+GameObject* GameObject::getChildObjectWithNodeLabel(QString label){
+    for (unsigned int i = 0; i < this->children.size(); i ++) {
+        GameObjectLink* l = &this->children[i];
+        NodeProperty* node_p = l->updLinkPtr()->getPropertyPtr<NodeProperty>();
+        if(node_p->node_label.startsWith(label)) return l->updLinkPtr();
+
+        GameObject* obj_ch = l->updLinkPtr()->getChildObjectWithLabelStartsWith(label);
+        if(obj_ch != nullptr) return obj_ch;
+
+    }
+    return nullptr;
+}
+
 void GameObject::trimChildrenArray(){
     for (unsigned int i = 0; i < children.size(); i ++) { //Iterating over all objects
         if(children[i].isEmpty() == true){ //If object marked as deleted

@@ -9,6 +9,8 @@ extern InspectorWin* _inspector_win;
 //selected terrain
 static TerrainProperty* current_terrain_prop;
 
+static AnimationProperty* current_anim;
+
 GameObjectProperty* ObjectPropertyLink::updLinkPtr(){
     ptr = this->object.updLinkPtr()->getPropertyPtrByType(this->prop_type);
 
@@ -100,6 +102,12 @@ QString getPropertyString(int type){
         case GO_PROPERTY_TYPE_TERRAIN:{
             return QString("Terrain");
         }
+        case GO_PROPERTY_TYPE_NODE:{
+            return QString("Node");
+        }
+        case GO_PROPERTY_TYPE_ANIMATION:{
+            return QString("Animation");
+        }
         case GO_PROPERTY_TYPE_CHARACTER_CONTROLLER:{
             return QString("Character Controller");
         }
@@ -114,10 +122,14 @@ GameObjectProperty* allocProperty(int type){
             _ptr = static_cast<GameObjectProperty*>(new TransformProperty); //Allocation of transform in heap
             break;
         }
-    case GO_PROPERTY_TYPE_NODE:{ //If type is transfrom
-        _ptr = static_cast<GameObjectProperty*>(new NodeProperty); //Allocation of transform in heap
-        break;
-    }
+        case GO_PROPERTY_TYPE_NODE:{ //If type is transfrom
+            _ptr = static_cast<GameObjectProperty*>(new NodeProperty); //Allocation of transform in heap
+            break;
+        }
+        case GO_PROPERTY_TYPE_ANIMATION:{ //If type is transfrom
+            _ptr = static_cast<GameObjectProperty*>(new AnimationProperty); //Allocation of transform in heap
+            break;
+        }
         case GO_PROPERTY_TYPE_LABEL:{
             LabelProperty* ptr = new LabelProperty;
             _ptr = static_cast<GameObjectProperty*>(ptr);
@@ -1542,20 +1554,42 @@ NodeProperty::NodeProperty(){
     type = GO_PROPERTY_TYPE_NODE;
     hasBone = false;
     local_transform_mat = getIdentity();
+    scale = ZSVECTOR3(1, 1, 1);
 }
 
 void NodeProperty::onPreRender(RenderPipeline* pipeline){
 
-    if(hasBone){
-        ZSMATRIX4x4 pos_m = getTranslationMat(this->translation);
-        ZSMATRIX4x4 rot_m = getRotationMat(this->rotation);
-
-        local_transform_mat = pos_m * rot_m;
-        local_transform_mat = (local_transform_mat);
-    }
-
     abs = transform_mat;
 
+    if(hasBone){
+        /*aiMatrix4x4 m(aiVector3D(scale.X, scale.Y, scale.Z),
+                      aiQuaternion(rotation.W, rotation.X, rotation.Y, rotation.Z),
+                      aiVector3D(translation.X, translation.Y, translation.Z));
+
+        Engine::cmat(m, &abs);
+        aiMatrix4x4 q = aiMatrix4x4(aiQuaternion(rotation.W, rotation.X, rotation.Y, rotation.Z).GetMatrix());
+        ZSMATRIX4x4 _q;
+        Engine::cmat(q, &_q);
+
+        ZSMATRIX4x4 tra = getTranslationMat(translation.X, translation.Y, translation.Z);
+        ZSMATRIX4x4 sca = getScaleMat(scale.X, scale.Y, scale.Z);
+
+        abs = sca * _q;
+        abs = abs * tra;*/
+
+        //aiMatrix4x4 m(aiVector3D(scale.X, scale.Y, scale.Z),
+        //                      aiQuaternion(rotation.W, rotation.X, rotation.Y, rotation.Z),
+        //                      aiVector3D(translation.X, translation.Y, translation.Z));
+        //Engine::cmat(m, &local_transform_mat);
+
+        ZSMATRIX4x4 tra = getTranslationMat(translation.X, translation.Y, translation.Z);
+        ZSMATRIX4x4 rot = getRotationMat(this->rotation);
+        ZSMATRIX4x4 sca = getScaleMat(scale.X, scale.Y, scale.Z);
+
+
+        local_transform_mat = tra * rot;
+        //local_transform_mat = local_transform_mat * tra;
+    }
 
     if(!go_link.updLinkPtr()->hasParent) return;
 
@@ -1564,8 +1598,9 @@ void NodeProperty::onPreRender(RenderPipeline* pipeline){
 
     if(nd == nullptr) return;
 
-    this->abs = nd->abs * transform_mat;
+    this->abs = nd->abs * abs;
 
+    this->local_transform_mat = nd->local_transform_mat * local_transform_mat;
 }
 
 void NodeProperty::updateChildren(){
@@ -1581,7 +1616,53 @@ void NodeProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
 
     Float3PropertyArea* area_rotation = new Float3PropertyArea; //New property area
     area_rotation->setLabel("Rotation"); //Its label
-    area_rotation->vector = &this->rotation; //Ptr to our vector
+    area_rotation->vector = (ZSVECTOR3*)&this->rotation; //Ptr to our vector
     area_rotation->go_property = static_cast<void*>(this);
     inspector->addPropertyArea(area_rotation);
+}
+
+AnimationProperty::AnimationProperty(){
+    type = GO_PROPERTY_TYPE_ANIMATION;
+    curFrame = 0;
+    anim_prop_ptr = nullptr;
+}
+
+void onPlay(){
+    current_anim->curFrame += 1;
+}
+
+void AnimationProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
+    current_anim = this;
+
+    PickResourceArea* area = new PickResourceArea(RESOURCE_TYPE_ANIMATION);
+    area->setLabel("Animation");
+    area->go_property = static_cast<void*>(this);
+    area->rel_path = &this->anim_label;
+    inspector->addPropertyArea(area);
+
+    AreaButton* btn = new AreaButton;
+    btn->onPressFuncPtr = &onPlay;
+    btn->button->setText("Next frame"); //Setting text to qt button
+    inspector->getContentLayout()->addWidget(btn->button);
+    btn->insp_ptr = inspector; //Setting inspector pointer
+    inspector->registerUiObject(btn);
+}
+void AnimationProperty::onPreRender(RenderPipeline* pipeline){
+    GameObject* obj = go_link.updLinkPtr();
+
+    if(this->anim_prop_ptr == nullptr) return;
+
+    for(unsigned int channels_i = 0; channels_i < this->anim_prop_ptr->NumChannels; channels_i ++){
+        ZSPIRE::AnimationChannel* ch = &anim_prop_ptr->channels[channels_i];
+        GameObject* node = obj->getChildObjectWithNodeLabel(QString::fromStdString(ch->bone_name));
+        NodeProperty* prop = node->getPropertyPtr<NodeProperty>();
+
+        prop->translation = ch->positions[curFrame];
+        prop->scale = ch->scalings[curFrame];
+        prop->rotation = ch->rotations[curFrame];
+
+    }
+}
+void AnimationProperty::onValueChanged(){
+    this->anim_prop_ptr = go_link.world_ptr->getAnimationPtrByRelPath(this->anim_label);
 }

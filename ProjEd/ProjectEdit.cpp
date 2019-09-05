@@ -788,6 +788,7 @@ void EditWindow::lookForResources(QString path){
             if(name.endsWith(".FBX") || name.endsWith(".fbx")){ //If its an mesh
                 //getting meshes amount
                 unsigned int num_meshes = Engine::getMeshesAmount(fileInfo.absoluteFilePath().toStdString());
+                unsigned int num_anims = Engine::getAnimsAmount(fileInfo.absoluteFilePath().toStdString());
                 //iterate to read all the meshes
                 for(unsigned int mesh_i = 0; mesh_i < num_meshes; mesh_i ++){
                     Resource resource;
@@ -801,6 +802,19 @@ void EditWindow::lookForResources(QString path){
                     this->project.resources.push_back(resource);
                     Engine::loadMesh(fileInfo.absoluteFilePath().toStdString(), static_cast<ZSPIRE::Mesh*>(this->project.resources.back().class_ptr), static_cast<int>(mesh_i));
                     this->project.resources.back().resource_label = static_cast<ZSPIRE::Mesh*>(this->project.resources.back().class_ptr)->mesh_label;
+                }
+                for(unsigned int anim_i = 0; anim_i < num_anims; anim_i ++){
+                    Resource resource;
+                    resource.file_path = fileInfo.absoluteFilePath();
+                    resource.rel_path = resource.file_path; //Preparing to get relative path
+                    resource.rel_path.remove(0, project.root_path.size() + 1); //Get relative path by removing length of project root from start
+                    resource.type = RESOURCE_TYPE_ANIMATION; //Type of resource is mesh
+
+                    resource.class_ptr = static_cast<void*>(new ZSPIRE::Animation);
+
+                    this->project.resources.push_back(resource);
+                    Engine::loadAnimation(fileInfo.absoluteFilePath().toStdString(), static_cast<ZSPIRE::Animation*>(this->project.resources.back().class_ptr), static_cast<int>(anim_i));
+                    this->project.resources.back().resource_label = static_cast<ZSPIRE::Animation*>(this->project.resources.back().class_ptr)->name;
                 }
             }
             if(name.endsWith(".WAV") || name.endsWith(".wav")){ //If its an mesh

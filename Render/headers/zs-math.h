@@ -47,6 +47,26 @@
 
 	}ZSVECTOR3;
 
+    typedef struct ZSQUATERNION{
+        float X;
+        float Y;
+        float Z;
+        float W;
+
+        ZSQUATERNION() {
+            X = 0;
+            Y = 0;
+            Z = 0;
+            W = 0;
+        }
+
+        ZSQUATERNION(float x, float y, float z, float w) {
+            this->X = x;
+            this->Y = y;
+            this->Z = z;
+            this->W = w;
+        }
+    }ZSQUATERNION;
 
 	typedef struct ZSVECTOR4 {
 
@@ -172,7 +192,11 @@
 
 	ZSMATRIX4x4 getIdentity();
 	ZSMATRIX4x4 transpose(ZSMATRIX4x4 mat);
+    float determinant(ZSMATRIX4x4 mat);
+    float determinant(float a, float b, float c, float d, float e, float f, float g, float h, float i);
+    ZSMATRIX4x4 invert(ZSMATRIX4x4 mat);
 	ZSMATRIX4x4 matrixMM(ZSMATRIX4x4 l, ZSMATRIX4x4 r);
+    ZSMATRIX4x4 matrixSum(ZSMATRIX4x4 l, ZSMATRIX4x4 r);
 	ZSMATRIX4x4 getPerspective(float fovy, float aspect, float zNear, float zFar);
 	ZSMATRIX4x4 getOrthogonal(float left, float right, float bottom, float top);
 	ZSMATRIX4x4 getOrthogonal(float left, float right, float bottom, float top, float zNear, float zFar);
@@ -190,6 +214,7 @@
     ZSMATRIX4x4 getRotationMat(float thetaX, float thetaY, float thetaZ);
     ZSMATRIX4x4 getRotationMat(ZSVECTOR3 rotation);
     ZSMATRIX4x4 getRotationMat(ZSVECTOR3 rotation, ZSVECTOR3 center);
+    ZSMATRIX4x4 getRotationMat(ZSQUATERNION quat);
     //ZSMATRIX4x4 parent
 
 
@@ -202,6 +227,25 @@
 		return matrixMM(l, r);
 
 	}
+
+    inline ZSMATRIX4x4 operator*(const ZSMATRIX4x4& l, const float& r)
+    {
+        ZSMATRIX4x4 result = l;
+        for (unsigned int i = 0; i < 4; i++) {
+            for (unsigned int b = 0; b < 4; b++) {
+                result.m[i][b] *= r;
+            }
+        }
+
+        return l;
+
+    }
+
+    inline ZSMATRIX4x4 operator+(const ZSMATRIX4x4& l, const ZSMATRIX4x4& r)
+    {
+        return matrixSum(l, r);
+
+    }
 
     inline ZSVECTOR2 operator-(const ZSVECTOR2& l, const ZSVECTOR2& r)
     {

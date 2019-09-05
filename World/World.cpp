@@ -522,7 +522,6 @@ void World::addMeshGroup(std::string file_path){
 
         if(mesh_prop_ptr->mesh_ptr->hasBones()){
             mesh_prop_ptr->skinning_root_node = rootobj;
-            mesh_prop_ptr->inverse = node.node_inverse_transform;
         }
     }
 }
@@ -543,17 +542,22 @@ GameObject* World::addMeshNode(MeshNode* node){
     obj.item_ptr->setText(0, *obj.label);
 
     TransformProperty* transform_prop = static_cast<TransformProperty*>(obj.getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
-    transform_prop->translation = (node->translation);
-    transform_prop->scale = node->scale;
-    transform_prop->rotation = node->rotation;
+    //transform_prop->translation = (node->translation);
+    //transform_prop->scale = node->scale;
+    //transform_prop->rotation = node->rotation;
     transform_prop->updateMat();
 
     NodeProperty* node_prop = static_cast<NodeProperty*>(obj.getPropertyPtrByType(GO_PROPERTY_TYPE_NODE));
+    node_prop->node_label = QString::fromStdString(node->node_label);
+    //node_prop->translation = (node->translation);
+    //node_prop->scale = node->scale;
+    //node_prop->rotation = node->rotation;
+
     node_prop->transform_mat = node->node_transform;
+
     if(node->hasBone){
         node_prop->hasBone = true;
     }
-
 
     //Add node to world
     GameObject* node_object = this->addObject(obj);
@@ -718,6 +722,21 @@ ZSPIRE::Mesh* World::getMeshPtrByRelPath(QString label){
     }
     return nullptr;
 }
+
+ZSPIRE::Animation* World::getAnimationPtrByRelPath(QString label){
+    Project* proj_ptr = static_cast<Project*>(this->proj_ptr); //Convert void pointer to Project*
+    unsigned int resources_num = static_cast<unsigned int>(proj_ptr->resources.size()); //Receive resource amount in project
+
+    for(unsigned int r_it = 0; r_it < resources_num; r_it ++){ //Iteerate over all resources in project
+        Resource* r_ptr = &proj_ptr->resources[r_it]; //Obtain pointer to resource
+        //If resource is mesh and has same name as in argument
+        if(r_ptr->type == RESOURCE_TYPE_ANIMATION && r_ptr->resource_label.compare(label.toStdString()) == 0){
+            return static_cast<ZSPIRE::Animation*>(r_ptr->class_ptr);
+        }
+    }
+    return nullptr;
+}
+
 
 ZSPIRE::Texture* World::getTexturePtrByRelPath(QString label){
     Project* proj_ptr = static_cast<Project*>(this->proj_ptr); //Convert void pointer to Project*

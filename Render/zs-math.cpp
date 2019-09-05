@@ -61,17 +61,29 @@ ZSMATRIX4x4 matrixMM(ZSMATRIX4x4 l, ZSMATRIX4x4 r) {
 	return Ret;
 }
 
+ZSMATRIX4x4 matrixSum(ZSMATRIX4x4 l, ZSMATRIX4x4 r) {
+    ZSMATRIX4x4 Ret;
+    for (unsigned int i = 0; i < 4; i++) {
+        for (unsigned int b = 0; b < 4; b++) {
+            Ret.m[i][b] = l.m[i][b] + r.m[i][b];
+        }
+
+    }
+    return Ret;
+}
+
+
 ZSMATRIX4x4 getPerspective(float fovy, float aspect, float zNear, float zFar) {
 	ZSMATRIX4x4 result;
 
-	double range = tan(ZS_PI * (fovy / (2.0f * 180.f))) * zNear;
-	double left = -range * aspect;
-	double right = range * aspect;
+    double range = tan(static_cast<double>(ZS_PI * (fovy / (2.0f * 180.f)))) * static_cast<double>(zNear);
+    double left = -range * static_cast<double>(aspect);
+    double right = range * static_cast<double>(aspect);
 	double bottom = -range;
 	double top = range;
 
-	result.m[0][0] = (2.0f * zNear) / (float)(right - left);
-	result.m[1][1] = (2.0f * zNear) / (float)(top - bottom);
+    result.m[0][0] = (2.0f * zNear) / static_cast<float>(right - left);
+    result.m[1][1] = (2.0f * zNear) / static_cast<float>(top - bottom);
 	result.m[2][2] = -(zFar + zNear) / (zFar - zNear);
 	result.m[2][3] = -1.0f;
 	result.m[3][2] = -(2.0f * zFar * zNear) / (zFar - zNear);
@@ -88,6 +100,57 @@ ZSMATRIX4x4 transpose(ZSMATRIX4x4 mat) {
 		}
 	}
 	return result;
+}
+
+float determinant(ZSMATRIX4x4 mat){
+    //[0][0] [0][1] [0][2] [0][3]
+    //[1][0] [1][1] [1][2] [1][3]
+    //[2][0] [2][1] [2][2] [2][3]
+    //[3][0] [3][1] [3][2] [3][3]
+
+    float d1 = mat.m[0][0] * determinant(mat.m[1][1], mat.m[1][2], mat.m[1][3], mat.m[2][1], mat.m[2][2], mat.m[2][3], mat.m[3][1], mat.m[3][2], mat.m[3][3]);
+    float d2 = mat.m[0][1] * determinant(mat.m[1][0], mat.m[1][2], mat.m[1][3], mat.m[2][0], mat.m[2][2], mat.m[2][3], mat.m[3][0], mat.m[3][2], mat.m[3][3]);
+    float d3 = mat.m[0][2] * determinant(mat.m[1][0], mat.m[1][1], mat.m[1][3], mat.m[2][0], mat.m[2][1], mat.m[2][3], mat.m[3][0], mat.m[3][1], mat.m[3][3]);
+    float d4 = mat.m[0][3] * determinant(mat.m[1][0], mat.m[1][1], mat.m[1][2], mat.m[2][0], mat.m[2][1], mat.m[2][2], mat.m[3][0], mat.m[3][1], mat.m[3][2]);
+
+    return d1 - d2 + d3 - d4;
+
+}
+float determinant(float a, float b, float c, float d, float e, float f, float g, float h, float i){
+    //a b c
+    //d e f
+    //g h i
+    return (a * e * i) + (d * c * h) + (g * b * f) - (g * e * c) - (d * b * i) - (h * f * a);
+}
+
+ZSMATRIX4x4 invert(ZSMATRIX4x4 mat){
+    float _determinant = determinant(mat);
+    _determinant = 1.f / _determinant;
+
+    float A11 = +determinant(mat.m[1][1], mat.m[1][2], mat.m[1][3], mat.m[2][1], mat.m[2][2], mat.m[2][3], mat.m[3][1], mat.m[3][2], mat.m[3][3]);
+    float A12 = -determinant(mat.m[1][0], mat.m[1][2], mat.m[1][3], mat.m[2][0], mat.m[2][2], mat.m[2][3], mat.m[3][0], mat.m[3][2], mat.m[3][3]);
+    float A13 = +determinant(mat.m[1][0], mat.m[1][1], mat.m[1][3], mat.m[2][0], mat.m[2][1], mat.m[2][3], mat.m[3][0], mat.m[3][1], mat.m[3][3]);
+    float A14 = -determinant(mat.m[1][0], mat.m[1][1], mat.m[1][2], mat.m[2][0], mat.m[2][1], mat.m[2][2], mat.m[3][0], mat.m[3][1], mat.m[3][2]);
+
+    float A21 = -determinant(mat.m[0][1], mat.m[0][2], mat.m[0][3], mat.m[2][1], mat.m[2][2], mat.m[2][3], mat.m[3][1], mat.m[3][2], mat.m[3][3]);
+    float A22 = +determinant(mat.m[0][0], mat.m[0][2], mat.m[0][3], mat.m[2][0], mat.m[2][2], mat.m[2][3], mat.m[3][0], mat.m[3][2], mat.m[3][3]);
+    float A23 = -determinant(mat.m[0][0], mat.m[0][1], mat.m[0][3], mat.m[2][0], mat.m[2][1], mat.m[2][3], mat.m[3][0], mat.m[3][1], mat.m[3][3]);
+    float A24 = +determinant(mat.m[0][0], mat.m[0][1], mat.m[0][2], mat.m[2][0], mat.m[2][1], mat.m[2][2], mat.m[3][0], mat.m[3][1], mat.m[3][2]);
+
+    float A31 = +determinant(mat.m[0][1], mat.m[0][2], mat.m[0][3], mat.m[1][1], mat.m[1][2], mat.m[1][3], mat.m[3][1], mat.m[3][2], mat.m[3][3]);
+    float A32 = -determinant(mat.m[0][0], mat.m[0][2], mat.m[0][3], mat.m[1][0], mat.m[1][2], mat.m[1][3], mat.m[3][0], mat.m[3][2], mat.m[3][3]);
+    float A33 = +determinant(mat.m[0][0], mat.m[0][1], mat.m[0][3], mat.m[1][0], mat.m[1][1], mat.m[1][3], mat.m[3][0], mat.m[3][1], mat.m[3][3]);
+    float A34 = -determinant(mat.m[0][0], mat.m[0][1], mat.m[0][2], mat.m[1][0], mat.m[1][1], mat.m[1][2], mat.m[3][0], mat.m[3][1], mat.m[3][2]);
+
+    float A41 = -determinant(mat.m[0][1], mat.m[0][2], mat.m[0][3], mat.m[1][1], mat.m[1][2], mat.m[1][3], mat.m[2][1], mat.m[2][2], mat.m[2][3]);
+    float A42 = +determinant(mat.m[0][0], mat.m[0][2], mat.m[0][3], mat.m[1][0], mat.m[1][2], mat.m[1][3], mat.m[2][0], mat.m[2][2], mat.m[2][3]);
+    float A43 = -determinant(mat.m[0][0], mat.m[0][1], mat.m[0][3], mat.m[1][0], mat.m[1][1], mat.m[1][3], mat.m[2][0], mat.m[2][1], mat.m[2][3]);
+    float A44 = +determinant(mat.m[0][0], mat.m[0][1], mat.m[0][2], mat.m[1][0], mat.m[1][1], mat.m[1][2], mat.m[2][0], mat.m[2][1], mat.m[2][2]);
+
+    ZSMATRIX4x4 result = ZSMATRIX4x4(ZSVECTOR4(A11, A21, A31, A41), ZSVECTOR4(A12, A22, A32, A42), ZSVECTOR4(A13, A23, A33, A43),
+                                     ZSVECTOR4(A14, A24, A34, A44));
+    result = result * _determinant;
+    return result;
 }
 
 ZSMATRIX4x4 matrixLookAt(ZSVECTOR3 eye, ZSVECTOR3 center, ZSVECTOR3 up)
@@ -244,6 +307,24 @@ ZSMATRIX4x4 getRotationMat(ZSVECTOR3 rotation, ZSVECTOR3 center){
     result = result * getRotationMat(rotation);
     result = result * getTranslationMat(center * -1);
     return result;
+}
+
+ZSMATRIX4x4 getRotationMat(ZSQUATERNION quat){
+    float x2 = quat.X * quat.X;
+    float y2 = quat.Y * quat.Y;
+    float z2 = quat.Z * quat.Z;
+    float xy = quat.X * quat.Y;
+    float xz = quat.X * quat.Z;
+    float yz = quat.Y * quat.Z;
+    float wx = quat.W * quat.X;
+    float wy = quat.W * quat.Y;
+    float wz = quat.W * quat.Z;
+
+    // This calculation would be a lot more complicated for non-unit length quaternions // Note: The constructor of Matrix4 expects the Matrix in column-major format like expected by // OpenGL
+    ZSMATRIX4x4 rot = ZSMATRIX4x4( ZSVECTOR4(1.0f - 2.0f * (y2 + z2), 2.0f * (xy - wz), 2.0f * (xz + wy), 0.0f), ZSVECTOR4(2.0f * (xy + wz), 1.0f - 2.0f * (x2 + z2), 2.0f * (yz - wx), 0.0f)
+                                   , ZSVECTOR4(2.0f * (xz - wy), 2.0f * (yz + wx), 1.0f - 2.0f * (x2 + y2), 0.0f),
+                                   ZSVECTOR4(0.0f, 0.0f, 0.0f, 1.0f));
+    return rot;
 }
 
 ZSMATRIX4x4 getOrthogonal(float left, float right, float bottom, float top)

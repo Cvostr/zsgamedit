@@ -2,12 +2,13 @@
 
 #ifdef USE_ASSIMP //Optional
 static Assimp::Importer importer;
-static unsigned int loadflags = aiProcess_CalcTangentSpace | aiProcess_Triangulate | aiProcess_FlipUVs;
+static unsigned int loadflags = aiProcess_CalcTangentSpace | aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_JoinIdenticalVertices |
+        aiProcess_LimitBoneWeights;
 #endif
 
 #include <iostream>
 
-void cmat(aiMatrix4x4 matin, ZSMATRIX4x4* matout){
+void Engine::cmat(aiMatrix4x4 matin, ZSMATRIX4x4* matout){
 
     matout->m[0][0] = matin.a1; matout->m[0][1] = matin.b1;  matout->m[0][2] = matin.c1; matout->m[0][3] = matin.d1;
     matout->m[1][0] = matin.a2; matout->m[1][1] = matin.b2;  matout->m[1][2] = matin.c2; matout->m[1][3] = matin.d2;
@@ -24,6 +25,11 @@ unsigned int Engine::getMeshesAmount(std::string file_path){
     return scene->mNumMeshes;
 }
 
+unsigned int Engine::getAnimsAmount(std::string file_path){
+    const aiScene* scene = importer.ReadFile(file_path, loadflags);
+
+    return scene->mNumAnimations;
+}
 
 #ifdef USE_ASSIMP
 void Engine::processMesh(aiMesh* mesh, const aiScene* scene, ZSPIRE::Mesh* mesh_ptr) {
@@ -83,7 +89,7 @@ void Engine::processMesh(aiMesh* mesh, const aiScene* scene, ZSPIRE::Mesh* mesh_
             aiVertexWeight* vw = &bone_ptr->mWeights[vw_i];
             ZSVERTEX* vertex = &vertices_arr[vw->mVertexId];
 
-            if(vertex->bones_num + 1> MAX_BONE_PER_VERTEX)
+            if(vertex->bones_num + 1 > MAX_BONE_PER_VERTEX)
                 //Its better way to crash here
                 assert(0);
 
@@ -144,29 +150,77 @@ void Engine::loadMesh(std::string file_path, ZSPIRE::Mesh* mesh_ptr, int index){
     processMesh(scene->mMeshes[index], scene, mesh_ptr);
 }
 
+void Engine::loadAnimation(std::string file_path, ZSPIRE::Animation* anim, int index){
+    const aiScene* scene = importer.ReadFile(file_path, loadflags);
+    std::cout << "Loading animation " << scene->mAnimations[index]->mName.C_Str() << " from file " << file_path << std::endl;
+
+    aiAnimation* _anim = scene->mAnimations[index];
+    anim->name = std::string(_anim->mName.C_Str());
+    anim->duration = _anim->mDuration;
+    anim->TPS = _anim->mTicksPerSecond;
+    anim->NumChannels = _anim->mNumChannels;
+    //allocate channels
+    anim->channels = new ZSPIRE::AnimationChannel[anim->NumChannels];
+
+    for(unsigned int chan_i = 0; chan_i < anim->NumChannels; chan_i ++){
+        //Assimp channel
+        aiNodeAnim* ai_channel = _anim->mChannels[chan_i];
+        //ZSPIRE channel
+        ZSPIRE::AnimationChannel* channel = &anim->channels[chan_i];
+        //channel->bone_name = (ai_channel->mNodeName.C_Str());
+
+        for(unsigned int f_i = 0; f_i < ai_channel->mNodeName.length; f_i ++){
+            channel->bone_name.push_back(ai_channel->mNodeName.data[f_i]);
+        }
+
+        //Allocate all keys
+        channel->scalings = new ZSVECTOR3[ai_channel->mNumScalingKeys];
+        channel->positions = new ZSVECTOR3[ai_channel->mNumPositionKeys];
+        channel->rotations = new ZSQUATERNION[ai_channel->mNumRotationKeys];
+        //store keys amount
+        channel->posKeysNum = ai_channel->mNumPositionKeys;
+        channel->scaleKeysNum = ai_channel->mNumScalingKeys;
+        channel->rotationKeysNum = ai_channel->mNumRotationKeys;
+
+        for(unsigned int pos_k_i = 0; pos_k_i < channel->posKeysNum; pos_k_i ++){
+            ZSVECTOR3* pos_key = &channel->positions[pos_k_i];
+            aiVector3D ai_pos_key = ai_channel->mPositionKeys[pos_k_i].mValue;
+            *pos_key = ZSVECTOR3(ai_pos_key.x, ai_pos_key.y, ai_pos_key.z);
+        }
+        for(unsigned int scale_k_i = 0; scale_k_i < channel->scaleKeysNum; scale_k_i ++){
+            ZSVECTOR3* scale_key = &channel->scalings[scale_k_i];
+            aiVector3D ai_scale_key = ai_channel->mScalingKeys[scale_k_i].mValue;
+            *scale_key = ZSVECTOR3(ai_scale_key.x, ai_scale_key.y, ai_scale_key.z);
+        }
+        for(unsigned int rot_k_i = 0; rot_k_i < channel->rotationKeysNum; rot_k_i ++){
+            ZSQUATERNION* rot_key = &channel->rotations[rot_k_i];
+            aiQuaternion ai_rot_key = ai_channel->mRotationKeys[rot_k_i].mValue.Normalize();
+            *rot_key = ZSQUATERNION(ai_rot_key.x, ai_rot_key.y, ai_rot_key.z, ai_rot_key.w);
+        }
+
+    }
+}
 
 void Engine::loadNodeTree(std::string file_path, MeshNode* node){
     const aiScene* scene = importer.ReadFile(file_path, loadflags);
 
     MeshNode* root_node = new MeshNode;
-    aiMatrix4x4 id ;
-
-    processNodeForTree(root_node, scene->mRootNode, scene, aiVector3t<float>(1,1,1), aiVector3t<float>(0,0,0), aiVector3t<float>(0,0,0), id);
+    processNodeForTree(root_node, scene->mRootNode, scene);
 
     *node = *root_node;
 }
 
+ZSPIRE::AnimationChannel::AnimationChannel(){
 
-void Engine::processNodeForTree(MeshNode* node, aiNode* node_assimp, const aiScene* scene, aiVector3t<float> _node_scale,
-                                                                                            aiVector3t<float> _node_translation,
-                                                                                            aiVector3t<float> _node_rotation,
-                                                                                            aiMatrix4x4 parent ){
+}
+
+void Engine::processNodeForTree(MeshNode* node, aiNode* node_assimp, const aiScene* scene){
     node->node_label = node_assimp->mName.C_Str(); //assigning node name
 
     //Declare vectors to store decomposed transform components
     aiVector3t<float> node_scale;
     aiVector3t<float> node_translation;
-    aiVector3t<float> node_rotation;
+    aiQuaternion node_rotation;
 
     aiMatrix4x4 result_mat;
 
@@ -188,9 +242,10 @@ void Engine::processNodeForTree(MeshNode* node, aiNode* node_assimp, const aiSce
     node->translation = ZSVECTOR3(node_translation.x, node_translation.y, node_translation.z);
     node->scale = ZSVECTOR3(node_scale.x, node_scale.y, node_scale.z);
     //This f%cking rotation is in radians, blyat
-    node->rotation = ZSVECTOR3(node_rotation.x * 180.f / ZS_PI,
-                                   node_rotation.y * 180.f / ZS_PI,
-                                   node_rotation.z * 180.f / ZS_PI);
+    node->rotation = ZSQUATERNION(node_rotation.x,
+                                   node_rotation.y,
+                                   node_rotation.z,
+                                    node_rotation.w);
 
     //iterate over all meshes in this node
     unsigned int meshes_num = node_assimp->mNumMeshes;
@@ -205,7 +260,7 @@ void Engine::processNodeForTree(MeshNode* node, aiNode* node_assimp, const aiSce
         MeshNode mNode;
         mNode.node_label = child->mName.C_Str();
 
-        processNodeForTree(&mNode, child, scene, node_scale, node_translation, node_rotation, result_mat);
+        processNodeForTree(&mNode, child, scene);
         node->children.push_back(mNode);
     }
 }

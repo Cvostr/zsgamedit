@@ -404,16 +404,22 @@ void GameObject::Draw(RenderPipeline* pipeline){
 
                     GameObject* node = nullptr;
                     GameObject* RootNode = mesh_prop->skinning_root_node;
-                    if(RootNode != nullptr)
-                        node = mesh_prop->skinning_root_node->getChildObjectWithLabelStartsWith(QString::fromStdString(b->bone_name));
+                    ZSMATRIX4x4 rootNodeTransform = getIdentity();
+                    if(RootNode != nullptr){
+                        node = mesh_prop->skinning_root_node->getChildObjectWithNodeLabel(QString::fromStdString(b->bone_name));
+                        rootNodeTransform = (RootNode->getTransformProperty()->transform_mat);
+                    }
 
 
                     if(node != nullptr){
                         TransformProperty* transform = node->getPropertyPtr<TransformProperty>();
                         NodeProperty* nd = node->getPropertyPtr<NodeProperty>();
                         //Calculate result matrix
-                        ZSMATRIX4x4 matrix = mesh_prop->inverse * nd->abs;
+                        ZSMATRIX4x4 matrix = getIdentity();
+                        matrix = matrix * invert(rootNodeTransform) * nd->abs;
                         matrix = matrix * b->offset;
+
+                        matrix = matrix * nd->local_transform_mat;
 
                         glBindBuffer(GL_UNIFORM_BUFFER, pipeline->skinningUniformBuffer);
                         glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * bone_i, sizeof (ZSMATRIX4x4), &matrix);
