@@ -121,6 +121,7 @@ public slots:
     void onNewScript();
     void onNewMaterial();
 
+    void onImportResource();
     bool onCloseProject();
     void onBuildProject();
     void onRunProject();
@@ -189,6 +190,7 @@ public:
 
     void lookForResources(QString path); //Recursively walk through game directory and load founded resources
     void loadResource(Resource* resource);
+    void ImportResource(QString pathToResource);
 
     QString createNewTextFile(QString directory, QString name, QString ext, std::string content);
     void openFile(QString file_path); //Useful to open a file

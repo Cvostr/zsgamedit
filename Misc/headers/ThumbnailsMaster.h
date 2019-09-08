@@ -27,6 +27,8 @@ public:
     void DrawMaterial(Material* material);
     void DrawMesh(ZSPIRE::Mesh* mesh);
 
+    bool isAvailable(std::string name);
+
     ThumbnailsMaster();
     ~ThumbnailsMaster();
 };

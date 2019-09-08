@@ -242,6 +242,7 @@ public:
     ZSMATRIX4x4 abs;
 
     bool hasBone;
+    bool isAnimated;
 
     void addPropertyInterfaceToInspector(InspectorWin* inspector);
     void onPreRender(RenderPipeline* pipeline);

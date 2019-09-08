@@ -14,6 +14,8 @@
 #include <QDesktopServices>
 #include <QMessageBox>
 #include <mainwin.h>
+#include <fstream>
+
 
 EditWindow* _editor_win;
 InspectorWin* _inspector_win;
@@ -42,6 +44,7 @@ EditWindow::EditWindow(QWidget *parent) :
     QObject::connect(ui->actionCreateMaterial, SIGNAL(triggered()), this, SLOT(onNewMaterial()));
     QObject::connect(ui->actionCreateScript, SIGNAL(triggered()), this, SLOT(onNewScript()));
 
+    QObject::connect(ui->actionImport_Resource, SIGNAL(triggered()), this, SLOT(onImportResource()));
     QObject::connect(ui->actionClose_project, SIGNAL(triggered()), this, SLOT(onCloseProject()));
     QObject::connect(ui->actionBuild, SIGNAL(triggered(bool)), this, SLOT(onBuildProject()));
     QObject::connect(ui->actionRun, SIGNAL(triggered(bool)), this, SLOT(onRunProject()));
@@ -207,8 +210,12 @@ void EditWindow::assignIconFile(QListWidgetItem* item){
     }
     if(item->text().endsWith(".dds") || item->text().endsWith(".DDS")){
         QString path = this->current_dir + "/" + item->text();
-        QImage* img = thumb_master->texture_thumbnails.at(path.toStdString());
-        item->setIcon(QIcon(QPixmap::fromImage(*img)));
+        //Check, if we have thumbnail for this texture
+        if(thumb_master->isAvailable(path.toStdString())){
+            //Thumbnail exists
+            QImage* img = thumb_master->texture_thumbnails.at(path.toStdString());
+            item->setIcon(QIcon(QPixmap::fromImage(*img)));
+        }
     }
     if(item->text().endsWith(".fbx") || item->text().endsWith(".FBX")){
         item->setIcon(QIcon::fromTheme("applications-graphics"));
@@ -311,7 +318,8 @@ void EditWindow::onSceneSaveAs(){
 }
 
 void EditWindow::onOpenScene(){
-    QString path = QFileDialog::getOpenFileName(this, tr("Scene File"), project.root_path);
+    QString filter = tr("ZSpire Scene (*.scn *.SCN);;");
+    QString path = QFileDialog::getOpenFileName(this, tr("Scene File"), project.root_path, filter);
     if ( path.isNull() == false ) //If user specified file path
     {
         openFile(path);
@@ -490,6 +498,22 @@ void EditWindow::addNewTerrain(){
 void EditWindow::setupObjectsHieList(){
     QTreeWidget* w_ptr = ui->objsList; //Getting pointer to objects list widget
     w_ptr->clear(); //Clears widget
+}
+
+void EditWindow::onImportResource(){
+    QString dir = "/home";
+#ifdef _WIN32
+    dir = "C:\";
+#endif
+    QString filter = tr("GPU compressed texture (*.dds *.DDS);; 3D model (*.fbx * .FBX);; Sound (*.wav * .WAV);;");
+
+    QFileDialog dialog;
+    QString path = dialog.getOpenFileName(this, tr("Select Resource"), dir, filter);
+
+    if ( path.isNull() == false ) //If user specified file path
+    {
+        ImportResource(path);
+    }
 }
 
 bool EditWindow::onCloseProject(){
@@ -856,6 +880,51 @@ void EditWindow::lookForResources(QString path){
     }
 }
 
+void EditWindow::ImportResource(QString pathToResource){
+
+    bool copyResource = false;
+    bool workWithFbx = false;
+
+    if(pathToResource.endsWith(".dds") || pathToResource.endsWith(".DDS")){
+        copyResource = true;
+    }
+    if(pathToResource.endsWith(".fbx") || pathToResource.endsWith(".FBX")){
+        workWithFbx = true;
+    }
+    if(pathToResource.endsWith(".wav") || pathToResource.endsWith(".WAV")){
+        copyResource = true;
+    }
+    if(pathToResource.endsWith(".lua")){
+        copyResource = true;
+    }
+
+    if(copyResource){
+        std::ifstream res_stream;
+        res_stream.open(pathToResource.toStdString(), std::iostream::binary | std::iostream::ate);
+
+        if (res_stream.fail()) return;
+
+        int size = static_cast<int>(res_stream.tellg());
+        unsigned char* data_buffer = new unsigned char[size];
+
+        res_stream.seekg(0);
+        res_stream.read(reinterpret_cast<char*>(data_buffer), size);
+
+        QString _file_name;
+        int step = 1;
+        while(pathToResource[pathToResource.length() - step] != "/"){
+            _file_name.push_front(pathToResource[pathToResource.length() - step]);
+            step += 1;
+        }
+
+        std::ofstream resource_write_stream;
+        resource_write_stream.open((this->current_dir + "/" + _file_name).toStdString(), std::iostream::binary);
+        resource_write_stream.write(reinterpret_cast<char*>(data_buffer), size);
+        delete[] data_buffer;
+    }
+    updateFileList();
+}
+
 void EditWindow::loadResource(Resource* resource){
     switch(resource->type){
         case RESOURCE_TYPE_SCRIPT : {
@@ -875,7 +944,9 @@ void EditWindow::loadResource(Resource* resource){
             break;
         }
         case RESOURCE_TYPE_MESH:{
-
+            break;
+        }
+        case RESOURCE_TYPE_ANIMATION:{
             break;
         }
         case RESOURCE_TYPE_AUDIO:{
@@ -1111,9 +1182,11 @@ void EditWindow::onMouseMotion(int relX, int relY){
             obj_trstate.Xcf = 0;
             obj_trstate.Ycf = 0;
             obj_trstate.Zcf = 0;
-
+            //if mouse under red color, we modifying X axis
             if(color.r == 255) obj_trstate.Xcf = 1; else obj_trstate.Xcf = 0;
+            //if mouse under green color, we modifying Y axis
             if(color.g == 255) obj_trstate.Ycf = 1; else obj_trstate.Ycf = 0;
+            //if mouse under blue color, we modifying Z axis
             if(color.b == 255) obj_trstate.Zcf = 1; else obj_trstate.Zcf = 0;
         }
 
@@ -1186,12 +1259,18 @@ void EditWindow::onKeyDown(SDL_Keysym sym){
     }
     if(sym.sym == SDLK_w && !isSceneRun && !input_state.isLCtrlHold){
         ZSVECTOR3 pos = edit_camera.getCameraPosition(); //obtain position
-        pos.Y += 2.2f * deltaTime;
+        if(project.perspective == 2)
+            pos.Y += 2.2f * deltaTime;
+        else
+            pos = pos + edit_camera.getCameraFrontVec() * 1.2f * deltaTime;
         edit_camera.setPosition(pos);
     }
     if(sym.sym == SDLK_s && !isSceneRun && !input_state.isLCtrlHold){
         ZSVECTOR3 pos = edit_camera.getCameraPosition(); //obtain position
-        pos.Y -= 2.2f * deltaTime;
+        if(project.perspective == 2)
+            pos.Y -= 2.2f * deltaTime;
+        else
+            pos = pos - edit_camera.getCameraFrontVec() * 1.2f * deltaTime;
         edit_camera.setPosition(pos);
     }
 

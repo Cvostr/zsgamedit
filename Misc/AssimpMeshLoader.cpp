@@ -21,14 +21,16 @@ void Engine::cmat(aiMatrix4x4 matin, ZSMATRIX4x4* matout){
 
 unsigned int Engine::getMeshesAmount(std::string file_path){
     const aiScene* scene = importer.ReadFile(file_path, loadflags);
-
-    return scene->mNumMeshes;
+    unsigned int result = scene->mNumMeshes;
+    importer.FreeScene();
+    return result;
 }
 
 unsigned int Engine::getAnimsAmount(std::string file_path){
     const aiScene* scene = importer.ReadFile(file_path, loadflags);
-
-    return scene->mNumAnimations;
+    unsigned int result = scene->mNumAnimations;
+    importer.FreeScene();
+    return result;
 }
 
 #ifdef USE_ASSIMP
@@ -141,13 +143,15 @@ void Engine::loadMeshes(std::string file_path, ZSPIRE::Mesh* meshes_array){
     for(unsigned int mesh_i = 0; mesh_i < scene->mNumMeshes; mesh_i ++){
         processMesh(scene->mMeshes[mesh_i], scene, &meshes_array[mesh_i]);
     }
+    importer.FreeScene();
 }
 
 void Engine::loadMesh(std::string file_path, ZSPIRE::Mesh* mesh_ptr, int index){
     const aiScene* scene = importer.ReadFile(file_path, loadflags);
-     std::cout << "Loading mesh " << scene->mMeshes[index]->mName.C_Str() << " from file " << file_path << std::endl;
+    std::cout << "Loading mesh " << scene->mMeshes[index]->mName.C_Str() << " from file " << file_path << std::endl;
 
     processMesh(scene->mMeshes[index], scene, mesh_ptr);
+    importer.FreeScene();
 }
 
 void Engine::loadAnimation(std::string file_path, ZSPIRE::Animation* anim, int index){
@@ -181,7 +185,7 @@ void Engine::loadAnimation(std::string file_path, ZSPIRE::Animation* anim, int i
         channel->posKeysNum = ai_channel->mNumPositionKeys;
         channel->scaleKeysNum = ai_channel->mNumScalingKeys;
         channel->rotationKeysNum = ai_channel->mNumRotationKeys;
-
+        //Write all transform data
         for(unsigned int pos_k_i = 0; pos_k_i < channel->posKeysNum; pos_k_i ++){
             ZSVECTOR3* pos_key = &channel->positions[pos_k_i];
             aiVector3D ai_pos_key = ai_channel->mPositionKeys[pos_k_i].mValue;
@@ -194,11 +198,12 @@ void Engine::loadAnimation(std::string file_path, ZSPIRE::Animation* anim, int i
         }
         for(unsigned int rot_k_i = 0; rot_k_i < channel->rotationKeysNum; rot_k_i ++){
             ZSQUATERNION* rot_key = &channel->rotations[rot_k_i];
-            aiQuaternion ai_rot_key = ai_channel->mRotationKeys[rot_k_i].mValue.Normalize();
+            aiQuaternion ai_rot_key = ai_channel->mRotationKeys[rot_k_i].mValue;
             *rot_key = ZSQUATERNION(ai_rot_key.x, ai_rot_key.y, ai_rot_key.z, ai_rot_key.w);
         }
 
     }
+    importer.FreeScene();
 }
 
 void Engine::loadNodeTree(std::string file_path, MeshNode* node){
@@ -208,6 +213,7 @@ void Engine::loadNodeTree(std::string file_path, MeshNode* node){
     processNodeForTree(root_node, scene->mRootNode, scene);
 
     *node = *root_node;
+    importer.FreeScene();
 }
 
 ZSPIRE::AnimationChannel::AnimationChannel(){

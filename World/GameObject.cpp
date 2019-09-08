@@ -198,7 +198,7 @@ GameObject* GameObject::getChildObjectWithNodeLabel(QString label){
     for (unsigned int i = 0; i < this->children.size(); i ++) {
         GameObjectLink* l = &this->children[i];
         NodeProperty* node_p = l->updLinkPtr()->getPropertyPtr<NodeProperty>();
-        if(node_p->node_label.startsWith(label)) return l->updLinkPtr();
+        if(!node_p->node_label.compare(label)) return l->updLinkPtr();
 
         GameObject* obj_ch = l->updLinkPtr()->getChildObjectWithLabelStartsWith(label);
         if(obj_ch != nullptr) return obj_ch;

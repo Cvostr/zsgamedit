@@ -1553,6 +1553,7 @@ void TerrainProperty::copyTo(GameObjectProperty* dest){
 NodeProperty::NodeProperty(){
     type = GO_PROPERTY_TYPE_NODE;
     hasBone = false;
+    isAnimated = false;
     local_transform_mat = getIdentity();
     scale = ZSVECTOR3(1, 1, 1);
 }
@@ -1561,34 +1562,22 @@ void NodeProperty::onPreRender(RenderPipeline* pipeline){
 
     abs = transform_mat;
 
-    if(hasBone){
-        /*aiMatrix4x4 m(aiVector3D(scale.X, scale.Y, scale.Z),
-                      aiQuaternion(rotation.W, rotation.X, rotation.Y, rotation.Z),
-                      aiVector3D(translation.X, translation.Y, translation.Z));
-
-        Engine::cmat(m, &abs);
-        aiMatrix4x4 q = aiMatrix4x4(aiQuaternion(rotation.W, rotation.X, rotation.Y, rotation.Z).GetMatrix());
-        ZSMATRIX4x4 _q;
-        Engine::cmat(q, &_q);
-
-        ZSMATRIX4x4 tra = getTranslationMat(translation.X, translation.Y, translation.Z);
-        ZSMATRIX4x4 sca = getScaleMat(scale.X, scale.Y, scale.Z);
-
-        abs = sca * _q;
-        abs = abs * tra;*/
-
-        //aiMatrix4x4 m(aiVector3D(scale.X, scale.Y, scale.Z),
-        //                      aiQuaternion(rotation.W, rotation.X, rotation.Y, rotation.Z),
-        //                      aiVector3D(translation.X, translation.Y, translation.Z));
-        //Engine::cmat(m, &local_transform_mat);
+    if(isAnimated){
 
         ZSMATRIX4x4 tra = getTranslationMat(translation.X, translation.Y, translation.Z);
         ZSMATRIX4x4 rot = getRotationMat(this->rotation);
         ZSMATRIX4x4 sca = getScaleMat(scale.X, scale.Y, scale.Z);
 
+        local_transform_mat = (sca * rot * tra);
 
-        local_transform_mat = tra * rot;
-        //local_transform_mat = local_transform_mat * tra;
+        aiMatrix4x4 m(aiVector3D(scale.X, scale.Y, scale.Z),
+                              aiQuaternion(rotation.W, rotation.X, rotation.Y, rotation.Z),
+                              aiVector3D(translation.X, translation.Y, translation.Z));
+        Engine::cmat(m, &local_transform_mat);
+
+
+        abs = local_transform_mat;
+
     }
 
     if(!go_link.updLinkPtr()->hasParent) return;
@@ -1600,7 +1589,8 @@ void NodeProperty::onPreRender(RenderPipeline* pipeline){
 
     this->abs = nd->abs * abs;
 
-    this->local_transform_mat = nd->local_transform_mat * local_transform_mat;
+
+
 }
 
 void NodeProperty::updateChildren(){
@@ -1657,9 +1647,12 @@ void AnimationProperty::onPreRender(RenderPipeline* pipeline){
         GameObject* node = obj->getChildObjectWithNodeLabel(QString::fromStdString(ch->bone_name));
         NodeProperty* prop = node->getPropertyPtr<NodeProperty>();
 
+        prop->isAnimated = true;
+
         prop->translation = ch->positions[curFrame];
         prop->scale = ch->scalings[curFrame];
         prop->rotation = ch->rotations[curFrame];
+        //qNormalize(&prop->rotation);
 
     }
 }

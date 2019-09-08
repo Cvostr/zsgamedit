@@ -87,7 +87,7 @@ public:
 
     void render(SDL_Window* w, void* projectedit_ptr);
     void render2D(void* projectedit_ptr);
-    void render3D(void* projectedit_ptr);
+    void render3D(void* projectedit_ptr, ZSPIRE::Camera* cam);
     void renderDepth(void* world_ptr);
     unsigned int render_getpickedObj(void* projectedit_ptr, int mouseX, int mouseY);
     ZSRGBCOLOR getColorOfPickedTransformControl(ZSVECTOR3 translation, int mouseX, int mouseY);

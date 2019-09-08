@@ -104,6 +104,7 @@
     <addaction name="actionSave"/>
     <addaction name="actionSave_As"/>
     <addaction name="actionRun"/>
+    <addaction name="actionImport_Resource"/>
     <addaction name="separator"/>
     <addaction name="actionBuild"/>
     <addaction name="actionClose_project"/>
@@ -248,6 +249,11 @@
   <action name="actionPhysics_Settings">
    <property name="text">
     <string>Physics Settings</string>
+   </property>
+  </action>
+  <action name="actionImport_Resource">
+   <property name="text">
+    <string>Import Resource</string>
    </property>
   </action>
  </widget>

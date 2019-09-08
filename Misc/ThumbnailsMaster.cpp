@@ -118,3 +118,10 @@ void ThumbnailsMaster::DrawMaterial(Material* material){
 void ThumbnailsMaster::DrawMesh(ZSPIRE::Mesh* mesh){
     mesh->Draw();
 }
+
+bool ThumbnailsMaster::isAvailable(std::string name){
+   if(texture_thumbnails.count(name) > 0)
+       return true;
+   else
+    return false;
+}

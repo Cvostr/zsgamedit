@@ -33,7 +33,16 @@ int main(int argc, char *argv[])
             ZSENSDK::Input::MouseState* mstate = ZSENSDK::Input::getMouseStatePtr();
             while (SDL_PollEvent(&event))
             {
-                if (event.type == SDL_WINDOWEVENT) { //If user caused SDL window to close
+                if (event.type == SDL_WINDOWEVENT) { //If user caused SDL window to do something
+
+                    if(event.window.event == SDL_WINDOWEVENT_MINIMIZED){
+                        w.edit_win_ptr->hide();
+                        w.edit_win_ptr->getInspector()->hide();
+                    }
+                    if(event.window.event == SDL_WINDOWEVENT_RESTORED){
+                        w.edit_win_ptr->show();
+                        w.edit_win_ptr->getInspector()->show();
+                    }
                     if(event.window.event == SDL_WINDOWEVENT_RESIZED){
                         w.edit_win_ptr->setGameViewWindowSize(event.window.data1, event.window.data2);
                         //Write new settings

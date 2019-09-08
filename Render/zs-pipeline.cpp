@@ -264,7 +264,7 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr){
             break;
         }
         case 3:{
-            render3D(projectedit_ptr);
+            render3D(projectedit_ptr, cam);
             break;
         }
     }
@@ -299,15 +299,15 @@ void RenderPipeline::render2D(void* projectedit_ptr){
     setLightsToBuffer();
 
 }
-void RenderPipeline::render3D(void* projectedit_ptr)
+void RenderPipeline::render3D(void* projectedit_ptr, ZSPIRE::Camera* cam)
 {
     EditWindow* editwin_ptr = static_cast<EditWindow*>(projectedit_ptr);
     World* world_ptr = &editwin_ptr->world;
-    ZSPIRE::Camera* cam_ptr = nullptr; //We'll set it next
+    ZSPIRE::Camera* cam_ptr = cam; //We'll set it next
 
     ShadowCasterProperty* shadowcast = static_cast<ShadowCasterProperty*>(this->render_settings.shadowcaster_ptr);
-    if(shadowcast != nullptr){
-        shadowcast->Draw(cam_ptr, this);
+    if(shadowcast != nullptr){ //we have shadowcaster
+        shadowcast->Draw(cam_ptr, this); //draw shadowcaster
     }
 
     //Active Geometry framebuffer
@@ -414,12 +414,11 @@ void GameObject::Draw(RenderPipeline* pipeline){
                     if(node != nullptr){
                         TransformProperty* transform = node->getPropertyPtr<TransformProperty>();
                         NodeProperty* nd = node->getPropertyPtr<NodeProperty>();
+                        nd->bone_transform = b->offset;
                         //Calculate result matrix
                         ZSMATRIX4x4 matrix = getIdentity();
-                        matrix = matrix * invert(rootNodeTransform) * nd->abs;
-                        matrix = matrix * b->offset;
-
-                        matrix = matrix * nd->local_transform_mat;
+                        matrix = matrix * invert(rootNodeTransform) * nd->abs * b->offset;
+                       // matrix = matrix * nd->local_transform_mat;
 
                         glBindBuffer(GL_UNIFORM_BUFFER, pipeline->skinningUniformBuffer);
                         glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * bone_i, sizeof (ZSMATRIX4x4), &matrix);

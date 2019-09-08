@@ -19,6 +19,20 @@ void vNormalize(ZSVECTOR3* v)
 
 }
 
+void qNormalize(ZSQUATERNION* q){
+    float m = q->X * q->X + q->Y * q->Y + q->Z * q->Z + q->W * q->W;
+
+    if (REAL_NUM_EQ(m, 1) || REAL_NUM_EQ(m, 0))
+        return;
+
+    m = 1.f / sqrt(m);
+
+    q->X *= m;
+    q->Y *= m;
+    q->Z *= m;
+    q->W *= m;
+}
+
 ZSVECTOR3 vCross(ZSVECTOR3 v1, ZSVECTOR3 v2)
 {
 	ZSVECTOR3 out = ZSVECTOR3(v1.Y*v2.Z - v1.Z*v2.Y, v1.Z*v2.X - v1.X*v2.Z, v1.X*v2.Y - v1.Y*v2.X);
@@ -33,6 +47,19 @@ float vDot(ZSVECTOR3 v1, ZSVECTOR3 v2)
 bool isDistanceFits(ZSVECTOR3 pos1, ZSVECTOR3 pos2, float max_dist){
     float dist = getDistance(pos1, pos2);
     return dist <= max_dist ? true : false;
+}
+
+ZSVECTOR3 lerp(ZSVECTOR3 v1, ZSVECTOR3 v2, float factor){
+    ZSVECTOR3 result = v1 * (1.f - factor) + v2 * factor;
+    return result;
+}
+ZSQUATERNION slerp(ZSQUATERNION v1, ZSQUATERNION v2, float factor){
+    ZSQUATERNION result;
+
+    result.X = v1.X + (v2.X - v1.X) * factor;
+    result.X = v1.Y + (v2.Y - v1.Y) * factor;
+    result.X = v1.Z + (v2.Z - v1.Z) * factor;
+    return result;
 }
 
 ZSMATRIX4x4 getIdentity() {
