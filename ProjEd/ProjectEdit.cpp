@@ -16,7 +16,6 @@
 #include <mainwin.h>
 #include <fstream>
 
-
 EditWindow* _editor_win;
 InspectorWin* _inspector_win;
 EdActions* _ed_actions_container;
@@ -192,7 +191,7 @@ void EditWindow::init(){
             this->edit_camera.setProjectionType(ZSCAMERA_PROJECTION_PERSPECTIVE);
             edit_camera.setPosition(ZSVECTOR3(0,0,0));
             edit_camera.setFront(ZSVECTOR3(0,0,1));
-            edit_camera.setZplanes(0.1f, 2000.f);
+            edit_camera.setZplanes(0.1f, 5000.f);
             break;
         }
     }
@@ -278,7 +277,7 @@ void EditWindow::addFileToObjectList(QString file_path){
     if(file_path.endsWith(".prefab")){
         this->world.addObjectsFromPrefab(file_path);
     }
-    if(file_path.endsWith(".fbx") || file_path.endsWith(".FBX")){
+    if(file_path.endsWith(".fbx") || file_path.endsWith(".FBX") || file_path.endsWith(".dae") || file_path.endsWith(".DAE")){
         this->world.addMeshGroup(file_path.toStdString());
     }
 }
@@ -791,92 +790,103 @@ void EditWindow::lookForResources(QString path){
         QFileInfo fileInfo = list.at(i);  //get iterated file info
 
         if(fileInfo.isFile() == true){
-            QString name = fileInfo.fileName();
-            if(name.endsWith(".ttf") || name.endsWith(".TTF")){
-                GlyphFontContainer* gf_container = new GlyphFontContainer(fileInfo.absoluteFilePath().toStdString(), 48, this->glyph_manager);
-                //load font
-                gf_container->loadGlyphs();
-                //register font
-                glyph_manager->addFontContainer(gf_container);
-            }
-            if(name.endsWith(".DDS") || name.endsWith(".dds")){ //If its an texture
-                Resource resource;
-                resource.file_path = fileInfo.absoluteFilePath(); //Writing full path
-                resource.rel_path = resource.file_path; //Preparing to get relative path
-                resource.rel_path.remove(0, project.root_path.size() + 1); //Get relative path by removing length of project root from start
-                resource.resource_label = resource.rel_path.toStdString();
-                resource.type = RESOURCE_TYPE_TEXTURE; //Type is texture
-                loadResource(&resource); //Perform texture loading to OpenGL
-                this->project.resources.push_back(resource);
-            }
-            if(name.endsWith(".FBX") || name.endsWith(".fbx")){ //If its an mesh
-                //getting meshes amount
-                unsigned int num_meshes = Engine::getMeshesAmount(fileInfo.absoluteFilePath().toStdString());
-                unsigned int num_anims = Engine::getAnimsAmount(fileInfo.absoluteFilePath().toStdString());
-                //iterate to read all the meshes
-                for(unsigned int mesh_i = 0; mesh_i < num_meshes; mesh_i ++){
-                    Resource resource;
-                    resource.file_path = fileInfo.absoluteFilePath();
-                    resource.rel_path = resource.file_path; //Preparing to get relative path
-                    resource.rel_path.remove(0, project.root_path.size() + 1); //Get relative path by removing length of project root from start
-                    resource.type = RESOURCE_TYPE_MESH; //Type of resource is mesh
 
-                    resource.class_ptr = static_cast<void*>(new ZSPIRE::Mesh);
-
-                    this->project.resources.push_back(resource);
-                    Engine::loadMesh(fileInfo.absoluteFilePath().toStdString(), static_cast<ZSPIRE::Mesh*>(this->project.resources.back().class_ptr), static_cast<int>(mesh_i));
-                    this->project.resources.back().resource_label = static_cast<ZSPIRE::Mesh*>(this->project.resources.back().class_ptr)->mesh_label;
-                }
-                for(unsigned int anim_i = 0; anim_i < num_anims; anim_i ++){
-                    Resource resource;
-                    resource.file_path = fileInfo.absoluteFilePath();
-                    resource.rel_path = resource.file_path; //Preparing to get relative path
-                    resource.rel_path.remove(0, project.root_path.size() + 1); //Get relative path by removing length of project root from start
-                    resource.type = RESOURCE_TYPE_ANIMATION; //Type of resource is mesh
-
-                    resource.class_ptr = static_cast<void*>(new ZSPIRE::Animation);
-
-                    this->project.resources.push_back(resource);
-                    Engine::loadAnimation(fileInfo.absoluteFilePath().toStdString(), static_cast<ZSPIRE::Animation*>(this->project.resources.back().class_ptr), static_cast<int>(anim_i));
-                    this->project.resources.back().resource_label = static_cast<ZSPIRE::Animation*>(this->project.resources.back().class_ptr)->name;
-                }
-            }
-            if(name.endsWith(".WAV") || name.endsWith(".wav")){ //If its an mesh
-                Resource resource;
-                resource.file_path = fileInfo.absoluteFilePath();
-                resource.rel_path = resource.file_path; //Preparing to get relative path
-                resource.rel_path.remove(0, project.root_path.size() + 1); //Get relative path by removing length of project root from start
-                resource.resource_label = resource.rel_path.toStdString();
-                resource.type = RESOURCE_TYPE_AUDIO; //Type of resource is mesh
-                loadResource(&resource); //Perform mesh processing & loading to OpenGL
-                this->project.resources.push_back(resource);
-            }
-            if(name.endsWith(".ZSMAT") || name.endsWith(".zsmat")){ //If its an mesh
-                Resource resource;
-                resource.file_path = fileInfo.absoluteFilePath();
-                resource.rel_path = resource.file_path; //Preparing to get relative path
-                resource.rel_path.remove(0, project.root_path.size() + 1); //Get relative path by removing length of project root from start
-                resource.resource_label = resource.rel_path.toStdString();
-                resource.type = RESOURCE_TYPE_MATERIAL; //Type of resource is mesh
-                loadResource(&resource); //Perform mesh processing & loading to OpenGL
-                this->project.resources.push_back(resource);
-            }
-            if(name.endsWith(".lua") || name.endsWith(".LUA") || name.endsWith(".ZSCR") || name.endsWith(".zscr")){ //If its an mesh
-                Resource resource;
-                resource.file_path = fileInfo.absoluteFilePath();
-                resource.rel_path = resource.file_path; //Preparing to get relative path
-                resource.rel_path.remove(0, project.root_path.size() + 1); //Get relative path by removing length of project root from start
-                resource.resource_label = resource.rel_path.toStdString();
-                resource.type = RESOURCE_TYPE_SCRIPT; //Type of resource is mesh
-                loadResource(&resource); //Perform mesh processing & loading to OpenGL
-                this->project.resources.push_back(resource);
-            }
+            processResourceFile(fileInfo);
         }
 
         if(fileInfo.isDir() == true){ //If it is directory
             QString newdir_str = path + "/" + fileInfo.fileName();
             lookForResources(newdir_str); //Call this function inside next dir
         }
+    }
+}
+
+void EditWindow::processResourceFile(QFileInfo fileInfo){
+    QString name = fileInfo.fileName();
+    QString absfpath = fileInfo.absoluteFilePath();
+    if(name.endsWith(".ttf") || name.endsWith(".TTF")){
+        GlyphFontContainer* gf_container = new GlyphFontContainer(fileInfo.absoluteFilePath().toStdString(), 48, this->glyph_manager);
+        //load font
+        gf_container->loadGlyphs();
+        //register font
+        glyph_manager->addFontContainer(gf_container);
+    }
+    if(name.endsWith(".DDS") || name.endsWith(".dds")){ //If its an texture
+        Resource resource;
+        resource.file_path = absfpath; //Writing full path
+        resource.rel_path = resource.file_path; //Preparing to get relative path
+        resource.rel_path.remove(0, project.root_path.size() + 1); //Get relative path by removing length of project root from start
+        resource.resource_label = resource.rel_path.toStdString();
+        resource.type = RESOURCE_TYPE_TEXTURE; //Type is texture
+        loadResource(&resource); //Perform texture loading to OpenGL
+        this->project.resources.push_back(resource);
+    }
+    if(name.endsWith(".FBX") || name.endsWith(".fbx") || name.endsWith(".DAE") || name.endsWith(".dae")){ //If its an mesh
+        //getting meshes amount
+        unsigned int num_meshes = 0;
+        unsigned int num_anims = 0;
+
+        Engine::getSizes(absfpath.toStdString(), &num_meshes, &num_anims);
+        //iterate to read all the meshes
+        for(unsigned int mesh_i = 0; mesh_i < num_meshes; mesh_i ++){
+            Resource resource;
+            resource.file_path = absfpath;
+            resource.rel_path = resource.file_path; //Preparing to get relative path
+            resource.rel_path.remove(0, project.root_path.size() + 1); //Get relative path by removing length of project root from start
+            resource.type = RESOURCE_TYPE_MESH; //Type of resource is mesh
+
+            resource.class_ptr = static_cast<void*>(new ZSPIRE::Mesh);
+
+            this->project.resources.push_back(resource);
+            Engine::loadMesh(fileInfo.absoluteFilePath().toStdString(), static_cast<ZSPIRE::Mesh*>(this->project.resources.back().class_ptr), static_cast<int>(mesh_i));
+            this->project.resources.back().resource_label = static_cast<ZSPIRE::Mesh*>(this->project.resources.back().class_ptr)->mesh_label;
+        }
+        for(unsigned int anim_i = 0; anim_i < num_anims; anim_i ++){
+            Resource resource;
+            resource.file_path = fileInfo.absoluteFilePath();
+            resource.rel_path = resource.file_path; //Preparing to get relative path
+            resource.rel_path.remove(0, project.root_path.size() + 1); //Get relative path by removing length of project root from start
+            resource.type = RESOURCE_TYPE_ANIMATION; //Type of resource is mesh
+
+            resource.class_ptr = static_cast<void*>(new ZSPIRE::Animation);
+
+            this->project.resources.push_back(resource);
+            Engine::loadAnimation(fileInfo.absoluteFilePath().toStdString(), static_cast<ZSPIRE::Animation*>(this->project.resources.back().class_ptr), static_cast<int>(anim_i));
+            ZSPIRE::Animation* anim_ptr = static_cast<ZSPIRE::Animation*>(this->project.resources.back().class_ptr);
+            this->project.resources.back().resource_label = anim_ptr->name;
+
+            //if(this->project.resources.back().resource_label.isE)
+        }
+    }
+    if(name.endsWith(".WAV") || name.endsWith(".wav")){ //If its an mesh
+        Resource resource;
+        resource.file_path = fileInfo.absoluteFilePath();
+        resource.rel_path = resource.file_path; //Preparing to get relative path
+        resource.rel_path.remove(0, project.root_path.size() + 1); //Get relative path by removing length of project root from start
+        resource.resource_label = resource.rel_path.toStdString();
+        resource.type = RESOURCE_TYPE_AUDIO; //Type of resource is mesh
+        loadResource(&resource); //Perform mesh processing & loading to OpenGL
+        this->project.resources.push_back(resource);
+    }
+    if(name.endsWith(".ZSMAT") || name.endsWith(".zsmat")){ //If its an mesh
+        Resource resource;
+        resource.file_path = fileInfo.absoluteFilePath();
+        resource.rel_path = resource.file_path; //Preparing to get relative path
+        resource.rel_path.remove(0, project.root_path.size() + 1); //Get relative path by removing length of project root from start
+        resource.resource_label = resource.rel_path.toStdString();
+        resource.type = RESOURCE_TYPE_MATERIAL; //Type of resource is mesh
+        loadResource(&resource); //Perform mesh processing & loading to OpenGL
+        this->project.resources.push_back(resource);
+    }
+    if(name.endsWith(".lua") || name.endsWith(".LUA") || name.endsWith(".ZSCR") || name.endsWith(".zscr")){ //If its an mesh
+        Resource resource;
+        resource.file_path = fileInfo.absoluteFilePath();
+        resource.rel_path = resource.file_path; //Preparing to get relative path
+        resource.rel_path.remove(0, project.root_path.size() + 1); //Get relative path by removing length of project root from start
+        resource.resource_label = resource.rel_path.toStdString();
+        resource.type = RESOURCE_TYPE_SCRIPT; //Type of resource is mesh
+        loadResource(&resource); //Perform mesh processing & loading to OpenGL
+        this->project.resources.push_back(resource);
     }
 }
 
@@ -909,6 +919,7 @@ void EditWindow::ImportResource(QString pathToResource){
 
         res_stream.seekg(0);
         res_stream.read(reinterpret_cast<char*>(data_buffer), size);
+        res_stream.close();
 
         QString _file_name;
         int step = 1;
@@ -920,7 +931,10 @@ void EditWindow::ImportResource(QString pathToResource){
         std::ofstream resource_write_stream;
         resource_write_stream.open((this->current_dir + "/" + _file_name).toStdString(), std::iostream::binary);
         resource_write_stream.write(reinterpret_cast<char*>(data_buffer), size);
+        resource_write_stream.close();
         delete[] data_buffer;
+        //Register new resource
+        processResourceFile(QFileInfo(this->current_dir + "/" + _file_name));
     }
     updateFileList();
 }

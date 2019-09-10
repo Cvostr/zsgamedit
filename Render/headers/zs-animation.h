@@ -4,6 +4,10 @@
 #include <string>
 #include "zs-math.h"
 
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+
 namespace ZSPIRE {
 
 class AnimationChannel{
@@ -14,9 +18,13 @@ public:
     unsigned int scaleKeysNum;
     unsigned int rotationKeysNum;
 
-    ZSVECTOR3* positions;
-    ZSVECTOR3* scalings;
-    ZSQUATERNION* rotations;
+    //ZSVECTOR3* positions;
+    //ZSVECTOR3* scalings;
+    //ZSQUATERNION* rotations;
+
+    aiVector3D* pos;
+    aiVector3D* scale;
+    aiQuaternion* rot;
 
     AnimationChannel();
 };
@@ -29,6 +37,8 @@ public:
 
     unsigned int NumChannels;
     AnimationChannel* channels;
+
+    AnimationChannel* getChannelByNodeName(std::string node_name);
 
 };
 

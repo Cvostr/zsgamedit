@@ -231,15 +231,15 @@ class NodeProperty : public GameObjectProperty {
 public:
     QString node_label;
 
-    ZSVECTOR3 translation;
-    ZSVECTOR3 scale;
-    ZSQUATERNION rotation;
+    aiVector3D translation;
+    aiVector3D scale;
+    aiQuaternion rotation;
 
-    ZSMATRIX4x4 local_transform_mat;
-    ZSMATRIX4x4 transform_mat;
-    ZSMATRIX4x4 bone_transform;
+    //ZSMATRIX4x4 local_transform_mat;
+    aiMatrix4x4 transform_mat;
+    //ZSMATRIX4x4 bone_transform;
 
-    ZSMATRIX4x4 abs;
+    aiMatrix4x4 abs;
 
     bool hasBone;
     bool isAnimated;
@@ -263,6 +263,9 @@ public:
     void onPreRender(RenderPipeline* pipeline);
     void onValueChanged();
     //void copyTo(GameObjectProperty* dest);
+
+    void updateNodeTransform(GameObject* obj, aiMatrix4x4 parent);
+
 
     AnimationProperty();
 };

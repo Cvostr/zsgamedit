@@ -5,7 +5,7 @@
 #-------------------------------------------------
 
 QT       += core gui widgets
-unix:LIBS += -lGLEW -lSDL2 -lopenal -llua5.3 -lassimp -lvulkan -lfreetype -lBulletSoftBody -lBulletDynamics -lBulletCollision -lLinearMath
+unix:LIBS += -lGLEW -lSDL2 -lopenal -llua5.3 -lvulkan -lassimp -lIrrXML -lz -lfreetype -lBulletSoftBody -lBulletDynamics -lBulletCollision -lLinearMath
 unix:INCLUDEPATH += /usr/include/freetype2/
 unix:INCLUDEPATH += /usr/include/bullet/
 
@@ -167,3 +167,4 @@ DEPENDPATH += $$PWD/../Engine/headers
 
 #win32:!win32-g++: PRE_TARGETDEPS += $$PWD/../build-ZSpireEngine-Desktop-Debug/zsengine.lib
 unix: PRE_TARGETDEPS += $$PWD/../build-ZSpireEngine-Desktop-Debug/libzsengine.a
+

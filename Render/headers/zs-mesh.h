@@ -5,7 +5,9 @@
 
 #define NO_INDICES 0
 
-
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
 
 #ifndef zs_mesh
 #define zs_mesh
@@ -15,11 +17,8 @@ namespace ZSPIRE {
     class Bone{
     public:
         std::string bone_name;
-        ZSMATRIX4x4 offset;
-
-        ZSVECTOR3 pos;
-        ZSVECTOR3 scale;
-        ZSVECTOR3 rot;
+        //ZSMATRIX4x4 offset;
+        aiMatrix4x4 offset;
 
         uint vertices_affected;
 

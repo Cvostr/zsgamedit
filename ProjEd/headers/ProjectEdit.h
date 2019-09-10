@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QTreeWidget>
 #include <QListWidget>
+#include <QFileInfo>
 #include <QMenu>
 #include <SDL2/SDL.h>
 #include <fstream>
@@ -189,6 +190,7 @@ public:
     void setViewDirectory(QString dir_path);
 
     void lookForResources(QString path); //Recursively walk through game directory and load founded resources
+    void processResourceFile(QFileInfo fileInfo);
     void loadResource(Resource* resource);
     void ImportResource(QString pathToResource);
 
