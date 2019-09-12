@@ -192,7 +192,7 @@
     bool isDistanceFits(ZSVECTOR3 pos1, ZSVECTOR3 pos2, float max_dist);
 
     ZSVECTOR3 lerp(ZSVECTOR3 v1, ZSVECTOR3 v2, float factor);
-    ZSQUATERNION slerp(ZSQUATERNION v1, ZSQUATERNION v2, float factor);
+    ZSQUATERNION slerp(ZSQUATERNION q1, ZSQUATERNION q2, float factor);
 
 	ZSMATRIX4x4 getIdentity();
 	ZSMATRIX4x4 transpose(ZSMATRIX4x4 mat);

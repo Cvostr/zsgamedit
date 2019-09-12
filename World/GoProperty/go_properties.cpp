@@ -1561,10 +1561,6 @@ NodeProperty::NodeProperty(){
 void NodeProperty::onPreRender(RenderPipeline* pipeline){
 }
 
-void NodeProperty::updateChildren(){
-
-}
-
 void NodeProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
     //Float3PropertyArea* area_pos = new Float3PropertyArea; //New property area
     //area_pos->setLabel("Position"); //Its label
@@ -1587,9 +1583,7 @@ AnimationProperty::AnimationProperty(){
 }
 
 void onPlay(){
-    //current_anim->curFrame += 1;
-
-    current_anim->start_sec = (double)SDL_GetTicks() / 1000.f;
+    current_anim->start_sec = (static_cast<double>(SDL_GetTicks()) / 1000);
     current_anim->Playing = true;
 }
 
@@ -1614,7 +1608,7 @@ void AnimationProperty::onPreRender(RenderPipeline* pipeline){
 
     if(this->anim_prop_ptr != nullptr && Playing){
 
-        double curTime = ((double)SDL_GetTicks() / 1000.f) - this->start_sec;
+        double curTime = (static_cast<double>(SDL_GetTicks()) / 1000) - this->start_sec;
         double Ticks = anim_prop_ptr->TPS * curTime;
         double animTime = fmod(Ticks, anim_prop_ptr->duration);
 
@@ -1625,9 +1619,9 @@ void AnimationProperty::onPreRender(RenderPipeline* pipeline){
 
             prop->isAnimated = true;
 
-            prop->translation = ch->getPosition(animTime);
-            prop->scale = ch->getScale(animTime);
-            prop->rotation = ch->getRotation(animTime);
+            prop->translation = ch->getPostitionInterpolated(animTime);
+            prop->scale = ch->getScaleInterpolated(animTime);
+            prop->rotation = ch->getRotationInterpolated(animTime);
         }
     }
     aiMatrix4x4 identity_matrix;
@@ -1641,7 +1635,6 @@ void AnimationProperty::updateNodeTransform(GameObject* obj, aiMatrix4x4 parent)
     NodeProperty* prop = obj->getPropertyPtr<NodeProperty>();
     if(!prop) return;
 
-    //prop->abs = prop->transform_mat;
     aiMatrix4x4 global = prop->transform_mat;
 
     if(this->anim_prop_ptr != nullptr){
@@ -1653,7 +1646,8 @@ void AnimationProperty::updateNodeTransform(GameObject* obj, aiMatrix4x4 parent)
 
             // Interpolate rotation and generate rotation transformation matrix
             aiMatrix4x4 RotationM;
-            RotationM = aiMatrix4x4(prop->rotation.GetMatrix());
+            aiQuaternion q = aiQuaternion(prop->rotation.W, prop->rotation.X, prop->rotation.Y, prop->rotation.Z);
+            RotationM = aiMatrix4x4(q.GetMatrix());
 
             // Interpolate translation and generate translation transformation matrix
             aiVector3D pos = aiVector3D(prop->translation.X, prop->translation.Y, prop->translation.Z);

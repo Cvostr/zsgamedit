@@ -233,7 +233,7 @@ public:
 
     ZSVECTOR3 translation;
     ZSVECTOR3 scale;
-    aiQuaternion rotation;
+    ZSQUATERNION rotation;
 
     aiMatrix4x4 transform_mat;
 
@@ -244,7 +244,6 @@ public:
 
     void addPropertyInterfaceToInspector(InspectorWin* inspector);
     void onPreRender(RenderPipeline* pipeline);
-    void updateChildren();
     //void copyTo(GameObjectProperty* dest);
 
     NodeProperty();
@@ -256,7 +255,7 @@ private:
 
 public:
     bool Playing;
-        double start_sec;
+    double start_sec;
 
     ZSPIRE::Animation* anim_prop_ptr;
     QString anim_label;

@@ -154,6 +154,7 @@ void Engine::loadAnimation(std::string file_path, ZSPIRE::Animation* anim, int i
         aiNodeAnim* ai_channel = _anim->mChannels[chan_i];
         //ZSPIRE channel
         ZSPIRE::AnimationChannel* channel = &anim->channels[chan_i];
+        channel->anim_ptr = anim; //Set pointer
         //Copy name
         for(unsigned int f_i = 0; f_i < ai_channel->mNodeName.length; f_i ++){
             channel->bone_name.push_back(ai_channel->mNodeName.data[f_i]);
@@ -162,7 +163,7 @@ void Engine::loadAnimation(std::string file_path, ZSPIRE::Animation* anim, int i
         //Allocate all keys
         channel->scale = new ZSVECTOR3[ai_channel->mNumScalingKeys];
         channel->pos = new ZSVECTOR3[ai_channel->mNumPositionKeys];
-        channel->rot = new aiQuaternion[ai_channel->mNumRotationKeys];
+        channel->rot = new ZSQUATERNION[ai_channel->mNumRotationKeys];
         //Allocate times for keys
         channel->posTimes = new double[ai_channel->mNumPositionKeys];
         channel->scaleTimes = new double[ai_channel->mNumScalingKeys];
@@ -178,21 +179,18 @@ void Engine::loadAnimation(std::string file_path, ZSPIRE::Animation* anim, int i
             channel->pos[pos_k_i] = ZSVECTOR3(ai_pos_key.x, ai_pos_key.y, ai_pos_key.z);
 
             channel->posTimes[pos_k_i] = ai_channel->mPositionKeys[pos_k_i].mTime;
-           // *pos_key = ZSVECTOR3(ai_pos_key.x, ai_pos_key.y, ai_pos_key.z);
         }
         for(unsigned int scale_k_i = 0; scale_k_i < channel->scaleKeysNum; scale_k_i ++){
             aiVector3D ai_scale_key = ai_channel->mScalingKeys[scale_k_i].mValue;
             channel->scale[scale_k_i] = ZSVECTOR3(ai_scale_key.x, ai_scale_key.y, ai_scale_key.z);
 
             channel->scaleTimes[scale_k_i] = ai_channel->mScalingKeys[scale_k_i].mTime;
-            //*scale_key = ZSVECTOR3(ai_scale_key.x, ai_scale_key.y, ai_scale_key.z);
         }
         for(unsigned int rot_k_i = 0; rot_k_i < channel->rotationKeysNum; rot_k_i ++){
             aiQuaternion ai_rot_key = ai_channel->mRotationKeys[rot_k_i].mValue.Normalize();
-            channel->rot[rot_k_i] = ai_rot_key;
+            channel->rot[rot_k_i] = ZSQUATERNION(ai_rot_key.x, ai_rot_key.y, ai_rot_key.z, ai_rot_key.w);
 
             channel->rotTimes[rot_k_i] = ai_channel->mRotationKeys[rot_k_i].mTime;
-            //*rot_key = ZSQUATERNION(ai_rot_key.x, ai_rot_key.y, ai_rot_key.z, ai_rot_key.w);
         }
 
     }
@@ -209,46 +207,6 @@ void Engine::loadNodeTree(std::string file_path, MeshNode* node){
     importer.FreeScene();
 }
 
-ZSPIRE::AnimationChannel::AnimationChannel(){
-
-}
-
-ZSPIRE::AnimationChannel* ZSPIRE::Animation::getChannelByNodeName(std::string node_name){
-    for(unsigned int i = 0; i < this->NumChannels; i ++){
-        AnimationChannel* cha = &this->channels[i];
-        if(cha->bone_name.compare(node_name) == false) return cha;
-    }
-    return nullptr;
-}
-
-ZSVECTOR3 ZSPIRE::AnimationChannel::getPosition(double Time){
-    for(unsigned int i = 0; i < this->posKeysNum - 1; i ++){
-        if(posTimes[i + 1] > Time){
-            ZSVECTOR3 _v = pos[i];
-            return _v;
-        }
-    }
-    assert(0);
-    return pos[0];
-}
-ZSVECTOR3 ZSPIRE::AnimationChannel::getScale(double Time){
-    for(unsigned int i = 0; i < this->scaleKeysNum - 1; i ++){
-        if(scaleTimes[i + 1] > Time)
-            return scale[i];
-    }
-    assert(0);
-    return scale[0];
-}
-aiQuaternion ZSPIRE::AnimationChannel::getRotation(double Time){
-    for(unsigned int i = 0; i < this->rotationKeysNum - 1; i ++){
-        if(rotTimes[i + 1] > Time){
-            aiQuaternion q = rot[i];
-            return q;
-        }
-    }
-    assert(0);
-    return rot[0];
-}
 
 void Engine::processNodeForTree(MeshNode* node, aiNode* node_assimp, const aiScene* scene){
     node->node_label = node_assimp->mName.C_Str(); //assigning node name

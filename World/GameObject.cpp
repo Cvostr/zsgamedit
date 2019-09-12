@@ -40,7 +40,7 @@ GameObject::GameObject(){
     props_num = 0;
     label = nullptr;
 
-    for(int prop_i = 0; prop_i < OBJ_PROPS_SIZE; prop_i ++){ //iterate over all property pointers and clear them
+    for(unsigned int prop_i = 0; prop_i < OBJ_PROPS_SIZE; prop_i ++){ //iterate over all property pointers and clear them
         properties[prop_i] = nullptr;
     }
 }

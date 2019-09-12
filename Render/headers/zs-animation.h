@@ -4,34 +4,9 @@
 #include <string>
 #include "zs-math.h"
 
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
-
 namespace ZSPIRE {
 
-class AnimationChannel{
-public:
-    std::string bone_name;
-
-    unsigned int posKeysNum;
-    unsigned int scaleKeysNum;
-    unsigned int rotationKeysNum;
-
-    ZSVECTOR3* pos;
-    ZSVECTOR3* scale;
-    aiQuaternion* rot;
-
-    double* posTimes;
-    double* scaleTimes;
-    double* rotTimes;
-
-    ZSVECTOR3 getPosition(double Time);
-    ZSVECTOR3 getScale(double Time);
-    aiQuaternion getRotation(double Time);
-
-    AnimationChannel();
-};
+class AnimationChannel;
 
 class Animation{
 public:
@@ -44,6 +19,34 @@ public:
 
     AnimationChannel* getChannelByNodeName(std::string node_name);
 
+};
+
+class AnimationChannel{
+public:
+    std::string bone_name;
+    Animation* anim_ptr;
+
+    unsigned int posKeysNum;
+    unsigned int scaleKeysNum;
+    unsigned int rotationKeysNum;
+
+    ZSVECTOR3* pos;
+    ZSVECTOR3* scale;
+    ZSQUATERNION* rot;
+
+    double* posTimes;
+    double* scaleTimes;
+    double* rotTimes;
+
+    unsigned int getPositionIndex(double Time);
+    unsigned int getScaleIndex(double Time);
+    unsigned int getRotationIndex(double Time);
+
+    ZSVECTOR3 getPostitionInterpolated(double Time);
+    ZSVECTOR3 getScaleInterpolated(double Time);
+    ZSQUATERNION getRotationInterpolated(double Time);
+
+    AnimationChannel();
 };
 
 }
