@@ -1555,42 +1555,10 @@ NodeProperty::NodeProperty(){
     hasBone = false;
     isAnimated = false;
     //local_transform_mat = getIdentity();
-    scale = aiVector3D(1, 1, 1);
+    scale = ZSVECTOR3(1, 1, 1);
 }
 
 void NodeProperty::onPreRender(RenderPipeline* pipeline){
-/*
-    abs = transform_mat;
-
-    if(isAnimated){
-        aiVector3D Scaling = scale;
-        aiMatrix4x4 ScalingM;
-        aiMatrix4x4::Scaling(Scaling, ScalingM);
-
-        // Interpolate rotation and generate rotation transformation matrix
-        aiQuaternion RotationQ = rotation;
-        aiMatrix4x4 RotationM;
-        RotationM = aiMatrix4x4(RotationQ.GetMatrix());
-
-        // Interpolate translation and generate translation transformation matrix
-        aiVector3D Translation = translation;
-        aiMatrix4x4 TranslationM;
-        aiMatrix4x4::Translation(Translation, TranslationM);
-
-        aiMatrix4x4 NodeTransformation = TranslationM * RotationM * ScalingM;
-        abs = NodeTransformation;
-
-    }
-
-    if(!go_link.updLinkPtr()->hasParent) return;
-
-    GameObject* parent = go_link.updLinkPtr()->parent.updLinkPtr();
-    NodeProperty* nd = parent->getPropertyPtr<NodeProperty>();
-
-    if(nd == nullptr) return;
-
-    this->abs = nd->abs * abs;
-*/
 }
 
 void NodeProperty::updateChildren(){
@@ -1613,12 +1581,16 @@ void NodeProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
 
 AnimationProperty::AnimationProperty(){
     type = GO_PROPERTY_TYPE_ANIMATION;
-    curFrame = 0;
     anim_prop_ptr = nullptr;
+    Playing = false;
+    start_sec = 0;
 }
 
 void onPlay(){
-    current_anim->curFrame += 1;
+    //current_anim->curFrame += 1;
+
+    current_anim->start_sec = (double)SDL_GetTicks() / 1000.f;
+    current_anim->Playing = true;
 }
 
 void AnimationProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
@@ -1632,63 +1604,75 @@ void AnimationProperty::addPropertyInterfaceToInspector(InspectorWin* inspector)
 
     AreaButton* btn = new AreaButton;
     btn->onPressFuncPtr = &onPlay;
-    btn->button->setText("Next frame"); //Setting text to qt button
+    btn->button->setText("Play"); //Setting text to qt button
     inspector->getContentLayout()->addWidget(btn->button);
     btn->insp_ptr = inspector; //Setting inspector pointer
     inspector->registerUiObject(btn);
 }
 void AnimationProperty::onPreRender(RenderPipeline* pipeline){
     GameObject* obj = go_link.updLinkPtr();
-    updateNodeTransform(obj, aiMatrix4x4());
-    if(this->anim_prop_ptr == nullptr) return;
 
-    for(unsigned int channels_i = 0; channels_i < this->anim_prop_ptr->NumChannels; channels_i ++){
-        ZSPIRE::AnimationChannel* ch = &anim_prop_ptr->channels[channels_i];
-        GameObject* node = obj->getChildObjectWithNodeLabel(QString::fromStdString(ch->bone_name));
-        NodeProperty* prop = node->getPropertyPtr<NodeProperty>();
+    if(this->anim_prop_ptr != nullptr && Playing){
 
-        //prop->isAnimated = true;
+        double curTime = ((double)SDL_GetTicks() / 1000.f) - this->start_sec;
+        double Ticks = anim_prop_ptr->TPS * curTime;
+        double animTime = fmod(Ticks, anim_prop_ptr->duration);
 
-        prop->translation = ch->pos[curFrame];
-        prop->scale = ch->scale[curFrame];
-        prop->rotation = ch->rot[curFrame];
+        for(unsigned int channels_i = 0; channels_i < this->anim_prop_ptr->NumChannels; channels_i ++){
+            ZSPIRE::AnimationChannel* ch = &anim_prop_ptr->channels[channels_i];
+            GameObject* node = obj->getChildObjectWithNodeLabel(QString::fromStdString(ch->bone_name));
+            NodeProperty* prop = node->getPropertyPtr<NodeProperty>();
 
-       // qNormalize(&prop->rotation);
+            prop->isAnimated = true;
 
+            prop->translation = ch->getPosition(animTime);
+            prop->scale = ch->getScale(animTime);
+            prop->rotation = ch->getRotation(animTime);
+        }
     }
+    aiMatrix4x4 identity_matrix;
+    updateNodeTransform(obj, identity_matrix);
 }
 
 void AnimationProperty::updateNodeTransform(GameObject* obj, aiMatrix4x4 parent){
+
+
     if(!obj) return;
     NodeProperty* prop = obj->getPropertyPtr<NodeProperty>();
     if(!prop) return;
 
-    prop->abs = prop->transform_mat;
+    //prop->abs = prop->transform_mat;
+    aiMatrix4x4 global = prop->transform_mat;
 
     if(this->anim_prop_ptr != nullptr){
-        if(this->anim_prop_ptr->getChannelByNodeName(prop->node_label.toStdString())){
-        aiMatrix4x4 ScalingM;
-        aiMatrix4x4::Scaling(prop->scale, ScalingM);
+        ZSPIRE::AnimationChannel* cha = this->anim_prop_ptr->getChannelByNodeName(prop->node_label.toStdString());
+        if(cha){
+            aiVector3D sca = aiVector3D(prop->scale.X, prop->scale.Y, prop->scale.Z);
+            aiMatrix4x4 ScalingM;
+            aiMatrix4x4::Scaling(sca, ScalingM);
 
-        // Interpolate rotation and generate rotation transformation matrix
-        aiMatrix4x4 RotationM;
-        RotationM = aiMatrix4x4(prop->rotation.GetMatrix());
+            // Interpolate rotation and generate rotation transformation matrix
+            aiMatrix4x4 RotationM;
+            RotationM = aiMatrix4x4(prop->rotation.GetMatrix());
 
-        // Interpolate translation and generate translation transformation matrix
-        aiMatrix4x4 TranslationM;
-        aiMatrix4x4::Translation(prop->translation, TranslationM);
+            // Interpolate translation and generate translation transformation matrix
+            aiVector3D pos = aiVector3D(prop->translation.X, prop->translation.Y, prop->translation.Z);
+            aiMatrix4x4 TranslationM;
+            aiMatrix4x4::Translation(pos, TranslationM);
 
-        aiMatrix4x4 NodeTransformation = TranslationM * RotationM * ScalingM;
-        prop->abs = NodeTransformation;
+            aiMatrix4x4 NodeTransformation = TranslationM * RotationM * ScalingM;
+            global = NodeTransformation;
         }
 
     }
 
-    prop->abs = parent * prop->abs;
+    global = parent * global;
 
     for(unsigned int i = 0; i < obj->children.size(); i ++){
-        updateNodeTransform(obj->children[i].updLinkPtr(), prop->abs);
+        updateNodeTransform(obj->children[i].updLinkPtr(), global);
     }
+
+    prop->abs = global;
 }
 
 void AnimationProperty::onValueChanged(){

@@ -18,13 +18,17 @@ public:
     unsigned int scaleKeysNum;
     unsigned int rotationKeysNum;
 
-    //ZSVECTOR3* positions;
-    //ZSVECTOR3* scalings;
-    //ZSQUATERNION* rotations;
-
-    aiVector3D* pos;
-    aiVector3D* scale;
+    ZSVECTOR3* pos;
+    ZSVECTOR3* scale;
     aiQuaternion* rot;
+
+    double* posTimes;
+    double* scaleTimes;
+    double* rotTimes;
+
+    ZSVECTOR3 getPosition(double Time);
+    ZSVECTOR3 getScale(double Time);
+    aiQuaternion getRotation(double Time);
 
     AnimationChannel();
 };

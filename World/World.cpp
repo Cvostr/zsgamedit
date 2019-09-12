@@ -513,6 +513,8 @@ void World::addMeshGroup(std::string file_path){
     GameObject* rootobj = addMeshNode(&node);
     this->obj_widget_ptr->addTopLevelItem(rootobj->item_ptr);
 
+    rootobj->addProperty(GO_PROPERTY_TYPE_ANIMATION);
+
     for(unsigned int m_i = 0; m_i < rootobj->children.size(); m_i ++){
         GameObject* objm = rootobj->children[m_i].updLinkPtr();
         MeshProperty* mesh_prop_ptr = (objm->getPropertyPtr<MeshProperty>());

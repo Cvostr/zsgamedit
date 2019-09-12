@@ -4,6 +4,9 @@
 static Assimp::Importer importer;
 static unsigned int loadflags = aiProcess_CalcTangentSpace | aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_JoinIdenticalVertices |
         aiProcess_LimitBoneWeights;
+
+static unsigned int loadflagsAnim = aiProcess_Triangulate | aiProcess_JoinIdenticalVertices |
+        aiProcess_LimitBoneWeights;
 #endif
 
 #include <iostream>
@@ -20,8 +23,8 @@ void Engine::cmat(aiMatrix4x4 matin, ZSMATRIX4x4* matout){
     *matout = transpose(*matout);
 }
 
-bool Engine::getSizes(std::string file_path, unsigned int* meshes, unsigned int* anims, unsigned int* textures){
-    const aiScene* scene = importer.ReadFile(file_path, loadflags);
+bool Engine::getSizes(std::string file_path, unsigned int* meshes, unsigned int* anims, unsigned int* textures, unsigned int* materials){
+    const aiScene* scene = importer.ReadFile(file_path, 0);
 
     if(scene == nullptr) return false;
 
@@ -30,6 +33,9 @@ bool Engine::getSizes(std::string file_path, unsigned int* meshes, unsigned int*
 
     if(textures != nullptr)
         *textures = scene->mNumTextures;
+
+    if(materials != nullptr)
+        *materials = scene->mNumMaterials;
 
     importer.FreeScene();
     return true;
@@ -73,7 +79,6 @@ void Engine::processMesh(aiMesh* mesh, const aiScene* scene, ZSPIRE::Mesh* mesh_
     for(unsigned int bone_i = 0; bone_i < bones; bone_i ++){
         aiBone* bone_ptr = mesh->mBones[bone_i];
         ZSPIRE::Bone bone(bone_ptr->mName.C_Str(), bone_ptr->mNumWeights);
-        //cmat(bone_ptr->mOffsetMatrix, &bone.offset);
         bone.offset = bone_ptr->mOffsetMatrix;
 
         //Iterate over all weights to set them to vertices
@@ -133,7 +138,7 @@ void Engine::loadMesh(std::string file_path, ZSPIRE::Mesh* mesh_ptr, int index){
 }
 
 void Engine::loadAnimation(std::string file_path, ZSPIRE::Animation* anim, int index){
-    const aiScene* scene = importer.ReadFile(file_path, loadflags);
+    const aiScene* scene = importer.ReadFile(file_path, loadflagsAnim);
     std::cout << "Loading animation " << scene->mAnimations[index]->mName.C_Str() << " from file " << file_path << std::endl;
 
     aiAnimation* _anim = scene->mAnimations[index];
@@ -155,32 +160,38 @@ void Engine::loadAnimation(std::string file_path, ZSPIRE::Animation* anim, int i
         }
 
         //Allocate all keys
-        channel->scale = new aiVector3D[ai_channel->mNumScalingKeys];
-        channel->pos = new aiVector3D[ai_channel->mNumPositionKeys];
+        channel->scale = new ZSVECTOR3[ai_channel->mNumScalingKeys];
+        channel->pos = new ZSVECTOR3[ai_channel->mNumPositionKeys];
         channel->rot = new aiQuaternion[ai_channel->mNumRotationKeys];
+        //Allocate times for keys
+        channel->posTimes = new double[ai_channel->mNumPositionKeys];
+        channel->scaleTimes = new double[ai_channel->mNumScalingKeys];
+        channel->rotTimes = new double[ai_channel->mNumRotationKeys];
+
         //store keys amount
         channel->posKeysNum = ai_channel->mNumPositionKeys;
         channel->scaleKeysNum = ai_channel->mNumScalingKeys;
         channel->rotationKeysNum = ai_channel->mNumRotationKeys;
         //Write all transform data
         for(unsigned int pos_k_i = 0; pos_k_i < channel->posKeysNum; pos_k_i ++){
-            aiVector3D* pos_key = &channel->pos[pos_k_i];
             aiVector3D ai_pos_key = ai_channel->mPositionKeys[pos_k_i].mValue;
-            *pos_key = ai_pos_key;
+            channel->pos[pos_k_i] = ZSVECTOR3(ai_pos_key.x, ai_pos_key.y, ai_pos_key.z);
+
+            channel->posTimes[pos_k_i] = ai_channel->mPositionKeys[pos_k_i].mTime;
            // *pos_key = ZSVECTOR3(ai_pos_key.x, ai_pos_key.y, ai_pos_key.z);
         }
         for(unsigned int scale_k_i = 0; scale_k_i < channel->scaleKeysNum; scale_k_i ++){
-            aiVector3D* scale_key = &channel->scale[scale_k_i];
             aiVector3D ai_scale_key = ai_channel->mScalingKeys[scale_k_i].mValue;
+            channel->scale[scale_k_i] = ZSVECTOR3(ai_scale_key.x, ai_scale_key.y, ai_scale_key.z);
 
-            *scale_key = ai_scale_key;
+            channel->scaleTimes[scale_k_i] = ai_channel->mScalingKeys[scale_k_i].mTime;
             //*scale_key = ZSVECTOR3(ai_scale_key.x, ai_scale_key.y, ai_scale_key.z);
         }
         for(unsigned int rot_k_i = 0; rot_k_i < channel->rotationKeysNum; rot_k_i ++){
-            aiQuaternion* rot_key = &channel->rot[rot_k_i];
             aiQuaternion ai_rot_key = ai_channel->mRotationKeys[rot_k_i].mValue.Normalize();
+            channel->rot[rot_k_i] = ai_rot_key;
 
-            *rot_key = ai_rot_key;
+            channel->rotTimes[rot_k_i] = ai_channel->mRotationKeys[rot_k_i].mTime;
             //*rot_key = ZSQUATERNION(ai_rot_key.x, ai_rot_key.y, ai_rot_key.z, ai_rot_key.w);
         }
 
@@ -210,13 +221,37 @@ ZSPIRE::AnimationChannel* ZSPIRE::Animation::getChannelByNodeName(std::string no
     return nullptr;
 }
 
+ZSVECTOR3 ZSPIRE::AnimationChannel::getPosition(double Time){
+    for(unsigned int i = 0; i < this->posKeysNum - 1; i ++){
+        if(posTimes[i + 1] > Time){
+            ZSVECTOR3 _v = pos[i];
+            return _v;
+        }
+    }
+    assert(0);
+    return pos[0];
+}
+ZSVECTOR3 ZSPIRE::AnimationChannel::getScale(double Time){
+    for(unsigned int i = 0; i < this->scaleKeysNum - 1; i ++){
+        if(scaleTimes[i + 1] > Time)
+            return scale[i];
+    }
+    assert(0);
+    return scale[0];
+}
+aiQuaternion ZSPIRE::AnimationChannel::getRotation(double Time){
+    for(unsigned int i = 0; i < this->rotationKeysNum - 1; i ++){
+        if(rotTimes[i + 1] > Time){
+            aiQuaternion q = rot[i];
+            return q;
+        }
+    }
+    assert(0);
+    return rot[0];
+}
+
 void Engine::processNodeForTree(MeshNode* node, aiNode* node_assimp, const aiScene* scene){
     node->node_label = node_assimp->mName.C_Str(); //assigning node name
-
-    //Declare vectors to store decomposed transform components
-    aiVector3t<float> node_scale;
-    aiVector3t<float> node_translation;
-    aiQuaternion node_rotation;
 
     aiMatrix4x4 result_mat;
 
@@ -224,12 +259,7 @@ void Engine::processNodeForTree(MeshNode* node, aiNode* node_assimp, const aiSce
     if(isBone)
         node->hasBone = true;
 
-    //if(!isBone){
-    result_mat = node_assimp->mTransformation;
-    //cmat(result_mat, &node->node_transform);
-    node->node_transform = (result_mat);
-    //Decompose them!
-    result_mat.Decompose(node_scale, node_rotation, node_translation);
+    node->node_transform = node_assimp->mTransformation;
 
     //iterate over all meshes in this node
     unsigned int meshes_num = node_assimp->mNumMeshes;

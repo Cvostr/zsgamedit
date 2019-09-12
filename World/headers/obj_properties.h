@@ -231,13 +231,11 @@ class NodeProperty : public GameObjectProperty {
 public:
     QString node_label;
 
-    aiVector3D translation;
-    aiVector3D scale;
+    ZSVECTOR3 translation;
+    ZSVECTOR3 scale;
     aiQuaternion rotation;
 
-    //ZSMATRIX4x4 local_transform_mat;
     aiMatrix4x4 transform_mat;
-    //ZSMATRIX4x4 bone_transform;
 
     aiMatrix4x4 abs;
 
@@ -253,8 +251,12 @@ public:
 };
 
 class AnimationProperty : public GameObjectProperty {
+private:
+
+
 public:
-    int curFrame;
+    bool Playing;
+        double start_sec;
 
     ZSPIRE::Animation* anim_prop_ptr;
     QString anim_label;
