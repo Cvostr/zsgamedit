@@ -58,8 +58,6 @@ mat4 getBoneTransform(){
         result += bone_transform[_ids[i]] * _weights[i];
    }
 	
-	
-    
     return result;
 }
 
@@ -72,16 +70,15 @@ void main(){
 	if(bones > 0)
 		bone_t = getBoneTransform();
 
-	vec4 vertpos = bone_t * vec4(position, 1.0);
+	vec4 vertpos = object_transform * bone_t * vec4(position, 1.0);
 
-	FragPos = (object_transform * vertpos).xyz;
+	FragPos = (vertpos).xyz;
 	
 	vec3 TangentVec = normalize(vec3(object_transform * vec4(tangent, 0)));
 	vec3 BiTangentVec = normalize(vec3(object_transform * vec4(bitangent, 0)));
 	vec3 NormalVec = normalize(vec3(object_transform * vec4(normal, 0)));
 	TBN = transpose(mat3(TangentVec, BiTangentVec, NormalVec));
-	
-	
+		
 	gl_Position = cam_projection * cam_view * vertpos;
 	
 }

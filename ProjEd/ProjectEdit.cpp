@@ -908,6 +908,24 @@ void EditWindow::ImportResource(QString pathToResource){
         copyResource = true;
     }
 
+    if(workWithFbx){
+        unsigned int num_meshes = 0;
+        unsigned int num_anims = 0;
+        unsigned int num_textures = 0;
+        unsigned int num_materials = 0;
+
+        Engine::getSizes(pathToResource.toStdString(), &num_meshes, &num_anims, &num_textures, &num_materials);
+        //Allocate array for meshes
+        ZSPIRE::Mesh* meshes = new ZSPIRE::Mesh[num_meshes];
+        MeshNode rootNode;
+        //Load all meshes in file
+        for(unsigned int mesh_i = 0; mesh_i < num_meshes; mesh_i ++){
+            Engine::loadMesh(pathToResource.toStdString(), static_cast<ZSPIRE::Mesh*>(this->project.resources.back().class_ptr), static_cast<int>(mesh_i));
+        }
+
+        Engine::loadNodeTree(pathToResource.toStdString(), &rootNode);
+    }
+
     if(copyResource){
         std::ifstream res_stream;
         res_stream.open(pathToResource.toStdString(), std::iostream::binary | std::iostream::ate);

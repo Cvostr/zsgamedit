@@ -418,7 +418,6 @@ void GameObject::Draw(RenderPipeline* pipeline){
                         //Calculate result matrix
                         aiMatrix4x4 matrix = rootNodeTransform * nd->abs * b->offset;
                         matrix.Transpose();
-                       // matrix = matrix * nd->local_transform_mat;
 
                         glBindBuffer(GL_UNIFORM_BUFFER, pipeline->skinningUniformBuffer);
                         glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * bone_i, sizeof (ZSMATRIX4x4), &matrix);

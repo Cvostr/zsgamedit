@@ -1553,8 +1553,6 @@ void TerrainProperty::copyTo(GameObjectProperty* dest){
 NodeProperty::NodeProperty(){
     type = GO_PROPERTY_TYPE_NODE;
     hasBone = false;
-    isAnimated = false;
-    //local_transform_mat = getIdentity();
     scale = ZSVECTOR3(1, 1, 1);
 }
 
@@ -1575,6 +1573,17 @@ void NodeProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
     inspector->addPropertyArea(area_rotation);*/
 }
 
+void NodeProperty::copyTo(GameObjectProperty* dest){
+    if(dest->type != this->type) return; //if it isn't Node property
+
+    //Do base things
+    GameObjectProperty::copyTo(dest);
+    NodeProperty* _dest = static_cast<NodeProperty*>(dest);
+
+    _dest->transform_mat = this->transform_mat;
+    _dest->node_label = this->node_label;
+}
+
 AnimationProperty::AnimationProperty(){
     type = GO_PROPERTY_TYPE_ANIMATION;
     anim_prop_ptr = nullptr;
@@ -1585,6 +1594,10 @@ AnimationProperty::AnimationProperty(){
 void onPlay(){
     current_anim->start_sec = (static_cast<double>(SDL_GetTicks()) / 1000);
     current_anim->Playing = true;
+}
+
+void onStop(){
+    current_anim->Playing = false;
 }
 
 void AnimationProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
@@ -1602,13 +1615,21 @@ void AnimationProperty::addPropertyInterfaceToInspector(InspectorWin* inspector)
     inspector->getContentLayout()->addWidget(btn->button);
     btn->insp_ptr = inspector; //Setting inspector pointer
     inspector->registerUiObject(btn);
+
+    AreaButton* stopbtn = new AreaButton;
+    stopbtn->onPressFuncPtr = &onStop;
+    stopbtn->button->setText("Stop"); //Setting text to qt button
+    inspector->getContentLayout()->addWidget(stopbtn->button);
+    stopbtn->insp_ptr = inspector; //Setting inspector pointer
+    inspector->registerUiObject(stopbtn);
 }
 void AnimationProperty::onPreRender(RenderPipeline* pipeline){
     GameObject* obj = go_link.updLinkPtr();
 
     if(this->anim_prop_ptr != nullptr && Playing){
-
+        //Calcualte current Time
         double curTime = (static_cast<double>(SDL_GetTicks()) / 1000) - this->start_sec;
+        //Time in animation ticks
         double Ticks = anim_prop_ptr->TPS * curTime;
         double animTime = fmod(Ticks, anim_prop_ptr->duration);
 
@@ -1616,8 +1637,6 @@ void AnimationProperty::onPreRender(RenderPipeline* pipeline){
             ZSPIRE::AnimationChannel* ch = &anim_prop_ptr->channels[channels_i];
             GameObject* node = obj->getChildObjectWithNodeLabel(QString::fromStdString(ch->bone_name));
             NodeProperty* prop = node->getPropertyPtr<NodeProperty>();
-
-            prop->isAnimated = true;
 
             prop->translation = ch->getPostitionInterpolated(animTime);
             prop->scale = ch->getScaleInterpolated(animTime);
@@ -1637,7 +1656,7 @@ void AnimationProperty::updateNodeTransform(GameObject* obj, aiMatrix4x4 parent)
 
     aiMatrix4x4 global = prop->transform_mat;
 
-    if(this->anim_prop_ptr != nullptr){
+    if(this->anim_prop_ptr != nullptr && Playing){
         ZSPIRE::AnimationChannel* cha = this->anim_prop_ptr->getChannelByNodeName(prop->node_label.toStdString());
         if(cha){
             aiVector3D sca = aiVector3D(prop->scale.X, prop->scale.Y, prop->scale.Z);
@@ -1667,6 +1686,17 @@ void AnimationProperty::updateNodeTransform(GameObject* obj, aiMatrix4x4 parent)
     }
 
     prop->abs = global;
+}
+
+void AnimationProperty::copyTo(GameObjectProperty *dest){
+    if(dest->type != this->type) return; //if it isn't script group
+
+    //Do base things
+    GameObjectProperty::copyTo(dest);
+    AnimationProperty* _dest = static_cast<AnimationProperty*>(dest);
+
+    _dest->anim_label = this->anim_label;
+    _dest->anim_prop_ptr = this->anim_prop_ptr;
 }
 
 void AnimationProperty::onValueChanged(){

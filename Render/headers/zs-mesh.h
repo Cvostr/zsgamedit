@@ -37,6 +37,9 @@ namespace ZSPIRE {
 		unsigned int vertices_num;
 		unsigned int indices_num;
 
+        ZSVERTEX* vertices_arr;
+        unsigned int* indices_arr;
+
         std::vector<Bone> bones;
         bool hasBones();
 

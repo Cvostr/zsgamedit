@@ -236,15 +236,13 @@ public:
     ZSQUATERNION rotation;
 
     aiMatrix4x4 transform_mat;
-
     aiMatrix4x4 abs;
 
     bool hasBone;
-    bool isAnimated;
 
     void addPropertyInterfaceToInspector(InspectorWin* inspector);
     void onPreRender(RenderPipeline* pipeline);
-    //void copyTo(GameObjectProperty* dest);
+    void copyTo(GameObjectProperty* dest);
 
     NodeProperty();
 };
@@ -263,7 +261,7 @@ public:
     void addPropertyInterfaceToInspector(InspectorWin* inspector);
     void onPreRender(RenderPipeline* pipeline);
     void onValueChanged();
-    //void copyTo(GameObjectProperty* dest);
+    void copyTo(GameObjectProperty* dest);
 
     void updateNodeTransform(GameObject* obj, aiMatrix4x4 parent);
 

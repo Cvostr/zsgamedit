@@ -544,16 +544,10 @@ GameObject* World::addMeshNode(MeshNode* node){
     obj.item_ptr->setText(0, *obj.label);
 
     TransformProperty* transform_prop = static_cast<TransformProperty*>(obj.getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
-    //transform_prop->translation = (node->translation);
-    //transform_prop->scale = node->scale;
-    //transform_prop->rotation = node->rotation;
     transform_prop->updateMat();
 
     NodeProperty* node_prop = static_cast<NodeProperty*>(obj.getPropertyPtrByType(GO_PROPERTY_TYPE_NODE));
     node_prop->node_label = QString::fromStdString(node->node_label);
-   // node_prop->translation = (node->translation);
-    //node_prop->scale = node->scale;
-   // node_prop->rotation = node->rotation;
 
     node_prop->transform_mat = node->node_transform;
 

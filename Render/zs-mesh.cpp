@@ -288,6 +288,10 @@ void ZSPIRE::Mesh::Destroy() {
     glDeleteBuffers(1, &this->meshVBO); //Remove vertex buffer
     glDeleteBuffers(1, &this->meshEBO); //Remove index buffer
 
+    this->bones.clear();
+    delete[] vertices_arr;
+    delete[] indices_arr;
+
 }
 
 void ZSPIRE::Mesh::setMeshData(ZSVERTEX* vertices, unsigned int* indices, unsigned int vertices_num, unsigned int indices_num) {
@@ -374,7 +378,7 @@ void ZSPIRE::Mesh::Draw(){
 	}
 	else {
 		//Indexed draw
-        glDrawElements(GL_TRIANGLES, this->indices_num, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, this->indices_num, GL_UNSIGNED_INT, nullptr);
 	}
 }
 

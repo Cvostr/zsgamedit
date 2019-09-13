@@ -17,7 +17,8 @@ ZSPIRE::AnimationChannel* ZSPIRE::Animation::getChannelByNodeName(std::string no
 
 unsigned int ZSPIRE::AnimationChannel::getPositionIndex(double Time){
     for(unsigned int i = 0; i < this->posKeysNum - 1; i ++){
-        if(posTimes[i + 1] > Time){
+        double _time = posTimes[i + 1];
+        if(_time > Time){
             return i;
         }
     }

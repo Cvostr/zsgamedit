@@ -60,7 +60,8 @@ SOURCES += \
     World/TerrainUtils.cpp \
     World/Physics.cpp \
     Misc/ThumbnailsMaster.cpp \
-    Render/zs-animation.cpp
+    Render/zs-animation.cpp \
+    Misc/zs3m-master.cpp
 
 HEADERS += \
         mainwin.h \
@@ -94,7 +95,8 @@ HEADERS += \
     ProjEd/headers/EditorSettings.h \
     World/headers/terrain.h \
     Misc/headers/ThumbnailsMaster.h \
-    Render/headers/zs-animation.h
+    Render/headers/zs-animation.h \
+    Misc/headers/zs3m-master.h
 
 
 FORMS += \

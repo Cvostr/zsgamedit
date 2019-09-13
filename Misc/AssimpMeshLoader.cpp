@@ -49,8 +49,8 @@ void Engine::processMesh(aiMesh* mesh, const aiScene* scene, ZSPIRE::Mesh* mesh_
     unsigned int faces = mesh->mNumFaces;
     unsigned int bones = mesh->mNumBones;
 
-    ZSVERTEX* vertices_arr = new ZSVERTEX[vertices];
-    unsigned int* indices = new unsigned int[faces * 3];
+    mesh_ptr->vertices_arr = new ZSVERTEX[vertices];
+    mesh_ptr->indices_arr = new unsigned int[faces * 3];
 
     for (unsigned int v = 0; v < vertices; v++) {
         aiVector3D vertex_pos = mesh->mVertices[v];
@@ -61,18 +61,18 @@ void Engine::processMesh(aiMesh* mesh, const aiScene* scene, ZSPIRE::Mesh* mesh_
         float U = mesh->mTextureCoords[0][v].x;
         float V = mesh->mTextureCoords[0][v].y;
 
-        vertices_arr[v] = ZSVERTEX(ZSVECTOR3(vertex_pos.x, vertex_pos.y, vertex_pos.z), ZSVECTOR2(U, V),
+        mesh_ptr->vertices_arr[v] = ZSVERTEX(ZSVECTOR3(vertex_pos.x, vertex_pos.y, vertex_pos.z), ZSVECTOR2(U, V),
             ZSVECTOR3(vertex_normal.x, vertex_normal.y, vertex_normal.z), ZSVECTOR3(vertex_tangent.x, vertex_tangent.y, vertex_tangent.z),
             ZSVECTOR3(vertex_bitangent.x, vertex_bitangent.y, vertex_bitangent.z)
         );
 
-        vertices_arr[v].bones_num = 0;
+        mesh_ptr->vertices_arr[v].bones_num = 0;
         for(unsigned int vw_i = 0; vw_i < MAX_BONE_PER_VERTEX; vw_i ++){
-            vertices_arr[v].ids[vw_i] = 0;
-            vertices_arr[v].weights[vw_i] = 0.f;
+            mesh_ptr->vertices_arr[v].ids[vw_i] = 0;
+            mesh_ptr->vertices_arr[v].weights[vw_i] = 0.f;
         }
 
-        vNormalize(&vertices_arr[v].normal);
+        vNormalize(&mesh_ptr->vertices_arr[v].normal);
 
     }
 
@@ -84,7 +84,7 @@ void Engine::processMesh(aiMesh* mesh, const aiScene* scene, ZSPIRE::Mesh* mesh_
         //Iterate over all weights to set them to vertices
         for(unsigned int vw_i = 0; vw_i < bone.vertices_affected; vw_i ++){
             aiVertexWeight* vw = &bone_ptr->mWeights[vw_i];
-            ZSVERTEX* vertex = &vertices_arr[vw->mVertexId];
+            ZSVERTEX* vertex = &mesh_ptr->vertices_arr[vw->mVertexId];
 
             if(vertex->bones_num + 1 > MAX_BONE_PER_VERTEX)
                 //Its better way to crash here
@@ -106,11 +106,11 @@ void Engine::processMesh(aiMesh* mesh, const aiScene* scene, ZSPIRE::Mesh* mesh_
     {
         aiFace face = mesh->mFaces[i];
         for (unsigned int j = 0; j < face.mNumIndices; j++)
-            indices[i * 3 + j] = face.mIndices[j];
+            mesh_ptr->indices_arr[i * 3 + j] = face.mIndices[j];
     }
 
     mesh_ptr->Init();
-    mesh_ptr->setMeshData(vertices_arr, indices, vertices, faces * 3);
+    mesh_ptr->setMeshData(mesh_ptr->vertices_arr, mesh_ptr->indices_arr, vertices, faces * 3);
 }
 
 void Engine::processNode(aiNode* node, const aiScene* scene) {
@@ -210,8 +210,6 @@ void Engine::loadNodeTree(std::string file_path, MeshNode* node){
 
 void Engine::processNodeForTree(MeshNode* node, aiNode* node_assimp, const aiScene* scene){
     node->node_label = node_assimp->mName.C_Str(); //assigning node name
-
-    aiMatrix4x4 result_mat;
 
     bool isBone = isBoneAvailable(node->node_label, scene);
     if(isBone)

@@ -388,7 +388,9 @@ void PickResourceArea::setup(){
 void PickResourceArea::updateLabel(){
     if(this->resource_type == RESOURCE_TYPE_TEXTURE && *rel_path != "@none"){
         std::string fpath = _editor_win->project.root_path.toStdString() + "/" + rel_path->toStdString();
-        QImage* img = _editor_win->thumb_master->texture_thumbnails.at(fpath);
+        QImage* img = nullptr;
+        if(_editor_win->thumb_master->isAvailable(fpath))
+            img = _editor_win->thumb_master->texture_thumbnails.at(fpath);
         if(img)
             relpath_label->setPixmap(QPixmap::fromImage(*img));
         relpath_label->setScaledContents(true);
