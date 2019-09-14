@@ -49,6 +49,14 @@ void ZS3M::SceneFileExport::write(std::string output_file){
         for(unsigned int ind_i = 0; ind_i < indexNum; ind_i ++){
             stream.write(reinterpret_cast<char*>(&mesh_ptr->indices_arr[ind_i]), sizeof(unsigned int));
         }
+        stream << "\n"; //Write divider
+        for (unsigned int b_i = 0; b_i < bonesNum; b_i ++) {
+            ZSPIRE::Bone* bone = &mesh_ptr->bones[b_i];
+            //Write bone name
+            stream << "b " << bone->bone_name << "\n";
+
+            stream << "\n"; //Write divider
+        }
 
     }
     stream.close();

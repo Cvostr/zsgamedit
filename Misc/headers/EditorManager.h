@@ -9,7 +9,7 @@ private:
 public:
     int WIDTH;
     int HEIGHT;
-
+    //Pointer to project structure
     Project* project_struct_ptr;
 
     void setDpMetrics(int W, int H);

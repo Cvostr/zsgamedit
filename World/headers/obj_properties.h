@@ -235,8 +235,11 @@ public:
     ZSVECTOR3 scale;
     ZSQUATERNION rotation;
 
-    aiMatrix4x4 transform_mat;
-    aiMatrix4x4 abs;
+    //aiMatrix4x4 transform_mat;
+    //aiMatrix4x4 abs;
+
+    ZSMATRIX4x4 transform_mat;
+    ZSMATRIX4x4 abs;
 
     bool hasBone;
 
@@ -263,7 +266,7 @@ public:
     void onValueChanged();
     void copyTo(GameObjectProperty* dest);
 
-    void updateNodeTransform(GameObject* obj, aiMatrix4x4 parent);
+    void updateNodeTransform(GameObject* obj, ZSMATRIX4x4 parent);
 
 
     AnimationProperty();

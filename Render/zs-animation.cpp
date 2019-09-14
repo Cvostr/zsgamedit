@@ -27,7 +27,8 @@ unsigned int ZSPIRE::AnimationChannel::getPositionIndex(double Time){
 }
 unsigned int ZSPIRE::AnimationChannel::getScaleIndex(double Time){
     for(unsigned int i = 0; i < this->scaleKeysNum - 1; i ++){
-        if(scaleTimes[i + 1] > Time)
+        double _time = scaleTimes[i + 1];
+        if(_time > Time)
             return i;
     }
     assert(0);
@@ -35,7 +36,8 @@ unsigned int ZSPIRE::AnimationChannel::getScaleIndex(double Time){
 }
 unsigned int ZSPIRE::AnimationChannel::getRotationIndex(double Time){
     for(unsigned int i = 0; i < this->rotationKeysNum - 1; i ++){
-        if(rotTimes[i + 1] > Time){
+        double _time = rotTimes[i + 1];
+        if(_time > Time){
             return i;
         }
     }

@@ -79,7 +79,8 @@ void Engine::processMesh(aiMesh* mesh, const aiScene* scene, ZSPIRE::Mesh* mesh_
     for(unsigned int bone_i = 0; bone_i < bones; bone_i ++){
         aiBone* bone_ptr = mesh->mBones[bone_i];
         ZSPIRE::Bone bone(bone_ptr->mName.C_Str(), bone_ptr->mNumWeights);
-        bone.offset = bone_ptr->mOffsetMatrix;
+        //bone.offset = bone_ptr->mOffsetMatrix;
+        cmat(bone_ptr->mOffsetMatrix, &bone.offset);
 
         //Iterate over all weights to set them to vertices
         for(unsigned int vw_i = 0; vw_i < bone.vertices_affected; vw_i ++){

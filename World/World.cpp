@@ -549,7 +549,8 @@ GameObject* World::addMeshNode(MeshNode* node){
     NodeProperty* node_prop = static_cast<NodeProperty*>(obj.getPropertyPtrByType(GO_PROPERTY_TYPE_NODE));
     node_prop->node_label = QString::fromStdString(node->node_label);
 
-    node_prop->transform_mat = node->node_transform;
+    //node_prop->transform_mat = node->node_transform;
+    Engine::cmat(node->node_transform, &node_prop->transform_mat);
 
     if(node->hasBone){
         node_prop->hasBone = true;

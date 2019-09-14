@@ -404,11 +404,10 @@ void GameObject::Draw(RenderPipeline* pipeline){
 
                     GameObject* node = nullptr;
                     GameObject* RootNode = mesh_prop->skinning_root_node;
-                    aiMatrix4x4 rootNodeTransform;
+                    ZSMATRIX4x4 rootNodeTransform;
                     if(RootNode != nullptr){
                         node = mesh_prop->skinning_root_node->getChildObjectWithNodeLabel(QString::fromStdString(b->bone_name));
                         rootNodeTransform = (RootNode->getPropertyPtr<NodeProperty>()->transform_mat);
-                        rootNodeTransform.Inverse();
                     }
 
 
@@ -416,8 +415,8 @@ void GameObject::Draw(RenderPipeline* pipeline){
                         TransformProperty* transform = node->getPropertyPtr<TransformProperty>();
                         NodeProperty* nd = node->getPropertyPtr<NodeProperty>();
                         //Calculate result matrix
-                        aiMatrix4x4 matrix = rootNodeTransform * nd->abs * b->offset;
-                        matrix.Transpose();
+                        ZSMATRIX4x4 matrix = invert(rootNodeTransform) * nd->abs * b->offset;
+                        matrix = transpose(matrix);
 
                         glBindBuffer(GL_UNIFORM_BUFFER, pipeline->skinningUniformBuffer);
                         glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * bone_i, sizeof (ZSMATRIX4x4), &matrix);
@@ -475,10 +474,7 @@ void GameObject::Draw(RenderPipeline* pipeline){
 
 void GameObject::processObject(RenderPipeline* pipeline){
     if(alive == false) return;
-    if(this->active)
-        item_ptr->setTextColor(0, QColor(Qt::black));
-    else
-        item_ptr->setTextColor(0, QColor(Qt::gray));
+
 
     //Obtain EditWindow pointer to check if scene is running
     EditWindow* editwin_ptr = static_cast<EditWindow*>(pipeline->win_ptr);

@@ -1592,8 +1592,11 @@ AnimationProperty::AnimationProperty(){
 }
 
 void onPlay(){
-    current_anim->start_sec = (static_cast<double>(SDL_GetTicks()) / 1000);
-    current_anim->Playing = true;
+    //if user specified animation, then play it!
+    if(current_anim->anim_prop_ptr != nullptr){
+        current_anim->start_sec = (static_cast<double>(SDL_GetTicks()) / 1000);
+        current_anim->Playing = true;
+    }
 }
 
 void onStop(){
@@ -1643,18 +1646,17 @@ void AnimationProperty::onPreRender(RenderPipeline* pipeline){
             prop->rotation = ch->getRotationInterpolated(animTime);
         }
     }
-    aiMatrix4x4 identity_matrix;
+    ZSMATRIX4x4 identity_matrix = getIdentity();
     updateNodeTransform(obj, identity_matrix);
 }
 
-void AnimationProperty::updateNodeTransform(GameObject* obj, aiMatrix4x4 parent){
-
+void AnimationProperty::updateNodeTransform(GameObject* obj, ZSMATRIX4x4 parent){
 
     if(!obj) return;
     NodeProperty* prop = obj->getPropertyPtr<NodeProperty>();
     if(!prop) return;
 
-    aiMatrix4x4 global = prop->transform_mat;
+    prop->abs = prop->transform_mat;
 
     if(this->anim_prop_ptr != nullptr && Playing){
         ZSPIRE::AnimationChannel* cha = this->anim_prop_ptr->getChannelByNodeName(prop->node_label.toStdString());
@@ -1674,18 +1676,22 @@ void AnimationProperty::updateNodeTransform(GameObject* obj, aiMatrix4x4 parent)
             aiMatrix4x4::Translation(pos, TranslationM);
 
             aiMatrix4x4 NodeTransformation = TranslationM * RotationM * ScalingM;
-            global = NodeTransformation;
+            Engine::cmat(NodeTransformation, &prop->abs);
+
+            /*ZSMATRIX4x4 transl = getTranslationMat(prop->translation);
+            ZSMATRIX4x4 sca = getScaleMat(prop->scale);
+            ZSMATRIX4x4 rot = getRotationMat(prop->rotation);
+            prop->abs = transl * rot * sca;*/
         }
 
     }
 
-    global = parent * global;
+    prop->abs = parent * prop->abs;
 
     for(unsigned int i = 0; i < obj->children.size(); i ++){
-        updateNodeTransform(obj->children[i].updLinkPtr(), global);
+        updateNodeTransform(obj->children[i].updLinkPtr(), prop->abs);
     }
 
-    prop->abs = global;
 }
 
 void AnimationProperty::copyTo(GameObjectProperty *dest){

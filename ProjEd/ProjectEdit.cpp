@@ -769,10 +769,26 @@ void EditWindow::toggleCameras(){
 }
 
 void EditWindow::glRender(){
+
+    for(unsigned int obj_i = 0; obj_i < world.objects.size(); obj_i ++){
+        GameObject* obj_ptr = &world.objects[obj_i];
+        if(obj_ptr->alive){
+            if(obj_ptr->active){
+                if(settings.isDarkTheme)
+                    obj_ptr->item_ptr->setTextColor(0, QColor(Qt::white));
+                else {
+                    obj_ptr->item_ptr->setTextColor(0, QColor(Qt::black));
+                }
+            }else
+                obj_ptr->item_ptr->setTextColor(0, QColor(Qt::gray));
+        }
+    }
+
     this->settings.inspector_win_pos_X = _inspector_win->pos().x();
     this->settings.inspector_win_pos_Y = _inspector_win->pos().y();
 
     if(isSceneRun){
+        //Update physics
         world.physical_world->stepSimulation(deltaTime);
     }
 
