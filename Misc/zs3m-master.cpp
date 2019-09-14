@@ -46,6 +46,9 @@ void ZS3M::SceneFileExport::write(std::string output_file){
             }
             stream << "\n"; //Write divider
         }
+        for(unsigned int ind_i = 0; ind_i < indexNum; ind_i ++){
+            stream.write(reinterpret_cast<char*>(&mesh_ptr->indices_arr[ind_i]), sizeof(unsigned int));
+        }
 
     }
     stream.close();

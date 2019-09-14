@@ -56,6 +56,11 @@ void EditorSettingsManager::init(){
             this->settings_ptr->editor_win_width = x;
             this->settings_ptr->editor_win_height = y;
         }
+        if(prefix.compare("darkTheme") == false){
+            bool dark;
+            stream >> dark;
+            this->settings_ptr->isDarkTheme = dark;
+        }
     }
 
     stream.close();
@@ -74,6 +79,7 @@ EditorSettingsManager::~EditorSettingsManager(){
     stream << "inspector_win_Size " << this->settings_ptr->inspector_win_width << " " << this->settings_ptr->inspector_win_height << "\n";
     stream << "editor_win_pos " << this->settings_ptr->editor_win_pos_X << " " << this->settings_ptr->editor_win_pos_Y << "\n";
     stream << "editor_win_Size " << this->settings_ptr->editor_win_width << " " << this->settings_ptr->editor_win_height << "\n";
+    stream << "darkTheme " << this->settings_ptr->isDarkTheme << "\n";
 
     stream.close();
 }

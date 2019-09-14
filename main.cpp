@@ -14,9 +14,11 @@ bool working = true; //Application started and it is working
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    MainWin w;
+    MainWin w(&a);
     w.show();
+/*
 
+*/
     while (working) {
         a.processEvents();
 

@@ -138,6 +138,8 @@ public slots:
     void openRenderSettings();
     void openPhysicsSettings();
 private:
+    QApplication* app_ptr;
+    //Vector to store all editor managers
     std::vector<EditorComponentManager*> managers;
 
     QString current_dir; //current directory path string
@@ -229,7 +231,7 @@ public:
     QTreeWidget* getObjectListWidget();
     QListWidget* getFilesListWidget();
 
-    explicit EditWindow(QWidget *parent = nullptr);
+    explicit EditWindow(QApplication* app, QWidget *parent = nullptr);
     ~EditWindow();
 
     void callObjectDeletion(GameObjectLink link);
@@ -372,7 +374,7 @@ public:
 };
 
 namespace ZSEditor {
-    EditWindow* openProject(Project& project);
+    EditWindow* openProject(QApplication* app, Project& project);
     EditWindow* openEditor();
 }
 

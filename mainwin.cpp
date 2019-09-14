@@ -17,7 +17,7 @@ static CreateProjectWindow* cr_w;
 
 extern bool working;
 
-MainWin::MainWin(QWidget *parent) :
+MainWin::MainWin(QApplication* app, QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWin)
 {
@@ -42,6 +42,8 @@ MainWin::MainWin(QWidget *parent) :
 
     project_menu = new ProjectCtxMenu(this); //Allocate projectCtxMenu
     project_menu->win = this;
+    this->app_ptr = app;
+
 }
 
 void MainWin::onDestroy(){
@@ -191,8 +193,8 @@ void MainWin::onSelectProjectToOpen(){
             //We found index, keep going
 
             this->hide(); //Close project selection window
-
-            this->edit_win_ptr = ZSEditor::openProject(conf_ptr->editwin_proj); //Call project opening
+            //Open Editor with project
+            this->edit_win_ptr = ZSEditor::openProject(app_ptr, conf_ptr->editwin_proj); //Call project opening
             this->edit_win_ptr->mainwin_ptr = static_cast<void*>(this);
         }
     }

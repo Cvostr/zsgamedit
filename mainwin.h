@@ -77,6 +77,7 @@ class MainWin : public QMainWindow
     Q_OBJECT
 private:
     ProjectCtxMenu* project_menu;
+    QApplication* app_ptr;
 public slots:
     //Executes on add project in file
     void onAddProjButtonClicked();
@@ -104,7 +105,7 @@ public:
 
     virtual void closeEvent ( QCloseEvent * event );
 
-    explicit MainWin(QWidget *parent = nullptr);
+    explicit MainWin(QApplication* app, QWidget *parent = nullptr);
     ~MainWin();
 };
 

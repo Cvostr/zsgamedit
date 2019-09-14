@@ -23,9 +23,11 @@ struct EditorSettings{
     int inspector_win_pos_Y;
     //Maximum size of one blob
     unsigned int _blob_writer_divide_size_kb;
+    bool isDarkTheme;
 
     EditorSettings(){
         isFirstSetup = true;
+        isDarkTheme = false;
 
         gameViewWin_Width = 640;
         gameViewWin_Height = 480;

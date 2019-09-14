@@ -15,6 +15,7 @@
 #include <QMessageBox>
 #include <mainwin.h>
 #include <fstream>
+#include "../Misc/headers/zs3m-master.h"
 
 EditWindow* _editor_win;
 InspectorWin* _inspector_win;
@@ -22,7 +23,7 @@ EdActions* _ed_actions_container;
 
 RenderPipeline* renderer;
 
-EditWindow::EditWindow(QWidget *parent) :
+EditWindow::EditWindow(QApplication* app, QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::EditWindow)
 {
@@ -98,6 +99,7 @@ EditWindow::EditWindow(QWidget *parent) :
 
     this->ui->objsList->win_ptr = this; //putting pointer to window to custom tree view
     this->ui->fileList->win_ptr = this;
+    this->app_ptr = app;
 
     ui->actionCopy->setShortcut(Qt::Key_C | Qt::CTRL);
     ui->actionPaste->setShortcut(Qt::Key_V | Qt::CTRL);
@@ -155,6 +157,24 @@ void EditWindow::init(){
 
         this->settings.inspector_win_width = _inspector_win->width();
         this->settings.inspector_win_height = _inspector_win->height();
+    }
+
+    if(this->settings.isDarkTheme){
+        QPalette palette = QPalette();
+        palette.setColor(QPalette::Window, QColor(53, 53, 53));
+        palette.setColor(QPalette::WindowText, Qt::white);
+        palette.setColor(QPalette::Base, QColor(25, 25, 25));
+        palette.setColor(QPalette::AlternateBase, QColor(53, 53, 53));
+        palette.setColor(QPalette::ToolTipBase, Qt::white);
+        palette.setColor(QPalette::ToolTipText, Qt::white);
+        palette.setColor(QPalette::Text, Qt::white);
+        palette.setColor(QPalette::Button, QColor(53, 53, 53));
+        palette.setColor(QPalette::ButtonText, Qt::white);
+        palette.setColor(QPalette::BrightText, Qt::red);
+        palette.setColor(QPalette::Link, QColor(42, 130, 218));
+        palette.setColor(QPalette::Highlight, QColor(42, 130, 218));
+        palette.setColor(QPalette::HighlightedText, Qt::black);
+        app_ptr->setPalette(palette);
     }
 
     this->window = SDL_CreateWindow("Game View", this->settings.gameView_win_pos_x, this->settings.gameView_win_pos_y, settings.gameViewWin_Width, settings.gameViewWin_Height, SDL_WINDOW_OPENGL); //Create window
@@ -914,16 +934,28 @@ void EditWindow::ImportResource(QString pathToResource){
         unsigned int num_textures = 0;
         unsigned int num_materials = 0;
 
+        ZS3M::SceneFileExport exporter;
+
         Engine::getSizes(pathToResource.toStdString(), &num_meshes, &num_anims, &num_textures, &num_materials);
         //Allocate array for meshes
         ZSPIRE::Mesh* meshes = new ZSPIRE::Mesh[num_meshes];
         MeshNode rootNode;
         //Load all meshes in file
         for(unsigned int mesh_i = 0; mesh_i < num_meshes; mesh_i ++){
-            Engine::loadMesh(pathToResource.toStdString(), static_cast<ZSPIRE::Mesh*>(this->project.resources.back().class_ptr), static_cast<int>(mesh_i));
+            Engine::loadMesh(pathToResource.toStdString(), &meshes[mesh_i], static_cast<int>(mesh_i));
+            //Add loaded mesh to exporter
+            exporter.pushMesh(&meshes[mesh_i]);
         }
 
         Engine::loadNodeTree(pathToResource.toStdString(), &rootNode);
+        exporter.setRootNode(&rootNode);
+
+        QString new_path = pathToResource.replace(".fbx", ".zs3m");
+        exporter.write(new_path.toStdString());
+
+        for(unsigned int mesh_i = 0; mesh_i < num_meshes; mesh_i ++){
+            meshes[mesh_i].Destroy();
+        }
     }
 
     if(copyResource){
@@ -998,8 +1030,8 @@ void EditWindow::loadResource(Resource* resource){
     }
 }
 
-EditWindow* ZSEditor::openProject(Project& project){
-    _editor_win = new EditWindow(); //Creating class object
+EditWindow* ZSEditor::openProject(QApplication* app, Project& project){
+    _editor_win = new EditWindow(app); //Creating class object
     _inspector_win = new InspectorWin();
     //Send project datas to editor window class
     _editor_win->project = project;
