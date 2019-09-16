@@ -17,6 +17,8 @@ public:
     void pushMesh(ZSPIRE::Mesh* mesh);
     void setRootNode(MeshNode* node);
     void write(std::string output_file);
+    void writeNode(std::ofstream *stream, MeshNode* node);
+    void getNodesNum(unsigned int* nds_ptr, MeshNode* node);
 };
 
 }

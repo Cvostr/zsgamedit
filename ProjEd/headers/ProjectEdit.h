@@ -195,6 +195,7 @@ public:
     void processResourceFile(QFileInfo fileInfo);
     void loadResource(Resource* resource);
     void ImportResource(QString pathToResource);
+    bool checkExtension(QString fpath, QString ext);
 
     QString createNewTextFile(QString directory, QString name, QString ext, std::string content);
     void openFile(QString file_path); //Useful to open a file

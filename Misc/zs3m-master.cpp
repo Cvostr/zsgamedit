@@ -13,8 +13,15 @@ void ZS3M::SceneFileExport::write(std::string output_file){
 
     stream << "zs3mscene0\n";
     unsigned int meshes_num = static_cast<unsigned int>(this->meshes_toWrite.size());
-    stream.write(reinterpret_cast<char*>(meshes_num), sizeof (unsigned int));
+    unsigned int nodes_num = 0;
+    getNodesNum(&nodes_num, this->rootNode);
 
+    stream.write(reinterpret_cast<char*>(meshes_num), sizeof (unsigned int));
+    stream.write(reinterpret_cast<char*>(nodes_num), sizeof (unsigned int));
+    //Write all nodes
+    writeNode(&stream, rootNode);
+
+    //Iterate over all meshes
     for(unsigned int mesh_i = 0; mesh_i < meshes_num; mesh_i ++){
         ZSPIRE::Mesh* mesh_ptr = this->meshes_toWrite[mesh_i];
         stream << "_MESH " << mesh_ptr->mesh_label << "\n";
@@ -22,7 +29,7 @@ void ZS3M::SceneFileExport::write(std::string output_file){
         unsigned int vertexNum = mesh_ptr->vertices_num;
         unsigned int indexNum = mesh_ptr->indices_num;
         unsigned int bonesNum = static_cast<unsigned int>(mesh_ptr->bones.size());
-
+        //Write base numbers
         stream.write(reinterpret_cast<char*>(vertexNum), sizeof (unsigned int));
         stream.write(reinterpret_cast<char*>(indexNum), sizeof (unsigned int));
         stream.write(reinterpret_cast<char*>(bonesNum), sizeof (unsigned int));
@@ -30,7 +37,7 @@ void ZS3M::SceneFileExport::write(std::string output_file){
         //Write all vertices
         for (unsigned int v_i = 0; v_i < vertexNum; v_i ++) {
             ZSVERTEX* v_ptr = &mesh_ptr->vertices_arr[v_i];
-
+            //Write vertex vectors
             stream.write(reinterpret_cast<char*>(&v_ptr->pos), sizeof(float) * 3);
             stream.write(reinterpret_cast<char*>(&v_ptr->uv), sizeof(float) * 2);
             stream.write(reinterpret_cast<char*>(&v_ptr->normal), sizeof(float) * 3);
@@ -54,10 +61,48 @@ void ZS3M::SceneFileExport::write(std::string output_file){
             ZSPIRE::Bone* bone = &mesh_ptr->bones[b_i];
             //Write bone name
             stream << "b " << bone->bone_name << "\n";
+            //Write offset matrix
+            for(unsigned int m_i = 0; m_i < 4; m_i ++){
+                for(unsigned int m_j = 0; m_j < 4; m_j ++){
+                    float m_v = bone->offset.m[m_i][m_j];
+                    stream.write(reinterpret_cast<char*>(&m_v), sizeof(float));
+                }
+            }
 
             stream << "\n"; //Write divider
         }
 
     }
     stream.close();
+}
+
+void ZS3M::SceneFileExport::writeNode(std::ofstream *stream, MeshNode* node){
+    //Write node header
+    *stream << "N " << node->node_label << " " << node->mesh_names.size() << " " << node->children.size() << " " << "\n";
+    for(unsigned int mesh_i = 0; mesh_i < node->mesh_names.size(); mesh_i ++){
+        //Write mesh name
+        *stream << node->mesh_names[mesh_i] << "\n";
+    }
+    for(unsigned int ch_i = 0; ch_i < node->children.size(); ch_i ++){
+        *stream << node->children[ch_i].node_label << "\n";
+    }
+    //Write node base matrix
+    for(unsigned int m_i = 0; m_i < 4; m_i ++){
+        for(unsigned int m_j = 0; m_j < 4; m_j ++){
+            float m_v = node->node_transform.m[m_i][m_j];
+            stream->write(reinterpret_cast<char*>(&m_v), sizeof(float));
+        }
+    }
+    //Write all children
+    for(unsigned int ch_i = 0; ch_i < node->children.size(); ch_i ++){
+        writeNode(stream, &node->children[ch_i]);
+    }
+}
+
+void ZS3M::SceneFileExport::getNodesNum(unsigned int* nds_ptr, MeshNode* node){
+    *nds_ptr += 1;
+    //Write all children
+    for(unsigned int ch_i = 0; ch_i < node->children.size(); ch_i ++){
+        getNodesNum(nds_ptr, &node->children[ch_i]);
+    }
 }

@@ -1655,37 +1655,20 @@ void AnimationProperty::updateNodeTransform(GameObject* obj, ZSMATRIX4x4 parent)
     if(!obj) return;
     NodeProperty* prop = obj->getPropertyPtr<NodeProperty>();
     if(!prop) return;
-
+    //Assign base node transform
     prop->abs = prop->transform_mat;
 
     if(this->anim_prop_ptr != nullptr && Playing){
         ZSPIRE::AnimationChannel* cha = this->anim_prop_ptr->getChannelByNodeName(prop->node_label.toStdString());
         if(cha){
-            aiVector3D sca = aiVector3D(prop->scale.X, prop->scale.Y, prop->scale.Z);
-            aiMatrix4x4 ScalingM;
-            aiMatrix4x4::Scaling(sca, ScalingM);
-
-            // Interpolate rotation and generate rotation transformation matrix
-            aiMatrix4x4 RotationM;
-            aiQuaternion q = aiQuaternion(prop->rotation.W, prop->rotation.X, prop->rotation.Y, prop->rotation.Z);
-            RotationM = aiMatrix4x4(q.GetMatrix());
-
-            // Interpolate translation and generate translation transformation matrix
-            aiVector3D pos = aiVector3D(prop->translation.X, prop->translation.Y, prop->translation.Z);
-            aiMatrix4x4 TranslationM;
-            aiMatrix4x4::Translation(pos, TranslationM);
-
-            aiMatrix4x4 NodeTransformation = TranslationM * RotationM * ScalingM;
-            Engine::cmat(NodeTransformation, &prop->abs);
-
-            /*ZSMATRIX4x4 transl = getTranslationMat(prop->translation);
-            ZSMATRIX4x4 sca = getScaleMat(prop->scale);
-            ZSMATRIX4x4 rot = getRotationMat(prop->rotation);
-            prop->abs = transl * rot * sca;*/
+            ZSMATRIX4x4 transl = transpose(getTranslationMat(prop->translation));
+            ZSMATRIX4x4 _sca = transpose(getScaleMat(prop->scale));
+            ZSMATRIX4x4 rot = (getRotationMat(prop->rotation));
+            //Multiply all matrices
+            prop->abs = transl * rot * _sca;
         }
-
     }
-
+    //Apply parent transform
     prop->abs = parent * prop->abs;
 
     for(unsigned int i = 0; i < obj->children.size(); i ++){
@@ -1695,7 +1678,7 @@ void AnimationProperty::updateNodeTransform(GameObject* obj, ZSMATRIX4x4 parent)
 }
 
 void AnimationProperty::copyTo(GameObjectProperty *dest){
-    if(dest->type != this->type) return; //if it isn't script group
+    if(dest->type != this->type) return; //if it isn't animation
 
     //Do base things
     GameObjectProperty::copyTo(dest);

@@ -224,10 +224,10 @@ void EditWindow::init(){
 
 void EditWindow::assignIconFile(QListWidgetItem* item){
     item->setIcon(QIcon::fromTheme("application-x-executable"));
-    if(item->text().endsWith(".txt") || item->text().endsWith(".inf") || item->text().endsWith(".scn")){
+    if(checkExtension(item->text(), (".txt")) || checkExtension(item->text(), (".inf")) || checkExtension(item->text(), (".scn"))){
         item->setIcon(QIcon::fromTheme("text-x-generic"));
     }
-    if(item->text().endsWith(".dds") || item->text().endsWith(".DDS")){
+    if(checkExtension(item->text(), (".dds"))){
         QString path = this->current_dir + "/" + item->text();
         //Check, if we have thumbnail for this texture
         if(thumb_master->isAvailable(path.toStdString())){
@@ -236,16 +236,16 @@ void EditWindow::assignIconFile(QListWidgetItem* item){
             item->setIcon(QIcon(QPixmap::fromImage(*img)));
         }
     }
-    if(item->text().endsWith(".fbx") || item->text().endsWith(".FBX")){
+    if(checkExtension(item->text(), (".fbx"))){
         item->setIcon(QIcon::fromTheme("applications-graphics"));
     }
-    if(item->text().endsWith(".wav") || item->text().endsWith(".WAV")){
+    if(checkExtension(item->text(), (".wav"))){
         item->setIcon(QIcon::fromTheme("audio-x-generic"));
     }
-    if(item->text().endsWith(".lua")){
+    if(checkExtension(item->text(), (".lua"))){
         item->setIcon(QIcon::fromTheme("text-x-script"));
     }
-    if(item->text().endsWith(".zsmat") || item->text().endsWith(".ZSMAT")){
+    if(checkExtension(item->text(), (".zsmat"))){
         //QString path = this->current_dir + "/" + item->text();
         //QImage* img = thumb_master->texture_thumbnails.at(path.toStdString());
         //item->setIcon(QIcon(QPixmap::fromImage(*img)));
@@ -294,12 +294,16 @@ void EditWindow::openFile(QString file_path){
 }
 
 void EditWindow::addFileToObjectList(QString file_path){
-    if(file_path.endsWith(".prefab")){
+    if(checkExtension(file_path, ".prefab")){
         this->world.addObjectsFromPrefab(file_path);
     }
-    if(file_path.endsWith(".fbx") || file_path.endsWith(".FBX") || file_path.endsWith(".dae") || file_path.endsWith(".DAE")){
+    if(checkExtension(file_path, ".fbx") || checkExtension(file_path, ".dae")){
         this->world.addMeshGroup(file_path.toStdString());
     }
+}
+
+bool EditWindow::checkExtension(QString fpath, QString ext){
+    return fpath.toLower().endsWith(ext);
 }
 
 QString EditWindow::getCurrentDirectory(){
@@ -524,7 +528,7 @@ void EditWindow::onImportResource(){
 #ifdef _WIN32
     dir = "C:\";
 #endif
-    QString filter = tr("GPU compressed texture (*.dds *.DDS);; 3D model (*.fbx * .FBX);; Sound (*.wav * .WAV);;");
+    QString filter = tr("GPU compressed texture (.DDS) (*.dds *.DDS);; 3D model (*.fbx *.FBX *.dae, *.DAE);; Sound (*.wav * .WAV);;");
 
     QFileDialog dialog;
     QString path = dialog.getOpenFileName(this, tr("Select Resource"), dir, filter);
@@ -840,14 +844,14 @@ void EditWindow::lookForResources(QString path){
 void EditWindow::processResourceFile(QFileInfo fileInfo){
     QString name = fileInfo.fileName();
     QString absfpath = fileInfo.absoluteFilePath();
-    if(name.endsWith(".ttf") || name.endsWith(".TTF")){
+    if(checkExtension(name, ".ttf")){
         GlyphFontContainer* gf_container = new GlyphFontContainer(fileInfo.absoluteFilePath().toStdString(), 48, this->glyph_manager);
         //load font
         gf_container->loadGlyphs();
         //register font
         glyph_manager->addFontContainer(gf_container);
     }
-    if(name.endsWith(".DDS") || name.endsWith(".dds")){ //If its an texture
+    if(checkExtension(name, ".dds")){ //If its an texture
         Resource resource;
         resource.file_path = absfpath; //Writing full path
         resource.rel_path = resource.file_path; //Preparing to get relative path
@@ -857,7 +861,7 @@ void EditWindow::processResourceFile(QFileInfo fileInfo){
         loadResource(&resource); //Perform texture loading to OpenGL
         this->project.resources.push_back(resource);
     }
-    if(name.endsWith(".FBX") || name.endsWith(".fbx") || name.endsWith(".DAE") || name.endsWith(".dae")){ //If its an mesh
+    if(checkExtension(name, ".fbx") || checkExtension(name, ".dae")){ //If its an mesh
         //getting meshes amount
         unsigned int num_meshes = 0;
         unsigned int num_anims = 0;
@@ -894,7 +898,7 @@ void EditWindow::processResourceFile(QFileInfo fileInfo){
             //if(this->project.resources.back().resource_label.isE)
         }
     }
-    if(name.endsWith(".WAV") || name.endsWith(".wav")){ //If its an mesh
+    if(checkExtension(name, ".wav")){ //If its an mesh
         Resource resource;
         resource.file_path = fileInfo.absoluteFilePath();
         resource.rel_path = resource.file_path; //Preparing to get relative path
@@ -904,7 +908,7 @@ void EditWindow::processResourceFile(QFileInfo fileInfo){
         loadResource(&resource); //Perform mesh processing & loading to OpenGL
         this->project.resources.push_back(resource);
     }
-    if(name.endsWith(".ZSMAT") || name.endsWith(".zsmat")){ //If its an mesh
+    if(checkExtension(name, ".zsmat")){ //If its an mesh
         Resource resource;
         resource.file_path = fileInfo.absoluteFilePath();
         resource.rel_path = resource.file_path; //Preparing to get relative path
@@ -914,7 +918,7 @@ void EditWindow::processResourceFile(QFileInfo fileInfo){
         loadResource(&resource); //Perform mesh processing & loading to OpenGL
         this->project.resources.push_back(resource);
     }
-    if(name.endsWith(".lua") || name.endsWith(".LUA") || name.endsWith(".ZSCR") || name.endsWith(".zscr")){ //If its an mesh
+    if(checkExtension(name, ".lua") || checkExtension(name, ".zscr")){ //If its an mesh
         Resource resource;
         resource.file_path = fileInfo.absoluteFilePath();
         resource.rel_path = resource.file_path; //Preparing to get relative path
@@ -931,16 +935,16 @@ void EditWindow::ImportResource(QString pathToResource){
     bool copyResource = false;
     bool workWithFbx = false;
 
-    if(pathToResource.endsWith(".dds") || pathToResource.endsWith(".DDS")){
+    if(checkExtension(pathToResource, ".dds")){
         copyResource = true;
     }
-    if(pathToResource.endsWith(".fbx") || pathToResource.endsWith(".FBX")){
+    if(checkExtension(pathToResource, ".fbx") || checkExtension(pathToResource, ".dae")){
         workWithFbx = true;
     }
-    if(pathToResource.endsWith(".wav") || pathToResource.endsWith(".WAV")){
+    if(checkExtension(pathToResource, ".wav")){
         copyResource = true;
     }
-    if(pathToResource.endsWith(".lua")){
+    if(checkExtension(pathToResource, ".lua")){
         copyResource = true;
     }
 

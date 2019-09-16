@@ -215,8 +215,8 @@ void Engine::processNodeForTree(MeshNode* node, aiNode* node_assimp, const aiSce
     bool isBone = isBoneAvailable(node->node_label, scene);
     if(isBone)
         node->hasBone = true;
-
-    node->node_transform = node_assimp->mTransformation;
+    //Write node matrix
+    Engine::cmat(node_assimp->mTransformation, &node->node_transform);
 
     //iterate over all meshes in this node
     unsigned int meshes_num = node_assimp->mNumMeshes;

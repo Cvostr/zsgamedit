@@ -58,6 +58,16 @@ void GameObject::saveProperties(std::ofstream* stream){
             stream->write(reinterpret_cast<char*>(&ptr->castShadows), sizeof(bool));
             break;
         }
+        case GO_PROPERTY_TYPE_NODE:{
+            NodeProperty* ptr = static_cast<NodeProperty*>(property_ptr);
+            for(unsigned int m_i = 0; m_i < 4; m_i ++){
+                for(unsigned int m_j = 0; m_j < 4; m_j ++){
+                    float m_v = ptr->transform_mat.m[m_i][m_j];
+                    stream->write(reinterpret_cast<char*>(&m_v), sizeof(float));
+                }
+            }
+            break;
+        }
         case GO_PROPERTY_TYPE_LIGHTSOURCE:{
             LightsourceProperty* ptr = static_cast<LightsourceProperty*>(property_ptr);
             LIGHTSOURCE_TYPE type = ptr->light_type;

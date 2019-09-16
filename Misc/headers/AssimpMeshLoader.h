@@ -17,7 +17,8 @@ class MeshNode
 {
 public:
     std::string node_label;
-    aiMatrix4x4 node_transform;
+    //aiMatrix4x4 node_transform;
+    ZSMATRIX4x4 node_transform;
 
     bool hasBone;
 
