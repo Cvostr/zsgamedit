@@ -350,13 +350,13 @@ void World::openFromFile(QString file, QTreeWidget* w_ptr){
     std::string fpath = file.toStdString(); //Turn QString to std::string
 
     std::ifstream world_stream;
-    world_stream.open(fpath.c_str(), std::ofstream::binary); //Opening to read binary data
+    world_stream.open(fpath.c_str(), std::ifstream::binary); //Opening to read binary data
 
     std::string test_header;
     world_stream >> test_header; //Read header
     if(test_header.compare("ZSP_SCENE") != 0) //If it isn't zspire scene
         return; //Go out, we have nothing to do
-    world_stream.seekg(1, std::ofstream::cur);
+    world_stream.seekg(1, std::ifstream::cur);
     int version = 0;
     int objs_num = 0;
     world_stream.read(reinterpret_cast<char*>(&version), sizeof(int)); //reading version
@@ -367,7 +367,7 @@ void World::openFromFile(QString file, QTreeWidget* w_ptr){
         world_stream >> prefix; //Read prefix
 
         if(prefix.compare("RENDER_SETTINGS_AMB_COLOR") == 0){ //if it is render setting of ambient light color
-            world_stream.seekg(1, std::ofstream::cur);
+            world_stream.seekg(1, std::ifstream::cur);
             world_stream.read(reinterpret_cast<char*>(&settings_ptr->ambient_light_color.r), sizeof(int)); //Writing R component of amb color
             world_stream.read(reinterpret_cast<char*>(&settings_ptr->ambient_light_color.g), sizeof(int)); //Writing G component of amb color
             world_stream.read(reinterpret_cast<char*>(&settings_ptr->ambient_light_color.b), sizeof(int)); //Writing B component of amb color

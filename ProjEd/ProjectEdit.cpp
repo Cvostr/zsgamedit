@@ -236,7 +236,7 @@ void EditWindow::assignIconFile(QListWidgetItem* item){
             item->setIcon(QIcon(QPixmap::fromImage(*img)));
         }
     }
-    if(checkExtension(item->text(), (".fbx"))){
+    if(checkExtension(item->text(), (".fbx")) || checkExtension(item->text(), (".dae"))){
         item->setIcon(QIcon::fromTheme("applications-graphics"));
     }
     if(checkExtension(item->text(), (".wav"))){
@@ -528,7 +528,7 @@ void EditWindow::onImportResource(){
 #ifdef _WIN32
     dir = "C:\";
 #endif
-    QString filter = tr("GPU compressed texture (.DDS) (*.dds *.DDS);; 3D model (*.fbx *.FBX *.dae, *.DAE);; Sound (*.wav * .WAV);;");
+    QString filter = tr("GPU compressed texture (.DDS) (*.dds *.DDS);; 3D model (*.fbx *.FBX *.dae *.DAE);; Sound (*.wav *.WAV);;");
 
     QFileDialog dialog;
     QString path = dialog.getOpenFileName(this, tr("Select Resource"), dir, filter);
@@ -861,6 +861,12 @@ void EditWindow::processResourceFile(QFileInfo fileInfo){
         loadResource(&resource); //Perform texture loading to OpenGL
         this->project.resources.push_back(resource);
     }
+    if(checkExtension(name, ".zs3m")){
+
+        ZS3M::ImportedSceneFile isf;
+        isf.loadFromFile(absfpath.toStdString());
+
+    }
     if(checkExtension(name, ".fbx") || checkExtension(name, ".dae")){ //If its an mesh
         //getting meshes amount
         unsigned int num_meshes = 0;
@@ -970,9 +976,22 @@ void EditWindow::ImportResource(QString pathToResource){
         Engine::loadNodeTree(pathToResource.toStdString(), &rootNode);
         exporter.setRootNode(&rootNode);
 
-        QString new_path = pathToResource.replace(".fbx", ".zs3m");
-        exporter.write(new_path.toStdString());
+        QString _file_name;
+        int step = 1;
+        while(pathToResource[pathToResource.length() - step] != "/"){
+            _file_name.push_front(pathToResource[pathToResource.length() - step]);
+            step += 1;
+        }
+        _file_name = this->current_dir + "/" + _file_name;
 
+        QString new_path;
+        if(checkExtension(_file_name, ".fbx"))
+            new_path = _file_name.replace(".fbx", ".zs3m");
+        if(checkExtension(_file_name, ".dae"))
+            new_path = _file_name.replace(".dae", ".zs3m");
+        //Write 3D model scene
+        exporter.write(new_path.toStdString());
+        //Free all meshes
         for(unsigned int mesh_i = 0; mesh_i < num_meshes; mesh_i ++){
             meshes[mesh_i].Destroy();
         }
@@ -981,13 +1000,14 @@ void EditWindow::ImportResource(QString pathToResource){
     if(copyResource){
         std::ifstream res_stream;
         res_stream.open(pathToResource.toStdString(), std::iostream::binary | std::iostream::ate);
-
+        //Failed opening file
         if (res_stream.fail()) return;
-
+        //Get size of importing file
         int size = static_cast<int>(res_stream.tellg());
         unsigned char* data_buffer = new unsigned char[size];
-
+        //Return to Zero position
         res_stream.seekg(0);
+        //Read file
         res_stream.read(reinterpret_cast<char*>(data_buffer), size);
         res_stream.close();
 

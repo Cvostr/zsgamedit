@@ -16,9 +16,7 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     MainWin w(&a);
     w.show();
-/*
 
-*/
     while (working) {
         a.processEvents();
 

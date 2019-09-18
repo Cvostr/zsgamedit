@@ -19,6 +19,17 @@ public:
     void write(std::string output_file);
     void writeNode(std::ofstream *stream, MeshNode* node);
     void getNodesNum(unsigned int* nds_ptr, MeshNode* node);
+
+    SceneFileExport();
+};
+
+class ImportedSceneFile{
+public:
+    std::vector<ZSPIRE::Mesh*> meshes_toWrite;
+    MeshNode* rootNode;
+
+    void loadFromFile(std::string output_file);
+    ImportedSceneFile();
 };
 
 }
