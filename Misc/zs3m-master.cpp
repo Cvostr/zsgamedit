@@ -25,6 +25,7 @@ void ZS3M::SceneFileExport::write(std::string output_file){
     stream.write(reinterpret_cast<char*>(&model_ver), sizeof (unsigned int));
     stream.write(reinterpret_cast<char*>(&meshes_num), sizeof (unsigned int));
     stream.write(reinterpret_cast<char*>(&nodes_num), sizeof (unsigned int));
+    stream << "\n"; //Write divider
     //Write all nodes
     writeNode(&stream, rootNode);
 
@@ -58,7 +59,7 @@ void ZS3M::SceneFileExport::write(std::string output_file){
                 stream.write(reinterpret_cast<char*>(&bone_id), sizeof(unsigned int));
                 stream.write(reinterpret_cast<char*>(&b_weight), sizeof(float));
             }
-            stream << "\n"; //Write divider
+            //stream << "\n"; //Write divider
         }
         for(unsigned int ind_i = 0; ind_i < indexNum; ind_i ++){
             stream.write(reinterpret_cast<char*>(&mesh_ptr->indices_arr[ind_i]), sizeof(unsigned int));
@@ -100,6 +101,7 @@ void ZS3M::SceneFileExport::writeNode(std::ofstream *stream, MeshNode* node){
             stream->write(reinterpret_cast<char*>(&m_v), sizeof(float));
         }
     }
+    *stream << "\n"; //Write divider
     //Write all children
     for(unsigned int ch_i = 0; ch_i < node->children.size(); ch_i ++){
         writeNode(stream, &node->children[ch_i]);
@@ -122,6 +124,7 @@ void ZS3M::ImportedSceneFile::loadFromFile(std::string output_file){
 
     std::string model_header;
     stream >> model_header;
+    stream.seekg(1, std::ifstream::cur);
 
     if(model_header.compare("zs3mscene") == true){
         stream.close();
@@ -146,9 +149,15 @@ void ZS3M::ImportedSceneFile::loadFromFile(std::string output_file){
     while(!stream.eof()){
         stream >> prefix;
 
+        //We reached node
+        if(prefix.compare("N") == false){
+
+        }
+        //We reached mesh
         if(prefix.compare("_MESH") == false){
             std::string mesh_label;
             stream >> mesh_label; // read mesh label
+            stream.seekg(1, std::ifstream::cur);
 
             unsigned int vertexNum = 0;
             unsigned int indexNum = 0;
@@ -157,6 +166,42 @@ void ZS3M::ImportedSceneFile::loadFromFile(std::string output_file){
             stream.read(reinterpret_cast<char*>(&vertexNum), sizeof (unsigned int));
             stream.read(reinterpret_cast<char*>(&indexNum), sizeof (unsigned int));
             stream.read(reinterpret_cast<char*>(&bonesNum), sizeof (unsigned int));
+            stream.seekg(1, std::ifstream::cur);
+            //Allocate new mesh class
+            ZSPIRE::Mesh* newmesh = new ZSPIRE::Mesh;
+            newmesh->mesh_label = mesh_label;
+            newmesh->vertices_num = vertexNum;
+            newmesh->indices_num = indexNum;
+            //Allocate arrays for vectors
+            newmesh->vertices_arr = new ZSVERTEX[vertexNum];
+            newmesh->indices_arr = new unsigned int[indexNum];
+
+            for(unsigned int v_i = 0; v_i < vertexNum; v_i ++){
+                ZSVERTEX v_ptr;
+                //Read vertex vectors
+                stream.read(reinterpret_cast<char*>(&v_ptr.pos), sizeof(float) * 3);
+                stream.read(reinterpret_cast<char*>(&v_ptr.uv), sizeof(float) * 2);
+                stream.read(reinterpret_cast<char*>(&v_ptr.normal), sizeof(float) * 3);
+                stream.read(reinterpret_cast<char*>(&v_ptr.tangent), sizeof(float) * 3);
+                stream.read(reinterpret_cast<char*>(&v_ptr.bitangent), sizeof(float) * 3);
+                stream.read(reinterpret_cast<char*>(&v_ptr.bones_num), sizeof(unsigned int));
+                for(unsigned int vb_i = 0; vb_i < v_ptr.bones_num; vb_i ++){
+                    unsigned int* bone_id = &v_ptr.ids[vb_i];
+                    float* b_weight = &v_ptr.weights[vb_i];
+                    //Write bone values
+                    stream.read(reinterpret_cast<char*>(bone_id), sizeof(unsigned int));
+                    stream.read(reinterpret_cast<char*>(b_weight), sizeof(float));
+                }
+                newmesh->vertices_arr[v_i] = v_ptr;
+            }
+            //Read mesh indices
+            for(unsigned int in_i = 0; in_i < indexNum; in_i ++){
+                stream.read(reinterpret_cast<char*>(&newmesh->indices_arr[in_i]), sizeof(unsigned int));
+            }
+            newmesh->Init();
+            newmesh->setMeshData(newmesh->vertices_arr, newmesh->indices_arr, newmesh->vertices_num, newmesh->indices_num);
+            //Push mesh as output result
+            this->meshes_toWrite.push_back(newmesh);
         }
     }
 

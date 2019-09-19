@@ -866,6 +866,20 @@ void EditWindow::processResourceFile(QFileInfo fileInfo){
         ZS3M::ImportedSceneFile isf;
         isf.loadFromFile(absfpath.toStdString());
 
+        for(unsigned int mesh_i = 0; mesh_i < isf.meshes_toWrite.size(); mesh_i ++){
+            Resource resource;
+            resource.file_path = absfpath;
+            resource.rel_path = resource.file_path; //Preparing to get relative path
+            resource.rel_path.remove(0, project.root_path.size() + 1); //Get relative path by removing length of project root from start
+            resource.type = RESOURCE_TYPE_MESH; //Type of resource is mesh
+
+            resource.class_ptr = isf.meshes_toWrite[mesh_i];
+            resource.resource_label = isf.meshes_toWrite[mesh_i]->mesh_label;
+
+            this->project.resources.push_back(resource);
+
+        }
+
     }
     if(checkExtension(name, ".fbx") || checkExtension(name, ".dae")){ //If its an mesh
         //getting meshes amount

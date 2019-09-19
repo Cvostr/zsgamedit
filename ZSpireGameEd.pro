@@ -5,7 +5,7 @@
 #-------------------------------------------------
 
 QT       += core gui widgets
-unix:LIBS += -lGLEW -lSDL2 -lopenal -llua5.3 -lvulkan -lassimp -lIrrXML -lz -lfreetype -lBulletSoftBody -lBulletDynamics -lBulletCollision -lLinearMath
+unix:LIBS += -lGLEW -lSDL2 -lopenal -llua5.3 -lvulkan -lassimp -lz -lfreetype -lBulletSoftBody -lBulletDynamics -lBulletCollision -lLinearMath
 unix:INCLUDEPATH += /usr/include/freetype2/
 unix:INCLUDEPATH += /usr/include/bullet/
 

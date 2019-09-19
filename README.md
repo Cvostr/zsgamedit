@@ -24,6 +24,8 @@ FreeType
 
 Bullet (Physics Library)
 
+ZSpireEngine
+
 ## Building on linux
 ```
 sudo apt install qt5-default

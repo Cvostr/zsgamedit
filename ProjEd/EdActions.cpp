@@ -5,7 +5,7 @@ EdActions::EdActions(){
     this->end_pos = 0; //Default tail pos is zero as well
     action_list.resize(0);
     storeActions = false;
-    this->insp_win = nullptr;
+    insp_win = nullptr;
     hasChangesUnsaved = false; //Defaultly, nothing to save
 }
 
