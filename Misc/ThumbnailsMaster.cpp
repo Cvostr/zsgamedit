@@ -100,18 +100,25 @@ void ThumbnailsMaster::DrawTexture(ZSPIRE::Texture* texture){
 void ThumbnailsMaster::DrawMaterial(Material* material){
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     material->group_ptr->render_shader->Use();
-/*
-    glBindBuffer(GL_UNIFORM_BUFFER, camBuffer);
-    ZSMATRIX4x4 proj = cam_ptr->getProjMatrix();
-    ZSMATRIX4x4 view = cam_ptr->getViewMatrix();
+    material->applyMatToPipeline();
+
+    ZSPIRE::Camera cam;
+    cam.setProjectionType(ZSCAMERA_PROJECTION_PERSPECTIVE);
+    cam.setPosition(ZSVECTOR3(0, 0, -4));
+    cam.setFront(ZSVECTOR3(0,0,1));
+    cam.setZplanes(0.1f, 5000.f);
+
+    glBindBuffer(GL_UNIFORM_BUFFER, 13);
+    ZSMATRIX4x4 proj = cam.getProjMatrix();
+    ZSMATRIX4x4 view = cam.getViewMatrix();
+    ZSMATRIX4x4 model = getIdentity();
     glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof (ZSMATRIX4x4), &proj);
     glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4), sizeof (ZSMATRIX4x4), &view);
+    glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 2, sizeof (ZSMATRIX4x4), &model);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
-*/
+
     ZSPIRE::getSphereMesh()->Draw();
 }
-
-
 
 void ThumbnailsMaster::DrawMesh(ZSPIRE::Mesh* mesh){
     mesh->Draw();

@@ -107,15 +107,23 @@
         float weights[MAX_BONE_PER_VERTEX];
         unsigned int bones_num;
 
-		ZSVERTEX() {}
-		ZSVERTEX(ZSVECTOR3 npos, ZSVECTOR2 nuv) : pos(npos.X, npos.Y, npos.Z), uv(nuv.X, nuv.Y) {}
-		ZSVERTEX(ZSVECTOR3 npos, ZSVECTOR2 nuv, ZSVECTOR3 nnormal) : pos(npos.X, npos.Y, npos.Z), uv(nuv.X, nuv.Y), normal(nnormal.X, nnormal.Y, nnormal.Z) {}
+        ZSVERTEX() {
+            bones_num = 0;
+        }
+        ZSVERTEX(ZSVECTOR3 npos, ZSVECTOR2 nuv) : pos(npos.X, npos.Y, npos.Z), uv(nuv.X, nuv.Y) {
+            bones_num = 0;
+        }
+        ZSVERTEX(ZSVECTOR3 npos, ZSVECTOR2 nuv, ZSVECTOR3 nnormal) : pos(npos.X, npos.Y, npos.Z), uv(nuv.X, nuv.Y), normal(nnormal.X, nnormal.Y, nnormal.Z) {
+            bones_num = 0;
+        }
 		ZSVERTEX(ZSVECTOR3 npos, ZSVECTOR2 nuv, ZSVECTOR3 nnormal, ZSVECTOR3 ntangent, ZSVECTOR3 nbitangent) 
 			: pos(npos.X, npos.Y, npos.Z), 
 			uv(nuv.X, nuv.Y), 
 			normal(nnormal.X, nnormal.Y, nnormal.Z),
 			tangent(ntangent.X, ntangent.Y, ntangent.Z),
-			bitangent(nbitangent.X, nbitangent.Y, nbitangent.Z){}
+            bitangent(nbitangent.X, nbitangent.Y, nbitangent.Z){
+            bones_num = 0;
+        }
 
 	}ZSVERTEX;
 

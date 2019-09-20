@@ -74,6 +74,7 @@ EditWindow::EditWindow(QApplication* app, QWidget *parent) :
     hasSceneFile = false; //No scene loaded by default
     isSceneRun = false; //Not running by default
     isWorldCamera = false;
+    hasSheduledWorld = false;
     object_buffer = nullptr;
 
     setupObjectsHieList();
@@ -246,9 +247,9 @@ void EditWindow::assignIconFile(QListWidgetItem* item){
         item->setIcon(QIcon::fromTheme("text-x-script"));
     }
     if(checkExtension(item->text(), (".zsmat"))){
-        //QString path = this->current_dir + "/" + item->text();
-        //QImage* img = thumb_master->texture_thumbnails.at(path.toStdString());
-        //item->setIcon(QIcon(QPixmap::fromImage(*img)));
+        QString path = this->current_dir + "/" + item->text();
+        QImage* img = thumb_master->texture_thumbnails.at(path.toStdString());
+        item->setIcon(QIcon(QPixmap::fromImage(*img)));
     }
 }
 
@@ -1126,7 +1127,7 @@ EditWindow* ZSEditor::openEditor(){
     _ed_actions_container->setStoreActions(true);
     //Create thumbnails
     _editor_win->thumb_master->createTexturesThumbnails();
-    //_editor_win->thumb_master->createMaterialThumbnails();
+    _editor_win->thumb_master->createMaterialThumbnails();
 
     _editor_win->setViewDirectory(_editor_win->project.root_path);
 

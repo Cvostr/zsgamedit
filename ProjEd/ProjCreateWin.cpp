@@ -62,3 +62,12 @@ void CreateProjectWindow::onBrowsePathButtonPressed(){
     root_path = filename; //Store picked directory
 
 }
+
+void CreateProjectWindow::resizeEvent(QResizeEvent* event){
+    QMainWindow::resizeEvent(event);
+
+    int new_width = event->size().width();
+    int new_height = event->size().height();
+
+    ui->prCreateBtn->move(new_width - ui->prCreateBtn->width() - 50 , new_height - ui->prCreateBtn->height() * 2);
+}

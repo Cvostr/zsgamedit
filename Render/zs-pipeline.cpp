@@ -249,8 +249,10 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr){
     World* world_ptr = &editwin_ptr->world;
 
     if(editwin_ptr->isWorldCamera){
+        //if isWorldCamera is true, then we are in gameplay camera
         cam_ptr = &world_ptr->world_camera;
     }else{
+        //if isWorldCamera is false, then we are in editor camera
         cam_ptr = &editwin_ptr->edit_camera;
     }
 

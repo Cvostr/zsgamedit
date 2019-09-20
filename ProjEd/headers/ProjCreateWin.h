@@ -1,6 +1,7 @@
 #ifndef PROJCREATEWIN_H
 #define PROJCREATEWIN_H
 #include <QMainWindow>
+#include <QResizeEvent>
 
 namespace Ui {
 class CreateProjectWindow;
@@ -15,6 +16,9 @@ public slots:
     void onBrowsePathButtonPressed();
 public:
     void* mainwin_ptr;
+
+    void resizeEvent(QResizeEvent* event);
+
     explicit CreateProjectWindow(QWidget *parent = nullptr);
     ~CreateProjectWindow();
 
