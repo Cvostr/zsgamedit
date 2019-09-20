@@ -86,7 +86,16 @@ void ZS3M::SceneFileExport::write(std::string output_file){
 
 void ZS3M::SceneFileExport::writeNode(std::ofstream *stream, MeshNode* node){
     //Write node header
-    *stream << "N " << node->node_label << " " << node->mesh_names.size() << " " << node->children.size() << " " << "\n";
+    *stream << "N " << node->node_label << "\n";
+
+    unsigned int meshesNum = static_cast<unsigned int>(node->mesh_names.size());
+    unsigned int childrenNum = static_cast<unsigned int>(node->children.size());
+
+    *stream << "\n"; //Write divider
+
+    stream->write(reinterpret_cast<char*>(&meshesNum), sizeof(unsigned int));
+    stream->write(reinterpret_cast<char*>(&childrenNum), sizeof(unsigned int));
+
     for(unsigned int mesh_i = 0; mesh_i < node->mesh_names.size(); mesh_i ++){
         //Write mesh name
         *stream << node->mesh_names[mesh_i] << "\n";
@@ -136,7 +145,7 @@ void ZS3M::ImportedSceneFile::loadFromFile(std::string output_file){
     unsigned int nodes_num = 0;
 
     stream.read(reinterpret_cast<char*>(&model_ver), sizeof (unsigned int));
-
+    //Check for file version
     if(model_ver != 1000){
         stream.close();
         return;
@@ -151,7 +160,39 @@ void ZS3M::ImportedSceneFile::loadFromFile(std::string output_file){
 
         //We reached node
         if(prefix.compare("N") == false){
+            MeshNode node;
 
+            stream >> node.node_label; // read mesh label
+
+            unsigned int meshesNum = 0;
+            unsigned int childrenNum = 0;
+
+            stream.seekg(1, std::ifstream::cur);
+            //Read data
+            stream.read(reinterpret_cast<char*>(&meshesNum), sizeof(unsigned int));
+            stream.read(reinterpret_cast<char*>(&childrenNum), sizeof(unsigned int));
+
+            for(unsigned int mesh_i = 0; mesh_i < meshesNum; mesh_i ++){
+                std::string mesh_name;
+                //Read mesh name
+                stream >> mesh_name;
+                //Put mesh name
+                node.mesh_names.push_back(mesh_name);
+            }
+            for(unsigned int ch_i = 0; ch_i < childrenNum; ch_i ++){
+                std::string child_name;
+                //Read child name
+                stream >> child_name;
+                //Put child name
+                //node.children.push_back(mesh_name);
+            }
+            //Read node base matrix
+            for(unsigned int m_i = 0; m_i < 4; m_i ++){
+                for(unsigned int m_j = 0; m_j < 4; m_j ++){
+                    float* m_v = &node.node_transform.m[m_i][m_j];
+                    stream.read(reinterpret_cast<char*>(m_v), sizeof(float));
+                }
+            }
         }
         //We reached mesh
         if(prefix.compare("_MESH") == false){
@@ -198,8 +239,37 @@ void ZS3M::ImportedSceneFile::loadFromFile(std::string output_file){
             for(unsigned int in_i = 0; in_i < indexNum; in_i ++){
                 stream.read(reinterpret_cast<char*>(&newmesh->indices_arr[in_i]), sizeof(unsigned int));
             }
+            stream.seekg(1, std::ifstream::cur);
+            //Read mesh bones
+            for(unsigned int bone_i = 0; bone_i < bonesNum; bone_i ++){
+                std::string pref;
+                stream >> pref;
+
+                if(pref.compare("b") == 0){
+
+                    std::string bone_label;
+                    stream >> bone_label;
+                    stream.seekg(1, std::ifstream::cur);
+
+                    ZSPIRE::Bone bone(bone_label);
+
+                    for(unsigned int m_i = 0; m_i < 4; m_i ++){
+                        for(unsigned int m_j = 0; m_j < 4; m_j ++){
+                            float* m_v = &bone.offset.m[m_i][m_j];
+                            stream.read(reinterpret_cast<char*>(m_v), sizeof(float));
+                        }
+                    }
+
+                    stream.seekg(1, std::ifstream::cur);
+                }
+            }
+
             newmesh->Init();
             newmesh->setMeshData(newmesh->vertices_arr, newmesh->indices_arr, newmesh->vertices_num, newmesh->indices_num);
+
+            delete[] newmesh->vertices_arr;
+            delete[] newmesh->indices_arr;
+
             //Push mesh as output result
             this->meshes_toWrite.push_back(newmesh);
         }

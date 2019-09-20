@@ -371,6 +371,8 @@ public:
     EditWindow* win_ptr;
     FileListWgt(QWidget* parent = nullptr);
 
+    void dropEvent(QDropEvent* event);
+
     World* world_ptr;
 };
 

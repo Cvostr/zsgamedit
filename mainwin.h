@@ -103,6 +103,7 @@ public:
 
     void updateListWidgetContent();
 
+    void resizeEvent(QResizeEvent* event);
     virtual void closeEvent ( QCloseEvent * event );
 
     explicit MainWin(QApplication* app, QWidget *parent = nullptr);

@@ -22,6 +22,7 @@ namespace ZSPIRE {
         uint vertices_affected;
 
         Bone(std::string name, uint vertices);
+        Bone(std::string name);
     };
 
 	class Mesh {

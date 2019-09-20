@@ -228,6 +228,15 @@ void MainWin::showCtxMenu(QPoint point){
     project_menu->show(point);
 }
 
+void MainWin::resizeEvent(QResizeEvent* event){
+    QMainWindow::resizeEvent(event);
+
+    int new_width = event->size().width();
+    int new_height = event->size().height();
+
+    ui->projList->resize(new_width, new_height);
+}
+
 ProjectListWgt::ProjectListWgt(QWidget* parent) : QListWidget (parent){
 }
 

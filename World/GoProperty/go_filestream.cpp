@@ -60,6 +60,8 @@ void GameObject::saveProperties(std::ofstream* stream){
         }
         case GO_PROPERTY_TYPE_NODE:{
             NodeProperty* ptr = static_cast<NodeProperty*>(property_ptr);
+            //Write node name
+            *stream << ptr->node_label.toStdString() << "\n";
             for(unsigned int m_i = 0; m_i < 4; m_i ++){
                 for(unsigned int m_j = 0; m_j < 4; m_j ++){
                     float m_v = ptr->transform_mat.m[m_i][m_j];
@@ -266,40 +268,52 @@ void GameObject::loadProperty(std::ifstream* world_stream){
             world_stream->read(reinterpret_cast<char*>(&t_ptr->rotation.Y), sizeof(float));
             world_stream->read(reinterpret_cast<char*>(&t_ptr->rotation.Z), sizeof(float));
 
-        break;
-    }
-    case GO_PROPERTY_TYPE_MESH :{
-        std::string rel_path;
-        *world_stream >> rel_path;
-        MeshProperty* lptr = static_cast<MeshProperty*>(prop_ptr);
-        lptr->resource_relpath = QString::fromStdString(rel_path); //Write loaded mesh relative path
-        lptr->updateMeshPtr(); //Pointer will now point to mesh resource
+            break;
+        }
+        case GO_PROPERTY_TYPE_MESH :{
+            std::string rel_path;
+            *world_stream >> rel_path;
+            MeshProperty* lptr = static_cast<MeshProperty*>(prop_ptr);
+            lptr->resource_relpath = QString::fromStdString(rel_path); //Write loaded mesh relative path
+            lptr->updateMeshPtr(); //Pointer will now point to mesh resource
 
-        world_stream->seekg(1, std::ofstream::cur);
-        world_stream->read(reinterpret_cast<char*>(&lptr->castShadows), sizeof(bool));
+            world_stream->seekg(1, std::ofstream::cur);
+            world_stream->read(reinterpret_cast<char*>(&lptr->castShadows), sizeof(bool));
 
-        break;
-    }
-    case GO_PROPERTY_TYPE_LIGHTSOURCE:{
-        LightsourceProperty* ptr = static_cast<LightsourceProperty*>(prop_ptr);
-        world_stream->seekg(1, std::ofstream::cur);
+            break;
+        }
+        case GO_PROPERTY_TYPE_NODE:{
+            NodeProperty* ptr = static_cast<NodeProperty*>(prop_ptr);
+            std::string nod_name;
+            //Write node name
+            *world_stream >> nod_name;
+            ptr->node_label = QString::fromStdString(nod_name);
+            for(unsigned int m_i = 0; m_i < 4; m_i ++){
+                for(unsigned int m_j = 0; m_j < 4; m_j ++){
+                    float m_v = ptr->transform_mat.m[m_i][m_j];
+                    world_stream->read(reinterpret_cast<char*>(&m_v), sizeof(float));
+                }
+            }
+            break;
+        }
+        case GO_PROPERTY_TYPE_LIGHTSOURCE:{
+            LightsourceProperty* ptr = static_cast<LightsourceProperty*>(prop_ptr);
+            world_stream->seekg(1, std::ofstream::cur);
 
-        world_stream->read(reinterpret_cast<char*>(&ptr->light_type), sizeof(LIGHTSOURCE_TYPE));
-        world_stream->read(reinterpret_cast<char*>(&ptr->intensity), sizeof(float));
-        world_stream->read(reinterpret_cast<char*>(&ptr->range), sizeof(float));
-        world_stream->read(reinterpret_cast<char*>(&ptr->spot_angle), sizeof(float));
+            world_stream->read(reinterpret_cast<char*>(&ptr->light_type), sizeof(LIGHTSOURCE_TYPE));
+            world_stream->read(reinterpret_cast<char*>(&ptr->intensity), sizeof(float));
+            world_stream->read(reinterpret_cast<char*>(&ptr->range), sizeof(float));
+            world_stream->read(reinterpret_cast<char*>(&ptr->spot_angle), sizeof(float));
 
-        float cl_r;
-        float cl_g;
-        float cl_b;
+            float cl_r = 0, cl_g = 0, cl_b = 0;
 
-        world_stream->read(reinterpret_cast<char*>(&cl_r), sizeof(float));
-        world_stream->read(reinterpret_cast<char*>(&cl_g), sizeof(float));
-        world_stream->read(reinterpret_cast<char*>(&cl_b), sizeof(float));
-        ptr->color = ZSRGBCOLOR(cl_r, cl_g, cl_b);
+            world_stream->read(reinterpret_cast<char*>(&cl_r), sizeof(float));
+            world_stream->read(reinterpret_cast<char*>(&cl_g), sizeof(float));
+            world_stream->read(reinterpret_cast<char*>(&cl_b), sizeof(float));
+            ptr->color = ZSRGBCOLOR(cl_r, cl_g, cl_b);
 
-        break;
-    }
+            break;
+        }
     case GO_PROPERTY_TYPE_SCRIPTGROUP:{
         ScriptGroupProperty* ptr = static_cast<ScriptGroupProperty*>(prop_ptr);
         world_stream->seekg(1, std::ofstream::cur);
@@ -420,14 +434,13 @@ void GameObject::loadProperty(std::ifstream* world_stream){
 
             std::string diffuse_relpath;
             std::string normal_relpath;
-
+            //Read texture pair
             *world_stream >> diffuse_relpath >> normal_relpath; //Write material relpath
-
+            //Assign paths to texture pair
             texture_pair.diffuse_relpath = QString::fromStdString(diffuse_relpath);
             texture_pair.normal_relpath = QString::fromStdString(normal_relpath);
 
             ptr->textures.push_back(texture_pair);
-            //texture_pair.diffuse
         }
         ptr->onValueChanged();
 

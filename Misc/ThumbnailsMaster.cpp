@@ -104,13 +104,11 @@ void ThumbnailsMaster::DrawMaterial(Material* material){
     glBindBuffer(GL_UNIFORM_BUFFER, camBuffer);
     ZSMATRIX4x4 proj = cam_ptr->getProjMatrix();
     ZSMATRIX4x4 view = cam_ptr->getViewMatrix();
-    ZSVECTOR3 cam_pos = cam_ptr->getCameraPosition();
     glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof (ZSMATRIX4x4), &proj);
     glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4), sizeof (ZSMATRIX4x4), &view);
-    glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 3, sizeof(ZSVECTOR3), &cam_pos);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 */
-    ZSPIRE::getSphereMesh();
+    ZSPIRE::getSphereMesh()->Draw();
 }
 
 

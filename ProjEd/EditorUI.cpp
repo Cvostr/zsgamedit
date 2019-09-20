@@ -3,6 +3,7 @@
 #include <QMessageBox>
 #include <QMouseEvent>
 #include <QDesktopServices>
+#include <QMimeData>
 
 #include "ui_editor.h"
 #include "ui_inspector_win.h"
@@ -61,6 +62,26 @@ void ObjTreeWgt::dropEvent(QDropEvent* event){
     }
     //return drg&drop mode to normal
     _editor_win->getObjectListWidget()->setDragDropMode(QAbstractItemView::DragDrop);
+}
+
+void FileListWgt::dropEvent(QDropEvent* event){
+     const QMimeData* mimeData = event->mimeData();
+
+       // check for our needed mime type, here a file or a list of files
+       if (mimeData->hasUrls())
+       {
+         QStringList pathList;
+         QList<QUrl> urlList = mimeData->urls();
+
+         // extract the local paths of the files
+         for (int i = 0; i < urlList.size() && i < 32; +i)
+         {
+           pathList.append(urlList.at(i).toLocalFile());
+         }
+
+         // call a function to open the files
+         //openFiles(pathList);
+       }
 }
 
 void ObjTreeWgt::mousePressEvent(QMouseEvent *event){

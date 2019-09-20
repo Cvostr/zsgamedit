@@ -91,6 +91,8 @@ void EdActions::undo(){
 
         snapshot->clear(); //Clear previous state
         snapshot->snapshot = cur_state_snap; //put previous state to current actions
+
+        this->insp_win->clearContentLayout();
     }
 
     if(act_type == ACT_TYPE_OBJECT){ //if this action is snapshot
@@ -139,7 +141,10 @@ void EdActions::redo(){
 
         world_ptr->recoverFromSnapshot(&snapshot->snapshot);
 
+        snapshot->clear();
         snapshot->snapshot = cur_state_snap;
+
+        this->insp_win->clearContentLayout();
     }
 
     if(act_type == ACT_TYPE_OBJECT){
