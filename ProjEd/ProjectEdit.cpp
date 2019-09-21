@@ -19,6 +19,7 @@
 
 EditWindow* _editor_win;
 InspectorWin* _inspector_win;
+Project* project_ptr;
 EdActions* _ed_actions_container;
 
 RenderPipeline* renderer;
@@ -221,6 +222,8 @@ void EditWindow::init(){
 
     world.world_camera = edit_camera;
     world.world_camera.isAlListenerCamera = true;
+
+    project_ptr = &this->project;
 }
 
 void EditWindow::assignIconFile(QListWidgetItem* item){
@@ -248,8 +251,10 @@ void EditWindow::assignIconFile(QListWidgetItem* item){
     }
     if(checkExtension(item->text(), (".zsmat"))){
         QString path = this->current_dir + "/" + item->text();
-        QImage* img = thumb_master->texture_thumbnails.at(path.toStdString());
-        item->setIcon(QIcon(QPixmap::fromImage(*img)));
+        if(thumb_master->isAvailable(path.toStdString())){
+            QImage* img = thumb_master->texture_thumbnails.at(path.toStdString());
+            item->setIcon(QIcon(QPixmap::fromImage(*img)));
+        }
     }
 }
 

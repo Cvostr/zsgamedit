@@ -1,6 +1,9 @@
 #include "headers/MatShaderProps.h"
 #include <fstream>
 #include <iostream>
+#include "../Misc/headers/zs_types.h"
+
+extern Project* project_ptr;
 
 static std::vector<MtShaderPropertiesGroup*> MatGroups;
 
@@ -484,7 +487,13 @@ void Material::applyMatToPipeline(){
                 TextureMaterialShaderProperty* texture_p = static_cast<TextureMaterialShaderProperty*>(prop_ptr);
                 TextureMtShPropConf* texture_conf = static_cast<TextureMtShPropConf*>(conf_ptr);
 
-                if(texture_conf->texture != nullptr){
+                if(texture_conf->path.compare("@none")){
+                    //if texture isn't loaded
+                    if(texture_conf->texture == nullptr){
+                        Resource* res_ptr = project_ptr->getResource(texture_conf->path);
+                        texture_conf->texture = static_cast<ZSPIRE::Texture*>(res_ptr->class_ptr);
+                    }
+                    //Set opengl texture
                     shader->setGLuniformInt(texture_p->ToggleUniform.c_str(), 1); //Set texture uniform toggle
                     texture_conf->texture->Use(texture_p->slotToBind); //Use texture
                 }else{

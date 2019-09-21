@@ -104,8 +104,9 @@ void ThumbnailsMaster::DrawMaterial(Material* material){
 
     ZSPIRE::Camera cam;
     cam.setProjectionType(ZSCAMERA_PROJECTION_PERSPECTIVE);
-    cam.setPosition(ZSVECTOR3(0, 0, -4));
+    cam.setPosition(ZSVECTOR3(0, 0, -3));
     cam.setFront(ZSVECTOR3(0,0,1));
+    cam.setViewport(ZSVIEWPORT(0,0, 512, 512));
     cam.setZplanes(0.1f, 5000.f);
 
     glBindBuffer(GL_UNIFORM_BUFFER, 13);

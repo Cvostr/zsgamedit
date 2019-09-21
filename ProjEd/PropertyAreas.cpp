@@ -477,7 +477,7 @@ void ResourcePickDialog::onResourceSelected(){
 }
 
 void ResourcePickDialog::onNeedToShow(){
-    if(this->area->resource_type == RESOURCE_TYPE_TEXTURE || this->area->resource_type == RESOURCE_TYPE_MESH){
+    if(this->area->resource_type == RESOURCE_TYPE_TEXTURE || this->area->resource_type == RESOURCE_TYPE_MATERIAL){
         this->list->setViewMode(QListView::IconMode);
     }
 
@@ -504,14 +504,13 @@ void ResourcePickDialog::onNeedToShow(){
             Resource* resource_ptr = &project_ptr->resources[res_i];
             if(resource_ptr->type == area->resource_type){ //if type is the same
                 QListWidgetItem* item = new QListWidgetItem(QString::fromStdString(resource_ptr->resource_label), this->list); //add resource to list
-                if(this->area->resource_type == RESOURCE_TYPE_TEXTURE){
+                if(this->area->resource_type == RESOURCE_TYPE_TEXTURE || this->area->resource_type == RESOURCE_TYPE_MATERIAL){
                     std::string fpath = _editor_win->project.root_path.toStdString() + "/" + resource_ptr->resource_label;
                     QImage* img = nullptr;
                     if(_editor_win->thumb_master->isAvailable(fpath))
                         img = _editor_win->thumb_master->texture_thumbnails.at(fpath);
                     if(img)
                         item->setIcon(QIcon(QPixmap::fromImage(*img)));
-                    //item->setText("");
                 }
             }
         }
