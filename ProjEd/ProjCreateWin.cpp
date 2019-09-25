@@ -69,5 +69,7 @@ void CreateProjectWindow::resizeEvent(QResizeEvent* event){
     int new_width = event->size().width();
     int new_height = event->size().height();
 
-    ui->prCreateBtn->move(new_width - ui->prCreateBtn->width() - 50 , new_height - ui->prCreateBtn->height() * 2);
+    ui->prNameEdit->resize(new_width - ui->prNameEdit->x() - 10, ui->prNameEdit->height());
+    ui->dirBrouseBtn->move(new_width - ui->dirBrouseBtn->width() - 25, ui->dirBrouseBtn->y());
+    ui->prCreateBtn->move(new_width - ui->prCreateBtn->width() - 25, new_height - ui->prCreateBtn->height() * 2);
 }

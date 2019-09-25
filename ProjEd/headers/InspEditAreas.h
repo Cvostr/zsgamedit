@@ -139,6 +139,7 @@ class ResourcePickDialog : public QDialog{
 public slots:
     void onNeedToShow();
     void onResourceSelected();
+    void onDialogClose();
 private:
     QGridLayout* contentLayout; //Layout to contain everything
     void findFiles(QString directory);

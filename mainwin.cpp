@@ -130,7 +130,7 @@ void MainWin::loadProjectsConfigurations(){
                 conf.editwin_proj = mProject; //Copy project data
 
                 addProjectToVector(conf); //Add project vector
-
+                //Refresh list widget
                 updateListWidgetContent();
             }
         }

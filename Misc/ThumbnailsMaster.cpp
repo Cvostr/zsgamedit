@@ -3,6 +3,8 @@
 
 #include <iostream>
 
+#define MAX_LIGHTS_AMOUNT 150
+
 const char texture_shaderFS[310] = "#version 150 core\n\
         #extension GL_ARB_explicit_attrib_location : require\n\
         #extension GL_ARB_explicit_uniform_location : require\n\
@@ -69,8 +71,34 @@ void ThumbnailsMaster::createTexturesThumbnails(){
 void ThumbnailsMaster::createMaterialThumbnails(){
     //Compile texture shader
     glViewport(0, 0, 512, 512);
-
+    glClearColor(0,0,0,0);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
+
+    glBindBuffer(GL_UNIFORM_BUFFER, 14);
+    int light_i = 0;
+    int light_type = 1;
+    float light_intensity = 0.8f;
+    ZSVECTOR3 pos = ZSVECTOR3(0,0,0);
+    ZSVECTOR3 light_dir = _getDirection(66, 30, 30);
+    ZSRGBCOLOR color = ZSRGBCOLOR(255,255,255,255);
+    color.updateGL();
+
+        glBufferSubData(GL_UNIFORM_BUFFER, 64 * light_i, sizeof (int), &light_type);
+        //glBufferSubData(GL_UNIFORM_BUFFER, 64 * light_i + 4, sizeof (float), &_light_ptr->range);
+        glBufferSubData(GL_UNIFORM_BUFFER, 64 * light_i + 8, sizeof (float), &light_intensity);
+        //glBufferSubData(GL_UNIFORM_BUFFER, 64 * light_i + 12, sizeof (float), &_light_ptr->spot_angle);
+        glBufferSubData(GL_UNIFORM_BUFFER, 64 * light_i + 16, 12, &pos);
+        glBufferSubData(GL_UNIFORM_BUFFER, 64 * light_i + 32, 12, &light_dir);
+        glBufferSubData(GL_UNIFORM_BUFFER, 64 * light_i + 48, 4, &color.gl_r);
+        glBufferSubData(GL_UNIFORM_BUFFER, 64 * light_i + 52, 4, &color.gl_g);
+        glBufferSubData(GL_UNIFORM_BUFFER, 64 * light_i + 56, 4, &color.gl_b);
+
+
+    int ls = 1;
+    glBufferSubData(GL_UNIFORM_BUFFER, 64 * MAX_LIGHTS_AMOUNT, 4, &ls);
+
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
     //Iterate over all resources
     for(unsigned int res_i = 0; res_i < project_struct_ptr->resources.size(); res_i ++){

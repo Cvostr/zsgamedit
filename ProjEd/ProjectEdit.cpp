@@ -193,12 +193,12 @@ void EditWindow::init(){
     this->glyph_manager = new GlyphManager;
     glyph_manager->pipeline_ptr = render;
     this->startManager(glyph_manager);
-
+    //Init thumbnails manager
     this->thumb_master = new ThumbnailsMaster;
     this->startManager(thumb_master);
 
     ready = true;//Everything is ready
-
+    //Init OpenAL sound system
     ZSPIRE::SFX::initAL();
 
     switch(project.perspective){
@@ -221,13 +221,17 @@ void EditWindow::init(){
     edit_camera.setViewport(viewport);
 
     world.world_camera = edit_camera;
+    //World gameplay camera will work with openal listener
     world.world_camera.isAlListenerCamera = true;
 
     project_ptr = &this->project;
 }
 
 void EditWindow::assignIconFile(QListWidgetItem* item){
+    //Set base icon
     item->setIcon(QIcon::fromTheme("application-x-executable"));
+
+    //File is plaintext
     if(checkExtension(item->text(), (".txt")) || checkExtension(item->text(), (".inf")) || checkExtension(item->text(), (".scn"))){
         item->setIcon(QIcon::fromTheme("text-x-generic"));
     }
@@ -240,15 +244,18 @@ void EditWindow::assignIconFile(QListWidgetItem* item){
             item->setIcon(QIcon(QPixmap::fromImage(*img)));
         }
     }
+    //File is .FBX .DAE scene
     if(checkExtension(item->text(), (".fbx")) || checkExtension(item->text(), (".dae"))){
         item->setIcon(QIcon::fromTheme("applications-graphics"));
     }
+    //File is .WAV sound
     if(checkExtension(item->text(), (".wav"))){
         item->setIcon(QIcon::fromTheme("audio-x-generic"));
     }
     if(checkExtension(item->text(), (".lua"))){
         item->setIcon(QIcon::fromTheme("text-x-script"));
     }
+    //File is .ZSMAT material
     if(checkExtension(item->text(), (".zsmat"))){
         QString path = this->current_dir + "/" + item->text();
         if(thumb_master->isAvailable(path.toStdString())){
@@ -731,6 +738,8 @@ void EditWindow::onFileCtxMenuShow(QPoint point){
 }
 
 void EditWindow::onCameraToObjTeleport(){
+    if(isWorldCamera) return;
+
     QTreeWidgetItem* selected_item = ui->objsList->currentItem(); //Obtain pointer to clicked obj item
     QString obj_name = selected_item->text(0); //Get label of clicked obj
     GameObject* obj_ptr = world.getObjectByLabel(obj_name); //Obtain pointer to selected object by label
@@ -1208,12 +1217,16 @@ void EditWindow::onMouseWheel(int x, int y){
         edit_camera.setPosition(pos + front * y);
     }
     //2D project
-    if(project.perspective == 2 &&
+    if(project.perspective == 2 && this->input_state.isLCtrlHold &&
             edit_camera.orthogonal_factor + static_cast<float>(y) / 50.F >= 0.2f &&
             edit_camera.orthogonal_factor + static_cast<float>(y) / 50.F <= 1.7f){
         edit_camera.orthogonal_factor += static_cast<float>(y) / 50.F;
         edit_camera.updateProjectionMat();
     }
+    //Common camera movement
+    if(project.perspective == 2 && !this->input_state.isLCtrlHold)
+        edit_camera.setPosition(edit_camera.getCameraPosition() + ZSVECTOR3(x * 10, y * 10, 0));
+
 }
 void EditWindow::onMouseMotion(int relX, int relY){
     //Terrain painting

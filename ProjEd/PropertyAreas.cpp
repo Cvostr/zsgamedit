@@ -8,6 +8,8 @@
 #include <QDir>
 #include <iostream>
 
+#define INSP_DIMENSION_WIDGET_SIZE 11
+
 extern EditWindow* _editor_win;
 
 AreaPropertyTitle::AreaPropertyTitle(){
@@ -154,8 +156,11 @@ Float3PropertyArea::Float3PropertyArea(){
 
     //Allocating separator labels
     x_label.setText(QString("X"));
+    x_label.setFixedWidth(INSP_DIMENSION_WIDGET_SIZE);
     y_label.setText(QString("Y"));
+    y_label.setFixedWidth(INSP_DIMENSION_WIDGET_SIZE);
     z_label.setText(QString("Z"));
+    z_label.setFixedWidth(INSP_DIMENSION_WIDGET_SIZE);
     //Set specific styles to labels
     x_label.setStyleSheet("QLabel { color : white; background-color: red }");
     y_label.setStyleSheet("QLabel { color : white; background-color: green }");
@@ -168,17 +173,17 @@ Float3PropertyArea::Float3PropertyArea(){
     validator->setLocale(locale); //English locale to accept dost instead of commas
 
     elem_layout->addWidget(&x_label); //Adding X label
-    x_field.setFixedWidth(60);
+    x_field.setMinimumWidth(60);
     x_field.setValidator(validator); //Set double validator
     elem_layout->addWidget(&x_field); //Adding X text field
 
     elem_layout->addWidget(&y_label);
-    y_field.setFixedWidth(60);
+    y_field.setMinimumWidth(60);
     y_field.setValidator(validator);
     elem_layout->addWidget(&y_field);
 
     elem_layout->addWidget(&z_label);
-    z_field.setFixedWidth(60);
+    z_field.setMinimumWidth(60);
     z_field.setValidator(validator);
     elem_layout->addWidget(&z_field);
 }
@@ -386,9 +391,10 @@ void PickResourceArea::setup(){
 }
 
 void PickResourceArea::updateLabel(){
-    if(this->resource_type == RESOURCE_TYPE_TEXTURE && *rel_path != "@none"){
+    if((this->resource_type == RESOURCE_TYPE_MATERIAL || this->resource_type == RESOURCE_TYPE_TEXTURE) && *rel_path != "@none"){
         std::string fpath = _editor_win->project.root_path.toStdString() + "/" + rel_path->toStdString();
         QImage* img = nullptr;
+        //Set resource pixmap
         if(_editor_win->thumb_master->isAvailable(fpath))
             img = _editor_win->thumb_master->texture_thumbnails.at(fpath);
         if(img)
@@ -473,12 +479,21 @@ void ResourcePickDialog::onResourceSelected(){
     *area->rel_path = resource_path;
     area->PropertyEditArea::callPropertyUpdate();
     this->resource_text->setText(resource_path);
-    accept(); //Close dailog with positive answer
+    emit accept(); //Close dailog with positive answer
+}
+
+void ResourcePickDialog::onDialogClose(){
+    //QListWidgetItem* selected = this->list->currentItem();
+    //emit accept();
+   //this->hide();
+   // _editor_win->getInspector()->updateObjectProperties();
 }
 
 void ResourcePickDialog::onNeedToShow(){
+
     if(this->area->resource_type == RESOURCE_TYPE_TEXTURE || this->area->resource_type == RESOURCE_TYPE_MATERIAL){
         this->list->setViewMode(QListView::IconMode);
+        this->list->setIconSize(QSize(75, 75));
     }
 
     this->extension_mask = area->extension_mask; //send extension mask
@@ -517,7 +532,7 @@ void ResourcePickDialog::onNeedToShow(){
     }else{ //we want to pick common file
         findFiles(project_ptr->root_path);
     }
-    this->exec();
+    this->show();
     //update label content
     area->updateLabel();
 }
@@ -552,19 +567,21 @@ void ResourcePickDialog::findFiles(QString directory){
 
 ResourcePickDialog::ResourcePickDialog(QWidget* parent) :
     QDialog (parent, Qt::WindowTitleHint | Qt::WindowSystemMenuHint){
-    resize(500, 400);
-    contentLayout = new QGridLayout(); // Alocation of layout
+    resize(700, 600);
+    contentLayout = new QGridLayout(this); // Alocation of layout
     list = new QListWidget;
     this->setWindowTitle("Select Resource");
 
     contentLayout->addWidget(list);
     connect(this->list, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(onResourceSelected())); //Connect to slot
+    connect(this, SIGNAL(rejected()), this, SLOT(onDialogClose())); //Connect to slot
     setLayout(contentLayout);
 
 }
 
 ResourcePickDialog::~ResourcePickDialog(){
     delete list;
+    delete contentLayout;
 }
 ColorDialogArea::ColorDialogArea(){
     type = PEA_TYPE_COLOR;

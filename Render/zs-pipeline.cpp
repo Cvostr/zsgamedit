@@ -551,7 +551,7 @@ void TerrainProperty::onRender(RenderPipeline* pipeline){
         this->data.generateGLMesh();
         hasChanged = false;
     }
-
+    //Binding terrain buffer
     glBindBuffer(GL_UNIFORM_BUFFER, pipeline->terrainUniformBuffer);
 
     MaterialProperty* mat = this->go_link.updLinkPtr()->getPropertyPtr<MaterialProperty>();
@@ -562,15 +562,19 @@ void TerrainProperty::onRender(RenderPipeline* pipeline){
 
     //Iterate over all textures to use them
     for(unsigned int i = 0; i < static_cast<unsigned int>(this->textures_size); i ++){
+        //Get pair pointer
         HeightmapTexturePair* pair = &this->textures[i];
+        //Check, if pair has diffuse texture
         if(pair->diffuse != nullptr){
+            //Use diffuse texture
             pair->diffuse->Use(static_cast<int>(i));
             glBufferSubData(GL_UNIFORM_BUFFER, 16 * i, 4, &dtrue);
         }else{
             glBufferSubData(GL_UNIFORM_BUFFER, 16 * i, 4, &dfalse);
         }
-
+        //Check, if pair has normal texture
         if(pair->normal != nullptr){
+            //Use normal texture
             pair->normal->Use(static_cast<int>(12 + i));
             glBufferSubData(GL_UNIFORM_BUFFER, 16 * 12 + 16 * i, 4, &dtrue);
         }else{
