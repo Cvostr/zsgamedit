@@ -303,7 +303,7 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr){
     f[8] = static_cast<int>(L'r');
     f[9] = static_cast<int>(L'l');
     f[10] = static_cast<int>(L'd');
-    c->DrawString(f, 11, ZSVECTOR2(10,10));
+    //c->DrawString(f, 11, ZSVECTOR2(10,10));
 
     SDL_GL_SwapWindow(w); //Send rendered frame
 }
@@ -512,12 +512,11 @@ void GameObject::processObject(RenderPipeline* pipeline){
 
 void MaterialProperty::onRender(RenderPipeline* pipeline){
     ZSPIRE::Shader* shader;
-
+    //Check for validity of pointer
     if(material_ptr == nullptr) return;
 
-    MaterialProperty* material_ptr = static_cast<MaterialProperty*>(this->go_link.updLinkPtr()->getPropertyPtrByType(GO_PROPERTY_TYPE_MATERIAL));
     TransformProperty* transform_ptr = static_cast<TransformProperty*>(this->go_link.updLinkPtr()->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
-    MtShaderPropertiesGroup* group_ptr = material_ptr->material_ptr->group_ptr;
+    MtShaderPropertiesGroup* group_ptr = material_ptr->group_ptr;
 
     if(transform_ptr == nullptr || group_ptr == nullptr) return ; //if object hasn't property
 
@@ -527,7 +526,7 @@ void MaterialProperty::onRender(RenderPipeline* pipeline){
     //Get pointer to shadowcaster
     ShadowCasterProperty* shadowcast = static_cast<ShadowCasterProperty*>(pipeline->getRenderSettings()->shadowcaster_ptr);
     if(shadowcast != nullptr && this->material_ptr->group_ptr->acceptShadows && this->receiveShadows){
-        shadowcast->sendData(shader);
+        shadowcast->setTexture(shader);
         glBindBuffer(GL_UNIFORM_BUFFER, pipeline->shadowBuffer);
         //In GLSL we should use Integer instead of bool
         int recShadows = static_cast<int>(this->receiveShadows);
@@ -540,11 +539,11 @@ void MaterialProperty::onRender(RenderPipeline* pipeline){
         glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 2 + 4, 4, &recShadows);
     }
 
-
+    //Send transform matrix to shader
     glBindBuffer(GL_UNIFORM_BUFFER, pipeline->camBuffer);
     glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 2, sizeof (ZSMATRIX4x4), &transform_ptr->transform_mat);
 
-    material_ptr->material_ptr->applyMatToPipeline();
+    material_ptr->applyMatToPipeline();
 
 
 }
@@ -586,7 +585,7 @@ void TerrainProperty::onRender(RenderPipeline* pipeline){
             glBufferSubData(GL_UNIFORM_BUFFER, 16 * 12 + 16 * i, 4, &dfalse);
         }
     }
-
+    //Tell shader, that we rendering terrain in normal mode (non picking)
     glBufferSubData(GL_UNIFORM_BUFFER, 16 * 12 * 2, 4, &dfalse);
 
     //Apply material shader
@@ -719,7 +718,7 @@ void ShadowCasterProperty::init(){
     this->initialized = true;
 }
 
-void ShadowCasterProperty::sendData(ZSPIRE::Shader* shader){
+void ShadowCasterProperty::setTexture(ZSPIRE::Shader* shader){
     glActiveTexture(GL_TEXTURE6);
     glBindTexture(GL_TEXTURE_2D, this->shadowDepthTexture);
 }
@@ -734,22 +733,18 @@ void RenderPipeline::updateShadersCameraInfo(ZSPIRE::Camera* cam_ptr){
     glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 3, sizeof(ZSVECTOR3), &cam_pos);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
     //Setting UI camera to UI buffer
-    if(ui_shader.isCreated == true){
-        glBindBuffer(GL_UNIFORM_BUFFER, uiUniformBuffer);
-        ZSMATRIX4x4 proj = cam_ptr->getUiProjMatrix();
-        glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof (ZSMATRIX4x4), &proj);
-        glBindBuffer(GL_UNIFORM_BUFFER, 0);
-    }
+    glBindBuffer(GL_UNIFORM_BUFFER, uiUniformBuffer);
+    proj = cam_ptr->getUiProjMatrix();
+    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof (ZSMATRIX4x4), &proj);
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
     //Setting cameras to skybox shader
-    if(skybox.isCreated == true){
-        ZSMATRIX4x4 proj = cam_ptr->getProjMatrix();
-        ZSMATRIX4x4 viewmat = cam_ptr->getViewMatrix();
-        viewmat = removeTranslationFromViewMat(viewmat);
+    proj = cam_ptr->getProjMatrix();
+    view = cam_ptr->getViewMatrix();
+    view = removeTranslationFromViewMat(view);
+    glBindBuffer(GL_UNIFORM_BUFFER, skyboxTransformUniformBuffer);
+    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof (ZSMATRIX4x4), &proj);
+    glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4), sizeof (ZSMATRIX4x4), &view);
 
-        glBindBuffer(GL_UNIFORM_BUFFER, skyboxTransformUniformBuffer);
-        glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof (ZSMATRIX4x4), &proj);
-        glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4), sizeof (ZSMATRIX4x4), &viewmat);
-    }
 }
 
 void RenderPipeline::addLight(void* light_ptr){

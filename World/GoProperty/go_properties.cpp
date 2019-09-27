@@ -1591,6 +1591,7 @@ void NodeProperty::copyTo(GameObjectProperty* dest){
 
 AnimationProperty::AnimationProperty(){
     type = GO_PROPERTY_TYPE_ANIMATION;
+    this->anim_label = "@none";
     anim_prop_ptr = nullptr;
     Playing = false;
     start_sec = 0;
@@ -1694,5 +1695,9 @@ void AnimationProperty::copyTo(GameObjectProperty *dest){
 }
 
 void AnimationProperty::onValueChanged(){
+    updateAnimationPtr();
+}
+
+void AnimationProperty::updateAnimationPtr(){
     this->anim_prop_ptr = go_link.world_ptr->getAnimationPtrByRelPath(this->anim_label);
 }

@@ -5,9 +5,7 @@
 
 #define MAX_LIGHTS_AMOUNT 150
 
-const char texture_shaderFS[310] = "#version 150 core\n\
-        #extension GL_ARB_explicit_attrib_location : require\n\
-        #extension GL_ARB_explicit_uniform_location : require\n\
+const char texture_shaderFS[310] = "#version 420 core\n\
         in vec2 _UV;\n\
         out vec4 FragColor;\n\
         uniform sampler2D texturem;\n\
@@ -15,9 +13,7 @@ const char texture_shaderFS[310] = "#version 150 core\n\
         FragColor = texture(texturem, _UV);\n\
         }\n";
 
-const char texture_shaderVS[343] = "#version 150 core\n\
-        #extension GL_ARB_explicit_attrib_location : require\n\
-        #extension GL_ARB_explicit_uniform_location : require\n\
+const char texture_shaderVS[343] = "#version 420 core\n\
         layout (location = 0) in vec3 pos;\n\
         layout (location = 1) in vec2 uv;\n\
         out vec2 _UV;\n\

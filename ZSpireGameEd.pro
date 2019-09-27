@@ -61,7 +61,9 @@ SOURCES += \
     World/Physics.cpp \
     Misc/ThumbnailsMaster.cpp \
     Render/zs-animation.cpp \
-    Misc/zs3m-master.cpp
+    Misc/zs3m-master.cpp \
+    ui/zs-uiwidget.cpp \
+    ui/zs-uibutton.cpp
 
 HEADERS += \
         mainwin.h \
@@ -96,7 +98,9 @@ HEADERS += \
     World/headers/terrain.h \
     Misc/headers/ThumbnailsMaster.h \
     Render/headers/zs-animation.h \
-    Misc/headers/zs3m-master.h
+    Misc/headers/zs3m-master.h \
+    ui/headers/zs-uiwidget.h \
+    ui/headers/zs-uibutton.h
 
 
 FORMS += \

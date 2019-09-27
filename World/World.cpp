@@ -512,20 +512,10 @@ void World::addMeshGroup(std::string file_path){
 
     GameObject* rootobj = addMeshNode(&node);
     this->obj_widget_ptr->addTopLevelItem(rootobj->item_ptr);
-
+    //Add animation property to root object for correct skinning support
     rootobj->addProperty(GO_PROPERTY_TYPE_ANIMATION);
-
-    for(unsigned int m_i = 0; m_i < rootobj->children.size(); m_i ++){
-        GameObject* objm = rootobj->children[m_i].updLinkPtr();
-        MeshProperty* mesh_prop_ptr = (objm->getPropertyPtr<MeshProperty>());
-
-        if(mesh_prop_ptr == nullptr) continue;
-        if(mesh_prop_ptr->mesh_ptr == nullptr) continue;
-
-        if(mesh_prop_ptr->mesh_ptr->hasBones()){
-            mesh_prop_ptr->skinning_root_node = rootobj;
-        }
-    }
+    //Set rootNode to meshProperty on all children objects
+    rootobj->setMeshSkinningRootNodeRecursively(rootobj);
 }
 
 GameObject* World::addMeshNode(MeshNode* node){
@@ -535,8 +525,9 @@ GameObject* World::addMeshNode(MeshNode* node){
     //Setting base variables
     obj.world_ptr = this;
     obj.addLabelProperty();
-
+    //Add common base property Transform
     obj.addProperty(GO_PROPERTY_TYPE_TRANSFORM);
+    //Add node property to support skinning
     obj.addProperty(GO_PROPERTY_TYPE_NODE);
 
     obj.label = &obj.getLabelProperty()->label;
@@ -548,8 +539,7 @@ GameObject* World::addMeshNode(MeshNode* node){
 
     NodeProperty* node_prop = static_cast<NodeProperty*>(obj.getPropertyPtrByType(GO_PROPERTY_TYPE_NODE));
     node_prop->node_label = QString::fromStdString(node->node_label);
-
-    //Engine::cmat(node->node_transform, &node_prop->transform_mat);
+    //Set original node transform
     node_prop->transform_mat = node->node_transform;
 
     if(node->hasBone){

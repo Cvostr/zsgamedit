@@ -222,7 +222,7 @@ public:
     void copyTo(GameObjectProperty* dest);
     void init();
     void Draw(ZSPIRE::Camera* cam, RenderPipeline* pipeline);
-    void sendData(ZSPIRE::Shader* shader);
+    void setTexture(ZSPIRE::Shader* shader);
     ShadowCasterProperty();
 };
 
@@ -263,6 +263,7 @@ public:
     void onValueChanged();
     void copyTo(GameObjectProperty* dest);
 
+    void updateAnimationPtr();
     void updateNodeTransform(GameObject* obj, ZSMATRIX4x4 parent);
 
 

@@ -239,6 +239,7 @@ public:
 
     GameObject* getChildObjectWithLabelStartsWith(QString label);
     GameObject* getChildObjectWithNodeLabel(QString label);
+    void setMeshSkinningRootNodeRecursively(GameObject* rootNode);
 
     //Remove property with type
     void removeProperty(int index);

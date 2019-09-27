@@ -58,6 +58,12 @@ void GameObject::saveProperties(std::ofstream* stream){
             stream->write(reinterpret_cast<char*>(&ptr->castShadows), sizeof(bool));
             break;
         }
+        case GO_PROPERTY_TYPE_ANIMATION:{
+            AnimationProperty* ptr = static_cast<AnimationProperty*>(property_ptr);
+            *stream << ptr->anim_label.toStdString() << "\n";
+            //stream->write(reinterpret_cast<char*>(&ptr->castShadows), sizeof(bool));
+            break;
+        }
         case GO_PROPERTY_TYPE_NODE:{
             NodeProperty* ptr = static_cast<NodeProperty*>(property_ptr);
             //Write node name
@@ -225,6 +231,12 @@ void GameObject::saveProperties(std::ofstream* stream){
             }
             break;
         }
+        case GO_PROPERTY_TYPE_SKYBOX:{
+            break;
+        }
+        case GO_PROPERTY_TYPE_CHARACTER_CONTROLLER:{
+            break;
+        }
         }
     }
 }
@@ -280,6 +292,14 @@ void GameObject::loadProperty(std::ifstream* world_stream){
             world_stream->seekg(1, std::ofstream::cur);
             world_stream->read(reinterpret_cast<char*>(&lptr->castShadows), sizeof(bool));
 
+            break;
+        }
+        case GO_PROPERTY_TYPE_ANIMATION:{
+            AnimationProperty* ptr = static_cast<AnimationProperty*>(prop_ptr);
+            std::string anim_rel_path;
+            *world_stream >> anim_rel_path;
+            ptr->anim_label = QString::fromStdString(anim_rel_path);
+            ptr->updateAnimationPtr();
             break;
         }
         case GO_PROPERTY_TYPE_NODE:{
@@ -494,6 +514,12 @@ void GameObject::loadProperty(std::ifstream* world_stream){
         }
 
         break;
+        }
+        case GO_PROPERTY_TYPE_SKYBOX:{
+            break;
+        }
+        case GO_PROPERTY_TYPE_CHARACTER_CONTROLLER:{
+            break;
         }
     }
 }

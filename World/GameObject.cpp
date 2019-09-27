@@ -207,6 +207,17 @@ GameObject* GameObject::getChildObjectWithNodeLabel(QString label){
     return nullptr;
 }
 
+void GameObject::setMeshSkinningRootNodeRecursively(GameObject* rootNode){
+    MeshProperty* mesh = getPropertyPtr<MeshProperty>();
+    if(mesh)
+        mesh->skinning_root_node = rootNode;
+
+    for(unsigned int ch_i = 0; ch_i < children.size(); ch_i ++){
+        GameObject* obj_ptr = children[ch_i].updLinkPtr();
+        obj_ptr->setMeshSkinningRootNodeRecursively(rootNode);
+    }
+}
+
 void GameObject::trimChildrenArray(){
     for (unsigned int i = 0; i < children.size(); i ++) { //Iterating over all objects
         if(children[i].isEmpty() == true){ //If object marked as deleted

@@ -9,7 +9,6 @@
 #include <sstream>
 #include <iostream>
 
-static int cur_shader_gl_id = -1;
 #define SHADER_STR_LEN 16384
 
 ZSPIRE::Shader::Shader(){
@@ -163,7 +162,7 @@ void ZSPIRE::Shader::Use() {
     //if(cur_shader_gl_id == this->SHADER_ID) return;
 
 	glUseProgram(this->SHADER_ID);
-    cur_shader_gl_id = this->SHADER_ID;
+    //cur_shader_gl_id = this->SHADER_ID;
 }
 
 void ZSPIRE::Shader::setGLuniformMat4x4(const char* uniform_str, ZSMATRIX4x4 value) {

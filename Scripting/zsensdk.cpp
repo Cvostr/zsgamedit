@@ -9,16 +9,16 @@
 #include <functional>
 #include <SDL2/SDL.h>
 
-unsigned int mode_fullscreen = SDL_WINDOW_FULLSCREEN;
-unsigned int mode_borderless = SDL_WINDOW_FULLSCREEN_DESKTOP;
-unsigned int mode_windowed = 0;
+static unsigned int mode_fullscreen = SDL_WINDOW_FULLSCREEN;
+static unsigned int mode_borderless = SDL_WINDOW_FULLSCREEN_DESKTOP;
+static unsigned int mode_windowed = 0;
 
-unsigned int prop_transform = GO_PROPERTY_TYPE_TRANSFORM;
-unsigned int prop_mesh = GO_PROPERTY_TYPE_MESH;
-unsigned int prop_audio = GO_PROPERTY_TYPE_AUDSOURCE;
-unsigned int prop_light = GO_PROPERTY_TYPE_LIGHTSOURCE;
-unsigned int prop_script = GO_PROPERTY_TYPE_SCRIPTGROUP;
-unsigned int prop_tile = GO_PROPERTY_TYPE_TILE;
+static unsigned int prop_transform = GO_PROPERTY_TYPE_TRANSFORM;
+static unsigned int prop_mesh = GO_PROPERTY_TYPE_MESH;
+static unsigned int prop_audio = GO_PROPERTY_TYPE_AUDSOURCE;
+static unsigned int prop_light = GO_PROPERTY_TYPE_LIGHTSOURCE;
+static unsigned int prop_script = GO_PROPERTY_TYPE_SCRIPTGROUP;
+static unsigned int prop_tile = GO_PROPERTY_TYPE_TILE;
 
 extern EditWindow* _editor_win;
 
