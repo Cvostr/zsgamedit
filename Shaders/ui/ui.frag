@@ -1,18 +1,20 @@
-#version 150 core
-#extension GL_ARB_explicit_attrib_location : require
-#extension GL_ARB_explicit_uniform_location : require
+#version 420 core
 
 #define RENDER_SPRITE 1
 #define RENDER_TEXT 2
 
-in vec2 _UV;
-out vec4 FragColor;
+layout(location = 0) in vec2 _UV;
+layout(location = 0) out vec4 FragColor;
 
-uniform vec3 text_color;
+layout (std140, binding = 7) uniform Ui{
+    mat4 cam_projection;
+    mat4 object_transform;
+	int render_mode;
+    vec3 text_color;
+   
+};
 
-uniform int render_mode;
-
-uniform sampler2D sprite_map;
+layout(binding = 0) uniform sampler2D sprite_map;
 
 void main(){
 

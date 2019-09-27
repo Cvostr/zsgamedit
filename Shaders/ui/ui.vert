@@ -1,14 +1,16 @@
-#version 150 core
-#extension GL_ARB_explicit_attrib_location : require
-#extension GL_ARB_explicit_uniform_location : require
+#version 420 core
 
 layout (location = 0) in vec3 pos;
 layout (location = 1) in vec2 uv;
 
-out vec2 _UV;
+layout(location = 0) out vec2 _UV;
 
-uniform mat4 cam_projection;
-uniform mat4 object_transform;
+layout (std140, binding = 7) uniform Ui{
+    mat4 cam_projection;
+    mat4 object_transform;
+	int render_mode;
+    vec3 text_color;
+};
 
 void main(){
 

@@ -799,6 +799,12 @@ void MaterialProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
 
                 break;
             }
+            case MATSHPROP_TYPE_FVEC2:{
+                break;
+            }
+            case MATSHPROP_TYPE_IVEC2:{
+                break;
+            }
             case MATSHPROP_TYPE_INTEGER:{
                 //Cast pointer
                 IntegerMaterialShaderProperty* integer_p = static_cast<IntegerMaterialShaderProperty*>(prop_ptr);
@@ -1179,7 +1185,7 @@ void ScriptGroupProperty::addPropertyInterfaceToInspector(InspectorWin* inspecto
 void ScriptGroupProperty::onUpdate(float deltaTime){
     for(unsigned int script_i = 0; script_i < this->scripts_attached.size(); script_i ++){
         ObjectScript* script_ptr = &this->scripts_attached[script_i]; //Obtain pointer to script
-
+        //if script isn't created, then create it.
         if(!script_ptr->created){
             script_ptr->_InitScript();
             script_ptr->_callStart(this->go_link.updLinkPtr(), go_link.world_ptr);
@@ -1206,10 +1212,6 @@ void ScriptGroupProperty::copyTo(GameObjectProperty* dest){
         _dest->scripts_attached[script_i] = this->scripts_attached[script_i];
         _dest->path_names[script_i] = this->path_names[script_i];
     }
-}
-
-void ScriptGroupProperty::wakeUp(){
-
 }
 
 void ScriptGroupProperty::shutdown(){

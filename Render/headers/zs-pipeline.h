@@ -77,6 +77,7 @@ public:
     unsigned int skinningUniformBuffer;
     unsigned int tileMaterialUniformBuffer;
     unsigned int skyboxTransformUniformBuffer;
+    unsigned int uiUniformBuffer;
 
     bool depthTest; //if enabled, GL will do depth testing
     bool cullFaces; //if enabled, GL will cull faces

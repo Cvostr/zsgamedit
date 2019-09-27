@@ -438,7 +438,6 @@ IntPropertyArea::~IntPropertyArea(){
 
 void IntPropertyArea::addToInspector(InspectorWin* win){
     win->connect(this->int_field, SIGNAL(textEdited(QString)), win, SLOT(onPropertyChange()));
-
     win->getContentLayout()->addLayout(this->elem_layout);
 }
 void IntPropertyArea::setup(){

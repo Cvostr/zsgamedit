@@ -29,7 +29,6 @@ public:
 
     void onValueChanged();
     void addPropertyInterfaceToInspector(InspectorWin* inspector);
-    void wakeUp(); //on scene startup
     void shutdown();
     void onUpdate(float deltaTime); //calls update in scripts
     void copyTo(GameObjectProperty* dest);
@@ -234,11 +233,9 @@ public:
     ZSVECTOR3 translation;
     ZSVECTOR3 scale;
     ZSQUATERNION rotation;
-
-    //aiMatrix4x4 transform_mat;
-    //aiMatrix4x4 abs;
-
+    //Node transform from file
     ZSMATRIX4x4 transform_mat;
+    //Caclulated node transform
     ZSMATRIX4x4 abs;
 
     bool hasBone;

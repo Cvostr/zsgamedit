@@ -10,6 +10,7 @@
 #include <iostream>
 
 static int cur_shader_gl_id = -1;
+#define SHADER_STR_LEN 16384
 
 ZSPIRE::Shader::Shader(){
     isCreated = false; //Not created by default
@@ -80,11 +81,11 @@ bool ZSPIRE::Shader::compileFromFile(const char* VSpath, const char* FSpath){
 
 	Init();
 
-	int VS = glCreateShader(GL_VERTEX_SHADER);
-	int FS = glCreateShader(GL_FRAGMENT_SHADER);
+    unsigned int VS = glCreateShader(GL_VERTEX_SHADER);
+    unsigned int FS = glCreateShader(GL_FRAGMENT_SHADER);
 
-    GLchar vs_data[8192 * 2];
-    GLchar fs_data[8192 * 2];
+    GLchar vs_data[SHADER_STR_LEN];
+    GLchar fs_data[SHADER_STR_LEN];
 
 	const GLchar* vs = &vs_data[0];
 	const GLchar* fs = &fs_data[0];
@@ -92,8 +93,8 @@ bool ZSPIRE::Shader::compileFromFile(const char* VSpath, const char* FSpath){
     readShaderFile(VSpath, &vs_data[0]);
     readShaderFile(FSpath, &fs_data[0]);
 
-	glShaderSource(VS, 1, &vs, NULL); //Setting shader code text on vs
-	glShaderSource(FS, 1, &fs, NULL); //Setting shader code text on fs
+    glShaderSource(VS, 1, &vs, nullptr); //Setting shader code text on vs
+    glShaderSource(FS, 1, &fs, nullptr); //Setting shader code text on fs
 
 	glCompileShader(VS); //Compile VS shader code
 	GLcheckCompileErrors(VS, "VERTEX", VSpath); //Check vertex errors
@@ -108,8 +109,6 @@ bool ZSPIRE::Shader::compileFromFile(const char* VSpath, const char* FSpath){
 	//Clear shaders, we don't need them anymore
 	glDeleteShader(VS);
 	glDeleteShader(FS);
-    //Set texture sampler uniforms
-    applyBaseSamplerUniforms();
 
     this->isCreated = true; //Shader created & compiled now
 	return true;
@@ -121,11 +120,11 @@ bool ZSPIRE::Shader::compileFromStr(const char* _VS, const char* _FS){
 
     Init();
 
-    int VS = glCreateShader(GL_VERTEX_SHADER);
-    int FS = glCreateShader(GL_FRAGMENT_SHADER);
+    unsigned int VS = glCreateShader(GL_VERTEX_SHADER);
+    unsigned int FS = glCreateShader(GL_FRAGMENT_SHADER);
 
-    GLchar vs_data[8192 * 2];
-    GLchar fs_data[8192 * 2];
+    GLchar vs_data[SHADER_STR_LEN];
+    GLchar fs_data[SHADER_STR_LEN];
 
     strcpy(vs_data, _VS);
     strcpy(fs_data, _FS);
@@ -134,8 +133,8 @@ bool ZSPIRE::Shader::compileFromStr(const char* _VS, const char* _FS){
     const GLchar* fs = &fs_data[0];
 
 
-    glShaderSource(VS, 1, &vs, NULL); //Setting shader code text on vs
-    glShaderSource(FS, 1, &fs, NULL); //Setting shader code text on fs
+    glShaderSource(VS, 1, &vs, nullptr); //Setting shader code text on vs
+    glShaderSource(FS, 1, &fs, nullptr); //Setting shader code text on fs
 
     glCompileShader(VS); //Compile VS shader code
     GLcheckCompileErrors(VS, "VERTEX", "VSpath"); //Check vertex errors
@@ -150,18 +149,9 @@ bool ZSPIRE::Shader::compileFromStr(const char* _VS, const char* _FS){
     //Clear shaders, we don't need them anymore
     glDeleteShader(VS);
     glDeleteShader(FS);
-    //Set texture sampler uniforms
-    applyBaseSamplerUniforms();
 
     this->isCreated = true; //Shader created & compiled now
     return true;
-}
-
-void ZSPIRE::Shader::applyBaseSamplerUniforms(){
-    Use();
-
-    //UI shader
-    setGLuniformInt("sprite_map", 0);
 }
 
 void ZSPIRE::Shader::Destroy() {
@@ -179,21 +169,6 @@ void ZSPIRE::Shader::Use() {
 void ZSPIRE::Shader::setGLuniformMat4x4(const char* uniform_str, ZSMATRIX4x4 value) {
     int uniform_id = glGetUniformLocation(this->SHADER_ID, uniform_str);
 	glUniformMatrix4fv(uniform_id, 1, GL_FALSE, &value.m[0][0]);
-}
-
-void ZSPIRE::Shader::setTransform(ZSMATRIX4x4 transform){
-	setGLuniformMat4x4("object_transform", transform);
-}
-
-void ZSPIRE::Shader::setCamera(Camera* cam, bool sendPos){
-    setGLuniformMat4x4("cam_projection", cam->getProjMatrix());
-    setGLuniformMat4x4("cam_view", cam->getViewMatrix());
-    if(sendPos)
-        setGLuniformVec3("cam_position", cam->getCameraPosition());
-}
-
-void ZSPIRE::Shader::setCameraUiProjMatrix(Camera* cam){
-    setGLuniformMat4x4("cam_projection", cam->getProjMatrix());
 }
 
 void ZSPIRE::Shader::setGLuniformColor(const char* uniform_str, ZSRGBCOLOR value) {
@@ -228,17 +203,4 @@ void ZSPIRE::Shader::setGLuniformInt(const char* uniform_str, int value) {
     int uniform_id = glGetUniformLocation(this->SHADER_ID, uniform_str);
 	glUniform1i(uniform_id, value);
 
-}
-
-void ZSPIRE::Shader::setHasDiffuseTextureProperty(bool hasDiffuseMap){
-    this->setGLuniformInt("hasDiffuseMap", static_cast<int>(hasDiffuseMap));
-}
-
-void ZSPIRE::Shader::setHasNormalTextureProperty(bool hasNormalMap){
-    this->setGLuniformInt("hasNormalMap", static_cast<int>(hasNormalMap));
-}
-
-void ZSPIRE::Shader::setTextureCountProperty(int tX, int tY) {
-	this->setGLuniformInt("textures_x", tX);
-	this->setGLuniformInt("textures_y", tY);
 }

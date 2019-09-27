@@ -14,7 +14,6 @@ namespace ZSPIRE {
 		void Init();
         bool compileFromFile(const char* VSpath, const char* FSpath);
         bool compileFromStr(const char* _VS, const char* _FS);
-        void applyBaseSamplerUniforms();
 		void Use();
 		void Destroy();
 
@@ -24,13 +23,6 @@ namespace ZSPIRE {
 		void setGLuniformVec3(const char* uniform_str, ZSVECTOR3 value);
         void setGLuniformVec4(const char* uniform_str, ZSVECTOR4 value);
 		void setGLuniformMat4x4(const char* uniform_str, ZSMATRIX4x4 value);
-
-		void setHasDiffuseTextureProperty(bool hasDiffuseMap);
-		void setHasNormalTextureProperty(bool hasNormalMap);
-		void setTextureCountProperty(int tX, int tY);
-		void setTransform(ZSMATRIX4x4 transform);
-        void setCamera(Camera* cam, bool sendPos = false);
-        void setCameraUiProjMatrix(Camera* cam);
 
         bool isCreated;
 

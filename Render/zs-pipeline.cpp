@@ -87,8 +87,14 @@ void RenderPipeline::setup(int bufWidth, int bufHeight){
     glGenBuffers(1, &skyboxTransformUniformBuffer);
     glBindBuffer(GL_UNIFORM_BUFFER, skyboxTransformUniformBuffer);
     glBufferData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 2, nullptr, GL_STATIC_DRAW);
-    //Connect to point 5
+    //Connect to point 6
     glBindBufferBase(GL_UNIFORM_BUFFER, 6, skyboxTransformUniformBuffer);
+
+    glGenBuffers(1, &uiUniformBuffer);
+    glBindBuffer(GL_UNIFORM_BUFFER, uiUniformBuffer);
+    glBufferData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 2 + 16 + 16, nullptr, GL_STATIC_DRAW);
+    //Connect to point 7
+    glBindBufferBase(GL_UNIFORM_BUFFER, 7, uiUniformBuffer);
 }
 
 void RenderPipeline::initGizmos(int projectPespective){
@@ -96,6 +102,8 @@ void RenderPipeline::initGizmos(int projectPespective){
 }
 
 RenderPipeline::~RenderPipeline(){
+    glDeleteBuffers(6, &camBuffer);
+
     this->tile_shader.Destroy();
     this->pick_shader.Destroy();
     this->obj_mark_shader.Destroy();
@@ -174,13 +182,11 @@ ZSRGBCOLOR RenderPipeline::getColorOfPickedTransformControl(ZSVECTOR3 translatio
 unsigned int RenderPipeline::render_getpickedObj(void* projectedit_ptr, int mouseX, int mouseY){
     EditWindow* editwin_ptr = static_cast<EditWindow*>(projectedit_ptr);
     World* world_ptr = &editwin_ptr->world;
-    ZSPIRE::Camera* cam_ptr = &editwin_ptr->edit_camera;
 
     glClearColor(1,1,1,1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glDisable(GL_BLEND);
     pick_shader.Use();
-    pick_shader.setCamera(cam_ptr);
     //Picking state
     this->current_state = PIPELINE_STATE_PICKING;
 
@@ -279,6 +285,26 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr){
         getGizmosRenderer()->drawTransformControls(editwin_ptr->obj_trstate.obj_ptr->getTransformProperty()->_last_translation, 100, 10);
 
 
+    glDisable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    this->ui_shader.Use();
+    GlyphFontContainer* c = editwin_ptr->getFontContainer("LiberationMono-Regular.ttf");
+    int f[12];
+    f[0] = static_cast<int>(L'H');
+    f[1] = static_cast<int>(L'e');
+    f[2] = static_cast<int>(L'l');
+    f[3] = static_cast<int>(L'l');
+    f[4] = static_cast<int>(L'o');
+    f[5] = static_cast<int>(L'q');
+    f[6] = static_cast<int>(L'W');
+    f[7] = static_cast<int>(L'o');
+    f[8] = static_cast<int>(L'r');
+    f[9] = static_cast<int>(L'l');
+    f[10] = static_cast<int>(L'd');
+    c->DrawString(f, 11, ZSVECTOR2(10,10));
+
     SDL_GL_SwapWindow(w); //Send rendered frame
 }
 void RenderPipeline::render2D(void* projectedit_ptr){
@@ -351,28 +377,7 @@ void RenderPipeline::render3D(void* projectedit_ptr, ZSPIRE::Camera* cam)
 
     setLightsToBuffer();
 
-    /*
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    this->ui_shader.Use();
-    GlyphFontContainer* c = editwin_ptr->getFontContainer("LiberationMono-Regular.ttf");
-    int f[12];
-    f[0] = static_cast<int>(L'H');
-    f[1] = static_cast<int>(L'e');
-    f[2] = static_cast<int>(L'l');
-    f[3] = static_cast<int>(L'l');
-    f[4] = static_cast<int>(L'o');
-    f[5] = static_cast<int>(L' ');
-    f[6] = static_cast<int>(L'W');
-    f[7] = static_cast<int>(L'o');
-    f[8] = static_cast<int>(L'r');
-    f[9] = static_cast<int>(L'l');
-    f[10] = static_cast<int>(L'd');
-    //c->DrawString(f, 11, ZSVECTOR2(10,10));
-
-    //std::cout << static_cast<int>(deltaTime) << std::endl;
-    */
 
 }
 
@@ -728,12 +733,14 @@ void RenderPipeline::updateShadersCameraInfo(ZSPIRE::Camera* cam_ptr){
     glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4), sizeof (ZSMATRIX4x4), &view);
     glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 3, sizeof(ZSVECTOR3), &cam_pos);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
+    //Setting UI camera to UI buffer
     if(ui_shader.isCreated == true){
-        ui_shader.Use();
-        ui_shader.setCameraUiProjMatrix(cam_ptr);
+        glBindBuffer(GL_UNIFORM_BUFFER, uiUniformBuffer);
+        ZSMATRIX4x4 proj = cam_ptr->getUiProjMatrix();
+        glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof (ZSMATRIX4x4), &proj);
+        glBindBuffer(GL_UNIFORM_BUFFER, 0);
     }
-
+    //Setting cameras to skybox shader
     if(skybox.isCreated == true){
         ZSMATRIX4x4 proj = cam_ptr->getProjMatrix();
         ZSMATRIX4x4 viewmat = cam_ptr->getViewMatrix();
@@ -846,7 +853,10 @@ void RenderPipeline::renderSprite(ZSPIRE::Texture* texture_sprite, int X, int Y,
 
 void RenderPipeline::renderSprite(unsigned int texture_id, int X, int Y, int scaleX, int scaleY){
     this->ui_shader.Use();
-    ui_shader.setGLuniformInt("render_mode", 1);
+    glBindBuffer(GL_UNIFORM_BUFFER, uiUniformBuffer);
+
+    int _render_mode = 1;
+    glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 2 , 4, &_render_mode);
     //Use texture at 0 slot
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture_id);
@@ -855,17 +865,23 @@ void RenderPipeline::renderSprite(unsigned int texture_id, int X, int Y, int sca
     ZSMATRIX4x4 scale = getScaleMat(scaleX, scaleY, 0.0f);
     ZSMATRIX4x4 transform = scale * translation;
 
-    ui_shader.setTransform(transform);
+    glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4), sizeof (ZSMATRIX4x4), &transform);
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
     ZSPIRE::getUiSpriteMesh2D()->Draw();
 }
 
 void RenderPipeline::renderGlyph(unsigned int texture_id, int X, int Y, int scaleX, int scaleY, ZSRGBCOLOR color){
     this->ui_shader.Use();
+    glBindBuffer(GL_UNIFORM_BUFFER, uiUniformBuffer);
     //tell shader, that we will render glyph
-    ui_shader.setGLuniformInt("render_mode", 2);
+    int _render_mode = 2;
+    glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 2 , 4, &_render_mode);
     //sending glyph color
-    ui_shader.setGLuniformColor("text_color", color);
+    glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 2 + 16, 4, &color.gl_r);
+    glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 2 + 4 + 16, 4, &color.gl_g);
+    glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 2 + 8 + 16, 4, &color.gl_b);
+
     //Use texture at 0 slot
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture_id);
@@ -874,7 +890,9 @@ void RenderPipeline::renderGlyph(unsigned int texture_id, int X, int Y, int scal
     ZSMATRIX4x4 scale = getScaleMat(scaleX, scaleY, 0.0f);
     ZSMATRIX4x4 transform = scale * translation;
 
-    ui_shader.setTransform(transform);
+
+    glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4), sizeof (ZSMATRIX4x4), &transform);
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
     ZSPIRE::getUiSpriteMesh2D()->Draw();
 }
