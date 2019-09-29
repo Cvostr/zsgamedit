@@ -22,6 +22,21 @@ const char texture_shaderVS[343] = "#version 420 core\n\
         gl_Position = vec4(pos, 1);\n\
         }\n";
 
+const char mesh_shaderVS[590] = "#version 420 core\n\
+        layout (location = 0) in vec3 pos;\n\
+        layout (location = 1) in vec2 uv;\n\
+        out vec2 _UV;\n\
+        layout (std140, binding = 0) uniform CamMatrices{\n\
+            uniform mat4 cam_projection;\n\
+            uniform mat4 cam_view;\n\
+            uniform mat4 object_transform;\n\
+            uniform vec3 cam_position;\n\
+        };\n\
+        void main(){\n\
+        _UV = uv;\n\
+        gl_Position = cam_projection * cam_view * object_transform * vec4(pos, 1);\n\
+        }\n";
+
 ThumbnailsMaster::ThumbnailsMaster(){
 
 }
@@ -34,6 +49,7 @@ ThumbnailsMaster::~ThumbnailsMaster(){
 
 void ThumbnailsMaster::initShader(){
     texture_shader.compileFromStr(&texture_shaderVS[0], &texture_shaderFS[0]);
+    mesh_shader.compileFromStr(&mesh_shaderVS[0], &texture_shaderFS[0]);
 }
 
 void ThumbnailsMaster::createTexturesThumbnails(){
@@ -145,7 +161,51 @@ void ThumbnailsMaster::DrawMaterial(Material* material){
     ZSPIRE::getSphereMesh()->Draw();
 }
 
+void ThumbnailsMaster::createMeshesThumbnails(){
+    //Compile texture shader
+    glViewport(0, 0, 512, 512);
+    glClearColor(0,0,0,0);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_DEPTH_TEST);
+    mesh_shader.Use();
+
+    //Iterate over all resources
+    for(unsigned int res_i = 0; res_i < project_struct_ptr->resources.size(); res_i ++){
+        Resource* resource_ptr = &this->project_struct_ptr->resources[res_i];
+        if(resource_ptr->type != RESOURCE_TYPE_MESH) continue;
+
+        ZSPIRE::Mesh* mesh_ptr = static_cast<ZSPIRE::Mesh*>(resource_ptr->class_ptr);
+        DrawMesh(mesh_ptr);
+        //Allocate image buffer
+        unsigned char* texture_data = new unsigned char[512 * 512 * 4];
+        //Read image to buffer from GL buffer
+        glReadPixels(0, 0, 512, 512, GL_RGBA, GL_UNSIGNED_BYTE, &texture_data[0]);
+
+        QImage* image = new QImage(texture_data, 512, 512, QImage::Format_RGBA8888);
+        texture_thumbnails.insert(std::pair<std::string, QImage*>(resource_ptr->resource_label, image));
+        //delete[] texture_data;
+    }
+}
+
 void ThumbnailsMaster::DrawMesh(ZSPIRE::Mesh* mesh){
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    ZSPIRE::Camera cam;
+    cam.setProjectionType(ZSCAMERA_PROJECTION_PERSPECTIVE);
+    cam.setPosition(ZSVECTOR3(0, 0, -6));
+    cam.setFront(ZSVECTOR3(0,0,1));
+    cam.setViewport(ZSVIEWPORT(0,0, 512, 512));
+    cam.setZplanes(0.1f, 5000.f);
+
+    glBindBuffer(GL_UNIFORM_BUFFER, 13);
+    ZSMATRIX4x4 proj = cam.getProjMatrix();
+    ZSMATRIX4x4 view = cam.getViewMatrix();
+    ZSMATRIX4x4 model = getIdentity();
+    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof (ZSMATRIX4x4), &proj);
+    glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4), sizeof (ZSMATRIX4x4), &view);
+    glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 2, sizeof (ZSMATRIX4x4), &model);
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
     mesh->Draw();
 }
 

@@ -49,10 +49,10 @@ void Engine::processMesh(aiMesh* mesh, const aiScene* scene, ZSPIRE::Mesh* mesh_
     unsigned int vertices = mesh->mNumVertices;
     unsigned int faces = mesh->mNumFaces;
     unsigned int bones = mesh->mNumBones;
-
+    //Allocate memory for vertices and indices
     mesh_ptr->vertices_arr = new ZSVERTEX[vertices];
     mesh_ptr->indices_arr = new unsigned int[faces * 3];
-
+    //Iterate over all vertices, read data and write to array
     for (unsigned int v = 0; v < vertices; v++) {
         aiVector3D vertex_pos = mesh->mVertices[v];
         aiVector3D vertex_normal = mesh->mNormals[v];
@@ -61,12 +61,12 @@ void Engine::processMesh(aiMesh* mesh, const aiScene* scene, ZSPIRE::Mesh* mesh_
 
         float U = mesh->mTextureCoords[0][v].x;
         float V = mesh->mTextureCoords[0][v].y;
-
+        //Set data to vertex
         mesh_ptr->vertices_arr[v] = ZSVERTEX(ZSVECTOR3(vertex_pos.x, vertex_pos.y, vertex_pos.z), ZSVECTOR2(U, V),
             ZSVECTOR3(vertex_normal.x, vertex_normal.y, vertex_normal.z), ZSVECTOR3(vertex_tangent.x, vertex_tangent.y, vertex_tangent.z),
             ZSVECTOR3(vertex_bitangent.x, vertex_bitangent.y, vertex_bitangent.z)
         );
-
+        //Read bones
         mesh_ptr->vertices_arr[v].bones_num = 0;
         for(unsigned int vw_i = 0; vw_i < MAX_BONE_PER_VERTEX; vw_i ++){
             mesh_ptr->vertices_arr[v].ids[vw_i] = 0;
@@ -80,7 +80,7 @@ void Engine::processMesh(aiMesh* mesh, const aiScene* scene, ZSPIRE::Mesh* mesh_
     for(unsigned int bone_i = 0; bone_i < bones; bone_i ++){
         aiBone* bone_ptr = mesh->mBones[bone_i];
         ZSPIRE::Bone bone(bone_ptr->mName.C_Str(), bone_ptr->mNumWeights);
-        //bone.offset = bone_ptr->mOffsetMatrix;
+        //Convert assimp bone offset matrix and store it in bone class
         cmat(bone_ptr->mOffsetMatrix, &bone.offset);
 
         //Iterate over all weights to set them to vertices
@@ -115,20 +115,6 @@ void Engine::processMesh(aiMesh* mesh, const aiScene* scene, ZSPIRE::Mesh* mesh_
     mesh_ptr->setMeshData(mesh_ptr->vertices_arr, mesh_ptr->indices_arr, vertices, faces * 3);
 }
 
-void Engine::processNode(aiNode* node, const aiScene* scene) {
-    unsigned int child_nodes_amount = node->mNumChildren;
-    unsigned int meshes_amount = node->mNumMeshes;
-
-    //Iterate child nodes
-    for (unsigned int i = 0; i < child_nodes_amount; i++) {
-        processNode(node->mChildren[i], scene);
-    }
-    //Iterate meshes
-    for (unsigned int i = 0; i < meshes_amount; i++) {
-       // processMesh(scene->mMeshes[node->mMeshes[i]], scene);
-    }
-
-}
 #endif
 
 void Engine::loadMesh(std::string file_path, ZSPIRE::Mesh* mesh_ptr, int index){

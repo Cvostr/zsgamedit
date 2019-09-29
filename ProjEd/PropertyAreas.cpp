@@ -490,7 +490,7 @@ void ResourcePickDialog::onDialogClose(){
 
 void ResourcePickDialog::onNeedToShow(){
 
-    if(this->area->resource_type == RESOURCE_TYPE_TEXTURE || this->area->resource_type == RESOURCE_TYPE_MATERIAL){
+    if(this->area->resource_type == RESOURCE_TYPE_TEXTURE || this->area->resource_type == RESOURCE_TYPE_MATERIAL || this->area->resource_type == RESOURCE_TYPE_MESH){
         this->list->setViewMode(QListView::IconMode);
         this->list->setIconSize(QSize(75, 75));
     }
@@ -520,6 +520,14 @@ void ResourcePickDialog::onNeedToShow(){
                 QListWidgetItem* item = new QListWidgetItem(QString::fromStdString(resource_ptr->resource_label), this->list); //add resource to list
                 if(this->area->resource_type == RESOURCE_TYPE_TEXTURE || this->area->resource_type == RESOURCE_TYPE_MATERIAL){
                     std::string fpath = _editor_win->project.root_path.toStdString() + "/" + resource_ptr->resource_label;
+                    QImage* img = nullptr;
+                    if(_editor_win->thumb_master->isAvailable(fpath))
+                        img = _editor_win->thumb_master->texture_thumbnails.at(fpath);
+                    if(img)
+                        item->setIcon(QIcon(QPixmap::fromImage(*img)));
+                }
+                if(this->area->resource_type == RESOURCE_TYPE_MESH){
+                    std::string fpath = resource_ptr->resource_label;
                     QImage* img = nullptr;
                     if(_editor_win->thumb_master->isAvailable(fpath))
                         img = _editor_win->thumb_master->texture_thumbnails.at(fpath);

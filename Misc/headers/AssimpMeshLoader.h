@@ -17,7 +17,6 @@ class MeshNode
 {
 public:
     std::string node_label;
-    //aiMatrix4x4 node_transform;
     ZSMATRIX4x4 node_transform;
 
     bool hasBone;
@@ -44,7 +43,6 @@ void loadMesh(std::string file_path, ZSPIRE::Mesh* mesh_ptr, int index);
 void loadAnimation(std::string file_path, ZSPIRE::Animation* anim, int index);
 
 void processMesh(aiMesh* mesh, const aiScene* scene, ZSPIRE::Mesh* mesh_ptr);
-void processNode(aiNode* node, const aiScene* scene);
 
 bool isBoneAvailable(std::string bone_label, const aiScene* scene);
 }

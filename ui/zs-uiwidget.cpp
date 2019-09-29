@@ -16,6 +16,9 @@ void ZSUI::Widget::move(unsigned int x, unsigned int y){
     this->pos.posX = x;
     this->pos.posY = y;
 }
+bool ZSUI::Widget::isHoveredByMouse(){
+    return false;
+}
 void ZSUI::Widget::draw(){
 
 }

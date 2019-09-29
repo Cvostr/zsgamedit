@@ -1142,6 +1142,7 @@ EditWindow* ZSEditor::openEditor(){
     //Create thumbnails
     _editor_win->thumb_master->createTexturesThumbnails();
     _editor_win->thumb_master->createMaterialThumbnails();
+    _editor_win->thumb_master->createMeshesThumbnails();
 
     _editor_win->setViewDirectory(_editor_win->project.root_path);
 

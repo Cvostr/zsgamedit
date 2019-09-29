@@ -29,6 +29,7 @@ namespace ZSUI {
     public:
         virtual void resize(unsigned int Width, unsigned int Height);
         virtual void move(unsigned int x, unsigned int y);
+        bool isHoveredByMouse();
 
         virtual void draw();
 

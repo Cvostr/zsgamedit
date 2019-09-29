@@ -16,12 +16,15 @@ public:
     std::map<std::string, QImage*> texture_thumbnails;
 
     ZSPIRE::Shader texture_shader;
+    ZSPIRE::Shader mesh_shader;
+
     //virtual void init();
     //virtual void updateWindowSize(int W, int H);
 
     void initShader();
     void createTexturesThumbnails();
     void createMaterialThumbnails();
+    void createMeshesThumbnails();
 
     void DrawTexture(ZSPIRE::Texture* texture);
     void DrawMaterial(Material* material);
