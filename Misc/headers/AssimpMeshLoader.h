@@ -16,8 +16,14 @@
 class MeshNode
 {
 public:
+    //Node name string
     std::string node_label;
+    //Transform matrix
     ZSMATRIX4x4 node_transform;
+
+    ZSVECTOR3 node_translation;
+    ZSVECTOR3 node_scaling;
+    ZSQUATERNION node_rotation;
 
     bool hasBone;
 

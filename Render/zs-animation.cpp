@@ -83,3 +83,13 @@ ZSQUATERNION ZSPIRE::AnimationChannel::getRotationInterpolated(double Time){
 
     return slerp(q1, q2, static_cast<float>(delta));
 }
+
+ZSVECTOR3 ZSPIRE::AnimationChannel::getPostitionInterpolated(unsigned int frame){
+
+}
+ZSVECTOR3 ZSPIRE::AnimationChannel::getScaleInterpolated(unsigned int frame){
+
+}
+ZSQUATERNION ZSPIRE::AnimationChannel::getRotationInterpolated(unsigned int frame){
+
+}

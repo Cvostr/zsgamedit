@@ -535,6 +535,8 @@ GameObject* World::addMeshNode(MeshNode* node){
     obj.item_ptr->setText(0, *obj.label);
 
     TransformProperty* transform_prop = static_cast<TransformProperty*>(obj.getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
+    transform_prop->setScale(node->node_scaling);
+    transform_prop->setTranslation(node->node_translation);
     transform_prop->updateMat();
 
     NodeProperty* node_prop = static_cast<NodeProperty*>(obj.getPropertyPtrByType(GO_PROPERTY_TYPE_NODE));

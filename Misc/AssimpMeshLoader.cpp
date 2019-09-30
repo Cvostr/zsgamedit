@@ -199,16 +199,23 @@ void Engine::loadNodeTree(std::string file_path, MeshNode* node){
 void Engine::processNodeForTree(MeshNode* node, aiNode* node_assimp, const aiScene* scene){
     node->node_label = node_assimp->mName.C_Str(); //assigning node name
 
-    bool isBone = isBoneAvailable(node->node_label, scene);
-    if(isBone)
-        node->hasBone = true;
+    node->hasBone = isBoneAvailable(node->node_label, scene);
     //Write node matrix
     Engine::cmat(node_assimp->mTransformation, &node->node_transform);
+
+    aiVector3D translation, scale;
+    aiQuaternion rotation;
+    node_assimp->mTransformation.Decompose(scale, rotation, translation);
+
+    node->node_translation = ZSVECTOR3(translation.x, translation.y, translation.z);
+    node->node_scaling = ZSVECTOR3(scale.x, scale.y, scale.z);
+    node->node_rotation = ZSQUATERNION(rotation.x, rotation.y, rotation.z, rotation.w);
 
     //iterate over all meshes in this node
     unsigned int meshes_num = node_assimp->mNumMeshes;
     for(unsigned int ch_i = 0; ch_i < meshes_num; ch_i ++){
         aiMesh* mesh = scene->mMeshes[node_assimp->mMeshes[ch_i]];
+        //Push mesh
         node->mesh_names.push_back(mesh->mName.C_Str());
     }
     //iterate over all children nodes and write their names

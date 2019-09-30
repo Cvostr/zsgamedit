@@ -33,6 +33,32 @@ void qNormalize(ZSQUATERNION* q){
     q->W *= m;
 }
 
+ZSQUATERNION eulerToQuat(ZSVECTOR3 v){
+
+
+    /*float p = DegToRad(pitch / 2.0f); float y = DegToRad(yaw / 2.0f); float r = DegToRad(roll / 2.0f);
+
+    float sinp = sin(p);
+    float siny = sin(y);
+    float sinr = sin(r);
+    float cosp = cos(p);
+    float cosy = cos(y);
+    float cosr = cos(r);
+
+    float _x = sinr * cosp * cosy - cosr * sinp * siny;
+    float _y = cosr * sinp * cosy + sinr * cosp * siny;
+    float _z = cosr * cosp * siny - sinr * sinp * cosy;
+    float _w = cosr * cosp * cosy + sinr * sinp * siny;
+
+    ZSQUATERNION result(_x, _y, _z, _w);
+
+    qNormalize(&result);*/
+}
+
+ZSVECTOR3 quatToEuler(ZSQUATERNION q){
+
+}
+
 ZSVECTOR3 vCross(ZSVECTOR3 v1, ZSVECTOR3 v2)
 {
 	ZSVECTOR3 out = ZSVECTOR3(v1.Y*v2.Z - v1.Z*v2.Y, v1.Z*v2.X - v1.X*v2.Z, v1.X*v2.Y - v1.Y*v2.X);

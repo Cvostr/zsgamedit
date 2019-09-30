@@ -50,7 +50,6 @@ public:
 
 class Material{
 private:
-
     std::string group_str;
 public:
     //path to material file

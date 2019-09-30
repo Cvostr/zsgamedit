@@ -46,6 +46,10 @@ public:
     ZSVECTOR3 getScaleInterpolated(double Time);
     ZSQUATERNION getRotationInterpolated(double Time);
 
+    ZSVECTOR3 getPostitionInterpolated(unsigned int frame);
+    ZSVECTOR3 getScaleInterpolated(unsigned int frame);
+    ZSQUATERNION getRotationInterpolated(unsigned int frame);
+
     AnimationChannel();
 };
 

@@ -263,6 +263,9 @@ public:
     void onValueChanged();
     void copyTo(GameObjectProperty* dest);
 
+    void play();
+    void stop();
+
     void updateAnimationPtr();
     void updateNodeTransform(GameObject* obj, ZSMATRIX4x4 parent);
 

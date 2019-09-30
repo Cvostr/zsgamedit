@@ -1598,15 +1598,13 @@ AnimationProperty::AnimationProperty(){
 }
 
 void onPlay(){
-    //if user specified animation, then play it!
-    if(current_anim->anim_prop_ptr != nullptr){
-        current_anim->start_sec = (static_cast<double>(SDL_GetTicks()) / 1000);
-        current_anim->Playing = true;
-    }
+    current_anim->play();
+    _inspector_win->updateRequired = true;
 }
 
 void onStop(){
-    current_anim->Playing = false;
+    current_anim->stop();
+    _inspector_win->updateRequired = true;
 }
 
 void AnimationProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
@@ -1618,20 +1616,35 @@ void AnimationProperty::addPropertyInterfaceToInspector(InspectorWin* inspector)
     area->rel_path = &this->anim_label;
     inspector->addPropertyArea(area);
 
-    AreaButton* btn = new AreaButton;
-    btn->onPressFuncPtr = &onPlay;
-    btn->button->setText("Play"); //Setting text to qt button
-    inspector->getContentLayout()->addWidget(btn->button);
-    btn->insp_ptr = inspector; //Setting inspector pointer
-    inspector->registerUiObject(btn);
-
-    AreaButton* stopbtn = new AreaButton;
-    stopbtn->onPressFuncPtr = &onStop;
-    stopbtn->button->setText("Stop"); //Setting text to qt button
-    inspector->getContentLayout()->addWidget(stopbtn->button);
-    stopbtn->insp_ptr = inspector; //Setting inspector pointer
-    inspector->registerUiObject(stopbtn);
+    if(Playing == false){
+        AreaButton* btn = new AreaButton;
+        btn->onPressFuncPtr = &onPlay;
+        btn->button->setText("Play"); //Setting text to qt button
+        inspector->getContentLayout()->addWidget(btn->button);
+        btn->insp_ptr = inspector; //Setting inspector pointer
+        inspector->registerUiObject(btn);
+    }
+    if(Playing == true){
+        AreaButton* stopbtn = new AreaButton;
+        stopbtn->onPressFuncPtr = &onStop;
+        stopbtn->button->setText("Stop"); //Setting text to qt button
+        inspector->getContentLayout()->addWidget(stopbtn->button);
+        stopbtn->insp_ptr = inspector; //Setting inspector pointer
+        inspector->registerUiObject(stopbtn);
+    }
 }
+
+void AnimationProperty::play(){
+    //if user specified animation, then play it!
+    if(current_anim->anim_prop_ptr != nullptr){
+        current_anim->start_sec = (static_cast<double>(SDL_GetTicks()) / 1000);
+        current_anim->Playing = true;
+    }
+}
+void AnimationProperty::stop(){
+    Playing = false;
+}
+
 void AnimationProperty::onPreRender(RenderPipeline* pipeline){
     GameObject* obj = go_link.updLinkPtr();
 

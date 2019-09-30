@@ -165,6 +165,7 @@ void ZSENSDK::bindSDK(lua_State* state){
         .addFunction("script", &GameObject::getPropertyPtr<ScriptGroupProperty>)
         .addFunction("rigidbody", &GameObject::getPropertyPtr<RigidbodyProperty>)
         .addFunction("character", &GameObject::getPropertyPtr<CharacterControllerProperty>)
+        .addFunction("animation", &GameObject::getPropertyPtr<AnimationProperty>)
         .endClass()
 
         .beginClass <World>("World")
@@ -232,6 +233,12 @@ void ZSENSDK::bindSDK(lua_State* state){
         .addFunction("playAnim", &TileProperty::playAnim)
         .addFunction("setDiffuseTexture", &TileProperty::setDiffuseTexture)
         .addFunction("stopAnim", &TileProperty::stopAnim)
+        .endClass()
+
+        .deriveClass <AnimationProperty, GameObjectProperty>("Animation")
+        .addFunction("play", &AnimationProperty::play)
+        .addFunction("setDiffuseTexture", &AnimationProperty::stop)
+            //.addFunction("stopAnim", &TileProperty::stopAnim)
         .endClass()
 
         .deriveClass <ScriptGroupProperty, GameObjectProperty>("ScriptGroup")
