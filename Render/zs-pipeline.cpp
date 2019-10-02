@@ -45,8 +45,6 @@ void RenderPipeline::setup(int bufWidth, int bufHeight){
     }
     ZSPIRE::setupDefaultMeshes();
     removeLights();
-    MtShProps::genDefaultMtShGroup(&diffuse3d_shader, &skybox, &heightmap);
-
 
     glGenBuffers(1, &camBuffer);
     glBindBuffer(GL_UNIFORM_BUFFER, camBuffer);
@@ -95,6 +93,8 @@ void RenderPipeline::setup(int bufWidth, int bufHeight){
     glBufferData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 2 + 16 + 16, nullptr, GL_STATIC_DRAW);
     //Connect to point 7
     glBindBufferBase(GL_UNIFORM_BUFFER, 7, uiUniformBuffer);
+
+    MtShProps::genDefaultMtShGroup(&diffuse3d_shader, &skybox, &heightmap, 7);
 }
 
 void RenderPipeline::initGizmos(int projectPespective){

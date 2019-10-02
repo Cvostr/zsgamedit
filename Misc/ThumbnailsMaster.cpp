@@ -57,7 +57,6 @@ void ThumbnailsMaster::createTexturesThumbnails(){
     initShader();
     glViewport(0, 0, 512, 512);
     texture_shader.Use();
-    texture_shader.setGLuniformInt("texturem", 0);
 
     glDisable(GL_CULL_FACE);
     glDisable(GL_DEPTH_TEST);

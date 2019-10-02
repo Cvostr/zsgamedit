@@ -1,6 +1,7 @@
 #include "headers/MatShaderProps.h"
 #include <fstream>
 #include <iostream>
+#include <GL/glew.h>
 #include "../Misc/headers/zs_types.h"
 
 extern Project* project_ptr;
@@ -13,9 +14,9 @@ MaterialShaderProperty::MaterialShaderProperty(){
 MaterialShaderProperty* MtShaderPropertiesGroup::addProperty(int type){
     //Allocate property in heap
     MaterialShaderProperty* newprop_ptr = MtShProps::allocateProperty(type);
-
+    //Push new material
     this->properties.push_back(newprop_ptr);
-
+    //Return new material pointer from vector
     return properties[properties.size() - 1];
 }
 
@@ -37,53 +38,6 @@ TextureMtShPropConf::TextureMtShPropConf(){
     this->path = "@none";
     this->texture = nullptr;
 }
-//Integer stuff
-IntegerMaterialShaderProperty::IntegerMaterialShaderProperty(){
-    type = MATSHPROP_TYPE_INTEGER;
-}
-IntegerMtShPropConf::IntegerMtShPropConf(){
-    type = MATSHPROP_TYPE_INTEGER;
-
-    value = 0;
-}
-//Float stuff
-FloatMaterialShaderProperty::FloatMaterialShaderProperty(){
-    type = MATSHPROP_TYPE_FLOAT;
-}
-FloatMtShPropConf::FloatMtShPropConf(){
-    type = MATSHPROP_TYPE_FLOAT;
-
-    value = 0.0f;
-}
-//Float3 stuff
-Float3MaterialShaderProperty::Float3MaterialShaderProperty(){
-    type = MATSHPROP_TYPE_FVEC3;
-}
-Float3MtShPropConf::Float3MtShPropConf(){
-    type = MATSHPROP_TYPE_FVEC3;
-
-    value = ZSVECTOR3(0.0f, 0.0f, 0.0f);
-}
-Float2MaterialShaderProperty::Float2MaterialShaderProperty(){
-    type = MATSHPROP_TYPE_FVEC2;
-}
-Float2MtShPropConf::Float2MtShPropConf(){
-    type = MATSHPROP_TYPE_FVEC2;
-    value = ZSVECTOR2(0.0f, 0.0f);
-}
-//Color stuff
-ColorMaterialShaderProperty::ColorMaterialShaderProperty(){
-    type = MATSHPROP_TYPE_COLOR;
-}
-ColorMtShPropConf::ColorMtShPropConf(){
-    type = MATSHPROP_TYPE_COLOR;
-}
-//Textures3D stuff
-Texture3MaterialShaderProperty::Texture3MaterialShaderProperty(){
-    type = MATSHPROP_TYPE_TEXTURE3;
-
-    this->slotToBind = 0;
-}
 //Configuration class
 Texture3MtShPropConf::Texture3MtShPropConf(){
     this->type = MATSHPROP_TYPE_TEXTURE3;
@@ -99,25 +53,51 @@ void MtShaderPropertiesGroup::loadFromFile(const char* fpath){
     std::ifstream mat_shader_group;
     mat_shader_group.open(fpath);
 }
-MtShaderPropertiesGroup::MtShaderPropertiesGroup(){
+MtShaderPropertiesGroup::MtShaderPropertiesGroup(ZSPIRE::Shader* shader, const char* UB_CAPTION, unsigned int UB_ConnectID, unsigned int UB_SIZE){
+    render_shader = shader;
+
+    if(UB_SIZE == 0 || strlen(UB_CAPTION) == 0) return;
+    this->UB_ConnectID = UB_ConnectID;
+    //First of all, tell shader uniform buffer point
+    //Get Index of buffer
+    unsigned int UB_INDEX = shader->getUniformBufferIndex(UB_CAPTION);
+    //Set UB binding
+    shader->setUniformBufferBinding(UB_INDEX, UB_ConnectID);
+
+    //Generate uniform buffer
+    glGenBuffers(1, &this->UB_ID);
+    glBindBuffer(GL_UNIFORM_BUFFER, UB_ID);
+    //Allocate memory for buffer
+    glBufferData(GL_UNIFORM_BUFFER, UB_SIZE, nullptr, GL_STATIC_DRAW);
+    //Connect to point (UB_ConnectID)
+    glBindBufferBase(GL_UNIFORM_BUFFER, UB_ConnectID, UB_ID);
+
     acceptShadows = false;
     properties.resize(0);
 }
 
-MtShaderPropertiesGroup* MtShProps::genDefaultMtShGroup(ZSPIRE::Shader* shader3d, ZSPIRE::Shader* skybox,
-                                                        ZSPIRE::Shader* heightmap){
+void MtShaderPropertiesGroup::setUB_Data(unsigned int offset, unsigned int size, void* data){
+    //Bind uniform buffer ID
+    glBindBuffer(GL_UNIFORM_BUFFER, UB_ID);
+    //Send data to uniform buffer
+    glBufferSubData(GL_UNIFORM_BUFFER, offset, size, data);
+}
 
-    MtShaderPropertiesGroup* default_group = new MtShaderPropertiesGroup;
+MtShaderPropertiesGroup* MtShProps::genDefaultMtShGroup(ZSPIRE::Shader* shader3d, ZSPIRE::Shader* skybox,
+                                                        ZSPIRE::Shader* heightmap,
+                                                        unsigned int uniform_buf_id_took){
+
+    MtShaderPropertiesGroup* default_group = new MtShaderPropertiesGroup(shader3d, "Default3d", uniform_buf_id_took + 1, 36);
     default_group->acceptShadows = true;
     default_group->str_path = "@default";
     default_group->groupCaption = "Default 3D";
-    default_group->render_shader = shader3d;
 
     ColorMaterialShaderProperty* diff_color_prop =
             static_cast<ColorMaterialShaderProperty*>(default_group->addProperty(MATSHPROP_TYPE_COLOR));
     diff_color_prop->prop_caption = "Color"; //Set caption in Inspector
     diff_color_prop->prop_identifier = "c_diffuse"; //Identifier to save
     diff_color_prop->colorUniform = "diffuse_color";
+    diff_color_prop->start_offset = 0;
 
     TextureMaterialShaderProperty* diff_texture_prop =
             static_cast<TextureMaterialShaderProperty*>(default_group->addProperty(MATSHPROP_TYPE_TEXTURE));
@@ -125,6 +105,7 @@ MtShaderPropertiesGroup* MtShProps::genDefaultMtShGroup(ZSPIRE::Shader* shader3d
     diff_texture_prop->prop_caption = "Diffuse"; //Set caption in Inspector
     diff_texture_prop->ToggleUniform = "hasDiffuseMap";
     diff_texture_prop->prop_identifier = "t_diffuse"; //Identifier to save
+    diff_texture_prop->start_offset = 12;
 
     TextureMaterialShaderProperty* normal_texture_prop =
             static_cast<TextureMaterialShaderProperty*>(default_group->addProperty(MATSHPROP_TYPE_TEXTURE));
@@ -132,6 +113,7 @@ MtShaderPropertiesGroup* MtShProps::genDefaultMtShGroup(ZSPIRE::Shader* shader3d
     normal_texture_prop->prop_caption = "Normal";
     normal_texture_prop->ToggleUniform = "hasNormalMap";
     normal_texture_prop->prop_identifier = "t_normal"; //Identifier to save
+    normal_texture_prop->start_offset = 16;
 
     TextureMaterialShaderProperty* specular_texture_prop =
             static_cast<TextureMaterialShaderProperty*>(default_group->addProperty(MATSHPROP_TYPE_TEXTURE));
@@ -139,6 +121,8 @@ MtShaderPropertiesGroup* MtShProps::genDefaultMtShGroup(ZSPIRE::Shader* shader3d
     specular_texture_prop->prop_caption = "Specular";
     specular_texture_prop->ToggleUniform = "hasSpecularMap";
     specular_texture_prop->prop_identifier = "t_specular"; //Identifier to save
+    specular_texture_prop->start_offset = 20;
+
 
     TextureMaterialShaderProperty* height_texture_prop =
             static_cast<TextureMaterialShaderProperty*>(default_group->addProperty(MATSHPROP_TYPE_TEXTURE));
@@ -146,20 +130,21 @@ MtShaderPropertiesGroup* MtShProps::genDefaultMtShGroup(ZSPIRE::Shader* shader3d
     height_texture_prop->prop_caption = "Height";
     height_texture_prop->ToggleUniform = "hasHeightMap";
     height_texture_prop->prop_identifier = "t_height"; //Identifier to save
+    height_texture_prop->start_offset = 24;
 
     FloatMaterialShaderProperty* shininess_factor_prop =
             static_cast<FloatMaterialShaderProperty*>(default_group->addProperty(MATSHPROP_TYPE_FLOAT));
     shininess_factor_prop->floatUniform = "material_shininess";
     shininess_factor_prop->prop_caption = "Shininess";
     shininess_factor_prop->prop_identifier = "f_shininess"; //Identifier to save
+    shininess_factor_prop->start_offset = 28;
 
     MtShProps::addMtShaderPropertyGroup(default_group);
 
 //Default skybox material
-    MtShaderPropertiesGroup* default_sky_group = new MtShaderPropertiesGroup;
+    MtShaderPropertiesGroup* default_sky_group = new MtShaderPropertiesGroup(skybox, "", 0, 0);
     default_sky_group->str_path = "@skybox";
     default_sky_group->groupCaption = "Default Skybox";
-    default_sky_group->render_shader = skybox;
     Texture3MaterialShaderProperty* sky_texture =
             static_cast<Texture3MaterialShaderProperty*>(default_sky_group->addProperty(MATSHPROP_TYPE_TEXTURE3));
     sky_texture->slotToBind = 0;
@@ -169,12 +154,11 @@ MtShaderPropertiesGroup* MtShProps::genDefaultMtShGroup(ZSPIRE::Shader* shader3d
 
     MtShProps::addMtShaderPropertyGroup(default_sky_group);
 
-//Default skybox material
-    MtShaderPropertiesGroup* default_heightmap_group = new MtShaderPropertiesGroup;
+//Default terrain material
+    MtShaderPropertiesGroup* default_heightmap_group = new MtShaderPropertiesGroup(heightmap, "", 0, 0);
     default_heightmap_group->str_path = "@heightmap";
     default_heightmap_group->groupCaption = "Default Heightmap";
     default_heightmap_group->acceptShadows = true;
-    default_heightmap_group->render_shader = heightmap;
 
     MtShProps::addMtShaderPropertyGroup(default_heightmap_group);
 
@@ -216,76 +200,6 @@ MtShaderPropertiesGroup* MtShProps::getMtShaderPropertiesGroupByIndex(unsigned i
 
 void MtShProps::clearMtShaderGroups(){
    MatGroups.clear();
-}
-
-MaterialShaderProperty* MtShProps::allocateProperty(int type){
-    MaterialShaderProperty* _ptr = nullptr;
-    switch (type) {
-        case MATSHPROP_TYPE_TEXTURE:{ //If type is transfrom
-            _ptr = static_cast<MaterialShaderProperty*>(new TextureMaterialShaderProperty); //Allocation of transform in heap
-            break;
-        }
-        case MATSHPROP_TYPE_INTEGER:{ //If type is transfrom
-            _ptr = static_cast<MaterialShaderProperty*>(new IntegerMaterialShaderProperty); //Allocation of transform in heap
-            break;
-        }
-        case MATSHPROP_TYPE_FLOAT:{ //If type is transfrom
-            _ptr = static_cast<MaterialShaderProperty*>(new FloatMaterialShaderProperty); //Allocation of transform in heap
-            break;
-        }
-        case MATSHPROP_TYPE_FVEC3:{ //If type is transfrom
-            _ptr = static_cast<MaterialShaderProperty*>(new Float3MaterialShaderProperty); //Allocation of transform in heap
-            break;
-        }
-        case MATSHPROP_TYPE_FVEC2:{ //If type is transfrom
-            _ptr = static_cast<MaterialShaderProperty*>(new Float2MaterialShaderProperty); //Allocation of transform in heap
-            break;
-        }
-        case MATSHPROP_TYPE_COLOR:{ //If type is transfrom
-            _ptr = static_cast<MaterialShaderProperty*>(new ColorMaterialShaderProperty); //Allocation of transform in heap
-            break;
-        }
-        case MATSHPROP_TYPE_TEXTURE3:{ //If type is transfrom
-            _ptr = static_cast<MaterialShaderProperty*>(new Texture3MaterialShaderProperty); //Allocation of transform in heap
-            break;
-        }
-
-    }
-    return _ptr;
-}
-MaterialShaderPropertyConf* MtShProps::allocatePropertyConf(int type){
-    MaterialShaderPropertyConf* _ptr = nullptr;
-    switch (type) {
-        case MATSHPROP_TYPE_TEXTURE:{ //If type is transfrom
-            _ptr = static_cast<MaterialShaderPropertyConf*>(new TextureMtShPropConf); //Allocation of transform in heap
-            break;
-        }
-        case MATSHPROP_TYPE_INTEGER:{ //If type is transfrom
-            _ptr = static_cast<MaterialShaderPropertyConf*>(new IntegerMtShPropConf); //Allocation of transform in heap
-            break;
-        }
-        case MATSHPROP_TYPE_FLOAT:{ //If type is transfrom
-            _ptr = static_cast<MaterialShaderPropertyConf*>(new FloatMtShPropConf); //Allocation of transform in heap
-            break;
-        }
-        case MATSHPROP_TYPE_FVEC3:{ //If type is transfrom
-            _ptr = static_cast<MaterialShaderPropertyConf*>(new Float3MtShPropConf); //Allocation of transform in heap
-            break;
-        }
-        case MATSHPROP_TYPE_FVEC2:{ //If type is transfrom
-            _ptr = static_cast<MaterialShaderPropertyConf*>(new Float2MtShPropConf); //Allocation of transform in heap
-            break;
-        }
-        case MATSHPROP_TYPE_COLOR:{ //If type is transfrom
-            _ptr = static_cast<MaterialShaderPropertyConf*>(new ColorMtShPropConf); //Allocation of transform in heap
-            break;
-        }
-        case MATSHPROP_TYPE_TEXTURE3:{ //If type is transfrom
-            _ptr = static_cast<MaterialShaderPropertyConf*>(new Texture3MtShPropConf); //Allocation of transform in heap
-            break;
-        }
-    }
-    return _ptr;
 }
 
 void Material::saveToFile(){
@@ -475,6 +389,7 @@ void Material::setPropertyGroup(MtShaderPropertiesGroup* group_ptr){
 void Material::applyMatToPipeline(){
     ZSPIRE::Shader* shader = this->group_ptr->render_shader;
     //iterate over all properties, send them all!
+    unsigned int offset = 0;
     for(unsigned int prop_i = 0; prop_i < group_ptr->properties.size(); prop_i ++){
         MaterialShaderProperty* prop_ptr = group_ptr->properties[prop_i];
         MaterialShaderPropertyConf* conf_ptr = confs[prop_i];
@@ -487,6 +402,8 @@ void Material::applyMatToPipeline(){
                 TextureMaterialShaderProperty* texture_p = static_cast<TextureMaterialShaderProperty*>(prop_ptr);
                 TextureMtShPropConf* texture_conf = static_cast<TextureMtShPropConf*>(conf_ptr);
 
+                int db = 0;
+
                 if(texture_conf->path.compare("@none")){
                     //if texture isn't loaded
                     if(texture_conf->texture == nullptr){
@@ -494,11 +411,12 @@ void Material::applyMatToPipeline(){
                         texture_conf->texture = static_cast<ZSPIRE::Texture*>(res_ptr->class_ptr);
                     }
                     //Set opengl texture
-                    shader->setGLuniformInt(texture_p->ToggleUniform.c_str(), 1); //Set texture uniform toggle
+                    db = 1;
                     texture_conf->texture->Use(texture_p->slotToBind); //Use texture
-                }else{
-                    shader->setGLuniformInt(texture_p->ToggleUniform.c_str(), 0);
                 }
+                offset = texture_p->start_offset;
+                group_ptr->setUB_Data(offset, 4, &db);
+
                 break;
             }
             case MATSHPROP_TYPE_FLOAT:{
@@ -506,7 +424,10 @@ void Material::applyMatToPipeline(){
                 FloatMaterialShaderProperty* float_p = static_cast<FloatMaterialShaderProperty*>(prop_ptr);
                 FloatMtShPropConf* float_conf = static_cast<FloatMtShPropConf*>(conf_ptr);
 
-                shader->setGLuniformFloat(float_p->floatUniform.c_str(), float_conf->value);
+                offset = float_p->start_offset;
+                //set float to buffer
+                group_ptr->setUB_Data(offset, 4, &float_conf->value);
+
                 break;
             }
             case MATSHPROP_TYPE_INTEGER:{
@@ -514,7 +435,10 @@ void Material::applyMatToPipeline(){
                 IntegerMaterialShaderProperty* int_p = static_cast<IntegerMaterialShaderProperty*>(prop_ptr);
                 IntegerMtShPropConf* int_conf = static_cast<IntegerMtShPropConf*>(conf_ptr);
 
-                shader->setGLuniformInt(int_p->integerUniform.c_str(), int_conf->value);
+                offset = int_p->start_offset;
+                //set integer to buffer
+                group_ptr->setUB_Data(offset, 4, &int_conf->value);
+
                 break;
             }
             case MATSHPROP_TYPE_COLOR:{
@@ -522,7 +446,15 @@ void Material::applyMatToPipeline(){
                 ColorMaterialShaderProperty* color_p = static_cast<ColorMaterialShaderProperty*>(prop_ptr);
                 ColorMtShPropConf* color_conf = static_cast<ColorMtShPropConf*>(conf_ptr);
 
-                shader->setGLuniformColor(color_p->colorUniform.c_str(), color_conf->color);
+                color_conf->color.updateGL();
+
+                offset = color_p->start_offset;
+                //Write color to buffer
+                group_ptr->setUB_Data(offset, 4, &color_conf->color.gl_r);
+                group_ptr->setUB_Data(offset + 4, 4, &color_conf->color.gl_g);
+                group_ptr->setUB_Data(offset + 8, 4, &color_conf->color.gl_b);
+
+
                 break;
             }
             case MATSHPROP_TYPE_FVEC3:{
@@ -530,7 +462,18 @@ void Material::applyMatToPipeline(){
                 Float3MaterialShaderProperty* fvec3_p = static_cast<Float3MaterialShaderProperty*>(prop_ptr);
                 Float3MtShPropConf* fvec3_conf = static_cast<Float3MtShPropConf*>(conf_ptr);
 
-                shader->setGLuniformVec3(fvec3_p->floatUniform.c_str(), fvec3_conf->value);
+                offset = fvec3_p->start_offset;
+                //Write color to buffer
+                group_ptr->setUB_Data(offset, 4, &fvec3_conf->value.X);
+                group_ptr->setUB_Data(offset + 4, 4, &fvec3_conf->value.Y);
+                group_ptr->setUB_Data(offset + 8, 4, &fvec3_conf->value.Z);
+
+                break;
+            }
+            case MATSHPROP_TYPE_FVEC2:{
+                break;
+            }
+            case MATSHPROP_TYPE_IVEC2:{
                 break;
             }
             case MATSHPROP_TYPE_TEXTURE3:{

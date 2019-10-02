@@ -165,28 +165,25 @@ void ZSPIRE::Shader::Use() {
     //cur_shader_gl_id = this->SHADER_ID;
 }
 
-void ZSPIRE::Shader::setGLuniformMat4x4(const char* uniform_str, ZSMATRIX4x4 value) {
-    int uniform_id = glGetUniformLocation(this->SHADER_ID, uniform_str);
-	glUniformMatrix4fv(uniform_id, 1, GL_FALSE, &value.m[0][0]);
+unsigned int ZSPIRE::Shader::getUniformBufferIndex(const char* UB_NAME){
+    return glGetUniformBlockIndex(this->SHADER_ID, UB_NAME);
+}
+
+void ZSPIRE::Shader::setUniformBufferBinding(unsigned int UB_INDEX, unsigned int binding){
+    glUniformBlockBinding(this->SHADER_ID, UB_INDEX, binding);
 }
 
 void ZSPIRE::Shader::setGLuniformColor(const char* uniform_str, ZSRGBCOLOR value) {
 
     int uniform_id = glGetUniformLocation(this->SHADER_ID, uniform_str);
-	glUniform3f(uniform_id, value.gl_r, value.gl_g, value.gl_b);
-
-}
-void ZSPIRE::Shader::setGLuniformFloat(const char* uniform_str, float value) {
-
-    int uniform_id = glGetUniformLocation(this->SHADER_ID, uniform_str);
-	glUniform1f(uniform_id, value);
+    glUniform3f(uniform_id, value.gl_r, value.gl_g, value.gl_b);
 
 }
 
 void ZSPIRE::Shader::setGLuniformVec3(const char* uniform_str, ZSVECTOR3 value){
 
     int uniform_id = glGetUniformLocation(this->SHADER_ID, uniform_str);
-	glUniform3f(uniform_id, value.X, value.Y, value.Z);
+    glUniform3f(uniform_id, value.X, value.Y, value.Z);
 
 }
 
@@ -197,9 +194,3 @@ void ZSPIRE::Shader::setGLuniformVec4(const char* uniform_str, ZSVECTOR4 value){
 
 }
 
-void ZSPIRE::Shader::setGLuniformInt(const char* uniform_str, int value) {
-
-    int uniform_id = glGetUniformLocation(this->SHADER_ID, uniform_str);
-	glUniform1i(uniform_id, value);
-
-}

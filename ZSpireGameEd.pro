@@ -63,7 +63,8 @@ SOURCES += \
     Render/zs-animation.cpp \
     Misc/zs3m-master.cpp \
     ui/zs-uiwidget.cpp \
-    ui/zs-uibutton.cpp
+    ui/zs-uibutton.cpp \
+    Render/zs-material-defines.cpp
 
 HEADERS += \
         mainwin.h \

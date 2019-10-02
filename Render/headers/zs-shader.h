@@ -17,12 +17,12 @@ namespace ZSPIRE {
 		void Use();
 		void Destroy();
 
-		void setGLuniformColor(const char* uniform_str, ZSRGBCOLOR value);
-		void setGLuniformFloat(const char* uniform_str, float value);
-		void setGLuniformInt(const char* uniform_str, int value);
-		void setGLuniformVec3(const char* uniform_str, ZSVECTOR3 value);
+        unsigned int getUniformBufferIndex(const char* UB_NAME);
+        void setUniformBufferBinding(unsigned int UB_INDEX, unsigned int binding);
+
+        void setGLuniformColor(const char* uniform_str, ZSRGBCOLOR value);
+        void setGLuniformVec3(const char* uniform_str, ZSVECTOR3 value);
         void setGLuniformVec4(const char* uniform_str, ZSVECTOR4 value);
-		void setGLuniformMat4x4(const char* uniform_str, ZSMATRIX4x4 value);
 
         bool isCreated;
 

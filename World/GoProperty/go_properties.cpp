@@ -4,6 +4,7 @@
 #include "../../ProjEd/headers/ProjectEdit.h"
 #include "../../Render/headers/zs-mesh.h"
 #include "../../ProjEd/headers/InspEditAreas.h"
+#include "../headers/Misc.h"
 
 extern InspectorWin* _inspector_win;
 //selected terrain
@@ -1451,8 +1452,11 @@ void TerrainProperty::onValueChanged(){
 }
 
 void TerrainProperty::onAddToObject(){
+    std::string terrain_random_prefix;
+    genRandomString(&terrain_random_prefix, 4);
+
     //relative path to terrain file
-    this->file_label = *this->go_link.updLinkPtr()->label + ".terrain";
+    this->file_label = *this->go_link.updLinkPtr()->label + "_" + QString::fromStdString(terrain_random_prefix) + ".terrain";
     //Allocate terrain
     data.alloc(this->Width, this->Length);
     //Generate opengl mesh to draw

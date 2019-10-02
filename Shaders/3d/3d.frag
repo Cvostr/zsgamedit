@@ -17,13 +17,16 @@ layout(binding = 2) uniform sampler2D specular_map;
 layout(binding = 3) uniform sampler2D height_map;
 layout(binding = 6) uniform sampler2D shadow_map;
 
-uniform bool hasDiffuseMap;
-uniform bool hasNormalMap;
-uniform bool hasSpecularMap;
-uniform bool hasHeightMap;
+layout (std140) uniform Default3d{
+    vec3 diffuse_color;
 
-uniform float material_shininess;
-uniform vec3 diffuse_color = vec3(1.0, 0.078, 0.574);
+    bool hasDiffuseMap;
+    bool hasNormalMap;
+    bool hasSpecularMap;
+    bool hasHeightMap;
+
+    float material_shininess;
+};
 
 layout (std140, binding = 0) uniform CamMatrices{
     uniform mat4 cam_projection;

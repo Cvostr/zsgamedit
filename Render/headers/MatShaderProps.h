@@ -18,11 +18,13 @@ enum MATSHPROP_TYPE{
     MATSHPROP_TYPE_FVEC2
 };
 
+//This class describes the property
 class MaterialShaderProperty{
 public:
     MATSHPROP_TYPE type; //type of property
     QString prop_caption;
     QString prop_identifier; //String identifier, that will appear in material file
+    unsigned int start_offset;
 
     MaterialShaderProperty();
 };
@@ -39,13 +41,20 @@ public:
     std::string str_path;
     QString groupCaption;
     bool acceptShadows;
+    //ID of connected shader uniform buffer
+    unsigned int UB_ConnectID;
+    //ID of uniform buffer
+    unsigned int UB_ID;
+    void setUB_Data(unsigned int offset, unsigned int size, void* data);
+
 
     ZSPIRE::Shader* render_shader; //Pointer to shader, that binds on object render
     std::vector<MaterialShaderProperty*> properties;
 
     MaterialShaderProperty* addProperty(int type);
     void loadFromFile(const char* fpath);
-    MtShaderPropertiesGroup();
+
+    MtShaderPropertiesGroup(ZSPIRE::Shader* shader, const char* UB_CAPTION, unsigned int UB_ConnectID, unsigned int UB_SIZE);
 };
 
 class Material{
@@ -74,7 +83,8 @@ namespace MtShProps {
     MaterialShaderPropertyConf* allocatePropertyConf(int type);
 
     MtShaderPropertiesGroup* genDefaultMtShGroup(ZSPIRE::Shader* shader3d, ZSPIRE::Shader* skybox,
-                                                 ZSPIRE::Shader* heightmap);
+                                                 ZSPIRE::Shader* heightmap,
+                                                 unsigned int uniform_buf_id_took);
     MtShaderPropertiesGroup* getDefaultMtShGroup();
 
     void addMtShaderPropertyGroup(MtShaderPropertiesGroup* group);

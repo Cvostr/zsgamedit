@@ -237,7 +237,7 @@ void ZSENSDK::bindSDK(lua_State* state){
 
         .deriveClass <AnimationProperty, GameObjectProperty>("Animation")
         .addFunction("play", &AnimationProperty::play)
-        .addFunction("setDiffuseTexture", &AnimationProperty::stop)
+        .addFunction("stop", &AnimationProperty::stop)
             //.addFunction("stopAnim", &TileProperty::stopAnim)
         .endClass()
 
