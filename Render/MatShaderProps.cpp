@@ -484,9 +484,10 @@ void Material::applyMatToPipeline(){
                 if(!texture_conf->texture3D->created){
                     texture_conf->texture3D->Init();
                     for(int i = 0; i < 6; i ++){
-                        texture_conf->texture3D->pushTexture(i, texture_conf->rel_path.toStdString() + "/" + texture_conf->texture_str[i].toStdString());
+                        texture_conf->texture3D->pushTexture(i, project_ptr->root_path.toStdString() + "/" + texture_conf->texture_str[i].toStdString());
                     }
                     texture_conf->texture3D->created = true;
+                    texture_conf->texture3D->Use(texture_p->slotToBind);
                 }else{
                     texture_conf->texture3D->Use(texture_p->slotToBind);
                 }

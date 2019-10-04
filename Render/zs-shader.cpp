@@ -179,7 +179,6 @@ void ZSPIRE::Shader::setGLuniformColor(const char* uniform_str, ZSRGBCOLOR value
 }
 
 void ZSPIRE::Shader::setGLuniformVec4(const char* uniform_str, ZSVECTOR4 value){
-
     int uniform_id = glGetUniformLocation(this->SHADER_ID, uniform_str);
     glUniform4f(uniform_id, value.X, value.Y, value.Z, value.W);
 

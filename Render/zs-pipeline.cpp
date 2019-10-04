@@ -226,9 +226,11 @@ void RenderPipeline::setLightsToBuffer(){
     glBindBuffer(GL_UNIFORM_BUFFER, lightsBuffer);
     for(unsigned int light_i = 0; light_i < this->lights_ptr.size(); light_i ++){
         LightsourceProperty* _light_ptr = static_cast<LightsourceProperty*>(lights_ptr[light_i]);
-
+        //Set light type to buffer
         glBufferSubData(GL_UNIFORM_BUFFER, 64 * light_i, sizeof (int), &_light_ptr->light_type);
+        //Set light range to buffer
         glBufferSubData(GL_UNIFORM_BUFFER, 64 * light_i + 4, sizeof (float), &_light_ptr->range);
+        //Set lights intensity to buffer
         glBufferSubData(GL_UNIFORM_BUFFER, 64 * light_i + 8, sizeof (float), &_light_ptr->intensity);
         glBufferSubData(GL_UNIFORM_BUFFER, 64 * light_i + 12, sizeof (float), &_light_ptr->spot_angle);
         glBufferSubData(GL_UNIFORM_BUFFER, 64 * light_i + 16, 12, &_light_ptr->last_pos);
@@ -374,11 +376,8 @@ void RenderPipeline::render3D(void* projectedit_ptr, ZSPIRE::Camera* cam)
     glClear(GL_COLOR_BUFFER_BIT); //Clear screen
     gbuffer.bindTextures(); //Bind gBuffer textures
     deffered_light.Use(); //use deffered shader
-
+    //Send lights to OpenGL uniform buffer
     setLightsToBuffer();
-
-
-
 }
 
 void RenderPipeline::renderDepth(void* world_ptr){
@@ -419,7 +418,6 @@ void GameObject::Draw(RenderPipeline* pipeline){
 
 
                     if(node != nullptr){
-                        TransformProperty* transform = node->getPropertyPtr<TransformProperty>();
                         NodeProperty* nd = node->getPropertyPtr<NodeProperty>();
                         //Calculate result matrix
                         ZSMATRIX4x4 matrix = invert(rootNodeTransform) * nd->abs * b->offset;

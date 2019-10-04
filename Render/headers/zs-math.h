@@ -4,7 +4,6 @@
 #include "math.h"
 #define ZS_PI 3.14159265f
 #define REAL_NUM_EQ(x, y) (fabs((x) - (y)) < 0.000001f)
-
 #define MAX_BONE_PER_VERTEX 12
 
 	typedef struct ZSVECTOR2 {

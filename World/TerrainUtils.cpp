@@ -274,9 +274,11 @@ bool TerrainData::loadFromFile(const char* file_path){
 
     //allocate memory
     alloc(W, H);
-
+    //read all terrain points
     for(int i = 0; i < W * H; i ++){
+        //Read height
         world_stream.read(reinterpret_cast<char*>(&data[i].height), sizeof(float));
+        //Iterate over all textures
         for(int tex_factor = 0; tex_factor < TERRAIN_TEXTURES_AMOUNT; tex_factor ++)
             world_stream.read(reinterpret_cast<char*>(&data[i].texture_factors[tex_factor]), sizeof(unsigned char));
     }

@@ -86,14 +86,38 @@ void ThumbnailsMaster::createMaterialThumbnails(){
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
 
-    glBindBuffer(GL_UNIFORM_BUFFER, 14);
-    int light_i = 0;
-    int light_type = 1;
-    float light_intensity = 0.8f;
-    ZSVECTOR3 pos = ZSVECTOR3(0,0,0);
-    ZSVECTOR3 light_dir = _getDirection(66, 30, 30);
-    ZSRGBCOLOR color = ZSRGBCOLOR(255,255,255,255);
-    color.updateGL();
+    {   //send camera data to transform shader and skybox shader
+        ZSPIRE::Camera cam;
+        cam.setProjectionType(ZSCAMERA_PROJECTION_PERSPECTIVE);
+        cam.setPosition(ZSVECTOR3(0, 0, -3));
+        cam.setFront(ZSVECTOR3(0,0,1));
+        cam.setViewport(ZSVIEWPORT(0,0, 512, 512));
+        cam.setZplanes(0.1f, 5000.f);
+
+        glBindBuffer(GL_UNIFORM_BUFFER, 13);
+        ZSMATRIX4x4 proj = cam.getProjMatrix();
+        ZSMATRIX4x4 view = cam.getViewMatrix();
+        ZSMATRIX4x4 model = getIdentity();
+        glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof (ZSMATRIX4x4), &proj);
+        glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4), sizeof (ZSMATRIX4x4), &view);
+        glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 2, sizeof (ZSMATRIX4x4), &model);
+        glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+        glBindBuffer(GL_UNIFORM_BUFFER, 19);
+        glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof (ZSMATRIX4x4), &proj);
+        glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4), sizeof (ZSMATRIX4x4), &view);
+        glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    }
+    {
+        //Set lights to lighting shader
+        glBindBuffer(GL_UNIFORM_BUFFER, 14);
+        int light_i = 0;
+        int light_type = 1;
+        float light_intensity = 0.8f;
+        ZSVECTOR3 pos = ZSVECTOR3(0,0,0);
+        ZSVECTOR3 light_dir = _getDirection(66, 30, 30);
+        ZSRGBCOLOR color = ZSRGBCOLOR(255,255,255,255);
+        color.updateGL();
 
         glBufferSubData(GL_UNIFORM_BUFFER, 64 * light_i, sizeof (int), &light_type);
         //glBufferSubData(GL_UNIFORM_BUFFER, 64 * light_i + 4, sizeof (float), &_light_ptr->range);
@@ -105,11 +129,10 @@ void ThumbnailsMaster::createMaterialThumbnails(){
         glBufferSubData(GL_UNIFORM_BUFFER, 64 * light_i + 52, 4, &color.gl_g);
         glBufferSubData(GL_UNIFORM_BUFFER, 64 * light_i + 56, 4, &color.gl_b);
 
-
-    int ls = 1;
-    glBufferSubData(GL_UNIFORM_BUFFER, 64 * MAX_LIGHTS_AMOUNT, 4, &ls);
-
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+        int ls = 1;
+        glBufferSubData(GL_UNIFORM_BUFFER, 64 * MAX_LIGHTS_AMOUNT, 4, &ls);
+        glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    }
 
     //Iterate over all resources
     for(unsigned int res_i = 0; res_i < project_struct_ptr->resources.size(); res_i ++){
@@ -140,22 +163,6 @@ void ThumbnailsMaster::DrawMaterial(Material* material){
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     material->group_ptr->render_shader->Use();
     material->applyMatToPipeline();
-
-    ZSPIRE::Camera cam;
-    cam.setProjectionType(ZSCAMERA_PROJECTION_PERSPECTIVE);
-    cam.setPosition(ZSVECTOR3(0, 0, -3));
-    cam.setFront(ZSVECTOR3(0,0,1));
-    cam.setViewport(ZSVIEWPORT(0,0, 512, 512));
-    cam.setZplanes(0.1f, 5000.f);
-
-    glBindBuffer(GL_UNIFORM_BUFFER, 13);
-    ZSMATRIX4x4 proj = cam.getProjMatrix();
-    ZSMATRIX4x4 view = cam.getViewMatrix();
-    ZSMATRIX4x4 model = getIdentity();
-    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof (ZSMATRIX4x4), &proj);
-    glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4), sizeof (ZSMATRIX4x4), &view);
-    glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 2, sizeof (ZSMATRIX4x4), &model);
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
     ZSPIRE::getSphereMesh()->Draw();
 }
