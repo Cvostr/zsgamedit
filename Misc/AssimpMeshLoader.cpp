@@ -3,11 +3,9 @@
 
 #ifdef USE_ASSIMP //Optional
 static Assimp::Importer importer;
-static unsigned int loadflags = aiProcess_CalcTangentSpace | aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_JoinIdenticalVertices |
-        aiProcess_LimitBoneWeights;
+static unsigned int loadflags = aiProcess_CalcTangentSpace | aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_JoinIdenticalVertices;
 
-static unsigned int loadflagsAnim = aiProcess_Triangulate | aiProcess_JoinIdenticalVertices |
-        aiProcess_LimitBoneWeights;
+static unsigned int loadflagsAnim = aiProcess_Triangulate | aiProcess_JoinIdenticalVertices;
 #endif
 
 #include <iostream>

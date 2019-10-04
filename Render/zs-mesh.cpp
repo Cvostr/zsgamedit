@@ -79,7 +79,7 @@ static float cube_vertices[] = {
     -1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f, 0.0f, 0.0f  // bottom-left
 };
 
-float skyboxVertices[] = {
+static float skyboxVertices[] = {
     // positions
     -1.0f,  1.0f, -1.0f,
     -1.0f, -1.0f, -1.0f,
@@ -163,7 +163,7 @@ void ZSPIRE::setupDefaultMeshes() {
     glBufferData(GL_ARRAY_BUFFER, sizeof(cube_vertices), cube_vertices, GL_STATIC_DRAW);
 
     glBindVertexArray(cube3Dmesh.meshVAO);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), nullptr);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(2);
@@ -177,7 +177,7 @@ void ZSPIRE::setupDefaultMeshes() {
     glBindBuffer(GL_ARRAY_BUFFER, skyboxMesh.meshVBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
 
     sphereMesh.Init();
     std::vector<ZSVERTEX> sphere_v;
@@ -305,20 +305,24 @@ void ZSPIRE::Mesh::setMeshData(ZSVERTEX* vertices, unsigned int* indices, unsign
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->meshEBO); //Bind index buffer
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, static_cast<unsigned int>(indices_num) * sizeof(unsigned int), indices, GL_STATIC_DRAW); //Send indices to buffer
+    //Set mesh offsets
+    setMeshOffsets();
+}
 
-	//Vertex pos 3 floats
+void ZSPIRE::Mesh::setMeshOffsets(){
+    //Vertex pos 3 floats
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(ZSVERTEX), nullptr);
     glEnableVertexAttribArray(0);
-	//Vertex UV 2 floats
+    //Vertex UV 2 floats
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(ZSVERTEX), reinterpret_cast<void*>(sizeof(float) * 3));
     glEnableVertexAttribArray(1);
-	//Vertex Normals 3 floats
+    //Vertex Normals 3 floats
     glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(ZSVERTEX), reinterpret_cast<void*>(sizeof(float) * 5));
     glEnableVertexAttribArray(2);
-	//Vertex Tangents 3 floats
+    //Vertex Tangents 3 floats
     glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(ZSVERTEX), reinterpret_cast<void*>(sizeof(float) * 8));
     glEnableVertexAttribArray(3);
-	//Vertex Bitangents 3 floats
+    //Vertex Bitangents 3 floats
     glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(ZSVERTEX), reinterpret_cast<void*>(sizeof(float) * 11));
     glEnableVertexAttribArray(4);
 
@@ -327,15 +331,20 @@ void ZSPIRE::Mesh::setMeshData(ZSVERTEX* vertices, unsigned int* indices, unsign
     glEnableVertexAttribArray(5);
     glVertexAttribIPointer(6, 4, GL_UNSIGNED_INT, sizeof(ZSVERTEX), reinterpret_cast<void*>(sizeof(float) * 18));
     glEnableVertexAttribArray(6);
-    //Weights
-    glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, sizeof(ZSVERTEX), reinterpret_cast<void*>(sizeof(float) * 22));
+    glVertexAttribIPointer(7, 4, GL_UNSIGNED_INT, sizeof(ZSVERTEX), reinterpret_cast<void*>(sizeof(float) * 22));
     glEnableVertexAttribArray(7);
+    //Weights
     glVertexAttribPointer(8, 4, GL_FLOAT, GL_FALSE, sizeof(ZSVERTEX), reinterpret_cast<void*>(sizeof(float) * 26));
     glEnableVertexAttribArray(8);
-    //Bones num
-    glVertexAttribIPointer(9, 1, GL_UNSIGNED_INT, sizeof(ZSVERTEX), reinterpret_cast<void*>(sizeof(float) * 30));
+    glVertexAttribPointer(9, 4, GL_FLOAT, GL_FALSE, sizeof(ZSVERTEX), reinterpret_cast<void*>(sizeof(float) * 30));
     glEnableVertexAttribArray(9);
+    glVertexAttribPointer(10, 4, GL_FLOAT, GL_FALSE, sizeof(ZSVERTEX), reinterpret_cast<void*>(sizeof(float) * 34));
+    glEnableVertexAttribArray(10);
+    //Bones num
+    glVertexAttribIPointer(11, 1, GL_UNSIGNED_INT, sizeof(ZSVERTEX), reinterpret_cast<void*>(sizeof(float) * 38));
+    glEnableVertexAttribArray(11);
 }
+
 void ZSPIRE::Mesh::setMeshData(ZSVERTEX* vertices, unsigned int vertices_num) {
 	this->vertices_num = vertices_num;
 	this->indices_num = NO_INDICES;
@@ -345,22 +354,7 @@ void ZSPIRE::Mesh::setMeshData(ZSVERTEX* vertices, unsigned int vertices_num) {
     glBindBuffer(GL_ARRAY_BUFFER, this->meshVBO); //Bind vertex buffer
     glBufferData(GL_ARRAY_BUFFER, vertices_num * sizeof(ZSMATRIX4x4), vertices, GL_STATIC_DRAW); //send vertices to buffer
 
-	//Vertex pos 3 floats
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(ZSVERTEX), nullptr);
-    glEnableVertexAttribArray(0);
-	//Vertex UV 2 floats
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(ZSVERTEX), reinterpret_cast<void*>(sizeof(float) * 3));
-    glEnableVertexAttribArray(1);
-	//Vertex Normals 3 floats
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(ZSVERTEX), reinterpret_cast<void*>(sizeof(float) * 5));
-    glEnableVertexAttribArray(2);
-
-	//Vertex Tangents 3 floats
-    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(ZSVERTEX), reinterpret_cast<void*>(sizeof(float) * 8));
-    glEnableVertexAttribArray(3);
-	//Vertex Bitangents 3 floats
-    glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(ZSVERTEX), reinterpret_cast<void*>(sizeof(float) * 11));
-    glEnableVertexAttribArray(4);
+    setMeshOffsets();
 }
 
 void ZSPIRE::Mesh::Draw(){
@@ -374,11 +368,11 @@ void ZSPIRE::Mesh::Draw(){
 
 	if (this->indices_num == NO_INDICES) {
 		//Draw without indices
-        glDrawArrays(GL_TRIANGLES, 0, this->vertices_num);
+        glDrawArrays(GL_TRIANGLES, 0, static_cast<int>(this->vertices_num));
 	}
 	else {
 		//Indexed draw
-        glDrawElements(GL_TRIANGLES, this->indices_num, GL_UNSIGNED_INT, nullptr);
+        glDrawElements(GL_TRIANGLES, static_cast<int>(this->indices_num), GL_UNSIGNED_INT, nullptr);
 	}
 }
 
@@ -394,11 +388,11 @@ void ZSPIRE::Mesh::DrawLines(){
 
     if (this->indices_num == NO_INDICES) {
         //Draw without indices
-        glDrawArrays(GL_LINE_LOOP, 0, this->vertices_num);
+        glDrawArrays(GL_LINE_LOOP, 0, static_cast<int>(this->vertices_num));
     }
     else {
         //Indexed draw
-        glDrawElements(GL_LINE_LOOP, this->indices_num, GL_UNSIGNED_INT, nullptr);
+        glDrawElements(GL_LINE_LOOP, static_cast<int>(this->indices_num), GL_UNSIGNED_INT, nullptr);
     }
 }
 
