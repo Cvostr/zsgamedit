@@ -62,10 +62,10 @@ public:
 
 class IntPropertyArea : public PropertyEditArea{
 public:
-
-    QLineEdit* int_field; //Text digit field for X coord
-
-    int* value; //Output variable
+    //Text digit field for X coord
+    QLineEdit* int_field;
+    //Output variable
+    int* value;
 
     IntPropertyArea();
     ~IntPropertyArea();

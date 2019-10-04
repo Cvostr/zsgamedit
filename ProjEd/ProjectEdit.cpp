@@ -659,6 +659,11 @@ void EditWindow::updateFileList(){
 
     for(int i = 0; i < list.size(); i ++){ //iterate all files, skip 2 last . and ..
         QFileInfo fileInfo = list.at(i);  //get iterated file info
+
+        //If file is project info, or terrain, then skip it.
+        if(checkExtension(fileInfo.fileName(), ".inf") || checkExtension(fileInfo.fileName(), ".terrain"))
+            continue;
+
         QListWidgetItem* item = new QListWidgetItem(fileInfo.fileName(), ui->fileList);
         if(fileInfo.isDir()){
             item->setIcon(QIcon::fromTheme("folder"));

@@ -1715,6 +1715,11 @@ void AnimationProperty::onValueChanged(){
     updateAnimationPtr();
 }
 
+void AnimationProperty::setAnimation(std::string anim){
+    this->anim_label = QString::fromStdString(anim);
+    updateAnimationPtr();
+}
+
 void AnimationProperty::updateAnimationPtr(){
     this->anim_prop_ptr = go_link.world_ptr->getAnimationPtrByRelPath(this->anim_label);
 }

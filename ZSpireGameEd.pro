@@ -64,7 +64,8 @@ SOURCES += \
     Misc/zs3m-master.cpp \
     ui/zs-uiwidget.cpp \
     ui/zs-uibutton.cpp \
-    Render/zs-material-defines.cpp
+    Render/zs-material-defines.cpp \
+    Input/zs-input.cpp
 
 HEADERS += \
         mainwin.h \
@@ -101,7 +102,8 @@ HEADERS += \
     Render/headers/zs-animation.h \
     Misc/headers/zs3m-master.h \
     ui/headers/zs-uiwidget.h \
-    ui/headers/zs-uibutton.h
+    ui/headers/zs-uibutton.h \
+    Input/headers/zs-input.h
 
 
 FORMS += \

@@ -8,6 +8,7 @@
 #include <iostream>
 #include <functional>
 #include <SDL2/SDL.h>
+#include "../Input/headers/zs-input.h"
 
 static unsigned int mode_fullscreen = SDL_WINDOW_FULLSCREEN;
 static unsigned int mode_borderless = SDL_WINDOW_FULLSCREEN_DESKTOP;
@@ -66,9 +67,9 @@ void ZSENSDK::bindSDK(lua_State* state){
 
     luabridge::getGlobalNamespace(state)
         .beginNamespace("input")
-        .addFunction("isKeyPressed", &ZSENSDK::Input::isKeyPressed)
-        .addFunction("isKeyHold", &ZSENSDK::Input::isKeyHold)
-        .addFunction("getMouseState", &ZSENSDK::Input::getMouseState)
+        .addFunction("isKeyPressed", &Input::isKeyPressed)
+        .addFunction("isKeyHold", &Input::isKeyHold)
+        .addFunction("getMouseState", &Input::getMouseState)
         //Add mouse state class
         .beginClass <Input::MouseState>("MouseState")
         .addData("cursorX", &Input::MouseState::mouseX)
@@ -238,7 +239,7 @@ void ZSENSDK::bindSDK(lua_State* state){
         .deriveClass <AnimationProperty, GameObjectProperty>("Animation")
         .addFunction("play", &AnimationProperty::play)
         .addFunction("stop", &AnimationProperty::stop)
-            //.addFunction("stopAnim", &TileProperty::stopAnim)
+        .addFunction("setAnimation", &AnimationProperty::setAnimation)
         .endClass()
 
         .deriveClass <ScriptGroupProperty, GameObjectProperty>("ScriptGroup")

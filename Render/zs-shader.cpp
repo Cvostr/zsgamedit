@@ -174,17 +174,8 @@ void ZSPIRE::Shader::setUniformBufferBinding(unsigned int UB_INDEX, unsigned int
 }
 
 void ZSPIRE::Shader::setGLuniformColor(const char* uniform_str, ZSRGBCOLOR value) {
-
     int uniform_id = glGetUniformLocation(this->SHADER_ID, uniform_str);
     glUniform3f(uniform_id, value.gl_r, value.gl_g, value.gl_b);
-
-}
-
-void ZSPIRE::Shader::setGLuniformVec3(const char* uniform_str, ZSVECTOR3 value){
-
-    int uniform_id = glGetUniformLocation(this->SHADER_ID, uniform_str);
-    glUniform3f(uniform_id, value.X, value.Y, value.Z);
-
 }
 
 void ZSPIRE::Shader::setGLuniformVec4(const char* uniform_str, ZSVECTOR4 value){

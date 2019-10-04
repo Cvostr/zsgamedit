@@ -21,7 +21,6 @@ namespace ZSPIRE {
         void setUniformBufferBinding(unsigned int UB_INDEX, unsigned int binding);
 
         void setGLuniformColor(const char* uniform_str, ZSRGBCOLOR value);
-        void setGLuniformVec3(const char* uniform_str, ZSVECTOR3 value);
         void setGLuniformVec4(const char* uniform_str, ZSVECTOR4 value);
 
         bool isCreated;

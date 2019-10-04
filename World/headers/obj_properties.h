@@ -265,6 +265,7 @@ public:
 
     void play();
     void stop();
+    void setAnimation(std::string anim);
 
     void updateAnimationPtr();
     void updateNodeTransform(GameObject* obj, ZSMATRIX4x4 parent);
