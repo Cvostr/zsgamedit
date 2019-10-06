@@ -10,3 +10,9 @@ glslangValidator -V ./3d/3d.frag
 
 mv vert.spv ./3d/3d.vert_vk
 mv frag.spv ./3d/3d.frag_vk
+#build default heightmap shader
+glslangValidator -V ./heightmap/heightmap.vert
+glslangValidator -V ./heightmap/heightmap.frag
+
+mv vert.spv ./heightmap/heightmap.vert_vk
+mv frag.spv ./heightmap/heightmap.frag_vk

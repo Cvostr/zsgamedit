@@ -1493,6 +1493,7 @@ void TerrainProperty::onMouseClick(int posX, int posY, int screenY, bool isLeftB
         //find picked texel
         for(int i = 0; i < Width; i ++){
             for(int y = 0; y < Length; y ++){
+
                 if(i == _data[0] * 2 && y == _data[2] * 2){
                     int mul = 1;
                     if(isCtrlHold)

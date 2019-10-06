@@ -42,12 +42,13 @@ typedef struct HeightmapTexturePair{
 class TerrainData{
 private:
     bool created;
-    int W, H;
-
+    //OpenGL texture IDs of texture masks
     unsigned int texture_mask1;
     unsigned int texture_mask2;
     unsigned int texture_mask3;
 public:
+    int W, H;
+
     unsigned int VAO;
     unsigned int VBO;
     unsigned int EBO;

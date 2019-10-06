@@ -66,7 +66,7 @@ void RenderPipeline::setup(int bufWidth, int bufHeight){
 
     glGenBuffers(1, &terrainUniformBuffer);
     glBindBuffer(GL_UNIFORM_BUFFER, terrainUniformBuffer);
-    glBufferData(GL_UNIFORM_BUFFER, 12 * 16 * 2 + 4, nullptr, GL_STATIC_DRAW);
+    glBufferData(GL_UNIFORM_BUFFER, 12 * 16 * 2 + 4 * 3, nullptr, GL_STATIC_DRAW);
     //Connect to point 3 (three)
     glBindBufferBase(GL_UNIFORM_BUFFER, 3, terrainUniformBuffer);
 
@@ -585,6 +585,9 @@ void TerrainProperty::onRender(RenderPipeline* pipeline){
     }
     //Tell shader, that we rendering terrain in normal mode (non picking)
     glBufferSubData(GL_UNIFORM_BUFFER, 16 * 12 * 2, 4, &dfalse);
+    //Send dimensions to buffer
+    glBufferSubData(GL_UNIFORM_BUFFER, 16 * 12 * 2 + 4, 4, &this->data.W);
+    glBufferSubData(GL_UNIFORM_BUFFER, 16 * 12 * 2 + 8, 4, &this->data.H);
 
     //Apply material shader
     mat->onRender(pipeline);
