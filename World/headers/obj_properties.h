@@ -222,7 +222,7 @@ public:
     void copyTo(GameObjectProperty* dest);
     void init();
     void Draw(ZSPIRE::Camera* cam, RenderPipeline* pipeline);
-    void setTexture(ZSPIRE::Shader* shader);
+    void setTexture();
     ShadowCasterProperty();
 };
 

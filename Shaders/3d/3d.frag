@@ -39,10 +39,11 @@ layout (std140, binding = 0) uniform CamMatrices{
 layout (std140, binding = 2) uniform ShadowData{
 //Shadowmapping stuff
     uniform mat4 LightProjectionMat; // 16 * 4
-    uniform mat4 LightViewMat; 
-     // 16 * 4
+    uniform mat4 LightViewMat; // 16 * 4
     uniform float shadow_bias; //4
     uniform bool hasShadowMap; //4
+    uniform int shadowmap_Width; //4
+    uniform int shadowmap_Height; //4
 };
 
 vec2 processParallaxMapUv(vec2 uv){
@@ -92,8 +93,11 @@ void main(){
         for(int x = 0; x < 8; x ++){
             for(int y = 0; y < 8; y ++){
                 vec2 _offset = vec2(x, y);
-            
-                vec4 shadowmap = texture(shadow_map, ShadowProjection.xy + _offset / 2048);
+
+                _offset.x /= shadowmap_Width;
+                _offset.y /= shadowmap_Height;
+
+                vec4 shadowmap = texture(shadow_map, ShadowProjection.xy + _offset);
                 float texture_depth = shadowmap.r;
                 tMasks.g += (real_depth - shadow_bias > texture_depth) ? 0.01 : 0.0;
             }

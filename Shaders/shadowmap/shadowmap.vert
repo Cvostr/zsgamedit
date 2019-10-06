@@ -1,6 +1,4 @@
 #version 420 core
-#extension GL_ARB_explicit_attrib_location : require
-#extension GL_ARB_explicit_uniform_location : require
 
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec2 uv;
@@ -21,10 +19,11 @@ layout (location = 11) in int bones;
 layout (std140, binding = 2) uniform ShadowData{
 //Shadowmapping stuff
     uniform mat4 LightProjectionMat; // 16 * 4
-    uniform mat4 LightViewMat; 
-     // 16 * 4
+    uniform mat4 LightViewMat; // 16 * 4
     uniform float shadow_bias; //4
     uniform bool hasShadowMap; //4
+    uniform int shadowmap_Width; //4
+    uniform int shadowmap_Height; //4
 };
 
 layout (std140, binding = 0) uniform CamMatrices{

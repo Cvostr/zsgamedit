@@ -60,7 +60,7 @@ void RenderPipeline::setup(int bufWidth, int bufHeight){
 
     glGenBuffers(1, &shadowBuffer);
     glBindBuffer(GL_UNIFORM_BUFFER, shadowBuffer);
-    glBufferData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 2 + 8, nullptr, GL_STATIC_DRAW);
+    glBufferData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 2 + 16, nullptr, GL_STATIC_DRAW);
     //Connect to point 2 (two)
     glBindBufferBase(GL_UNIFORM_BUFFER, 2, shadowBuffer);
 
@@ -678,11 +678,18 @@ void ShadowCasterProperty::Draw(ZSPIRE::Camera* cam, RenderPipeline* pipeline){
     glEnable(GL_DEPTH_TEST);
     glFrontFace(GL_CW);
     glDisable(GL_CULL_FACE);
-
+    //Bind shadow uniform buffer
     glBindBuffer(GL_UNIFORM_BUFFER, pipeline->shadowBuffer);
+    //Bind ortho shadow projection
     glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof (ZSMATRIX4x4), &LightProjectionMat);
+    //Bind shadow view matrix
     glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4), sizeof (ZSMATRIX4x4), &LightViewMat);
+    //Send BIAS value
     glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 2, 4, &shadow_bias);
+    //Send Width of shadow texture
+    glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 2 + 8, 4, &this->TextureWidth);
+    //Send Height of shadow texture
+    glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 2 + 12, 4, &this->TextureHeight);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
     pipeline->getShadowmapShader()->Use();
@@ -698,7 +705,7 @@ void ShadowCasterProperty::init(){
 
     glBindTexture(GL_TEXTURE_2D, shadowDepthTexture);
     //Configuring texture
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, this->TextureWidth, this->TextureHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, this->TextureWidth, this->TextureHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
@@ -719,7 +726,7 @@ void ShadowCasterProperty::init(){
     this->initialized = true;
 }
 
-void ShadowCasterProperty::setTexture(ZSPIRE::Shader* shader){
+void ShadowCasterProperty::setTexture(){
     glActiveTexture(GL_TEXTURE6);
     glBindTexture(GL_TEXTURE_2D, this->shadowDepthTexture);
 }
