@@ -8,7 +8,6 @@
 #include "EditorManager.h"
 #include "../../Render/headers/zs-shader.h"
 #include "../../Render/headers/zs-pipeline.h"
-
 #include "ft2build.h"
 
 #include FT_FREETYPE_H
@@ -49,7 +48,6 @@ private:
     FT_Library ftlib;
     std::vector<GlyphFontContainer*> fonts;
 public:
-    RenderPipeline* pipeline_ptr;
 
     void addFontContainer(GlyphFontContainer* ptr); //add font container to vector
     GlyphFontContainer* getFontContainer(std::string path);

@@ -5,6 +5,8 @@
 
 #define MAX_LIGHTS_AMOUNT 150
 
+extern RenderPipeline* renderer;
+
 const char texture_shaderFS[310] = "#version 420 core\n\
         in vec2 _UV;\n\
         out vec4 FragColor;\n\
@@ -89,12 +91,12 @@ void ThumbnailsMaster::createMaterialThumbnails(){
     {   //send camera data to transform shader and skybox shader
         ZSPIRE::Camera cam;
         cam.setProjectionType(ZSCAMERA_PROJECTION_PERSPECTIVE);
-        cam.setPosition(ZSVECTOR3(0, 0, -3));
+        cam.setPosition(ZSVECTOR3(0, 0, -2.6f));
         cam.setFront(ZSVECTOR3(0,0,1));
         cam.setViewport(ZSVIEWPORT(0,0, 512, 512));
         cam.setZplanes(0.1f, 5000.f);
 
-        glBindBuffer(GL_UNIFORM_BUFFER, 13);
+        glBindBuffer(GL_UNIFORM_BUFFER, renderer->camBuffer);
         ZSMATRIX4x4 proj = cam.getProjMatrix();
         ZSMATRIX4x4 view = cam.getViewMatrix();
         ZSMATRIX4x4 model = getIdentity();
@@ -103,14 +105,14 @@ void ThumbnailsMaster::createMaterialThumbnails(){
         glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 2, sizeof (ZSMATRIX4x4), &model);
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-        glBindBuffer(GL_UNIFORM_BUFFER, 19);
+        glBindBuffer(GL_UNIFORM_BUFFER, renderer->skyboxTransformUniformBuffer);
         glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof (ZSMATRIX4x4), &proj);
         glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4), sizeof (ZSMATRIX4x4), &view);
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
     }
     {
         //Set lights to lighting shader
-        glBindBuffer(GL_UNIFORM_BUFFER, 14);
+        glBindBuffer(GL_UNIFORM_BUFFER, renderer->lightsBuffer);
         int light_i = 0;
         int light_type = 1;
         float light_intensity = 0.8f;
@@ -203,7 +205,7 @@ void ThumbnailsMaster::DrawMesh(ZSPIRE::Mesh* mesh){
     cam.setViewport(ZSVIEWPORT(0,0, 512, 512));
     cam.setZplanes(0.1f, 5000.f);
 
-    glBindBuffer(GL_UNIFORM_BUFFER, 13);
+    glBindBuffer(GL_UNIFORM_BUFFER, renderer->camBuffer);
     ZSMATRIX4x4 proj = cam.getProjMatrix();
     ZSMATRIX4x4 view = cam.getViewMatrix();
     ZSMATRIX4x4 model = getIdentity();

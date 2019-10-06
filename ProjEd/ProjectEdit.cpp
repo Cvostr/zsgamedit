@@ -21,7 +21,6 @@ EditWindow* _editor_win;
 InspectorWin* _inspector_win;
 Project* project_ptr;
 EdActions* _ed_actions_container;
-
 RenderPipeline* renderer;
 
 EditWindow::EditWindow(QApplication* app, QWidget *parent) :
@@ -191,7 +190,6 @@ void EditWindow::init(){
     renderer = render;
     //init glyph manager
     this->glyph_manager = new GlyphManager;
-    glyph_manager->pipeline_ptr = render;
     this->startManager(glyph_manager);
     //Init thumbnails manager
     this->thumb_master = new ThumbnailsMaster;
@@ -539,7 +537,7 @@ void EditWindow::setupObjectsHieList(){
 void EditWindow::onImportResource(){
     QString dir = "/home";
 #ifdef _WIN32
-    dir = "C:\";
+    dir = "C:\\\n";
 #endif
     QString filter = tr("GPU compressed texture (.DDS) (*.dds *.DDS);; 3D model (*.fbx *.FBX *.dae *.DAE);; Sound (*.wav *.WAV);;");
 

@@ -3,6 +3,8 @@
 #include <GL/glew.h>
 #include <iostream>
 
+extern RenderPipeline* renderer;
+
 GlyphManager::GlyphManager(){
     if (FT_Init_FreeType(&this->ftlib))
         std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
@@ -109,7 +111,7 @@ void GlyphFontContainer::DrawChar(int _char, ZSVECTOR2 pos, unsigned int* char_l
     CharacterGlyph* glyph = this->characters.at(static_cast<unsigned int>(_char));
     *char_length = static_cast<unsigned int>(glyph->glyph_bearing.X + glyph->glyph_size.X);
 
-    manager_ptr->pipeline_ptr->renderGlyph(glyph->gl_texture_id, static_cast<int>(pos.X), static_cast<int>(pos.Y - (glyph->glyph_size.Y - glyph->glyph_bearing.Y)), static_cast<int>(glyph->glyph_size.X), static_cast<int>(glyph->glyph_size.Y), color);
+    renderer->renderGlyph(glyph->gl_texture_id, static_cast<int>(pos.X), static_cast<int>(pos.Y - (glyph->glyph_size.Y - glyph->glyph_bearing.Y)), static_cast<int>(glyph->glyph_size.X), static_cast<int>(glyph->glyph_size.Y), color);
 }
 void GlyphFontContainer::DrawString(int* string, unsigned int len, ZSVECTOR2 pos, ZSRGBCOLOR color){
     unsigned int xpos_offset = static_cast<unsigned int>(pos.X);

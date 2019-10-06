@@ -25,9 +25,11 @@ class AnimationChannel{
 public:
     std::string bone_name;
     Animation* anim_ptr;
-
+    //Number of position keys in animation channel
     unsigned int posKeysNum;
+    //Number of scale keys in animation channel
     unsigned int scaleKeysNum;
+    //Number of rotation keys in animation channel
     unsigned int rotationKeysNum;
 
     ZSVECTOR3* pos;

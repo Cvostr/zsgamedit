@@ -18,6 +18,11 @@ void ZSUI::Widget::move(unsigned int x, unsigned int y){
     this->pos.posY = y;
 }
 bool ZSUI::Widget::isHoveredByMouse(){
+    Input::MouseState mstate = Input::getMouseState();
+
+    if(pos.posX < mstate.mouseX && pos.posY < mstate.mouseY && pos.posX + metrics.WIDTH > mstate.mouseX && pos.posY + metrics.HEIGHT > mstate.mouseY)
+        return true;
+
     return false;
 }
 void ZSUI::Widget::draw(){

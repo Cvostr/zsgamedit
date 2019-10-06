@@ -1,6 +1,7 @@
 #include "headers/zs-uibutton.h"
+#include "../Render/headers/zs-pipeline.h"
 
-//extern ZSENSDK::Input::MouseState mouse;
+extern RenderPipeline* renderer;
 
 ZSUI::Button::Button(){
 
