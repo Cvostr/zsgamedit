@@ -9,7 +9,7 @@
 
 #include "triggers.h"
 #ifdef USE_ZSPIRE
-#include "engine.h" //include engine headers
+#include <zsengine/engine.h> //include engine headers
 #endif
 
 typedef struct ProjectConf{
