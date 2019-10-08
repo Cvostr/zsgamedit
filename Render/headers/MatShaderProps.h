@@ -72,10 +72,13 @@ public:
     void saveToFile();
     void setPropertyGroup(MtShaderPropertiesGroup* group_ptr);
     void clear();
-
     void applyMatToPipeline();
 
+    Material(std::string shader_group_str);
+    Material(MtShaderPropertiesGroup* _group_ptr);
     Material();
+
+    ~Material();
 };
 
 namespace MtShProps {

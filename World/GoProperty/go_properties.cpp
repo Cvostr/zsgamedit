@@ -1494,7 +1494,7 @@ void TerrainProperty::onMouseClick(int posX, int posY, int screenY, bool isLeftB
         for(int i = 0; i < Width; i ++){
             for(int y = 0; y < Length; y ++){
 
-                if(i == _data[0] * 2 && y == _data[2] * 2){
+                if(i == static_cast<int>(_data[0]) * 2 && y == static_cast<int>(_data[2]) * 2){
                     int mul = 1;
                     if(isCtrlHold)
                         mul *= -1;
@@ -1518,7 +1518,7 @@ void TerrainProperty::onMouseMotion(int posX, int posY, int relX, int relY, int 
         //find picked texel
         for(int i = 0; i < Width; i ++){
             for(int y = 0; y < Length; y ++){
-                if(i == _data[0] * 2 && y == _data[2] * 2){
+                if(i == static_cast<int>(_data[0]) * 2 && y == static_cast<int>(_data[2]) * 2){
                     int mul = 1;
                     if(isCtrlHold)
                         mul *= -1;

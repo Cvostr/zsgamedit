@@ -416,13 +416,11 @@ void GameObject::Draw(RenderPipeline* pipeline){
                         rootNodeTransform = (RootNode->getPropertyPtr<NodeProperty>()->transform_mat);
                     }
 
-
                     if(node != nullptr){
                         NodeProperty* nd = node->getPropertyPtr<NodeProperty>();
                         //Calculate result matrix
-                        ZSMATRIX4x4 matrix = invert(rootNodeTransform) * nd->abs * b->offset;
-                        matrix = transpose(matrix);
-
+                        ZSMATRIX4x4 matrix = transpose(invert(rootNodeTransform) * nd->abs * b->offset);
+                        //Send skinned matrix to skinning uniform buffer
                         glBindBuffer(GL_UNIFORM_BUFFER, pipeline->skinningUniformBuffer);
                         glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * bone_i, sizeof (ZSMATRIX4x4), &matrix);
                     }
@@ -524,7 +522,7 @@ void MaterialProperty::onRender(RenderPipeline* pipeline){
     //Get pointer to shadowcaster
     ShadowCasterProperty* shadowcast = static_cast<ShadowCasterProperty*>(pipeline->getRenderSettings()->shadowcaster_ptr);
     if(shadowcast != nullptr && this->material_ptr->group_ptr->acceptShadows && this->receiveShadows){
-        shadowcast->setTexture(shader);
+        shadowcast->setTexture();
         glBindBuffer(GL_UNIFORM_BUFFER, pipeline->shadowBuffer);
         //In GLSL we should use Integer instead of bool
         int recShadows = static_cast<int>(this->receiveShadows);

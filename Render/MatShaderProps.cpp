@@ -5,7 +5,7 @@
 #include "../Misc/headers/zs_types.h"
 
 extern Project* project_ptr;
-
+Material* default3dmat;
 static std::vector<MtShaderPropertiesGroup*> MatGroups;
 
 MaterialShaderProperty::MaterialShaderProperty(){
@@ -161,6 +161,10 @@ MtShaderPropertiesGroup* MtShProps::genDefaultMtShGroup(ZSPIRE::Shader* shader3d
     default_heightmap_group->acceptShadows = true;
 
     MtShProps::addMtShaderPropertyGroup(default_heightmap_group);
+
+
+    default3dmat = new Material(default_group);
+    default3dmat->file_path = "@none";
 
     return default_group;
 }
@@ -382,7 +386,9 @@ void Material::setPropertyGroup(MtShaderPropertiesGroup* group_ptr){
         //Add PropertyConf with the same type
         this->addPropertyConf(prop_ptr->type);
     }
+    //store pointer of picked group
     this->group_ptr = group_ptr;
+    //store string id of picked group
     this->group_str = group_ptr->str_path;
 }
 
@@ -499,7 +505,18 @@ void Material::applyMatToPipeline(){
 
 Material::Material(){
     setPropertyGroup(MtShProps::getDefaultMtShGroup());
-    group_str = "@default";
+}
+
+Material::Material(std::string shader_group_str){
+    setPropertyGroup(MtShProps::getMtShaderPropertyGroup(shader_group_str));
+}
+
+Material::Material(MtShaderPropertiesGroup* _group_ptr){
+    setPropertyGroup(_group_ptr);
+}
+
+Material::~Material(){
+
 }
 
 void Material::clear(){
