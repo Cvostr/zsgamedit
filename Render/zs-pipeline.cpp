@@ -866,6 +866,7 @@ void RenderPipeline::renderSprite(unsigned int texture_id, int X, int Y, int sca
     ZSMATRIX4x4 scale = getScaleMat(scaleX, scaleY, 0.0f);
     ZSMATRIX4x4 transform = scale * translation;
 
+    //Push glyph transform
     glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4), sizeof (ZSMATRIX4x4), &transform);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
@@ -891,7 +892,7 @@ void RenderPipeline::renderGlyph(unsigned int texture_id, int X, int Y, int scal
     ZSMATRIX4x4 scale = getScaleMat(scaleX, scaleY, 0.0f);
     ZSMATRIX4x4 transform = scale * translation;
 
-
+    //Push glyph transform
     glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4), sizeof (ZSMATRIX4x4), &transform);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 

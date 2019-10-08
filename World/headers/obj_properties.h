@@ -78,6 +78,8 @@ public:
 
     bool receiveShadows;
 
+    void setMaterial(Material* mat);
+    void setMaterial(std::string path);
     void addPropertyInterfaceToInspector(InspectorWin* inspector);
     void onValueChanged();
     void copyTo(GameObjectProperty* dest);

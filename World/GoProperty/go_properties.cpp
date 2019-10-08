@@ -859,7 +859,7 @@ void MaterialProperty::onValueChanged(){
     //Check, if material file has changed
     if(newmat_ptr != this->material_ptr){
         this->material_ptr = newmat_ptr;
-        this->group_label = material_ptr->group_ptr->groupCaption;
+        this->group_label = newmat_ptr->group_ptr->groupCaption;
         //update window
         _inspector_win->updateRequired = true;
     }
@@ -920,6 +920,17 @@ void MaterialProperty::copyTo(GameObjectProperty* dest){
     mat_prop->material_path = this->material_path;
     mat_prop->material_ptr = this->material_ptr;
     mat_prop->group_label = this->group_label;
+}
+
+void MaterialProperty::setMaterial(Material* mat){
+    this->material_ptr = mat;
+    this->material_path = QString::fromStdString(mat->file_path);
+    this->group_label = mat->group_ptr->groupCaption;
+}
+
+void MaterialProperty::setMaterial(std::string path){
+    Material* newmat_ptr = go_link.world_ptr->getMaterialPtrByName(QString::fromStdString(path));
+    setMaterial(newmat_ptr);
 }
 
 void MaterialProperty::onAddToObject(){

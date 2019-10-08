@@ -23,6 +23,8 @@ Project* project_ptr;
 EdActions* _ed_actions_container;
 RenderPipeline* renderer;
 
+extern Material* default3dmat;
+
 EditWindow::EditWindow(QApplication* app, QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::EditWindow)
@@ -149,7 +151,9 @@ void EditWindow::init(){
     SDL_GetCurrentDisplayMode(0, &current);
 
     std::cout << "SDL window creation requested" << std::endl;
+    //If no window settings made
     if(this->settings.isFirstSetup){
+        //Set base windows values
         this->settings.gameView_win_pos_x = this->width();
         this->settings.gameView_win_pos_y = 0;
 
@@ -159,7 +163,7 @@ void EditWindow::init(){
         this->settings.inspector_win_width = _inspector_win->width();
         this->settings.inspector_win_height = _inspector_win->height();
     }
-
+    //If dark theme is set
     if(this->settings.isDarkTheme){
         QPalette palette = QPalette();
         palette.setColor(QPalette::Window, QColor(53, 53, 53));
@@ -480,6 +484,10 @@ void EditWindow::addNewCube(){
     MeshProperty* mesh = static_cast<MeshProperty*>(obj->getPropertyPtrByType(GO_PROPERTY_TYPE_MESH));
     mesh->resource_relpath = "@cube";
     mesh->updateMeshPtr();
+
+    MaterialProperty* mat = obj->getPropertyPtr<MaterialProperty>();
+    mat->setMaterial(default3dmat);
+
 }
 void EditWindow::addNewLight(){
     GameObject* obj = onAddNewGameObject();

@@ -5,6 +5,7 @@
 #include "headers/obj_properties.h"
 
 extern RenderPipeline* renderer;
+extern Material* default3dmat;
 
 World::World(){
     objects.reserve(MAX_OBJS);
@@ -599,14 +600,7 @@ GameObject* World::addMeshNode(MeshNode* node){
         mesh_prop_ptr->updateMeshPtr();
         //configure material
         MaterialProperty* mat_prop_ptr = static_cast<MaterialProperty*>(mesh_obj->getPropertyPtrByType(GO_PROPERTY_TYPE_MATERIAL));
-        Project* proj_ptr = static_cast<Project*>(this->proj_ptr); //Convert void pointer to Project*
-
-        for(unsigned int mat_i = 0; mat_i < proj_ptr->resources.size(); mat_i ++){
-            if(proj_ptr->resources[mat_i].type == RESOURCE_TYPE_MATERIAL){
-                mat_prop_ptr->material_path = proj_ptr->resources[mat_i].rel_path;
-                mat_prop_ptr->onValueChanged();
-            }
-        }
+        mat_prop_ptr->setMaterial("@none");
 
     }
 
@@ -766,7 +760,8 @@ Material* World::getMaterialPtrByName(QString label){
             return static_cast<Material*>(r_ptr->class_ptr);
         }
     }
-    return nullptr;
+    //if path is incorrect, return default material
+    return default3dmat;
 }
 
 WorldSnapshot::WorldSnapshot(){
