@@ -716,17 +716,22 @@ void QLabelResourcePickWgt::dragEnterEvent( QDragEnterEvent* event ){
 void QLabelResourcePickWgt::dropEvent( QDropEvent* event ){
     QList<QListWidgetItem*> file_dropped = _editor_win->getFilesListWidget()->selectedItems();
     QList<QTreeWidgetItem*> object_dropped = _editor_win->getObjectListWidget()->selectedItems();
-
-    if(file_dropped.length() > 0 && (file_dropped[0]->text().endsWith(".dds") || file_dropped[0]->text().endsWith(".DDS"))){
+    //We drooped common file
+    if(file_dropped.length() > 0){
+        //Get pointer to resource picker
         PickResourceArea* resource_area = static_cast<PickResourceArea*>(area_ptr);
+        //if we drooped texture to texture pick area
+        if(resource_area->resource_type == RESOURCE_TYPE_TEXTURE && (file_dropped[0]->text().endsWith(".dds") || file_dropped[0]->text().endsWith(".DDS"))){
 
-        *resource_area->rel_path = _editor_win->getCurrentDirectory() + "/" + file_dropped[0]->text();
-        resource_area->rel_path->remove(0, _editor_win->project.root_path.size() + 1);
+            *resource_area->rel_path = _editor_win->getCurrentDirectory() + "/" + file_dropped[0]->text();
+            resource_area->rel_path->remove(0, _editor_win->project.root_path.size() + 1);
 
-        GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(area_ptr->go_property);
-        getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
-        //Apply resource change
-        area_ptr->PropertyEditArea::callPropertyUpdate();
+            GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(area_ptr->go_property);
+            getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
+            //Apply resource change
+            area_ptr->PropertyEditArea::callPropertyUpdate();
+        }
+
     }
 
     if(object_dropped.length() > 0){

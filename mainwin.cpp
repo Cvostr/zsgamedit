@@ -255,24 +255,19 @@ ProjectCtxMenu::ProjectCtxMenu(MainWin* win, QWidget* parent) : QObject(parent){
 
     this->action_delete = new QAction("Delete", win);
     this->action_open_folder = new QAction("Open Root directory", win);
-#ifdef USE_ZSPIRE
+
     this->action_run_engine = new QAction("Run in engine instance", win);
     this->action_run_engine_vk = new QAction("Run in engine instance (Vulkan)", win);
-#endif
 
     menu->addAction(action_delete);
     menu->addAction(action_open_folder);
-#ifdef USE_ZSPIRE
     menu->addAction(action_run_engine);
     menu->addAction(action_run_engine_vk);
-#endif
 
     QObject::connect(this->action_delete, SIGNAL(triggered(bool)), this, SLOT(onDeleteClicked()));
     QObject::connect(this->action_open_folder, SIGNAL(triggered(bool)), this, SLOT(onOpenDirClicked()));
-#ifdef USE_ZSPIRE
     QObject::connect(this->action_run_engine, SIGNAL(triggered(bool)), this, SLOT(runEngineClickedGL()));
     QObject::connect(this->action_run_engine_vk, SIGNAL(triggered(bool)), this, SLOT(runEngineClickedVK()));
-#endif
 }
 
 void ProjectCtxMenu::show(QPoint point){
@@ -301,7 +296,6 @@ void ProjectCtxMenu::onOpenDirClicked(){
     QDesktopServices::openUrl(QUrl::fromLocalFile(this->project_conf_ptr->projectRootPath));
 }
 
-#ifdef USE_ZSPIRE
 void ProjectCtxMenu::runEngineClickedGL(){
     runEngineClicked(OGL32);
 }
@@ -344,4 +338,3 @@ void ProjectCtxMenu::runEngineClicked(ZSGAPI gapi){
     win->engine->loadGame();
 
 }
-#endif

@@ -54,8 +54,8 @@ bool readShaderFile(const char* path, char* result) {
 	std::string res_data;
 
 	std::ifstream stream;
-
-	stream.exceptions(std::ifstream::badbit);
+    //It will throw exception if read fail or file open fail
+    stream.exceptions(std::ifstream::badbit | std::ifstream::failbit);
 
 	try
 	{
@@ -75,7 +75,7 @@ bool readShaderFile(const char* path, char* result) {
 }
 
 bool ZSPIRE::Shader::compileFromFile(const char* VSpath, const char* FSpath){
-
+    bool result = true;
     std::cout << "OGL: Compiling shader " << VSpath << " " << FSpath << std::endl;
 
 	Init();
@@ -89,8 +89,18 @@ bool ZSPIRE::Shader::compileFromFile(const char* VSpath, const char* FSpath){
 	const GLchar* vs = &vs_data[0];
 	const GLchar* fs = &fs_data[0];
 
-    readShaderFile(VSpath, &vs_data[0]);
-    readShaderFile(FSpath, &fs_data[0]);
+    if(!readShaderFile(VSpath, &vs_data[0])){
+        //Vertex shader reading error
+        std::cout << "Error reading Vertex shader file " << VSpath << std::endl;
+        result = false;
+    }
+    if(!readShaderFile(FSpath, &fs_data[0])){
+        //Fragment shader reading error
+        std::cout << "Error reading Fragment shader file " << FSpath << std::endl;
+        result = false;
+    }
+    if(!result)
+        return result;
 
     glShaderSource(VS, 1, &vs, nullptr); //Setting shader code text on vs
     glShaderSource(FS, 1, &fs, nullptr); //Setting shader code text on fs
@@ -110,7 +120,7 @@ bool ZSPIRE::Shader::compileFromFile(const char* VSpath, const char* FSpath){
 	glDeleteShader(FS);
 
     this->isCreated = true; //Shader created & compiled now
-	return true;
+    return result;
 
 }
 

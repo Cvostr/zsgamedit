@@ -380,8 +380,8 @@ void GameObject::loadProperty(std::ifstream* world_stream){
         *world_stream >> path;
         //Assigning path
         ptr->material_path = QString::fromStdString(path);
-        if(path.compare("@none")) //if user specified material
-            ptr->onValueChanged(); //find it and process
+
+        ptr->onValueChanged(); //find it and process
 
         world_stream->seekg(1, std::ofstream::cur);
         world_stream->read(reinterpret_cast<char*>(&ptr->receiveShadows), sizeof(bool));

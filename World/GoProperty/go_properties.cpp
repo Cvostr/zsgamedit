@@ -46,18 +46,18 @@ void GameObjectProperty::onAddToObject(){
 }
 
 void GameObjectProperty::onUpdate(float deltaTime){
-
+    std::cout << "onUpdate(" << deltaTime << ")";
 }
 
 void GameObjectProperty::onPreRender(RenderPipeline* pipeline){
-
+    std::cout << "onPreRender(" << pipeline << ")";
 }
 
 void GameObjectProperty::onRender(RenderPipeline* pipeline){
-
+    std::cout << "onRender(" << pipeline << ")";
 }
 void GameObjectProperty::onTrigger(GameObject* obj){
-
+    std::cout << "onTrigger(" << obj << ")";
 }
 QString getPropertyString(int type){
     switch (type) {
@@ -207,7 +207,7 @@ GameObjectProperty* allocProperty(int type){
 
 //Cast inheritance calls
 void GameObjectProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
-
+    std::cout << "addPropertyInterfaceToInspector(" << inspector << ")";
 }
 
 void GameObjectProperty::onValueChanged(){

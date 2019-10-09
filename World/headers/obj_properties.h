@@ -100,7 +100,7 @@ public:
 
     void addPropertyInterfaceToInspector(InspectorWin* inspector);
     void updateMeshPtr(); //Updates pointer according to resource_relpath
-    void onValueChanged(); //Update mesh pointer
+    void onValueChanged(); //Update mesh    pointer
     void copyTo(GameObjectProperty* dest);
     MeshProperty();
 };
