@@ -127,7 +127,7 @@ void PropertyEditArea::setup(){
 }
 
 void PropertyEditArea::addToInspector(InspectorWin* win){
-
+    assert(win);
 }
 void PropertyEditArea::writeNewValues(){
 
@@ -414,9 +414,9 @@ void PickResourceArea::updateValues(){
     //Get current value in text field
     QString cur = this->relpath_label->text();
 
-    if(*rel_path != cur){
+    //if(*rel_path != cur){
         updateLabel();
-    }
+    //}
 }
 
 IntPropertyArea::IntPropertyArea(){
@@ -714,6 +714,7 @@ void QLabelResourcePickWgt::dragEnterEvent( QDragEnterEvent* event ){
     event->acceptProposedAction();
 }
 void QLabelResourcePickWgt::dropEvent( QDropEvent* event ){
+    assert(event);
     QList<QListWidgetItem*> file_dropped = _editor_win->getFilesListWidget()->selectedItems();
     QList<QTreeWidgetItem*> object_dropped = _editor_win->getObjectListWidget()->selectedItems();
     //We drooped common file
@@ -731,7 +732,17 @@ void QLabelResourcePickWgt::dropEvent( QDropEvent* event ){
             //Apply resource change
             area_ptr->PropertyEditArea::callPropertyUpdate();
         }
+        //if we drooped material to material pick area
+        if(resource_area->resource_type == RESOURCE_TYPE_MATERIAL && (file_dropped[0]->text().endsWith(".zsmat"))){
 
+            *resource_area->rel_path = _editor_win->getCurrentDirectory() + "/" + file_dropped[0]->text();
+            resource_area->rel_path->remove(0, _editor_win->project.root_path.size() + 1);
+
+            GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(area_ptr->go_property);
+            getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
+            //Apply resource change
+            area_ptr->PropertyEditArea::callPropertyUpdate();
+        }
     }
 
     if(object_dropped.length() > 0){

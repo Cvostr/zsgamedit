@@ -7,9 +7,10 @@
 #include "../headers/Misc.h"
 
 extern InspectorWin* _inspector_win;
+extern EditWindow* _editor_win;
 //selected terrain
 static TerrainProperty* current_terrain_prop;
-
+//Selected animation
 static AnimationProperty* current_anim;
 
 GameObjectProperty* ObjectPropertyLink::updLinkPtr(){
@@ -46,18 +47,18 @@ void GameObjectProperty::onAddToObject(){
 }
 
 void GameObjectProperty::onUpdate(float deltaTime){
-    std::cout << "onUpdate(" << deltaTime << ")";
+
 }
 
 void GameObjectProperty::onPreRender(RenderPipeline* pipeline){
-    std::cout << "onPreRender(" << pipeline << ")";
+    assert(pipeline);
 }
 
 void GameObjectProperty::onRender(RenderPipeline* pipeline){
-    std::cout << "onRender(" << pipeline << ")";
+    assert(pipeline);
 }
 void GameObjectProperty::onTrigger(GameObject* obj){
-    std::cout << "onTrigger(" << obj << ")";
+    assert(obj);
 }
 QString getPropertyString(int type){
     switch (type) {
@@ -207,6 +208,7 @@ GameObjectProperty* allocProperty(int type){
 
 //Cast inheritance calls
 void GameObjectProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
+    assert(inspector);
     std::cout << "addPropertyInterfaceToInspector(" << inspector << ")";
 }
 
@@ -301,6 +303,7 @@ void TransformProperty::onValueChanged(){
 }
 
 void TransformProperty::onPreRender(RenderPipeline* pipeline){
+    assert(pipeline);
     updateMat();
 }
 
@@ -834,7 +837,6 @@ void MaterialProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
             }
             case MATSHPROP_TYPE_TEXTURE3:{
                 //Cast pointer
-                Texture3MaterialShaderProperty* texture_p = static_cast<Texture3MaterialShaderProperty*>(prop_ptr);
                 Texture3MtShPropConf* texture_conf = static_cast<Texture3MtShPropConf*>(conf_ptr);
 
                 QString captions[6] = {"Right", "Left", "Top", "Bottom", "Back", "Front"};
@@ -907,6 +909,8 @@ void MaterialProperty::onValueChanged(){
     }
     //save changes to material file
     material_ptr->saveToFile();
+    //Recreate thumbnails for all materials
+    _editor_win->thumb_master->createMaterialThumbnails();
 }
 
 void MaterialProperty::copyTo(GameObjectProperty* dest){

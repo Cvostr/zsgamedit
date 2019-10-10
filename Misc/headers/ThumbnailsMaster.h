@@ -21,9 +21,12 @@ public:
     //virtual void init();
     //virtual void updateWindowSize(int W, int H);
 
+    void prepareMaterialThumbnailPipeline();
+
     void initShader();
     void createTexturesThumbnails();
     void createMaterialThumbnails();
+    void createMaterialThumbnail(QString name);
     void createMeshesThumbnails();
 
     void DrawTexture(ZSPIRE::Texture* texture);

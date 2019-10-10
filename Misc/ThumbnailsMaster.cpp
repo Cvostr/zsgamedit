@@ -4,6 +4,7 @@
 #include <iostream>
 
 #define MAX_LIGHTS_AMOUNT 150
+#define THUMBNAIL_IMG_SIZE 512
 
 extern RenderPipeline* renderer;
 
@@ -57,7 +58,7 @@ void ThumbnailsMaster::initShader(){
 void ThumbnailsMaster::createTexturesThumbnails(){
     //Compile texture shader
     initShader();
-    glViewport(0, 0, 512, 512);
+    glViewport(0, 0, THUMBNAIL_IMG_SIZE, THUMBNAIL_IMG_SIZE);
     texture_shader.Use();
 
     glDisable(GL_CULL_FACE);
@@ -71,29 +72,29 @@ void ThumbnailsMaster::createTexturesThumbnails(){
         ZSPIRE::Texture* texture_ptr = static_cast<ZSPIRE::Texture*>(resource_ptr->class_ptr);
         DrawTexture(texture_ptr);
         //Allocate image buffer
-        unsigned char* texture_data = new unsigned char[512 * 512 * 4];
+        unsigned char* texture_data = new unsigned char[THUMBNAIL_IMG_SIZE * THUMBNAIL_IMG_SIZE * 4];
         //Read image to buffer from GL buffer
-        glReadPixels(0, 0, 512, 512, GL_RGBA, GL_UNSIGNED_BYTE, &texture_data[0]);
+        glReadPixels(0, 0, THUMBNAIL_IMG_SIZE, THUMBNAIL_IMG_SIZE, GL_RGBA, GL_UNSIGNED_BYTE, &texture_data[0]);
 
-        QImage* image = new QImage(texture_data, 512, 512, QImage::Format_RGBA8888);
+        QImage* image = new QImage(texture_data, THUMBNAIL_IMG_SIZE, THUMBNAIL_IMG_SIZE, QImage::Format_RGBA8888);
         texture_thumbnails.insert(std::pair<std::string, QImage*>(resource_ptr->file_path.toStdString(), image));
         //delete[] texture_data;
     }
 }
 
-void ThumbnailsMaster::createMaterialThumbnails(){
-    //Compile texture shader
-    glViewport(0, 0, 512, 512);
+void ThumbnailsMaster::prepareMaterialThumbnailPipeline(){
+    glViewport(0, 0, THUMBNAIL_IMG_SIZE, THUMBNAIL_IMG_SIZE);
     glClearColor(0,0,0,0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
+    glDisable(GL_BLEND);
 
     {   //send camera data to transform shader and skybox shader
         ZSPIRE::Camera cam;
         cam.setProjectionType(ZSCAMERA_PROJECTION_PERSPECTIVE);
         cam.setPosition(ZSVECTOR3(0, 0, -2.6f));
         cam.setFront(ZSVECTOR3(0,0,1));
-        cam.setViewport(ZSVIEWPORT(0,0, 512, 512));
+        cam.setViewport(ZSVIEWPORT(0,0, THUMBNAIL_IMG_SIZE, THUMBNAIL_IMG_SIZE));
         cam.setZplanes(0.1f, 5000.f);
 
         glBindBuffer(GL_UNIFORM_BUFFER, renderer->camBuffer);
@@ -136,6 +137,10 @@ void ThumbnailsMaster::createMaterialThumbnails(){
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
     }
 
+}
+
+void ThumbnailsMaster::createMaterialThumbnails(){
+    prepareMaterialThumbnailPipeline();
     //Iterate over all resources
     for(unsigned int res_i = 0; res_i < project_struct_ptr->resources.size(); res_i ++){
         Resource* resource_ptr = &this->project_struct_ptr->resources[res_i];
@@ -144,14 +149,46 @@ void ThumbnailsMaster::createMaterialThumbnails(){
         Material* material_ptr = static_cast<Material*>(resource_ptr->class_ptr);
         DrawMaterial(material_ptr);
         //Allocate image buffer
-        unsigned char* texture_data = new unsigned char[512 * 512 * 4];
+        unsigned char* texture_data = new unsigned char[THUMBNAIL_IMG_SIZE * THUMBNAIL_IMG_SIZE * 4];
         //Read image to buffer from GL buffer
-        glReadPixels(0, 0, 512, 512, GL_RGBA, GL_UNSIGNED_BYTE, &texture_data[0]);
+        glReadPixels(0, 0, THUMBNAIL_IMG_SIZE, THUMBNAIL_IMG_SIZE, GL_RGBA, GL_UNSIGNED_BYTE, &texture_data[0]);
 
-        QImage* image = new QImage(texture_data, 512, 512, QImage::Format_RGBA8888);
-        texture_thumbnails.insert(std::pair<std::string, QImage*>(resource_ptr->file_path.toStdString(), image));
-        //delete[] texture_data;
+        QImage* image = new QImage(texture_data, THUMBNAIL_IMG_SIZE, THUMBNAIL_IMG_SIZE, QImage::Format_RGBA8888);
+        //texture_thumbnails.insert(std::pair<std::string, QImage*>(resource_ptr->file_path.toStdString(), image));
+        if(isAvailable(resource_ptr->file_path.toStdString())){
+            QImage* img_old = texture_thumbnails.at(resource_ptr->file_path.toStdString());
+            delete img_old;
+
+            texture_thumbnails.at(resource_ptr->file_path.toStdString()) = image;
+        }else{
+            texture_thumbnails.insert(std::pair<std::string, QImage*>(resource_ptr->file_path.toStdString(), image));
+        }
     }
+}
+
+void ThumbnailsMaster::createMaterialThumbnail(QString name){
+    prepareMaterialThumbnailPipeline();
+    Resource* resource_ptr = this->project_struct_ptr->getResource(name);
+
+    if(resource_ptr == nullptr) return; //maybe its default material
+
+    Material* material_ptr = static_cast<Material*>(resource_ptr->class_ptr);
+    DrawMaterial(material_ptr);
+    //Allocate image buffer
+    unsigned char* texture_data = new unsigned char[512 * 512 * 4];
+    //Read image to buffer from GL buffer
+    glReadPixels(0, 0, 512, 512, GL_RGBA, GL_UNSIGNED_BYTE, &texture_data[0]);
+
+    QImage* image = new QImage(texture_data, 512, 512, QImage::Format_RGBA8888);
+    if(isAvailable(resource_ptr->file_path.toStdString())){
+        QImage* img_old = texture_thumbnails.at(resource_ptr->file_path.toStdString());
+        delete img_old;
+
+        texture_thumbnails.at(resource_ptr->file_path.toStdString()) = image;
+    }else{
+        //texture_thumbnails.insert(std::pair<std::string, QImage*>(resource_ptr->file_path.toStdString(), image));
+    }
+
 }
 
 void ThumbnailsMaster::DrawTexture(ZSPIRE::Texture* texture){
@@ -171,7 +208,7 @@ void ThumbnailsMaster::DrawMaterial(Material* material){
 
 void ThumbnailsMaster::createMeshesThumbnails(){
     //Compile texture shader
-    glViewport(0, 0, 512, 512);
+    glViewport(0, 0, THUMBNAIL_IMG_SIZE, THUMBNAIL_IMG_SIZE);
     glClearColor(0,0,0,0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
@@ -185,11 +222,11 @@ void ThumbnailsMaster::createMeshesThumbnails(){
         ZSPIRE::Mesh* mesh_ptr = static_cast<ZSPIRE::Mesh*>(resource_ptr->class_ptr);
         DrawMesh(mesh_ptr);
         //Allocate image buffer
-        unsigned char* texture_data = new unsigned char[512 * 512 * 4];
+        unsigned char* texture_data = new unsigned char[THUMBNAIL_IMG_SIZE * THUMBNAIL_IMG_SIZE * 4];
         //Read image to buffer from GL buffer
-        glReadPixels(0, 0, 512, 512, GL_RGBA, GL_UNSIGNED_BYTE, &texture_data[0]);
+        glReadPixels(0, 0, THUMBNAIL_IMG_SIZE, THUMBNAIL_IMG_SIZE, GL_RGBA, GL_UNSIGNED_BYTE, &texture_data[0]);
 
-        QImage* image = new QImage(texture_data, 512, 512, QImage::Format_RGBA8888);
+        QImage* image = new QImage(texture_data, THUMBNAIL_IMG_SIZE, THUMBNAIL_IMG_SIZE, QImage::Format_RGBA8888);
         texture_thumbnails.insert(std::pair<std::string, QImage*>(resource_ptr->resource_label, image));
         //delete[] texture_data;
     }
