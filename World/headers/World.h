@@ -11,7 +11,7 @@
 #include "../../Render/headers/zs-pipeline.h"
 #include "../../Render/headers/zs-mesh.h"
 #include "../../Render/headers/zs-texture.h"
-#include "../../Render/headers/zs-math.h"
+#include <render/zs-math.h>
 #include "../../Render/headers/zs-shader.h"
 #include "../../Render/headers/MatShaderProps.h"
 #include "../../Misc/headers/oal_manager.h"

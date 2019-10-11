@@ -65,6 +65,7 @@ void ZS3M::SceneFileExport::write(std::string output_file){
             stream.write(reinterpret_cast<char*>(&mesh_ptr->indices_arr[ind_i]), sizeof(unsigned int));
         }
         stream << "\n"; //Write divider
+        /*
         for (unsigned int b_i = 0; b_i < bonesNum; b_i ++) {
             ZSPIRE::Bone* bone = &mesh_ptr->bones[b_i];
             //Write bone name
@@ -78,7 +79,7 @@ void ZS3M::SceneFileExport::write(std::string output_file){
             }
 
             stream << "\n"; //Write divider
-        }
+        }*/
 
     }
     stream.close();
@@ -91,17 +92,18 @@ void ZS3M::SceneFileExport::writeNode(std::ofstream *stream, MeshNode* node){
     unsigned int meshesNum = static_cast<unsigned int>(node->mesh_names.size());
     unsigned int childrenNum = static_cast<unsigned int>(node->children.size());
 
-    *stream << "\n"; //Write divider
-
     stream->write(reinterpret_cast<char*>(&meshesNum), sizeof(unsigned int));
     stream->write(reinterpret_cast<char*>(&childrenNum), sizeof(unsigned int));
+
+    *stream << "\n"; //Write divider
 
     for(unsigned int mesh_i = 0; mesh_i < node->mesh_names.size(); mesh_i ++){
         //Write mesh name
         *stream << node->mesh_names[mesh_i] << "\n";
     }
     for(unsigned int ch_i = 0; ch_i < node->children.size(); ch_i ++){
-        *stream << node->children[ch_i].node_label << "\n";
+        //Write child node string
+        *stream << node->children[ch_i]->node_label << "\n";
     }
     //Write node base matrix
     for(unsigned int m_i = 0; m_i < 4; m_i ++){
@@ -113,7 +115,7 @@ void ZS3M::SceneFileExport::writeNode(std::ofstream *stream, MeshNode* node){
     *stream << "\n"; //Write divider
     //Write all children
     for(unsigned int ch_i = 0; ch_i < node->children.size(); ch_i ++){
-        writeNode(stream, &node->children[ch_i]);
+        writeNode(stream, node->children[ch_i]);
     }
 }
 
@@ -121,7 +123,7 @@ void ZS3M::SceneFileExport::getNodesNum(unsigned int* nds_ptr, MeshNode* node){
     *nds_ptr += 1;
     //Write all children
     for(unsigned int ch_i = 0; ch_i < node->children.size(); ch_i ++){
-        getNodesNum(nds_ptr, &node->children[ch_i]);
+        getNodesNum(nds_ptr, node->children[ch_i]);
     }
 }
 
@@ -155,6 +157,9 @@ void ZS3M::ImportedSceneFile::loadFromFile(std::string output_file){
     stream.read(reinterpret_cast<char*>(&nodes_num), sizeof (unsigned int));
 
     std::string prefix;
+
+    std::vector<MeshNode> nodes_list;
+
     while(!stream.eof()){
         stream >> prefix;
 
@@ -172,6 +177,9 @@ void ZS3M::ImportedSceneFile::loadFromFile(std::string output_file){
             stream.read(reinterpret_cast<char*>(&meshesNum), sizeof(unsigned int));
             stream.read(reinterpret_cast<char*>(&childrenNum), sizeof(unsigned int));
 
+            stream.seekg(1, std::ifstream::cur);
+
+            //iterate over all meshes, connected to this node
             for(unsigned int mesh_i = 0; mesh_i < meshesNum; mesh_i ++){
                 std::string mesh_name;
                 //Read mesh name
@@ -179,12 +187,13 @@ void ZS3M::ImportedSceneFile::loadFromFile(std::string output_file){
                 //Put mesh name
                 node.mesh_names.push_back(mesh_name);
             }
+            //iterate over all children nodes, connected to this node
             for(unsigned int ch_i = 0; ch_i < childrenNum; ch_i ++){
-                std::string child_name;
+                MeshNode* _node = new MeshNode;
                 //Read child name
-                stream >> child_name;
+                stream >> _node->node_label;
                 //Put child name
-                //node.children.push_back(mesh_name);
+                node.children.push_back(_node);
             }
             //Read node base matrix
             for(unsigned int m_i = 0; m_i < 4; m_i ++){
@@ -193,7 +202,10 @@ void ZS3M::ImportedSceneFile::loadFromFile(std::string output_file){
                     stream.read(reinterpret_cast<char*>(m_v), sizeof(float));
                 }
             }
+            //Add node to list
+            nodes_list.push_back(node);
         }
+
         //We reached mesh
         if(prefix.compare("_MESH") == false){
             std::string mesh_label;
@@ -240,6 +252,7 @@ void ZS3M::ImportedSceneFile::loadFromFile(std::string output_file){
                 stream.read(reinterpret_cast<char*>(&newmesh->indices_arr[in_i]), sizeof(unsigned int));
             }
             stream.seekg(1, std::ifstream::cur);
+            /*
             //Read mesh bones
             for(unsigned int bone_i = 0; bone_i < bonesNum; bone_i ++){
                 std::string pref;
@@ -262,7 +275,7 @@ void ZS3M::ImportedSceneFile::loadFromFile(std::string output_file){
 
                     stream.seekg(1, std::ifstream::cur);
                 }
-            }
+            }*/
 
             newmesh->Init();
             newmesh->setMeshData(newmesh->vertices_arr, newmesh->indices_arr, newmesh->vertices_num, newmesh->indices_num);
@@ -274,6 +287,25 @@ void ZS3M::ImportedSceneFile::loadFromFile(std::string output_file){
             this->meshes_toWrite.push_back(newmesh);
         }
     }
+    //Post loading activities
+   /* for(unsigned int node_i = 0; node_i < nodes_list.size(); node_i ++){
+        MeshNode* node = &nodes_list[node_i];
+        //iterate over all children in node
+        for(unsigned int node_ch_i = 0; node_ch_i < node->children.size(); node_ch_i ++){
+            //get name of child
+            std::string child_name = node->children[node_ch_i]->node_label;
+            //Now look for node with this name
+            for(unsigned int n_i = 0; n_i < nodes_list.size(); n_i ++){
+                MeshNode* nnode_ptr = &nodes_list[n_i];
+                if(nnode_ptr->node_label.compare(child_name) == false){
+                    delete node->children[node_ch_i];
+                    node->children[node_ch_i] = nnode_ptr;
+                }
+            }
+        }
+    }*/
+    //Set first node as root node
+    //this->rootNode = &nodes_list[0];
 
     stream.close();
 }

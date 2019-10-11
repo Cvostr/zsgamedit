@@ -30,7 +30,6 @@ SOURCES += \
         mainwin.cpp \
     ProjEd/ProjectEdit.cpp \
     Render/zs-shader.cpp \
-    Render/zs-math.cpp \
     Render/zs-pipeline.cpp \
     Render/zs-mesh.cpp \
     Render/zs-texture.cpp \
@@ -71,7 +70,6 @@ HEADERS += \
         mainwin.h \
     ProjEd/headers/ProjectEdit.h \
     Render/headers/zs-shader.h \
-    Render/headers/zs-math.h \
     Render/headers/zs-pipeline.h \
     Render/headers/zs-mesh.h \
     Render/headers/zs-texture.h \

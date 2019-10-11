@@ -220,10 +220,10 @@ void Engine::processNodeForTree(MeshNode* node, aiNode* node_assimp, const aiSce
     unsigned int nodes_num = node_assimp->mNumChildren;
     for(unsigned int ch_i = 0; ch_i < nodes_num; ch_i ++){
         aiNode* child = node_assimp->mChildren[ch_i];
-        MeshNode mNode;
-        mNode.node_label = child->mName.C_Str();
+        MeshNode* mNode = new MeshNode;
+        mNode->node_label = child->mName.C_Str();
 
-        processNodeForTree(&mNode, child, scene);
+        processNodeForTree(mNode, child, scene);
         node->children.push_back(mNode);
     }
 }

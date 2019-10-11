@@ -16,7 +16,7 @@
 #include <QComboBox>
 #include <QScrollArea>
 
-#include "../../Render/headers/zs-math.h"
+#include <render/zs-math.h>
 #include "../../Misc/headers/zs_types.h"
 
 enum EDITAREA_TYPE {PEA_TYPE_NONE, PEA_TYPE_STRING, PEA_TYPE_FLOAT, PEA_TYPE_FLOAT2, PEA_TYPE_FLOAT3, PEA_TYPE_INT,

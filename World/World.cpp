@@ -553,7 +553,7 @@ GameObject* World::addMeshNode(MeshNode* node){
     GameObject* node_object = this->addObject(obj);
     //Iterate over all children nodes
     for(unsigned int node_i = 0; node_i < node->children.size(); node_i ++){
-        MeshNode* ptr = &node->children[node_i];
+        MeshNode* ptr = node->children[node_i];
         //Create new node object
         GameObject* newobj = addMeshNode(ptr);
         node_object->addChildObject(newobj->getLinkToThisObject());

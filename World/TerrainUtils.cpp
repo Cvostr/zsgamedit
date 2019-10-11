@@ -86,7 +86,7 @@ void TerrainData::Draw(bool picking){
     glBindVertexArray(VAO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->EBO);
     glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
-    glDrawElements(GL_TRIANGLES, (W - 1) * (H - 1) * 2 * 3, GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, (W - 1) * (H - 1) * 2 * 3, GL_UNSIGNED_INT, nullptr);
 }
 
 void TerrainData::generateGLMesh(){

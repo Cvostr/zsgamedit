@@ -4,7 +4,7 @@
 #include <map>
 #include <string>
 
-#include "../../Render/headers/zs-math.h"
+#include <render/zs-math.h>
 #include "EditorManager.h"
 #include "../../Render/headers/zs-shader.h"
 #include "../../Render/headers/zs-pipeline.h"

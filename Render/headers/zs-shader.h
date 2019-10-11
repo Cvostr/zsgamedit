@@ -1,7 +1,7 @@
 #ifndef zs_shader
 #define zs_shader
 
-#include "zs-math.h"
+#include <render/zs-math.h>
 #include "../../World/headers/zs-camera.h"
 
 namespace ZSPIRE {

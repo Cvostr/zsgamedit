@@ -1,7 +1,7 @@
 #ifndef zs_oal_manager
 #define zs_oal_manager
 
-#include "../../Render/headers/zs-math.h"
+#include <render/zs-math.h>
 
 namespace ZSPIRE {
 	namespace SFX {

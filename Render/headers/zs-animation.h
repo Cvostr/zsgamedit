@@ -2,7 +2,7 @@
 #define ZSANIMATION_H
 
 #include <string>
-#include "zs-math.h"
+#include <render/zs-math.h>
 
 namespace ZSPIRE {
 

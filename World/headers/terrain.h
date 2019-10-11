@@ -5,7 +5,7 @@
 
 #include <QString>
 #include "../../Render/headers/zs-texture.h"
-#include "../../Render/headers/zs-math.h"
+#include <render/zs-math.h>
 
 typedef struct HeightmapGrass{
     QString diffuse_relpath;

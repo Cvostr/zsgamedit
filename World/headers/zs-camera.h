@@ -1,7 +1,7 @@
 #ifndef zs_camera
 #define zs_camera
 
-#include "../../Render/headers/zs-math.h"
+#include <render/zs-math.h>
 #include "../../Misc/headers/oal_manager.h"
 
 enum ZSCAMERAPROJECTIONTYPE {ZSCAMERA_PROJECTION_NONE,
