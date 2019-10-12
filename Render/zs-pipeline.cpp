@@ -76,6 +76,11 @@ void RenderPipeline::setup(int bufWidth, int bufHeight){
     //Connect to point 4 (four)
     glBindBufferBase(GL_UNIFORM_BUFFER, 4, skinningUniformBuffer);
 
+    for(unsigned int i = 0; i < MAX_LIGHTS_AMOUNT; i ++){
+        ZSMATRIX4x4 m = getIdentity();
+        glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * i, sizeof (ZSMATRIX4x4), &m);
+    }
+
     glGenBuffers(1, &tileMaterialUniformBuffer);
     glBindBuffer(GL_UNIFORM_BUFFER, tileMaterialUniformBuffer);
     glBufferData(GL_UNIFORM_BUFFER, 28, nullptr, GL_STATIC_DRAW);
@@ -411,8 +416,11 @@ void GameObject::Draw(RenderPipeline* pipeline){
                     GameObject* node = nullptr;
                     GameObject* RootNode = mesh_prop->skinning_root_node;
                     ZSMATRIX4x4 rootNodeTransform;
+
                     if(RootNode != nullptr){
+                        //if RootNode is specified
                         node = mesh_prop->skinning_root_node->getChildObjectWithNodeLabel(QString::fromStdString(b->bone_name));
+                        //Get root transform
                         rootNodeTransform = (RootNode->getPropertyPtr<NodeProperty>()->transform_mat);
                     }
 

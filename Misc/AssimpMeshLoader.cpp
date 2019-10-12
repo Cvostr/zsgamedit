@@ -183,18 +183,19 @@ void Engine::loadAnimation(std::string file_path, ZSPIRE::Animation* anim, int i
     importer.FreeScene();
 }
 
-void Engine::loadNodeTree(std::string file_path, MeshNode* node){
+void Engine::loadNodeTree(std::string file_path, ZS3M::SceneNode* node){
     const aiScene* scene = importer.ReadFile(file_path, loadflags);
 
-    MeshNode* root_node = new MeshNode;
+    ZS3M::SceneNode* root_node = new ZS3M::SceneNode;
     processNodeForTree(root_node, scene->mRootNode, scene);
 
     *node = *root_node;
+    delete root_node;
     importer.FreeScene();
 }
 
 
-void Engine::processNodeForTree(MeshNode* node, aiNode* node_assimp, const aiScene* scene){
+void Engine::processNodeForTree(ZS3M::SceneNode* node, aiNode* node_assimp, const aiScene* scene){
     node->node_label = node_assimp->mName.C_Str(); //assigning node name
 
     node->hasBone = isBoneAvailable(node->node_label, scene);
@@ -220,7 +221,7 @@ void Engine::processNodeForTree(MeshNode* node, aiNode* node_assimp, const aiSce
     unsigned int nodes_num = node_assimp->mNumChildren;
     for(unsigned int ch_i = 0; ch_i < nodes_num; ch_i ++){
         aiNode* child = node_assimp->mChildren[ch_i];
-        MeshNode* mNode = new MeshNode;
+        ZS3M::SceneNode* mNode = new ZS3M::SceneNode;
         mNode->node_label = child->mName.C_Str();
 
         processNodeForTree(mNode, child, scene);

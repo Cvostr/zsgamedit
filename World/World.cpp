@@ -508,10 +508,25 @@ void World::addObjectsFromPrefabStr(std::string file){
 }
 
 void World::addMeshGroup(std::string file_path){
-    MeshNode node;
-    Engine::loadNodeTree(file_path, &node);
+    ZS3M::SceneNode* node = nullptr;
+    QString fpath_qt = QString::fromStdString(file_path);
+    fpath_qt = fpath_qt.toLower();
 
-    GameObject* rootobj = addMeshNode(&node);
+    if(fpath_qt.endsWith(".fbx") || fpath_qt.endsWith(".dae")){
+        node = new ZS3M::SceneNode;
+        Engine::loadNodeTree(file_path, node);
+    }else if(fpath_qt.endsWith(".zs3m")){
+        std::string absolute_path = file_path;
+
+        std::cout << absolute_path << std::endl;
+
+        ZS3M::ImportedSceneFile isf;
+        isf.loadFromFile(absolute_path);
+
+        node = isf.rootNode;
+    }
+
+    GameObject* rootobj = addMeshNode(node);
     this->obj_widget_ptr->addTopLevelItem(rootobj->item_ptr);
     //Add animation property to root object for correct skinning support
     rootobj->addProperty(GO_PROPERTY_TYPE_ANIMATION);
@@ -519,7 +534,7 @@ void World::addMeshGroup(std::string file_path){
     rootobj->setMeshSkinningRootNodeRecursively(rootobj);
 }
 
-GameObject* World::addMeshNode(MeshNode* node){
+GameObject* World::addMeshNode(ZS3M::SceneNode* node){
     GameObject obj; //Creating base gameobject
     int add_num = 0; //Declaration of addititonal integer
     getAvailableNumObjLabel(QString::fromStdString(node->node_label), &add_num);
@@ -553,7 +568,7 @@ GameObject* World::addMeshNode(MeshNode* node){
     GameObject* node_object = this->addObject(obj);
     //Iterate over all children nodes
     for(unsigned int node_i = 0; node_i < node->children.size(); node_i ++){
-        MeshNode* ptr = node->children[node_i];
+        ZS3M::SceneNode* ptr = node->children[node_i];
         //Create new node object
         GameObject* newobj = addMeshNode(ptr);
         node_object->addChildObject(newobj->getLinkToThisObject());

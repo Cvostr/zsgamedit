@@ -455,12 +455,12 @@ void MeshProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
 
 
     if(mesh_ptr){
-    if(mesh_ptr->hasBones()){
-        GameobjectPickArea* rtnode = new GameobjectPickArea;
-        rtnode->gameobject_ptr_ptr = &this->skinning_root_node;
-        rtnode->setLabel("Root Node");
-        inspector->addPropertyArea(rtnode);
-    }
+        if(mesh_ptr->hasBones()){
+            GameobjectPickArea* rtnode = new GameobjectPickArea;
+            rtnode->gameobject_ptr_ptr = &this->skinning_root_node;
+            rtnode->setLabel("Root Node");
+            inspector->addPropertyArea(rtnode);
+        }
     }
 }
 void MeshProperty::updateMeshPtr(){

@@ -4,6 +4,7 @@
 #include "../../triggers.h"
 #include "../../Render/headers/zs-mesh.h"
 #include "../../Render/headers/zs-animation.h"
+#include "zs3m-master.h"
 #include "zs_types.h"
 
 #ifdef USE_ASSIMP
@@ -12,35 +13,12 @@
 #include <assimp/postprocess.h>
 #endif
 
-
-class MeshNode
-{
-public:
-    //Node name string
-    std::string node_label;
-    //Transform matrix
-    ZSMATRIX4x4 node_transform;
-
-    ZSVECTOR3 node_translation;
-    ZSVECTOR3 node_scaling;
-    ZSQUATERNION node_rotation;
-
-    bool hasBone;
-
-    std::vector<MeshNode*> children;
-    std::vector<std::string> mesh_names;
-
-    MeshNode() {
-        hasBone = false;
-    }
-};
-
 namespace Engine {
 
 void cmat(aiMatrix4x4 matin, ZSMATRIX4x4* matout);
 
-void processNodeForTree(MeshNode* node, aiNode* node_assimp, const aiScene* scene);
-void loadNodeTree(std::string file_path, MeshNode* node);
+void processNodeForTree(ZS3M::SceneNode* node, aiNode* node_assimp, const aiScene* scene);
+void loadNodeTree(std::string file_path, ZS3M::SceneNode* node);
 
 bool getSizes(std::string file_path, unsigned int* meshes, unsigned int* anims, unsigned int* textures = nullptr, unsigned int* materials = nullptr);
 

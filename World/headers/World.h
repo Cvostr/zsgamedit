@@ -338,7 +338,7 @@ public:
     void processPrefabObject(GameObject* object_ptr, std::vector<GameObject>* objects_array);
 
     void addMeshGroup(std::string file_path);
-    GameObject* addMeshNode(MeshNode* node);
+    GameObject* addMeshNode(ZS3M::SceneNode* node);
 
     void clear();
 

@@ -312,7 +312,7 @@ void EditWindow::addFileToObjectList(QString file_path){
     if(checkExtension(file_path, ".prefab")){
         this->world.addObjectsFromPrefab(file_path);
     }
-    if(checkExtension(file_path, ".fbx") || checkExtension(file_path, ".dae")){
+    if(checkExtension(file_path, ".fbx") || checkExtension(file_path, ".dae") || checkExtension(file_path, ".zs3m")){
         this->world.addMeshGroup(file_path.toStdString());
     }
 }
@@ -889,8 +889,16 @@ void EditWindow::processResourceFile(QFileInfo fileInfo){
     }
     if(checkExtension(name, ".zs3m")){
 
+        std::ifstream stream;
+        stream.open(absfpath.toStdString(), std::iostream::binary | std::iostream::ate);
+        unsigned int zs3m_size = static_cast<unsigned int>(stream.tellg());
+        stream.seekg(0, std::ifstream::beg);
+        char* file_buffer = new char[zs3m_size];
+        stream.read(file_buffer, zs3m_size);
+
         ZS3M::ImportedSceneFile isf;
-        isf.loadFromFile(absfpath.toStdString());
+        isf.loadFromBuffer(file_buffer, zs3m_size);
+        //isf.loadFromFile(absfpath.toStdString());
 
         for(unsigned int mesh_i = 0; mesh_i < isf.meshes_toWrite.size(); mesh_i ++){
             Resource resource;
@@ -1005,7 +1013,7 @@ void EditWindow::ImportResource(QString pathToResource){
         Engine::getSizes(pathToResource.toStdString(), &num_meshes, &num_anims, &num_textures, &num_materials);
         //Allocate array for meshes
         ZSPIRE::Mesh* meshes = new ZSPIRE::Mesh[num_meshes];
-        MeshNode rootNode;
+        ZS3M::SceneNode rootNode;
         //Load all meshes in file
         for(unsigned int mesh_i = 0; mesh_i < num_meshes; mesh_i ++){
             Engine::loadMesh(pathToResource.toStdString(), &meshes[mesh_i], static_cast<int>(mesh_i));
