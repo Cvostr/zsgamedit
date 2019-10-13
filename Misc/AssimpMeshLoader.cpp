@@ -1,16 +1,12 @@
 #include "headers/AssimpMeshLoader.h"
 #include <cassert>
 
-#ifdef USE_ASSIMP //Optional
 static Assimp::Importer importer;
 static unsigned int loadflags = aiProcess_CalcTangentSpace | aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_JoinIdenticalVertices;
 
 static unsigned int loadflagsAnim = aiProcess_Triangulate | aiProcess_JoinIdenticalVertices;
-#endif
 
 #include <iostream>
-
-#ifdef USE_ASSIMP
 
 void Engine::cmat(aiMatrix4x4 matin, ZSMATRIX4x4* matout){
 
@@ -41,7 +37,7 @@ bool Engine::getSizes(std::string file_path, unsigned int* meshes, unsigned int*
 }
 
 
-void Engine::processMesh(aiMesh* mesh, const aiScene* scene, ZSPIRE::Mesh* mesh_ptr) {
+void Engine::processMesh(aiMesh* mesh, ZSPIRE::Mesh* mesh_ptr) {
     mesh_ptr->mesh_label = std::string(mesh->mName.C_Str());
 
     unsigned int vertices = mesh->mNumVertices;
@@ -113,13 +109,12 @@ void Engine::processMesh(aiMesh* mesh, const aiScene* scene, ZSPIRE::Mesh* mesh_
     mesh_ptr->setMeshData(mesh_ptr->vertices_arr, mesh_ptr->indices_arr, vertices, faces * 3);
 }
 
-#endif
 
 void Engine::loadMesh(std::string file_path, ZSPIRE::Mesh* mesh_ptr, int index){
     const aiScene* scene = importer.ReadFile(file_path, loadflags);
     std::cout << "Loading mesh " << scene->mMeshes[index]->mName.C_Str() << " from file " << file_path << std::endl;
 
-    processMesh(scene->mMeshes[index], scene, mesh_ptr);
+    processMesh(scene->mMeshes[index], mesh_ptr);
     importer.FreeScene();
 }
 

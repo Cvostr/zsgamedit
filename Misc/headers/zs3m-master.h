@@ -2,7 +2,6 @@
 #define ZS3MMASTER_H
 #include <render/zs-math.h>
 #include "../../Render/headers/zs-mesh.h"
-//#include "AssimpMeshLoader.h"
 #include <string>
 #include <vector>
 namespace ZS3M {

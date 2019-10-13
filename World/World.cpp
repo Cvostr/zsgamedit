@@ -524,6 +524,8 @@ void World::addMeshGroup(std::string file_path){
         isf.loadFromFile(absolute_path);
 
         node = isf.rootNode;
+    }else {
+        return;
     }
 
     GameObject* rootobj = addMeshNode(node);

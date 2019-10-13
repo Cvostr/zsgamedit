@@ -162,7 +162,7 @@ MtShaderPropertiesGroup* MtShProps::genDefaultMtShGroup(ZSPIRE::Shader* shader3d
 
     MtShProps::addMtShaderPropertyGroup(default_heightmap_group);
 
-
+    //Create default base material
     default3dmat = new Material(default_group);
     default3dmat->file_path = "@none";
 
@@ -207,6 +207,9 @@ void MtShProps::clearMtShaderGroups(){
 }
 
 void Material::saveToFile(){
+    //if it is a default material, then quit function
+    if(file_path[0] == '@') return;
+
     std::ofstream mat_stream;
     mat_stream.open(file_path, std::ofstream::out);
     //Write material header

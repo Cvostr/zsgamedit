@@ -65,7 +65,8 @@ namespace ZSPIRE {
     Mesh* getSphereMesh();
     Mesh* getSkyboxMesh();
 
-    void processTangentSpace(ZSVERTEX* vert_array, unsigned int* indices_array, int indices_num, int vertex_num);
+    void processTangentSpace(ZSVERTEX* vert_array, unsigned int* indices_array, int indices_num);
+    void processTangentSpace(ZSVERTEX* vert_array, int vertices_num);
 }
 
 

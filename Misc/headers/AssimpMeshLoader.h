@@ -7,11 +7,9 @@
 #include "zs3m-master.h"
 #include "zs_types.h"
 
-#ifdef USE_ASSIMP
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
-#endif
 
 namespace Engine {
 
@@ -26,7 +24,7 @@ void loadMesh(std::string file_path, ZSPIRE::Mesh* mesh_ptr, int index);
 
 void loadAnimation(std::string file_path, ZSPIRE::Animation* anim, int index);
 
-void processMesh(aiMesh* mesh, const aiScene* scene, ZSPIRE::Mesh* mesh_ptr);
+void processMesh(aiMesh* mesh, ZSPIRE::Mesh* mesh_ptr);
 
 bool isBoneAvailable(std::string bone_label, const aiScene* scene);
 }

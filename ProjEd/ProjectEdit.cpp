@@ -16,6 +16,7 @@
 #include <mainwin.h>
 #include <fstream>
 #include "../Misc/headers/zs3m-master.h"
+#include "../World/headers/Misc.h"
 
 EditWindow* _editor_win;
 InspectorWin* _inspector_win;
@@ -898,7 +899,6 @@ void EditWindow::processResourceFile(QFileInfo fileInfo){
 
         ZS3M::ImportedSceneFile isf;
         isf.loadFromBuffer(file_buffer, zs3m_size);
-        //isf.loadFromFile(absfpath.toStdString());
 
         for(unsigned int mesh_i = 0; mesh_i < isf.meshes_toWrite.size(); mesh_i ++){
             Resource resource;
@@ -949,7 +949,12 @@ void EditWindow::processResourceFile(QFileInfo fileInfo){
             ZSPIRE::Animation* anim_ptr = static_cast<ZSPIRE::Animation*>(this->project.resources.back().class_ptr);
             this->project.resources.back().resource_label = anim_ptr->name;
 
-            //if(this->project.resources.back().resource_label.isE)
+            //Check, if animation name is empty
+            if(this->project.resources.back().resource_label.empty()){
+                std::string postfix;
+                genRandomString(&postfix, 3);
+                this->project.resources.back().resource_label = "Animation_" + postfix;
+            }
         }
     }
     if(checkExtension(name, ".wav")){ //If its an mesh

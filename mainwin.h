@@ -7,7 +7,6 @@
 #include "ProjEd/headers/ProjectEdit.h"
 #include "ProjEd/headers/ProjCreateWin.h"
 
-#include "triggers.h"
 #include <engine.h> //include engine headers
 
 typedef struct ProjectConf{
@@ -46,10 +45,9 @@ class ProjectCtxMenu : public QObject{
 public slots:
     void onDeleteClicked();
     void onOpenDirClicked();
-#ifdef USE_ZSPIRE
+
     void runEngineClickedGL();
     void runEngineClickedVK();
-#endif
 
 private:
     QMenu* menu; //Menu object to contain everything
@@ -64,9 +62,8 @@ public:
 
     ProjectCtxMenu(MainWin* win, QWidget* parent = nullptr);
     void show(QPoint point);
-#ifdef USE_ZSPIRE
+
     void runEngineClicked(ZSGAPI gapi);
-#endif
     void close();
 };
 
