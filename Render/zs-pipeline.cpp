@@ -165,7 +165,21 @@ void RenderPipeline::init(){
     initGizmos(this->project_struct_ptr->perspective);
 }
 
-ZSRGBCOLOR RenderPipeline::getColorOfPickedTransformControl(ZSVECTOR3 translation, int mouseX, int mouseY){
+ZSRGBCOLOR RenderPipeline::getColorOfPickedTransformControl(ZSVECTOR3 translation, int mouseX, int mouseY, void* projectedit_ptr){
+
+        EditWindow* editwin_ptr = static_cast<EditWindow*>(projectedit_ptr);
+        ZSPIRE::Camera* cam_ptr = nullptr; //We'll set it next
+        World* world_ptr = &editwin_ptr->world;
+
+        if(editwin_ptr->isWorldCamera){
+            //if isWorldCamera is true, then we are in gameplay camera
+            cam_ptr = &world_ptr->world_camera;
+        }else{
+            //if isWorldCamera is false, then we are in editor camera
+            cam_ptr = &editwin_ptr->edit_camera;
+        }
+    //}
+
     glClearColor(0,0,0,1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     //Picking state
@@ -176,7 +190,13 @@ ZSRGBCOLOR RenderPipeline::getColorOfPickedTransformControl(ZSVECTOR3 translatio
     if(cullFaces == true)
         glDisable(GL_CULL_FACE);
 
-    getGizmosRenderer()->drawTransformControls(translation, 200, 25);
+    if(editwin_ptr->obj_trstate.isTransforming == true && !editwin_ptr->isWorldCamera){
+
+        float dist = getDistance(cam_ptr->camera_pos, editwin_ptr->obj_trstate.obj_ptr->getTransformProperty()->_last_translation);
+
+        if(this->project_struct_ptr->perspective == 2) dist = 70.0f;
+        getGizmosRenderer()->drawTransformControls(editwin_ptr->obj_trstate.obj_ptr->getTransformProperty()->_last_translation, dist, dist / 10.f);
+    }
 
     unsigned char data[4];
     glReadPixels(mouseX, this->HEIGHT - mouseY, 1,1, GL_RGBA, GL_UNSIGNED_BYTE, data);
@@ -288,9 +308,13 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr){
     ZSPIRE::getPlaneMesh2D()->Draw(); //Draw screen
 
     //if we control this object
-    if(editwin_ptr->obj_trstate.isTransforming == true && !editwin_ptr->isWorldCamera)
-        getGizmosRenderer()->drawTransformControls(editwin_ptr->obj_trstate.obj_ptr->getTransformProperty()->_last_translation, 100, 10);
+    if(editwin_ptr->obj_trstate.isTransforming == true && !editwin_ptr->isWorldCamera){
 
+        float dist = getDistance(cam_ptr->camera_pos, editwin_ptr->obj_trstate.obj_ptr->getTransformProperty()->_last_translation);
+
+        if(this->project_struct_ptr->perspective == 2) dist = 70.0f;
+        getGizmosRenderer()->drawTransformControls(editwin_ptr->obj_trstate.obj_ptr->getTransformProperty()->_last_translation, dist, dist / 10.f);
+    }
 
     glDisable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);

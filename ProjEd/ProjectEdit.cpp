@@ -1337,7 +1337,10 @@ void EditWindow::onMouseMotion(int relX, int relY){
     }
     //Visual transform control
     if(obj_trstate.isTransforming == true && input_state.isLeftBtnHold == true){ //Only affective if object is transforming
-        ZSRGBCOLOR color = render->getColorOfPickedTransformControl(obj_trstate.tprop_ptr->_last_translation, this->input_state.mouseX, this->input_state.mouseY);
+        ZSRGBCOLOR color = render->getColorOfPickedTransformControl(obj_trstate.tprop_ptr->_last_translation,
+                                                                    this->input_state.mouseX,
+                                                                    this->input_state.mouseY,
+                                                                    static_cast<void*>(this));
         //If transformation method isn't set
         if(obj_trstate.isModifying == false){
             //Set all coordinates to 0

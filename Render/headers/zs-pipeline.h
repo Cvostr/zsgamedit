@@ -91,7 +91,7 @@ public:
     void render3D(void* projectedit_ptr, ZSPIRE::Camera* cam);
     void renderDepth(void* world_ptr);
     unsigned int render_getpickedObj(void* projectedit_ptr, int mouseX, int mouseY);
-    ZSRGBCOLOR getColorOfPickedTransformControl(ZSVECTOR3 translation, int mouseX, int mouseY);
+    ZSRGBCOLOR getColorOfPickedTransformControl(ZSVECTOR3 translation, int mouseX, int mouseY, void* projectedit_ptr);
 
     void updateShadersCameraInfo(ZSPIRE::Camera* cam_ptr);
     void addLight(void* light_ptr);

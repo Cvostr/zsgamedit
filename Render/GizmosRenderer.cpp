@@ -35,7 +35,7 @@ void GizmosRenderer::drawCube(ZSMATRIX4x4 transform, ZSRGBCOLOR color){
     ZSPIRE::getCubeMesh3D()->Draw();
 }
 
-void GizmosRenderer::drawTransformControls(ZSVECTOR3 position, int tall, int dim){
+void GizmosRenderer::drawTransformControls(ZSVECTOR3 position, float tall, float dim){
     if(projectPerspective == 3){
         tall /= 10;
         dim /= 10;
