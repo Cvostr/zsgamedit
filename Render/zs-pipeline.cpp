@@ -167,18 +167,17 @@ void RenderPipeline::init(){
 
 ZSRGBCOLOR RenderPipeline::getColorOfPickedTransformControl(ZSVECTOR3 translation, int mouseX, int mouseY, void* projectedit_ptr){
 
-        EditWindow* editwin_ptr = static_cast<EditWindow*>(projectedit_ptr);
-        ZSPIRE::Camera* cam_ptr = nullptr; //We'll set it next
-        World* world_ptr = &editwin_ptr->world;
+    EditWindow* editwin_ptr = static_cast<EditWindow*>(projectedit_ptr);
+    ZSPIRE::Camera* cam_ptr = nullptr; //We'll set it next
+    World* world_ptr = &editwin_ptr->world;
 
-        if(editwin_ptr->isWorldCamera){
-            //if isWorldCamera is true, then we are in gameplay camera
-            cam_ptr = &world_ptr->world_camera;
-        }else{
-            //if isWorldCamera is false, then we are in editor camera
-            cam_ptr = &editwin_ptr->edit_camera;
-        }
-    //}
+    if(editwin_ptr->isWorldCamera){
+        //if isWorldCamera is true, then we are in gameplay camera
+        cam_ptr = &world_ptr->world_camera;
+    }else{
+        //if isWorldCamera is false, then we are in editor camera
+        cam_ptr = &editwin_ptr->edit_camera;
+    }
 
     glClearColor(0,0,0,1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -191,10 +190,11 @@ ZSRGBCOLOR RenderPipeline::getColorOfPickedTransformControl(ZSVECTOR3 translatio
         glDisable(GL_CULL_FACE);
 
     if(editwin_ptr->obj_trstate.isTransforming == true && !editwin_ptr->isWorldCamera){
-
+        //Calclate distance between camera and object
         float dist = getDistance(cam_ptr->camera_pos, editwin_ptr->obj_trstate.obj_ptr->getTransformProperty()->_last_translation);
 
-        if(this->project_struct_ptr->perspective == 2) dist = 70.0f;
+        if(this->project_struct_ptr->perspective == 2) dist = 85.0f;
+        //Draw gizmos
         getGizmosRenderer()->drawTransformControls(editwin_ptr->obj_trstate.obj_ptr->getTransformProperty()->_last_translation, dist, dist / 10.f);
     }
 
@@ -215,11 +215,8 @@ unsigned int RenderPipeline::render_getpickedObj(void* projectedit_ptr, int mous
     //Picking state
     this->current_state = PIPELINE_STATE_PICKING;
 
-    if(depthTest == true) //if depth is disable, then enable it for a little time
-        glEnable(GL_DEPTH_TEST);
-
     if(cullFaces == true) // if face cull is enabled, then disable it
-        glDisable(GL_CULL_FACE);
+        glEnable(GL_CULL_FACE);
 
     //Iterate over all objects in the world
     for(unsigned int obj_i = 0; obj_i < world_ptr->objects.size(); obj_i ++){
@@ -231,8 +228,6 @@ unsigned int RenderPipeline::render_getpickedObj(void* projectedit_ptr, int mous
     if(depthTest == false) //if depth is enabled, then disable it
         glDisable(GL_DEPTH_TEST);
 
-    if(cullFaces == true) //if cull faces is enabled, then enable GL function
-        glEnable(GL_CULL_FACE);
 
     unsigned char data[4];
     glReadPixels(mouseX, this->HEIGHT - mouseY, 1,1, GL_RGBA, GL_UNSIGNED_BYTE, data);
@@ -509,7 +504,6 @@ void GameObject::Draw(RenderPipeline* pipeline){
 
 void GameObject::processObject(RenderPipeline* pipeline){
     if(alive == false) return;
-
 
     //Obtain EditWindow pointer to check if scene is running
     EditWindow* editwin_ptr = static_cast<EditWindow*>(pipeline->win_ptr);

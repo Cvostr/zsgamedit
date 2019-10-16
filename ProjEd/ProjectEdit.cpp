@@ -915,6 +915,30 @@ void EditWindow::processResourceFile(QFileInfo fileInfo){
         }
 
     }
+    if(checkExtension(name, ".zsanim")){
+
+        std::ifstream stream;
+        stream.open(absfpath.toStdString(), std::iostream::binary | std::iostream::ate);
+        unsigned int zs3m_size = static_cast<unsigned int>(stream.tellg());
+        stream.seekg(0, std::ifstream::beg);
+        char* file_buffer = new char[zs3m_size];
+        stream.read(file_buffer, zs3m_size);
+
+        ZS3M::ImportedAnimationFile iaf;
+        iaf.loadFromBuffer(file_buffer, zs3m_size);
+
+        Resource resource;
+        resource.file_path = absfpath;
+        resource.rel_path = resource.file_path; //Preparing to get relative path
+        resource.rel_path.remove(0, project.root_path.size() + 1); //Get relative path by removing length of project root from start
+        resource.type = RESOURCE_TYPE_ANIMATION; //Type of resource is mesh
+
+        resource.class_ptr = iaf.anim_ptr;
+        resource.resource_label = iaf.anim_ptr->name;
+
+        this->project.resources.push_back(resource);
+
+    }
     if(checkExtension(name, ".fbx") || checkExtension(name, ".dae")){ //If its an mesh
         //getting meshes amount
         unsigned int num_meshes = 0;
@@ -949,12 +973,7 @@ void EditWindow::processResourceFile(QFileInfo fileInfo){
             ZSPIRE::Animation* anim_ptr = static_cast<ZSPIRE::Animation*>(this->project.resources.back().class_ptr);
             this->project.resources.back().resource_label = anim_ptr->name;
 
-            //Check, if animation name is empty
-            if(this->project.resources.back().resource_label.empty()){
-                std::string postfix;
-                genRandomString(&postfix, 3);
-                this->project.resources.back().resource_label = "Animation_" + postfix;
-            }
+
         }
     }
     if(checkExtension(name, ".wav")){ //If its an mesh
@@ -1018,12 +1037,21 @@ void EditWindow::ImportResource(QString pathToResource){
         Engine::getSizes(pathToResource.toStdString(), &num_meshes, &num_anims, &num_textures, &num_materials);
         //Allocate array for meshes
         ZSPIRE::Mesh* meshes = new ZSPIRE::Mesh[num_meshes];
+        ZSPIRE::Animation* anims = new ZSPIRE::Animation[num_anims];
+
         ZS3M::SceneNode rootNode;
         //Load all meshes in file
         for(unsigned int mesh_i = 0; mesh_i < num_meshes; mesh_i ++){
             Engine::loadMesh(pathToResource.toStdString(), &meshes[mesh_i], static_cast<int>(mesh_i));
             //Add loaded mesh to exporter
             exporter.pushMesh(&meshes[mesh_i]);
+        }
+        //Load all animations in file
+        for(unsigned int anim_i = 0; anim_i < num_anims; anim_i ++){
+            Engine::loadAnimation(pathToResource.toStdString(), &anims[anim_i], static_cast<int>(anim_i));
+            ZS3M::AnimationFileExport ex(&anims[anim_i]);
+            QString newanim_path = this->current_dir + "/" + QString::fromStdString(anims[anim_i].name + ".zsanim");
+            ex.write(newanim_path.toStdString());
         }
 
         Engine::loadNodeTree(pathToResource.toStdString(), &rootNode);

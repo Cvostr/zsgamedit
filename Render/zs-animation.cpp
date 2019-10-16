@@ -1,10 +1,27 @@
 #include "headers/zs-animation.h"
 #include <cassert>
 
+ZSPIRE::Animation::Animation(){
+
+}
+ZSPIRE::Animation::~Animation(){
+    delete[] this->channels;
+}
+
 ZSPIRE::AnimationChannel::AnimationChannel(){
     this->posKeysNum = 0;
     this->rotationKeysNum = 0;
     this->scaleKeysNum = 0;
+}
+
+ZSPIRE::AnimationChannel::~AnimationChannel(){
+    delete[] this->pos;
+    delete[] this->rot;
+    delete[] this->scale;
+
+    delete[] this->rotTimes;
+    delete[] this->posTimes;
+    delete[] this->scaleTimes;
 }
 
 ZSPIRE::AnimationChannel* ZSPIRE::Animation::getChannelByNodeName(std::string node_name){

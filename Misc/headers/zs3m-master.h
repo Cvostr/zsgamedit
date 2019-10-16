@@ -2,6 +2,7 @@
 #define ZS3MMASTER_H
 #include <render/zs-math.h>
 #include "../../Render/headers/zs-mesh.h"
+#include "../../Render/headers/zs-animation.h"
 #include <string>
 #include <vector>
 namespace ZS3M {
@@ -44,6 +45,17 @@ public:
     SceneFileExport();
 };
 
+class AnimationFileExport{
+private:
+    ZSPIRE::Animation* anim_ptr;
+public:
+
+    void writeChannel(std::ofstream* stream, unsigned int index);
+    void write(std::string output_file);
+
+    AnimationFileExport(ZSPIRE::Animation* anim_ptr);
+};
+
 class ImportedSceneFile{
 private:
     std::vector<ZS3M::SceneNode*> nodes_list;
@@ -57,6 +69,15 @@ public:
 
     void makeNodeHierarchy(ZS3M::SceneNode* node);
     ImportedSceneFile();
+};
+
+class ImportedAnimationFile{
+public:
+    ZSPIRE::Animation* anim_ptr;
+
+    void loadFromBuffer(char* buffer, unsigned int size);
+
+    ImportedAnimationFile();
 };
 
 }

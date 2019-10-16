@@ -150,9 +150,9 @@ void ZS3M::ImportedSceneFile::loadFromBuffer(char* buffer, unsigned int buf_size
     unsigned int meshes_num = 0;
     unsigned int nodes_num = 0;
 
-    memcpy(reinterpret_cast<char*>(&model_ver), &buffer[10], 4);
-    memcpy(reinterpret_cast<char*>(&meshes_num), &buffer[14], 4);
-    memcpy(reinterpret_cast<char*>(&nodes_num), &buffer[18], 4);
+    memcpy(reinterpret_cast<char*>(&model_ver), &buffer[10], sizeof(unsigned int));
+    memcpy(reinterpret_cast<char*>(&meshes_num), &buffer[14], sizeof(unsigned int));
+    memcpy(reinterpret_cast<char*>(&nodes_num), &buffer[18], sizeof(unsigned int));
 
     if(model_ver != 1000){
         return;
@@ -179,8 +179,8 @@ void ZS3M::ImportedSceneFile::loadFromBuffer(char* buffer, unsigned int buf_size
             unsigned int childrenNum = 0;
 
             //Read data
-            memcpy(reinterpret_cast<char*>(&meshesNum), &buffer[cur_pos], 4);
-            memcpy(reinterpret_cast<char*>(&childrenNum), &buffer[cur_pos + 4], 4);
+            memcpy(reinterpret_cast<char*>(&meshesNum), &buffer[cur_pos], sizeof (unsigned int));
+            memcpy(reinterpret_cast<char*>(&childrenNum), &buffer[cur_pos + sizeof (unsigned int)], sizeof (unsigned int));
             cur_pos += 9;
 
             //iterate over all meshes, connected to this node
@@ -209,26 +209,26 @@ void ZS3M::ImportedSceneFile::loadFromBuffer(char* buffer, unsigned int buf_size
                     cur_pos += 4;
                 }
             }
-            memcpy(reinterpret_cast<char*>(&node->node_translation.X), &buffer[cur_pos], 4);
-            cur_pos += 4;
-            memcpy(reinterpret_cast<char*>(&node->node_translation.Y), &buffer[cur_pos], 4);
-            cur_pos += 4;
-            memcpy(reinterpret_cast<char*>(&node->node_translation.Z), &buffer[cur_pos], 4);
-            cur_pos += 4;
-            memcpy(reinterpret_cast<char*>(&node->node_scaling.X), &buffer[cur_pos], 4);
-            cur_pos += 4;
-            memcpy(reinterpret_cast<char*>(&node->node_scaling.Y), &buffer[cur_pos], 4);
-            cur_pos += 4;
-            memcpy(reinterpret_cast<char*>(&node->node_scaling.Z), &buffer[cur_pos], 4);
-            cur_pos += 4;
-            memcpy(reinterpret_cast<char*>(&node->node_rotation.X), &buffer[cur_pos], 4);
-            cur_pos += 4;
-            memcpy(reinterpret_cast<char*>(&node->node_rotation.Y), &buffer[cur_pos], 4);
-            cur_pos += 4;
-            memcpy(reinterpret_cast<char*>(&node->node_rotation.Z), &buffer[cur_pos], 4);
-            cur_pos += 4;
-            memcpy(reinterpret_cast<char*>(&node->node_rotation.W), &buffer[cur_pos], 4);
-            cur_pos += 4;
+            memcpy(reinterpret_cast<char*>(&node->node_translation.X), &buffer[cur_pos], sizeof(float));
+            cur_pos += sizeof(float);
+            memcpy(reinterpret_cast<char*>(&node->node_translation.Y), &buffer[cur_pos], sizeof(float));
+            cur_pos += sizeof(float);
+            memcpy(reinterpret_cast<char*>(&node->node_translation.Z), &buffer[cur_pos], sizeof(float));
+            cur_pos += sizeof(float);
+            memcpy(reinterpret_cast<char*>(&node->node_scaling.X), &buffer[cur_pos], sizeof(float));
+            cur_pos += sizeof(float);
+            memcpy(reinterpret_cast<char*>(&node->node_scaling.Y), &buffer[cur_pos], sizeof(float));
+            cur_pos += sizeof(float);
+            memcpy(reinterpret_cast<char*>(&node->node_scaling.Z), &buffer[cur_pos], sizeof(float));
+            cur_pos += sizeof(float);
+            memcpy(reinterpret_cast<char*>(&node->node_rotation.X), &buffer[cur_pos], sizeof(float));
+            cur_pos += sizeof(float);
+            memcpy(reinterpret_cast<char*>(&node->node_rotation.Y), &buffer[cur_pos], sizeof(float));
+            cur_pos += sizeof(float);
+            memcpy(reinterpret_cast<char*>(&node->node_rotation.Z), &buffer[cur_pos], sizeof(float));
+            cur_pos += sizeof(float);
+            memcpy(reinterpret_cast<char*>(&node->node_rotation.W), &buffer[cur_pos], sizeof(float));
+            cur_pos += sizeof(float);
 
 
             //Add node to list
@@ -248,9 +248,9 @@ void ZS3M::ImportedSceneFile::loadFromBuffer(char* buffer, unsigned int buf_size
             unsigned int indexNum = 0;
             unsigned int bonesNum = 0;
 
-            memcpy(reinterpret_cast<char*>(&vertexNum), &buffer[cur_pos], 4);
-            memcpy(reinterpret_cast<char*>(&indexNum), &buffer[cur_pos + 4], 4);
-            memcpy(reinterpret_cast<char*>(&bonesNum), &buffer[cur_pos + 8], 4);
+            memcpy(reinterpret_cast<char*>(&vertexNum), &buffer[cur_pos], sizeof (unsigned int));
+            memcpy(reinterpret_cast<char*>(&indexNum), &buffer[cur_pos + 4], sizeof (unsigned int));
+            memcpy(reinterpret_cast<char*>(&bonesNum), &buffer[cur_pos + 8], sizeof (unsigned int));
             cur_pos += 13;
 
             ZSPIRE::Mesh* newmesh = new ZSPIRE::Mesh;
@@ -375,5 +375,169 @@ void ZS3M::ImportedSceneFile::loadFromFile(std::string file){
 }
 
 ZS3M::ImportedSceneFile::ImportedSceneFile(){
+
+}
+
+
+ZS3M::AnimationFileExport::AnimationFileExport(ZSPIRE::Animation* anim_ptr){
+    this->anim_ptr = anim_ptr;
+}
+
+void ZS3M::AnimationFileExport::writeChannel(std::ofstream* stream, unsigned int index){
+    ZSPIRE::AnimationChannel* channel = &anim_ptr->channels[index];
+    //Write channel prefix and its name
+    *stream << "_CHAN" << '\0' << channel->bone_name + '\0';
+
+    stream->write(reinterpret_cast<char*>(&channel->posKeysNum), sizeof (unsigned int));
+    stream->write(reinterpret_cast<char*>(&channel->scaleKeysNum), sizeof (unsigned int));
+    stream->write(reinterpret_cast<char*>(&channel->rotationKeysNum), sizeof (unsigned int));
+
+    for(unsigned int pos_i = 0; pos_i < channel->posKeysNum; pos_i ++){
+        //Writing pos vector
+        stream->write(reinterpret_cast<char*>(&channel->pos[pos_i].X), sizeof (float));
+        stream->write(reinterpret_cast<char*>(&channel->pos[pos_i].Y), sizeof (float));
+        stream->write(reinterpret_cast<char*>(&channel->pos[pos_i].Z), sizeof (float));
+        //Write pos key time
+        stream->write(reinterpret_cast<char*>(&channel->posTimes[pos_i]), sizeof (double));
+
+    }
+    for(unsigned int sca_i = 0; sca_i < channel->scaleKeysNum; sca_i ++){
+        //Writing scale vector
+        stream->write(reinterpret_cast<char*>(&channel->scale[sca_i].X), sizeof (float));
+        stream->write(reinterpret_cast<char*>(&channel->scale[sca_i].Y), sizeof (float));
+        stream->write(reinterpret_cast<char*>(&channel->scale[sca_i].Z), sizeof (float));
+        //Write pos key time
+        stream->write(reinterpret_cast<char*>(&channel->scaleTimes[sca_i]), sizeof (double));
+    }
+    for(unsigned int rot_i = 0; rot_i < channel->rotationKeysNum; rot_i ++){
+        //Writing pos vector
+        stream->write(reinterpret_cast<char*>(&channel->rot[rot_i].X), sizeof (float));
+        stream->write(reinterpret_cast<char*>(&channel->rot[rot_i].Y), sizeof (float));
+        stream->write(reinterpret_cast<char*>(&channel->rot[rot_i].Z), sizeof (float));
+        stream->write(reinterpret_cast<char*>(&channel->rot[rot_i].W), sizeof (float));
+        //Write pos key time
+        stream->write(reinterpret_cast<char*>(&channel->rotTimes[rot_i]), sizeof (double));
+    }
+    *stream << '\n';
+}
+void ZS3M::AnimationFileExport::write(std::string output_file){
+    std::ofstream stream;
+    stream.open(output_file.c_str(), std::ofstream::binary);
+
+    stream << "zs3manim" << '\0' << anim_ptr->name + '\0'; //Write animation
+    //Write main animation data
+    stream.write(reinterpret_cast<char*>(&anim_ptr->TPS), sizeof (double));
+    stream.write(reinterpret_cast<char*>(&anim_ptr->duration), sizeof (double));
+    stream.write(reinterpret_cast<char*>(&anim_ptr->NumChannels), sizeof (unsigned int));
+    //Write divider
+    stream << "\n";
+
+    for(unsigned int cha_i = 0; cha_i < anim_ptr->NumChannels; cha_i ++){
+        writeChannel(&stream, cha_i);
+    }
+
+    stream.close();
+}
+
+ZS3M::ImportedAnimationFile::ImportedAnimationFile(){
+
+}
+
+void ZS3M::ImportedAnimationFile::loadFromBuffer(char* buffer, unsigned int size){
+    char prefix[64];
+    unsigned int byte_offset = 0;
+
+    strcpy(&prefix[0], &buffer[byte_offset]);
+    byte_offset += strlen(prefix) + 1;
+    if(strcmp(prefix, "zs3manim") == true){
+        return;
+    }
+
+    anim_ptr = new ZSPIRE::Animation; //allocate animation
+
+    strcpy(&prefix[0], &buffer[byte_offset]);
+    byte_offset += strlen(prefix) + 1;
+    anim_ptr->name = std::string(prefix);
+
+    memcpy(reinterpret_cast<char*>(&anim_ptr->TPS), &buffer[byte_offset], sizeof(double));
+    byte_offset += sizeof(double);
+    memcpy(reinterpret_cast<char*>(&anim_ptr->duration), &buffer[byte_offset], sizeof(double));
+    byte_offset += sizeof(double);
+    memcpy(reinterpret_cast<char*>(&anim_ptr->NumChannels), &buffer[byte_offset], sizeof (unsigned int));
+    byte_offset += sizeof (unsigned int);
+
+    anim_ptr->channels = new ZSPIRE::AnimationChannel[anim_ptr->NumChannels];
+    unsigned int ch_i = 0;
+
+    while (byte_offset < size) {
+        byte_offset += 1;
+        memcpy(&prefix, &buffer[byte_offset], 6);
+
+        if(strcmp(prefix, "_CHAN") == false){
+            byte_offset += 6;
+
+            strcpy(&prefix[0], &buffer[byte_offset]);
+            byte_offset += strlen(prefix) + 1;
+
+            ZSPIRE::AnimationChannel* chan = &anim_ptr->channels[ch_i];
+            chan->bone_name = std::string(prefix);
+            chan->anim_ptr = anim_ptr;
+
+            memcpy(reinterpret_cast<char*>(&chan->posKeysNum), &buffer[byte_offset], sizeof(unsigned int));
+            byte_offset += sizeof(unsigned int);
+            memcpy(reinterpret_cast<char*>(&chan->scaleKeysNum), &buffer[byte_offset], sizeof(unsigned int));
+            byte_offset += sizeof(unsigned int);
+            memcpy(reinterpret_cast<char*>(&chan->rotationKeysNum), &buffer[byte_offset], sizeof(unsigned int));
+            byte_offset += sizeof(unsigned int);
+
+            //Allocate pos vectors and time intervals array
+            chan->pos = new ZSVECTOR3[chan->posKeysNum];
+            chan->posTimes = new double[chan->posKeysNum];
+            //Allocate scale vectors and time intervals array
+            chan->scale = new ZSVECTOR3[chan->scaleKeysNum];
+            chan->scaleTimes = new double[chan->scaleKeysNum];
+            //Allocate rotation vectors and time intervals array
+            chan->rot = new ZSQUATERNION[chan->rotationKeysNum];
+            chan->rotTimes = new double[chan->rotationKeysNum];
+
+            for(unsigned int pos_i = 0; pos_i < chan->posKeysNum; pos_i ++){
+                //reading pos vector
+                memcpy(reinterpret_cast<char*>(&chan->pos[pos_i].X), &buffer[byte_offset], sizeof(float));
+                byte_offset += sizeof(float);
+                memcpy(reinterpret_cast<char*>(&chan->pos[pos_i].Y), &buffer[byte_offset], sizeof(float));
+                byte_offset += sizeof(float);
+                memcpy(reinterpret_cast<char*>(&chan->pos[pos_i].Z), &buffer[byte_offset], sizeof(float));
+                byte_offset += sizeof(float);
+                memcpy(reinterpret_cast<char*>(&chan->posTimes[pos_i]), &buffer[byte_offset], sizeof(double));
+                byte_offset += sizeof(double);
+            }
+            for(unsigned int sca_i = 0; sca_i < chan->scaleKeysNum; sca_i ++){
+                //reading scale vector
+                memcpy(reinterpret_cast<char*>(&chan->scale[sca_i].X), &buffer[byte_offset], sizeof(float));
+                byte_offset += sizeof(float);
+                memcpy(reinterpret_cast<char*>(&chan->scale[sca_i].Y), &buffer[byte_offset], sizeof(float));
+                byte_offset += sizeof(float);
+                memcpy(reinterpret_cast<char*>(&chan->scale[sca_i].Z), &buffer[byte_offset], sizeof(float));
+                byte_offset += sizeof(float);
+                memcpy(reinterpret_cast<char*>(&chan->scaleTimes[sca_i]), &buffer[byte_offset], sizeof(double));
+                byte_offset += sizeof(double);
+            }
+            for(unsigned int rot_i = 0; rot_i < chan->rotationKeysNum; rot_i ++){
+                //reading scale vector
+                memcpy(reinterpret_cast<char*>(&chan->rot[rot_i].X), &buffer[byte_offset], sizeof(float));
+                byte_offset += sizeof(float);
+                memcpy(reinterpret_cast<char*>(&chan->rot[rot_i].Y), &buffer[byte_offset], sizeof(float));
+                byte_offset += sizeof(float);
+                memcpy(reinterpret_cast<char*>(&chan->rot[rot_i].Z), &buffer[byte_offset], sizeof(float));
+                byte_offset += sizeof(float);
+                memcpy(reinterpret_cast<char*>(&chan->rot[rot_i].W), &buffer[byte_offset], sizeof(float));
+                byte_offset += sizeof(float);
+                memcpy(reinterpret_cast<char*>(&chan->rotTimes[rot_i]), &buffer[byte_offset], sizeof(double));
+                byte_offset += sizeof(double);
+            }
+            byte_offset += 1;
+            ch_i += 1;
+        }
+    }
 
 }

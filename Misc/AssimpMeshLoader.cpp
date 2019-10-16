@@ -1,4 +1,5 @@
 #include "headers/AssimpMeshLoader.h"
+#include "../World/headers/Misc.h"
 #include <cassert>
 
 static Assimp::Importer importer;
@@ -124,6 +125,14 @@ void Engine::loadAnimation(std::string file_path, ZSPIRE::Animation* anim, int i
 
     aiAnimation* _anim = scene->mAnimations[index];
     anim->name = std::string(_anim->mName.C_Str());
+
+    //Check, if animation name is empty
+    if(anim->name.empty()){
+        std::string postfix;
+        genRandomString(&postfix, 3);
+        anim->name = "Animation_" + postfix;
+    }
+
     anim->duration = _anim->mDuration;
     anim->TPS = _anim->mTicksPerSecond;
     anim->NumChannels = _anim->mNumChannels;

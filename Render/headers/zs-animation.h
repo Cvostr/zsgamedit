@@ -19,6 +19,9 @@ public:
 
     AnimationChannel* getChannelByNodeName(std::string node_name);
 
+    Animation();
+    ~Animation();
+
 };
 
 class AnimationChannel{
@@ -53,6 +56,7 @@ public:
     ZSQUATERNION getRotationInterpolated(unsigned int frame);
 
     AnimationChannel();
+    ~AnimationChannel();
 };
 
 }
