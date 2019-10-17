@@ -222,9 +222,11 @@ public:
     void addPropertyInterfaceToInspector(InspectorWin* inspector);
     void onPreRender(RenderPipeline* pipeline);
     void copyTo(GameObjectProperty* dest);
+    void onValueChanged();
     void init();
     void Draw(ZSPIRE::Camera* cam, RenderPipeline* pipeline);
     void setTexture();
+    void setTextureSize(unsigned int W, unsigned int H);
     ShadowCasterProperty();
 };
 

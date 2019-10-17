@@ -889,16 +889,8 @@ void EditWindow::processResourceFile(QFileInfo fileInfo){
         this->project.resources.push_back(resource);
     }
     if(checkExtension(name, ".zs3m")){
-
-        std::ifstream stream;
-        stream.open(absfpath.toStdString(), std::iostream::binary | std::iostream::ate);
-        unsigned int zs3m_size = static_cast<unsigned int>(stream.tellg());
-        stream.seekg(0, std::ifstream::beg);
-        char* file_buffer = new char[zs3m_size];
-        stream.read(file_buffer, zs3m_size);
-
         ZS3M::ImportedSceneFile isf;
-        isf.loadFromBuffer(file_buffer, zs3m_size);
+        isf.loadFromFile(absfpath.toStdString());
 
         for(unsigned int mesh_i = 0; mesh_i < isf.meshes_toWrite.size(); mesh_i ++){
             Resource resource;
@@ -917,15 +909,8 @@ void EditWindow::processResourceFile(QFileInfo fileInfo){
     }
     if(checkExtension(name, ".zsanim")){
 
-        std::ifstream stream;
-        stream.open(absfpath.toStdString(), std::iostream::binary | std::iostream::ate);
-        unsigned int zs3m_size = static_cast<unsigned int>(stream.tellg());
-        stream.seekg(0, std::ifstream::beg);
-        char* file_buffer = new char[zs3m_size];
-        stream.read(file_buffer, zs3m_size);
-
         ZS3M::ImportedAnimationFile iaf;
-        iaf.loadFromBuffer(file_buffer, zs3m_size);
+        iaf.loadFromFile(absfpath.toStdString());
 
         Resource resource;
         resource.file_path = absfpath;

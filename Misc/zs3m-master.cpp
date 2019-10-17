@@ -452,20 +452,23 @@ void ZS3M::ImportedAnimationFile::loadFromBuffer(char* buffer, unsigned int size
     if(strcmp(prefix, "zs3manim") == true){
         return;
     }
-
+    //Allocate animation class
     anim_ptr = new ZSPIRE::Animation; //allocate animation
-
+    //Read animation name
     strcpy(&prefix[0], &buffer[byte_offset]);
     byte_offset += strlen(prefix) + 1;
+    //Set animation name
     anim_ptr->name = std::string(prefix);
-
+    //Read Tick Per Second property
     memcpy(reinterpret_cast<char*>(&anim_ptr->TPS), &buffer[byte_offset], sizeof(double));
     byte_offset += sizeof(double);
+    //Read duration property
     memcpy(reinterpret_cast<char*>(&anim_ptr->duration), &buffer[byte_offset], sizeof(double));
     byte_offset += sizeof(double);
+    //Read Channel amount
     memcpy(reinterpret_cast<char*>(&anim_ptr->NumChannels), &buffer[byte_offset], sizeof (unsigned int));
     byte_offset += sizeof (unsigned int);
-
+    //Allocate all channels
     anim_ptr->channels = new ZSPIRE::AnimationChannel[anim_ptr->NumChannels];
     unsigned int ch_i = 0;
 
@@ -475,10 +478,10 @@ void ZS3M::ImportedAnimationFile::loadFromBuffer(char* buffer, unsigned int size
 
         if(strcmp(prefix, "_CHAN") == false){
             byte_offset += 6;
-
+            //Read node, channel will work with
             strcpy(&prefix[0], &buffer[byte_offset]);
             byte_offset += strlen(prefix) + 1;
-
+            //Allocate animation channel
             ZSPIRE::AnimationChannel* chan = &anim_ptr->channels[ch_i];
             chan->bone_name = std::string(prefix);
             chan->anim_ptr = anim_ptr;
@@ -535,9 +538,18 @@ void ZS3M::ImportedAnimationFile::loadFromBuffer(char* buffer, unsigned int size
                 memcpy(reinterpret_cast<char*>(&chan->rotTimes[rot_i]), &buffer[byte_offset], sizeof(double));
                 byte_offset += sizeof(double);
             }
-            byte_offset += 1;
             ch_i += 1;
         }
     }
+}
 
+void ZS3M::ImportedAnimationFile::loadFromFile(std::string file){
+    std::ifstream stream;
+    stream.open(file, std::iostream::binary | std::iostream::ate);
+    unsigned int zs3m_size = static_cast<unsigned int>(stream.tellg());
+    stream.seekg(0, std::ifstream::beg);
+    char* file_buffer = new char[zs3m_size];
+    stream.read(file_buffer, zs3m_size);
+
+    loadFromBuffer(file_buffer, zs3m_size);
 }

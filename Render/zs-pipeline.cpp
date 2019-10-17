@@ -751,6 +751,13 @@ void ShadowCasterProperty::init(){
     this->initialized = true;
 }
 
+void ShadowCasterProperty::setTextureSize(unsigned int W, unsigned int H){
+    glDeleteTextures(1, &this->shadowDepthTexture);
+    glDeleteFramebuffers(1, &shadowBuffer);
+
+    init();
+}
+
 void ShadowCasterProperty::setTexture(){
     glActiveTexture(GL_TEXTURE6);
     glBindTexture(GL_TEXTURE_2D, this->shadowDepthTexture);

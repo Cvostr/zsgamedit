@@ -76,6 +76,7 @@ public:
     ZSPIRE::Animation* anim_ptr;
 
     void loadFromBuffer(char* buffer, unsigned int size);
+    void loadFromFile(std::string file);
 
     ImportedAnimationFile();
 };

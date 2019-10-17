@@ -1309,6 +1309,10 @@ void ShadowCasterProperty::addPropertyInterfaceToInspector(InspectorWin* inspect
     inspector->addPropertyArea(_viewport);
 }
 
+void ShadowCasterProperty::onValueChanged(){
+    setTextureSize(this->TextureWidth, this->TextureHeight);
+}
+
 void ShadowCasterProperty::copyTo(GameObjectProperty* dest){
     if(dest->type != this->type) return; //if it isn't script group
 
