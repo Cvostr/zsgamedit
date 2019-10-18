@@ -1310,7 +1310,8 @@ void ShadowCasterProperty::addPropertyInterfaceToInspector(InspectorWin* inspect
 }
 
 void ShadowCasterProperty::onValueChanged(){
-    setTextureSize(this->TextureWidth, this->TextureHeight);
+    //Update shadowmap texture
+    setTextureSize();
 }
 
 void ShadowCasterProperty::copyTo(GameObjectProperty* dest){
@@ -1327,6 +1328,7 @@ void ShadowCasterProperty::copyTo(GameObjectProperty* dest){
     _dest->TextureHeight = this->TextureHeight;
     _dest->projection_viewport = this->projection_viewport;
 }
+
 
 TerrainProperty::TerrainProperty(){
     type = GO_PROPERTY_TYPE_TERRAIN;
@@ -1420,11 +1422,9 @@ void TerrainProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
     //if selected mode is texture paint
     if(edit_mode == 2){
 
-        IntPropertyArea* EditTex = new IntPropertyArea; //New property area
-        EditTex->setLabel("Texture"); //Its label
-        EditTex->value = &this->textureid; //Ptr to our vector
-        EditTex->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
-        inspector->addPropertyArea(EditTex);
+        AreaRadioGroup* texturegroup_pick = new AreaRadioGroup; //allocate button layout
+        texturegroup_pick->value_ptr = reinterpret_cast<uint8_t*>(&this->textureid);
+        texturegroup_pick->go_property = static_cast<void*>(this);
 
         IntPropertyArea* tSize = new IntPropertyArea; //New property area
         tSize->setLabel("Textures"); //Its label
@@ -1433,6 +1433,14 @@ void TerrainProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
         inspector->addPropertyArea(tSize);
 
         for(int i = 0; i < this->textures_size; i ++){
+            QRadioButton* group_radio = new QRadioButton; //allocate first radio
+            group_radio->setText("Group " + QString::number(i));
+            if(textureid == i)
+                group_radio->setChecked(true);
+            //add created radio button
+            texturegroup_pick->addRadioButton(group_radio);
+            inspector->getContentLayout()->addWidget(group_radio);
+
             PickResourceArea* diffuse_area = new PickResourceArea(RESOURCE_TYPE_TEXTURE);
             diffuse_area->setLabel("Diffuse");
             diffuse_area->go_property = static_cast<void*>(this);
@@ -1445,6 +1453,9 @@ void TerrainProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
             normal_area->rel_path = &textures[static_cast<uint>(i)].normal_relpath;
             inspector->addPropertyArea(normal_area);
         }
+        //Add texture picker UI elements
+        inspector->registerUiObject(texturegroup_pick);
+
     }
 }
 
@@ -1453,6 +1464,10 @@ void TerrainProperty::DrawMesh(){
 }
 
 void TerrainProperty::onValueChanged(){
+    //check for limitation of texture groups
+    if(this->textures_size > 12)
+        textures_size = 12;
+
     if(_last_edit_mode != edit_mode){
         _last_edit_mode = edit_mode;
         _inspector_win->updateRequired = true;
@@ -1486,8 +1501,9 @@ void TerrainProperty::onAddToObject(){
     data.saveToFile(fpath.c_str());
 }
 
-void TerrainProperty::getPickedVertexId(int posX, int posY, int screenY, unsigned char* data){
+void TerrainProperty::getPickedVertexId(int posX, int posY, int screenX, int screenY, unsigned char* data){
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_DEPTH_TEST);
     //get pointer to material property
     MaterialProperty* mat = this->go_link.updLinkPtr()->getPropertyPtr<MaterialProperty>();
     if(mat == nullptr || mat->material_ptr == nullptr) return;
@@ -1503,11 +1519,11 @@ void TerrainProperty::getPickedVertexId(int posX, int posY, int screenY, unsigne
     glReadPixels(posX, screenY - posY, 1,1, GL_RGBA, GL_UNSIGNED_BYTE, data);
 }
 
-void TerrainProperty::onMouseClick(int posX, int posY, int screenY, bool isLeftButtonHold, bool isCtrlHold){
+void TerrainProperty::onMouseClick(int posX, int posY, int screenX, int screenY, bool isLeftButtonHold, bool isCtrlHold){
     if(isLeftButtonHold){
         unsigned char _data[4];
 
-        getPickedVertexId(posX, posY, screenY, &_data[0]);
+        getPickedVertexId(posX, posY, screenX, screenY, &_data[0]);
 
         //find picked texel
         for(int i = 0; i < Width; i ++){
@@ -1521,7 +1537,7 @@ void TerrainProperty::onMouseClick(int posX, int posY, int screenY, bool isLeftB
                     if(edit_mode == 1)
                         this->data.modifyHeight(y, i, editHeight, range, mul);
                     else
-                        this->data.modifyTexture(i, y, range, static_cast<unsigned char>(textureid));
+                        this->data.modifyTexture(i, y, range, static_cast<unsigned char>(textureid - 1));
                     hasChanged = true;
                     return;
                 }
@@ -1530,10 +1546,10 @@ void TerrainProperty::onMouseClick(int posX, int posY, int screenY, bool isLeftB
     }
 }
 
-void TerrainProperty::onMouseMotion(int posX, int posY, int relX, int relY, int screenY, bool isLeftButtonHold, bool isCtrlHold){
+void TerrainProperty::onMouseMotion(int posX, int posY, int relX, int relY, int screenX, int screenY, bool isLeftButtonHold, bool isCtrlHold){
     if(isLeftButtonHold){
         unsigned char _data[4];
-        getPickedVertexId(posX, posY, screenY, &_data[0]);
+        getPickedVertexId(posX, posY, screenX, screenY, &_data[0]);
         //find picked texel
         for(int i = 0; i < Width; i ++){
             for(int y = 0; y < Length; y ++){
@@ -1545,7 +1561,7 @@ void TerrainProperty::onMouseMotion(int posX, int posY, int relX, int relY, int 
                     if(edit_mode == 1){
                        // this->data.modifyHeight(y, i, editHeight, range, mul);
                     }else
-                        this->data.modifyTexture(i, y, range, static_cast<unsigned char>(textureid));
+                        this->data.modifyTexture(i, y, range, static_cast<unsigned char>(textureid - 1));
                     hasChanged = true;
                     return;
                 }

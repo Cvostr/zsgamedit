@@ -19,9 +19,9 @@ namespace ZSPIRE {
         std::string bone_name;
         ZSMATRIX4x4 offset;
 
-        uint vertices_affected;
+        unsigned int vertices_affected;
 
-        Bone(std::string name, uint vertices);
+        Bone(std::string name, unsigned int vertices);
         Bone(std::string name);
     };
 

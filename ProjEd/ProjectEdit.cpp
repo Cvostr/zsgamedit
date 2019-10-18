@@ -1198,8 +1198,11 @@ void EditWindow::onLeftBtnClicked(int X, int Y){
         TerrainProperty* terrain = obj->getPropertyPtr<TerrainProperty>();
 
         if(terrain != nullptr)
-            terrain->onMouseClick(this->input_state.mouseX, input_state.mouseY,  settings.gameViewWin_Height, this->input_state.isLeftBtnHold,
-                                 this->input_state.isLCtrlHold);
+            terrain->onMouseClick(this->input_state.mouseX, input_state.mouseY,
+                                  settings.gameViewWin_Width,
+                                  settings.gameViewWin_Height,
+                                  this->input_state.isLeftBtnHold,
+                                  this->input_state.isLCtrlHold);
     }
 
     //Stop camera moving
@@ -1273,8 +1276,11 @@ void EditWindow::onMouseMotion(int relX, int relY){
         TerrainProperty* terrain = obj->getPropertyPtr<TerrainProperty>();
 
         if(terrain != nullptr)
-            terrain->onMouseMotion(this->input_state.mouseX, input_state.mouseY, relX, relY, settings.gameViewWin_Height, this->input_state.isLeftBtnHold,
-                                 this->input_state.isLCtrlHold);
+            terrain->onMouseMotion(this->input_state.mouseX, input_state.mouseY, relX, relY,
+                                   settings.gameViewWin_Width,
+                                   settings.gameViewWin_Height,
+                                   this->input_state.isLeftBtnHold,
+                                   this->input_state.isLCtrlHold);
     }
 
     //Property painting

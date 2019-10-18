@@ -226,7 +226,7 @@ public:
     void init();
     void Draw(ZSPIRE::Camera* cam, RenderPipeline* pipeline);
     void setTexture();
-    void setTextureSize(unsigned int W, unsigned int H);
+    void setTextureSize();
     ShadowCasterProperty();
 };
 
@@ -308,9 +308,9 @@ public:
     void onAddToObject();
     void copyTo(GameObjectProperty* dest);
     TerrainProperty();
-    void onMouseClick(int posX, int posY, int screenY, bool isLeftButtonHold, bool isCtrlHold);
-    void onMouseMotion(int posX, int posY, int relX, int relY, int screenY, bool isLeftButtonHold, bool isCtrlHold);
-    void getPickedVertexId(int posX, int posY, int screenY, unsigned char* data);
+    void onMouseClick(int posX, int posY, int screenX, int screenY, bool isLeftButtonHold, bool isCtrlHold);
+    void onMouseMotion(int posX, int posY, int relX, int relY, int screenX, int screenY, bool isLeftButtonHold, bool isCtrlHold);
+    void getPickedVertexId(int posX, int posY, int screenX, int screenY, unsigned char* data);
 
     TerrainData* getTerrainData();
 

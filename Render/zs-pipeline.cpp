@@ -751,7 +751,7 @@ void ShadowCasterProperty::init(){
     this->initialized = true;
 }
 
-void ShadowCasterProperty::setTextureSize(unsigned int W, unsigned int H){
+void ShadowCasterProperty::setTextureSize(){
     glDeleteTextures(1, &this->shadowDepthTexture);
     glDeleteFramebuffers(1, &shadowBuffer);
 

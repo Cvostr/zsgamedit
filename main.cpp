@@ -11,8 +11,7 @@ static float deltaTime = 0;
 
 bool working = true; //Application started and it is working
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]){
     QApplication a(argc, argv);
     MainWin w(&a);
     w.show();

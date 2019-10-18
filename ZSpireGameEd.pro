@@ -97,7 +97,6 @@ HEADERS += \
     ProjEd/headers/EditorSettings.h \
     World/headers/terrain.h \
     Misc/headers/ThumbnailsMaster.h \
-    Render/headers/zs-animation.h \
     Misc/headers/zs3m-master.h \
     ui/headers/zs-uiwidget.h \
     ui/headers/zs-uibutton.h \

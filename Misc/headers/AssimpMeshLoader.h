@@ -3,7 +3,7 @@
 
 #include "../../triggers.h"
 #include "../../Render/headers/zs-mesh.h"
-#include "../../Render/headers/zs-animation.h"
+#include <render/zs-animation.h>
 #include "zs3m-master.h"
 #include "zs_types.h"
 
