@@ -11,7 +11,7 @@ GizmosRenderer::GizmosRenderer(ZSPIRE::Shader* mark_shader, bool depthTestEnable
     this->camBuffer = camBuffer;
 }
 
-void GizmosRenderer::drawPickedMeshWireframe(ZSPIRE::Mesh *mesh_ptr, ZSMATRIX4x4 transform, ZSRGBCOLOR color){
+void GizmosRenderer::drawPickedMeshWireframe(Engine::Mesh *mesh_ptr, ZSMATRIX4x4 transform, ZSRGBCOLOR color){
     glFeaturesOff();
 
     this->mark_shader_ptr->Use();
@@ -32,7 +32,7 @@ void GizmosRenderer::drawCube(ZSMATRIX4x4 transform, ZSRGBCOLOR color){
     glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 2, sizeof (ZSMATRIX4x4), &transform);
     this->mark_shader_ptr->setGLuniformColor("color", color);
 
-    ZSPIRE::getCubeMesh3D()->Draw();
+    Engine::getCubeMesh3D()->Draw();
 }
 
 void GizmosRenderer::drawTransformControls(ZSVECTOR3 position, float tall, float dim){

@@ -3,7 +3,7 @@
 
 #include "../../Render/headers/zs-shader.h"
 #include "../../Render/headers/zs-texture.h"
-#include "../../Render/headers/zs-mesh.h"
+#include <render/zs-mesh.h>
 #include "../../Render/headers/MatShaderProps.h"
 #include "../../Render/headers/zs-pipeline.h"
 #include "EditorManager.h"
@@ -31,7 +31,7 @@ public:
 
     void DrawTexture(ZSPIRE::Texture* texture);
     void DrawMaterial(Material* material);
-    void DrawMesh(ZSPIRE::Mesh* mesh);
+    void DrawMesh(Engine::Mesh* mesh);
 
     bool isAvailable(std::string name);
 

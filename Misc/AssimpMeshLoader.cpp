@@ -38,7 +38,7 @@ bool Engine::getSizes(std::string file_path, unsigned int* meshes, unsigned int*
 }
 
 
-void Engine::processMesh(aiMesh* mesh, ZSPIRE::Mesh* mesh_ptr) {
+void Engine::processMesh(aiMesh* mesh, Engine::Mesh* mesh_ptr) {
     mesh_ptr->mesh_label = std::string(mesh->mName.C_Str());
 
     unsigned int vertices = mesh->mNumVertices;
@@ -74,7 +74,7 @@ void Engine::processMesh(aiMesh* mesh, ZSPIRE::Mesh* mesh_ptr) {
 
     for(unsigned int bone_i = 0; bone_i < bones; bone_i ++){
         aiBone* bone_ptr = mesh->mBones[bone_i];
-        ZSPIRE::Bone bone(bone_ptr->mName.C_Str(), bone_ptr->mNumWeights);
+        Engine::Bone bone(bone_ptr->mName.C_Str(), bone_ptr->mNumWeights);
         //Convert assimp bone offset matrix and store it in bone class
         cmat(bone_ptr->mOffsetMatrix, &bone.offset);
 
@@ -111,7 +111,7 @@ void Engine::processMesh(aiMesh* mesh, ZSPIRE::Mesh* mesh_ptr) {
 }
 
 
-void Engine::loadMesh(std::string file_path, ZSPIRE::Mesh* mesh_ptr, int index){
+void Engine::loadMesh(std::string file_path, Engine::Mesh* mesh_ptr, int index){
     const aiScene* scene = importer.ReadFile(file_path, loadflags);
     std::cout << "Loading mesh " << scene->mMeshes[index]->mName.C_Str() << " from file " << file_path << std::endl;
 

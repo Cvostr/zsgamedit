@@ -43,7 +43,7 @@ void RenderPipeline::setup(int bufWidth, int bufHeight){
         heightmap.compileFromFile("Shaders/heightmap/heightmap.vert", "Shaders/heightmap/heightmap.frag");
         this->gbuffer.create(bufWidth, bufHeight);
     }
-    ZSPIRE::setupDefaultMeshes();
+    Engine::setupDefaultMeshes();
     removeLights();
 
     glGenBuffers(1, &camBuffer);
@@ -118,7 +118,7 @@ RenderPipeline::~RenderPipeline(){
     skybox.Destroy();
     shadowMap.Destroy();
     heightmap.Destroy();
-    ZSPIRE::freeDefaultMeshes();
+    Engine::freeDefaultMeshes();
 
     this->gbuffer.Destroy();
     removeLights();
@@ -300,7 +300,7 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr){
     }
 
 
-    ZSPIRE::getPlaneMesh2D()->Draw(); //Draw screen
+    Engine::getPlaneMesh2D()->Draw(); //Draw screen
 
     //if we control this object
     if(editwin_ptr->obj_trstate.isTransforming == true && !editwin_ptr->isWorldCamera){
@@ -430,7 +430,7 @@ void GameObject::Draw(RenderPipeline* pipeline){
                 //Iterate over all bones
                 for(unsigned int bone_i = 0; bone_i < mesh_prop->mesh_ptr->bones.size(); bone_i ++){
                     //Obtain bone by pointer
-                    ZSPIRE::Bone* b = &mesh_prop->mesh_ptr->bones[bone_i];
+                    Engine::Bone* b = &mesh_prop->mesh_ptr->bones[bone_i];
 
                     GameObject* node = nullptr;
                     GameObject* RootNode = mesh_prop->skinning_root_node;
@@ -675,7 +675,7 @@ void SkyboxProperty::DrawSky(RenderPipeline* pipeline){
     mat->onRender(pipeline);
     //Draw skybox cube
     glDisable(GL_DEPTH_TEST);
-    ZSPIRE::getSkyboxMesh()->Draw();
+    Engine::getSkyboxMesh()->Draw();
 }
 
 void ShadowCasterProperty::onPreRender(RenderPipeline* pipeline){
@@ -904,7 +904,7 @@ void RenderPipeline::renderSprite(unsigned int texture_id, int X, int Y, int sca
     glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4), sizeof (ZSMATRIX4x4), &transform);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-    ZSPIRE::getUiSpriteMesh2D()->Draw();
+    Engine::getUiSpriteMesh2D()->Draw();
 }
 
 void RenderPipeline::renderGlyph(unsigned int texture_id, int X, int Y, int scaleX, int scaleY, ZSRGBCOLOR color){
@@ -930,7 +930,7 @@ void RenderPipeline::renderGlyph(unsigned int texture_id, int X, int Y, int scal
     glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4), sizeof (ZSMATRIX4x4), &transform);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-    ZSPIRE::getUiSpriteMesh2D()->Draw();
+    Engine::getUiSpriteMesh2D()->Draw();
 }
 
 void RenderPipeline::updateWindowSize(int W, int H){

@@ -93,7 +93,7 @@ public:
 class MeshProperty : public GameObjectProperty{
 public:
     QString resource_relpath; //Relative path to resource
-    ZSPIRE::Mesh* mesh_ptr; //Pointer to mesh
+    Engine::Mesh* mesh_ptr; //Pointer to mesh
     bool castShadows;
 
     GameObject* skinning_root_node;

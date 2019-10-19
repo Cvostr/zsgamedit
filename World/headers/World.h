@@ -9,7 +9,7 @@
 #include "../../ProjEd/headers/InspectorWin.h"
 
 #include "../../Render/headers/zs-pipeline.h"
-#include "../../Render/headers/zs-mesh.h"
+#include <render/zs-mesh.h>
 #include "../../Render/headers/zs-texture.h"
 #include <render/zs-math.h>
 #include "../../Render/headers/zs-shader.h"
@@ -320,7 +320,7 @@ public:
     void trimObjectsList();
     void unpickObject();
 
-    ZSPIRE::Mesh* getMeshPtrByRelPath(QString label); //look through all meshes in project ptr
+    Engine::Mesh* getMeshPtrByRelPath(QString label); //look through all meshes in project ptr
     ZSPIRE::Animation* getAnimationPtrByRelPath(QString label);
     ZSPIRE::Texture* getTexturePtrByRelPath(QString label); //look through all meshes in project ptr
     SoundBuffer* getSoundPtrByName(QString label);

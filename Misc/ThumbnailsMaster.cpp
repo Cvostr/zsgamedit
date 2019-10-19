@@ -195,7 +195,7 @@ void ThumbnailsMaster::DrawTexture(ZSPIRE::Texture* texture){
     //use texture
     texture->Use(0);
     //draw plane
-    ZSPIRE::getPlaneMesh2D()->Draw();
+    Engine::getPlaneMesh2D()->Draw();
 }
 
 void ThumbnailsMaster::DrawMaterial(Material* material){
@@ -203,7 +203,7 @@ void ThumbnailsMaster::DrawMaterial(Material* material){
     material->group_ptr->render_shader->Use();
     material->applyMatToPipeline();
 
-    ZSPIRE::getSphereMesh()->Draw();
+    Engine::getSphereMesh()->Draw();
 }
 
 void ThumbnailsMaster::createMeshesThumbnails(){
@@ -219,7 +219,7 @@ void ThumbnailsMaster::createMeshesThumbnails(){
         Resource* resource_ptr = &this->project_struct_ptr->resources[res_i];
         if(resource_ptr->type != RESOURCE_TYPE_MESH) continue;
 
-        ZSPIRE::Mesh* mesh_ptr = static_cast<ZSPIRE::Mesh*>(resource_ptr->class_ptr);
+        Engine::Mesh* mesh_ptr = static_cast<Engine::Mesh*>(resource_ptr->class_ptr);
         DrawMesh(mesh_ptr);
         //Allocate image buffer
         unsigned char* texture_data = new unsigned char[THUMBNAIL_IMG_SIZE * THUMBNAIL_IMG_SIZE * 4];
@@ -232,7 +232,7 @@ void ThumbnailsMaster::createMeshesThumbnails(){
     }
 }
 
-void ThumbnailsMaster::DrawMesh(ZSPIRE::Mesh* mesh){
+void ThumbnailsMaster::DrawMesh(Engine::Mesh* mesh){
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     ZSPIRE::Camera cam;

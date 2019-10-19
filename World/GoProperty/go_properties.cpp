@@ -2,7 +2,7 @@
 #include "../headers/obj_properties.h"
 #include "../headers/2dtileproperties.h"
 #include "../../ProjEd/headers/ProjectEdit.h"
-#include "../../Render/headers/zs-mesh.h"
+#include <render/zs-mesh.h>
 #include "../../ProjEd/headers/InspEditAreas.h"
 #include "../headers/Misc.h"
 
@@ -467,13 +467,13 @@ void MeshProperty::updateMeshPtr(){
     if(resource_relpath.length() < 1) return;
 
     if(resource_relpath.compare("@plane") == false){
-        this->mesh_ptr = ZSPIRE::getPlaneMesh2D();
+        this->mesh_ptr = Engine::getPlaneMesh2D();
     }else if(resource_relpath.compare("@isotile") == false){
-        this->mesh_ptr = ZSPIRE::getIsoTileMesh2D();
+        this->mesh_ptr = Engine::getIsoTileMesh2D();
     }else if(resource_relpath.compare("@cube") == false){
-        this->mesh_ptr = ZSPIRE::getCubeMesh3D();
+        this->mesh_ptr = Engine::getCubeMesh3D();
     }else if(resource_relpath.compare("@sphere") == false){
-        this->mesh_ptr = ZSPIRE::getSphereMesh();
+        this->mesh_ptr = Engine::getSphereMesh();
     }
     else //If it isn't built in mesh
     {

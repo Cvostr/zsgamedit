@@ -1,7 +1,7 @@
 #ifndef ZS3MMASTER_H
 #define ZS3MMASTER_H
 #include <render/zs-math.h>
-#include "../../Render/headers/zs-mesh.h"
+#include <render/zs-mesh.h>
 #include <render/zs-animation.h>
 #include <string>
 #include <vector>
@@ -32,11 +32,11 @@ public:
 
 class SceneFileExport{
 private:
-    std::vector<ZSPIRE::Mesh*> meshes_toWrite;
+    std::vector<Engine::Mesh*> meshes_toWrite;
     ZS3M::SceneNode* rootNode;
 public:
 
-    void pushMesh(ZSPIRE::Mesh* mesh);
+    void pushMesh(Engine::Mesh* mesh);
     void setRootNode(ZS3M::SceneNode* node);
     void write(std::string output_file);
     void writeNode(std::ofstream *stream, ZS3M::SceneNode* node);
@@ -60,7 +60,7 @@ class ImportedSceneFile{
 private:
     std::vector<ZS3M::SceneNode*> nodes_list;
 public:
-    std::vector<ZSPIRE::Mesh*> meshes_toWrite;
+    std::vector<Engine::Mesh*> meshes_toWrite;
     ZS3M::SceneNode* rootNode;
 
     ZS3M::SceneNode* getSceneNodeWithName(std::string label);

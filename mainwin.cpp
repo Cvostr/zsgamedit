@@ -320,7 +320,7 @@ void ProjectCtxMenu::runEngineClicked(ZSGAPI gapi){
     ZSENGINE_CREATE_INFO engine_create_info;
     engine_create_info.appName = "GameEditorRun";
     engine_create_info.createWindow = true; //window already created, we don't need one
-    engine_create_info.graphicsApi = gapi; //use opengl
+    engine_create_info.graphicsApi = gapi; //use selected graphics API
 
     ZSWINDOW_CREATE_INFO window_create_info;
     window_create_info.title = "Preview";

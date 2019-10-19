@@ -581,7 +581,7 @@ GameObject* World::addMeshNode(ZS3M::SceneNode* node){
     //Iterate over all meshes, that inside of node
     for(unsigned int mesh_i = 0; mesh_i < node->mesh_names.size(); mesh_i ++){
         std::string mesh_label = node->mesh_names[mesh_i];
-        ZSPIRE::Mesh* mesh_ptr = this->getMeshPtrByRelPath(QString::fromStdString(mesh_label));
+        Engine::Mesh* mesh_ptr = this->getMeshPtrByRelPath(QString::fromStdString(mesh_label));
 
         GameObject* mesh_obj = nullptr;
         //if found mesh with name as node, create mesh inside the node
@@ -709,7 +709,7 @@ void World::recoverFromSnapshot(WorldSnapshot* snapshot){
     }
 }
 
-ZSPIRE::Mesh* World::getMeshPtrByRelPath(QString label){
+Engine::Mesh* World::getMeshPtrByRelPath(QString label){
     Project* proj_ptr = static_cast<Project*>(this->proj_ptr); //Convert void pointer to Project*
     unsigned int resources_num = static_cast<unsigned int>(proj_ptr->resources.size()); //Receive resource amount in project
 
@@ -717,7 +717,7 @@ ZSPIRE::Mesh* World::getMeshPtrByRelPath(QString label){
         Resource* r_ptr = &proj_ptr->resources[r_it]; //Obtain pointer to resource
         //If resource is mesh and has same name as in argument
         if(r_ptr->type == RESOURCE_TYPE_MESH && r_ptr->resource_label.compare(label.toStdString()) == 0){
-            return static_cast<ZSPIRE::Mesh*>(r_ptr->class_ptr);
+            return static_cast<Engine::Mesh*>(r_ptr->class_ptr);
         }
     }
     return nullptr;

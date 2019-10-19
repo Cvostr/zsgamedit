@@ -31,7 +31,6 @@ SOURCES += \
     ProjEd/ProjectEdit.cpp \
     Render/zs-shader.cpp \
     Render/zs-pipeline.cpp \
-    Render/zs-mesh.cpp \
     Render/zs-texture.cpp \
     World/World.cpp \
     World/Misc.cpp \
@@ -70,7 +69,6 @@ HEADERS += \
     ProjEd/headers/ProjectEdit.h \
     Render/headers/zs-shader.h \
     Render/headers/zs-pipeline.h \
-    Render/headers/zs-mesh.h \
     Render/headers/zs-texture.h \
     World/headers/World.h \
     World/headers/Misc.h \

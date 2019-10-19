@@ -2,7 +2,7 @@
 #include "../headers/obj_properties.h"
 #include "../headers/2dtileproperties.h"
 #include "../../ProjEd/headers/ProjectEdit.h"
-#include "../../Render/headers/zs-mesh.h"
+#include <render/zs-mesh.h>
 #include "../../ProjEd/headers/InspEditAreas.h"
 
 

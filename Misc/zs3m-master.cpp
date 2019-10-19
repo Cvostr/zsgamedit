@@ -1,11 +1,12 @@
 #include "headers/zs3m-master.h"
 #include <fstream>
 #include <iostream>
+#include <cstring>
 
 ZS3M::SceneFileExport::SceneFileExport(){
 
 }
-void ZS3M::SceneFileExport::pushMesh(ZSPIRE::Mesh* mesh){
+void ZS3M::SceneFileExport::pushMesh(Engine::Mesh* mesh){
     this->meshes_toWrite.push_back(mesh);
 }
 void ZS3M::SceneFileExport::setRootNode(ZS3M::SceneNode* node){
@@ -31,16 +32,16 @@ void ZS3M::SceneFileExport::write(std::string output_file){
 
     //Iterate over all meshes
     for(unsigned int mesh_i = 0; mesh_i < meshes_num; mesh_i ++){
-        ZSPIRE::Mesh* mesh_ptr = this->meshes_toWrite[mesh_i];
+        Engine::Mesh* mesh_ptr = this->meshes_toWrite[mesh_i];
         std::cout << "ZS3M: Writing Mesh " << mesh_ptr->mesh_label << std::endl;
         stream << "_MESH " << (mesh_ptr->mesh_label + '\0');
 
-        unsigned int vertexNum = mesh_ptr->vertices_num;
-        unsigned int indexNum = mesh_ptr->indices_num;
+        int vertexNum = mesh_ptr->vertices_num;
+        int indexNum = mesh_ptr->indices_num;
         unsigned int bonesNum = static_cast<unsigned int>(mesh_ptr->bones.size());
         //Write base numbers
-        stream.write(reinterpret_cast<char*>(&vertexNum), sizeof (unsigned int));
-        stream.write(reinterpret_cast<char*>(&indexNum), sizeof (unsigned int));
+        stream.write(reinterpret_cast<char*>(&vertexNum), sizeof (int));
+        stream.write(reinterpret_cast<char*>(&indexNum), sizeof (int));
         stream.write(reinterpret_cast<char*>(&bonesNum), sizeof (unsigned int));
         stream << "\n"; //Write divider
         //Write all vertices
@@ -67,7 +68,7 @@ void ZS3M::SceneFileExport::write(std::string output_file){
         stream << "\n"; //Write divider
 
         for (unsigned int b_i = 0; b_i < bonesNum; b_i ++) {
-            ZSPIRE::Bone* bone = &mesh_ptr->bones[b_i];
+            Engine::Bone* bone = &mesh_ptr->bones[b_i];
             //Write bone name
             stream << bone->bone_name + '\0';
             //Write offset matrix
@@ -244,8 +245,8 @@ void ZS3M::ImportedSceneFile::loadFromBuffer(char* buffer, unsigned int buf_size
             strcpy(&mesh_label[0], &buffer[cur_pos]);
             cur_pos += strlen(mesh_label) + 1;
 
-            unsigned int vertexNum = 0;
-            unsigned int indexNum = 0;
+            int vertexNum = 0;
+            int indexNum = 0;
             unsigned int bonesNum = 0;
 
             memcpy(reinterpret_cast<char*>(&vertexNum), &buffer[cur_pos], sizeof (unsigned int));
@@ -253,7 +254,7 @@ void ZS3M::ImportedSceneFile::loadFromBuffer(char* buffer, unsigned int buf_size
             memcpy(reinterpret_cast<char*>(&bonesNum), &buffer[cur_pos + 8], sizeof (unsigned int));
             cur_pos += 13;
 
-            ZSPIRE::Mesh* newmesh = new ZSPIRE::Mesh;
+            Engine::Mesh* newmesh = Engine::allocateMesh();
             newmesh->mesh_label = mesh_label;
             newmesh->vertices_num = vertexNum;
             newmesh->indices_num = indexNum;
@@ -314,7 +315,7 @@ void ZS3M::ImportedSceneFile::loadFromBuffer(char* buffer, unsigned int buf_size
                 strcpy(&bone_label[0], &buffer[cur_pos]);
                 cur_pos += strlen(bone_label) + 1;
 
-                ZSPIRE::Bone bone(bone_label);
+                Engine::Bone bone(bone_label);
                 for(unsigned int m_i = 0; m_i < 4; m_i ++){
                     for(unsigned int m_j = 0; m_j < 4; m_j ++){
                         float* m_v = &bone.offset.m[m_i][m_j];

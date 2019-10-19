@@ -3,7 +3,7 @@
 #define GLEW_STATIC
 #include <GL/glew.h>
 #include "zs-shader.h"
-#include "zs-mesh.h"
+#include <render/zs-mesh.h>
 #include "zs-texture.h"
 #include "GizmosRenderer.h"
 #include "../../Misc/headers/EditorManager.h"

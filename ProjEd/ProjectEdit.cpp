@@ -18,6 +18,9 @@
 #include "../Misc/headers/zs3m-master.h"
 #include "../World/headers/Misc.h"
 
+//Hack to support meshes
+extern ZSpireEngine* engine_ptr;
+
 EditWindow* _editor_win;
 InspectorWin* _inspector_win;
 Project* project_ptr;
@@ -120,6 +123,14 @@ EditWindow::EditWindow(QApplication* app, QWidget *parent) :
     ui->actionToggle_Cameras->setShortcut(Qt::Key_Apostrophe | Qt::CTRL);
 
     this->glcontext = nullptr;
+
+    ZSENGINE_CREATE_INFO* engine_create_info = new ZSENGINE_CREATE_INFO;
+    engine_create_info->appName = "EDITOR";
+    engine_create_info->createWindow = false; //window already created, we don't need one
+    engine_create_info->graphicsApi = OGL32; //use opengl
+
+    engine_ptr = new ZSpireEngine();
+    engine_ptr->engine_info = engine_create_info;
 }
 
 EditWindow::~EditWindow()
@@ -938,11 +949,11 @@ void EditWindow::processResourceFile(QFileInfo fileInfo){
             resource.rel_path.remove(0, project.root_path.size() + 1); //Get relative path by removing length of project root from start
             resource.type = RESOURCE_TYPE_MESH; //Type of resource is mesh
 
-            resource.class_ptr = static_cast<void*>(new ZSPIRE::Mesh);
+            resource.class_ptr = static_cast<void*>(Engine::allocateMesh());
 
             this->project.resources.push_back(resource);
-            Engine::loadMesh(fileInfo.absoluteFilePath().toStdString(), static_cast<ZSPIRE::Mesh*>(this->project.resources.back().class_ptr), static_cast<int>(mesh_i));
-            this->project.resources.back().resource_label = static_cast<ZSPIRE::Mesh*>(this->project.resources.back().class_ptr)->mesh_label;
+            Engine::loadMesh(fileInfo.absoluteFilePath().toStdString(), static_cast<Engine::Mesh*>(this->project.resources.back().class_ptr), static_cast<int>(mesh_i));
+            this->project.resources.back().resource_label = static_cast<Engine::Mesh*>(this->project.resources.back().class_ptr)->mesh_label;
         }
         for(unsigned int anim_i = 0; anim_i < num_anims; anim_i ++){
             Resource resource;
@@ -1021,7 +1032,7 @@ void EditWindow::ImportResource(QString pathToResource){
 
         Engine::getSizes(pathToResource.toStdString(), &num_meshes, &num_anims, &num_textures, &num_materials);
         //Allocate array for meshes
-        ZSPIRE::Mesh* meshes = new ZSPIRE::Mesh[num_meshes];
+        Engine::Mesh* meshes = Engine::allocateMesh(num_meshes);
         ZSPIRE::Animation* anims = new ZSPIRE::Animation[num_anims];
 
         ZS3M::SceneNode rootNode;
