@@ -8,7 +8,7 @@
 #include "../../triggers.h"
 #include <render/zs-mesh.h>
 #include <render/zs-animation.h>
-#include "zs3m-master.h"
+#include <misc/zs3m-master.h>
 #include "zs_types.h"
 
 #include <assimp/Importer.hpp>

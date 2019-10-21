@@ -4,8 +4,6 @@
 #include "../ProjEd/headers/ProjectEdit.h"
 #include <iostream>
 
-#define MAX_LIGHTS_AMOUNT 150
-
 RenderPipeline::RenderPipeline(){
     this->current_state = PIPELINE_STATE_DEFAULT;
 
@@ -45,30 +43,18 @@ void RenderPipeline::setup(int bufWidth, int bufHeight){
     }
     Engine::setupDefaultMeshes();
     removeLights();
+    //Initialize transform uniform buffer with connection to 0
+    transformBuffer = Engine::allocUniformBuffer();
+    transformBuffer->init(0, sizeof (ZSMATRIX4x4) * 3 + 16 * 2);
+    //Initialize lighting uniform buffer with connection to 1
+    lightsBuffer = Engine::allocUniformBuffer();
+    lightsBuffer->init(1, 64 * MAX_LIGHTS_AMOUNT + 16 * 2);
 
-    glGenBuffers(1, &camBuffer);
-    glBindBuffer(GL_UNIFORM_BUFFER, camBuffer);
-    glBufferData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 3 + 16 * 2, nullptr, GL_STATIC_DRAW);
-    //Connect to point 0 (zero)
-    glBindBufferBase(GL_UNIFORM_BUFFER, 0, camBuffer);
+    shadowBuffer = Engine::allocUniformBuffer();
+    shadowBuffer->init(2, sizeof (ZSMATRIX4x4) * 2 + 16);
 
-    glGenBuffers(1, &lightsBuffer);
-    glBindBuffer(GL_UNIFORM_BUFFER, lightsBuffer);
-    glBufferData(GL_UNIFORM_BUFFER, 64 * MAX_LIGHTS_AMOUNT + 16 * 2, nullptr, GL_STATIC_DRAW);
-    //Connect to point 1 (one)
-    glBindBufferBase(GL_UNIFORM_BUFFER, 1, lightsBuffer);
-
-    glGenBuffers(1, &shadowBuffer);
-    glBindBuffer(GL_UNIFORM_BUFFER, shadowBuffer);
-    glBufferData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 2 + 16, nullptr, GL_STATIC_DRAW);
-    //Connect to point 2 (two)
-    glBindBufferBase(GL_UNIFORM_BUFFER, 2, shadowBuffer);
-
-    glGenBuffers(1, &terrainUniformBuffer);
-    glBindBuffer(GL_UNIFORM_BUFFER, terrainUniformBuffer);
-    glBufferData(GL_UNIFORM_BUFFER, 12 * 16 * 2 + 4 * 3, nullptr, GL_STATIC_DRAW);
-    //Connect to point 3 (three)
-    glBindBufferBase(GL_UNIFORM_BUFFER, 3, terrainUniformBuffer);
+    terrainUniformBuffer = Engine::allocUniformBuffer();
+    terrainUniformBuffer->init(3, 12 * 16 * 2 + 4 * 3);
 
     glGenBuffers(1, &skinningUniformBuffer);
     glBindBuffer(GL_UNIFORM_BUFFER, skinningUniformBuffer);
@@ -103,11 +89,14 @@ void RenderPipeline::setup(int bufWidth, int bufHeight){
 }
 
 void RenderPipeline::initGizmos(int projectPespective){
-    gizmos = new GizmosRenderer(&obj_mark_shader, this->depthTest, this->cullFaces, projectPespective, camBuffer);
+    gizmos = new GizmosRenderer(&obj_mark_shader, this->depthTest, this->cullFaces, projectPespective, transformBuffer);
 }
 
 RenderPipeline::~RenderPipeline(){
-    glDeleteBuffers(6, &camBuffer);
+    transformBuffer->Destroy();
+    lightsBuffer->Destroy();
+    shadowBuffer->Destroy();
+    terrainUniformBuffer->Destroy();
 
     this->tile_shader.Destroy();
     this->pick_shader.Destroy();
@@ -243,30 +232,29 @@ unsigned int RenderPipeline::render_getpickedObj(void* projectedit_ptr, int mous
 }
 
 void RenderPipeline::setLightsToBuffer(){
-    glBindBuffer(GL_UNIFORM_BUFFER, lightsBuffer);
+    lightsBuffer->bind();
     for(unsigned int light_i = 0; light_i < this->lights_ptr.size(); light_i ++){
         LightsourceProperty* _light_ptr = static_cast<LightsourceProperty*>(lights_ptr[light_i]);
         //Set light type to buffer
-        glBufferSubData(GL_UNIFORM_BUFFER, 64 * light_i, sizeof (int), &_light_ptr->light_type);
+        lightsBuffer->writeData(64 * light_i, sizeof (int), &_light_ptr->light_type);
         //Set light range to buffer
-        glBufferSubData(GL_UNIFORM_BUFFER, 64 * light_i + 4, sizeof (float), &_light_ptr->range);
+        lightsBuffer->writeData(64 * light_i + 4, sizeof (float), &_light_ptr->range);
         //Set lights intensity to buffer
-        glBufferSubData(GL_UNIFORM_BUFFER, 64 * light_i + 8, sizeof (float), &_light_ptr->intensity);
-        glBufferSubData(GL_UNIFORM_BUFFER, 64 * light_i + 12, sizeof (float), &_light_ptr->spot_angle);
-        glBufferSubData(GL_UNIFORM_BUFFER, 64 * light_i + 16, 12, &_light_ptr->last_pos);
-        glBufferSubData(GL_UNIFORM_BUFFER, 64 * light_i + 32, 12, &_light_ptr->direction);
-        glBufferSubData(GL_UNIFORM_BUFFER, 64 * light_i + 48, 4, &_light_ptr->color.gl_r);
-        glBufferSubData(GL_UNIFORM_BUFFER, 64 * light_i + 52, 4, &_light_ptr->color.gl_g);
-        glBufferSubData(GL_UNIFORM_BUFFER, 64 * light_i + 56, 4, &_light_ptr->color.gl_b);
+        lightsBuffer->writeData(64 * light_i + 8, sizeof (float), &_light_ptr->intensity);
+        lightsBuffer->writeData(64 * light_i + 12, sizeof (float), &_light_ptr->spot_angle);
+        lightsBuffer->writeData(64 * light_i + 16, 12, &_light_ptr->last_pos);
+        lightsBuffer->writeData(64 * light_i + 32, 12, &_light_ptr->direction);
+        lightsBuffer->writeData(64 * light_i + 48, 4, &_light_ptr->color.gl_r);
+        lightsBuffer->writeData(64 * light_i + 52, 4, &_light_ptr->color.gl_g);
+        lightsBuffer->writeData(64 * light_i + 56, 4, &_light_ptr->color.gl_b);
     }
 
     int ls = static_cast<int>(lights_ptr.size());
-    glBufferSubData(GL_UNIFORM_BUFFER, 64 * MAX_LIGHTS_AMOUNT, 4, &ls);
+    lightsBuffer->writeData(64 * MAX_LIGHTS_AMOUNT, 4, &ls);
 
     ZSVECTOR3 ambient_L = ZSVECTOR3(render_settings.ambient_light_color.r / 255.0f,render_settings.ambient_light_color.g / 255.0f, render_settings.ambient_light_color.b / 255.0f);
-    glBufferSubData(GL_UNIFORM_BUFFER, 64 * MAX_LIGHTS_AMOUNT + 16, 12, &ambient_L);
+    lightsBuffer->writeData(64 * MAX_LIGHTS_AMOUNT + 16, 12, &ambient_L);
 
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
     //free lights array
     this->removeLights();
 }
@@ -417,6 +405,14 @@ void RenderPipeline::renderDepth(void* world_ptr){
 }
 
 void GameObject::Draw(RenderPipeline* pipeline){
+    TransformProperty* transform_ptr = static_cast<TransformProperty*>(getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
+
+    if(transform_ptr == nullptr) return;
+
+    //Send transform matrix to transform buffer
+    pipeline->transformBuffer->bind();
+    pipeline->transformBuffer->writeData(sizeof (ZSMATRIX4x4) * 2, sizeof (ZSMATRIX4x4), &transform_ptr->transform_mat);
+
     //Call prerender on each property in object
     if(pipeline->current_state == PIPELINE_STATE_DEFAULT)
         this->onPreRender(pipeline);
@@ -467,8 +463,8 @@ void GameObject::Draw(RenderPipeline* pipeline){
             float a = static_cast<float>(to_send[3]);
 
             //set transform to camera buffer
-            glBindBuffer(GL_UNIFORM_BUFFER, pipeline->camBuffer);
-            glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 2, sizeof (ZSMATRIX4x4), &transform_ptr->transform_mat);
+            pipeline->transformBuffer->bind();
+            pipeline->transformBuffer->writeData(sizeof (ZSMATRIX4x4) * 2, sizeof (ZSMATRIX4x4), &transform_ptr->transform_mat);
 
             pipeline->getPickingShader()->setGLuniformVec4("color", ZSVECTOR4(r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f));
             DrawMesh();
@@ -476,8 +472,8 @@ void GameObject::Draw(RenderPipeline* pipeline){
         if(pipeline->current_state == PIPELINE_STATE_SHADOWDEPTH) {
             TransformProperty* transform_ptr = static_cast<TransformProperty*>(getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
             //set transform to camera buffer
-            glBindBuffer(GL_UNIFORM_BUFFER, pipeline->camBuffer);
-            glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 2, sizeof (ZSMATRIX4x4), &transform_ptr->transform_mat);
+            pipeline->transformBuffer->bind();
+            pipeline->transformBuffer->writeData(sizeof (ZSMATRIX4x4) * 2, sizeof (ZSMATRIX4x4), &transform_ptr->transform_mat);
 
             //Get castShadows boolean from several properties
             bool castShadows = (hasTerrain()) ? getPropertyPtr<TerrainProperty>()->castShadows : mesh_prop->castShadows;
@@ -537,37 +533,30 @@ void MaterialProperty::onRender(RenderPipeline* pipeline){
     //Check for validity of pointer
     if(material_ptr == nullptr) return;
 
-    TransformProperty* transform_ptr = static_cast<TransformProperty*>(this->go_link.updLinkPtr()->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
     MtShaderPropertiesGroup* group_ptr = material_ptr->group_ptr;
 
-    if(transform_ptr == nullptr || group_ptr == nullptr) return ; //if object hasn't property
+    if( group_ptr == nullptr) return ; //if object hasn't property
 
     //Work with shader
     shader = group_ptr->render_shader;
     shader->Use();
     //Get pointer to shadowcaster
     ShadowCasterProperty* shadowcast = static_cast<ShadowCasterProperty*>(pipeline->getRenderSettings()->shadowcaster_ptr);
+    //Bind shadow uniform buffer
+    pipeline->shadowBuffer->bind();
     if(shadowcast != nullptr && this->material_ptr->group_ptr->acceptShadows && this->receiveShadows){
         shadowcast->setTexture();
-        glBindBuffer(GL_UNIFORM_BUFFER, pipeline->shadowBuffer);
         //In GLSL we should use Integer instead of bool
         int recShadows = static_cast<int>(this->receiveShadows);
-        glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 2 + 4, 4, &recShadows);
+        pipeline->shadowBuffer->writeData(sizeof (ZSMATRIX4x4) * 2 + 4, 4, &recShadows);
     }
     if(!this->receiveShadows || shadowcast == nullptr || !shadowcast->active){
-        glBindBuffer(GL_UNIFORM_BUFFER, pipeline->shadowBuffer);
         //In GLSL we should use Integer instead of bool
         int recShadows = 0;
-        glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 2 + 4, 4, &recShadows);
+        pipeline->shadowBuffer->writeData(sizeof (ZSMATRIX4x4) * 2 + 4, 4, &recShadows);
     }
 
-    //Send transform matrix to shader
-    glBindBuffer(GL_UNIFORM_BUFFER, pipeline->camBuffer);
-    glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 2, sizeof (ZSMATRIX4x4), &transform_ptr->transform_mat);
-
     material_ptr->applyMatToPipeline();
-
-
 }
 
 void TerrainProperty::onRender(RenderPipeline* pipeline){
@@ -578,7 +567,7 @@ void TerrainProperty::onRender(RenderPipeline* pipeline){
         hasChanged = false;
     }
     //Binding terrain buffer
-    glBindBuffer(GL_UNIFORM_BUFFER, pipeline->terrainUniformBuffer);
+     pipeline->terrainUniformBuffer->bind();
 
     MaterialProperty* mat = this->go_link.updLinkPtr()->getPropertyPtr<MaterialProperty>();
     if(mat == nullptr) return;
@@ -594,40 +583,31 @@ void TerrainProperty::onRender(RenderPipeline* pipeline){
         if(pair->diffuse != nullptr){
             //Use diffuse texture
             pair->diffuse->Use(static_cast<int>(i));
-            glBufferSubData(GL_UNIFORM_BUFFER, 16 * i, 4, &dtrue);
+            terrainUniformBuffer->writeData(16 * i, 4, &dtrue);
         }else{
-            glBufferSubData(GL_UNIFORM_BUFFER, 16 * i, 4, &dfalse);
+            terrainUniformBuffer->writeData(16 * i, 4, &dfalse);
         }
         //Check, if pair has normal texture
         if(pair->normal != nullptr){
             //Use normal texture
             pair->normal->Use(static_cast<int>(12 + i));
-            glBufferSubData(GL_UNIFORM_BUFFER, 16 * 12 + 16 * i, 4, &dtrue);
+            terrainUniformBuffer->writeData(16 * 12 + 16 * i, 4, &dtrue);
         }else{
-            glBufferSubData(GL_UNIFORM_BUFFER, 16 * 12 + 16 * i, 4, &dfalse);
+            terrainUniformBuffer->writeData(16 * 12 + 16 * i, 4, &dfalse);
         }
     }
     //Tell shader, that we rendering terrain in normal mode (non picking)
-    glBufferSubData(GL_UNIFORM_BUFFER, 16 * 12 * 2, 4, &dfalse);
+    terrainUniformBuffer->writeData(16 * 12 * 2, 4, &dfalse);
     //Send dimensions to buffer
-    glBufferSubData(GL_UNIFORM_BUFFER, 16 * 12 * 2 + 4, 4, &this->data.W);
-    glBufferSubData(GL_UNIFORM_BUFFER, 16 * 12 * 2 + 8, 4, &this->data.H);
+    terrainUniformBuffer->writeData(16 * 12 * 2 + 4, 4, &this->data.W);
+    terrainUniformBuffer->writeData(16 * 12 * 2 + 8, 4, &this->data.H);
 
     //Apply material shader
     mat->onRender(pipeline);
-
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
 void TileProperty::onRender(RenderPipeline* pipeline){
     ZSPIRE::Shader* tile_shader = pipeline->getTileShader();
-    //Receive pointer to tile information
-    TransformProperty* transform_ptr = static_cast<TransformProperty*>(this->go_link.updLinkPtr()->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
-
-    if(transform_ptr == nullptr) return;
-
-    glBindBuffer(GL_UNIFORM_BUFFER, pipeline->camBuffer);
-    glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 2, sizeof (ZSMATRIX4x4), &transform_ptr->transform_mat);
 
     tile_shader->Use();
 
@@ -704,18 +684,17 @@ void ShadowCasterProperty::Draw(ZSPIRE::Camera* cam, RenderPipeline* pipeline){
     glFrontFace(GL_CW);
     glDisable(GL_CULL_FACE);
     //Bind shadow uniform buffer
-    glBindBuffer(GL_UNIFORM_BUFFER, pipeline->shadowBuffer);
+    pipeline->shadowBuffer->bind();
     //Bind ortho shadow projection
-    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof (ZSMATRIX4x4), &LightProjectionMat);
+    pipeline->shadowBuffer->writeData(0, sizeof (ZSMATRIX4x4), &LightProjectionMat);
     //Bind shadow view matrix
-    glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4), sizeof (ZSMATRIX4x4), &LightViewMat);
+    pipeline->shadowBuffer->writeData(sizeof (ZSMATRIX4x4), sizeof (ZSMATRIX4x4), &LightViewMat);
     //Send BIAS value
-    glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 2, 4, &shadow_bias);
+    pipeline->shadowBuffer->writeData(sizeof (ZSMATRIX4x4) * 2, 4, &shadow_bias);
     //Send Width of shadow texture
-    glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 2 + 8, 4, &this->TextureWidth);
+    pipeline->shadowBuffer->writeData(sizeof (ZSMATRIX4x4) * 2 + 8, 4, &this->TextureWidth);
     //Send Height of shadow texture
-    glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 2 + 12, 4, &this->TextureHeight);
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    pipeline->shadowBuffer->writeData(sizeof (ZSMATRIX4x4) * 2 + 12, 4, &this->TextureHeight);
 
     pipeline->getShadowmapShader()->Use();
 
@@ -764,14 +743,13 @@ void ShadowCasterProperty::setTexture(){
 }
 
 void RenderPipeline::updateShadersCameraInfo(ZSPIRE::Camera* cam_ptr){
-    glBindBuffer(GL_UNIFORM_BUFFER, camBuffer);
+    transformBuffer->bind();
     ZSMATRIX4x4 proj = cam_ptr->getProjMatrix();
     ZSMATRIX4x4 view = cam_ptr->getViewMatrix();
     ZSVECTOR3 cam_pos = cam_ptr->getCameraPosition();
-    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof (ZSMATRIX4x4), &proj);
-    glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4), sizeof (ZSMATRIX4x4), &view);
-    glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 3, sizeof(ZSVECTOR3), &cam_pos);
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    transformBuffer->writeData(0, sizeof (ZSMATRIX4x4), &proj);
+    transformBuffer->writeData(sizeof (ZSMATRIX4x4), sizeof (ZSMATRIX4x4), &view);
+    transformBuffer->writeData(sizeof (ZSMATRIX4x4) * 3, sizeof(ZSVECTOR3), &cam_pos);
     //Setting UI camera to UI buffer
     glBindBuffer(GL_UNIFORM_BUFFER, uiUniformBuffer);
     proj = cam_ptr->getUiProjMatrix();

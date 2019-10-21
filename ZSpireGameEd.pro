@@ -58,7 +58,6 @@ SOURCES += \
     World/TerrainUtils.cpp \
     World/Physics.cpp \
     Misc/ThumbnailsMaster.cpp \
-    Misc/zs3m-master.cpp \
     ui/zs-uiwidget.cpp \
     ui/zs-uibutton.cpp \
     Render/zs-material-defines.cpp \

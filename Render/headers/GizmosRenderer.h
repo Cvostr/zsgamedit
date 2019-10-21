@@ -3,14 +3,14 @@
 
 #include "zs-shader.h"
 #include <render/zs-mesh.h>
-
+#include <render/zs-uniform-buffer.h>
 #include <GL/glew.h>
 
 class GizmosRenderer{
 private:
     //pointer to mark shader
     ZSPIRE::Shader* mark_shader_ptr;
-    unsigned int camBuffer;
+    Engine::UniformBuffer* transformBuffer;
     bool depthTestEnabled;
     bool cullFaceEnabled;
     int projectPerspective;
@@ -23,7 +23,7 @@ public:
     void glFeaturesOff();
     void glFeaturesOn();
 
-    GizmosRenderer(ZSPIRE::Shader* mark_shader, bool depthTestEnabled, bool cullFaceEnabled, int projectPerspective, uint camBuffer);
+    GizmosRenderer(ZSPIRE::Shader* mark_shader, bool depthTestEnabled, bool cullFaceEnabled, int projectPerspective, Engine::UniformBuffer* buf);
 };
 
 

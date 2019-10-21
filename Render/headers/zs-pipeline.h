@@ -4,11 +4,14 @@
 #include <GL/glew.h>
 #include "zs-shader.h"
 #include <render/zs-mesh.h>
+#include <render/zs-uniform-buffer.h>
 #include "zs-texture.h"
 #include "GizmosRenderer.h"
 #include "../../Misc/headers/EditorManager.h"
 #include <QMainWindow>
 #include <SDL2/SDL.h>
+
+#define MAX_LIGHTS_AMOUNT 150
 
 enum PIPELINE_STATE {
     PIPELINE_STATE_DEFAULT,
@@ -70,10 +73,10 @@ private:
 public:
     ZSPIRE::Shader diffuse3d_shader;
 
-    unsigned int camBuffer;
-    unsigned int lightsBuffer;
-    unsigned int shadowBuffer;
-    unsigned int terrainUniformBuffer;
+    Engine::UniformBuffer* transformBuffer;
+    Engine::UniformBuffer* lightsBuffer;
+    Engine::UniformBuffer* shadowBuffer;
+    Engine::UniformBuffer* terrainUniformBuffer;
     unsigned int skinningUniformBuffer;
     unsigned int tileMaterialUniformBuffer;
     unsigned int skyboxTransformUniformBuffer;

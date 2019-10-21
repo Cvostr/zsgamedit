@@ -31,6 +31,8 @@ void ProjBuilder::start(){
                 break;
             case RESOURCE_TYPE_MATERIAL : type_str = "MATERIAL";
                 break;
+            case RESOURCE_TYPE_ANIMATION : type_str = "ANIMATION";
+                break;
         }
         window->addToOutput("Resource #" + QString::number(res_i) + " type: " + type_str + " " + res_ptr->rel_path);
         writer->writeToBlob((proj_ptr->root_path + "/" + res_ptr->rel_path).toStdString(), res_ptr->rel_path.toStdString(), res_ptr);

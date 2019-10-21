@@ -2,8 +2,6 @@
 #include <GL/glew.h>
 
 #include <iostream>
-
-#define MAX_LIGHTS_AMOUNT 150
 #define THUMBNAIL_IMG_SIZE 512
 
 extern RenderPipeline* renderer;
@@ -97,14 +95,14 @@ void ThumbnailsMaster::prepareMaterialThumbnailPipeline(){
         cam.setViewport(ZSVIEWPORT(0,0, THUMBNAIL_IMG_SIZE, THUMBNAIL_IMG_SIZE));
         cam.setZplanes(0.1f, 5000.f);
 
-        glBindBuffer(GL_UNIFORM_BUFFER, renderer->camBuffer);
+        renderer->transformBuffer->bind();
         ZSMATRIX4x4 proj = cam.getProjMatrix();
         ZSMATRIX4x4 view = cam.getViewMatrix();
         ZSMATRIX4x4 model = getIdentity();
-        glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof (ZSMATRIX4x4), &proj);
-        glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4), sizeof (ZSMATRIX4x4), &view);
-        glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 2, sizeof (ZSMATRIX4x4), &model);
-        glBindBuffer(GL_UNIFORM_BUFFER, 0);
+        renderer->transformBuffer->writeData(0, sizeof (ZSMATRIX4x4), &proj);
+        renderer->transformBuffer->writeData(sizeof (ZSMATRIX4x4), sizeof (ZSMATRIX4x4), &view);
+        renderer->transformBuffer->writeData(sizeof (ZSMATRIX4x4) * 2, sizeof (ZSMATRIX4x4), &model);
+        //glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
         glBindBuffer(GL_UNIFORM_BUFFER, renderer->skyboxTransformUniformBuffer);
         glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof (ZSMATRIX4x4), &proj);
@@ -113,8 +111,8 @@ void ThumbnailsMaster::prepareMaterialThumbnailPipeline(){
     }
     {
         //Set lights to lighting shader
-        glBindBuffer(GL_UNIFORM_BUFFER, renderer->lightsBuffer);
-        int light_i = 0;
+        renderer->lightsBuffer->bind();
+        unsigned int light_i = 0;
         int light_type = 1;
         float light_intensity = 0.8f;
         ZSVECTOR3 pos = ZSVECTOR3(0,0,0);
@@ -122,19 +120,18 @@ void ThumbnailsMaster::prepareMaterialThumbnailPipeline(){
         ZSRGBCOLOR color = ZSRGBCOLOR(255,255,255,255);
         color.updateGL();
 
-        glBufferSubData(GL_UNIFORM_BUFFER, 64 * light_i, sizeof (int), &light_type);
+        renderer->lightsBuffer->writeData(64 * light_i, sizeof (int), &light_type);
         //glBufferSubData(GL_UNIFORM_BUFFER, 64 * light_i + 4, sizeof (float), &_light_ptr->range);
-        glBufferSubData(GL_UNIFORM_BUFFER, 64 * light_i + 8, sizeof (float), &light_intensity);
+        renderer->lightsBuffer->writeData(64 * light_i + 8, sizeof (float), &light_intensity);
         //glBufferSubData(GL_UNIFORM_BUFFER, 64 * light_i + 12, sizeof (float), &_light_ptr->spot_angle);
-        glBufferSubData(GL_UNIFORM_BUFFER, 64 * light_i + 16, 12, &pos);
-        glBufferSubData(GL_UNIFORM_BUFFER, 64 * light_i + 32, 12, &light_dir);
-        glBufferSubData(GL_UNIFORM_BUFFER, 64 * light_i + 48, 4, &color.gl_r);
-        glBufferSubData(GL_UNIFORM_BUFFER, 64 * light_i + 52, 4, &color.gl_g);
-        glBufferSubData(GL_UNIFORM_BUFFER, 64 * light_i + 56, 4, &color.gl_b);
+        renderer->lightsBuffer->writeData(64 * light_i + 16, 12, &pos);
+        renderer->lightsBuffer->writeData(64 * light_i + 32, 12, &light_dir);
+        renderer->lightsBuffer->writeData(64 * light_i + 48, 4, &color.gl_r);
+        renderer->lightsBuffer->writeData(64 * light_i + 52, 4, &color.gl_g);
+        renderer->lightsBuffer->writeData(64 * light_i + 56, 4, &color.gl_b);
 
         int ls = 1;
-        glBufferSubData(GL_UNIFORM_BUFFER, 64 * MAX_LIGHTS_AMOUNT, 4, &ls);
-        glBindBuffer(GL_UNIFORM_BUFFER, 0);
+        renderer->lightsBuffer->writeData(64 * MAX_LIGHTS_AMOUNT, 4, &ls);
     }
 
 }
@@ -242,13 +239,13 @@ void ThumbnailsMaster::DrawMesh(Engine::Mesh* mesh){
     cam.setViewport(ZSVIEWPORT(0,0, 512, 512));
     cam.setZplanes(0.1f, 5000.f);
 
-    glBindBuffer(GL_UNIFORM_BUFFER, renderer->camBuffer);
+    renderer->transformBuffer->bind();
     ZSMATRIX4x4 proj = cam.getProjMatrix();
     ZSMATRIX4x4 view = cam.getViewMatrix();
     ZSMATRIX4x4 model = getIdentity();
-    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof (ZSMATRIX4x4), &proj);
-    glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4), sizeof (ZSMATRIX4x4), &view);
-    glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 2, sizeof (ZSMATRIX4x4), &model);
+    renderer->transformBuffer->writeData(0, sizeof (ZSMATRIX4x4), &proj);
+    renderer->transformBuffer->writeData(sizeof (ZSMATRIX4x4), sizeof (ZSMATRIX4x4), &view);
+    renderer->transformBuffer->writeData(sizeof (ZSMATRIX4x4) * 2, sizeof (ZSMATRIX4x4), &model);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
     mesh->Draw();

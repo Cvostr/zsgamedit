@@ -1,6 +1,10 @@
 #include "headers/GizmosRenderer.h"
 
-GizmosRenderer::GizmosRenderer(ZSPIRE::Shader* mark_shader, bool depthTestEnabled, bool cullFaceEnabled, int projectPerspective, uint camBuffer){
+GizmosRenderer::GizmosRenderer(ZSPIRE::Shader* mark_shader,
+                               bool depthTestEnabled,
+                               bool cullFaceEnabled,
+                               int projectPerspective,
+                               Engine::UniformBuffer* buf){
     //set shader pointer
     this->mark_shader_ptr = mark_shader;
 
@@ -8,7 +12,7 @@ GizmosRenderer::GizmosRenderer(ZSPIRE::Shader* mark_shader, bool depthTestEnable
     this->depthTestEnabled = depthTestEnabled;
     this->projectPerspective = projectPerspective;
 
-    this->camBuffer = camBuffer;
+    this->transformBuffer = buf;
 }
 
 void GizmosRenderer::drawPickedMeshWireframe(Engine::Mesh *mesh_ptr, ZSMATRIX4x4 transform, ZSRGBCOLOR color){
@@ -16,8 +20,8 @@ void GizmosRenderer::drawPickedMeshWireframe(Engine::Mesh *mesh_ptr, ZSMATRIX4x4
 
     this->mark_shader_ptr->Use();
 
-    glBindBuffer(GL_UNIFORM_BUFFER, camBuffer);
-    glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 2, sizeof (ZSMATRIX4x4), &transform);
+    transformBuffer->bind();
+    transformBuffer->writeData(sizeof (ZSMATRIX4x4) * 2, sizeof (ZSMATRIX4x4), &transform);
 
     this->mark_shader_ptr->setGLuniformColor("color", color);
 
@@ -28,8 +32,8 @@ void GizmosRenderer::drawPickedMeshWireframe(Engine::Mesh *mesh_ptr, ZSMATRIX4x4
 
 void GizmosRenderer::drawCube(ZSMATRIX4x4 transform, ZSRGBCOLOR color){
     this->mark_shader_ptr->Use();
-    glBindBuffer(GL_UNIFORM_BUFFER, camBuffer);
-    glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 2, sizeof (ZSMATRIX4x4), &transform);
+    transformBuffer->bind();
+    transformBuffer->writeData(sizeof (ZSMATRIX4x4) * 2, sizeof (ZSMATRIX4x4), &transform);
     this->mark_shader_ptr->setGLuniformColor("color", color);
 
     Engine::getCubeMesh3D()->Draw();

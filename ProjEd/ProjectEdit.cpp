@@ -15,7 +15,7 @@
 #include <QMessageBox>
 #include <mainwin.h>
 #include <fstream>
-#include "../Misc/headers/zs3m-master.h"
+#include <misc/zs3m-master.h>
 #include "../World/headers/Misc.h"
 
 //Hack to support meshes
@@ -125,7 +125,6 @@ EditWindow::EditWindow(QApplication* app, QWidget *parent) :
     this->glcontext = nullptr;
 
     ZSENGINE_CREATE_INFO* engine_create_info = new ZSENGINE_CREATE_INFO;
-    engine_create_info->appName = "EDITOR";
     engine_create_info->createWindow = false; //window already created, we don't need one
     engine_create_info->graphicsApi = OGL32; //use opengl
 
@@ -258,8 +257,8 @@ void EditWindow::assignIconFile(QListWidgetItem* item){
             item->setIcon(QIcon(QPixmap::fromImage(*img)));
         }
     }
-    //File is .FBX .DAE scene
-    if(checkExtension(item->text(), (".fbx")) || checkExtension(item->text(), (".dae"))){
+    //File is .FBX .DAE .ZS3M scene
+    if(checkExtension(item->text(), (".fbx")) || checkExtension(item->text(), (".dae")) || checkExtension(item->text(), (".zs3m"))){
         item->setIcon(QIcon::fromTheme("applications-graphics"));
     }
     //File is .WAV sound

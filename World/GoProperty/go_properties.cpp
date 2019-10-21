@@ -1510,9 +1510,9 @@ void TerrainProperty::getPickedVertexId(int posX, int posY, int screenX, int scr
     //Apply material shader
     mat->material_ptr->group_ptr->render_shader->Use();
 
-    glBindBuffer(GL_UNIFORM_BUFFER, terrainUniformBuffer);
+    terrainUniformBuffer->bind();
     int dtrue = 1;
-    glBufferSubData(GL_UNIFORM_BUFFER, 16 * 12 * 2, 4, &dtrue);
+    terrainUniformBuffer->writeData(16 * 12 * 2, 4, &dtrue);
 
     this->data.Draw(true);
     //read picked pixel
