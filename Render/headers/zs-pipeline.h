@@ -2,9 +2,10 @@
 #define ZSPIPELINE_H
 #define GLEW_STATIC
 #include <GL/glew.h>
-#include "zs-shader.h"
+#include <render/zs-shader.h>
 #include <render/zs-mesh.h>
 #include <render/zs-uniform-buffer.h>
+#include "../../World/headers/zs-camera.h"
 #include "zs-texture.h"
 #include "GizmosRenderer.h"
 #include "../../Misc/headers/EditorManager.h"
@@ -57,30 +58,31 @@ private:
 
     G_BUFFER_GL gbuffer;
 
-    ZSPIRE::Shader tile_shader; //Shader to draw tiles
+    Engine::Shader* tile_shader; //Shader to draw tiles
 
-    ZSPIRE::Shader pick_shader; //Shader to draw & pick objects
-    ZSPIRE::Shader obj_mark_shader; //Shader to draw mark of selected objects
-    ZSPIRE::Shader ui_shader;
-    ZSPIRE::Shader deffered_light;
-    ZSPIRE::Shader skybox;
-    ZSPIRE::Shader shadowMap;
-    ZSPIRE::Shader heightmap;
+    Engine::Shader* pick_shader; //Shader to draw & pick objects
+    Engine::Shader* obj_mark_shader; //Shader to draw mark of selected objects
+    Engine::Shader* ui_shader;
+    Engine::Shader* deffered_light;
+    Engine::Shader* skybox;
+    Engine::Shader* shadowMap;
+    Engine::Shader* heightmap;
 
     std::vector<void*> lights_ptr;
 
     RenderSettings render_settings;
 public:
-    ZSPIRE::Shader diffuse3d_shader;
+    Engine::Shader* diffuse3d_shader;
 
     Engine::UniformBuffer* transformBuffer;
     Engine::UniformBuffer* lightsBuffer;
     Engine::UniformBuffer* shadowBuffer;
     Engine::UniformBuffer* terrainUniformBuffer;
-    unsigned int skinningUniformBuffer;
-    unsigned int tileMaterialUniformBuffer;
-    unsigned int skyboxTransformUniformBuffer;
-    unsigned int uiUniformBuffer;
+    Engine::UniformBuffer* skinningUniformBuffer;
+    Engine::UniformBuffer* tileMaterialUniformBuffer;
+    Engine::UniformBuffer* skyboxTransformUniformBuffer;
+    Engine::UniformBuffer* uiUniformBuffer;
+    Engine::UniformBuffer* editorUniformBuffer;
 
     bool depthTest; //if enabled, GL will do depth testing
     bool cullFaces; //if enabled, GL will cull faces
@@ -114,10 +116,10 @@ public:
     void init();
     void updateWindowSize(int W, int H);
 
-    ZSPIRE::Shader* getTileShader();
-    ZSPIRE::Shader* getPickingShader();
-    ZSPIRE::Shader* getShadowmapShader();
-    ZSPIRE::Shader* getUiShader();
+    Engine::Shader* getTileShader();
+    Engine::Shader* getPickingShader();
+    Engine::Shader* getShadowmapShader();
+    Engine::Shader* getUiShader();
 
     RenderPipeline();
     ~RenderPipeline();

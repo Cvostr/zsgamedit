@@ -2,7 +2,8 @@
 #define matshaderprops
 
 #include "zs-texture.h"
-#include "zs-shader.h"
+#include <render/zs-shader.h>
+#include <render/zs-uniform-buffer.h>
 #include <vector>
 #include <QString>
 
@@ -44,17 +45,17 @@ public:
     //ID of connected shader uniform buffer
     unsigned int UB_ConnectID;
     //ID of uniform buffer
-    unsigned int UB_ID;
+    Engine::UniformBuffer* UB_ID;
     void setUB_Data(unsigned int offset, unsigned int size, void* data);
 
 
-    ZSPIRE::Shader* render_shader; //Pointer to shader, that binds on object render
+    Engine::Shader* render_shader; //Pointer to shader, that binds on object render
     std::vector<MaterialShaderProperty*> properties;
 
     MaterialShaderProperty* addProperty(int type);
     void loadFromFile(const char* fpath);
 
-    MtShaderPropertiesGroup(ZSPIRE::Shader* shader, const char* UB_CAPTION, unsigned int UB_ConnectID, unsigned int UB_SIZE);
+    MtShaderPropertiesGroup(Engine::Shader* shader, const char* UB_CAPTION, unsigned int UB_ConnectID, unsigned int UB_SIZE);
 };
 
 class Material{
@@ -85,8 +86,8 @@ namespace MtShProps {
     MaterialShaderProperty* allocateProperty(int type);
     MaterialShaderPropertyConf* allocatePropertyConf(int type);
 
-    MtShaderPropertiesGroup* genDefaultMtShGroup(ZSPIRE::Shader* shader3d, ZSPIRE::Shader* skybox,
-                                                 ZSPIRE::Shader* heightmap,
+    MtShaderPropertiesGroup* genDefaultMtShGroup(Engine::Shader* shader3d, Engine::Shader* skybox,
+                                                 Engine::Shader* heightmap,
                                                  unsigned int uniform_buf_id_took);
     MtShaderPropertiesGroup* getDefaultMtShGroup();
 

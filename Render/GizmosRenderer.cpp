@@ -1,10 +1,11 @@
 #include "headers/GizmosRenderer.h"
 
-GizmosRenderer::GizmosRenderer(ZSPIRE::Shader* mark_shader,
+GizmosRenderer::GizmosRenderer(Engine::Shader* mark_shader,
                                bool depthTestEnabled,
                                bool cullFaceEnabled,
                                int projectPerspective,
-                               Engine::UniformBuffer* buf){
+                               Engine::UniformBuffer* buf,
+                               Engine::UniformBuffer* editor){
     //set shader pointer
     this->mark_shader_ptr = mark_shader;
 
@@ -13,6 +14,7 @@ GizmosRenderer::GizmosRenderer(ZSPIRE::Shader* mark_shader,
     this->projectPerspective = projectPerspective;
 
     this->transformBuffer = buf;
+    this->editorBuffer = editor;
 }
 
 void GizmosRenderer::drawPickedMeshWireframe(Engine::Mesh *mesh_ptr, ZSMATRIX4x4 transform, ZSRGBCOLOR color){
@@ -23,7 +25,9 @@ void GizmosRenderer::drawPickedMeshWireframe(Engine::Mesh *mesh_ptr, ZSMATRIX4x4
     transformBuffer->bind();
     transformBuffer->writeData(sizeof (ZSMATRIX4x4) * 2, sizeof (ZSMATRIX4x4), &transform);
 
-    this->mark_shader_ptr->setGLuniformColor("color", color);
+    editorBuffer->bind();
+    ZSVECTOR4 v = ZSVECTOR4(color.gl_r, color.gl_g, color.gl_b, color.gl_a);
+    editorBuffer->writeData(0, 16, &v);
 
     mesh_ptr->DrawLines();
 
@@ -34,7 +38,10 @@ void GizmosRenderer::drawCube(ZSMATRIX4x4 transform, ZSRGBCOLOR color){
     this->mark_shader_ptr->Use();
     transformBuffer->bind();
     transformBuffer->writeData(sizeof (ZSMATRIX4x4) * 2, sizeof (ZSMATRIX4x4), &transform);
-    this->mark_shader_ptr->setGLuniformColor("color", color);
+
+    editorBuffer->bind();
+    ZSVECTOR4 v = ZSVECTOR4(color.gl_r, color.gl_g, color.gl_b, color.gl_a);
+    editorBuffer->writeData(0, 16, &v);
 
     Engine::getCubeMesh3D()->Draw();
 }

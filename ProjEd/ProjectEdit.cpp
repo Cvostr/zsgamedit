@@ -261,6 +261,10 @@ void EditWindow::assignIconFile(QListWidgetItem* item){
     if(checkExtension(item->text(), (".fbx")) || checkExtension(item->text(), (".dae")) || checkExtension(item->text(), (".zs3m"))){
         item->setIcon(QIcon::fromTheme("applications-graphics"));
     }
+    //File is .zsanim animation
+    if(checkExtension(item->text(), (".zsanim"))){
+        item->setIcon(QIcon::fromTheme("media-playback-start"));
+    }
     //File is .WAV sound
     if(checkExtension(item->text(), (".wav"))){
         item->setIcon(QIcon::fromTheme("audio-x-generic"));

@@ -29,7 +29,6 @@ SOURCES += \
         main.cpp \
         mainwin.cpp \
     ProjEd/ProjectEdit.cpp \
-    Render/zs-shader.cpp \
     Render/zs-pipeline.cpp \
     Render/zs-texture.cpp \
     World/World.cpp \
@@ -66,7 +65,6 @@ SOURCES += \
 HEADERS += \
         mainwin.h \
     ProjEd/headers/ProjectEdit.h \
-    Render/headers/zs-shader.h \
     Render/headers/zs-pipeline.h \
     Render/headers/zs-texture.h \
     World/headers/World.h \

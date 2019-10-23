@@ -53,38 +53,33 @@ void MtShaderPropertiesGroup::loadFromFile(const char* fpath){
     std::ifstream mat_shader_group;
     mat_shader_group.open(fpath);
 }
-MtShaderPropertiesGroup::MtShaderPropertiesGroup(ZSPIRE::Shader* shader, const char* UB_CAPTION, unsigned int UB_ConnectID, unsigned int UB_SIZE){
+MtShaderPropertiesGroup::MtShaderPropertiesGroup(Engine::Shader* shader, const char* UB_CAPTION, unsigned int UB_ConnectID, unsigned int UB_SIZE){
     render_shader = shader;
 
     if(UB_SIZE == 0 || strlen(UB_CAPTION) == 0) return;
     this->UB_ConnectID = UB_ConnectID;
     //First of all, tell shader uniform buffer point
     //Get Index of buffer
-    unsigned int UB_INDEX = shader->getUniformBufferIndex(UB_CAPTION);
+    //unsigned int UB_INDEX = shader->getUniformBufferIndex(UB_CAPTION);
     //Set UB binding
-    shader->setUniformBufferBinding(UB_INDEX, UB_ConnectID);
+   // shader->setUniformBufferBinding(UB_INDEX, UB_ConnectID);
+    shader->setUniformBufferBinding(UB_CAPTION, UB_ConnectID);
 
     //Generate uniform buffer
-    glGenBuffers(1, &this->UB_ID);
-    glBindBuffer(GL_UNIFORM_BUFFER, UB_ID);
-    //Allocate memory for buffer
-    glBufferData(GL_UNIFORM_BUFFER, UB_SIZE, nullptr, GL_STATIC_DRAW);
-    //Connect to point (UB_ConnectID)
-    glBindBufferBase(GL_UNIFORM_BUFFER, UB_ConnectID, UB_ID);
+    this->UB_ID = Engine::allocUniformBuffer();
+    this->UB_ID->init(UB_ConnectID, UB_SIZE);
 
     acceptShadows = false;
     properties.resize(0);
 }
 
 void MtShaderPropertiesGroup::setUB_Data(unsigned int offset, unsigned int size, void* data){
-    //Bind uniform buffer ID
-    glBindBuffer(GL_UNIFORM_BUFFER, UB_ID);
-    //Send data to uniform buffer
-    glBufferSubData(GL_UNIFORM_BUFFER, offset, size, data);
+    this->UB_ID->bind();
+    this->UB_ID->writeData(offset, size, data);
 }
 
-MtShaderPropertiesGroup* MtShProps::genDefaultMtShGroup(ZSPIRE::Shader* shader3d, ZSPIRE::Shader* skybox,
-                                                        ZSPIRE::Shader* heightmap,
+MtShaderPropertiesGroup* MtShProps::genDefaultMtShGroup(Engine::Shader* shader3d, Engine::Shader* skybox,
+                                                        Engine::Shader* heightmap,
                                                         unsigned int uniform_buf_id_took){
 
     MtShaderPropertiesGroup* default_group = new MtShaderPropertiesGroup(shader3d, "Default3d", uniform_buf_id_took + 1, 36);
@@ -396,7 +391,8 @@ void Material::setPropertyGroup(MtShaderPropertiesGroup* group_ptr){
 }
 
 void Material::applyMatToPipeline(){
-    ZSPIRE::Shader* shader = this->group_ptr->render_shader;
+    Engine::Shader* shader = this->group_ptr->render_shader;
+    shader->Use();
     //iterate over all properties, send them all!
     unsigned int offset = 0;
     for(unsigned int prop_i = 0; prop_i < group_ptr->properties.size(); prop_i ++){

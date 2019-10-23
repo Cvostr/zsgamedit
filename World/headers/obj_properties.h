@@ -2,6 +2,7 @@
 #define OBJ_PROPERTIES_H
 
 #include "World.h"
+#include "zs-camera.h"
 #include "../../Scripting/headers/LuaScript.h"
 #include "../../Render/headers/MatShaderProps.h"
 #include "../../World/headers/terrain.h"

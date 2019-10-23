@@ -6,7 +6,7 @@
 
 #include <render/zs-math.h>
 #include "EditorManager.h"
-#include "../../Render/headers/zs-shader.h"
+#include <render/zs-shader.h>
 #include "../../Render/headers/zs-pipeline.h"
 #include "ft2build.h"
 

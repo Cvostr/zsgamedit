@@ -45,19 +45,22 @@ ThumbnailsMaster::ThumbnailsMaster(){
 ThumbnailsMaster::~ThumbnailsMaster(){
     //interate over all textures and clear them
     this->texture_thumbnails.clear();
-    texture_shader.Destroy();
+    texture_shader->Destroy();
 }
 
 void ThumbnailsMaster::initShader(){
-    texture_shader.compileFromStr(&texture_shaderVS[0], &texture_shaderFS[0]);
-    mesh_shader.compileFromStr(&mesh_shaderVS[0], &texture_shaderFS[0]);
+    texture_shader = Engine::allocShader();
+    mesh_shader = Engine::allocShader();
+
+    texture_shader->compileFromStr(&texture_shaderVS[0], &texture_shaderFS[0]);
+    mesh_shader->compileFromStr(&mesh_shaderVS[0], &texture_shaderFS[0]);
 }
 
 void ThumbnailsMaster::createTexturesThumbnails(){
     //Compile texture shader
     initShader();
     glViewport(0, 0, THUMBNAIL_IMG_SIZE, THUMBNAIL_IMG_SIZE);
-    texture_shader.Use();
+    texture_shader->Use();
 
     glDisable(GL_CULL_FACE);
     glDisable(GL_DEPTH_TEST);
@@ -102,12 +105,10 @@ void ThumbnailsMaster::prepareMaterialThumbnailPipeline(){
         renderer->transformBuffer->writeData(0, sizeof (ZSMATRIX4x4), &proj);
         renderer->transformBuffer->writeData(sizeof (ZSMATRIX4x4), sizeof (ZSMATRIX4x4), &view);
         renderer->transformBuffer->writeData(sizeof (ZSMATRIX4x4) * 2, sizeof (ZSMATRIX4x4), &model);
-        //glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
-        glBindBuffer(GL_UNIFORM_BUFFER, renderer->skyboxTransformUniformBuffer);
-        glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof (ZSMATRIX4x4), &proj);
-        glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4), sizeof (ZSMATRIX4x4), &view);
-        glBindBuffer(GL_UNIFORM_BUFFER, 0);
+        //Send translation to skybox uniform buffer
+        renderer->skyboxTransformUniformBuffer->bind();
+        renderer->skyboxTransformUniformBuffer->writeData(0, sizeof (ZSMATRIX4x4), &proj);
+        renderer->skyboxTransformUniformBuffer->writeData(sizeof (ZSMATRIX4x4), sizeof (ZSMATRIX4x4), &view);
     }
     {
         //Set lights to lighting shader
@@ -197,7 +198,6 @@ void ThumbnailsMaster::DrawTexture(ZSPIRE::Texture* texture){
 
 void ThumbnailsMaster::DrawMaterial(Material* material){
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    material->group_ptr->render_shader->Use();
     material->applyMatToPipeline();
 
     Engine::getSphereMesh()->Draw();
@@ -209,7 +209,7 @@ void ThumbnailsMaster::createMeshesThumbnails(){
     glClearColor(0,0,0,0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
-    mesh_shader.Use();
+    mesh_shader->Use();
 
     //Iterate over all resources
     for(unsigned int res_i = 0; res_i < project_struct_ptr->resources.size(); res_i ++){

@@ -1,7 +1,7 @@
 #ifndef THUMBNAILSMASTER_H
 #define THUMBNAILSMASTER_H
 
-#include "../../Render/headers/zs-shader.h"
+#include <render/zs-shader.h>
 #include "../../Render/headers/zs-texture.h"
 #include <render/zs-mesh.h>
 #include "../../Render/headers/MatShaderProps.h"
@@ -15,8 +15,8 @@ public:
 
     std::map<std::string, QImage*> texture_thumbnails;
 
-    ZSPIRE::Shader texture_shader;
-    ZSPIRE::Shader mesh_shader;
+    Engine::Shader* texture_shader;
+    Engine::Shader* mesh_shader;
 
     //virtual void init();
     //virtual void updateWindowSize(int W, int H);

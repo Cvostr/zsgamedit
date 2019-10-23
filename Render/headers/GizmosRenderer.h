@@ -1,7 +1,7 @@
 #ifndef zs_gizmosRenderer
 #define zs_gizmosRenderer
 
-#include "zs-shader.h"
+#include <render/zs-shader.h>
 #include <render/zs-mesh.h>
 #include <render/zs-uniform-buffer.h>
 #include <GL/glew.h>
@@ -9,8 +9,9 @@
 class GizmosRenderer{
 private:
     //pointer to mark shader
-    ZSPIRE::Shader* mark_shader_ptr;
+    Engine::Shader* mark_shader_ptr;
     Engine::UniformBuffer* transformBuffer;
+    Engine::UniformBuffer* editorBuffer;
     bool depthTestEnabled;
     bool cullFaceEnabled;
     int projectPerspective;
@@ -23,7 +24,11 @@ public:
     void glFeaturesOff();
     void glFeaturesOn();
 
-    GizmosRenderer(ZSPIRE::Shader* mark_shader, bool depthTestEnabled, bool cullFaceEnabled, int projectPerspective, Engine::UniformBuffer* buf);
+    GizmosRenderer(Engine::Shader* mark_shader, bool depthTestEnabled,
+                   bool cullFaceEnabled,
+                   int projectPerspective,
+                   Engine::UniformBuffer* buf,
+                   Engine::UniformBuffer* editor);
 };
 
 

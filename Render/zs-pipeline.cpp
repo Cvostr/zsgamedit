@@ -26,19 +26,29 @@ void RenderSettings::defaults(){
 }
 
 void RenderPipeline::setup(int bufWidth, int bufHeight){
+    this->tile_shader = Engine::allocShader();
+    this->pick_shader = Engine::allocShader();
+    this->obj_mark_shader = Engine::allocShader();
+    this->ui_shader = Engine::allocShader();
+    this->deffered_light = Engine::allocShader();
+    this->diffuse3d_shader = Engine::allocShader();
+    this->skybox = Engine::allocShader();
+    shadowMap = Engine::allocShader();
+    heightmap = Engine::allocShader();
+
     if(this->project_struct_ptr->perspective == 2){
-        this->tile_shader.compileFromFile("Shaders/2d_tile/tile2d.vert", "Shaders/2d_tile/tile2d.frag");
+        this->tile_shader->compileFromFile("Shaders/2d_tile/tile2d.vert", "Shaders/2d_tile/tile2d.frag");
     }
-    this->pick_shader.compileFromFile("Shaders/pick/pick.vert", "Shaders/pick/pick.frag");
-    this->obj_mark_shader.compileFromFile("Shaders/mark/mark.vert", "Shaders/mark/mark.frag");
-    this->ui_shader.compileFromFile("Shaders/ui/ui.vert", "Shaders/ui/ui.frag");
+    this->pick_shader->compileFromFile("Shaders/pick/pick.vert", "Shaders/pick/pick.frag");
+    this->obj_mark_shader->compileFromFile("Shaders/mark/mark.vert", "Shaders/mark/mark.frag");
+    this->ui_shader->compileFromFile("Shaders/ui/ui.vert", "Shaders/ui/ui.frag");
     if(this->project_struct_ptr->perspective == 3){
-        this->deffered_light.compileFromFile("Shaders/postprocess/deffered_light/deffered.vert",
+        this->deffered_light->compileFromFile("Shaders/postprocess/deffered_light/deffered.vert",
                                              "Shaders/postprocess/deffered_light/deffered.frag");
-        this->diffuse3d_shader.compileFromFile("Shaders/3d/3d.vert", "Shaders/3d/3d.frag");
-        skybox.compileFromFile("Shaders/skybox/skybox.vert", "Shaders/skybox/skybox.frag");
-        shadowMap.compileFromFile("Shaders/shadowmap/shadowmap.vert", "Shaders/shadowmap/shadowmap.frag");
-        heightmap.compileFromFile("Shaders/heightmap/heightmap.vert", "Shaders/heightmap/heightmap.frag");
+        this->diffuse3d_shader->compileFromFile("Shaders/3d/3d.vert", "Shaders/3d/3d.frag");
+        skybox->compileFromFile("Shaders/skybox/skybox.vert", "Shaders/skybox/skybox.frag");
+        shadowMap->compileFromFile("Shaders/shadowmap/shadowmap.vert", "Shaders/shadowmap/shadowmap.frag");
+        heightmap->compileFromFile("Shaders/heightmap/heightmap.vert", "Shaders/heightmap/heightmap.frag");
         this->gbuffer.create(bufWidth, bufHeight);
     }
     Engine::setupDefaultMeshes();
@@ -56,40 +66,34 @@ void RenderPipeline::setup(int bufWidth, int bufHeight){
     terrainUniformBuffer = Engine::allocUniformBuffer();
     terrainUniformBuffer->init(3, 12 * 16 * 2 + 4 * 3);
 
-    glGenBuffers(1, &skinningUniformBuffer);
-    glBindBuffer(GL_UNIFORM_BUFFER, skinningUniformBuffer);
-    glBufferData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 150, nullptr, GL_STATIC_DRAW);
-    //Connect to point 4 (four)
-    glBindBufferBase(GL_UNIFORM_BUFFER, 4, skinningUniformBuffer);
+    skinningUniformBuffer = Engine::allocUniformBuffer();
+    skinningUniformBuffer->init(4, sizeof (ZSMATRIX4x4) * 150);
 
     for(unsigned int i = 0; i < MAX_LIGHTS_AMOUNT; i ++){
         ZSMATRIX4x4 m = getIdentity();
-        glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * i, sizeof (ZSMATRIX4x4), &m);
+        skinningUniformBuffer->writeData(sizeof (ZSMATRIX4x4) * i, sizeof (ZSMATRIX4x4), &m);
     }
 
-    glGenBuffers(1, &tileMaterialUniformBuffer);
-    glBindBuffer(GL_UNIFORM_BUFFER, tileMaterialUniformBuffer);
-    glBufferData(GL_UNIFORM_BUFFER, 28, nullptr, GL_STATIC_DRAW);
-    //Connect to point 5
-    glBindBufferBase(GL_UNIFORM_BUFFER, 5, tileMaterialUniformBuffer);
+    tileMaterialUniformBuffer = Engine::allocUniformBuffer();
+    tileMaterialUniformBuffer->init(5, 28);
 
-    glGenBuffers(1, &skyboxTransformUniformBuffer);
-    glBindBuffer(GL_UNIFORM_BUFFER, skyboxTransformUniformBuffer);
-    glBufferData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 2, nullptr, GL_STATIC_DRAW);
-    //Connect to point 6
-    glBindBufferBase(GL_UNIFORM_BUFFER, 6, skyboxTransformUniformBuffer);
+    skyboxTransformUniformBuffer = Engine::allocUniformBuffer();
+    skyboxTransformUniformBuffer->init(6, sizeof (ZSMATRIX4x4) * 2);
 
-    glGenBuffers(1, &uiUniformBuffer);
-    glBindBuffer(GL_UNIFORM_BUFFER, uiUniformBuffer);
-    glBufferData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 2 + 16 + 16, nullptr, GL_STATIC_DRAW);
-    //Connect to point 7
-    glBindBufferBase(GL_UNIFORM_BUFFER, 7, uiUniformBuffer);
+    uiUniformBuffer = Engine::allocUniformBuffer();
+    uiUniformBuffer->init(7, sizeof (ZSMATRIX4x4) * 2 + 16 + 16);
 
-    MtShProps::genDefaultMtShGroup(&diffuse3d_shader, &skybox, &heightmap, 7);
+    editorUniformBuffer = Engine::allocUniformBuffer();
+    editorUniformBuffer->init(8, 16);
+
+    MtShProps::genDefaultMtShGroup(diffuse3d_shader, skybox, heightmap, 8);
 }
 
 void RenderPipeline::initGizmos(int projectPespective){
-    gizmos = new GizmosRenderer(&obj_mark_shader, this->depthTest, this->cullFaces, projectPespective, transformBuffer);
+    gizmos = new GizmosRenderer(obj_mark_shader, this->depthTest, this->cullFaces,
+                                projectPespective,
+                                transformBuffer,
+                                editorUniformBuffer);
 }
 
 RenderPipeline::~RenderPipeline(){
@@ -98,15 +102,15 @@ RenderPipeline::~RenderPipeline(){
     shadowBuffer->Destroy();
     terrainUniformBuffer->Destroy();
 
-    this->tile_shader.Destroy();
-    this->pick_shader.Destroy();
-    this->obj_mark_shader.Destroy();
-    this->deffered_light.Destroy();
-    this->diffuse3d_shader.Destroy();
-    ui_shader.Destroy();
-    skybox.Destroy();
-    shadowMap.Destroy();
-    heightmap.Destroy();
+    this->tile_shader->Destroy();
+    this->pick_shader->Destroy();
+    this->obj_mark_shader->Destroy();
+    this->deffered_light->Destroy();
+    this->diffuse3d_shader->Destroy();
+    ui_shader->Destroy();
+    skybox->Destroy();
+    shadowMap->Destroy();
+    heightmap->Destroy();
     Engine::freeDefaultMeshes();
 
     this->gbuffer.Destroy();
@@ -200,7 +204,7 @@ unsigned int RenderPipeline::render_getpickedObj(void* projectedit_ptr, int mous
     glClearColor(1,1,1,1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glDisable(GL_BLEND);
-    pick_shader.Use();
+    pick_shader->Use();
     //Picking state
     this->current_state = PIPELINE_STATE_PICKING;
 
@@ -303,7 +307,7 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr){
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    this->ui_shader.Use();
+    this->ui_shader->Use();
     GlyphFontContainer* c = editwin_ptr->getFontContainer("LiberationMono-Regular.ttf");
     int f[12];
     f[0] = static_cast<int>(L'H');
@@ -387,7 +391,7 @@ void RenderPipeline::render3D(void* projectedit_ptr, ZSPIRE::Camera* cam)
     glBindFramebuffer(GL_FRAMEBUFFER, 0); //Back to default framebuffer
     glClear(GL_COLOR_BUFFER_BIT); //Clear screen
     gbuffer.bindTextures(); //Bind gBuffer textures
-    deffered_light.Use(); //use deffered shader
+    deffered_light->Use(); //use deffered shader
     //Send lights to OpenGL uniform buffer
     setLightsToBuffer();
 }
@@ -444,8 +448,8 @@ void GameObject::Draw(RenderPipeline* pipeline){
                         //Calculate result matrix
                         ZSMATRIX4x4 matrix = transpose(invert(rootNodeTransform) * nd->abs * b->offset);
                         //Send skinned matrix to skinning uniform buffer
-                        glBindBuffer(GL_UNIFORM_BUFFER, pipeline->skinningUniformBuffer);
-                        glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * bone_i, sizeof (ZSMATRIX4x4), &matrix);
+                        pipeline->skinningUniformBuffer->bind();
+                        pipeline->skinningUniformBuffer->writeData(sizeof (ZSMATRIX4x4) * bone_i, sizeof (ZSMATRIX4x4), &matrix);
                     }
                 }
             }
@@ -461,12 +465,14 @@ void GameObject::Draw(RenderPipeline* pipeline){
             float g = static_cast<float>(to_send[1]);
             float b = static_cast<float>(to_send[2]);
             float a = static_cast<float>(to_send[3]);
+            ZSVECTOR4 color = ZSVECTOR4(r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f);
 
             //set transform to camera buffer
             pipeline->transformBuffer->bind();
             pipeline->transformBuffer->writeData(sizeof (ZSMATRIX4x4) * 2, sizeof (ZSMATRIX4x4), &transform_ptr->transform_mat);
 
-            pipeline->getPickingShader()->setGLuniformVec4("color", ZSVECTOR4(r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f));
+            pipeline->editorUniformBuffer->bind();
+            pipeline->editorUniformBuffer->writeData(0, 16, &color);
             DrawMesh();
         }
         if(pipeline->current_state == PIPELINE_STATE_SHADOWDEPTH) {
@@ -529,7 +535,6 @@ void GameObject::processObject(RenderPipeline* pipeline){
 }
 
 void MaterialProperty::onRender(RenderPipeline* pipeline){
-    ZSPIRE::Shader* shader;
     //Check for validity of pointer
     if(material_ptr == nullptr) return;
 
@@ -537,9 +542,6 @@ void MaterialProperty::onRender(RenderPipeline* pipeline){
 
     if( group_ptr == nullptr) return ; //if object hasn't property
 
-    //Work with shader
-    shader = group_ptr->render_shader;
-    shader->Use();
     //Get pointer to shadowcaster
     ShadowCasterProperty* shadowcast = static_cast<ShadowCasterProperty*>(pipeline->getRenderSettings()->shadowcaster_ptr);
     //Bind shadow uniform buffer
@@ -607,11 +609,11 @@ void TerrainProperty::onRender(RenderPipeline* pipeline){
 }
 
 void TileProperty::onRender(RenderPipeline* pipeline){
-    ZSPIRE::Shader* tile_shader = pipeline->getTileShader();
+    Engine::Shader* tile_shader = pipeline->getTileShader();
 
     tile_shader->Use();
 
-    glBindBuffer(GL_UNIFORM_BUFFER, pipeline->tileMaterialUniformBuffer);
+    pipeline->tileMaterialUniformBuffer->bind();
 
     //Checking for diffuse texture
     if(texture_diffuse != nullptr){
@@ -619,25 +621,25 @@ void TileProperty::onRender(RenderPipeline* pipeline){
     }
 
     int diffuse1_ = texture_diffuse != nullptr;
-    glBufferSubData(GL_UNIFORM_BUFFER, 20, 4, &diffuse1_);
+    pipeline->tileMaterialUniformBuffer->writeData(20, 4, &diffuse1_);
 
     //Checking for transparent texture
     if(texture_transparent != nullptr){
         texture_transparent->Use(1); //Use this texture
     }
     int diffuse2_ = texture_transparent != nullptr;
-    glBufferSubData(GL_UNIFORM_BUFFER, 24, 4, &diffuse2_);
+    pipeline->tileMaterialUniformBuffer->writeData(24, 4, &diffuse2_);
     //calculate animation state
     int anim_state_i = anim_property.isAnimated && anim_state.playing;
     //Sending animation info
     if(anim_property.isAnimated && anim_state.playing == true){ //If tile animated, then send anim state to shader
-        glBufferSubData(GL_UNIFORM_BUFFER, 16, 4, &anim_state_i);
-        glBufferSubData(GL_UNIFORM_BUFFER, 0, 4, &anim_property.framesX);
-        glBufferSubData(GL_UNIFORM_BUFFER, 4, 4, &anim_property.framesY);
-        glBufferSubData(GL_UNIFORM_BUFFER, 8, 4, &anim_state.cur_frameX);
-        glBufferSubData(GL_UNIFORM_BUFFER, 12, 4, &anim_state.cur_frameY);
+        pipeline->tileMaterialUniformBuffer->writeData(16, 4, &anim_state_i);
+        pipeline->tileMaterialUniformBuffer->writeData(0, 4, &anim_property.framesX);
+        pipeline->tileMaterialUniformBuffer->writeData(4, 4, &anim_property.framesY);
+        pipeline->tileMaterialUniformBuffer->writeData(8, 4, &anim_state.cur_frameX);
+        pipeline->tileMaterialUniformBuffer->writeData(12, 4, &anim_state.cur_frameY);
     }else{ //No animation or unplayed
-         glBufferSubData(GL_UNIFORM_BUFFER, 16, 4, &anim_state_i);
+        pipeline->tileMaterialUniformBuffer->writeData(16, 4, &anim_state_i);
     }
 }
 
@@ -751,17 +753,16 @@ void RenderPipeline::updateShadersCameraInfo(ZSPIRE::Camera* cam_ptr){
     transformBuffer->writeData(sizeof (ZSMATRIX4x4), sizeof (ZSMATRIX4x4), &view);
     transformBuffer->writeData(sizeof (ZSMATRIX4x4) * 3, sizeof(ZSVECTOR3), &cam_pos);
     //Setting UI camera to UI buffer
-    glBindBuffer(GL_UNIFORM_BUFFER, uiUniformBuffer);
+    uiUniformBuffer->bind();
     proj = cam_ptr->getUiProjMatrix();
-    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof (ZSMATRIX4x4), &proj);
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    uiUniformBuffer->writeData(0, sizeof (ZSMATRIX4x4), &proj);
     //Setting cameras to skybox shader
     proj = cam_ptr->getProjMatrix();
     view = cam_ptr->getViewMatrix();
     view = removeTranslationFromViewMat(view);
-    glBindBuffer(GL_UNIFORM_BUFFER, skyboxTransformUniformBuffer);
-    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof (ZSMATRIX4x4), &proj);
-    glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4), sizeof (ZSMATRIX4x4), &view);
+    skyboxTransformUniformBuffer->bind();
+    skyboxTransformUniformBuffer->writeData(0, sizeof (ZSMATRIX4x4), &proj);
+    skyboxTransformUniformBuffer->writeData(sizeof (ZSMATRIX4x4), sizeof (ZSMATRIX4x4), &view);
 
 }
 
@@ -865,11 +866,11 @@ void RenderPipeline::renderSprite(ZSPIRE::Texture* texture_sprite, int X, int Y,
 }
 
 void RenderPipeline::renderSprite(unsigned int texture_id, int X, int Y, int scaleX, int scaleY){
-    this->ui_shader.Use();
-    glBindBuffer(GL_UNIFORM_BUFFER, uiUniformBuffer);
+    this->ui_shader->Use();
+    uiUniformBuffer->bind();
 
     int _render_mode = 1;
-    glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 2 , 4, &_render_mode);
+    uiUniformBuffer->writeData(sizeof (ZSMATRIX4x4) * 2 , 4, &_render_mode);
     //Use texture at 0 slot
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture_id);
@@ -879,22 +880,22 @@ void RenderPipeline::renderSprite(unsigned int texture_id, int X, int Y, int sca
     ZSMATRIX4x4 transform = scale * translation;
 
     //Push glyph transform
-    glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4), sizeof (ZSMATRIX4x4), &transform);
+    uiUniformBuffer->writeData(sizeof (ZSMATRIX4x4), sizeof (ZSMATRIX4x4), &transform);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
     Engine::getUiSpriteMesh2D()->Draw();
 }
 
 void RenderPipeline::renderGlyph(unsigned int texture_id, int X, int Y, int scaleX, int scaleY, ZSRGBCOLOR color){
-    this->ui_shader.Use();
-    glBindBuffer(GL_UNIFORM_BUFFER, uiUniformBuffer);
+    this->ui_shader->Use();
+    uiUniformBuffer->bind();
     //tell shader, that we will render glyph
     int _render_mode = 2;
-    glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 2 , 4, &_render_mode);
+    uiUniformBuffer->writeData(sizeof (ZSMATRIX4x4) * 2 , 4, &_render_mode);
     //sending glyph color
-    glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 2 + 16, 4, &color.gl_r);
-    glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 2 + 4 + 16, 4, &color.gl_g);
-    glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4) * 2 + 8 + 16, 4, &color.gl_b);
+    uiUniformBuffer->writeData(sizeof (ZSMATRIX4x4) * 2 + 16, 4, &color.gl_r);
+    uiUniformBuffer->writeData(sizeof (ZSMATRIX4x4) * 2 + 4 + 16, 4, &color.gl_g);
+    uiUniformBuffer->writeData(sizeof (ZSMATRIX4x4) * 2 + 8 + 16, 4, &color.gl_b);
 
     //Use texture at 0 slot
     glActiveTexture(GL_TEXTURE0);
@@ -905,7 +906,7 @@ void RenderPipeline::renderGlyph(unsigned int texture_id, int X, int Y, int scal
     ZSMATRIX4x4 transform = scale * translation;
 
     //Push glyph transform
-    glBufferSubData(GL_UNIFORM_BUFFER, sizeof (ZSMATRIX4x4), sizeof (ZSMATRIX4x4), &transform);
+    uiUniformBuffer->writeData(sizeof (ZSMATRIX4x4), sizeof (ZSMATRIX4x4), &transform);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
     Engine::getUiSpriteMesh2D()->Draw();
@@ -920,18 +921,18 @@ void RenderPipeline::updateWindowSize(int W, int H){
     }
 }
 
-ZSPIRE::Shader* RenderPipeline::getTileShader(){
-    return &this->tile_shader;
+Engine::Shader* RenderPipeline::getTileShader(){
+    return this->tile_shader;
 }
 
-ZSPIRE::Shader* RenderPipeline::getPickingShader(){
-    return &this->pick_shader;
+Engine::Shader* RenderPipeline::getPickingShader(){
+    return this->pick_shader;
 }
 
-ZSPIRE::Shader* RenderPipeline::getShadowmapShader(){
-    return &this->shadowMap;
+Engine::Shader* RenderPipeline::getShadowmapShader(){
+    return this->shadowMap;
 }
 
-ZSPIRE::Shader* RenderPipeline::getUiShader(){
-    return &this->ui_shader;
+Engine::Shader* RenderPipeline::getUiShader(){
+    return this->ui_shader;
 }
