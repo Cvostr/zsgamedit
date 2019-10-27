@@ -1,10 +1,10 @@
 #version 420 core
-#extension GL_ARB_explicit_attrib_location : require
-#extension GL_ARB_explicit_uniform_location : require
 
 out vec4 FragColor;
 
-uniform vec4 color;
+layout (std140, binding = 8) uniform EditorData{
+	uniform vec4 color;
+};
 
 void main(){
 	FragColor = color;

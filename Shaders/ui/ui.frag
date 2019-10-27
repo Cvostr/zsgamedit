@@ -11,7 +11,6 @@ layout (std140, binding = 7) uniform Ui{
     mat4 object_transform;
 	int render_mode;
     vec3 text_color;
-   
 };
 
 layout(binding = 0) uniform sampler2D sprite_map;

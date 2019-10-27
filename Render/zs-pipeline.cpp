@@ -208,6 +208,9 @@ unsigned int RenderPipeline::render_getpickedObj(void* projectedit_ptr, int mous
     //Picking state
     this->current_state = PIPELINE_STATE_PICKING;
 
+    if(depthTest == true) //if depth is enabled, then disable it
+        glEnable(GL_DEPTH_TEST);
+
     if(cullFaces == true) // if face cull is enabled, then disable it
         glEnable(GL_CULL_FACE);
 
@@ -217,9 +220,6 @@ unsigned int RenderPipeline::render_getpickedObj(void* projectedit_ptr, int mous
         if(!obj_ptr->hasParent)
             obj_ptr->processObject(this);
     }
-
-    if(depthTest == false) //if depth is enabled, then disable it
-        glDisable(GL_DEPTH_TEST);
 
 
     unsigned char data[4];

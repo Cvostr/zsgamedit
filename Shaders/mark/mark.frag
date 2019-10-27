@@ -5,7 +5,9 @@ layout (location = 4) out vec4 tMasks;
 
 out vec4 FragColor;
 
-uniform vec3 color;
+layout (std140, binding = 8) uniform EditorData{
+	uniform vec3 color;
+};
 
 void main(){
 	
