@@ -1,7 +1,7 @@
 #ifndef matshaderprops
 #define matshaderprops
 
-#include "zs-texture.h"
+#include <render/zs-texture.h>
 #include <render/zs-shader.h>
 #include <render/zs-uniform-buffer.h>
 #include <vector>
@@ -156,7 +156,7 @@ public:
 //Property configurations
 class TextureMtShPropConf : public MaterialShaderPropertyConf{
 public:
-     ZSPIRE::Texture* texture;
+     Engine::Texture* texture;
      QString path;
 
      TextureMtShPropConf();
@@ -203,7 +203,7 @@ public:
     QString texture_str[6];
     QString rel_path;
 
-    ZSPIRE::Texture3D* texture3D;
+    Engine::Texture3D* texture3D;
 
      Texture3MtShPropConf();
 };

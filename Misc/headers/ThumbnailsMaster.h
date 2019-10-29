@@ -2,7 +2,7 @@
 #define THUMBNAILSMASTER_H
 
 #include <render/zs-shader.h>
-#include "../../Render/headers/zs-texture.h"
+#include <render/zs-texture.h>
 #include <render/zs-mesh.h>
 #include "../../Render/headers/MatShaderProps.h"
 #include "../../Render/headers/zs-pipeline.h"
@@ -29,7 +29,7 @@ public:
     void createMaterialThumbnail(QString name);
     void createMeshesThumbnails();
 
-    void DrawTexture(ZSPIRE::Texture* texture);
+    void DrawTexture(Engine::Texture* texture);
     void DrawMaterial(Material* material);
     void DrawMesh(Engine::Mesh* mesh);
 

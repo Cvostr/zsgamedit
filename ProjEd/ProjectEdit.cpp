@@ -212,7 +212,7 @@ void EditWindow::init(){
 
     ready = true;//Everything is ready
     //Init OpenAL sound system
-    ZSPIRE::SFX::initAL();
+    Engine::SFX::initAL();
 
     switch(project.perspective){
         case 2:{ //2D project
@@ -597,7 +597,7 @@ bool EditWindow::onCloseProject(){
         destroyAllManagers();
 
         _ed_actions_container->clear();
-        ZSPIRE::SFX::destroyAL();
+        Engine::SFX::destroyAL();
 
         this->ready = false; //won't render anymore
 
@@ -1121,8 +1121,8 @@ void EditWindow::loadResource(Resource* resource){
             break;
         }
         case RESOURCE_TYPE_TEXTURE:{ //If resource type is texture
-            resource->class_ptr = static_cast<void*>(new ZSPIRE::Texture); //Initialize pointer to texture
-            ZSPIRE::Texture* texture_ptr = static_cast<ZSPIRE::Texture*>(resource->class_ptr); //Aquire casted pointer
+            resource->class_ptr = static_cast<void*>(Engine::allocTexture()); //Initialize pointer to texture
+            Engine::Texture* texture_ptr = static_cast<Engine::Texture*>(resource->class_ptr); //Aquire casted pointer
             std::string str = resource->file_path.toStdString();
             texture_ptr->LoadDDSTextureFromFile(str.c_str()); //Perform texture resource loading
             break;
@@ -1134,8 +1134,8 @@ void EditWindow::loadResource(Resource* resource){
             break;
         }
         case RESOURCE_TYPE_AUDIO:{
-            resource->class_ptr = static_cast<void*>(new SoundBuffer); //Initialize pointer to sound buffer
-            SoundBuffer* sound_ptr = static_cast<SoundBuffer*>(resource->class_ptr); //Aquire casted pointer
+            resource->class_ptr = static_cast<void*>(new Engine::SoundBuffer); //Initialize pointer to sound buffer
+            Engine::SoundBuffer* sound_ptr = static_cast<Engine::SoundBuffer*>(resource->class_ptr); //Aquire casted pointer
             std::string str = resource->file_path.toStdString();
             sound_ptr->loadFileWAV(str.c_str()); //Load music file
             break;

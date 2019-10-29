@@ -4,12 +4,12 @@
 #define TERRAIN_TEXTURES_AMOUNT 12
 
 #include <QString>
-#include "../../Render/headers/zs-texture.h"
+#include <render/zs-texture.h>
 #include <render/zs-math.h>
 
 typedef struct HeightmapGrass{
     QString diffuse_relpath;
-    ZSPIRE::Texture* diffuse;
+    Engine::Texture* diffuse;
 }HeightmapGrass;
 
 typedef struct HeightmapTexel{
@@ -29,8 +29,8 @@ typedef struct HeightmapTexturePair{
     QString diffuse_relpath;
     QString normal_relpath;
 
-    ZSPIRE::Texture* diffuse;
-    ZSPIRE::Texture* normal;
+    Engine::Texture* diffuse;
+    Engine::Texture* normal;
 
     HeightmapTexturePair(){
         diffuse_relpath = normal_relpath = "@none";

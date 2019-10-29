@@ -71,10 +71,10 @@ private:
 public:
     TileGeometry geometry;
     //Defines color texture
-    ZSPIRE::Texture* texture_diffuse;
+    Engine::Texture* texture_diffuse;
     QString diffuse_relpath;
     //Defines texture, that will cover tile
-    ZSPIRE::Texture* texture_transparent;
+    Engine::Texture* texture_transparent;
     QString transparent_relpath;
     //Defines animation
     TileAnimation anim_property;

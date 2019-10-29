@@ -6,7 +6,7 @@
 #include <render/zs-mesh.h>
 #include <render/zs-uniform-buffer.h>
 #include "../../World/headers/zs-camera.h"
-#include "zs-texture.h"
+#include <render/zs-texture.h>
 #include "GizmosRenderer.h"
 #include "../../Misc/headers/EditorManager.h"
 #include <QMainWindow>
@@ -108,8 +108,7 @@ public:
     RenderSettings* getRenderSettings();
     GizmosRenderer* getGizmosRenderer();
 
-    void renderSprite(unsigned int texture_id, int X, int Y, int scaleX, int scaleY);
-    void renderSprite(ZSPIRE::Texture* texture_sprite, int X, int Y, int scaleX, int scaleY);
+    void renderSprite(Engine::Texture* texture_sprite, int X, int Y, int scaleX, int scaleY);
 
     void renderGlyph(unsigned int texture_id, int X, int Y, int scaleX, int scaleY, ZSRGBCOLOR color);
     //override virtual function from EngineComponentManager

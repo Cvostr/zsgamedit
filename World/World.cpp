@@ -738,7 +738,7 @@ ZSPIRE::Animation* World::getAnimationPtrByRelPath(QString label){
 }
 
 
-ZSPIRE::Texture* World::getTexturePtrByRelPath(QString label){
+Engine::Texture* World::getTexturePtrByRelPath(QString label){
     Project* proj_ptr = static_cast<Project*>(this->proj_ptr); //Convert void pointer to Project*
     unsigned int resources_num = static_cast<unsigned int>(proj_ptr->resources.size()); //Receive resource amount in project
 
@@ -746,13 +746,13 @@ ZSPIRE::Texture* World::getTexturePtrByRelPath(QString label){
         Resource* r_ptr = &proj_ptr->resources[r_it]; //Obtain pointer to resource
         //If resource is mesh and has same name as in argument
         if(r_ptr->type == RESOURCE_TYPE_TEXTURE && r_ptr->rel_path.compare(label) == 0){
-            return static_cast<ZSPIRE::Texture*>(r_ptr->class_ptr);
+            return static_cast<Engine::Texture*>(r_ptr->class_ptr);
         }
     }
     return nullptr;
 }
 
-SoundBuffer* World::getSoundPtrByName(QString label){
+Engine::SoundBuffer* World::getSoundPtrByName(QString label){
     Project* proj_ptr = static_cast<Project*>(this->proj_ptr); //Convert void pointer to Project*
     unsigned int resources_num = static_cast<unsigned int>(proj_ptr->resources.size()); //Receive resource amount in project
 
@@ -760,7 +760,7 @@ SoundBuffer* World::getSoundPtrByName(QString label){
         Resource* r_ptr = &proj_ptr->resources[r_it]; //Obtain pointer to resource
         //If resource is mesh and has same name as in argument
         if(r_ptr->type == RESOURCE_TYPE_AUDIO && r_ptr->rel_path.compare(label) == 0){
-            return static_cast<SoundBuffer*>(r_ptr->class_ptr);
+            return static_cast<Engine::SoundBuffer*>(r_ptr->class_ptr);
         }
     }
     return nullptr;

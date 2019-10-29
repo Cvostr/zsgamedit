@@ -36,8 +36,8 @@ void ZSPIRE::Camera::updateProjectionMat(){
 
 void ZSPIRE::Camera::updateViewMat(){
     if(isAlListenerCamera){
-        ZSPIRE::SFX::setListenerPos(camera_pos);
-        ZSPIRE::SFX::setListenerOri(camera_front, camera_up);
+        Engine::SFX::setListenerPos(camera_pos);
+        Engine::SFX::setListenerOri(camera_front, camera_up);
     }
     view = matrixLookAt(camera_pos, (camera_pos + camera_front), camera_up);
 }

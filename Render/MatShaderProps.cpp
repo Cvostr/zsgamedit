@@ -42,7 +42,7 @@ TextureMtShPropConf::TextureMtShPropConf(){
 Texture3MtShPropConf::Texture3MtShPropConf(){
     this->type = MATSHPROP_TYPE_TEXTURE3;
 
-    texture3D = new ZSPIRE::Texture3D;
+    texture3D = Engine::allocTexture3D();
 
     for(int i = 0; i < 6; i ++){
         this->texture_str[i] = "@none";
@@ -413,7 +413,7 @@ void Material::applyMatToPipeline(){
                     //if texture isn't loaded
                     if(texture_conf->texture == nullptr){
                         Resource* res_ptr = project_ptr->getResource(texture_conf->path);
-                        texture_conf->texture = static_cast<ZSPIRE::Texture*>(res_ptr->class_ptr);
+                        texture_conf->texture = static_cast<Engine::Texture*>(res_ptr->class_ptr);
                     }
                     //Set opengl texture
                     db = 1;

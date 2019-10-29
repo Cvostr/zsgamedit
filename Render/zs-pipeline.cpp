@@ -861,19 +861,14 @@ void G_BUFFER_GL::Destroy(){
     glDeleteFramebuffers(1, &this->gBuffer);
 }
 
-void RenderPipeline::renderSprite(ZSPIRE::Texture* texture_sprite, int X, int Y, int scaleX, int scaleY){
-    renderSprite(texture_sprite->TEXTURE_ID, X, Y, scaleX, scaleY);
-}
-
-void RenderPipeline::renderSprite(unsigned int texture_id, int X, int Y, int scaleX, int scaleY){
+void RenderPipeline::renderSprite(Engine::Texture* texture_sprite, int X, int Y, int scaleX, int scaleY){
     this->ui_shader->Use();
     uiUniformBuffer->bind();
 
     int _render_mode = 1;
     uiUniformBuffer->writeData(sizeof (ZSMATRIX4x4) * 2 , 4, &_render_mode);
     //Use texture at 0 slot
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture_id);
+    texture_sprite->Use(0);
 
     ZSMATRIX4x4 translation = getTranslationMat(X, Y, 0.0f);
     ZSMATRIX4x4 scale = getScaleMat(scaleX, scaleY, 0.0f);
@@ -881,7 +876,6 @@ void RenderPipeline::renderSprite(unsigned int texture_id, int X, int Y, int sca
 
     //Push glyph transform
     uiUniformBuffer->writeData(sizeof (ZSMATRIX4x4), sizeof (ZSMATRIX4x4), &transform);
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
     Engine::getUiSpriteMesh2D()->Draw();
 }

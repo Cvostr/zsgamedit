@@ -42,8 +42,8 @@ public:
 class AudioSourceProperty : public GameObjectProperty{
 public:
     QString resource_relpath; //Relative path to resource
-    SoundBuffer* buffer_ptr;
-    SoundSource source;
+    Engine::SoundBuffer* buffer_ptr;
+    Engine::SoundSource source;
 
     ZSVECTOR3 last_pos;
 

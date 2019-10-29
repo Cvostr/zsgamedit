@@ -10,11 +10,10 @@
 
 #include "../../Render/headers/zs-pipeline.h"
 #include <render/zs-mesh.h>
-#include "../../Render/headers/zs-texture.h"
 #include <render/zs-math.h>
 #include <render/zs-shader.h>
 #include "../../Render/headers/MatShaderProps.h"
-#include "../../Misc/headers/oal_manager.h"
+#include <misc/oal_manager.h>
 
 #include "../../Misc/headers/AssimpMeshLoader.h"
 #include "../../Misc/headers/zs_types.h"
@@ -322,8 +321,8 @@ public:
 
     Engine::Mesh* getMeshPtrByRelPath(QString label); //look through all meshes in project ptr
     ZSPIRE::Animation* getAnimationPtrByRelPath(QString label);
-    ZSPIRE::Texture* getTexturePtrByRelPath(QString label); //look through all meshes in project ptr
-    SoundBuffer* getSoundPtrByName(QString label);
+    Engine::Texture* getTexturePtrByRelPath(QString label); //look through all meshes in project ptr
+    Engine::SoundBuffer* getSoundPtrByName(QString label);
     Material* getMaterialPtrByName(QString label);
 
     void saveToFile(QString file);

@@ -70,7 +70,7 @@ void ThumbnailsMaster::createTexturesThumbnails(){
         Resource* resource_ptr = &this->project_struct_ptr->resources[res_i];
         if(resource_ptr->type != RESOURCE_TYPE_TEXTURE) continue;
 
-        ZSPIRE::Texture* texture_ptr = static_cast<ZSPIRE::Texture*>(resource_ptr->class_ptr);
+        Engine::Texture* texture_ptr = static_cast<Engine::Texture*>(resource_ptr->class_ptr);
         DrawTexture(texture_ptr);
         //Allocate image buffer
         unsigned char* texture_data = new unsigned char[THUMBNAIL_IMG_SIZE * THUMBNAIL_IMG_SIZE * 4];
@@ -189,7 +189,7 @@ void ThumbnailsMaster::createMaterialThumbnail(QString name){
 
 }
 
-void ThumbnailsMaster::DrawTexture(ZSPIRE::Texture* texture){
+void ThumbnailsMaster::DrawTexture(Engine::Texture* texture){
     //use texture
     texture->Use(0);
     //draw plane

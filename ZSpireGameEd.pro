@@ -30,7 +30,6 @@ SOURCES += \
         mainwin.cpp \
     ProjEd/ProjectEdit.cpp \
     Render/zs-pipeline.cpp \
-    Render/zs-texture.cpp \
     World/World.cpp \
     World/Misc.cpp \
     ProjEd/InspectorWin.cpp \
@@ -38,7 +37,7 @@ SOURCES += \
     World/zs-camera.cpp \
     ProjEd/PropertyAreas.cpp \
     ProjEd/EdActions.cpp \
-    Misc/oal_manager.cpp \
+    #Misc/oal_manager.cpp \
     ProjEd/EditorUI.cpp \
     Misc/ProjBuilder.cpp \
     Scripting/LuaScript.cpp \
@@ -66,7 +65,6 @@ HEADERS += \
         mainwin.h \
     ProjEd/headers/ProjectEdit.h \
     Render/headers/zs-pipeline.h \
-    Render/headers/zs-texture.h \
     World/headers/World.h \
     World/headers/Misc.h \
     ProjEd/headers/InspectorWin.h \
@@ -74,7 +72,7 @@ HEADERS += \
     World/headers/zs-camera.h \
     World/headers/2dtileproperties.h \
     ProjEd/headers/EdActions.h \
-    Misc/headers/oal_manager.h \
+   # Misc/headers/oal_manager.h \
     Misc/headers/ProjBuilder.h \
     include_engine.h \
     Scripting/headers/LuaScript.h \
@@ -161,7 +159,7 @@ win32:DEPENDPATH += $$PWD/../../LIBS/LUABRIDGE
 
 #-------------------------------------------------- ZSPIRE ENGINE Library ---------------------
 
-unix: LIBS += -L$$PWD/../debug_engine/ -lzsengine -lvulkan
+unix: LIBS += -L$$PWD/../debug_engine/ -lzsengine -lvulkan -lopenal
 
 INCLUDEPATH += $$PWD/../zspirengine/headers
 DEPENDPATH += $$PWD/../zspirengine/headers
