@@ -37,7 +37,6 @@ SOURCES += \
     World/zs-camera.cpp \
     ProjEd/PropertyAreas.cpp \
     ProjEd/EdActions.cpp \
-    #Misc/oal_manager.cpp \
     ProjEd/EditorUI.cpp \
     Misc/ProjBuilder.cpp \
     Scripting/LuaScript.cpp \
@@ -72,7 +71,6 @@ HEADERS += \
     World/headers/zs-camera.h \
     World/headers/2dtileproperties.h \
     ProjEd/headers/EdActions.h \
-   # Misc/headers/oal_manager.h \
     Misc/headers/ProjBuilder.h \
     include_engine.h \
     Scripting/headers/LuaScript.h \
@@ -89,7 +87,6 @@ HEADERS += \
     ProjEd/headers/EditorSettings.h \
     World/headers/terrain.h \
     Misc/headers/ThumbnailsMaster.h \
-    Misc/headers/zs3m-master.h \
     ui/headers/zs-uiwidget.h \
     ui/headers/zs-uibutton.h \
     Input/headers/zs-input.h
@@ -108,62 +105,58 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 #-------------------------------------WINDOWS LIBS PATHS---------------------------
+win32:INCLUDEPATH += $$PWD/../../LIBS/
+win32:INCLUDEPATH += $$PWD/../../LIBS/BULLET/
+
 #FREETYPE library
 win32: LIBS += -L$$PWD/../../LIBS/ -lfreetype
-win32:INCLUDEPATH += $$PWD/../../LIBS/
 win32:DEPENDPATH += $$PWD/../../LIBS/
 
 win32:!win32-g++: PRE_TARGETDEPS += $$PWD/../../LIBS/freetype.lib
 
 #ASSIMP library
-win32: LIBS += -L$$PWD/../../LIBS/ -lassimp_x64
+win32: LIBS += -L$$PWD/../../LIBS/ -lassimp
 
 win32:INCLUDEPATH += $$PWD/../../LIBS/ASSIMP
 win32:DEPENDPATH += $$PWD/../../LIBS/ASSIMP
 
-win32:!win32-g++: PRE_TARGETDEPS += $$PWD/../../LIBS/assimp_x64.lib
+win32:!win32-g++: PRE_TARGETDEPS += $$PWD/../../LIBS/assimp.lib
 #OpenAL library
 win32: LIBS += -L$$PWD/../../LIBS/ -lOpenAL_x64
 
-win32:INCLUDEPATH += $$PWD/../../LIBS/OPENAL
 win32:DEPENDPATH += $$PWD/../../LIBS/OPENAL
 
 win32:!win32-g++: PRE_TARGETDEPS += $$PWD/../../LIBS/OpenAL_x64.lib
 #GLEW library
 win32: LIBS += -L$$PWD/../../LIBS/ -lglew32s
-
-win32:INCLUDEPATH += $$PWD/../../LIBS/GLEW
 win32:DEPENDPATH += $$PWD/../../LIBS/GLEW
 
-win32:!win32-g++: PRE_TARGETDEPS += $$PWD/../../LIBS/glew32s.lib
 win32: LIBS += -lOpenGL32
 
 #SDL2 lib
 win32: LIBS += -L$$PWD/../../LIBS/ -lSDL2
 win32: LIBS += -L$$PWD/../../LIBS/ -lSDL2main
 win32: LIBS += -L$$PWD/../../LIBS/ -lSDL2test
-
-win32:INCLUDEPATH += $$PWD/../../LIBS/SDL
 win32:DEPENDPATH += $$PWD/../../LIBS/SDL
 
 win32:!win32-g++: PRE_TARGETDEPS += $$PWD/../../LIBS/SDL2.lib
 win32:!win32-g++: PRE_TARGETDEPS += $$PWD/../../LIBS/SDL2main.lib
 win32:!win32-g++: PRE_TARGETDEPS += $$PWD/../../LIBS/SDL2test.lib
-#LUA 5.2
-win32: LIBS += -L$$PWD/../../LIBS/ -llua52
-
-win32:INCLUDEPATH += $$PWD/../../LIBS/LUA
+#LUA 5.3
+win32: LIBS += -L$$PWD/../../LIBS/ -llua53
 win32:DEPENDPATH += $$PWD/../../LIBS/LUA
-win32:INCLUDEPATH += $$PWD/../../LIBS/LUABRIDGE
 win32:DEPENDPATH += $$PWD/../../LIBS/LUABRIDGE
 
+#Bullet release static libs
+#win32: LIBS += -L$$PWD/../../LIBS/BULLET/STATIC_RELEASE -lBulletSoftBody -lBulletDynamics -lBulletCollision -lLinearMath
+#Bullet debug static libs
+win32: LIBS += -L$$PWD/../../LIBS/BULLET/STATIC_DEBUG -lBulletSoftBody_Debug -lBulletDynamics_Debug -lBulletCollision_Debug -lLinearMath_Debug
 #-------------------------------------------------- ZSPIRE ENGINE Library ---------------------
 
 unix: LIBS += -L$$PWD/../debug_engine/ -lzsengine -lvulkan -lopenal
+win32: LIBS += -L$$PWD/../debug_engine/debug/ -lzsengine -lvulkan-1 -lOpenAL_x64
 
 INCLUDEPATH += $$PWD/../zspirengine/headers
 DEPENDPATH += $$PWD/../zspirengine/headers
 
-#win32:!win32-g++: PRE_TARGETDEPS += $$PWD/../build-ZSpireEngine-Desktop-Debug/zsengine.lib
 unix: PRE_TARGETDEPS += $$PWD/../debug_engine/libzsengine.a
-

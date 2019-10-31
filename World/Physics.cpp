@@ -75,24 +75,24 @@ void PhysicalProperty::updateCollisionShape(){
     TransformProperty* transform = this->go_link.updLinkPtr()->getPropertyPtr<TransformProperty>();
 
     switch(coll_type){
-    case COLLIDER_TYPE_NONE: {
-        break;
-    }
-    case COLLIDER_TYPE_CUBE: {
-        shape = new btBoxShape(btVector3(btScalar(transform->_last_scale.X),
-                                     btScalar(transform->_last_scale.Y),
-                                     btScalar(transform->_last_scale.Z)));
-        break;
-    }
-    case COLLIDER_TYPE_BOX: {
-        shape = new btBox2dShape(btVector3(btScalar(transform->_last_scale.X),
-                                     btScalar(transform->_last_scale.Y),
-                                     0));
-        break;
-    }
-    case COLLIDER_TYPE_SPHERE:{
-        shape = new btSphereShape(btScalar(transform->_last_scale.Y));
-    }
+        case COLLIDER_TYPE_NONE: {
+            break;
+        }
+        case COLLIDER_TYPE_CUBE: {
+            shape = new btBoxShape(btVector3(btScalar(transform->_last_scale.X),
+                                         btScalar(transform->_last_scale.Y),
+                                         btScalar(transform->_last_scale.Z)));
+            break;
+        }
+        case COLLIDER_TYPE_BOX: {
+            shape = new btBox2dShape(btVector3(btScalar(transform->_last_scale.X),
+                                         btScalar(transform->_last_scale.Y),
+                                         0));
+            break;
+        }
+        case COLLIDER_TYPE_SPHERE:{
+            shape = new btSphereShape(btScalar(transform->_last_scale.Y));
+        }
     }
 }
 
