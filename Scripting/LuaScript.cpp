@@ -48,7 +48,8 @@ void ObjectScript::_callStart(GameObject* obj, World* world) {
         }
     }
     //Some error returned by script
-    if(result == 1) std::cout << "SCRIPT" << "Script (onStart) function exited with 1" << name << std::endl;
+    if(result == 1)
+        SCRIPT_LOG << "SCRIPT" << "Script (onStart) function exited with 1" << name << std::endl;
 }
 
 void ObjectScript::_callDraw(float deltaTime) {
@@ -90,7 +91,7 @@ void ObjectScript::func(lua_State *L){
     for(unsigned int i = 0; i <= argsNum; i ++){
         int arg_index = static_cast<int>(3 + i);
         if(lua_isinteger(L, arg_index)){
-            int in = lua_tointeger(L, arg_index);
+            long long in = lua_tointeger(L, arg_index);
             lua_pushinteger(this->L, in);
             continue;
         }
@@ -100,7 +101,7 @@ void ObjectScript::func(lua_State *L){
             continue;
         }
         if(lua_isstring(L, arg_index)){
-            char* s = (char*)lua_tostring(L, arg_index);
+            const char* s = lua_tostring(L, arg_index);
             lua_pushstring(this->L, s);
         }
         if(lua_isboolean(L, arg_index)){
@@ -128,7 +129,7 @@ void ObjectScript::_func(std::string func_name, luabridge::LuaRef arg_table){
 
     luabridge::LuaRef func = luabridge::getGlobal(L, func_name.c_str());
 
-    for(unsigned int table_entry = 0; table_entry < arg_table.length(); table_entry ++){
+    for(unsigned int table_entry = 0; table_entry < static_cast<unsigned int>(arg_table.length()); table_entry ++){
         luabridge::LuaRef ref = arg_table[table_entry];
 
         newtable[table_entry] = ref;

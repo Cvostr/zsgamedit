@@ -8,7 +8,7 @@
 #include <iostream>
 #include <functional>
 #include <SDL2/SDL.h>
-#include "../Input/headers/zs-input.h"
+#include <input/zs-input.h>
 
 static unsigned int mode_fullscreen = SDL_WINDOW_FULLSCREEN;
 static unsigned int mode_borderless = SDL_WINDOW_FULLSCREEN_DESKTOP;

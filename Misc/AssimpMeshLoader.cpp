@@ -47,6 +47,8 @@ void Engine::processMesh(aiMesh* mesh, Engine::Mesh* mesh_ptr) {
     //Allocate memory for vertices and indices
     mesh_ptr->vertices_arr = new ZSVERTEX[vertices];
     mesh_ptr->indices_arr = new unsigned int[faces * 3];
+    //Allocate vertex coordinate array
+    mesh_ptr->vertices_coord = new float[vertices * 3];
     //Iterate over all vertices, read data and write to array
     for (unsigned int v = 0; v < vertices; v++) {
         aiVector3D vertex_pos = mesh->mVertices[v];
@@ -61,6 +63,11 @@ void Engine::processMesh(aiMesh* mesh, Engine::Mesh* mesh_ptr) {
             ZSVECTOR3(vertex_normal.x, vertex_normal.y, vertex_normal.z), ZSVECTOR3(vertex_tangent.x, vertex_tangent.y, vertex_tangent.z),
             ZSVECTOR3(vertex_bitangent.x, vertex_bitangent.y, vertex_bitangent.z)
         );
+
+        mesh_ptr->vertices_coord[v * 3] = vertex_pos.x;
+        mesh_ptr->vertices_coord[v * 3 + 1] = vertex_pos.y;
+        mesh_ptr->vertices_coord[v * 3 + 2] = vertex_pos.z;
+
         //Read bones
         mesh_ptr->vertices_arr[v].bones_num = 0;
         for(unsigned int vw_i = 0; vw_i < MAX_BONE_PER_VERTEX; vw_i ++){
@@ -74,7 +81,8 @@ void Engine::processMesh(aiMesh* mesh, Engine::Mesh* mesh_ptr) {
 
     for(unsigned int bone_i = 0; bone_i < bones; bone_i ++){
         aiBone* bone_ptr = mesh->mBones[bone_i];
-        Engine::Bone bone(bone_ptr->mName.C_Str(), bone_ptr->mNumWeights);
+        std::string bone_label_strstd = std::string(bone_ptr->mName.C_Str());
+        Engine::Bone bone(bone_label_strstd, bone_ptr->mNumWeights);
         //Convert assimp bone offset matrix and store it in bone class
         cmat(bone_ptr->mOffsetMatrix, &bone.offset);
 

@@ -569,7 +569,7 @@ void TerrainProperty::onRender(RenderPipeline* pipeline){
         hasChanged = false;
     }
     //Binding terrain buffer
-     pipeline->terrainUniformBuffer->bind();
+    pipeline->terrainUniformBuffer->bind();
 
     MaterialProperty* mat = this->go_link.updLinkPtr()->getPropertyPtr<MaterialProperty>();
     if(mat == nullptr) return;

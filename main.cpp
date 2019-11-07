@@ -3,7 +3,7 @@
 #include <SDL2/SDL.h>
 #include <iostream>
 
-#include "Input/headers/zs-input.h"
+#include <input/zs-input.h>
 
 static uint64_t NOW = SDL_GetPerformanceCounter();
 static uint64_t last = 0;

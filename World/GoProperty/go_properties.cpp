@@ -1444,18 +1444,51 @@ void TerrainProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
             PickResourceArea* diffuse_area = new PickResourceArea(RESOURCE_TYPE_TEXTURE);
             diffuse_area->setLabel("Diffuse");
             diffuse_area->go_property = static_cast<void*>(this);
-            diffuse_area->rel_path = &textures[static_cast<uint>(i)].diffuse_relpath;
+            diffuse_area->rel_path = &textures[static_cast<unsigned int>(i)].diffuse_relpath;
             inspector->addPropertyArea(diffuse_area);
 
             PickResourceArea* normal_area = new PickResourceArea(RESOURCE_TYPE_TEXTURE);
             normal_area->setLabel("Normal");
             normal_area->go_property = static_cast<void*>(this);
-            normal_area->rel_path = &textures[static_cast<uint>(i)].normal_relpath;
+            normal_area->rel_path = &textures[static_cast<unsigned int>(i)].normal_relpath;
             inspector->addPropertyArea(normal_area);
         }
         //Add texture picker UI elements
         inspector->registerUiObject(texturegroup_pick);
 
+    }
+    //if selected mode is vegetable paint
+    if(edit_mode == 3){
+
+        AreaRadioGroup* vegetablegroup_pick = new AreaRadioGroup; //allocate button layout
+        vegetablegroup_pick->value_ptr = reinterpret_cast<uint8_t*>(&this->vegetableid);
+        vegetablegroup_pick->go_property = static_cast<void*>(this);
+
+        IntPropertyArea* vSize = new IntPropertyArea; //New property area
+        vSize->setLabel("Grass variants"); //Its label
+        vSize->value = &this->grassType_size; //Ptr to our vector
+        vSize->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
+        inspector->addPropertyArea(vSize);
+
+        for(int i = 0; i < this->grassType_size; i ++){
+            QRadioButton* group_radio = new QRadioButton; //allocate first radio
+            group_radio->setText("Veg " + QString::number(i));
+            if(vegetableid == i)
+                group_radio->setChecked(true);
+            //add created radio button
+            vegetablegroup_pick->addRadioButton(group_radio);
+            inspector->getContentLayout()->addWidget(group_radio);
+
+            PickResourceArea* diffuse_area = new PickResourceArea(RESOURCE_TYPE_TEXTURE);
+            diffuse_area->setLabel("Diffuse");
+            diffuse_area->go_property = static_cast<void*>(this);
+            diffuse_area->rel_path = &this->grass[static_cast<unsigned int>(i)].diffuse_relpath;
+            inspector->addPropertyArea(diffuse_area);
+
+        }
+
+        //Add texture picker UI elements
+        inspector->registerUiObject(vegetablegroup_pick);
     }
 }
 
@@ -1477,7 +1510,11 @@ void TerrainProperty::onValueChanged(){
         textures.resize(static_cast<unsigned int>(this->textures_size));
         _inspector_win->updateRequired = true;
     }
-
+    //if amount of vegetables changed
+    if(static_cast<unsigned int>(this->grassType_size) != grass.size()){
+        grass.resize(static_cast<unsigned int>(this->grassType_size));
+        _inspector_win->updateRequired = true;
+    }
     for(unsigned int i = 0; i < static_cast<unsigned int>(this->textures_size); i ++){
         HeightmapTexturePair* pair = &this->textures[i];
         pair->diffuse = world_ptr->getTexturePtrByRelPath(pair->diffuse_relpath);

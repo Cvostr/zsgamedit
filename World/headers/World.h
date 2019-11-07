@@ -27,6 +27,7 @@
 #include <BulletCollision/CollisionShapes/btSphereShape.h>
 #include <BulletCollision/CollisionShapes/btTriangleMeshShape.h>
 #include <BulletCollision/CollisionShapes/btCapsuleShape.h>
+#include <BulletCollision/CollisionShapes/btConvexHullShape.h>
 #include <LinearMath/btDefaultMotionState.h>
 
 #define OBJ_PROPS_SIZE 11

@@ -17,7 +17,8 @@ enum LIGHTSOURCE_TYPE {
 enum COLLIDER_TYPE {COLLIDER_TYPE_NONE,
                     COLLIDER_TYPE_BOX,
                     COLLIDER_TYPE_CUBE,
-                    COLLIDER_TYPE_SPHERE};
+                    COLLIDER_TYPE_SPHERE,
+                    COLLIDER_TYPE_CONVEX_HULL};
 
 typedef uint8_t ZSLIGHTSOURCE_GL_ID;
 
@@ -290,17 +291,20 @@ public:
     Engine::UniformBuffer* terrainUniformBuffer;
 
     std::vector<HeightmapTexturePair> textures;
+    std::vector<HeightmapGrass> grass;
 
     QString file_label;
-    int Width;
-    int Length;
+    int Width; //Width of terrain mesh
+    int Length; //Height of terrain mesh
     int MaxHeight;
     bool castShadows;
     int textures_size;
+    int grassType_size;
 
-    int range;
-    float editHeight;
+    int range; //Range of edit
+    float editHeight; //Modifying height
     int textureid;
+    int vegetableid;
 
     void addPropertyInterfaceToInspector(InspectorWin* inspector);
     void onRender(RenderPipeline* pipeline);

@@ -1,5 +1,5 @@
 #include "headers/zs-uiwidget.h"
-#include "../Input/headers/zs-input.h"
+#include <input/zs-input.h>
 
 ZSUI::Widget::Widget(){
 

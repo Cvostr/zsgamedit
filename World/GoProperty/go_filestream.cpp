@@ -61,7 +61,6 @@ void GameObject::saveProperties(std::ofstream* stream){
         case GO_PROPERTY_TYPE_ANIMATION:{
             AnimationProperty* ptr = static_cast<AnimationProperty*>(property_ptr);
             *stream << ptr->anim_label.toStdString() << "\n";
-            //stream->write(reinterpret_cast<char*>(&ptr->castShadows), sizeof(bool));
             break;
         }
         case GO_PROPERTY_TYPE_NODE:{

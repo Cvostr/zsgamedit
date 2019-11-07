@@ -10,6 +10,16 @@
 typedef struct HeightmapGrass{
     QString diffuse_relpath;
     Engine::Texture* diffuse;
+
+    ZSVECTOR3 scale;
+
+    HeightmapGrass(){
+        diffuse_relpath = "@none";
+        diffuse = nullptr;
+
+        scale = ZSVECTOR3(1.f, 1.f, 1.f);
+    }
+
 }HeightmapGrass;
 
 typedef struct HeightmapTexel{

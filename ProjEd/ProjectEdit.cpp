@@ -340,7 +340,7 @@ QString EditWindow::getCurrentDirectory(){
     return this->current_dir;
 }
 
-QString EditWindow::createNewTextFile(QString directory, QString name, QString ext, std::string content){
+QString EditWindow::createNewTextFile(QString directory, QString name, QString ext, std::string& content){
     int addition_number = 0;
     QString newfile_name = directory + "/" + name + "_" + QString::number(addition_number) + ext;
     //Iterate until we find free name
@@ -1211,7 +1211,7 @@ void EditWindow::onLeftBtnClicked(int X, int Y){
         GameObject* obj = static_cast<GameObject*>(_inspector_win->gameobject_ptr);
         TerrainProperty* terrain = obj->getPropertyPtr<TerrainProperty>();
 
-        if(terrain != nullptr)
+        if(terrain != nullptr && !isWorldCamera)
             terrain->onMouseClick(this->input_state.mouseX, input_state.mouseY,
                                   settings.gameViewWin_Width,
                                   settings.gameViewWin_Height,
@@ -1223,7 +1223,8 @@ void EditWindow::onLeftBtnClicked(int X, int Y){
     this->edit_camera.stopMoving();
     this->obj_ctx_menu->close(); //Close ctx menu
 
-    if(obj_trstate.isTransforming || isWorldCamera) return;
+    if(obj_trstate.isTransforming || isWorldCamera)
+        return;
     unsigned int clicked = render->render_getpickedObj(static_cast<void*>(this), X, Y);
 
     if(clicked > world.objects.size() || clicked >= 256 * 256 * 256){
@@ -1238,6 +1239,7 @@ void EditWindow::onLeftBtnClicked(int X, int Y){
     this->ui->objsList->setCurrentItem(obj_ptr->item_ptr); //item selected in tree
 }
 void EditWindow::onRightBtnClicked(int X, int Y){
+    //Exit function if playcamera used to render world
     if(isWorldCamera) return;
 
     //Stop camera moving
@@ -1289,7 +1291,7 @@ void EditWindow::onMouseMotion(int relX, int relY){
         GameObject* obj = static_cast<GameObject*>(_inspector_win->gameobject_ptr);
         TerrainProperty* terrain = obj->getPropertyPtr<TerrainProperty>();
 
-        if(terrain != nullptr)
+        if(terrain != nullptr && !isWorldCamera)
             terrain->onMouseMotion(this->input_state.mouseX, input_state.mouseY, relX, relY,
                                    settings.gameViewWin_Width,
                                    settings.gameViewWin_Height,

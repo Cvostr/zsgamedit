@@ -168,7 +168,8 @@ public:
     bool ready; //Is everything loaded?
     int close_reason;
     bool isSceneRun; //Is scene running right now
-    bool isWorldCamera; //Use World's camera to render world?
+    //Use World's camera to render world?
+    bool isWorldCamera;
 
     void* mainwin_ptr;
     World world;
@@ -197,7 +198,7 @@ public:
     void ImportResource(QString pathToResource);
     bool checkExtension(QString fpath, QString ext);
 
-    QString createNewTextFile(QString directory, QString name, QString ext, std::string content);
+    QString createNewTextFile(QString directory, QString name, QString ext, std::string& content);
     void openFile(QString file_path); //Useful to open a file
     void addFileToObjectList(QString file_path);
     void assignIconFile(QListWidgetItem* item);
