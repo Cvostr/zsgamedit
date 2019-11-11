@@ -15,7 +15,7 @@ extern "C" {
 
 namespace ZSENSDK {
 
-namespace Engine {
+namespace _Engine {
     void loadWorldFromFile(std::string file);
 }
 

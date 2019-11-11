@@ -16,6 +16,7 @@ layout (std140, binding = 0) uniform CamMatrices{
     uniform mat4 cam_projection;
     uniform mat4 cam_view;
     uniform mat4 object_transform;
+	uniform vec3 cam_position;
 };
 
 void main(){
@@ -24,6 +25,7 @@ void main(){
 	InNormal = normal;
 	
 	FragPos = (object_transform * vec4(position, 1.0)).xyz;
+
 	//Calculate TBN
 	vec3 TangentVec = normalize(vec3(object_transform * vec4(tangent, 0)));
 	vec3 BiTangentVec = normalize(vec3(object_transform * vec4(bitangent, 0)));

@@ -12,7 +12,7 @@
 #include "EdActions.h"
 #include "EditorSettings.h"
 #include "../../Render/headers/zs-pipeline.h"
-#include "../../World/headers/zs-camera.h"
+#include <world/zs-camera.h>
 #include <misc/oal_manager.h>
 
 struct Resource;
@@ -173,7 +173,7 @@ public:
 
     void* mainwin_ptr;
     World world;
-    ZSPIRE::Camera edit_camera; //Camera to show editing scene
+    Engine::Camera edit_camera; //Camera to show editing scene
     Project project; //info about current project
     EditorInputState input_state;
     ObjectTransformState obj_trstate; //Describes object transform

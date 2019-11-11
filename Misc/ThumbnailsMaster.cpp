@@ -91,11 +91,11 @@ void ThumbnailsMaster::prepareMaterialThumbnailPipeline(){
     glDisable(GL_BLEND);
 
     {   //send camera data to transform shader and skybox shader
-        ZSPIRE::Camera cam;
+        Engine::Camera cam;
         cam.setProjectionType(ZSCAMERA_PROJECTION_PERSPECTIVE);
         cam.setPosition(ZSVECTOR3(0, 0, -2.6f));
         cam.setFront(ZSVECTOR3(0,0,1));
-        cam.setViewport(ZSVIEWPORT(0,0, THUMBNAIL_IMG_SIZE, THUMBNAIL_IMG_SIZE));
+        cam.setViewport(Engine::ZSVIEWPORT(0,0, THUMBNAIL_IMG_SIZE, THUMBNAIL_IMG_SIZE));
         cam.setZplanes(0.1f, 5000.f);
 
         renderer->transformBuffer->bind();
@@ -232,11 +232,11 @@ void ThumbnailsMaster::createMeshesThumbnails(){
 void ThumbnailsMaster::DrawMesh(Engine::Mesh* mesh){
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    ZSPIRE::Camera cam;
+    Engine::Camera cam;
     cam.setProjectionType(ZSCAMERA_PROJECTION_PERSPECTIVE);
     cam.setPosition(ZSVECTOR3(0, 0, -6));
     cam.setFront(ZSVECTOR3(0,0,1));
-    cam.setViewport(ZSVIEWPORT(0,0, 512, 512));
+    cam.setViewport(Engine::ZSVIEWPORT(0,0, 512, 512));
     cam.setZplanes(0.1f, 5000.f);
 
     renderer->transformBuffer->bind();

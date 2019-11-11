@@ -5,7 +5,7 @@
 #include <render/zs-shader.h>
 #include <render/zs-mesh.h>
 #include <render/zs-uniform-buffer.h>
-#include "../../World/headers/zs-camera.h"
+#include <world/zs-camera.h>
 #include <render/zs-texture.h>
 #include "GizmosRenderer.h"
 #include "../../Misc/headers/EditorManager.h"
@@ -93,16 +93,16 @@ public:
 
     void render(SDL_Window* w, void* projectedit_ptr);
     void render2D(void* projectedit_ptr);
-    void render3D(void* projectedit_ptr, ZSPIRE::Camera* cam);
+    void render3D(void* projectedit_ptr, Engine::Camera* cam);
     void renderDepth(void* world_ptr);
     unsigned int render_getpickedObj(void* projectedit_ptr, int mouseX, int mouseY);
     ZSRGBCOLOR getColorOfPickedTransformControl(ZSVECTOR3 translation, int mouseX, int mouseY, void* projectedit_ptr);
 
-    void updateShadersCameraInfo(ZSPIRE::Camera* cam_ptr);
+    void updateShadersCameraInfo(Engine::Camera* cam_ptr);
     void addLight(void* light_ptr);
     void removeLights();
     void setLightsToBuffer();
-    ZSPIRE::Camera* cam;
+    Engine::Camera* cam;
     void* win_ptr;
 
     RenderSettings* getRenderSettings();

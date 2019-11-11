@@ -16,3 +16,9 @@ glslangValidator -V ./heightmap/heightmap.frag
 
 mv vert.spv ./heightmap/heightmap.vert_vk
 mv frag.spv ./heightmap/heightmap.frag_vk
+#build default deffered light shader
+glslangValidator -V ./postprocess/deffered_light/deffered.vert
+glslangValidator -V ./postprocess/deffered_light/deffered.frag
+
+mv vert.spv ./postprocess/deffered_light/deffered.vert_vk
+mv frag.spv ./postprocess/deffered_light/deffered.frag_vk

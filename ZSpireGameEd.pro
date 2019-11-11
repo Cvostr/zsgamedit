@@ -34,7 +34,6 @@ SOURCES += \
     World/Misc.cpp \
     ProjEd/InspectorWin.cpp \
     ProjEd/ProjCreateWin.cpp \
-    World/zs-camera.cpp \
     ProjEd/PropertyAreas.cpp \
     ProjEd/EdActions.cpp \
     ProjEd/EditorUI.cpp \
@@ -67,7 +66,6 @@ HEADERS += \
     World/headers/Misc.h \
     ProjEd/headers/InspectorWin.h \
     ProjEd/headers/ProjCreateWin.h \
-    World/headers/zs-camera.h \
     World/headers/2dtileproperties.h \
     ProjEd/headers/EdActions.h \
     Misc/headers/ProjBuilder.h \

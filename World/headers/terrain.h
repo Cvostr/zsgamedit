@@ -7,6 +7,12 @@
 #include <render/zs-texture.h>
 #include <render/zs-math.h>
 
+enum TERRAIN_MODIFY_TYPE{
+    TMT_HEIGHT,
+    TMT_TEXTURE,
+    TMT_GRASS
+};
+
 typedef struct HeightmapGrass{
     QString diffuse_relpath;
     Engine::Texture* diffuse;
@@ -25,6 +31,9 @@ typedef struct HeightmapGrass{
 typedef struct HeightmapTexel{
     float height;
     unsigned char texture_factors[TERRAIN_TEXTURES_AMOUNT];
+
+    HeightmapTexel(){
+    }
 }HeightmapTexel;
 
 typedef struct HeightmapVertex{
@@ -78,6 +87,7 @@ public:
 
     void modifyHeight(int originX, int originY, float originHeight, int range, int multiplyer);
     void modifyTexture(int originX, int originY, int range, unsigned char texture);
+    void plantGrass(int originX, int originY, int range, int grass);
 
     void sum(unsigned char* ptr, int val);
     void reduce(unsigned char* ptr, int val);
@@ -87,5 +97,26 @@ public:
     TerrainData();
     ~TerrainData();
 };
+
+void startTerrainThread();
+
+
+typedef struct HeightmapModifyRequest{
+    TerrainData* terrain;
+    TERRAIN_MODIFY_TYPE modify_type;
+
+    int originX;
+    int originY;
+    int range;
+
+    float originHeight;
+    int multiplyer;
+
+    unsigned char texture;
+    int grass;
+
+}HeightmapModifyRequest;
+
+void queryTerrainModifyRequest(HeightmapModifyRequest* req);
 
 #endif // TERRAIN_H

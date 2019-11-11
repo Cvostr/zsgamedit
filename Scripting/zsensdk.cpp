@@ -9,6 +9,7 @@
 #include <functional>
 #include <SDL2/SDL.h>
 #include <input/zs-input.h>
+#include <world/zs-camera.h>
 
 static unsigned int mode_fullscreen = SDL_WINDOW_FULLSCREEN;
 static unsigned int mode_borderless = SDL_WINDOW_FULLSCREEN_DESKTOP;
@@ -41,7 +42,7 @@ ZSVECTOR3 ZSENSDK::Math::vmul(ZSVECTOR3 v1, float m){
     return v1 * m;
 }
 
-void ZSENSDK::Engine::loadWorldFromFile(std::string file){
+void ZSENSDK::_Engine::loadWorldFromFile(std::string file){
     Project* proj_ptr = static_cast<Project*>(_editor_win->world.proj_ptr);
 
     QString load = proj_ptr->root_path + "/" + QString::fromStdString(file);
@@ -50,7 +51,6 @@ void ZSENSDK::Engine::loadWorldFromFile(std::string file){
 }
 
 void ZSENSDK::bindSDK(lua_State* state){
-
     luabridge::getGlobalNamespace(state)
         .beginNamespace("window")
         .addVariable("MODE_WINDOWED", &mode_windowed, false)
@@ -99,27 +99,27 @@ void ZSENSDK::bindSDK(lua_State* state){
         .addFunction("mul", &ZSENSDK::Math::vmul)
         .addFunction("v_cross", &vCross);
 
-    luabridge::getGlobalNamespace(state).beginClass <ZSVIEWPORT>("CmViewport")
-        .addData("startX", &ZSVIEWPORT::startX)
-        .addData("startY", &ZSVIEWPORT::startY)
-        .addData("endX", &ZSVIEWPORT::endX)
-        .addData("endY", &ZSVIEWPORT::endY)
+     luabridge::getGlobalNamespace(state).beginClass <Engine::ZSVIEWPORT>("CmViewport")
+        .addData("startX", &Engine::ZSVIEWPORT::startX)
+        .addData("startY", &Engine::ZSVIEWPORT::startY)
+        .addData("endX", &Engine::ZSVIEWPORT::endX)
+        .addData("endY", &Engine::ZSVIEWPORT::endY)
         .addConstructor <void(*) (unsigned int, unsigned int, unsigned int, unsigned int)>()
         .endClass();
 
-    luabridge::getGlobalNamespace(state).beginClass <ZSPIRE::Camera>("Camera")
-            .addFunction("setPosition", &ZSPIRE::Camera::setPosition)
-            .addFunction("setFront", &ZSPIRE::Camera::setFront)
-            .addData("pos", &ZSPIRE::Camera::camera_pos, false)
-            .addData("front", &ZSPIRE::Camera::camera_front, false)
-            .addData("up", &ZSPIRE::Camera::camera_up, false)
-            .addFunction("setProjection", &ZSPIRE::Camera::setProjectionType)
-            .addFunction("setZplanes", &ZSPIRE::Camera::setZplanes)
-            .addFunction("setViewport", &ZSPIRE::Camera::setViewport)
-            .addData("viewport", &ZSPIRE::Camera::viewport, false)
-            .addData("Fov", &ZSPIRE::Camera::FOV, false)
-            .addData("nearZ", &ZSPIRE::Camera::nearZ, false)
-            .addData("farZ", &ZSPIRE::Camera::farZ, false)
+    luabridge::getGlobalNamespace(state).beginClass <Engine::Camera>("Camera")
+            .addFunction("setPosition", &Engine::Camera::setPosition)
+            .addFunction("setFront", &Engine::Camera::setFront)
+            .addData("pos", &Engine::Camera::camera_pos, false)
+            .addData("front", &Engine::Camera::camera_front, false)
+            .addData("up", &Engine::Camera::camera_up, false)
+            .addFunction("setProjection", &Engine::Camera::setProjectionType)
+            .addFunction("setZplanes", &Engine::Camera::setZplanes)
+            .addFunction("setViewport", &Engine::Camera::setViewport)
+            .addData("viewport", &Engine::Camera::viewport, false)
+            .addData("Fov", &Engine::Camera::FOV, false)
+            .addData("nearZ", &Engine::Camera::nearZ, false)
+            .addData("farZ", &Engine::Camera::farZ, false)
         .endClass();
 
     luabridge::getGlobalNamespace(state).beginClass <ZSRGBCOLOR>("RGBColor")
@@ -132,7 +132,7 @@ void ZSENSDK::bindSDK(lua_State* state){
     luabridge::getGlobalNamespace(state)
         .beginNamespace("engine")
 
-        .addFunction("loadWorld", &Engine::loadWorldFromFile)
+        .addFunction("loadWorld", &_Engine::loadWorldFromFile)
 
         .addVariable("PROPERTY_SCRIPT", &prop_script)
         .addVariable("PROPERTY_TRANSFORM", &prop_transform)

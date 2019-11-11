@@ -2,6 +2,46 @@
 #include <GL/glew.h>
 #include "../World/headers/Misc.h"
 #include <fstream>
+#include <thread>
+
+static bool terrain_thread_working = true;
+static std::list<HeightmapModifyRequest*> terrain_mdf_requests;
+
+void terrain_loop(){
+    while(terrain_thread_working){
+        if(terrain_mdf_requests.size() > 0){
+            HeightmapModifyRequest* req = terrain_mdf_requests.front();
+
+            switch(req->modify_type){
+                case TMT_HEIGHT:{
+                    req->terrain->modifyHeight(req->originX, req->originY, req->originHeight, req->range, req->multiplyer);
+                    break;
+                }
+                case TMT_TEXTURE:{
+                    req->terrain->modifyTexture(req->originX, req->originY, req->range, req->texture);
+                    break;
+
+                }
+                case TMT_GRASS:{
+                    req->terrain->plantGrass(req->originX, req->originY, req->range, req->grass);
+                    break;
+                }
+            }
+
+            terrain_mdf_requests.remove(req);
+        }
+    }
+}
+
+void queryTerrainModifyRequest(HeightmapModifyRequest* req){
+    terrain_mdf_requests.push_back(req);
+}
+
+void startTerrainThread(){
+    std::thread loader_loop(terrain_loop);
+    loader_loop.detach();
+    terrain_thread_working = true;
+}
 
 void TerrainData::alloc(int W, int H){
     if(created)
@@ -326,6 +366,20 @@ void TerrainData::modifyTexture(int originX, int originY, int range, unsigned ch
                     }
                     sum(&data[y * H + x].texture_factors[texture], mod);
                 }
+            }
+        }
+    }
+}
+
+void TerrainData::plantGrass(int originX, int originY, int range, int grass){
+    //Iterate over all pixels
+    for(int y = 0; y < W; y ++){
+        for(int x = 0; x < H; x ++){
+            //if pixel is in circle
+            float dist = getDistance(ZSVECTOR3(x, y, 0), ZSVECTOR3(originX, originY, 0));
+            if(dist <= range){
+                //calculate modifier
+                //data[y * H + x].grass = grass;
             }
         }
     }

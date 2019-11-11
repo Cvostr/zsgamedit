@@ -2,7 +2,6 @@
 #define OBJ_PROPERTIES_H
 
 #include "World.h"
-#include "zs-camera.h"
 #include "../../Scripting/headers/LuaScript.h"
 #include "../../Render/headers/MatShaderProps.h"
 #include "../../World/headers/terrain.h"
@@ -226,7 +225,7 @@ public:
     void copyTo(GameObjectProperty* dest);
     void onValueChanged();
     void init();
-    void Draw(ZSPIRE::Camera* cam, RenderPipeline* pipeline);
+    void Draw(Engine::Camera* cam, RenderPipeline* pipeline);
     void setTexture();
     void setTextureSize();
     ShadowCasterProperty();
@@ -289,6 +288,7 @@ private:
     char edit_mode;
 public:
     Engine::UniformBuffer* terrainUniformBuffer;
+    Engine::UniformBuffer* transformBuffer;
 
     std::vector<HeightmapTexturePair> textures;
     std::vector<HeightmapGrass> grass;

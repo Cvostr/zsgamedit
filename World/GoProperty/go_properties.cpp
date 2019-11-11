@@ -1338,10 +1338,12 @@ TerrainProperty::TerrainProperty(){
     this->MaxHeight = 500;
     castShadows = true;
     textures_size = 0;
+    grassType_size = 0;
 
     this->range = 15;
     this->editHeight = 10;
     this->textureid = 0;
+    this->vegetableid = 0;
 
     edit_mode = 1;
 
@@ -1493,7 +1495,7 @@ void TerrainProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
 }
 
 void TerrainProperty::DrawMesh(){
-    data.Draw();
+    data.Draw(false);
 }
 
 void TerrainProperty::onValueChanged(){
@@ -1543,17 +1545,21 @@ void TerrainProperty::getPickedVertexId(int posX, int posY, int screenX, int scr
     glEnable(GL_DEPTH_TEST);
     //get pointer to material property
     MaterialProperty* mat = this->go_link.updLinkPtr()->getPropertyPtr<MaterialProperty>();
+    TransformProperty* transform = this->go_link.updLinkPtr()->getPropertyPtr<TransformProperty>();
     if(mat == nullptr || mat->material_ptr == nullptr) return;
     //Apply material shader
     mat->material_ptr->group_ptr->render_shader->Use();
-
+    //Bind terrain buffer and set isPicking to true
     terrainUniformBuffer->bind();
     int dtrue = 1;
     terrainUniformBuffer->writeData(16 * 12 * 2, 4, &dtrue);
-
+    //Bind transform
+    transformBuffer->bind();
+    transformBuffer->writeData(sizeof (ZSMATRIX4x4) * 2, sizeof (ZSMATRIX4x4), &transform->transform_mat);
+    //Render terrain mesh without textures
     this->data.Draw(true);
     //read picked pixel
-    glReadPixels(posX, screenY - posY, 1,1, GL_RGBA, GL_UNSIGNED_BYTE, data);
+    glReadPixels(posX, screenY - posY, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, &data[0]);
 }
 
 void TerrainProperty::onMouseClick(int posX, int posY, int screenX, int screenY, bool isLeftButtonHold, bool isCtrlHold){
@@ -1570,11 +1576,29 @@ void TerrainProperty::onMouseClick(int posX, int posY, int screenX, int screenY,
                     int mul = 1;
                     if(isCtrlHold)
                         mul *= -1;
-                    //apply change
-                    if(edit_mode == 1)
-                        this->data.modifyHeight(y, i, editHeight, range, mul);
-                    else
-                        this->data.modifyTexture(i, y, range, static_cast<unsigned char>(textureid - 1));
+                    HeightmapModifyRequest* req = new HeightmapModifyRequest;
+                    req->terrain = &data;
+                    if(edit_mode == 1){
+                        req->modify_type = TMT_HEIGHT;
+                        req->originX = y;
+                        req->originY = i;
+                        req->originHeight = editHeight;
+                        req->range = range;
+                        req->multiplyer = mul;
+                    }else if(edit_mode == 2){
+                        req->modify_type = TMT_TEXTURE;
+                        req->originX = i;
+                        req->originY = y;
+                        req->range = range;
+                        req->texture = static_cast<unsigned char>(textureid - 1);
+                    }else if(edit_mode == 3){
+                        req->modify_type = TMT_GRASS;
+                        req->originX = y;
+                        req->originY = i;
+                        req->range = range;
+                        req->grass = vegetableid;
+                    }
+                    queryTerrainModifyRequest(req);
                     hasChanged = true;
                     return;
                 }
@@ -1595,10 +1619,29 @@ void TerrainProperty::onMouseMotion(int posX, int posY, int relX, int relY, int 
                     if(isCtrlHold)
                         mul *= -1;
                     //apply change
+                    HeightmapModifyRequest* req = new HeightmapModifyRequest;
+                    req->terrain = &data;
                     if(edit_mode == 1){
-                       // this->data.modifyHeight(y, i, editHeight, range, mul);
-                    }else
-                        this->data.modifyTexture(i, y, range, static_cast<unsigned char>(textureid - 1));
+                        req->modify_type = TMT_HEIGHT;
+                        req->originX = y;
+                        req->originY = i;
+                        req->originHeight = editHeight;
+                        req->range = range;
+                        req->multiplyer = mul;
+                    }else if(edit_mode == 2){
+                        req->modify_type = TMT_TEXTURE;
+                        req->originX = i;
+                        req->originY = y;
+                        req->range = range;
+                        req->texture = static_cast<unsigned char>(textureid - 1);
+                    }else if(edit_mode == 3){
+                        req->modify_type = TMT_GRASS;
+                        req->originX = y;
+                        req->originY = i;
+                        req->range = range;
+                        req->grass = vegetableid;
+                    }
+                    queryTerrainModifyRequest(req);
                     hasChanged = true;
                     return;
                 }

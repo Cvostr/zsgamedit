@@ -57,6 +57,13 @@ layout (std140, binding = 3) uniform TerrainData{
     uniform int terrain_Height;
 };
 
+layout (std140, binding = 0) uniform CamMatrices{
+    uniform mat4 cam_projection;
+    uniform mat4 cam_view;
+    uniform mat4 object_transform;
+    uniform vec3 cam_position;
+};
+
 layout (std140, binding = 2) uniform ShadowData{
 //Shadowmapping stuff
     uniform mat4 LightProjectionMat; // 16 * 4
@@ -281,13 +288,6 @@ void main(){
 	vec2 uv = UVCoord;
 	
 	vec3 result = vec3(1.0, 1.0, 1.0); //Default value
-	vec3 Normal = InNormal; //defaultly, use normals from mesh
-	   
-	Normal = getFragmentNormal(uv, 8);   
-	   
-	tPos = FragPos;
-	tNormal = Normal;
-	tMasks = vec4(1.0, 0, 0, 0);
 	
 	if(isPicking == 1){
         float id_r = _id.r / terrain_Width;
@@ -296,8 +296,13 @@ void main(){
 		FragColor = vec4(id_r, 0, id_b, 1);
 	}
     if(isPicking == 0){
+        vec3 Normal = getFragmentNormal(uv, 8); //defaultly, use normals from mesh
+	   
+	    tPos = FragPos;
+	    tNormal = Normal;
+	    tMasks = vec4(1.0, 0, 0, 0);
+        
         _shadow();
 		FragColor = vec4(getFragment(uv, 8), 0);
 	}	
-	
 }

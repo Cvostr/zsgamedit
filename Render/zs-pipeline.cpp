@@ -161,7 +161,7 @@ void RenderPipeline::init(){
 ZSRGBCOLOR RenderPipeline::getColorOfPickedTransformControl(ZSVECTOR3 translation, int mouseX, int mouseY, void* projectedit_ptr){
 
     EditWindow* editwin_ptr = static_cast<EditWindow*>(projectedit_ptr);
-    ZSPIRE::Camera* cam_ptr = nullptr; //We'll set it next
+    Engine::Camera* cam_ptr = nullptr; //We'll set it next
     World* world_ptr = &editwin_ptr->world;
 
     if(editwin_ptr->isWorldCamera){
@@ -265,7 +265,7 @@ void RenderPipeline::setLightsToBuffer(){
 
 void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr){
     EditWindow* editwin_ptr = static_cast<EditWindow*>(projectedit_ptr);
-    ZSPIRE::Camera* cam_ptr = nullptr; //We'll set it next
+    Engine::Camera* cam_ptr = nullptr; //We'll set it next
     World* world_ptr = &editwin_ptr->world;
 
     if(editwin_ptr->isWorldCamera){
@@ -345,11 +345,11 @@ void RenderPipeline::render2D(void* projectedit_ptr){
     setLightsToBuffer();
 
 }
-void RenderPipeline::render3D(void* projectedit_ptr, ZSPIRE::Camera* cam)
+void RenderPipeline::render3D(void* projectedit_ptr, Engine::Camera* cam)
 {
     EditWindow* editwin_ptr = static_cast<EditWindow*>(projectedit_ptr);
     World* world_ptr = &editwin_ptr->world;
-    ZSPIRE::Camera* cam_ptr = cam; //We'll set it next
+    Engine::Camera* cam_ptr = cam; //We'll set it next
 
     ShadowCasterProperty* shadowcast = static_cast<ShadowCasterProperty*>(this->render_settings.shadowcaster_ptr);
     if(shadowcast != nullptr){ //we have shadowcaster
@@ -517,7 +517,7 @@ void GameObject::processObject(RenderPipeline* pipeline){
         this->onUpdate(static_cast<int>(pipeline->deltaTime));
 
     //Obtain camera viewport
-    ZSVIEWPORT cam_viewport = pipeline->cam->getViewport();
+    Engine::ZSVIEWPORT cam_viewport = pipeline->cam->getViewport();
     //Distance limit
     int max_dist = static_cast<int>(cam_viewport.endX - cam_viewport.startX);
     bool difts = isDistanceFits(pipeline->cam->getCameraViewCenterPos(), transform_prop->_last_translation, max_dist);
@@ -562,7 +562,25 @@ void MaterialProperty::onRender(RenderPipeline* pipeline){
 }
 
 void TerrainProperty::onRender(RenderPipeline* pipeline){
+    /*pipeline->diffuse3d_shader->Use();
+    for(unsigned int texelZ = 0; texelZ < data.W; texelZ ++){
+        for(int texelX = 0; texelX < data.H; texelX ++){
+            TransformProperty* t_ptr = this->go_link.updLinkPtr()->getTransformProperty();
+
+            HeightmapTexel* texel_ptr = &this->data.data[texelZ * data.H + texelX];
+            if(texel_ptr->grass >= 0){
+            ZSVECTOR3 pos = t_ptr->translation + ZSVECTOR3(texelX, texel_ptr->height, texelZ);
+            ZSMATRIX4x4 m = getTranslationMat(pos);
+
+            pipeline->transformBuffer->bind();
+            pipeline->transformBuffer->writeData(sizeof (ZSMATRIX4x4) * 2, sizeof (ZSMATRIX4x4), &m);
+            Engine::getGrassMesh()->Draw();
+            }
+        }
+    }*/
+
     terrainUniformBuffer = pipeline->terrainUniformBuffer;
+    transformBuffer = pipeline->transformBuffer;
 
     if(hasChanged){
         this->data.generateGLMesh();
@@ -664,7 +682,7 @@ void ShadowCasterProperty::onPreRender(RenderPipeline* pipeline){
     pipeline->getRenderSettings()->shadowcaster_ptr = static_cast<void*>(this);
 }
 
-void ShadowCasterProperty::Draw(ZSPIRE::Camera* cam, RenderPipeline* pipeline){
+void ShadowCasterProperty::Draw(Engine::Camera* cam, RenderPipeline* pipeline){
     if(!this->active) return;
     if(!this->initialized) init();
     if(this->go_link.updLinkPtr() == nullptr) return;
@@ -744,7 +762,7 @@ void ShadowCasterProperty::setTexture(){
     glBindTexture(GL_TEXTURE_2D, this->shadowDepthTexture);
 }
 
-void RenderPipeline::updateShadersCameraInfo(ZSPIRE::Camera* cam_ptr){
+void RenderPipeline::updateShadersCameraInfo(Engine::Camera* cam_ptr){
     transformBuffer->bind();
     ZSMATRIX4x4 proj = cam_ptr->getProjMatrix();
     ZSMATRIX4x4 view = cam_ptr->getViewMatrix();

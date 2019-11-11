@@ -302,7 +302,7 @@ public:
     Project* proj_ptr; //Pointer to Project structure
     PhysicalWorldSettings phys_settngs;
     PhysicalWorld* physical_world;
-    ZSPIRE::Camera world_camera;
+    Engine::Camera world_camera;
 
     std::vector<GameObject> objects; //Vector, containing all gameobjects
 

@@ -210,6 +210,8 @@ void EditWindow::init(){
     this->thumb_master = new ThumbnailsMaster;
     this->startManager(thumb_master);
 
+    startTerrainThread();
+
     ready = true;//Everything is ready
     //Init OpenAL sound system
     Engine::SFX::initAL();
@@ -230,7 +232,7 @@ void EditWindow::init(){
             break;
         }
     }
-    ZSVIEWPORT viewport = ZSVIEWPORT(0,0,static_cast<unsigned int>(this->settings.gameViewWin_Width),static_cast<unsigned int>( this->settings.gameViewWin_Height));
+    Engine::ZSVIEWPORT viewport = Engine::ZSVIEWPORT(0,0,static_cast<unsigned int>(this->settings.gameViewWin_Width),static_cast<unsigned int>( this->settings.gameViewWin_Height));
     edit_camera.setViewport(viewport);
 
     world.world_camera = edit_camera;
@@ -1212,7 +1214,7 @@ void EditWindow::onLeftBtnClicked(int X, int Y){
         TerrainProperty* terrain = obj->getPropertyPtr<TerrainProperty>();
 
         if(terrain != nullptr && !isWorldCamera)
-            terrain->onMouseClick(this->input_state.mouseX, input_state.mouseY,
+            terrain->onMouseClick(X, Y,
                                   settings.gameViewWin_Width,
                                   settings.gameViewWin_Height,
                                   this->input_state.isLeftBtnHold,
@@ -1568,7 +1570,7 @@ void EditWindow::setGameViewWindowSize(int W, int H){
     //Set SDL window size
     SDL_SetWindowSize(this->window, W, H);
     //Apply new viewport to cameras
-    ZSVIEWPORT viewport = ZSVIEWPORT(0,0,static_cast<unsigned int>(W),static_cast<unsigned int>(H));
+    Engine::ZSVIEWPORT viewport = Engine::ZSVIEWPORT(0,0,static_cast<unsigned int>(W),static_cast<unsigned int>(H));
     edit_camera.setViewport(viewport);
     world.world_camera.setViewport(viewport);
 
