@@ -582,10 +582,18 @@ void TerrainProperty::onRender(RenderPipeline* pipeline){
     terrainUniformBuffer = pipeline->terrainUniformBuffer;
     transformBuffer = pipeline->transformBuffer;
 
-    if(hasChanged){
-        this->data.generateGLMesh();
-        hasChanged = false;
+    if(data.hasHeightmapChanged){
+        this->data.updateGeometryBuffers();
+        this->data.updateGeometryBuffersGL();
+        data.hasHeightmapChanged = false;
     }
+
+    if(data.hasPaintingChanged){
+        this->data.updateTextureBuffers();
+        this->data.updateTextureBuffersGL();
+        data.hasPaintingChanged = false;
+    }
+
     //Binding terrain buffer
     pipeline->terrainUniformBuffer->bind();
 

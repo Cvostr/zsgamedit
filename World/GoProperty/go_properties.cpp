@@ -1342,12 +1342,12 @@ TerrainProperty::TerrainProperty(){
 
     this->range = 15;
     this->editHeight = 10;
-    this->textureid = 0;
+    this->textureid = 1;
     this->vegetableid = 0;
 
     edit_mode = 1;
 
-    hasChanged = false;
+    rigidBody = nullptr;
 }
 
 void onClearTerrain(){
@@ -1437,7 +1437,7 @@ void TerrainProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
         for(int i = 0; i < this->textures_size; i ++){
             QRadioButton* group_radio = new QRadioButton; //allocate first radio
             group_radio->setText("Group " + QString::number(i));
-            if(textureid == i)
+            if(textureid == i + 1)
                 group_radio->setChecked(true);
             //add created radio button
             texturegroup_pick->addRadioButton(group_radio);
@@ -1496,6 +1496,37 @@ void TerrainProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
 
 void TerrainProperty::DrawMesh(){
     data.Draw(false);
+}
+
+void TerrainProperty::onUpdate(float deltaTime){
+    if(data.hasPhysicShapeChanged){
+        TransformProperty* transform = this->go_link.updLinkPtr()->getPropertyPtr<TransformProperty>();
+
+        //Declare start transform
+        btTransform startTransform;
+        startTransform.setIdentity();
+        //Set start transform
+        startTransform.setOrigin(btVector3( btScalar(transform->_last_translation.X), btScalar(transform->_last_translation.Y),
+                                                    btScalar(transform->_last_translation.Z)));
+
+
+         //using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
+         btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
+
+         btRigidBody::btRigidBodyConstructionInfo cInfo(0, myMotionState, data.shape, btVector3(0,0,0));
+
+         if(rigidBody != nullptr){
+             world_ptr->physical_world->removeRidigbodyFromWorld(rigidBody);
+             delete rigidBody;
+         }
+         rigidBody = new btRigidBody(cInfo);
+
+         rigidBody->setUserIndex(go_link.updLinkPtr()->array_index);
+         //add rigidbody to world
+         go_link.world_ptr->physical_world->addRidigbodyToWorld(rigidBody);
+
+         data.hasPhysicShapeChanged = false;
+    }
 }
 
 void TerrainProperty::onValueChanged(){
@@ -1562,48 +1593,49 @@ void TerrainProperty::getPickedVertexId(int posX, int posY, int screenX, int scr
     glReadPixels(posX, screenY - posY, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, &data[0]);
 }
 
+void TerrainProperty::modifyTerrainVertex(unsigned char* gl_data, bool isCtrlHold){
+    for(int i = 0; i < Width; i ++){
+        for(int y = 0; y < Length; y ++){
+            if(i == static_cast<int>(gl_data[0]) * 2 && y == static_cast<int>(gl_data[2]) * 2){
+                int mul = 1;
+                if(isCtrlHold)
+                    mul *= -1;
+                //apply change
+                HeightmapModifyRequest* req = new HeightmapModifyRequest;
+                req->terrain = &data;
+                if(edit_mode == 1){
+                    req->modify_type = TMT_HEIGHT;
+                    req->originX = y;
+                    req->originY = i;
+                    req->originHeight = editHeight;
+                    req->range = range;
+                    req->multiplyer = mul;
+                }else if(edit_mode == 2){
+                    req->modify_type = TMT_TEXTURE;
+                    req->originX = i;
+                    req->originY = y;
+                    req->range = range;
+                    req->texture = static_cast<unsigned char>(textureid - 1);
+                }else if(edit_mode == 3){
+                    req->modify_type = TMT_GRASS;
+                    req->originX = y;
+                    req->originY = i;
+                    req->range = range;
+                    req->grass = vegetableid;
+                }
+                queryTerrainModifyRequest(req);
+                return;
+            }
+        }
+    }
+}
+
 void TerrainProperty::onMouseClick(int posX, int posY, int screenX, int screenY, bool isLeftButtonHold, bool isCtrlHold){
     if(isLeftButtonHold){
         unsigned char _data[4];
-
         getPickedVertexId(posX, posY, screenX, screenY, &_data[0]);
-
         //find picked texel
-        for(int i = 0; i < Width; i ++){
-            for(int y = 0; y < Length; y ++){
-
-                if(i == static_cast<int>(_data[0]) * 2 && y == static_cast<int>(_data[2]) * 2){
-                    int mul = 1;
-                    if(isCtrlHold)
-                        mul *= -1;
-                    HeightmapModifyRequest* req = new HeightmapModifyRequest;
-                    req->terrain = &data;
-                    if(edit_mode == 1){
-                        req->modify_type = TMT_HEIGHT;
-                        req->originX = y;
-                        req->originY = i;
-                        req->originHeight = editHeight;
-                        req->range = range;
-                        req->multiplyer = mul;
-                    }else if(edit_mode == 2){
-                        req->modify_type = TMT_TEXTURE;
-                        req->originX = i;
-                        req->originY = y;
-                        req->range = range;
-                        req->texture = static_cast<unsigned char>(textureid - 1);
-                    }else if(edit_mode == 3){
-                        req->modify_type = TMT_GRASS;
-                        req->originX = y;
-                        req->originY = i;
-                        req->range = range;
-                        req->grass = vegetableid;
-                    }
-                    queryTerrainModifyRequest(req);
-                    hasChanged = true;
-                    return;
-                }
-            }
-        }
+        modifyTerrainVertex(&_data[0], isCtrlHold);
     }
 }
 
@@ -1612,41 +1644,7 @@ void TerrainProperty::onMouseMotion(int posX, int posY, int relX, int relY, int 
         unsigned char _data[4];
         getPickedVertexId(posX, posY, screenX, screenY, &_data[0]);
         //find picked texel
-        for(int i = 0; i < Width; i ++){
-            for(int y = 0; y < Length; y ++){
-                if(i == static_cast<int>(_data[0]) * 2 && y == static_cast<int>(_data[2]) * 2){
-                    int mul = 1;
-                    if(isCtrlHold)
-                        mul *= -1;
-                    //apply change
-                    HeightmapModifyRequest* req = new HeightmapModifyRequest;
-                    req->terrain = &data;
-                    if(edit_mode == 1){
-                        req->modify_type = TMT_HEIGHT;
-                        req->originX = y;
-                        req->originY = i;
-                        req->originHeight = editHeight;
-                        req->range = range;
-                        req->multiplyer = mul;
-                    }else if(edit_mode == 2){
-                        req->modify_type = TMT_TEXTURE;
-                        req->originX = i;
-                        req->originY = y;
-                        req->range = range;
-                        req->texture = static_cast<unsigned char>(textureid - 1);
-                    }else if(edit_mode == 3){
-                        req->modify_type = TMT_GRASS;
-                        req->originX = y;
-                        req->originY = i;
-                        req->range = range;
-                        req->grass = vegetableid;
-                    }
-                    queryTerrainModifyRequest(req);
-                    hasChanged = true;
-                    return;
-                }
-            }
-        }
+        modifyTerrainVertex(&_data[0], isCtrlHold);
     }
 }
 
@@ -1667,18 +1665,24 @@ void TerrainProperty::copyTo(GameObjectProperty* dest){
     _dest->file_label = this->file_label;
     _dest->castShadows = this->castShadows;
     _dest->textures_size = this->textures_size;
+    _dest->grassType_size = this->grassType_size;
     //Copying terrain data
     data.copyTo(&_dest->data);
     //Copy textures data
-    for(unsigned int t_i = 0; t_i < this->textures.size(); t_i ++){
+    for(unsigned int t_i = 0; t_i < this->textures.size(); t_i ++)
         _dest->textures.push_back(textures[t_i]);
-    }
+
+    for(unsigned int g_i = 0; g_i < this->grass.size(); g_i ++)
+        _dest->grass.push_back(grass[g_i]);
 }
 
 NodeProperty::NodeProperty(){
     type = GO_PROPERTY_TYPE_NODE;
     hasBone = false;
-    scale = ZSVECTOR3(1, 1, 1);
+
+    scale = ZSVECTOR3(1.f, 1.f, 1.f);
+    translation = ZSVECTOR3(0.f, 0.f, 0.f);
+    rotation = ZSQUATERNION(0.f, 0.f, 0.f, 0.f);
 }
 
 void NodeProperty::onPreRender(RenderPipeline* pipeline){

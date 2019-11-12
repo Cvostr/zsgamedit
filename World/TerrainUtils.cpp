@@ -15,10 +15,12 @@ void terrain_loop(){
             switch(req->modify_type){
                 case TMT_HEIGHT:{
                     req->terrain->modifyHeight(req->originX, req->originY, req->originHeight, req->range, req->multiplyer);
+                    req->terrain->hasHeightmapChanged = true;
                     break;
                 }
                 case TMT_TEXTURE:{
                     req->terrain->modifyTexture(req->originX, req->originY, req->range, req->texture);
+                    req->terrain->hasPaintingChanged = true;
                     break;
 
                 }
@@ -105,6 +107,30 @@ void TerrainData::initGL(){
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }
+
+void TerrainData::initPhysics(){
+
+    ZSVECTOR3* vertex_pos = new ZSVECTOR3[W * H];
+    int* phys_indices = new int[(W - 1) * (H - 1) * 2 * 3];
+    //Copy vertices
+    for(int i = 0; i < W * H; i ++)
+        vertex_pos[i] = vertices[i].pos;
+    //Copy indices
+    for(int i = 0; i < (W - 1) * (H - 1) * 2 * 3; i ++)
+        phys_indices[i] = static_cast<int>(indices[i]);
+
+    int numFaces = (W - 1) * (H - 1) * 2;
+    int vertStride = sizeof(ZSVECTOR3);
+    int indexStride = 3 * sizeof(unsigned int);
+    btTriangleIndexVertexArray* va = new btTriangleIndexVertexArray(numFaces, phys_indices, indexStride,  W * H, reinterpret_cast<btScalar*>(vertex_pos), vertStride);
+    if(shape != nullptr)
+        delete shape;
+
+    this->shape = new btBvhTriangleMeshShape(va, false);
+    hasPhysicShapeChanged = true;
+
+}
+
 void TerrainData::destroyGL(){
     glDeleteVertexArrays(1, &this->VAO);
     glDeleteBuffers(1, &this->VBO);
@@ -129,16 +155,11 @@ void TerrainData::Draw(bool picking){
     glDrawElements(GL_TRIANGLES, (W - 1) * (H - 1) * 2 * 3, GL_UNSIGNED_INT, nullptr);
 }
 
-void TerrainData::generateGLMesh(){
-    if(W < 1 || H < 1)
-        return;
-    if(!created)
-        initGL();
-
+void TerrainData::updateTextureBuffers(){
     //write temporary array to store texture ids
-    unsigned char* _texture = new unsigned char[W * H * 4];
-    unsigned char* _texture1 = new unsigned char[W * H * 4];
-    unsigned char* _texture2 = new unsigned char[W * H * 4];
+    _texture = new unsigned char[W * H * 4];
+    _texture1 = new unsigned char[W * H * 4];
+    _texture2 = new unsigned char[W * H * 4];
     for(int y = 0; y < H; y ++){
         for(int x = 0; x < W; x ++){
            _texture[(x * H + y) * 4] = data[x * H + y].texture_factors[0];
@@ -157,7 +178,9 @@ void TerrainData::generateGLMesh(){
            _texture2[(x * H + y) * 4 + 3] = data[x * H + y].texture_factors[11];
         }
     }
+}
 
+void TerrainData::updateTextureBuffersGL(){
     //Create texture masks texture
     glBindTexture(GL_TEXTURE_2D, this->texture_mask1);
     glTexImage2D(
@@ -199,18 +222,26 @@ void TerrainData::generateGLMesh(){
     delete [] _texture;
     delete [] _texture1;
     delete [] _texture2;
+}
 
+void TerrainData::updateGeometryBuffers(){
+    //Allocate vertices array
+    vertices = new HeightmapVertex[W * H];
+    //Allocate indices array
+    indices = new unsigned int[(W - 1) * (H - 1) * 2 * 3];
 
-    HeightmapVertex* vertices = new HeightmapVertex[W * H];
-    unsigned int* indices = new unsigned int[(W - 1) * (H - 1) * 2 * 3];
-
+    //Iterate over all vertices and fill their vectors
     for(int y = 0; y < H; y ++){
         for(int x = 0; x < W; x ++){
+            //Set vertex height
             vertices[x * H + y].pos = ZSVECTOR3(x, data[x * H + y].height, y);
+            //Calculate vertex texture UV
             vertices[x * H + y].uv = ZSVECTOR2(static_cast<float>(x) / W, static_cast<float>(y) / H);
         }
     }
+    //Declare indices iterator
     unsigned int inds = 0;
+    //Iterate over all vertices
     for(int y = 0; y < H - 1; y ++){
         for(int x = 0; x < W - 1; x ++){
             indices[inds] = static_cast<unsigned int>(x * H + y);
@@ -224,6 +255,9 @@ void TerrainData::generateGLMesh(){
             inds += 6;
         }
     }
+    //Allocate physics shape
+    initPhysics();
+
     for(unsigned int i = 0; i < inds - 2; i ++){
         HeightmapVertex* v1 = &vertices[indices[i]];
         HeightmapVertex* v2 = &vertices[indices[i + 1]];
@@ -238,7 +272,8 @@ void TerrainData::generateGLMesh(){
     }
     //generate tangent, bitangent
     processTangentSpace(vertices, indices, (W - 1) * (H - 1) * 2 * 3, W * H);
-
+}
+void TerrainData::updateGeometryBuffersGL(){
     glBindVertexArray(this->VAO); //Bind vertex array
     glBindBuffer(GL_ARRAY_BUFFER, this->VBO); //Bind vertex buffer
     glBufferData(GL_ARRAY_BUFFER, static_cast<int>(W * H) * static_cast<int>(sizeof(HeightmapVertex)), vertices, GL_STATIC_DRAW); //send vertices to buffer
@@ -264,6 +299,19 @@ void TerrainData::generateGLMesh(){
 
     delete[] vertices;
     delete[] indices;
+}
+
+void TerrainData::generateGLMesh(){
+    if(W < 1 || H < 1)
+        return;
+    if(!created)
+        initGL();
+
+    updateTextureBuffers();
+    updateTextureBuffersGL();
+
+    updateGeometryBuffers();
+    updateGeometryBuffersGL();
 
     created = true;
 }
@@ -271,6 +319,10 @@ void TerrainData::generateGLMesh(){
 TerrainData::TerrainData(){
     W = 0; H = 0;
     created = false;
+    hasHeightmapChanged = false;
+    hasPaintingChanged = false;
+    hasPhysicShapeChanged = false;
+    shape = nullptr;
 }
 
 TerrainData::~TerrainData(){

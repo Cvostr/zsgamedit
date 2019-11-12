@@ -296,10 +296,9 @@ void main(){
 		FragColor = vec4(id_r, 0, id_b, 1);
 	}
     if(isPicking == 0){
-        vec3 Normal = getFragmentNormal(uv, 8); //defaultly, use normals from mesh
 	   
 	    tPos = FragPos;
-	    tNormal = Normal;
+	    tNormal = getFragmentNormal(uv, 8); //defaultly, use normals from mesh
 	    tMasks = vec4(1.0, 0, 0, 0);
         
         _shadow();

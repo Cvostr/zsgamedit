@@ -7,6 +7,10 @@
 #include <render/zs-texture.h>
 #include <render/zs-math.h>
 
+#include <BulletDynamics/Dynamics/btDiscreteDynamicsWorld.h>
+#include <BulletCollision/CollisionShapes/btTriangleIndexVertexArray.h>
+#include <BulletCollision/CollisionShapes/btBvhTriangleMeshShape.h>
+
 enum TERRAIN_MODIFY_TYPE{
     TMT_HEIGHT,
     TMT_TEXTURE,
@@ -65,8 +69,21 @@ private:
     unsigned int texture_mask1;
     unsigned int texture_mask2;
     unsigned int texture_mask3;
+
+    unsigned char* _texture;
+    unsigned char* _texture1;
+    unsigned char* _texture2;
+
+    HeightmapVertex* vertices;
+    unsigned int* indices;
+
 public:
     int W, H;
+    bool hasHeightmapChanged;
+    bool hasPaintingChanged;
+
+    btBvhTriangleMeshShape* shape;
+    bool hasPhysicShapeChanged;
 
     unsigned int VAO;
     unsigned int VBO;
@@ -78,6 +95,7 @@ public:
     void flatTerrain(int height);
 
     void initGL();
+    void initPhysics();
     void destroyGL();
     void Draw(bool picking = false);
     void generateGLMesh();
@@ -93,6 +111,12 @@ public:
     void reduce(unsigned char* ptr, int val);
 
     void copyTo(TerrainData* dest);
+
+    void updateTextureBuffers();
+    void updateTextureBuffersGL();
+
+    void updateGeometryBuffers();
+    void updateGeometryBuffersGL();
 
     TerrainData();
     ~TerrainData();
