@@ -845,7 +845,7 @@ void MaterialProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
                     PickResourceArea* area = new PickResourceArea(RESOURCE_TYPE_TEXTURE);
                     area->setLabel(captions[i]);
                     area->go_property = static_cast<void*>(this);
-                    area->rel_path = &texture_conf->texture_str[i];
+                    area->rel_path_std = &texture_conf->texture_str[i];
                     area->isShowNoneItem = true;
                     inspector->addPropertyArea(area);
                 }
@@ -902,7 +902,6 @@ void MaterialProperty::onValueChanged(){
             case MATSHPROP_TYPE_TEXTURE3:{
                 //Cast pointer
                 Texture3MtShPropConf* texture_conf = static_cast<Texture3MtShPropConf*>(conf_ptr);
-                texture_conf->rel_path = this->world_ptr->proj_ptr->root_path;
                 texture_conf->texture3D->created = false;
                 _inspector_win->updateRequired = true;
 

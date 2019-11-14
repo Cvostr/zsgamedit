@@ -12,7 +12,7 @@
 #include <render/zs-mesh.h>
 #include <render/zs-math.h>
 #include <render/zs-shader.h>
-#include "../../Render/headers/MatShaderProps.h"
+#include <render/zs-materials.h>
 #include <misc/oal_manager.h>
 
 #include "../../Misc/headers/AssimpMeshLoader.h"

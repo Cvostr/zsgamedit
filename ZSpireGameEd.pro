@@ -40,7 +40,6 @@ SOURCES += \
     Misc/ProjBuilder.cpp \
     Scripting/LuaScript.cpp \
     Scripting/zsensdk.cpp \
-    Render/MatShaderProps.cpp \
     World/GameObject.cpp \
     World/GoProperty/go_filestream.cpp \
     World/GoProperty/go_properties.cpp \
@@ -54,7 +53,7 @@ SOURCES += \
     World/TerrainUtils.cpp \
     World/Physics.cpp \
     Misc/ThumbnailsMaster.cpp \
-    Render/zs-material-defines.cpp \
+    Render/MatShaderProps.cpp
 
 HEADERS += \
         mainwin.h \
@@ -73,7 +72,6 @@ HEADERS += \
     World/headers/obj_properties.h \
     ProjEd/headers/InspEditAreas.h \
     triggers.h \
-    Render/headers/MatShaderProps.h \
     Misc/headers/zs_types.h \
     Misc/headers/AssimpMeshLoader.h \
     Render/headers/GizmosRenderer.h \

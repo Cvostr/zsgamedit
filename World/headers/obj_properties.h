@@ -3,7 +3,7 @@
 
 #include "World.h"
 #include "../../Scripting/headers/LuaScript.h"
-#include "../../Render/headers/MatShaderProps.h"
+#include <render/zs-materials.h>
 #include "../../World/headers/terrain.h"
 
 enum LIGHTSOURCE_TYPE {

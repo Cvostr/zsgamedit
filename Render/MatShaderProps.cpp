@@ -1,4 +1,4 @@
-#include "headers/MatShaderProps.h"
+#include <render/zs-materials.h>
 #include <fstream>
 #include <iostream>
 #include <GL/glew.h>
@@ -8,9 +8,6 @@ extern Project* project_ptr;
 Material* default3dmat;
 static std::vector<MtShaderPropertiesGroup*> MatGroups;
 
-MaterialShaderProperty::MaterialShaderProperty(){
-    type = MATSHPROP_TYPE_NONE;
-}
 MaterialShaderProperty* MtShaderPropertiesGroup::addProperty(int type){
     //Allocate property in heap
     MaterialShaderProperty* newprop_ptr = MtShProps::allocateProperty(type);
@@ -20,38 +17,11 @@ MaterialShaderProperty* MtShaderPropertiesGroup::addProperty(int type){
     return properties[properties.size() - 1];
 }
 
-
-MaterialShaderPropertyConf::MaterialShaderPropertyConf(){
-    this->type = MATSHPROP_TYPE_NONE;
-}
-
-//Textures stuff
-TextureMaterialShaderProperty::TextureMaterialShaderProperty(){
-    type = MATSHPROP_TYPE_TEXTURE;
-
-    this->slotToBind = 0;
-}
-//Configuration class
-TextureMtShPropConf::TextureMtShPropConf(){
-    this->type = MATSHPROP_TYPE_TEXTURE;
-
-    this->path = "@none";
-    this->texture = nullptr;
-}
-//Configuration class
-Texture3MtShPropConf::Texture3MtShPropConf(){
-    this->type = MATSHPROP_TYPE_TEXTURE3;
-
-    texture3D = Engine::allocTexture3D();
-
-    for(int i = 0; i < 6; i ++){
-        this->texture_str[i] = "@none";
-    }
-
-}
 void MtShaderPropertiesGroup::loadFromFile(const char* fpath){
     std::ifstream mat_shader_group;
     mat_shader_group.open(fpath);
+
+    mat_shader_group.close();
 }
 MtShaderPropertiesGroup::MtShaderPropertiesGroup(Engine::Shader* shader, const char* UB_CAPTION, unsigned int UB_ConnectID, unsigned int UB_SIZE){
     render_shader = shader;
@@ -259,7 +229,7 @@ void Material::saveToFile(){
                 Texture3MtShPropConf* tex3_conf = static_cast<Texture3MtShPropConf*>(conf_ptr);
                 //Write value
                 for(int i = 0; i < 6; i ++)
-                    mat_stream << tex3_conf->texture_str[i].toStdString() << " ";
+                    mat_stream << tex3_conf->texture_str[i] << " ";
 
                 break;
             }
@@ -355,7 +325,7 @@ void Material::loadFromFile(std::string fpath){
                             for(int i = 0; i < 6; i ++){
                                 std::string path;
                                 mat_stream >> path;
-                                texture3_conf->texture_str[i] = QString::fromStdString(path);
+                                texture3_conf->texture_str[i] = (path);
                             }
 
                             break;
@@ -367,20 +337,6 @@ void Material::loadFromFile(std::string fpath){
         }
     }
     mat_stream.close(); //close material stream
-}
-void Material::setPropertyGroup(MtShaderPropertiesGroup* group_ptr){
-    this->clear(); //clear all confs, first
-    //Iterate over all properties in group
-    for(unsigned int prop_i = 0; prop_i < group_ptr->properties.size(); prop_i ++){
-        //Obtain pointer to property in group
-        MaterialShaderProperty* prop_ptr = group_ptr->properties[prop_i];
-        //Add PropertyConf with the same type
-        this->addPropertyConf(prop_ptr->type);
-    }
-    //store pointer of picked group
-    this->group_ptr = group_ptr;
-    //store string id of picked group
-    this->group_str = group_ptr->str_path;
 }
 
 void Material::applyMatToPipeline(){
@@ -482,7 +438,7 @@ void Material::applyMatToPipeline(){
                 if(!texture_conf->texture3D->created){
                     texture_conf->texture3D->Init();
                     for(int i = 0; i < 6; i ++){
-                        texture_conf->texture3D->pushTexture(i, project_ptr->root_path.toStdString() + "/" + texture_conf->texture_str[i].toStdString());
+                        texture_conf->texture3D->pushTexture(i, project_ptr->root_path.toStdString() + "/" + texture_conf->texture_str[i]);
                     }
                     texture_conf->texture3D->created = true;
                     texture_conf->texture3D->Use(texture_p->slotToBind);
@@ -493,37 +449,4 @@ void Material::applyMatToPipeline(){
             }
         }
     }
-}
-
-Material::Material(){
-    setPropertyGroup(MtShProps::getDefaultMtShGroup());
-}
-
-Material::Material(std::string shader_group_str){
-    setPropertyGroup(MtShProps::getMtShaderPropertyGroup(shader_group_str));
-}
-
-Material::Material(MtShaderPropertiesGroup* _group_ptr){
-    setPropertyGroup(_group_ptr);
-}
-
-Material::~Material(){
-
-}
-
-void Material::clear(){
-    for(unsigned int prop_i = 0; prop_i < this->confs.size(); prop_i ++){
-        delete this->confs[prop_i];
-    }
-    confs.clear(); //Resize array to 0
-}
-
-MaterialShaderPropertyConf* Material::addPropertyConf(int type){
-    //Allocate new property
-    MaterialShaderPropertyConf* newprop_ptr =
-            static_cast<MaterialShaderPropertyConf*>(MtShProps::allocatePropertyConf(type));
-    //Push pointer to vector
-    this->confs.push_back(newprop_ptr);
-
-    return confs[confs.size() - 1];
 }

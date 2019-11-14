@@ -4,7 +4,7 @@
 #include <render/zs-shader.h>
 #include <render/zs-texture.h>
 #include <render/zs-mesh.h>
-#include "../../Render/headers/MatShaderProps.h"
+#include <render/zs-materials.h>
 #include "../../Render/headers/zs-pipeline.h"
 #include "EditorManager.h"
 #include <map>
