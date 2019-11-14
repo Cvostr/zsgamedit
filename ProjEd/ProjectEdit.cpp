@@ -1294,7 +1294,7 @@ void EditWindow::onMouseMotion(int relX, int relY){
         TerrainProperty* terrain = obj->getPropertyPtr<TerrainProperty>();
 
         if(terrain != nullptr && !isWorldCamera)
-            terrain->onMouseMotion(this->input_state.mouseX, input_state.mouseY, relX, relY,
+            terrain->onMouseMotion(this->input_state.mouseX, input_state.mouseY,
                                    settings.gameViewWin_Width,
                                    settings.gameViewWin_Height,
                                    this->input_state.isLeftBtnHold,

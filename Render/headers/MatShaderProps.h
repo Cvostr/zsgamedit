@@ -23,8 +23,8 @@ enum MATSHPROP_TYPE{
 class MaterialShaderProperty{
 public:
     MATSHPROP_TYPE type; //type of property
-    QString prop_caption;
-    QString prop_identifier; //String identifier, that will appear in material file
+    std::string prop_caption;
+    std::string prop_identifier; //String identifier, that will appear in material file
     unsigned int start_offset;
 
     MaterialShaderProperty();
@@ -40,7 +40,7 @@ public:
 class MtShaderPropertiesGroup{
 public:
     std::string str_path;
-    QString groupCaption;
+    std::string groupCaption;
     bool acceptShadows;
     //ID of connected shader uniform buffer
     unsigned int UB_ConnectID;
@@ -93,7 +93,7 @@ namespace MtShProps {
 
     void addMtShaderPropertyGroup(MtShaderPropertiesGroup* group);
     MtShaderPropertiesGroup* getMtShaderPropertyGroup(std::string group_name);
-    MtShaderPropertiesGroup* getMtShaderPropertyGroupByLabel(QString group_label);
+    MtShaderPropertiesGroup* getMtShaderPropertyGroupByLabel(std::string group_label);
     //Get amount of registered material shader properties
     unsigned int getMaterialShaderPropertyAmount();
     //Get shader properties by index
@@ -157,7 +157,7 @@ public:
 class TextureMtShPropConf : public MaterialShaderPropertyConf{
 public:
      Engine::Texture* texture;
-     QString path;
+     std::string path;
 
      TextureMtShPropConf();
 };

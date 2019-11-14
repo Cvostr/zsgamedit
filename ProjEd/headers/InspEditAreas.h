@@ -92,6 +92,7 @@ class ComboBoxArea : public PropertyEditArea{
 public:
     QComboBox widget;
     QString* result_string;
+    std::string* result_string_std;
 
     void setup(); //Virtual
     void addToInspector(InspectorWin* win);
@@ -120,7 +121,9 @@ public:
     bool isShowNoneItem; //If enabled, @none will be added to list
     QString extension_mask; //Extension mask to show needed files
     RESOURCE_TYPE resource_type; //flag of resource type
+
     QString* rel_path; //Pointer to store result
+    std::string* rel_path_std;
 
     QPushButton* respick_btn; //button to press
     QLabelResourcePickWgt* relpath_label;

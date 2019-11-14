@@ -60,9 +60,6 @@ MtShaderPropertiesGroup::MtShaderPropertiesGroup(Engine::Shader* shader, const c
     this->UB_ConnectID = UB_ConnectID;
     //First of all, tell shader uniform buffer point
     //Get Index of buffer
-    //unsigned int UB_INDEX = shader->getUniformBufferIndex(UB_CAPTION);
-    //Set UB binding
-   // shader->setUniformBufferBinding(UB_INDEX, UB_ConnectID);
     shader->setUniformBufferBinding(UB_CAPTION, UB_ConnectID);
 
     //Generate uniform buffer
@@ -181,7 +178,7 @@ MtShaderPropertiesGroup* MtShProps::getMtShaderPropertyGroup(std::string group_n
     return nullptr;
 }
 
-MtShaderPropertiesGroup* MtShProps::getMtShaderPropertyGroupByLabel(QString group_label){
+MtShaderPropertiesGroup* MtShProps::getMtShaderPropertyGroupByLabel(std::string group_label){
     for(unsigned int group_i = 0; group_i < MatGroups.size(); group_i ++){
         MtShaderPropertiesGroup* group_ptr = MatGroups[group_i];
         if(group_ptr->groupCaption.compare(group_label) == false)
@@ -216,7 +213,7 @@ void Material::saveToFile(){
         MaterialShaderProperty* prop_ptr = group_ptr->properties[prop_i];
         MaterialShaderPropertyConf* conf_ptr = this->confs[prop_i];
         //write entry header
-        mat_stream << "ENTRY " << prop_ptr->prop_identifier.toStdString() << " "; //Write identifier
+        mat_stream << "ENTRY " << prop_ptr->prop_identifier << " "; //Write identifier
 
         switch(prop_ptr->type){
             case MATSHPROP_TYPE_NONE:{
@@ -226,7 +223,7 @@ void Material::saveToFile(){
                 //Cast pointer
                 TextureMtShPropConf* texture_conf = static_cast<TextureMtShPropConf*>(conf_ptr);
                 //Write value
-                mat_stream << texture_conf->path.toStdString();
+                mat_stream << texture_conf->path;
                 break;
             }
             case MATSHPROP_TYPE_FLOAT:{
@@ -294,7 +291,6 @@ void Material::loadFromFile(std::string fpath){
             mat_stream >> this->group_str; //Read identifier
 
             setPropertyGroup(MtShProps::getMtShaderPropertyGroup(group_str));
-            //this->group_ptr = ;
         }
 
         if(prefix.compare("ENTRY") == 0){ //if it is game object
@@ -305,7 +301,7 @@ void Material::loadFromFile(std::string fpath){
                 MaterialShaderProperty* prop_ptr = group_ptr->properties[prop_i];
                 MaterialShaderPropertyConf* conf_ptr = this->confs[prop_i];
                 //check if compare
-                if(prop_identifier.compare(prop_ptr->prop_identifier.toStdString()) == 0){
+                if(prop_identifier.compare(prop_ptr->prop_identifier) == 0){
                     switch(prop_ptr->type){
                         case MATSHPROP_TYPE_NONE:{
                             break;
@@ -314,10 +310,7 @@ void Material::loadFromFile(std::string fpath){
                             //Cast pointer
                             TextureMtShPropConf* texture_conf = static_cast<TextureMtShPropConf*>(conf_ptr);
 
-                            std::string path;
-                            mat_stream >> path;
-
-                            texture_conf->path = QString::fromStdString(path);
+                            mat_stream >> texture_conf->path;
                             break;
                         }
                         case MATSHPROP_TYPE_FLOAT:{
@@ -412,7 +405,7 @@ void Material::applyMatToPipeline(){
                 if(texture_conf->path.compare("@none")){
                     //if texture isn't loaded
                     if(texture_conf->texture == nullptr){
-                        Resource* res_ptr = project_ptr->getResource(texture_conf->path);
+                        Resource* res_ptr = project_ptr->getResource(QString::fromStdString(texture_conf->path));
                         texture_conf->texture = static_cast<Engine::Texture*>(res_ptr->class_ptr);
                     }
                     //Set opengl texture

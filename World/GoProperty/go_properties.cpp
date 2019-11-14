@@ -657,11 +657,12 @@ void AudioSourceProperty::updateAudioPtr(){
 
 void AudioSourceProperty::onUpdate(float deltaTime){
     TransformProperty* transform = go_link.updLinkPtr()->getTransformProperty();
-
-    //if(transform->translation != this->last_pos){
-    this->source.setPosition(transform->translation);
-      //  this->last_pos = transform->translation;
-    //}
+    //if object position changed
+    if(transform->translation != this->last_pos){
+        //apply new position to openal audio source
+        this->source.setPosition(transform->translation);
+        this->last_pos = transform->translation;
+    }
 }
 
 void AudioSourceProperty::copyTo(GameObjectProperty* dest){
@@ -740,16 +741,15 @@ void MaterialProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
         receiveShdws->bool_ptr = &this->receiveShadows;
         inspector->addPropertyArea(receiveShdws);
     }
-    if(material_ptr == nullptr) return;
-
+    //Add shader group picker
     ComboBoxArea* mt_shader_group_area = new ComboBoxArea;
     mt_shader_group_area->setLabel("Shader Group");
     mt_shader_group_area->go_property = static_cast<void*>(this);
-    mt_shader_group_area->result_string = &this->group_label;
-
+    mt_shader_group_area->result_string_std = &this->group_label;
+    //Iterate over all available shader groups and add them to combo box
     for(unsigned int i = 0; i < MtShProps::getMaterialShaderPropertyAmount(); i ++){
         MtShaderPropertiesGroup* ptr = MtShProps::getMtShaderPropertiesGroupByIndex(i);
-        mt_shader_group_area->widget.addItem(ptr->groupCaption);
+        mt_shader_group_area->widget.addItem(QString::fromStdString(ptr->groupCaption));
     }
     inspector->addPropertyArea(mt_shader_group_area);
 
@@ -769,9 +769,9 @@ void MaterialProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
                 TextureMtShPropConf* texture_conf = static_cast<TextureMtShPropConf*>(conf_ptr);
 
                 PickResourceArea* area = new PickResourceArea(RESOURCE_TYPE_TEXTURE);
-                area->setLabel(texture_p->prop_caption);
+                area->setLabel(QString::fromStdString(texture_p->prop_caption));
                 area->go_property = static_cast<void*>(this);
-                area->rel_path = &texture_conf->path;
+                area->rel_path_std = &texture_conf->path;
                 area->isShowNoneItem = true;
                 inspector->addPropertyArea(area);
 
@@ -783,7 +783,7 @@ void MaterialProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
                 FloatMtShPropConf* float_conf = static_cast<FloatMtShPropConf*>(conf_ptr);
 
                 FloatPropertyArea* float_area = new FloatPropertyArea;
-                float_area->setLabel(float_p->prop_caption); //Its label
+                float_area->setLabel(QString::fromStdString(float_p->prop_caption)); //Its label
                 float_area->value = &float_conf->value;
                 float_area->go_property = static_cast<void*>(this);
                 inspector->addPropertyArea(float_area);
@@ -796,7 +796,7 @@ void MaterialProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
                 Float3MtShPropConf* float3_conf = static_cast<Float3MtShPropConf*>(conf_ptr);
 
                 Float3PropertyArea* float3_area = new Float3PropertyArea;
-                float3_area->setLabel(float3_p->prop_caption); //Its label
+                float3_area->setLabel(QString::fromStdString(float3_p->prop_caption)); //Its label
                 float3_area->vector = &float3_conf->value;
                 float3_area->go_property = static_cast<void*>(this);
                 inspector->addPropertyArea(float3_area);
@@ -815,7 +815,7 @@ void MaterialProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
                 IntegerMtShPropConf* integer_conf = static_cast<IntegerMtShPropConf*>(conf_ptr);
 
                 IntPropertyArea* integer_area = new IntPropertyArea;
-                integer_area->setLabel(integer_p->prop_caption); //Its label
+                integer_area->setLabel(QString::fromStdString(integer_p->prop_caption)); //Its label
                 integer_area->value = &integer_conf->value;
                 integer_area->go_property = static_cast<void*>(this);
                 inspector->addPropertyArea(integer_area);
@@ -828,7 +828,7 @@ void MaterialProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
                 ColorMtShPropConf* color_conf = static_cast<ColorMtShPropConf*>(conf_ptr);
 
                 ColorDialogArea* color_area = new ColorDialogArea;
-                color_area->setLabel(color_p->prop_caption); //Its label
+                color_area->setLabel(QString::fromStdString(color_p->prop_caption)); //Its label
                 color_area->color = &color_conf->color;
                 color_area->go_property = static_cast<void*>(this);
                 inspector->addPropertyArea(color_area);
@@ -877,10 +877,13 @@ void MaterialProperty::onValueChanged(){
             return; //go out
         }
     }else{ //Material already had group, check, if user decided to change it
-        if(MtShProps::getMtShaderPropertyGroupByLabel(this->group_label) != this->material_ptr->group_ptr){
+        //Get pointer to new selected shader group
+        MtShaderPropertiesGroup* newgroup_ptr = MtShProps::getMtShaderPropertyGroupByLabel(this->group_label);
+        //if new pointer and old aren't match, then change property group
+        if(newgroup_ptr != this->material_ptr->group_ptr){
             //Apply changing
             this->material_ptr->setPropertyGroup(MtShProps::getMtShaderPropertyGroupByLabel(this->group_label));
-           // this->group_label = material_ptr->group_ptr->groupCaption;
+            //Update material interface
             _inspector_win->updateRequired = true;
         }
     }
@@ -892,7 +895,7 @@ void MaterialProperty::onValueChanged(){
             case MATSHPROP_TYPE_TEXTURE:{
                 //Cast pointer
                 TextureMtShPropConf* texture_conf = static_cast<TextureMtShPropConf*>(conf_ptr);
-                texture_conf->texture = go_link.world_ptr->getTexturePtrByRelPath(texture_conf->path);
+                texture_conf->texture = go_link.world_ptr->getTexturePtrByRelPath(QString::fromStdString(texture_conf->path));
 
                 break;
             }
@@ -1639,7 +1642,7 @@ void TerrainProperty::onMouseClick(int posX, int posY, int screenX, int screenY,
     }
 }
 
-void TerrainProperty::onMouseMotion(int posX, int posY, int relX, int relY, int screenX, int screenY, bool isLeftButtonHold, bool isCtrlHold){
+void TerrainProperty::onMouseMotion(int posX, int posY, int screenX, int screenY, bool isLeftButtonHold, bool isCtrlHold){
     if(isLeftButtonHold){
         unsigned char _data[4];
         getPickedVertexId(posX, posY, screenX, screenY, &_data[0]);

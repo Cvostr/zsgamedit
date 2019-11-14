@@ -328,6 +328,9 @@ TerrainData::TerrainData(){
 TerrainData::~TerrainData(){
     if(created)
         delete[] data;
+
+    if(shape)
+        delete shape;
 }
 
 void TerrainData::saveToFile(const char* file_path){

@@ -189,7 +189,7 @@ bool World::isObjectLabelUnique(QString label){
     return true;
 }
 
-void World::removeObj(GameObjectLink link){
+void World::removeObj(GameObjectLink& link){
     GameObjectLink l = link;
     l.updLinkPtr();
     l.ptr->alive = false; //Mark object as dead
@@ -217,7 +217,9 @@ void World::removeObj(GameObjectLink link){
 }
 
 void World::removeObjPtr(GameObject* obj){
-    removeObj(obj->getLinkToThisObject());
+    GameObjectLink link = obj->getLinkToThisObject();
+    //call object remove
+    removeObj(link);
 }
 void World::trimObjectsList(){
     for (unsigned int i = 0; i < objects.size(); i ++) { //Iterating over all objects

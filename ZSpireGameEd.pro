@@ -54,8 +54,6 @@ SOURCES += \
     World/TerrainUtils.cpp \
     World/Physics.cpp \
     Misc/ThumbnailsMaster.cpp \
-    ui/zs-uiwidget.cpp \
-    ui/zs-uibutton.cpp \
     Render/zs-material-defines.cpp \
 
 HEADERS += \
@@ -83,9 +81,7 @@ HEADERS += \
     Misc/headers/EditorManager.h \
     ProjEd/headers/EditorSettings.h \
     World/headers/terrain.h \
-    Misc/headers/ThumbnailsMaster.h \
-    ui/headers/zs-uiwidget.h \
-    ui/headers/zs-uibutton.h
+    Misc/headers/ThumbnailsMaster.h
 
 
 FORMS += \

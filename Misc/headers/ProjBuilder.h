@@ -7,6 +7,7 @@
 #include <QDialog>
 #include <QMainWindow>
 #include <QGridLayout>
+#include <QResizeEvent>
 #include "ui_buildconsole.h"
 #include <fstream>
 
@@ -25,6 +26,9 @@ public:
     explicit BuilderWindow(QWidget* parent = nullptr);
     QLabel* getTextWgt();
     void addToOutput(QString text);
+
+    void resizeEvent(QResizeEvent* event);
+
     ~BuilderWindow();
 };
 
@@ -46,7 +50,7 @@ public:
 
     QString map_path; // path to resource map file
 
-    void writeToBlob(std::string file_path, std::string rel_path, Resource* res_ptr);
+    void writeToBlob(std::string& file_path, std::string& rel_path, Resource* res_ptr);
     unsigned int getFileSize(std::string file_path);
 
     BlobWriter(QString map_path, BuilderWindow* window);

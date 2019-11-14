@@ -69,7 +69,7 @@ public:
 
 class MaterialProperty : public GameObjectProperty{
 private:
-    QString group_label;
+    std::string group_label;
 
 public:
     //Pointer to picked material
@@ -318,7 +318,7 @@ public:
     void onUpdate(float deltaTime);
     TerrainProperty();
     void onMouseClick(int posX, int posY, int screenX, int screenY, bool isLeftButtonHold, bool isCtrlHold);
-    void onMouseMotion(int posX, int posY, int relX, int relY, int screenX, int screenY, bool isLeftButtonHold, bool isCtrlHold);
+    void onMouseMotion(int posX, int posY, int screenX, int screenY, bool isLeftButtonHold, bool isCtrlHold);
     void getPickedVertexId(int posX, int posY, int screenX, int screenY, unsigned char* data);
 
     void modifyTerrainVertex(unsigned char* gl_data, bool isCtrlHold);

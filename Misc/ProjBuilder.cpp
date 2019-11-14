@@ -21,6 +21,10 @@ void ProjBuilder::start(){
         Resource* res_ptr = &proj_ptr->resources[res_i];
         QString type_str;
         switch(res_ptr->type){
+            case RESOURCE_TYPE_NONE: type_str = "NONE";
+                break;
+            case RESOURCE_TYPE_FILE: type_str = "FILE";
+                break;
             case RESOURCE_TYPE_TEXTURE: type_str = "TEXTURE";
                  break;
             case RESOURCE_TYPE_MESH : type_str = "MESH";
@@ -35,7 +39,9 @@ void ProjBuilder::start(){
                 break;
         }
         window->addToOutput("Resource #" + QString::number(res_i) + " type: " + type_str + " " + res_ptr->rel_path);
-        writer->writeToBlob((proj_ptr->root_path + "/" + res_ptr->rel_path).toStdString(), res_ptr->rel_path.toStdString(), res_ptr);
+        std::string abs_path = (proj_ptr->root_path + "/" + res_ptr->rel_path).toStdString();
+        std::string rel_path = res_ptr->rel_path.toStdString();
+        writer->writeToBlob(abs_path, rel_path, res_ptr);
     }
 
     window->addToOutput("All Resources are Written!");
@@ -67,12 +73,23 @@ BuilderWindow::~BuilderWindow(){
 
 }
 
+void BuilderWindow::resizeEvent(QResizeEvent* event){
+    QMainWindow::resizeEvent(event);
+
+    int new_width = event->size().width();
+    int new_height = event->size().height();
+
+    ui->scrollArea->resize(new_width - 20, new_height);
+    //ui->outputText->resize(new_width - 40, new_height - 20);
+}
+
 QLabel* BuilderWindow::getTextWgt(){
     return ui->outputText;
 }
 void BuilderWindow::addToOutput(QString text){
     this->outputTextBuf += text + "\n";
     this->ui->outputText->setText(outputTextBuf);
+    ui->outputText->resize(ui->outputText->size().width(), ui->outputText->size().height() + 10);
 }
 
 BlobWriter::BlobWriter(QString map_path, BuilderWindow* window){
@@ -105,7 +122,7 @@ unsigned int BlobWriter::getFileSize(std::string file_path){
     return result;
 }
 
-void BlobWriter::writeToBlob(std::string file_path, std::string rel_path, Resource* res_ptr){
+void BlobWriter::writeToBlob(std::string& file_path, std::string& rel_path, Resource* res_ptr){
     if(written_bytes >= this->max_blob_size){
         written_bytes = 0;
         this->bl_stream_opened = false;

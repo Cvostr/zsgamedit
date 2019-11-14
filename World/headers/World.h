@@ -313,7 +313,7 @@ public:
     GameObject* getObjectByStringId(std::string id);
     int getFreeObjectSpaceIndex();
     bool isObjectLabelUnique(QString label); //Get amount of objects with this label
-    void removeObj(GameObjectLink link); //Remove object from world
+    void removeObj(GameObjectLink& link); //Remove object from world
     void removeObjPtr(GameObject* obj); //Remove object from world
     GameObject* dublicateObject(GameObject* original, bool parent = true);
     GameObject* Instantiate(GameObject* original);
