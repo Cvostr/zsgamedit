@@ -352,7 +352,6 @@ void FloatPropertyArea::updateValues(){
 //Pick resoource area stuff
 PickResourceArea::PickResourceArea(RESOURCE_TYPE resource_type){
     type = PEA_TYPE_RESPICK;
-    this->rel_path = nullptr;
     this->rel_path_std = nullptr;
     this->resource_type = resource_type; //Default type is texture
 
@@ -392,25 +391,15 @@ void PickResourceArea::setup(){
 }
 
 void PickResourceArea::updateLabel(){
-    if(this->rel_path == nullptr && this->rel_path_std == nullptr) //If vector hasn't been set
+    if(this->rel_path_std == nullptr) //If vector hasn't been set
         return; //Go out
 
-    bool resource_specified = false;
-    if(rel_path != nullptr)
-        if(*rel_path != "@none")
-            resource_specified = true;
-    if(rel_path_std != nullptr)
-        if(*rel_path_std != "@none")
-            resource_specified = true;
-
+    bool resource_specified = *rel_path_std != "@none";
 
     if((this->resource_type == RESOURCE_TYPE_MATERIAL || this->resource_type == RESOURCE_TYPE_TEXTURE) && resource_specified){
         std::string fpath = _editor_win->project.root_path.toStdString() + "/";
 
-        if(rel_path != nullptr)
-            fpath += rel_path->toStdString();
-        if(rel_path_std != nullptr)
-            fpath += *rel_path_std;
+        fpath += *rel_path_std;
 
         QImage* img = nullptr;
         //Set resource pixmap
@@ -423,15 +412,12 @@ void PickResourceArea::updateLabel(){
         relpath_label->setMinimumSize(QSize(50, 50));
         relpath_label->setMaximumSize(QSize(50, 50));
     }else{
-        if(rel_path != nullptr)
-            relpath_label->setText(*rel_path);
-        if(rel_path_std != nullptr)
-            relpath_label->setText(QString::fromStdString(*rel_path_std));
+        relpath_label->setText(QString::fromStdString(*rel_path_std));
     }
 }
 
 void PickResourceArea::updateValues(){
-    if(this->rel_path == nullptr && this->rel_path_std == nullptr) //If vector hasn't been set
+    if(this->rel_path_std == nullptr) //If vector hasn't been set
         return; //Go out
     //Get current value in text field
     QString cur = this->relpath_label->text();
@@ -491,16 +477,15 @@ void IntPropertyArea::updateValues(){
 }
 
 void ResourcePickDialog::onResourceSelected(){
+    if(area->rel_path_std == nullptr) return;
+
     QListWidgetItem* selected = this->list->currentItem();
     QString resource_path = selected->text(); //Get selected text
     //Make action
     GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(area->go_property);
     getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
     //Apply resource change
-    if(area->rel_path != nullptr)
-        *area->rel_path = resource_path;
-    if(area->rel_path_std != nullptr)
-        *area->rel_path_std = resource_path.toStdString();
+    *area->rel_path_std = resource_path.toStdString();
 
     area->PropertyEditArea::callPropertyUpdate();
     this->resource_text->setText(resource_path);
@@ -508,10 +493,7 @@ void ResourcePickDialog::onResourceSelected(){
 }
 
 void ResourcePickDialog::onDialogClose(){
-    //QListWidgetItem* selected = this->list->currentItem();
-    //emit accept();
-   //this->hide();
-   // _editor_win->getInspector()->updateObjectProperties();
+
 }
 
 void ResourcePickDialog::onNeedToShow(){
@@ -749,6 +731,7 @@ void QLabelResourcePickWgt::dragEnterEvent( QDragEnterEvent* event ){
     event->acceptProposedAction();
 }
 void QLabelResourcePickWgt::dropEvent( QDropEvent* event ){
+
     assert(event);
     QList<QListWidgetItem*> file_dropped = _editor_win->getFilesListWidget()->selectedItems();
     QList<QTreeWidgetItem*> object_dropped = _editor_win->getObjectListWidget()->selectedItems();
@@ -756,16 +739,14 @@ void QLabelResourcePickWgt::dropEvent( QDropEvent* event ){
     if(file_dropped.length() > 0){
         //Get pointer to resource picker
         PickResourceArea* resource_area = static_cast<PickResourceArea*>(area_ptr);
+        if(resource_area->rel_path_std == nullptr) return;
         //if we drooped texture to texture pick area
         if(resource_area->resource_type == RESOURCE_TYPE_TEXTURE && (file_dropped[0]->text().endsWith(".dds") || file_dropped[0]->text().endsWith(".DDS"))){
 
             QString newpath = _editor_win->getCurrentDirectory() + "/" + file_dropped[0]->text();
             newpath.remove(0, _editor_win->project.root_path.size() + 1);
-
-            if(resource_area->rel_path != nullptr)
-                *resource_area->rel_path = newpath;
-            if(resource_area->rel_path_std != nullptr)
-                *resource_area->rel_path_std = newpath.toStdString();
+            //Set new relative path
+            *resource_area->rel_path_std = newpath.toStdString();
 
             GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(area_ptr->go_property);
             getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
@@ -775,8 +756,10 @@ void QLabelResourcePickWgt::dropEvent( QDropEvent* event ){
         //if we drooped material to material pick area
         if(resource_area->resource_type == RESOURCE_TYPE_MATERIAL && (file_dropped[0]->text().endsWith(".zsmat"))){
 
-            *resource_area->rel_path = _editor_win->getCurrentDirectory() + "/" + file_dropped[0]->text();
-            resource_area->rel_path->remove(0, _editor_win->project.root_path.size() + 1);
+            QString newpath = _editor_win->getCurrentDirectory() + "/" + file_dropped[0]->text();
+            newpath.remove(0, _editor_win->project.root_path.size() + 1);
+            //Set new relative path
+            *resource_area->rel_path_std = newpath.toStdString();
 
             GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(area_ptr->go_property);
             getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);

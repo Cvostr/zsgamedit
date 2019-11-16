@@ -438,7 +438,7 @@ void GameObject::Draw(RenderPipeline* pipeline){
 
                     if(RootNode != nullptr){
                         //if RootNode is specified
-                        node = mesh_prop->skinning_root_node->getChildObjectWithNodeLabel(QString::fromStdString(b->bone_name));
+                        node = mesh_prop->skinning_root_node->getChildObjectWithNodeLabel(b->bone_name);
                         //Get root transform
                         rootNodeTransform = (RootNode->getPropertyPtr<NodeProperty>()->transform_mat);
                     }

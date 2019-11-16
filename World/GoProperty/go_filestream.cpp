@@ -54,19 +54,19 @@ void GameObject::saveProperties(std::ofstream* stream){
         }
         case GO_PROPERTY_TYPE_MESH:{
             MeshProperty* ptr = static_cast<MeshProperty*>(property_ptr);
-            *stream << ptr->resource_relpath.toStdString() << "\n";
+            *stream << ptr->resource_relpath << "\n";
             stream->write(reinterpret_cast<char*>(&ptr->castShadows), sizeof(bool));
             break;
         }
         case GO_PROPERTY_TYPE_ANIMATION:{
             AnimationProperty* ptr = static_cast<AnimationProperty*>(property_ptr);
-            *stream << ptr->anim_label.toStdString() << "\n";
+            *stream << ptr->anim_label << "\n";
             break;
         }
         case GO_PROPERTY_TYPE_NODE:{
             NodeProperty* ptr = static_cast<NodeProperty*>(property_ptr);
             //Write node name
-            *stream << ptr->node_label.toStdString() << "\n";
+            *stream << ptr->node_label << "\n";
             for(unsigned int m_i = 0; m_i < 4; m_i ++){
                 for(unsigned int m_j = 0; m_j < 4; m_j ++){
                     float m_v = ptr->transform_mat.m[m_i][m_j];
@@ -98,10 +98,10 @@ void GameObject::saveProperties(std::ofstream* stream){
         }
         case GO_PROPERTY_TYPE_AUDSOURCE:{
             AudioSourceProperty* ptr = static_cast<AudioSourceProperty*>(property_ptr);
-            if(ptr->resource_relpath.isEmpty()) //check if object has no audioclip
+            if(ptr->resource_relpath.empty()) //check if object has no audioclip
                 *stream << "@none";
             else
-                *stream << ptr->resource_relpath.toStdString() << "\n";
+                *stream << ptr->resource_relpath << "\n";
 
             stream->write(reinterpret_cast<char*>(&ptr->source.source_gain), sizeof(float));
             stream->write(reinterpret_cast<char*>(&ptr->source.source_pitch), sizeof(float));
@@ -112,7 +112,7 @@ void GameObject::saveProperties(std::ofstream* stream){
             MaterialProperty* ptr = static_cast<MaterialProperty*>(property_ptr);
             //Write path to material string
             if(ptr->material_ptr != nullptr)
-                *stream << ptr->material_path.toStdString() << "\n"; //Write material relpath
+                *stream << ptr->material_path << "\n"; //Write material relpath
             else
                 *stream << "@none" << "\n";
 
@@ -127,7 +127,7 @@ void GameObject::saveProperties(std::ofstream* stream){
             stream->write(reinterpret_cast<char*>(&script_num), sizeof(int));
             *stream << "\n"; //write divider
             for(unsigned int script_w_i = 0; script_w_i < static_cast<unsigned int>(script_num); script_w_i ++){
-                 *stream << ptr->path_names[script_w_i].toStdString() << "\n";
+                 *stream << ptr->path_names[script_w_i] << "\n";
             }
 
             break;
@@ -187,7 +187,7 @@ void GameObject::saveProperties(std::ofstream* stream){
             //Write textures relative pathes
             for(int texture_i = 0; texture_i < ptr->textures_size; texture_i ++){
                 HeightmapTexturePair* texture_pair = &ptr->textures[texture_i];
-                *stream << texture_pair->diffuse_relpath.toStdString() << " " << texture_pair->normal_relpath.toStdString() << "\n"; //Write material relpath
+                *stream << texture_pair->diffuse_relpath << " " << texture_pair->normal_relpath << "\n"; //Write material relpath
             }
 
             break;
@@ -207,20 +207,20 @@ void GameObject::saveProperties(std::ofstream* stream){
             stream->write(reinterpret_cast<char*>(&amountY), sizeof(int));
 
             *stream << "\n"; //write divider
-            *stream << ptr->diffuse_relpath.toStdString() << " " << ptr->mesh_string.toStdString();
+            *stream << ptr->diffuse_relpath << " " << ptr->mesh_string;
             break;
         }
         case GO_PROPERTY_TYPE_TILE:{
             TileProperty* ptr = static_cast<TileProperty*>(property_ptr);
-            if(ptr->diffuse_relpath.isEmpty()) //check if object has no texture
+            if(ptr->diffuse_relpath.empty()) //check if object has no texture
                 *stream << "@none";
             else
-                *stream << ptr->diffuse_relpath.toStdString() << "\n";
+                *stream << ptr->diffuse_relpath << "\n";
 
-            if(ptr->transparent_relpath.isEmpty()) //check if object has no texture
+            if(ptr->transparent_relpath.empty()) //check if object has no texture
                 *stream << "@none";
             else
-                *stream << ptr->transparent_relpath.toStdString() << "\n";
+                *stream << ptr->transparent_relpath << "\n";
 
             //Animation stuff
             stream->write(reinterpret_cast<char*>(&ptr->anim_property.isAnimated), sizeof(bool));
@@ -282,10 +282,10 @@ void GameObject::loadProperty(std::ifstream* world_stream){
             break;
         }
         case GO_PROPERTY_TYPE_MESH :{
-            std::string rel_path;
-            *world_stream >> rel_path;
             MeshProperty* lptr = static_cast<MeshProperty*>(prop_ptr);
-            lptr->resource_relpath = QString::fromStdString(rel_path); //Write loaded mesh relative path
+            //Read mesh name
+            *world_stream >> lptr->resource_relpath;
+
             lptr->updateMeshPtr(); //Pointer will now point to mesh resource
 
             world_stream->seekg(1, std::ofstream::cur);
@@ -295,22 +295,22 @@ void GameObject::loadProperty(std::ifstream* world_stream){
         }
         case GO_PROPERTY_TYPE_ANIMATION:{
             AnimationProperty* ptr = static_cast<AnimationProperty*>(prop_ptr);
-            std::string anim_rel_path;
-            *world_stream >> anim_rel_path;
-            ptr->anim_label = QString::fromStdString(anim_rel_path);
+            //Read animation clip name
+            *world_stream >> ptr->anim_label;
             ptr->updateAnimationPtr();
             break;
         }
         case GO_PROPERTY_TYPE_NODE:{
             NodeProperty* ptr = static_cast<NodeProperty*>(prop_ptr);
-            std::string nod_name;
-            //Write node name
-            *world_stream >> nod_name;
-            ptr->node_label = QString::fromStdString(nod_name);
+            //Read node name
+            *world_stream >> ptr->node_label;
+            //Skip 1 byte
+            world_stream->seekg(1, std::ofstream::cur);
+            //Now read node matrix
             for(unsigned int m_i = 0; m_i < 4; m_i ++){
                 for(unsigned int m_j = 0; m_j < 4; m_j ++){
-                    float m_v = ptr->transform_mat.m[m_i][m_j];
-                    world_stream->read(reinterpret_cast<char*>(&m_v), sizeof(float));
+                    float* m_v = &ptr->transform_mat.m[m_i][m_j];
+                    world_stream->read(reinterpret_cast<char*>(m_v), sizeof(float));
                 }
             }
             break;
@@ -345,23 +345,21 @@ void GameObject::loadProperty(std::ifstream* world_stream){
         //iterate over all scripts and read their path
         Project* project_ptr = static_cast<Project*>(static_cast<World*>(this->world_ptr)->proj_ptr);
         for(unsigned int script_w_i = 0; script_w_i < static_cast<unsigned int>(ptr->scr_num); script_w_i ++){
-            std::string scr_path;
-            *world_stream >> scr_path;
-            ptr->path_names[script_w_i] = QString::fromStdString(scr_path);
-
-            ptr->scripts_attached[script_w_i].fpath = project_ptr->root_path + "/" + ptr->path_names[script_w_i];
-            ptr->scripts_attached[script_w_i].name = ptr->path_names[script_w_i].toStdString();
+            //Read script relative path
+            *world_stream >> ptr->path_names[script_w_i];
+            //Push absolute and relative path to LuaScript object
+            ptr->scripts_attached[script_w_i].fpath = project_ptr->root_path.toStdString() + "/" + ptr->path_names[script_w_i];
+            ptr->scripts_attached[script_w_i].name = ptr->path_names[script_w_i];
         }
         break;
     }
     case GO_PROPERTY_TYPE_AUDSOURCE:{
-        std::string rel_path;
-        *world_stream >> rel_path;
         AudioSourceProperty* lptr = static_cast<AudioSourceProperty*>(prop_ptr);
-        if(rel_path.compare("@none") != 0){
-            lptr->resource_relpath = QString::fromStdString(rel_path); //Write loaded mesh relative path
-            lptr->updateAudioPtr(); //Pointer will now point to mesh resource
-        }
+        //Reading audio clip label
+        *world_stream >> lptr->resource_relpath;
+
+        lptr->updateAudioPtr(); //Pointer will now point to mesh resource
+
         world_stream->seekg(1, std::ofstream::cur);
         //Load settings
         world_stream->read(reinterpret_cast<char*>(&lptr->source.source_gain), sizeof(float));
@@ -373,12 +371,8 @@ void GameObject::loadProperty(std::ifstream* world_stream){
     }
     case GO_PROPERTY_TYPE_MATERIAL:{
         MaterialProperty* ptr = static_cast<MaterialProperty*>(prop_ptr);
-
-        std::string path;
         //reading path
-        *world_stream >> path;
-        //Assigning path
-        ptr->material_path = QString::fromStdString(path);
+        *world_stream >> ptr->material_path;
 
         ptr->onValueChanged(); //find it and process
 
@@ -394,8 +388,6 @@ void GameObject::loadProperty(std::ifstream* world_stream){
         world_stream->read(reinterpret_cast<char*>(&ptr->coll_type), sizeof(COLLIDER_TYPE));
         //read isTrigger boolean
         world_stream->read(reinterpret_cast<char*>(&ptr->isTrigger), sizeof(bool));
-
-        //world_ptr->pushCollider(ptr); //send collider to world
 
         break;
     }
@@ -450,14 +442,8 @@ void GameObject::loadProperty(std::ifstream* world_stream){
         //Read textures relative pathes
         for(int texture_i = 0; texture_i < ptr->textures_size; texture_i ++){
             HeightmapTexturePair texture_pair;
-
-            std::string diffuse_relpath;
-            std::string normal_relpath;
             //Read texture pair
-            *world_stream >> diffuse_relpath >> normal_relpath; //Write material relpath
-            //Assign paths to texture pair
-            texture_pair.diffuse_relpath = QString::fromStdString(diffuse_relpath);
-            texture_pair.normal_relpath = QString::fromStdString(normal_relpath);
+            *world_stream >> texture_pair.diffuse_relpath >> texture_pair.normal_relpath; //Write material relpath
 
             ptr->textures.push_back(texture_pair);
         }
@@ -479,29 +465,17 @@ void GameObject::loadProperty(std::ifstream* world_stream){
         t_ptr->isCreated = static_cast<bool>(isCreated);
 
         world_stream->seekg(1, std::ofstream::cur); //Skip space
-
-        std::string diffuse_relpath, mesh_relpath;
-
-        *world_stream >> diffuse_relpath >> mesh_relpath;
-
-        t_ptr->diffuse_relpath = QString::fromStdString(diffuse_relpath);
-        t_ptr->mesh_string = QString::fromStdString(mesh_relpath);
+        //Read diffuse and mesh
+        *world_stream >> t_ptr->diffuse_relpath >> t_ptr->mesh_string;
 
         break;
     }
     case GO_PROPERTY_TYPE_TILE:{
-        std::string diffuse_rel_path;
-        *world_stream >> diffuse_rel_path;
         TileProperty* lptr = static_cast<TileProperty*>(prop_ptr);
-        if(diffuse_rel_path.compare("@none") != 0){
-            lptr->diffuse_relpath = QString::fromStdString(diffuse_rel_path); //Write loaded mesh relative path
-        }
-
-        std::string transparent_rel_path;
-        *world_stream >> transparent_rel_path;
-        if(transparent_rel_path.compare("@none") != 0){
-            lptr->transparent_relpath = QString::fromStdString(transparent_rel_path); //Write loaded mesh relative path
-        }
+        //Read diffuse texture string
+        *world_stream >> lptr->diffuse_relpath;
+        //Read transparent texture string
+        *world_stream >> lptr->transparent_relpath;
 
         lptr->updTexturePtr(); //set pointers to textures in tile property
 

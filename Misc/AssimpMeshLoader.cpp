@@ -127,7 +127,7 @@ void Engine::loadMesh(std::string file_path, Engine::Mesh* mesh_ptr, int index){
     importer.FreeScene();
 }
 
-void Engine::loadAnimation(std::string file_path, ZSPIRE::Animation* anim, int index){
+void Engine::loadAnimation(std::string file_path, Engine::Animation* anim, int index){
     const aiScene* scene = importer.ReadFile(file_path, loadflagsAnim);
     std::cout << "Loading animation " << scene->mAnimations[index]->mName.C_Str() << " from file " << file_path << std::endl;
 
@@ -145,13 +145,13 @@ void Engine::loadAnimation(std::string file_path, ZSPIRE::Animation* anim, int i
     anim->TPS = _anim->mTicksPerSecond;
     anim->NumChannels = _anim->mNumChannels;
     //allocate channels
-    anim->channels = new ZSPIRE::AnimationChannel[anim->NumChannels];
+    anim->channels = new Engine::AnimationChannel[anim->NumChannels];
 
     for(unsigned int chan_i = 0; chan_i < anim->NumChannels; chan_i ++){
         //Assimp channel
         aiNodeAnim* ai_channel = _anim->mChannels[chan_i];
         //ZSPIRE channel
-        ZSPIRE::AnimationChannel* channel = &anim->channels[chan_i];
+        Engine::AnimationChannel* channel = &anim->channels[chan_i];
         channel->anim_ptr = anim; //Set pointer
         //Copy name
         for(unsigned int f_i = 0; f_i < ai_channel->mNodeName.length; f_i ++){

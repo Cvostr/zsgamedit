@@ -182,25 +182,18 @@ void GameObject::removeChildObject(GameObjectLink link){
     trimChildrenArray(); //Remove broken link from vector
 }
 
-GameObject* GameObject::getChildObjectWithLabelStartsWith(QString label){
-    for (unsigned int i = 0; i < this->children.size(); i ++) {
-        GameObjectLink* l = &this->children[i];
-        if(l->updLinkPtr()->label->startsWith(label)) return l->updLinkPtr();
-
-        GameObject* obj_ch = l->updLinkPtr()->getChildObjectWithLabelStartsWith(label);
-        if(obj_ch != nullptr) return obj_ch;
-
-    }
-    return nullptr;
-}
-
-GameObject* GameObject::getChildObjectWithNodeLabel(QString label){
+GameObject* GameObject::getChildObjectWithNodeLabel(std::string label){
+    //This function works recursively
+    //Iterate over all children in current object
     for (unsigned int i = 0; i < this->children.size(); i ++) {
         GameObjectLink* l = &this->children[i];
         NodeProperty* node_p = l->updLinkPtr()->getPropertyPtr<NodeProperty>();
-        if(!node_p->node_label.compare(label)) return l->updLinkPtr();
-
-        GameObject* obj_ch = l->updLinkPtr()->getChildObjectWithLabelStartsWith(label);
+        //if node's name match
+        if(!node_p->node_label.compare(label))
+            //Then return object with this node
+            return l->updLinkPtr();
+        //call function from this child
+        GameObject* obj_ch = l->updLinkPtr()->getChildObjectWithNodeLabel(label);
         if(obj_ch != nullptr) return obj_ch;
 
     }

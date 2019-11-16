@@ -444,7 +444,7 @@ void MeshProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
     PickResourceArea* area = new PickResourceArea(RESOURCE_TYPE_MESH);
     area->setLabel("Mesh");
     area->go_property = static_cast<void*>(this);
-    area->rel_path = &resource_relpath;
+    area->rel_path_std = &resource_relpath;
     inspector->addPropertyArea(area);
 
     BoolCheckboxArea* IsCastShadows = new BoolCheckboxArea;
@@ -477,7 +477,7 @@ void MeshProperty::updateMeshPtr(){
     }
     else //If it isn't built in mesh
     {
-       this->mesh_ptr = world_ptr->getMeshPtrByRelPath(resource_relpath);
+       this->mesh_ptr = world_ptr->getMeshPtrByRelPath(QString::fromStdString(resource_relpath));
     }
 }
 
@@ -619,7 +619,7 @@ void AudioSourceProperty::addPropertyInterfaceToInspector(InspectorWin* inspecto
     PickResourceArea* area = new PickResourceArea(RESOURCE_TYPE_AUDIO);
     area->setLabel("Sound");
     area->go_property = static_cast<void*>(this);
-    area->rel_path = &resource_relpath;
+    area->rel_path_std = &resource_relpath;
     inspector->addPropertyArea(area);
 
     BoolCheckboxArea* isLooped = new BoolCheckboxArea;
@@ -648,7 +648,7 @@ void AudioSourceProperty::onValueChanged(){
 }
 
 void AudioSourceProperty::updateAudioPtr(){
-    this->buffer_ptr = world_ptr->getSoundPtrByName(resource_relpath);
+    this->buffer_ptr = world_ptr->getSoundPtrByName(QString::fromStdString(resource_relpath));
 
     if(buffer_ptr == nullptr) return;
 
@@ -682,7 +682,7 @@ void AudioSourceProperty::copyTo(GameObjectProperty* dest){
     //_dest->source.setAlBuffer(this->buffer_ptr);
 }
 void AudioSourceProperty::setAudioFile(std::string relpath){
-    this->resource_relpath = QString::fromStdString(relpath);
+    this->resource_relpath = relpath;
     this->updateAudioPtr();
 }
 void AudioSourceProperty::audio_start(){
@@ -729,7 +729,7 @@ void MaterialProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
     PickResourceArea* area = new PickResourceArea(RESOURCE_TYPE_MATERIAL);
     area->setLabel("Material");
     area->go_property = static_cast<void*>(this);
-    area->rel_path = &material_path;
+    area->rel_path_std = &material_path;
     inspector->addPropertyArea(area);
     //No material, exiting
     if(material_ptr == nullptr) return;
@@ -856,7 +856,7 @@ void MaterialProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
     }
 }
 void MaterialProperty::onValueChanged(){
-    Material* newmat_ptr = go_link.world_ptr->getMaterialPtrByName(material_path);
+    Material* newmat_ptr = go_link.world_ptr->getMaterialPtrByName(QString::fromStdString(material_path));
 
     //Check, if material file has changed
     if(newmat_ptr != this->material_ptr){
@@ -930,7 +930,7 @@ void MaterialProperty::copyTo(GameObjectProperty* dest){
 
 void MaterialProperty::setMaterial(Material* mat){
     this->material_ptr = mat;
-    this->material_path = QString::fromStdString(mat->file_path);
+    this->material_path = mat->file_path;
     this->group_label = mat->group_ptr->groupCaption;
 }
 
@@ -1178,8 +1178,8 @@ void ScriptGroupProperty::onValueChanged(){
     }
     for(unsigned int script_i = 0; script_i < static_cast<unsigned int>(scr_num); script_i ++){
         //Set absolute path to script object
-        scripts_attached[script_i].fpath = project_ptr->root_path + "/" + path_names[script_i];
-        scripts_attached[script_i].name = path_names[script_i].toStdString();
+        scripts_attached[script_i].fpath = project_ptr->root_path.toStdString() + "/" + path_names[script_i];
+        scripts_attached[script_i].name = path_names[script_i];
     }
 }
 
@@ -1195,7 +1195,7 @@ void ScriptGroupProperty::addPropertyInterfaceToInspector(InspectorWin* inspecto
         PickResourceArea* area = new PickResourceArea(RESOURCE_TYPE_FILE);
         area->setLabel("Lua Script");
         area->go_property = static_cast<void*>(this);
-        area->rel_path = &path_names[static_cast<unsigned int>(script_i)];
+        area->rel_path_std = &path_names[static_cast<unsigned int>(script_i)];
         area->extension_mask = ".lua";
         inspector->addPropertyArea(area);
     }
@@ -1448,13 +1448,13 @@ void TerrainProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
             PickResourceArea* diffuse_area = new PickResourceArea(RESOURCE_TYPE_TEXTURE);
             diffuse_area->setLabel("Diffuse");
             diffuse_area->go_property = static_cast<void*>(this);
-            diffuse_area->rel_path = &textures[static_cast<unsigned int>(i)].diffuse_relpath;
+            diffuse_area->rel_path_std = &textures[static_cast<unsigned int>(i)].diffuse_relpath;
             inspector->addPropertyArea(diffuse_area);
 
             PickResourceArea* normal_area = new PickResourceArea(RESOURCE_TYPE_TEXTURE);
             normal_area->setLabel("Normal");
             normal_area->go_property = static_cast<void*>(this);
-            normal_area->rel_path = &textures[static_cast<unsigned int>(i)].normal_relpath;
+            normal_area->rel_path_std = &textures[static_cast<unsigned int>(i)].normal_relpath;
             inspector->addPropertyArea(normal_area);
         }
         //Add texture picker UI elements
@@ -1486,7 +1486,7 @@ void TerrainProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
             PickResourceArea* diffuse_area = new PickResourceArea(RESOURCE_TYPE_TEXTURE);
             diffuse_area->setLabel("Diffuse");
             diffuse_area->go_property = static_cast<void*>(this);
-            diffuse_area->rel_path = &this->grass[static_cast<unsigned int>(i)].diffuse_relpath;
+            diffuse_area->rel_path_std = &this->grass[static_cast<unsigned int>(i)].diffuse_relpath;
             inspector->addPropertyArea(diffuse_area);
 
         }
@@ -1552,8 +1552,8 @@ void TerrainProperty::onValueChanged(){
     }
     for(unsigned int i = 0; i < static_cast<unsigned int>(this->textures_size); i ++){
         HeightmapTexturePair* pair = &this->textures[i];
-        pair->diffuse = world_ptr->getTexturePtrByRelPath(pair->diffuse_relpath);
-        pair->normal = world_ptr->getTexturePtrByRelPath(pair->normal_relpath);
+        pair->diffuse = world_ptr->getTexturePtrByRelPath(QString::fromStdString(pair->diffuse_relpath));
+        pair->normal = world_ptr->getTexturePtrByRelPath(QString::fromStdString(pair->normal_relpath));
     }
 }
 
@@ -1739,7 +1739,7 @@ void AnimationProperty::addPropertyInterfaceToInspector(InspectorWin* inspector)
     PickResourceArea* area = new PickResourceArea(RESOURCE_TYPE_ANIMATION);
     area->setLabel("Animation");
     area->go_property = static_cast<void*>(this);
-    area->rel_path = &this->anim_label;
+    area->rel_path_std = &this->anim_label;
     inspector->addPropertyArea(area);
 
     if(Playing == false){
@@ -1782,8 +1782,8 @@ void AnimationProperty::onPreRender(RenderPipeline* pipeline){
         double animTime = fmod(Ticks, anim_prop_ptr->duration);
 
         for(unsigned int channels_i = 0; channels_i < this->anim_prop_ptr->NumChannels; channels_i ++){
-            ZSPIRE::AnimationChannel* ch = &anim_prop_ptr->channels[channels_i];
-            GameObject* node = obj->getChildObjectWithNodeLabel(QString::fromStdString(ch->bone_name));
+            Engine::AnimationChannel* ch = &anim_prop_ptr->channels[channels_i];
+            GameObject* node = obj->getChildObjectWithNodeLabel(ch->bone_name);
             NodeProperty* prop = node->getPropertyPtr<NodeProperty>();
 
             prop->translation = ch->getPostitionInterpolated(animTime);
@@ -1804,7 +1804,7 @@ void AnimationProperty::updateNodeTransform(GameObject* obj, ZSMATRIX4x4 parent)
     prop->abs = prop->transform_mat;
 
     if(this->anim_prop_ptr != nullptr && Playing){
-        ZSPIRE::AnimationChannel* cha = this->anim_prop_ptr->getChannelByNodeName(prop->node_label.toStdString());
+        Engine::AnimationChannel* cha = this->anim_prop_ptr->getChannelByNodeName(prop->node_label);
         if(cha){
             ZSMATRIX4x4 transl = transpose(getTranslationMat(prop->translation));
             ZSMATRIX4x4 _sca = transpose(getScaleMat(prop->scale));
@@ -1838,10 +1838,10 @@ void AnimationProperty::onValueChanged(){
 }
 
 void AnimationProperty::setAnimation(std::string anim){
-    this->anim_label = QString::fromStdString(anim);
+    this->anim_label = anim;
     updateAnimationPtr();
 }
 
 void AnimationProperty::updateAnimationPtr(){
-    this->anim_prop_ptr = go_link.world_ptr->getAnimationPtrByRelPath(this->anim_label);
+    this->anim_prop_ptr = go_link.world_ptr->getAnimationPtrByRelPath(QString::fromStdString(this->anim_label));
 }

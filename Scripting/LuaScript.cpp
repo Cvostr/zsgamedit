@@ -15,7 +15,7 @@ void ObjectScript::_InitScript() {
     ZSENSDK::bindSDK(L);
     ZSENSDK::bindKeyCodesSDK(L);
 
-    int start_result = luaL_dofile(L, fpath.toStdString().c_str());
+    int start_result = luaL_dofile(L, fpath.c_str());
 
     if(start_result == 1){ //if error in script
         SCRIPT_LOG << name << " error loading occured!" << std::endl;

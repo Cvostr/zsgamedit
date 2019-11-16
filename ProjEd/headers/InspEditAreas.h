@@ -122,8 +122,7 @@ public:
     QString extension_mask; //Extension mask to show needed files
     RESOURCE_TYPE resource_type; //flag of resource type
 
-    QString* rel_path; //Pointer to store result
-    std::string* rel_path_std;
+    std::string* rel_path_std; //Pointer to store result
 
     QPushButton* respick_btn; //button to press
     QLabelResourcePickWgt* relpath_label;

@@ -560,7 +560,7 @@ GameObject* World::addMeshNode(ZS3M::SceneNode* node){
     transform_prop->updateMat();
 
     NodeProperty* node_prop = static_cast<NodeProperty*>(obj.getPropertyPtrByType(GO_PROPERTY_TYPE_NODE));
-    node_prop->node_label = QString::fromStdString(node->node_label);
+    node_prop->node_label = node->node_label;
     //Set original node transform
     node_prop->transform_mat = node->node_transform;
 
@@ -614,7 +614,7 @@ GameObject* World::addMeshNode(ZS3M::SceneNode* node){
 
         //configure mesh
         MeshProperty* mesh_prop_ptr = static_cast<MeshProperty*>(mesh_obj->getPropertyPtrByType(GO_PROPERTY_TYPE_MESH));
-        mesh_prop_ptr->resource_relpath = QString::fromStdString(mesh_label);
+        mesh_prop_ptr->resource_relpath = mesh_label;
 
         mesh_prop_ptr->updateMeshPtr();
         //configure material
@@ -725,7 +725,7 @@ Engine::Mesh* World::getMeshPtrByRelPath(QString label){
     return nullptr;
 }
 
-ZSPIRE::Animation* World::getAnimationPtrByRelPath(QString label){
+Engine::Animation* World::getAnimationPtrByRelPath(QString label){
     Project* proj_ptr = static_cast<Project*>(this->proj_ptr); //Convert void pointer to Project*
     unsigned int resources_num = static_cast<unsigned int>(proj_ptr->resources.size()); //Receive resource amount in project
 
@@ -733,7 +733,7 @@ ZSPIRE::Animation* World::getAnimationPtrByRelPath(QString label){
         Resource* r_ptr = &proj_ptr->resources[r_it]; //Obtain pointer to resource
         //If resource is mesh and has same name as in argument
         if(r_ptr->type == RESOURCE_TYPE_ANIMATION && r_ptr->resource_label.compare(label.toStdString()) == 0){
-            return static_cast<ZSPIRE::Animation*>(r_ptr->class_ptr);
+            return static_cast<Engine::Animation*>(r_ptr->class_ptr);
         }
     }
     return nullptr;

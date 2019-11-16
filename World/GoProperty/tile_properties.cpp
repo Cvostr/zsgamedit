@@ -77,14 +77,14 @@ void TileGroupProperty::addPropertyInterfaceToInspector(InspectorWin* inspector)
         PickResourceArea* mesh_area = new PickResourceArea(RESOURCE_TYPE_MESH);
         mesh_area->setLabel("Tiles Mesh");
         mesh_area->go_property = static_cast<void*>(this);
-        mesh_area->rel_path = &this->mesh_string;
+        mesh_area->rel_path_std = &this->mesh_string;
         mesh_area->isShowNoneItem = false;
         inspector->addPropertyArea(mesh_area);
 
         PickResourceArea* diffuse_area = new PickResourceArea(RESOURCE_TYPE_TEXTURE);
         diffuse_area->setLabel("Tiles Diffuse");
         diffuse_area->go_property = static_cast<void*>(this);
-        diffuse_area->rel_path = &this->diffuse_relpath;
+        diffuse_area->rel_path_std = &this->diffuse_relpath;
         diffuse_area->isShowNoneItem = true;
         inspector->addPropertyArea(diffuse_area);
 
@@ -227,13 +227,13 @@ void TileProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
     PickResourceArea* area = new PickResourceArea(RESOURCE_TYPE_TEXTURE);
     area->setLabel("Texture");
     area->go_property = static_cast<void*>(this);
-    area->rel_path = &diffuse_relpath;
+    area->rel_path_std = &diffuse_relpath;
     inspector->addPropertyArea(area);
 
     PickResourceArea* transparent_area = new PickResourceArea(RESOURCE_TYPE_TEXTURE);
     transparent_area->setLabel("Secondary Diffuse");
     transparent_area->go_property = static_cast<void*>(this);
-    transparent_area->rel_path = &transparent_relpath;
+    transparent_area->rel_path_std = &transparent_relpath;
     inspector->addPropertyArea(transparent_area);
 }
 
@@ -248,9 +248,9 @@ void TileProperty::onValueChanged(){
 
 void TileProperty::updTexturePtr(){
     //Update color texture
-    this->texture_diffuse = world_ptr->getTexturePtrByRelPath(diffuse_relpath);
+    this->texture_diffuse = world_ptr->getTexturePtrByRelPath(QString::fromStdString(diffuse_relpath));
     //Update transparent layer texture
-    this->texture_transparent = world_ptr->getTexturePtrByRelPath(transparent_relpath);
+    this->texture_transparent = world_ptr->getTexturePtrByRelPath(QString::fromStdString(transparent_relpath));
 }
 
 void TileProperty::onAddToObject(){
@@ -299,7 +299,7 @@ void TileProperty::stopAnim(){
     anim_state.playing = false;
 }
 void TileProperty::setDiffuseTexture(std::string texture){
-    diffuse_relpath = QString::fromStdString(texture);
+    diffuse_relpath = texture;
         //Update texture pointer
     updTexturePtr();
 }

@@ -26,7 +26,7 @@ bool getSizes(std::string file_path, unsigned int* meshes, unsigned int* anims, 
 
 void loadMesh(std::string file_path, Engine::Mesh* mesh_ptr, int index);
 
-void loadAnimation(std::string file_path, ZSPIRE::Animation* anim, int index);
+void loadAnimation(std::string file_path, Engine::Animation* anim, int index);
 
 void processMesh(aiMesh* mesh, Engine::Mesh* mesh_ptr);
 

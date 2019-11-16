@@ -54,8 +54,8 @@ public:
     bool isCreated;
     TileGeometry geometry; //Tile to add geometry
 
-    QString diffuse_relpath; //Diffuse texture to generate
-    QString mesh_string; //Mesh to generate
+    std::string diffuse_relpath; //Diffuse texture to generate
+    std::string mesh_string; //Mesh to generate
 
     void addPropertyInterfaceToInspector(InspectorWin* inspector);
     void process();
@@ -72,10 +72,10 @@ public:
     TileGeometry geometry;
     //Defines color texture
     Engine::Texture* texture_diffuse;
-    QString diffuse_relpath;
+    std::string diffuse_relpath;
     //Defines texture, that will cover tile
     Engine::Texture* texture_transparent;
-    QString transparent_relpath;
+    std::string transparent_relpath;
     //Defines animation
     TileAnimation anim_property;
     TileAnimationState anim_state;

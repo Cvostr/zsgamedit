@@ -26,7 +26,7 @@ public:
     int scr_num; //to update amount via IntPropertyArea
 
     std::vector<ObjectScript> scripts_attached;
-    std::vector<QString> path_names;
+    std::vector<std::string> path_names;
 
     void onValueChanged();
     void addPropertyInterfaceToInspector(InspectorWin* inspector);
@@ -41,7 +41,7 @@ public:
 
 class AudioSourceProperty : public GameObjectProperty{
 public:
-    QString resource_relpath; //Relative path to resource
+    std::string resource_relpath; //Relative path to resource
     Engine::SoundBuffer* buffer_ptr;
     Engine::SoundSource source;
 
@@ -75,7 +75,7 @@ public:
     //Pointer to picked material
     Material* material_ptr;
     //Path to material fil
-    QString material_path;
+    std::string material_path;
 
     bool receiveShadows;
 
@@ -93,7 +93,7 @@ public:
 
 class MeshProperty : public GameObjectProperty{
 public:
-    QString resource_relpath; //Relative path to resource
+    std::string resource_relpath; //Relative path to resource
     Engine::Mesh* mesh_ptr; //Pointer to mesh
     bool castShadows;
 
@@ -233,7 +233,7 @@ public:
 
 class NodeProperty : public GameObjectProperty {
 public:
-    QString node_label;
+    std::string node_label;
 
     ZSVECTOR3 translation;
     ZSVECTOR3 scale;
@@ -260,8 +260,8 @@ public:
     bool Playing;
     double start_sec;
 
-    ZSPIRE::Animation* anim_prop_ptr;
-    QString anim_label;
+    Engine::Animation* anim_prop_ptr;
+    std::string anim_label;
 
     void addPropertyInterfaceToInspector(InspectorWin* inspector);
     void onPreRender(RenderPipeline* pipeline);

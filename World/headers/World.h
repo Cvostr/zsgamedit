@@ -237,8 +237,7 @@ public:
     void addChildObject(GameObjectLink link, bool updTransform = true);
     void removeChildObject(GameObjectLink link);
 
-    GameObject* getChildObjectWithLabelStartsWith(QString label);
-    GameObject* getChildObjectWithNodeLabel(QString label);
+    GameObject* getChildObjectWithNodeLabel(std::string label);
     void setMeshSkinningRootNodeRecursively(GameObject* rootNode);
 
     //Remove property with type
@@ -321,7 +320,7 @@ public:
     void unpickObject();
 
     Engine::Mesh* getMeshPtrByRelPath(QString label); //look through all meshes in project ptr
-    ZSPIRE::Animation* getAnimationPtrByRelPath(QString label);
+    Engine::Animation* getAnimationPtrByRelPath(QString label);
     Engine::Texture* getTexturePtrByRelPath(QString label); //look through all meshes in project ptr
     Engine::SoundBuffer* getSoundPtrByName(QString label);
     Material* getMaterialPtrByName(QString label);

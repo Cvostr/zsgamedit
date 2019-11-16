@@ -967,11 +967,11 @@ void EditWindow::processResourceFile(QFileInfo fileInfo){
             resource.rel_path.remove(0, project.root_path.size() + 1); //Get relative path by removing length of project root from start
             resource.type = RESOURCE_TYPE_ANIMATION; //Type of resource is mesh
 
-            resource.class_ptr = static_cast<void*>(new ZSPIRE::Animation);
+            resource.class_ptr = static_cast<void*>(new Engine::Animation);
 
             this->project.resources.push_back(resource);
-            Engine::loadAnimation(fileInfo.absoluteFilePath().toStdString(), static_cast<ZSPIRE::Animation*>(this->project.resources.back().class_ptr), static_cast<int>(anim_i));
-            ZSPIRE::Animation* anim_ptr = static_cast<ZSPIRE::Animation*>(this->project.resources.back().class_ptr);
+            Engine::loadAnimation(fileInfo.absoluteFilePath().toStdString(), static_cast<Engine::Animation*>(this->project.resources.back().class_ptr), static_cast<int>(anim_i));
+            Engine::Animation* anim_ptr = static_cast<Engine::Animation*>(this->project.resources.back().class_ptr);
             this->project.resources.back().resource_label = anim_ptr->name;
 
 
@@ -1038,7 +1038,7 @@ void EditWindow::ImportResource(QString pathToResource){
         Engine::getSizes(pathToResource.toStdString(), &num_meshes, &num_anims, &num_textures, &num_materials);
         //Allocate array for meshes
         Engine::Mesh* meshes = Engine::allocateMesh(num_meshes);
-        ZSPIRE::Animation* anims = new ZSPIRE::Animation[num_anims];
+        Engine::Animation* anims = new Engine::Animation[num_anims];
 
         ZS3M::SceneNode rootNode;
         //Load all meshes in file

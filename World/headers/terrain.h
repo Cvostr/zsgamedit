@@ -18,7 +18,7 @@ enum TERRAIN_MODIFY_TYPE{
 };
 
 typedef struct HeightmapGrass{
-    QString diffuse_relpath;
+    std::string diffuse_relpath;
     Engine::Texture* diffuse;
 
     ZSVECTOR3 scale;
@@ -49,8 +49,8 @@ typedef struct HeightmapVertex{
 }HeightmapVertex;
 
 typedef struct HeightmapTexturePair{
-    QString diffuse_relpath;
-    QString normal_relpath;
+    std::string diffuse_relpath;
+    std::string normal_relpath;
 
     Engine::Texture* diffuse;
     Engine::Texture* normal;
