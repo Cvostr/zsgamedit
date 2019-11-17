@@ -298,7 +298,6 @@ public:
 class World{
 public:
     QTreeWidget* obj_widget_ptr;
-    Project* proj_ptr; //Pointer to Project structure
     PhysicalWorldSettings phys_settngs;
     PhysicalWorld* physical_world;
     Engine::Camera world_camera;

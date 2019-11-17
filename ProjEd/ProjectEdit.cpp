@@ -95,7 +95,6 @@ EditWindow::EditWindow(QApplication* app, QWidget *parent) :
 
     ui->objsList->world_ptr = &world;
 
-    world.proj_ptr = &project; //Assigning project pointer into world's variable
     world.obj_widget_ptr = ui->objsList;
 
     ui->fileList->setViewMode(QListView::IconMode);
@@ -1406,8 +1405,8 @@ void EditWindow::onMouseMotion(int relX, int relY){
         if(obj_trstate.transformMode == GO_TRANSFORM_MODE_ROTATE){
             vec_ptr = &obj_trstate.tprop_ptr->rotation;
         }
-
-        *vec_ptr = *vec_ptr + ZSVECTOR3(-relX, -relY,relX) * ZSVECTOR3(obj_trstate.Xcf, obj_trstate.Ycf, obj_trstate.Zcf);
+        if(obj_trstate.transformMode > 0)
+            *vec_ptr = *vec_ptr + ZSVECTOR3(-relX, -relY,relX) * ZSVECTOR3(obj_trstate.Xcf, obj_trstate.Ycf, obj_trstate.Zcf);
     }
 }
 

@@ -23,6 +23,7 @@ static unsigned int prop_script = GO_PROPERTY_TYPE_SCRIPTGROUP;
 static unsigned int prop_tile = GO_PROPERTY_TYPE_TILE;
 
 extern EditWindow* _editor_win;
+extern Project* project_ptr;
 
 void ZSENSDK::Debug::Log(std::string text){
     std::cout << "SCRIPT: " << text << std::endl;
@@ -43,9 +44,7 @@ ZSVECTOR3 ZSENSDK::Math::vmul(ZSVECTOR3 v1, float m){
 }
 
 void ZSENSDK::_Engine::loadWorldFromFile(std::string file){
-    Project* proj_ptr = static_cast<Project*>(_editor_win->world.proj_ptr);
-
-    QString load = proj_ptr->root_path + "/" + QString::fromStdString(file);
+    QString load = project_ptr->root_path + "/" + QString::fromStdString(file);
 
    _editor_win->sheduleWorldLoad(load);
 }

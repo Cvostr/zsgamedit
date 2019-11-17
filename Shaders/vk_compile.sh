@@ -1,3 +1,4 @@
+#!/bin/bash
 #build 2d tile shader
 glslangValidator -V ./2d_tile/tile2d.vert
 glslangValidator -V ./2d_tile/tile2d.frag

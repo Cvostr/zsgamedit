@@ -53,7 +53,6 @@ public:
 class AreaText : public QObject{
     Q_OBJECT
 public:
-    InspectorWin* insp_ptr;
     QLabel* label;
 
     AreaText();

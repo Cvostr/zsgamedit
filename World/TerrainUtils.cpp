@@ -323,6 +323,7 @@ TerrainData::TerrainData(){
     hasPaintingChanged = false;
     hasPhysicShapeChanged = false;
     shape = nullptr;
+    data = nullptr;
 }
 
 TerrainData::~TerrainData(){

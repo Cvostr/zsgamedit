@@ -5,6 +5,7 @@
 #include <render/zs-mesh.h>
 #include "../../ProjEd/headers/InspEditAreas.h"
 
+extern Project* project_ptr;
 
 void GameObject::saveProperties(std::ofstream* stream){
     unsigned int props_num = static_cast<unsigned int>(this->props_num);
@@ -182,7 +183,7 @@ void GameObject::saveProperties(std::ofstream* stream){
 
             *stream << "\n";
 
-            std::string fpath = ptr->go_link.world_ptr->proj_ptr->root_path.toStdString() + "/" + ptr->file_label.toStdString();
+            std::string fpath = project_ptr->root_path.toStdString() + "/" + ptr->file_label.toStdString();
             ptr->getTerrainData()->saveToFile(fpath.c_str());
             //Write textures relative pathes
             for(int texture_i = 0; texture_i < ptr->textures_size; texture_i ++){
@@ -343,7 +344,6 @@ void GameObject::loadProperty(std::ifstream* world_stream){
         ptr->path_names.resize(static_cast<unsigned int>(ptr->scr_num));
         ptr->scripts_attached.resize(static_cast<unsigned int>(ptr->scr_num));
         //iterate over all scripts and read their path
-        Project* project_ptr = static_cast<Project*>(static_cast<World*>(this->world_ptr)->proj_ptr);
         for(unsigned int script_w_i = 0; script_w_i < static_cast<unsigned int>(ptr->scr_num); script_w_i ++){
             //Read script relative path
             *world_stream >> ptr->path_names[script_w_i];
@@ -432,7 +432,7 @@ void GameObject::loadProperty(std::ifstream* world_stream){
         world_stream->read(reinterpret_cast<char*>(&ptr->castShadows), sizeof(bool));
         world_stream->read(reinterpret_cast<char*>(&ptr->textures_size), sizeof(int));
 
-        std::string fpath = ptr->go_link.world_ptr->proj_ptr->root_path.toStdString() + "/" + ptr->file_label.toStdString();
+        std::string fpath = project_ptr->root_path.toStdString() + "/" + ptr->file_label.toStdString();
         bool result = ptr->getTerrainData()->loadFromFile(fpath.c_str());
         if(result) //if loading sucessstd::cout << "Terrain : Probably, missing terrain file" << file_path;
             ptr->getTerrainData()->generateGLMesh();

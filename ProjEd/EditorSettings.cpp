@@ -17,46 +17,46 @@ void EditorSettingsManager::init(){
         //reading prefix
         stream >> prefix;
         //if we reached gameview window position
-        if(prefix.compare("gameView_win_pos") == false){
+        if(prefix.compare("gameView_win_pos") == 0){
             int x, y;
             stream >> x >> y;
             this->settings_ptr->gameView_win_pos_x = x;
             this->settings_ptr->gameView_win_pos_y = y;
         }
         //if we reached gameview window size
-        if(prefix.compare("gameView_win_Size") == false){
+        if(prefix.compare("gameView_win_Size") == 0){
             int Width, Height;
             stream >> Width >> Height;
             this->settings_ptr->gameViewWin_Width = Width;
             this->settings_ptr->gameViewWin_Height = Height;
         }
 
-        if(prefix.compare("inspector_win_pos") == false){
+        if(prefix.compare("inspector_win_pos") == 0){
             int x, y;
             stream >> x >> y;
             this->settings_ptr->inspector_win_pos_X = x;
             this->settings_ptr->inspector_win_pos_Y = y;
         }
 
-        if(prefix.compare("inspector_win_Size") == false){
+        if(prefix.compare("inspector_win_Size") == 0){
             int x, y;
             stream >> x >> y;
             this->settings_ptr->inspector_win_width = x;
             this->settings_ptr->inspector_win_height = y;
         }
-        if(prefix.compare("editor_win_pos") == false){
+        if(prefix.compare("editor_win_pos") == 0){
             int x, y;
             stream >> x >> y;
             this->settings_ptr->editor_win_pos_X = x;
             this->settings_ptr->editor_win_pos_Y = y;
         }
-        if(prefix.compare("editor_win_Size") == false){
+        if(prefix.compare("editor_win_Size") == 0){
             int x, y;
             stream >> x >> y;
             this->settings_ptr->editor_win_width = x;
             this->settings_ptr->editor_win_height = y;
         }
-        if(prefix.compare("darkTheme") == false){
+        if(prefix.compare("darkTheme") == 0){
             bool dark;
             stream >> dark;
             this->settings_ptr->isDarkTheme = dark;

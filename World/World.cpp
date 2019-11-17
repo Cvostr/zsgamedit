@@ -6,10 +6,10 @@
 
 extern RenderPipeline* renderer;
 extern Material* default3dmat;
+extern Project* project_ptr;
 
 World::World(){
     objects.reserve(MAX_OBJS);
-    proj_ptr = nullptr;
 }
 
 int World::getFreeObjectSpaceIndex(){
@@ -712,11 +712,10 @@ void World::recoverFromSnapshot(WorldSnapshot* snapshot){
 }
 
 Engine::Mesh* World::getMeshPtrByRelPath(QString label){
-    Project* proj_ptr = static_cast<Project*>(this->proj_ptr); //Convert void pointer to Project*
-    unsigned int resources_num = static_cast<unsigned int>(proj_ptr->resources.size()); //Receive resource amount in project
+    unsigned int resources_num = static_cast<unsigned int>(project_ptr->resources.size()); //Receive resource amount in project
 
     for(unsigned int r_it = 0; r_it < resources_num; r_it ++){ //Iteerate over all resources in project
-        Resource* r_ptr = &proj_ptr->resources[r_it]; //Obtain pointer to resource
+        Resource* r_ptr = &project_ptr->resources[r_it]; //Obtain pointer to resource
         //If resource is mesh and has same name as in argument
         if(r_ptr->type == RESOURCE_TYPE_MESH && r_ptr->resource_label.compare(label.toStdString()) == 0){
             return static_cast<Engine::Mesh*>(r_ptr->class_ptr);
@@ -726,11 +725,10 @@ Engine::Mesh* World::getMeshPtrByRelPath(QString label){
 }
 
 Engine::Animation* World::getAnimationPtrByRelPath(QString label){
-    Project* proj_ptr = static_cast<Project*>(this->proj_ptr); //Convert void pointer to Project*
-    unsigned int resources_num = static_cast<unsigned int>(proj_ptr->resources.size()); //Receive resource amount in project
+    unsigned int resources_num = static_cast<unsigned int>(project_ptr->resources.size()); //Receive resource amount in project
 
     for(unsigned int r_it = 0; r_it < resources_num; r_it ++){ //Iteerate over all resources in project
-        Resource* r_ptr = &proj_ptr->resources[r_it]; //Obtain pointer to resource
+        Resource* r_ptr = &project_ptr->resources[r_it]; //Obtain pointer to resource
         //If resource is mesh and has same name as in argument
         if(r_ptr->type == RESOURCE_TYPE_ANIMATION && r_ptr->resource_label.compare(label.toStdString()) == 0){
             return static_cast<Engine::Animation*>(r_ptr->class_ptr);
@@ -741,11 +739,10 @@ Engine::Animation* World::getAnimationPtrByRelPath(QString label){
 
 
 Engine::Texture* World::getTexturePtrByRelPath(QString label){
-    Project* proj_ptr = static_cast<Project*>(this->proj_ptr); //Convert void pointer to Project*
-    unsigned int resources_num = static_cast<unsigned int>(proj_ptr->resources.size()); //Receive resource amount in project
+    unsigned int resources_num = static_cast<unsigned int>(project_ptr->resources.size()); //Receive resource amount in project
 
     for(unsigned int r_it = 0; r_it < resources_num; r_it ++){ //Iteerate over all resources in project
-        Resource* r_ptr = &proj_ptr->resources[r_it]; //Obtain pointer to resource
+        Resource* r_ptr = &project_ptr->resources[r_it]; //Obtain pointer to resource
         //If resource is mesh and has same name as in argument
         if(r_ptr->type == RESOURCE_TYPE_TEXTURE && r_ptr->rel_path.compare(label) == 0){
             return static_cast<Engine::Texture*>(r_ptr->class_ptr);
@@ -755,11 +752,10 @@ Engine::Texture* World::getTexturePtrByRelPath(QString label){
 }
 
 Engine::SoundBuffer* World::getSoundPtrByName(QString label){
-    Project* proj_ptr = static_cast<Project*>(this->proj_ptr); //Convert void pointer to Project*
-    unsigned int resources_num = static_cast<unsigned int>(proj_ptr->resources.size()); //Receive resource amount in project
+    unsigned int resources_num = static_cast<unsigned int>(project_ptr->resources.size()); //Receive resource amount in project
 
     for(unsigned int r_it = 0; r_it < resources_num; r_it ++){ //Iteerate over all resources in project
-        Resource* r_ptr = &proj_ptr->resources[r_it]; //Obtain pointer to resource
+        Resource* r_ptr = &project_ptr->resources[r_it]; //Obtain pointer to resource
         //If resource is mesh and has same name as in argument
         if(r_ptr->type == RESOURCE_TYPE_AUDIO && r_ptr->rel_path.compare(label) == 0){
             return static_cast<Engine::SoundBuffer*>(r_ptr->class_ptr);
@@ -769,11 +765,10 @@ Engine::SoundBuffer* World::getSoundPtrByName(QString label){
 }
 
 Material* World::getMaterialPtrByName(QString label){
-    Project* proj_ptr = static_cast<Project*>(this->proj_ptr); //Convert void pointer to Project*
-    unsigned int resources_num = static_cast<unsigned int>(proj_ptr->resources.size()); //Receive resource amount in project
+    unsigned int resources_num = static_cast<unsigned int>(project_ptr->resources.size()); //Receive resource amount in project
 
     for(unsigned int r_it = 0; r_it < resources_num; r_it ++){ //Iteerate over all resources in project
-        Resource* r_ptr = &proj_ptr->resources[r_it]; //Obtain pointer to resource
+        Resource* r_ptr = &project_ptr->resources[r_it]; //Obtain pointer to resource
         //If resource is mesh and has same name as in argument
         if(r_ptr->type == RESOURCE_TYPE_MATERIAL && r_ptr->rel_path.compare(label) == 0){
             return static_cast<Material*>(r_ptr->class_ptr);

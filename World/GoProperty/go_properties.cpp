@@ -8,6 +8,7 @@
 
 extern InspectorWin* _inspector_win;
 extern EditWindow* _editor_win;
+extern Project* project_ptr;
 //selected terrain
 static TerrainProperty* current_terrain_prop;
 //Selected animation
@@ -25,6 +26,7 @@ ObjectPropertyLink::ObjectPropertyLink(){
 GameObjectProperty::GameObjectProperty(){
     type = GO_PROPERTY_TYPE_NONE;
     active = true; //Inactive by default
+    world_ptr = nullptr; //World ponter is nullptr
 }
 
 GameObjectProperty::~GameObjectProperty(){
@@ -229,6 +231,7 @@ TransformProperty::TransformProperty(){
 LabelProperty::LabelProperty(){
     type = GO_PROPERTY_TYPE_LABEL; //its an label
     active = true;
+    list_item_ptr = nullptr;
 }
 
 MeshProperty::MeshProperty(){
@@ -466,13 +469,13 @@ void MeshProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
 void MeshProperty::updateMeshPtr(){
     if(resource_relpath.length() < 1) return;
 
-    if(resource_relpath.compare("@plane") == false){
+    if(resource_relpath.compare("@plane") == 0){
         this->mesh_ptr = Engine::getPlaneMesh2D();
-    }else if(resource_relpath.compare("@isotile") == false){
+    }else if(resource_relpath.compare("@isotile") == 0){
         this->mesh_ptr = Engine::getIsoTileMesh2D();
-    }else if(resource_relpath.compare("@cube") == false){
+    }else if(resource_relpath.compare("@cube") == 0){
         this->mesh_ptr = Engine::getCubeMesh3D();
-    }else if(resource_relpath.compare("@sphere") == false){
+    }else if(resource_relpath.compare("@sphere") == 0){
         this->mesh_ptr = Engine::getSphereMesh();
     }
     else //If it isn't built in mesh
@@ -1164,7 +1167,6 @@ void CharacterControllerProperty::onUpdate(float deltaTime){
 }
 
 void ScriptGroupProperty::onValueChanged(){
-    Project* project_ptr = static_cast<Project*>(this->world_ptr->proj_ptr);
     //if size changed
     if(static_cast<int>(path_names.size()) != this->scr_num){
         path_names.resize(static_cast<unsigned int>(scr_num));
@@ -1568,7 +1570,7 @@ void TerrainProperty::onAddToObject(){
     //Generate opengl mesh to draw
     data.generateGLMesh();
     //absolute path to terrain file
-    std::string fpath = this->go_link.world_ptr->proj_ptr->root_path.toStdString() + "/" + this->file_label.toStdString();
+    std::string fpath = project_ptr->root_path.toStdString() + "/" + this->file_label.toStdString();
     //Create and save file
     data.saveToFile(fpath.c_str());
 }

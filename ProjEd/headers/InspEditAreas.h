@@ -91,7 +91,6 @@ public:
 class ComboBoxArea : public PropertyEditArea{
 public:
     QComboBox widget;
-    QString* result_string;
     std::string* result_string_std;
 
     void setup(); //Virtual

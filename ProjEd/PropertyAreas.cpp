@@ -11,6 +11,7 @@
 #define INSP_DIMENSION_WIDGET_SIZE 11
 
 extern EditWindow* _editor_win;
+extern Project* project_ptr;
 
 AreaPropertyTitle::AreaPropertyTitle(){
     this->layout.addWidget(&this->line);
@@ -422,9 +423,7 @@ void PickResourceArea::updateValues(){
     //Get current value in text field
     QString cur = this->relpath_label->text();
 
-    //if(*rel_path != cur){
-        updateLabel();
-    //}
+    updateLabel();
 }
 
 IntPropertyArea::IntPropertyArea(){
@@ -506,7 +505,6 @@ void ResourcePickDialog::onNeedToShow(){
     this->extension_mask = area->extension_mask; //send extension mask
     this->list->clear();
     //Receiving pointer to project
-    Project* project_ptr = static_cast<Project*>(static_cast<GameObjectProperty*>(this->area->go_property)->go_link.world_ptr->proj_ptr);
     unsigned int resources_num = static_cast<unsigned int>(project_ptr->resources.size());
 
     if(area->isShowNoneItem){
@@ -554,7 +552,6 @@ void ResourcePickDialog::onNeedToShow(){
 
 void ResourcePickDialog::findFiles(QString directory){
     //Obtain pointer to project
-    Project* project_ptr = static_cast<Project*>(static_cast<GameObjectProperty*>(this->area->go_property)->go_link.world_ptr->proj_ptr);
     QDir _directory (directory); //Creating QDir object
     _directory.setFilter(QDir::Files | QDir::Dirs | QDir::NoSymLinks | QDir::NoDot | QDir::NoDotDot);
     _directory.setSorting(QDir::DirsLast); //I want to recursive call this function after all files
@@ -697,12 +694,9 @@ ComboBoxArea::ComboBoxArea(){
 
     elem_layout->addWidget(&this->widget);
 
-    result_string = nullptr;
     result_string_std = nullptr;
 }
 void ComboBoxArea::setup(){ //Virtual
-    if(this->result_string != nullptr)
-        widget.setCurrentText(*this->result_string);
     if(this->result_string_std != nullptr)
         widget.setCurrentText(QString::fromStdString(*this->result_string_std));
 }
@@ -711,13 +705,10 @@ void ComboBoxArea::addToInspector(InspectorWin* win){
     win->connect(&this->widget, SIGNAL(currentIndexChanged(int)), win, SLOT(onPropertyChange()));
 }
 void ComboBoxArea::writeNewValues(){ //Virtual, to check widget state
-    if(result_string == nullptr && result_string_std == nullptr) return; //pointer not set, exiting
+    if(result_string_std == nullptr) return; //pointer not set, exiting
 
     QString selected = widget.currentText();
-    if(result_string != nullptr)
-        *this->result_string = selected;
-    if(result_string_std != nullptr)
-        *this->result_string_std = selected.toStdString();
+    *this->result_string_std = selected.toStdString();
 
     PropertyEditArea::callPropertyUpdate();
 }
@@ -741,20 +732,8 @@ void QLabelResourcePickWgt::dropEvent( QDropEvent* event ){
         PickResourceArea* resource_area = static_cast<PickResourceArea*>(area_ptr);
         if(resource_area->rel_path_std == nullptr) return;
         //if we drooped texture to texture pick area
-        if(resource_area->resource_type == RESOURCE_TYPE_TEXTURE && (file_dropped[0]->text().endsWith(".dds") || file_dropped[0]->text().endsWith(".DDS"))){
-
-            QString newpath = _editor_win->getCurrentDirectory() + "/" + file_dropped[0]->text();
-            newpath.remove(0, _editor_win->project.root_path.size() + 1);
-            //Set new relative path
-            *resource_area->rel_path_std = newpath.toStdString();
-
-            GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(area_ptr->go_property);
-            getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
-            //Apply resource change
-            area_ptr->PropertyEditArea::callPropertyUpdate();
-        }
-        //if we drooped material to material pick area
-        if(resource_area->resource_type == RESOURCE_TYPE_MATERIAL && (file_dropped[0]->text().endsWith(".zsmat"))){
+        if((resource_area->resource_type == RESOURCE_TYPE_TEXTURE && (file_dropped[0]->text().endsWith(".dds") || file_dropped[0]->text().endsWith(".DDS")))
+                || (resource_area->resource_type == RESOURCE_TYPE_MATERIAL && (file_dropped[0]->text().endsWith(".zsmat")))){
 
             QString newpath = _editor_win->getCurrentDirectory() + "/" + file_dropped[0]->text();
             newpath.remove(0, _editor_win->project.root_path.size() + 1);
@@ -831,6 +810,7 @@ GameobjectPickArea::GameobjectPickArea(){
     this->type = PEA_TYPE_GOBJECT_PICK;
 
     this->property_label = new QLabelResourcePickWgt(this); //Allocation of resource relpath text
+    gameobject_ptr_ptr = nullptr;
     elem_layout->addWidget(property_label);
 }
 GameobjectPickArea::~GameobjectPickArea(){
