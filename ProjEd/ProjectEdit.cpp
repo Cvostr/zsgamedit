@@ -20,6 +20,8 @@
 
 //Hack to support meshes
 extern ZSpireEngine* engine_ptr;
+//Hack to support materials
+extern ZSGAME_DATA* data;
 
 EditWindow* _editor_win;
 InspectorWin* _inspector_win;

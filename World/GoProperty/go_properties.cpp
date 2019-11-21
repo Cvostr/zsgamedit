@@ -916,6 +916,8 @@ void MaterialProperty::onValueChanged(){
     material_ptr->saveToFile();
     //Recreate thumbnails for all materials
     _editor_win->thumb_master->createMaterialThumbnails();
+    //Update thumbnail in file list
+    _editor_win->updateFileList();
 }
 
 void MaterialProperty::copyTo(GameObjectProperty* dest){

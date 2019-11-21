@@ -65,7 +65,7 @@ void RenderPipeline::setup(int bufWidth, int bufHeight){
 
     terrainUniformBuffer = Engine::allocUniformBuffer();
     terrainUniformBuffer->init(3, 12 * 16 * 2 + 4 * 3);
-
+    //Allocate 150 matrices for skinning
     skinningUniformBuffer = Engine::allocUniformBuffer();
     skinningUniformBuffer->init(4, sizeof (ZSMATRIX4x4) * 150);
 
@@ -146,6 +146,7 @@ void RenderPipeline::init(){
         cullFaces = true;
         glFrontFace(GL_CCW);
     }else{
+        //Project is 2D, disable depth test and face cull
         glDisable(GL_DEPTH_TEST);
         depthTest = false;
         cullFaces = false;

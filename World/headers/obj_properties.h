@@ -13,12 +13,6 @@ enum LIGHTSOURCE_TYPE {
     LIGHTSOURCE_TYPE_SPOT
 };
 
-enum COLLIDER_TYPE {COLLIDER_TYPE_NONE,
-                    COLLIDER_TYPE_BOX,
-                    COLLIDER_TYPE_CUBE,
-                    COLLIDER_TYPE_SPHERE,
-                    COLLIDER_TYPE_CONVEX_HULL};
-
 typedef uint8_t ZSLIGHTSOURCE_GL_ID;
 
 class ScriptGroupProperty : public GameObjectProperty {

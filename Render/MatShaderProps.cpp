@@ -177,13 +177,13 @@ void Material::saveToFile(){
     //Write material header
     mat_stream << "ZSP_MATERIAL\n";
     //Write group string
-    mat_stream << "GROUP " << this->group_str << "\n";
+    mat_stream << "_GROUP " << (this->group_str + '\0') << "\n";
     for(unsigned int prop_i = 0; prop_i < group_ptr->properties.size(); prop_i ++){
         //Obtain pointers to prop and prop's configuration
         MaterialShaderProperty* prop_ptr = group_ptr->properties[prop_i];
         MaterialShaderPropertyConf* conf_ptr = this->confs[prop_i];
         //write entry header
-        mat_stream << "ENTRY " << prop_ptr->prop_identifier << " "; //Write identifier
+        mat_stream << "_ENTRY " << (prop_ptr->prop_identifier + '\0'); //Write identifier
 
         switch(prop_ptr->type){
             case MATSHPROP_TYPE_NONE:{
@@ -193,35 +193,39 @@ void Material::saveToFile(){
                 //Cast pointer
                 TextureMtShPropConf* texture_conf = static_cast<TextureMtShPropConf*>(conf_ptr);
                 //Write value
-                mat_stream << texture_conf->path;
+                mat_stream << texture_conf->path + '\0';
                 break;
             }
             case MATSHPROP_TYPE_FLOAT:{
                 //Cast pointer
                 FloatMtShPropConf* float_conf = static_cast<FloatMtShPropConf*>(conf_ptr);
                 //Write value
-                mat_stream << float_conf->value;
+                mat_stream.write(reinterpret_cast<char*>(&float_conf->value), sizeof (float));
                 break;
             }
             case MATSHPROP_TYPE_INTEGER:{
                 //Cast pointer
                 IntegerMtShPropConf* int_conf = static_cast<IntegerMtShPropConf*>(conf_ptr);
                 //Write value
-                mat_stream << int_conf->value;
+                mat_stream.write(reinterpret_cast<char*>(&int_conf->value), sizeof(int));
                 break;
             }
             case MATSHPROP_TYPE_COLOR:{
                 //Cast pointer
                 ColorMtShPropConf* color_conf = static_cast<ColorMtShPropConf*>(conf_ptr);
                 //Write value
-                mat_stream << color_conf->color.r << " " << color_conf->color.g << " " << color_conf->color.b;
+                mat_stream.write(reinterpret_cast<char*>(&color_conf->color.r), 4);
+                mat_stream.write(reinterpret_cast<char*>(&color_conf->color.g), 4);
+                mat_stream.write(reinterpret_cast<char*>(&color_conf->color.b), 4);
                 break;
             }
             case MATSHPROP_TYPE_FVEC3:{
                 //Cast pointer
                 Float3MtShPropConf* fvec3_conf = static_cast<Float3MtShPropConf*>(conf_ptr);
                 //Write value
-                mat_stream << fvec3_conf->value.X << " " << fvec3_conf->value.Y << " " << fvec3_conf->value.Z;
+                mat_stream.write(reinterpret_cast<char*>(&fvec3_conf->value.X), sizeof (float));
+                mat_stream.write(reinterpret_cast<char*>(&fvec3_conf->value.Y), sizeof (float));
+                mat_stream.write(reinterpret_cast<char*>(&fvec3_conf->value.Z), sizeof (float));
                 break;
             }
             case MATSHPROP_TYPE_TEXTURE3:{
@@ -229,7 +233,7 @@ void Material::saveToFile(){
                 Texture3MtShPropConf* tex3_conf = static_cast<Texture3MtShPropConf*>(conf_ptr);
                 //Write value
                 for(int i = 0; i < 6; i ++)
-                    mat_stream << tex3_conf->texture_str[i] << " ";
+                    mat_stream << (tex3_conf->texture_str[i] + '\0');
 
                 break;
             }
@@ -239,33 +243,37 @@ void Material::saveToFile(){
     mat_stream.close(); //close stream
 }
 
-void Material::loadFromFile(std::string fpath){
-    std::cout << "Loading Material " << fpath << std::endl;
-
-    this->file_path = fpath;
+void Material::loadFromBuffer(char* buffer, unsigned int size){
     //Define and open file stream
-    std::ifstream mat_stream;
-    //Open stream
-    mat_stream.open(fpath, std::ifstream::in);
+    unsigned int position = 0;
 
-    std::string test_header;
-    mat_stream >> test_header; //Read header
-    if(test_header.compare("ZSP_MATERIAL") != 0) //If it isn't zspire scene
+    char test_header[13];
+    //Read header
+    memcpy(test_header, &buffer[position], 13);
+
+    if(strcmp(test_header, "ZSP_MATERIAL\n") != 0) //If it isn't zspire scene
         return; //Go out, we have nothing to do
 
-    while(!mat_stream.eof()){ //While file not finished reading
-        std::string prefix;
-        mat_stream >> prefix; //Read prefix
+    position += 13;
 
-        if(prefix.compare("GROUP") == 0){ //if it is game object
-            mat_stream >> this->group_str; //Read identifier
+    while(position <= size){ //While file not finished reading
+        char prefix[7];
+        memcpy(prefix, &buffer[position], 6);
+        position += 7;
 
-            setPropertyGroup(MtShProps::getMtShaderPropertyGroup(group_str));
+        if(strcmp(prefix, "_GROUP") == 0){ //if it is game object
+            char group_name[100];
+            strcpy(group_name, &buffer[position]);
+            position += strlen(group_name) + 2;
+
+            setPropertyGroup(MtShProps::getMtShaderPropertyGroup(std::string(group_name)));
         }
 
-        if(prefix.compare("ENTRY") == 0){ //if it is game object
-            std::string prop_identifier;
-            mat_stream >> prop_identifier; //Read identifier
+        if(strcmp(prefix, "_ENTRY") == 0){ //if it is game object
+            char _prop_identifier[100];
+            strcpy(_prop_identifier, &buffer[position]);
+            std::string prop_identifier = std::string(_prop_identifier);
+            position += prop_identifier.size() + 1;
 
             for(unsigned int prop_i = 0; prop_i < group_ptr->properties.size(); prop_i ++){
                 MaterialShaderProperty* prop_ptr = group_ptr->properties[prop_i];
@@ -279,43 +287,59 @@ void Material::loadFromFile(std::string fpath){
                         case MATSHPROP_TYPE_TEXTURE:{
                             //Cast pointer
                             TextureMtShPropConf* texture_conf = static_cast<TextureMtShPropConf*>(conf_ptr);
+                            char texture_relpath[64];
 
-                            mat_stream >> texture_conf->path;
+                            strcpy(texture_relpath, &buffer[position]);
+                            position += strlen(texture_relpath);
+                            texture_conf->path = std::string(texture_relpath);
+
+                            position += 2;
                             break;
                         }
+
                         case MATSHPROP_TYPE_FLOAT:{
                             //Cast pointer
                             FloatMtShPropConf* float_conf = static_cast<FloatMtShPropConf*>(conf_ptr);
 
-                            float value;
-                            mat_stream >> value;
-
-                            float_conf->value = value;
+                            memcpy(&float_conf->value, &buffer[position], sizeof(float));
+                            position += sizeof (float) + 1;
                             break;
                         }
+
                         case MATSHPROP_TYPE_INTEGER:{
                             //Cast pointer
                             IntegerMtShPropConf* int_conf = static_cast<IntegerMtShPropConf*>(conf_ptr);
 
-                            int value;
-                            mat_stream >> value;
-
-                            int_conf->value = value;
+                            memcpy(&int_conf->value, &buffer[position], sizeof(int));
+                            position += sizeof (int);
                             break;
                         }
+
                         case MATSHPROP_TYPE_COLOR:{
                             //Cast pointer
                             ColorMtShPropConf* color_conf = static_cast<ColorMtShPropConf*>(conf_ptr);
-                            //Write value
-                            mat_stream >> color_conf->color.r >> color_conf->color.g >> color_conf->color.b;
-                            color_conf->color.updateGL();
+                            //Read color values
+                            memcpy(&color_conf->color.r, &buffer[position], sizeof(int));
+                            position += sizeof (int);
+                            memcpy(&color_conf->color.g, &buffer[position], sizeof(int));
+                            position += sizeof (int);
+                            memcpy(&color_conf->color.b, &buffer[position], sizeof(int));
+                            position += sizeof (int);
+                            position += 1;
                             break;
                         }
+
                         case MATSHPROP_TYPE_FVEC3:{
                             //Cast pointer
                             Float3MtShPropConf* fvec3_conf = static_cast<Float3MtShPropConf*>(conf_ptr);
-                            //Write value
-                            mat_stream >> fvec3_conf->value.X >> fvec3_conf->value.Y >> fvec3_conf->value.Z;
+                            //Read float vector values
+                            memcpy(&fvec3_conf->value.X, &buffer[position], sizeof(int));
+                            position += sizeof (int);
+                            memcpy(&fvec3_conf->value.Y, &buffer[position], sizeof(int));
+                            position += sizeof (int);
+                            memcpy(&fvec3_conf->value.Z, &buffer[position], sizeof(int));
+                            position += sizeof (int);
+                            position += 1;
                             break;
                         }
                         case MATSHPROP_TYPE_TEXTURE3:{
@@ -323,19 +347,40 @@ void Material::loadFromFile(std::string fpath){
                             Texture3MtShPropConf* texture3_conf = static_cast<Texture3MtShPropConf*>(conf_ptr);
 
                             for(int i = 0; i < 6; i ++){
-                                std::string path;
-                                mat_stream >> path;
-                                texture3_conf->texture_str[i] = (path);
+                                char texture_relpath[64];
+                                strcpy(texture_relpath, &buffer[position]);
+                                texture3_conf->texture_str[i] = std::string(texture_relpath);
+                                position += strlen(texture_relpath) + 1;
                             }
 
                             break;
                         }
                    }
-                   mat_stream.seekg(1, std::ofstream::cur); //Skip space
                 }
             }
         }
     }
+}
+
+void Material::loadFromFile(std::string fpath){
+    std::cout << "Loading Material " << fpath << std::endl;
+
+    this->file_path = fpath;
+
+    std::ifstream mat_stream;
+    //Open stream
+    mat_stream.open(fpath, std::ifstream::in | std::ifstream::ate);
+    //Allocate space for file
+    unsigned int fileSize = static_cast<unsigned int>(mat_stream.tellg());
+    char* data = new char[fileSize];
+    mat_stream.seekg(0);
+    //Read file
+    mat_stream.read(data, fileSize);
+    //Parse it from buffer
+    loadFromBuffer(data, fileSize);
+    //Free buffer
+    delete[] data;
+
     mat_stream.close(); //close material stream
 }
 
