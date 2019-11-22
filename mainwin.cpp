@@ -72,8 +72,8 @@ void MainWin::addProjectToVector(ProjectConf conf){
     conf.projectRootPath.resize(conf.projectRootPath.size() - step);
 
     //Copy required data
-    conf.editwin_proj.label = conf.projLabel;
-    conf.editwin_proj.root_path = conf.projectRootPath;
+    conf.editwin_proj.label = conf.projLabel.toStdString();
+    conf.editwin_proj.root_path = conf.projectRootPath.toStdString();
 
     //push to vector
     this->projects.push_back(conf);

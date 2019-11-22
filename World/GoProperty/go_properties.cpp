@@ -1182,7 +1182,7 @@ void ScriptGroupProperty::onValueChanged(){
     }
     for(unsigned int script_i = 0; script_i < static_cast<unsigned int>(scr_num); script_i ++){
         //Set absolute path to script object
-        scripts_attached[script_i].fpath = project_ptr->root_path.toStdString() + "/" + path_names[script_i];
+        scripts_attached[script_i].fpath = project_ptr->root_path + "/" + path_names[script_i];
         scripts_attached[script_i].name = path_names[script_i];
     }
 }
@@ -1572,7 +1572,7 @@ void TerrainProperty::onAddToObject(){
     //Generate opengl mesh to draw
     data.generateGLMesh();
     //absolute path to terrain file
-    std::string fpath = project_ptr->root_path.toStdString() + "/" + this->file_label.toStdString();
+    std::string fpath = project_ptr->root_path + "/" + this->file_label.toStdString();
     //Create and save file
     data.saveToFile(fpath.c_str());
 }

@@ -21,7 +21,7 @@
 //Hack to support meshes
 extern ZSpireEngine* engine_ptr;
 //Hack to support materials
-extern ZSGAME_DATA* data;
+extern ZSGAME_DATA* game_data;
 
 EditWindow* _editor_win;
 InspectorWin* _inspector_win;
@@ -131,6 +131,10 @@ EditWindow::EditWindow(QApplication* app, QWidget *parent) :
 
     engine_ptr = new ZSpireEngine();
     engine_ptr->engine_info = engine_create_info;
+
+    game_data = new ZSGAME_DATA;
+    game_data->resources = new Engine::ResourceManager;
+
 }
 
 EditWindow::~EditWindow()
@@ -211,6 +215,9 @@ void EditWindow::init(){
     this->thumb_master = new ThumbnailsMaster;
     this->startManager(thumb_master);
 
+    std::string absolute = project.root_path + "/";
+    Engine::Loader::setBlobRootDirectory(absolute);
+    Engine::Loader::start();
     startTerrainThread();
 
     ready = true;//Everything is ready
@@ -363,7 +370,7 @@ QString EditWindow::createNewTextFile(QString directory, QString name, QString e
 void EditWindow::onSceneSaveAs(){
     _ed_actions_container->hasChangesUnsaved = false;
 
-    QString filename = QFileDialog::getSaveFileName(this, tr("Save scene file"), project.root_path, "*.scn");
+    QString filename = QFileDialog::getSaveFileName(this, tr("Save scene file"), QString::fromStdString(project.root_path), "*.scn");
     if(!filename.endsWith(".scn")) //If filename doesn't end with ".scn"
         filename.append(".scn"); //Add this extension
     world.saveToFile(filename); //Save to picked file
@@ -375,7 +382,7 @@ void EditWindow::onSceneSaveAs(){
 
 void EditWindow::onOpenScene(){
     QString filter = tr("ZSpire Scene (*.scn *.SCN);;");
-    QString path = QFileDialog::getOpenFileName(this, tr("Scene File"), project.root_path, filter);
+    QString path = QFileDialog::getOpenFileName(this, tr("Scene File"), QString::fromStdString(project.root_path), filter);
     if ( path.isNull() == false ) //If user specified file path
     {
         openFile(path);
@@ -676,7 +683,7 @@ void EditWindow::updateFileList(){
     directory.setSorting(QDir::DirsFirst | QDir::Name | QDir::Reversed);
 
     QFileInfoList list = directory.entryInfoList(); //Get folder content iterator
-    if(this->current_dir.compare(project.root_path)){
+    if(this->current_dir.compare(QString::fromStdString(project.root_path))){
         QListWidgetItem* backBtn_item = new QListWidgetItem("(back)", ui->fileList);
         backBtn_item->setIcon(QIcon::fromTheme("go-up"));
     }
@@ -896,12 +903,21 @@ void EditWindow::processResourceFile(QFileInfo fileInfo){
         glyph_manager->addFontContainer(gf_container);
     }
     if(checkExtension(name, ".dds")){ //If its an texture
+        Engine::ZsResource* _resource = new Engine::TextureResource;
+
+
         Resource resource;
         resource.file_path = absfpath; //Writing full path
         resource.rel_path = resource.file_path; //Preparing to get relative path
         resource.rel_path.remove(0, project.root_path.size() + 1); //Get relative path by removing length of project root from start
         resource.resource_label = resource.rel_path.toStdString();
         resource.type = RESOURCE_TYPE_TEXTURE; //Type is texture
+
+        _resource->rel_path = resource.rel_path.toStdString();
+        _resource->blob_path = _resource->rel_path;
+        _resource->resource_label = resource.resource_label;
+        game_data->resources->pushResource(_resource);
+
         loadResource(&resource); //Perform texture loading to OpenGL
         this->project.resources.push_back(resource);
     }
@@ -1171,7 +1187,7 @@ EditWindow* ZSEditor::openEditor(){
     _editor_win->init();
 
     _editor_win->close_reason = EW_CLOSE_REASON_UNCLOSED;
-    _editor_win->lookForResources(_editor_win->project.root_path); //Make a vector of all resource files
+    _editor_win->lookForResources(QString::fromStdString(_editor_win->project.root_path)); //Make a vector of all resource files
     _editor_win->move(0,0); //Editor base win would be in the left part of screen
     //resize editor window
     _editor_win->resize(_editor_win->settings.editor_win_width, _editor_win->settings.editor_win_height);
@@ -1198,7 +1214,7 @@ EditWindow* ZSEditor::openEditor(){
     _editor_win->thumb_master->createMaterialThumbnails();
     _editor_win->thumb_master->createMeshesThumbnails();
 
-    _editor_win->setViewDirectory(_editor_win->project.root_path);
+    _editor_win->setViewDirectory(QString::fromStdString(_editor_win->project.root_path));
 
     return _editor_win;
 }

@@ -28,6 +28,7 @@
 #include <BulletCollision/CollisionShapes/btTriangleMeshShape.h>
 #include <BulletCollision/CollisionShapes/btCapsuleShape.h>
 #include <BulletCollision/CollisionShapes/btConvexHullShape.h>
+#include <BulletCollision/CollisionShapes/btTriangleShape.h>
 #include <LinearMath/btDefaultMotionState.h>
 
 #include <game.h>

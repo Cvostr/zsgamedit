@@ -183,7 +183,7 @@ void GameObject::saveProperties(std::ofstream* stream){
 
             *stream << "\n";
 
-            std::string fpath = project_ptr->root_path.toStdString() + "/" + ptr->file_label.toStdString();
+            std::string fpath = project_ptr->root_path + "/" + ptr->file_label.toStdString();
             ptr->getTerrainData()->saveToFile(fpath.c_str());
             //Write textures relative pathes
             for(int texture_i = 0; texture_i < ptr->textures_size; texture_i ++){
@@ -348,7 +348,7 @@ void GameObject::loadProperty(std::ifstream* world_stream){
             //Read script relative path
             *world_stream >> ptr->path_names[script_w_i];
             //Push absolute and relative path to LuaScript object
-            ptr->scripts_attached[script_w_i].fpath = project_ptr->root_path.toStdString() + "/" + ptr->path_names[script_w_i];
+            ptr->scripts_attached[script_w_i].fpath = project_ptr->root_path + "/" + ptr->path_names[script_w_i];
             ptr->scripts_attached[script_w_i].name = ptr->path_names[script_w_i];
         }
         break;
@@ -432,7 +432,7 @@ void GameObject::loadProperty(std::ifstream* world_stream){
         world_stream->read(reinterpret_cast<char*>(&ptr->castShadows), sizeof(bool));
         world_stream->read(reinterpret_cast<char*>(&ptr->textures_size), sizeof(int));
 
-        std::string fpath = project_ptr->root_path.toStdString() + "/" + ptr->file_label.toStdString();
+        std::string fpath = project_ptr->root_path + "/" + ptr->file_label.toStdString();
         bool result = ptr->getTerrainData()->loadFromFile(fpath.c_str());
         if(result) //if loading sucessstd::cout << "Terrain : Probably, missing terrain file" << file_path;
             ptr->getTerrainData()->generateGLMesh();

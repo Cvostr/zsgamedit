@@ -4,15 +4,7 @@
 #include <QString>
 #include <vector>
 #include <string>
-
-enum RESOURCE_TYPE {RESOURCE_TYPE_NONE,
-                    RESOURCE_TYPE_TEXTURE,
-                    RESOURCE_TYPE_MESH,
-                    RESOURCE_TYPE_AUDIO,
-                    RESOURCE_TYPE_MATERIAL,
-                    RESOURCE_TYPE_SCRIPT,
-                    RESOURCE_TYPE_ANIMATION,
-                    RESOURCE_TYPE_FILE = 1000};
+#include <game.h>
 
 typedef struct Resource{
     QString file_path; //Resource file
@@ -22,9 +14,9 @@ typedef struct Resource{
     void* class_ptr; //Pointer to resource class
 }Resource;
 
-struct Project{
-    QString label; //Label of the project
-    QString root_path; //Project root folder
+typedef struct Project{
+    std::string label; //Label of the project
+    std::string root_path; //Project root folder
 
     int version; //Project version
     int perspective; //3D or 2D
@@ -33,6 +25,6 @@ struct Project{
 
     std::vector<Resource> resources;
     Resource* getResource(QString rel_path);
-};
+}Project;
 
 #endif // ZS_TYPES_H

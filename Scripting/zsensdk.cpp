@@ -44,7 +44,7 @@ ZSVECTOR3 ZSENSDK::Math::vmul(ZSVECTOR3 v1, float m){
 }
 
 void ZSENSDK::_Engine::loadWorldFromFile(std::string file){
-    QString load = project_ptr->root_path + "/" + QString::fromStdString(file);
+    QString load = QString::fromStdString(project_ptr->root_path) + "/" + QString::fromStdString(file);
 
    _editor_win->sheduleWorldLoad(load);
 }

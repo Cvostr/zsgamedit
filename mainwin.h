@@ -7,7 +7,7 @@
 #include "ProjEd/headers/ProjectEdit.h"
 #include "ProjEd/headers/ProjCreateWin.h"
 
-#include <engine.h> //include engine headers
+#include "include_engine.h" //include engine headers
 
 typedef struct ProjectConf{
     QString projLabel; //Label of project

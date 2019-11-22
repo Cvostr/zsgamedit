@@ -398,7 +398,7 @@ void PickResourceArea::updateLabel(){
     bool resource_specified = *rel_path_std != "@none";
 
     if((this->resource_type == RESOURCE_TYPE_MATERIAL || this->resource_type == RESOURCE_TYPE_TEXTURE) && resource_specified){
-        std::string fpath = _editor_win->project.root_path.toStdString() + "/";
+        std::string fpath = _editor_win->project.root_path + "/";
 
         fpath += *rel_path_std;
 
@@ -527,7 +527,7 @@ void ResourcePickDialog::onNeedToShow(){
                 QImage* img = nullptr;
                 std::string fpath;
                 if(this->area->resource_type == RESOURCE_TYPE_TEXTURE || this->area->resource_type == RESOURCE_TYPE_MATERIAL)
-                    fpath = _editor_win->project.root_path.toStdString() + "/" + resource_ptr->resource_label;
+                    fpath = _editor_win->project.root_path + "/" + resource_ptr->resource_label;
 
                 if(this->area->resource_type == RESOURCE_TYPE_MESH)
                     fpath = resource_ptr->resource_label;
@@ -539,7 +539,7 @@ void ResourcePickDialog::onNeedToShow(){
             }
         }
     }else{ //we want to pick common file
-        findFiles(project_ptr->root_path);
+        findFiles(QString::fromStdString(project_ptr->root_path));
     }
     this->show();
     //update label content

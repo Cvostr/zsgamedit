@@ -97,7 +97,21 @@ void PhysicalProperty::updateCollisionShape(){
         case COLLIDER_TYPE_CONVEX_HULL:{
             MeshProperty* mesh = this->go_link.updLinkPtr()->getPropertyPtr<MeshProperty>();
             shape = new btConvexHullShape(mesh->mesh_ptr->vertices_coord, mesh->mesh_ptr->vertices_num, sizeof (float) * 3);
+            break;
+        }
+        case COLLIDER_TYPE_MESH:{
+            MeshProperty* mesh = this->go_link.updLinkPtr()->getPropertyPtr<MeshProperty>();
 
+            float* vertices = mesh->mesh_ptr->vertices_coord;
+            int* indices = reinterpret_cast<int*>(mesh->mesh_ptr->indices_arr);
+
+            btTriangleIndexVertexArray* va = new btTriangleIndexVertexArray(mesh->mesh_ptr->indices_num / 3,
+                                                                            indices,
+                                                                            3 * sizeof (int),
+                                                                            mesh->mesh_ptr->vertices_num,
+                                                                            reinterpret_cast<btScalar*>(vertices),
+                                                                            sizeof (ZSVECTOR3));
+            shape = new btBvhTriangleMeshShape(va, false);
             break;
         }
     }
@@ -116,11 +130,14 @@ void PhysicalProperty::addColliderRadio(InspectorWin* inspector){
     sphere_radio->setText("Sphere");
     QRadioButton* convex_radio = new QRadioButton;
     convex_radio->setText("Convex Hull");
+    QRadioButton* mesh_radio = new QRadioButton;
+    mesh_radio->setText("Mesh");
     //add created radio buttons
     group->addRadioButton(box_radio);
     group->addRadioButton(cube_radio);
     group->addRadioButton(sphere_radio);
     group->addRadioButton(convex_radio);
+    group->addRadioButton(mesh_radio);
     //Register in Inspector
     inspector->registerUiObject(group);
     inspector->getContentLayout()->addLayout(group->btn_layout);

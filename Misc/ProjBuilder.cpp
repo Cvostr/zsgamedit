@@ -12,8 +12,8 @@ void ProjBuilder::start(){
     prepareDirectory(); //prepare output directory
 
     window->addToOutput("Packing resources...");
-    writer = new BlobWriter(proj_ptr->root_path + "/.build/resources.map", window);
-    writer->directory = proj_ptr->root_path + "/.build";
+    writer = new BlobWriter(QString::fromStdString(proj_ptr->root_path) + "/.build/resources.map", window);
+    writer->directory = QString::fromStdString(proj_ptr->root_path) + "/.build";
     writer->name_prefix = "blob_";
     writer->max_blob_size = 100*1024*1024; //100 megabytes limit
 
@@ -39,7 +39,7 @@ void ProjBuilder::start(){
                 break;
         }
         window->addToOutput("Resource #" + QString::number(res_i) + " type: " + type_str + " " + res_ptr->rel_path);
-        std::string abs_path = (proj_ptr->root_path + "/" + res_ptr->rel_path).toStdString();
+        std::string abs_path = (proj_ptr->root_path + "/" + res_ptr->rel_path.toStdString());
         std::string rel_path = res_ptr->rel_path.toStdString();
         writer->writeToBlob(abs_path, rel_path, res_ptr);
     }
@@ -57,10 +57,10 @@ ProjBuilder::ProjBuilder(Project* proj){
 }
 
 void ProjBuilder::prepareDirectory(){
-    QDir out_dir(this->proj_ptr->root_path + "/.build");
+    QDir out_dir(QString::fromStdString(this->proj_ptr->root_path) + "/.build");
     if(out_dir.exists() == false){ //if there is no .build directory
         window->addToOutput("Create .build directory");
-        QDir(this->proj_ptr->root_path).mkdir(".build"); //create ddirectory
+        QDir(QString::fromStdString(this->proj_ptr->root_path)).mkdir(".build"); //create ddirectory
     }
 }
 
