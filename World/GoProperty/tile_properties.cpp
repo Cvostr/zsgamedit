@@ -15,6 +15,7 @@
 
 extern InspectorWin* _inspector_win;
 static TileGroupProperty* current_property; //Property, that shown
+extern ZSGAME_DATA* game_data;
 
 void onCreateBtnPress(){
     current_property->process();
@@ -248,9 +249,9 @@ void TileProperty::onValueChanged(){
 
 void TileProperty::updTexturePtr(){
     //Update color texture
-    this->texture_diffuse = world_ptr->getTexturePtrByRelPath(QString::fromStdString(diffuse_relpath));
+    this->texture_diffuse = game_data->resources->getTextureByLabel(diffuse_relpath);
     //Update transparent layer texture
-    this->texture_transparent = world_ptr->getTexturePtrByRelPath(QString::fromStdString(transparent_relpath));
+    this->texture_transparent = game_data->resources->getTextureByLabel(transparent_relpath);
 }
 
 void TileProperty::onAddToObject(){

@@ -52,6 +52,7 @@ void MainWin::onDestroy(){
 
 void MainWin::closeEvent( QCloseEvent *event )
 {
+    assert(event);
     working = false;
 }
 
@@ -121,10 +122,12 @@ void MainWin::loadProjectsConfigurations(){
                         mProject.version = ver; //Storing version in project struct
                     }
                     if(prefix.compare("persp") == 0){ //If reched to persp
-                        project_conf_stream >> mProject.perspective; //Reading perspective
+                        int persp_int = 0;
+                        project_conf_stream >> persp_int; //Reading perspective
+                        mProject.perspective = static_cast<ZSPERSPECTIVE>(persp_int);
                     }
                     if(prefix.compare("startup_scene") == 0){ //If reched to persp
-                        project_conf_stream >> mProject.startup_scene; //Reading perspective
+                        project_conf_stream >> mProject.startup_scene; //Reading startup scene string
                     }
                 }
                 conf.editwin_proj = mProject; //Copy project data

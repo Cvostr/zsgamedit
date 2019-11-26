@@ -9,6 +9,7 @@
 extern InspectorWin* _inspector_win;
 extern EditWindow* _editor_win;
 extern Project* project_ptr;
+extern ZSGAME_DATA* game_data;
 //selected terrain
 static TerrainProperty* current_terrain_prop;
 //Selected animation
@@ -611,6 +612,7 @@ AudioSourceProperty::AudioSourceProperty(){
 
     buffer_ptr = nullptr;
     this->resource_relpath = "@none";
+    isPlaySheduled = false;
 
     this->source.source_gain = 1.0f;
     this->source.source_pitch = 1.0f;
@@ -651,14 +653,21 @@ void AudioSourceProperty::onValueChanged(){
 }
 
 void AudioSourceProperty::updateAudioPtr(){
-    this->buffer_ptr = world_ptr->getSoundPtrByName(QString::fromStdString(resource_relpath));
+    this->buffer_ptr = game_data->resources->getAudioByLabel(resource_relpath);
 
     if(buffer_ptr == nullptr) return;
 
-    this->source.setAlBuffer(this->buffer_ptr);
+    this->source.setAlBuffer(this->buffer_ptr->buffer);
 }
 
 void AudioSourceProperty::onUpdate(float deltaTime){
+    if(buffer_ptr->resource_state == STATE_LOADING_PROCESS)
+        this->buffer_ptr->load();
+    if(buffer_ptr->resource_state == STATE_LOADED && isPlaySheduled){
+        audio_start();
+        isPlaySheduled = false;
+    }
+
     TransformProperty* transform = go_link.updLinkPtr()->getTransformProperty();
     //if object position changed
     if(transform->translation != this->last_pos){
@@ -689,7 +698,18 @@ void AudioSourceProperty::setAudioFile(std::string relpath){
     this->updateAudioPtr();
 }
 void AudioSourceProperty::audio_start(){
-    this->source.play();
+    //this->source.play();
+    if(buffer_ptr->resource_state == STATE_LOADED){
+        //Update source buffer
+        if(buffer_ptr == nullptr) return;
+        this->source.setAlBuffer(this->buffer_ptr->buffer);
+        //play source
+        this->source.play();
+
+    }else {
+        this->buffer_ptr->load();
+        isPlaySheduled = true;
+    }
 }
 
 void AudioSourceProperty::audio_stop(){
@@ -898,8 +918,8 @@ void MaterialProperty::onValueChanged(){
             case MATSHPROP_TYPE_TEXTURE:{
                 //Cast pointer
                 TextureMtShPropConf* texture_conf = static_cast<TextureMtShPropConf*>(conf_ptr);
-                texture_conf->texture = go_link.world_ptr->getTexturePtrByRelPath(QString::fromStdString(texture_conf->path));
-
+                //texture_conf->texture = go_link.world_ptr->getTexturePtrByRelPath(QString::fromStdString(texture_conf->path));
+                texture_conf->texture = game_data->resources->getTextureByLabel(texture_conf->path);
                 break;
             }
             case MATSHPROP_TYPE_TEXTURE3:{
@@ -1556,8 +1576,8 @@ void TerrainProperty::onValueChanged(){
     }
     for(unsigned int i = 0; i < static_cast<unsigned int>(this->textures_size); i ++){
         HeightmapTexturePair* pair = &this->textures[i];
-        pair->diffuse = world_ptr->getTexturePtrByRelPath(QString::fromStdString(pair->diffuse_relpath));
-        pair->normal = world_ptr->getTexturePtrByRelPath(QString::fromStdString(pair->normal_relpath));
+        pair->diffuse = game_data->resources->getTextureByLabel(pair->diffuse_relpath);
+        pair->normal = game_data->resources->getTextureByLabel(pair->normal_relpath);
     }
 }
 

@@ -34,9 +34,11 @@ public:
 };
 
 class AudioSourceProperty : public GameObjectProperty{
+private:
+    bool isPlaySheduled;
 public:
     std::string resource_relpath; //Relative path to resource
-    Engine::SoundBuffer* buffer_ptr;
+    Engine::AudioResource* buffer_ptr;
     Engine::SoundSource source;
 
     ZSVECTOR3 last_pos;

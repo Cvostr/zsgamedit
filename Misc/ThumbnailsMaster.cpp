@@ -5,6 +5,9 @@
 #define THUMBNAIL_IMG_SIZE 512
 
 extern RenderPipeline* renderer;
+//Hack to support resources
+extern ZSGAME_DATA* game_data;
+extern Project* project_ptr;
 
 const char texture_shaderFS[310] = "#version 420 core\n\
         in vec2 _UV;\n\
@@ -66,11 +69,11 @@ void ThumbnailsMaster::createTexturesThumbnails(){
     glDisable(GL_DEPTH_TEST);
     glClear(GL_COLOR_BUFFER_BIT);
     //Iterate over all resources
-    for(unsigned int res_i = 0; res_i < project_struct_ptr->resources.size(); res_i ++){
-        Resource* resource_ptr = &this->project_struct_ptr->resources[res_i];
-        if(resource_ptr->type != RESOURCE_TYPE_TEXTURE) continue;
+    for(unsigned int res_i = 0; res_i < game_data->resources->getResourcesSize(); res_i ++){
+        Engine::ZsResource* resource_ptr = game_data->resources->getResourceByIndex(res_i);
+        if(resource_ptr->resource_type != RESOURCE_TYPE_TEXTURE) continue;
 
-        Engine::Texture* texture_ptr = static_cast<Engine::Texture*>(resource_ptr->class_ptr);
+        Engine::TextureResource* texture_ptr = static_cast<Engine::TextureResource*>(resource_ptr);
         DrawTexture(texture_ptr);
         //Allocate image buffer
         unsigned char* texture_data = new unsigned char[THUMBNAIL_IMG_SIZE * THUMBNAIL_IMG_SIZE * 4];
@@ -78,7 +81,7 @@ void ThumbnailsMaster::createTexturesThumbnails(){
         glReadPixels(0, 0, THUMBNAIL_IMG_SIZE, THUMBNAIL_IMG_SIZE, GL_RGBA, GL_UNSIGNED_BYTE, &texture_data[0]);
 
         QImage* image = new QImage(texture_data, THUMBNAIL_IMG_SIZE, THUMBNAIL_IMG_SIZE, QImage::Format_RGBA8888);
-        texture_thumbnails.insert(std::pair<std::string, QImage*>(resource_ptr->file_path.toStdString(), image));
+        texture_thumbnails.insert(std::pair<std::string, QImage*>(project_ptr->root_path + "/" + resource_ptr->rel_path, image));
         //delete[] texture_data;
     }
 }
@@ -189,8 +192,13 @@ void ThumbnailsMaster::createMaterialThumbnail(QString name){
 
 }
 
-void ThumbnailsMaster::DrawTexture(Engine::Texture* texture){
+void ThumbnailsMaster::DrawTexture(Engine::TextureResource* texture){
+
     //use texture
+    texture->Use(0);
+    while(texture->resource_state != STATE_LOADED){
+        texture->Use(0);
+    }
     texture->Use(0);
     //draw plane
     Engine::getPlaneMesh2D()->Draw();

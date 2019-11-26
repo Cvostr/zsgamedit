@@ -36,13 +36,13 @@ void RenderPipeline::setup(int bufWidth, int bufHeight){
     shadowMap = Engine::allocShader();
     heightmap = Engine::allocShader();
 
-    if(this->project_struct_ptr->perspective == 2){
+    if(this->project_struct_ptr->perspective == PERSP_2D){
         this->tile_shader->compileFromFile("Shaders/2d_tile/tile2d.vert", "Shaders/2d_tile/tile2d.frag");
     }
     this->pick_shader->compileFromFile("Shaders/pick/pick.vert", "Shaders/pick/pick.frag");
     this->obj_mark_shader->compileFromFile("Shaders/mark/mark.vert", "Shaders/mark/mark.frag");
     this->ui_shader->compileFromFile("Shaders/ui/ui.vert", "Shaders/ui/ui.frag");
-    if(this->project_struct_ptr->perspective == 3){
+    if(this->project_struct_ptr->perspective == PERSP_3D){
         this->deffered_light->compileFromFile("Shaders/postprocess/deffered_light/deffered.vert",
                                              "Shaders/postprocess/deffered_light/deffered.frag");
         this->diffuse3d_shader->compileFromFile("Shaders/3d/3d.vert", "Shaders/3d/3d.frag");
@@ -140,7 +140,7 @@ void RenderPipeline::init(){
     glEnable(GL_LINE_SMOOTH);
     glLineWidth(16.0f);
     //If our proj is 3D, then enable depth test by default
-    if(this->project_struct_ptr->perspective == 3){
+    if(this->project_struct_ptr->perspective == PERSP_3D){
         glEnable(GL_DEPTH_TEST);
         depthTest = true;
         cullFaces = true;
@@ -282,11 +282,11 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr){
     this->updateShadersCameraInfo(cam_ptr); //Send camera properties to all drawing shaders
 
     switch(this->project_struct_ptr->perspective){
-        case 2:{
+        case PERSP_2D:{
             render2D(projectedit_ptr);
             break;
         }
-        case 3:{
+        case PERSP_3D:{
             render3D(projectedit_ptr, cam);
             break;
         }

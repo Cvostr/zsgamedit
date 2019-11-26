@@ -5,6 +5,7 @@
 #include <render/zs-texture.h>
 #include <render/zs-mesh.h>
 #include <render/zs-materials.h>
+#include <engine/loader.h>
 #include "../../Render/headers/zs-pipeline.h"
 #include "EditorManager.h"
 #include <map>
@@ -29,7 +30,7 @@ public:
     void createMaterialThumbnail(QString name);
     void createMeshesThumbnails();
 
-    void DrawTexture(Engine::Texture* texture);
+    void DrawTexture(Engine::TextureResource* texture);
     void DrawMaterial(Material* material);
     void DrawMesh(Engine::Mesh* mesh);
 

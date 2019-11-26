@@ -3,10 +3,13 @@
 #include <iostream>
 #include <GL/glew.h>
 #include "../Misc/headers/zs_types.h"
+#include <engine/resources.h>
 
 extern Project* project_ptr;
 Material* default3dmat;
 static std::vector<MtShaderPropertiesGroup*> MatGroups;
+//Hack to support resources
+extern ZSGAME_DATA* game_data;
 
 MaterialShaderProperty* MtShaderPropertiesGroup::addProperty(int type){
     //Allocate property in heap
@@ -402,17 +405,19 @@ void Material::applyMatToPipeline(){
                 TextureMtShPropConf* texture_conf = static_cast<TextureMtShPropConf*>(conf_ptr);
 
                 int db = 0;
-
-                if(texture_conf->path.compare("@none")){
+                //If correct path is set to texture
+                if(texture_conf->path.compare("@none") == 1){
                     //if texture isn't loaded
                     if(texture_conf->texture == nullptr){
-                        Resource* res_ptr = project_ptr->getResource(QString::fromStdString(texture_conf->path));
-                        texture_conf->texture = static_cast<Engine::Texture*>(res_ptr->class_ptr);
+                        //Try to find texture
+                        texture_conf->texture = game_data->resources->getTextureByLabel(texture_conf->path);
                     }
                     //Set opengl texture
                     db = 1;
-                    texture_conf->texture->Use(texture_p->slotToBind); //Use texture
+                    Engine::TextureResource* tex_ptr = ((Engine::TextureResource*)texture_conf->texture);
+                    tex_ptr->Use(texture_p->slotToBind);
                 }
+
                 offset = texture_p->start_offset;
                 group_ptr->setUB_Data(offset, 4, &db);
 

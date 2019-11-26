@@ -71,10 +71,10 @@ private:
 public:
     TileGeometry geometry;
     //Defines color texture
-    Engine::Texture* texture_diffuse;
+    Engine::TextureResource* texture_diffuse;
     std::string diffuse_relpath;
     //Defines texture, that will cover tile
-    Engine::Texture* texture_transparent;
+    Engine::TextureResource* texture_transparent;
     std::string transparent_relpath;
     //Defines animation
     TileAnimation anim_property;

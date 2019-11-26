@@ -6,6 +6,7 @@
 #include <QString>
 #include <render/zs-texture.h>
 #include <render/zs-math.h>
+#include <engine/resources.h>
 
 #include <BulletDynamics/Dynamics/btDiscreteDynamicsWorld.h>
 #include <BulletCollision/CollisionShapes/btTriangleIndexVertexArray.h>
@@ -52,8 +53,8 @@ typedef struct HeightmapTexturePair{
     std::string diffuse_relpath;
     std::string normal_relpath;
 
-    Engine::Texture* diffuse;
-    Engine::Texture* normal;
+    Engine::TextureResource* diffuse;
+    Engine::TextureResource* normal;
 
     HeightmapTexturePair(){
         diffuse_relpath = normal_relpath = "@none";

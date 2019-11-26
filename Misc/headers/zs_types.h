@@ -19,7 +19,7 @@ typedef struct Project{
     std::string root_path; //Project root folder
 
     int version; //Project version
-    int perspective; //3D or 2D
+    ZSPERSPECTIVE perspective; //3D or 2D
 
     std::string startup_scene;
 

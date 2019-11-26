@@ -20,7 +20,7 @@
 
 //Hack to support meshes
 extern ZSpireEngine* engine_ptr;
-//Hack to support materials
+//Hack to support resources
 extern ZSGAME_DATA* game_data;
 
 EditWindow* _editor_win;
@@ -131,10 +131,6 @@ EditWindow::EditWindow(QApplication* app, QWidget *parent) :
 
     engine_ptr = new ZSpireEngine();
     engine_ptr->engine_info = engine_create_info;
-
-    game_data = new ZSGAME_DATA;
-    game_data->resources = new Engine::ResourceManager;
-
 }
 
 EditWindow::~EditWindow()
@@ -215,6 +211,10 @@ void EditWindow::init(){
     this->thumb_master = new ThumbnailsMaster;
     this->startManager(thumb_master);
 
+    game_data = new ZSGAME_DATA;
+    game_data->resources = new Engine::ResourceManager;
+
+
     std::string absolute = project.root_path + "/";
     Engine::Loader::setBlobRootDirectory(absolute);
     Engine::Loader::start();
@@ -225,14 +225,14 @@ void EditWindow::init(){
     Engine::SFX::initAL();
 
     switch(project.perspective){
-        case 2:{ //2D project
+        case PERSP_2D:{ //2D project
 
             this->edit_camera.setProjectionType(ZSCAMERA_PROJECTION_ORTHOGONAL);
             edit_camera.setPosition(ZSVECTOR3(0,0,0));
             edit_camera.setFront(ZSVECTOR3(0,0,1));
             break;
         }
-        case 3:{ //3D project
+        case PERSP_3D:{ //3D project
             this->edit_camera.setProjectionType(ZSCAMERA_PROJECTION_PERSPECTIVE);
             edit_camera.setPosition(ZSVECTOR3(0,0,0));
             edit_camera.setFront(ZSVECTOR3(0,0,1));
@@ -604,10 +604,16 @@ bool EditWindow::onCloseProject(){
         _editor_win->close();
         _inspector_win->close();
 
+        //Release all resources
+        //And delete ResourceManager class
+        delete game_data->resources;
+        delete game_data;
+
         destroyAllManagers();
 
         _ed_actions_container->clear();
         Engine::SFX::destroyAL();
+
 
         this->ready = false; //won't render anymore
 
@@ -788,7 +794,7 @@ void EditWindow::onCameraToObjTeleport(){
     transform->getAbsoluteParentTransform(_t, _s, _r); //Calculate absolute transform
 
     edit_camera._dest_pos = _t; //Sending position
-    if(project.perspective == 3){ //if we're in 3D
+    if(project.perspective == PERSP_3D){ //if we're in 3D
         ZSVECTOR3 camFront = edit_camera.getCameraFrontVec();
         edit_camera._dest_pos = edit_camera._dest_pos - camFront * 6; //move back a little
     }
@@ -918,7 +924,6 @@ void EditWindow::processResourceFile(QFileInfo fileInfo){
         _resource->resource_label = resource.resource_label;
         game_data->resources->pushResource(_resource);
 
-        loadResource(&resource); //Perform texture loading to OpenGL
         this->project.resources.push_back(resource);
     }
     if(checkExtension(name, ".zs3m")){
@@ -995,14 +1000,20 @@ void EditWindow::processResourceFile(QFileInfo fileInfo){
         }
     }
     if(checkExtension(name, ".wav")){ //If its an mesh
+        Engine::ZsResource* _resource = new Engine::AudioResource;
+
         Resource resource;
         resource.file_path = fileInfo.absoluteFilePath();
         resource.rel_path = resource.file_path; //Preparing to get relative path
         resource.rel_path.remove(0, project.root_path.size() + 1); //Get relative path by removing length of project root from start
         resource.resource_label = resource.rel_path.toStdString();
         resource.type = RESOURCE_TYPE_AUDIO; //Type of resource is mesh
-        loadResource(&resource); //Perform mesh processing & loading to OpenGL
         this->project.resources.push_back(resource);
+
+        _resource->rel_path = resource.rel_path.toStdString();
+        _resource->blob_path = _resource->rel_path;
+        _resource->resource_label = resource.resource_label;
+        game_data->resources->pushResource(_resource);
     }
     if(checkExtension(name, ".zsmat")){ //If its an mesh
         Resource resource;
