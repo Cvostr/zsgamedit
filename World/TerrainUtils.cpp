@@ -40,9 +40,14 @@ void queryTerrainModifyRequest(HeightmapModifyRequest* req){
 }
 
 void startTerrainThread(){
+    terrain_thread_working = true;
     std::thread loader_loop(terrain_loop);
     loader_loop.detach();
-    terrain_thread_working = true;
+}
+
+void stopTerrainThread(){
+    terrain_thread_working = false;
+    terrain_mdf_requests.clear();
 }
 
 void TerrainData::alloc(int W, int H){

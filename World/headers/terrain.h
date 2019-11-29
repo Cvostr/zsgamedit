@@ -123,9 +123,6 @@ public:
     ~TerrainData();
 };
 
-void startTerrainThread();
-
-
 typedef struct HeightmapModifyRequest{
     TerrainData* terrain;
     TERRAIN_MODIFY_TYPE modify_type;
@@ -142,6 +139,8 @@ typedef struct HeightmapModifyRequest{
 
 }HeightmapModifyRequest;
 
+void startTerrainThread();
+void stopTerrainThread();
 void queryTerrainModifyRequest(HeightmapModifyRequest* req);
 
 #endif // TERRAIN_H

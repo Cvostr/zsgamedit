@@ -698,7 +698,6 @@ void AudioSourceProperty::setAudioFile(std::string relpath){
     this->updateAudioPtr();
 }
 void AudioSourceProperty::audio_start(){
-    //this->source.play();
     if(buffer_ptr->resource_state == STATE_LOADED){
         //Update source buffer
         if(buffer_ptr == nullptr) return;
@@ -1605,7 +1604,7 @@ void TerrainProperty::getPickedVertexId(int posX, int posY, int screenX, int scr
     TransformProperty* transform = this->go_link.updLinkPtr()->getPropertyPtr<TransformProperty>();
     if(mat == nullptr || mat->material_ptr == nullptr) return;
     //Apply material shader
-    mat->material_ptr->group_ptr->render_shader->Use();
+    mat->material_ptr->applyMatToPipeline();
     //Bind terrain buffer and set isPicking to true
     terrainUniformBuffer->bind();
     int dtrue = 1;
@@ -1704,7 +1703,6 @@ void TerrainProperty::copyTo(GameObjectProperty* dest){
 
 NodeProperty::NodeProperty(){
     type = GO_PROPERTY_TYPE_NODE;
-    hasBone = false;
 
     scale = ZSVECTOR3(1.f, 1.f, 1.f);
     translation = ZSVECTOR3(0.f, 0.f, 0.f);

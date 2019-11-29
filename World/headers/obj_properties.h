@@ -239,7 +239,7 @@ public:
     //Caclulated node transform
     ZSMATRIX4x4 abs;
 
-    bool hasBone;
+    //bool hasBone;
 
     void addPropertyInterfaceToInspector(InspectorWin* inspector);
     void onPreRender(RenderPipeline* pipeline);

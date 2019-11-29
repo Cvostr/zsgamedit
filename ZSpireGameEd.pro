@@ -52,8 +52,7 @@ SOURCES += \
     ProjEd/EditorSettings.cpp \
     World/TerrainUtils.cpp \
     World/Physics.cpp \
-    Misc/ThumbnailsMaster.cpp \
-    Render/MatShaderProps.cpp
+    Misc/ThumbnailsMaster.cpp
 
 HEADERS += \
         mainwin.h \

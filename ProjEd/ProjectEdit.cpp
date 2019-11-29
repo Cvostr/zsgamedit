@@ -438,6 +438,8 @@ void EditWindow::onNewMaterial(){
     loadResource(&resource); //Perform mesh processing & loading to OpenGL
     this->project.resources.push_back(resource);
 
+    thumb_master->createMaterialThumbnail(resource.rel_path);
+
     updateFileList(); //Make new file visible
 }
 
@@ -608,6 +610,8 @@ bool EditWindow::onCloseProject(){
         //And delete ResourceManager class
         delete game_data->resources;
         delete game_data;
+        Engine::Loader::stop();
+        stopTerrainThread();
 
         destroyAllManagers();
 
@@ -1016,6 +1020,8 @@ void EditWindow::processResourceFile(QFileInfo fileInfo){
         game_data->resources->pushResource(_resource);
     }
     if(checkExtension(name, ".zsmat")){ //If its an mesh
+        Engine::ZsResource* _resource = new Engine::MaterialResource;
+
         Resource resource;
         resource.file_path = fileInfo.absoluteFilePath();
         resource.rel_path = resource.file_path; //Preparing to get relative path
@@ -1023,6 +1029,12 @@ void EditWindow::processResourceFile(QFileInfo fileInfo){
         resource.resource_label = resource.rel_path.toStdString();
         resource.type = RESOURCE_TYPE_MATERIAL; //Type of resource is mesh
         loadResource(&resource); //Perform mesh processing & loading to OpenGL
+
+        _resource->rel_path = resource.rel_path.toStdString();
+        _resource->blob_path = _resource->rel_path;
+        _resource->resource_label = resource.resource_label;
+        game_data->resources->pushResource(_resource);
+
         this->project.resources.push_back(resource);
     }
     if(checkExtension(name, ".lua") || checkExtension(name, ".zscr")){ //If its an mesh
@@ -1150,11 +1162,7 @@ void EditWindow::loadResource(Resource* resource){
         case RESOURCE_TYPE_FILE:{
             break;
         }
-        case RESOURCE_TYPE_TEXTURE:{ //If resource type is texture
-            resource->class_ptr = static_cast<void*>(Engine::allocTexture()); //Initialize pointer to texture
-            Engine::Texture* texture_ptr = static_cast<Engine::Texture*>(resource->class_ptr); //Aquire casted pointer
-            std::string str = resource->file_path.toStdString();
-            texture_ptr->LoadDDSTextureFromFile(str.c_str()); //Perform texture resource loading
+        case RESOURCE_TYPE_TEXTURE:{
             break;
         }
         case RESOURCE_TYPE_MESH:{
@@ -1164,10 +1172,6 @@ void EditWindow::loadResource(Resource* resource){
             break;
         }
         case RESOURCE_TYPE_AUDIO:{
-            resource->class_ptr = static_cast<void*>(new Engine::SoundBuffer); //Initialize pointer to sound buffer
-            Engine::SoundBuffer* sound_ptr = static_cast<Engine::SoundBuffer*>(resource->class_ptr); //Aquire casted pointer
-            std::string str = resource->file_path.toStdString();
-            sound_ptr->loadFileWAV(str.c_str()); //Load music file
             break;
         }
         case RESOURCE_TYPE_MATERIAL:{

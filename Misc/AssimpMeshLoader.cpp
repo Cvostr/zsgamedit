@@ -210,7 +210,6 @@ void Engine::loadNodeTree(std::string file_path, ZS3M::SceneNode* node){
 void Engine::processNodeForTree(ZS3M::SceneNode* node, aiNode* node_assimp, const aiScene* scene){
     node->node_label = node_assimp->mName.C_Str(); //assigning node name
 
-    node->hasBone = isBoneAvailable(node->node_label, scene);
     //Write node matrix
     Engine::cmat(node_assimp->mTransformation, &node->node_transform);
 

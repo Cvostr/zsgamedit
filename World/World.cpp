@@ -564,10 +564,6 @@ GameObject* World::addMeshNode(ZS3M::SceneNode* node){
     //Set original node transform
     node_prop->transform_mat = node->node_transform;
 
-    if(node->hasBone){
-        node_prop->hasBone = true;
-    }
-
     //Add node to world
     GameObject* node_object = this->addObject(obj);
     //Iterate over all children nodes

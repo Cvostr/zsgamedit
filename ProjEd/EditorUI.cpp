@@ -313,6 +313,8 @@ void FileRenameDialog::onRenameButtonPressed(){
 
     Resource* res = this->win_ptr->project.getResource(rel_path);
     if(res != nullptr){ //if resource found
+        //Store old relative path
+        QString old_rel_path = res->rel_path;
         //No need to do that with mesh resources
         if(res->type == RESOURCE_TYPE_MESH) return;
         QString new_relpath = cur_path + edit_field.text();
@@ -324,6 +326,10 @@ void FileRenameDialog::onRenameButtonPressed(){
             //if we renamed material, update its file path
             Material* mat = static_cast<Material*>(res->class_ptr);
             mat->file_path = res->file_path.toStdString();
+            //Remove thumbnail with old path
+            this->win_ptr->thumb_master->texture_thumbnails.erase(old_rel_path.toStdString());
+            //Store thumbnail of new material name
+            win_ptr->thumb_master->createMaterialThumbnail(res->rel_path);
         }
     }
 }

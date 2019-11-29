@@ -187,7 +187,7 @@ void ThumbnailsMaster::createMaterialThumbnail(QString name){
 
         texture_thumbnails.at(resource_ptr->file_path.toStdString()) = image;
     }else{
-        //texture_thumbnails.insert(std::pair<std::string, QImage*>(resource_ptr->file_path.toStdString(), image));
+        texture_thumbnails.insert(std::pair<std::string, QImage*>(resource_ptr->file_path.toStdString(), image));
     }
 
 }
