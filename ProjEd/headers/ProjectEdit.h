@@ -194,7 +194,6 @@ public:
 
     void lookForResources(QString path); //Recursively walk through game directory and load founded resources
     void processResourceFile(QFileInfo fileInfo);
-    void loadResource(Resource* resource);
     void ImportResource(QString pathToResource);
     bool checkExtension(QString fpath, QString ext);
 

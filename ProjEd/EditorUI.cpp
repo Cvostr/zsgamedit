@@ -11,7 +11,7 @@
 extern EditWindow* _editor_win;
 extern InspectorWin* _inspector_win;
 extern EdActions* _ed_actions_container;
-
+extern ZSGAME_DATA* game_data;
 
 ObjTreeWgt::ObjTreeWgt(QWidget* parent) : QTreeWidget (parent){
     this->world_ptr = nullptr; //Not assigned by default
@@ -312,6 +312,7 @@ void FileRenameDialog::onRenameButtonPressed(){
     rel_path = file_path.remove(0, this->win_ptr->project.root_path.size() + 1);
 
     Resource* res = this->win_ptr->project.getResource(rel_path);
+    Engine::ZsResource* _res = game_data->resources->getMaterialByLabel(rel_path.toStdString());
     if(res != nullptr){ //if resource found
         //Store old relative path
         QString old_rel_path = res->rel_path;
@@ -322,9 +323,13 @@ void FileRenameDialog::onRenameButtonPressed(){
         res->resource_label = res->rel_path.toStdString();
         res->file_path = cur_path + edit_field.text();
 
+        _res->rel_path = res->rel_path.toStdString();
+        _res->blob_path = _res->rel_path;
+        _res->resource_label = res->resource_label;
+
         if(res->type == RESOURCE_TYPE_MATERIAL){
             //if we renamed material, update its file path
-            Material* mat = static_cast<Material*>(res->class_ptr);
+            Material* mat = static_cast<Engine::MaterialResource*>(_res)->material;
             mat->file_path = res->file_path.toStdString();
             //Remove thumbnail with old path
             this->win_ptr->thumb_master->texture_thumbnails.erase(old_rel_path.toStdString());

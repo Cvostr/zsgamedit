@@ -878,7 +878,11 @@ void MaterialProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
     }
 }
 void MaterialProperty::onValueChanged(){
-    Material* newmat_ptr = go_link.world_ptr->getMaterialPtrByName(QString::fromStdString(material_path));
+
+    Engine::MaterialResource* newmat_ptr_res = game_data->resources->getMaterialByLabel(this->material_path);
+    Material* newmat_ptr = nullptr;
+    if(newmat_ptr_res)
+        newmat_ptr = newmat_ptr_res->material;
 
     //Check, if material file has changed
     if(newmat_ptr != this->material_ptr){
@@ -917,7 +921,7 @@ void MaterialProperty::onValueChanged(){
             case MATSHPROP_TYPE_TEXTURE:{
                 //Cast pointer
                 TextureMtShPropConf* texture_conf = static_cast<TextureMtShPropConf*>(conf_ptr);
-                //texture_conf->texture = go_link.world_ptr->getTexturePtrByRelPath(QString::fromStdString(texture_conf->path));
+                //Update pointer to texture resource
                 texture_conf->texture = game_data->resources->getTextureByLabel(texture_conf->path);
                 break;
             }

@@ -143,11 +143,14 @@ void ThumbnailsMaster::prepareMaterialThumbnailPipeline(){
 void ThumbnailsMaster::createMaterialThumbnails(){
     prepareMaterialThumbnailPipeline();
     //Iterate over all resources
-    for(unsigned int res_i = 0; res_i < project_struct_ptr->resources.size(); res_i ++){
-        Resource* resource_ptr = &this->project_struct_ptr->resources[res_i];
-        if(resource_ptr->type != RESOURCE_TYPE_MATERIAL) continue;
+    for(unsigned int res_i = 0; res_i < game_data->resources->getResourcesSize(); res_i ++){
 
-        Material* material_ptr = static_cast<Material*>(resource_ptr->class_ptr);
+        Engine::ZsResource* resource_ptr = game_data->resources->getResourceByIndex(res_i);
+        if(resource_ptr->resource_type != RESOURCE_TYPE_MATERIAL) continue;
+
+        Engine::MaterialResource* m_ptr = static_cast<Engine::MaterialResource*>(resource_ptr);
+
+        Material* material_ptr = m_ptr->material;
         DrawMaterial(material_ptr);
         //Allocate image buffer
         unsigned char* texture_data = new unsigned char[THUMBNAIL_IMG_SIZE * THUMBNAIL_IMG_SIZE * 4];
@@ -156,24 +159,26 @@ void ThumbnailsMaster::createMaterialThumbnails(){
 
         QImage* image = new QImage(texture_data, THUMBNAIL_IMG_SIZE, THUMBNAIL_IMG_SIZE, QImage::Format_RGBA8888);
         //texture_thumbnails.insert(std::pair<std::string, QImage*>(resource_ptr->file_path.toStdString(), image));
-        if(isAvailable(resource_ptr->file_path.toStdString())){
-            QImage* img_old = texture_thumbnails.at(resource_ptr->file_path.toStdString());
+        if(isAvailable(project_ptr->root_path + "/" + resource_ptr->rel_path)){
+            QImage* img_old = texture_thumbnails.at(project_ptr->root_path + "/" + resource_ptr->rel_path);
             delete img_old;
 
-            texture_thumbnails.at(resource_ptr->file_path.toStdString()) = image;
+            texture_thumbnails.at(project_ptr->root_path + "/" + resource_ptr->rel_path) = image;
         }else{
-            texture_thumbnails.insert(std::pair<std::string, QImage*>(resource_ptr->file_path.toStdString(), image));
+            texture_thumbnails.insert(std::pair<std::string, QImage*>(project_ptr->root_path + "/" + resource_ptr->rel_path, image));
         }
     }
 }
 
 void ThumbnailsMaster::createMaterialThumbnail(QString name){
     prepareMaterialThumbnailPipeline();
-    Resource* resource_ptr = this->project_struct_ptr->getResource(name);
 
-    if(resource_ptr == nullptr) return; //maybe its default material
+    Engine::ZsResource* resource_ptr = game_data->resources->getMaterialByLabel(name.toStdString());
+    if(resource_ptr->resource_type != RESOURCE_TYPE_MATERIAL) return;
 
-    Material* material_ptr = static_cast<Material*>(resource_ptr->class_ptr);
+    Engine::MaterialResource* m_ptr = static_cast<Engine::MaterialResource*>(resource_ptr);
+    Material* material_ptr = m_ptr->material;
+
     DrawMaterial(material_ptr);
     //Allocate image buffer
     unsigned char* texture_data = new unsigned char[512 * 512 * 4];
@@ -181,13 +186,13 @@ void ThumbnailsMaster::createMaterialThumbnail(QString name){
     glReadPixels(0, 0, 512, 512, GL_RGBA, GL_UNSIGNED_BYTE, &texture_data[0]);
 
     QImage* image = new QImage(texture_data, 512, 512, QImage::Format_RGBA8888);
-    if(isAvailable(resource_ptr->file_path.toStdString())){
-        QImage* img_old = texture_thumbnails.at(resource_ptr->file_path.toStdString());
+    if(isAvailable(project_ptr->root_path + "/" + resource_ptr->rel_path)){
+        QImage* img_old = texture_thumbnails.at(project_ptr->root_path + "/" + resource_ptr->rel_path);
         delete img_old;
 
-        texture_thumbnails.at(resource_ptr->file_path.toStdString()) = image;
+        texture_thumbnails.at(project_ptr->root_path + "/" + resource_ptr->rel_path) = image;
     }else{
-        texture_thumbnails.insert(std::pair<std::string, QImage*>(resource_ptr->file_path.toStdString(), image));
+        texture_thumbnails.insert(std::pair<std::string, QImage*>(project_ptr->root_path + "/" + resource_ptr->rel_path, image));
     }
 
 }

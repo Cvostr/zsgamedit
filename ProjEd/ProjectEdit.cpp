@@ -214,7 +214,6 @@ void EditWindow::init(){
     game_data = new ZSGAME_DATA;
     game_data->resources = new Engine::ResourceManager;
 
-
     std::string absolute = project.root_path + "/";
     Engine::Loader::setBlobRootDirectory(absolute);
     Engine::Loader::start();
@@ -395,7 +394,9 @@ void EditWindow::onSceneSave(){
     if(hasSceneFile == false){ //If new created scene without file
         onSceneSaveAs(); //Show dialog and save
     }else{
+        //unset unsavedchanges flag to avoid showing dialog
         _ed_actions_container->hasChangesUnsaved = false;
+        //perform scene save
         world.saveToFile(this->scene_path);
     }
 }
@@ -435,8 +436,14 @@ void EditWindow::onNewMaterial(){
     resource.rel_path.remove(0, project.root_path.size() + 1); //Get relative path by removing length of project root from start
     resource.resource_label = resource.rel_path.toStdString();
     resource.type = RESOURCE_TYPE_MATERIAL; //Type of resource is mesh
-    loadResource(&resource); //Perform mesh processing & loading to OpenGL
     this->project.resources.push_back(resource);
+
+    Engine::ZsResource* _resource = new Engine::MaterialResource;
+    _resource->size = 0;
+    _resource->rel_path = resource.rel_path.toStdString();
+    _resource->blob_path = _resource->rel_path;
+    _resource->resource_label = resource.resource_label;
+    game_data->resources->pushResource(_resource);
 
     thumb_master->createMaterialThumbnail(resource.rel_path);
 
@@ -1028,8 +1035,8 @@ void EditWindow::processResourceFile(QFileInfo fileInfo){
         resource.rel_path.remove(0, project.root_path.size() + 1); //Get relative path by removing length of project root from start
         resource.resource_label = resource.rel_path.toStdString();
         resource.type = RESOURCE_TYPE_MATERIAL; //Type of resource is mesh
-        loadResource(&resource); //Perform mesh processing & loading to OpenGL
 
+        _resource->size = 0;
         _resource->rel_path = resource.rel_path.toStdString();
         _resource->blob_path = _resource->rel_path;
         _resource->resource_label = resource.resource_label;
@@ -1044,7 +1051,6 @@ void EditWindow::processResourceFile(QFileInfo fileInfo){
         resource.rel_path.remove(0, project.root_path.size() + 1); //Get relative path by removing length of project root from start
         resource.resource_label = resource.rel_path.toStdString();
         resource.type = RESOURCE_TYPE_SCRIPT; //Type of resource is mesh
-        loadResource(&resource); //Perform mesh processing & loading to OpenGL
         this->project.resources.push_back(resource);
     }
 }
@@ -1149,39 +1155,6 @@ void EditWindow::ImportResource(QString pathToResource){
         processResourceFile(QFileInfo(this->current_dir + "/" + _file_name));
     }
     updateFileList();
-}
-
-void EditWindow::loadResource(Resource* resource){
-    switch(resource->type){
-        case RESOURCE_TYPE_SCRIPT : {
-            break;
-        }
-        case RESOURCE_TYPE_NONE:{
-            break;
-        }
-        case RESOURCE_TYPE_FILE:{
-            break;
-        }
-        case RESOURCE_TYPE_TEXTURE:{
-            break;
-        }
-        case RESOURCE_TYPE_MESH:{
-            break;
-        }
-        case RESOURCE_TYPE_ANIMATION:{
-            break;
-        }
-        case RESOURCE_TYPE_AUDIO:{
-            break;
-        }
-        case RESOURCE_TYPE_MATERIAL:{
-            resource->class_ptr = static_cast<void*>(new Material); //Initialize pointer to sound buffer
-            Material* mat_ptr = static_cast<Material*>(resource->class_ptr); //Aquire casted pointer
-            std::string str = resource->file_path.toStdString();
-            mat_ptr->loadFromFile(str); //Load music file
-            break;
-        }
-    }
 }
 
 EditWindow* ZSEditor::openProject(QApplication* app, Project& project){
