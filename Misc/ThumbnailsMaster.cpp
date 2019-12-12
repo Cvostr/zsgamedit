@@ -229,8 +229,8 @@ void ThumbnailsMaster::createMeshesThumbnails(){
         Resource* resource_ptr = &this->project_struct_ptr->resources[res_i];
         if(resource_ptr->type != RESOURCE_TYPE_MESH) continue;
 
-        Engine::Mesh* mesh_ptr = static_cast<Engine::Mesh*>(resource_ptr->class_ptr);
-        DrawMesh(mesh_ptr);
+        //Engine::Mesh* mesh_ptr = static_cast<Engine::Mesh*>(resource_ptr->class_ptr);
+        //DrawMesh(mesh_ptr);
         //Allocate image buffer
         unsigned char* texture_data = new unsigned char[THUMBNAIL_IMG_SIZE * THUMBNAIL_IMG_SIZE * 4];
         //Read image to buffer from GL buffer

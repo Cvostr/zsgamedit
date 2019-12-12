@@ -36,6 +36,7 @@ MainWin::MainWin(QApplication* app, QWidget *parent) :
 
     QObject::connect(ui->projList, SIGNAL(onRightClick(QPoint)), this, SLOT(showCtxMenu(QPoint)));
     QObject::connect(ui->projList, SIGNAL(destroyed()), this, SLOT(onDestroy()));
+    QObject::connect(ui->actionPreferences, SIGNAL(triggered()), this, SLOT(openPreferences()));
 
     loadProjectsConfigurations();
     cr_w = new CreateProjectWindow;
@@ -54,6 +55,16 @@ void MainWin::closeEvent( QCloseEvent *event )
 {
     assert(event);
     working = false;
+}
+
+void MainWin::openPreferences(){
+    QFileInfo f(QString("editor_settings.cfg"));
+#ifdef _WIN32
+        QDesktopServices::openUrl(QUrl::fromLocalFile("file://" + f.absoluteFilePath()));
+#endif
+#ifdef __linux
+        QDesktopServices::openUrl(QUrl::fromLocalFile(f.absoluteFilePath()));
+#endif
 }
 
 MainWin::~MainWin()

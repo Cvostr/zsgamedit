@@ -6,6 +6,7 @@
 #include "../../ProjEd/headers/InspEditAreas.h"
 
 extern Project* project_ptr;
+extern ZSGAME_DATA* game_data;
 
 void GameObject::saveProperties(std::ofstream* stream){
     unsigned int props_num = static_cast<unsigned int>(this->props_num);
@@ -347,8 +348,9 @@ void GameObject::loadProperty(std::ifstream* world_stream){
         for(unsigned int script_w_i = 0; script_w_i < static_cast<unsigned int>(ptr->scr_num); script_w_i ++){
             //Read script relative path
             *world_stream >> ptr->path_names[script_w_i];
-            //Push absolute and relative path to LuaScript object
-            ptr->scripts_attached[script_w_i].fpath = project_ptr->root_path + "/" + ptr->path_names[script_w_i];
+
+            Engine::ScriptResource* res = game_data->resources->getScriptByLabel(ptr->path_names[script_w_i]);
+            ptr->scripts_attached[script_w_i].script_content = res->script_content;
             ptr->scripts_attached[script_w_i].name = ptr->path_names[script_w_i];
         }
         break;

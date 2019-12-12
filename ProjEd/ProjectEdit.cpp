@@ -581,7 +581,7 @@ void EditWindow::onImportResource(){
 #ifdef _WIN32
     dir = "C:\\\n";
 #endif
-    QString filter = tr("GPU compressed texture (.DDS) (*.dds *.DDS);; 3D model (*.fbx *.FBX *.dae *.DAE);; Sound (*.wav *.WAV);;");
+    QString filter = tr("GPU compressed texture (.DDS) (*.dds *.DDS);; 3D model (*.fbx *.FBX *.dae *.DAE);; Sound (*.wav *.WAV);; All files (*.*);;");
 
     QFileDialog dialog;
     QString path = dialog.getOpenFileName(this, tr("Select Resource"), dir, filter);
@@ -953,13 +953,19 @@ void EditWindow::processResourceFile(QFileInfo fileInfo){
 
             this->project.resources.push_back(resource);
 
+
+            Engine::ZsResource* _resource = new Engine::MeshResource;
+            _resource->rel_path = resource.rel_path.toStdString();
+            _resource->blob_path = _resource->rel_path;
+            _resource->resource_label = resource.resource_label;
+            game_data->resources->pushResource(_resource);
         }
 
     }
     if(checkExtension(name, ".zsanim")){
 
-        ZS3M::ImportedAnimationFile iaf;
-        iaf.loadFromFile(absfpath.toStdString());
+        ZS3M::ImportedAnimationFile* iaf = new ZS3M::ImportedAnimationFile;
+        iaf->loadFromFile(absfpath.toStdString());
 
         Resource resource;
         resource.file_path = absfpath;
@@ -967,49 +973,20 @@ void EditWindow::processResourceFile(QFileInfo fileInfo){
         resource.rel_path.remove(0, project.root_path.size() + 1); //Get relative path by removing length of project root from start
         resource.type = RESOURCE_TYPE_ANIMATION; //Type of resource is mesh
 
-        resource.class_ptr = iaf.anim_ptr;
-        resource.resource_label = iaf.anim_ptr->name;
+        resource.resource_label = iaf->anim_ptr->name;
 
         this->project.resources.push_back(resource);
 
+
+        Engine::ZsResource* _resource = new Engine::AnimationResource;
+        _resource->rel_path = resource.rel_path.toStdString();
+        _resource->blob_path = _resource->rel_path;
+        _resource->resource_label = resource.resource_label;
+        game_data->resources->pushResource(_resource);
+
+        delete iaf;
     }
-    if(checkExtension(name, ".fbx") || checkExtension(name, ".dae")){ //If its an mesh
-        //getting meshes amount
-        unsigned int num_meshes = 0;
-        unsigned int num_anims = 0;
 
-        Engine::getSizes(absfpath.toStdString(), &num_meshes, &num_anims);
-        //iterate to read all the meshes
-        for(unsigned int mesh_i = 0; mesh_i < num_meshes; mesh_i ++){
-            Resource resource;
-            resource.file_path = absfpath;
-            resource.rel_path = resource.file_path; //Preparing to get relative path
-            resource.rel_path.remove(0, project.root_path.size() + 1); //Get relative path by removing length of project root from start
-            resource.type = RESOURCE_TYPE_MESH; //Type of resource is mesh
-
-            resource.class_ptr = static_cast<void*>(Engine::allocateMesh());
-
-            this->project.resources.push_back(resource);
-            Engine::loadMesh(fileInfo.absoluteFilePath().toStdString(), static_cast<Engine::Mesh*>(this->project.resources.back().class_ptr), static_cast<int>(mesh_i));
-            this->project.resources.back().resource_label = static_cast<Engine::Mesh*>(this->project.resources.back().class_ptr)->mesh_label;
-        }
-        for(unsigned int anim_i = 0; anim_i < num_anims; anim_i ++){
-            Resource resource;
-            resource.file_path = fileInfo.absoluteFilePath();
-            resource.rel_path = resource.file_path; //Preparing to get relative path
-            resource.rel_path.remove(0, project.root_path.size() + 1); //Get relative path by removing length of project root from start
-            resource.type = RESOURCE_TYPE_ANIMATION; //Type of resource is mesh
-
-            resource.class_ptr = static_cast<void*>(new Engine::Animation);
-
-            this->project.resources.push_back(resource);
-            Engine::loadAnimation(fileInfo.absoluteFilePath().toStdString(), static_cast<Engine::Animation*>(this->project.resources.back().class_ptr), static_cast<int>(anim_i));
-            Engine::Animation* anim_ptr = static_cast<Engine::Animation*>(this->project.resources.back().class_ptr);
-            this->project.resources.back().resource_label = anim_ptr->name;
-
-
-        }
-    }
     if(checkExtension(name, ".wav")){ //If its an mesh
         Engine::ZsResource* _resource = new Engine::AudioResource;
 
@@ -1045,12 +1022,21 @@ void EditWindow::processResourceFile(QFileInfo fileInfo){
         this->project.resources.push_back(resource);
     }
     if(checkExtension(name, ".lua") || checkExtension(name, ".zscr")){ //If its an mesh
+        Engine::ZsResource* _resource = new Engine::ScriptResource;
+
         Resource resource;
         resource.file_path = fileInfo.absoluteFilePath();
         resource.rel_path = resource.file_path; //Preparing to get relative path
         resource.rel_path.remove(0, project.root_path.size() + 1); //Get relative path by removing length of project root from start
         resource.resource_label = resource.rel_path.toStdString();
         resource.type = RESOURCE_TYPE_SCRIPT; //Type of resource is mesh
+
+        _resource->size = 0;
+        _resource->rel_path = resource.rel_path.toStdString();
+        _resource->blob_path = _resource->rel_path;
+        _resource->resource_label = resource.resource_label;
+        game_data->resources->pushResource(_resource);
+
         this->project.resources.push_back(resource);
     }
 }
@@ -1083,7 +1069,7 @@ void EditWindow::ImportResource(QString pathToResource){
 
         Engine::getSizes(pathToResource.toStdString(), &num_meshes, &num_anims, &num_textures, &num_materials);
         //Allocate array for meshes
-        Engine::Mesh* meshes = Engine::allocateMesh(num_meshes);
+        Engine::_ogl_Mesh* meshes = static_cast<Engine::_ogl_Mesh*>(Engine::allocateMesh(num_meshes));
         Engine::Animation* anims = new Engine::Animation[num_anims];
 
         ZS3M::SceneNode rootNode;
@@ -1099,29 +1085,35 @@ void EditWindow::ImportResource(QString pathToResource){
             ZS3M::AnimationFileExport ex(&anims[anim_i]);
             QString newanim_path = this->current_dir + "/" + QString::fromStdString(anims[anim_i].name + ".zsanim");
             ex.write(newanim_path.toStdString());
+            //Register new resource file
+            processResourceFile(QFileInfo( newanim_path));
         }
+        //if FBX has at least one mesh inside
+        if(num_meshes > 0){
+            Engine::loadNodeTree(pathToResource.toStdString(), &rootNode);
+            exporter.setRootNode(&rootNode);
 
-        Engine::loadNodeTree(pathToResource.toStdString(), &rootNode);
-        exporter.setRootNode(&rootNode);
+            QString _file_name;
+            int step = 1;
+            while(pathToResource[pathToResource.length() - step] != "/"){
+                _file_name.push_front(pathToResource[pathToResource.length() - step]);
+                step += 1;
+            }
+            _file_name = this->current_dir + "/" + _file_name;
 
-        QString _file_name;
-        int step = 1;
-        while(pathToResource[pathToResource.length() - step] != "/"){
-            _file_name.push_front(pathToResource[pathToResource.length() - step]);
-            step += 1;
-        }
-        _file_name = this->current_dir + "/" + _file_name;
-
-        QString new_path;
-        if(checkExtension(_file_name, ".fbx"))
-            new_path = _file_name.replace(".fbx", ".zs3m");
-        if(checkExtension(_file_name, ".dae"))
-            new_path = _file_name.replace(".dae", ".zs3m");
-        //Write 3D model scene
-        exporter.write(new_path.toStdString());
-        //Free all meshes
-        for(unsigned int mesh_i = 0; mesh_i < num_meshes; mesh_i ++){
-            meshes[mesh_i].Destroy();
+            QString new_path;
+            if(checkExtension(_file_name, ".fbx"))
+                new_path = _file_name.replace(".fbx", ".zs3m");
+            if(checkExtension(_file_name, ".dae"))
+                new_path = _file_name.replace(".dae", ".zs3m");
+            //Write 3D model scene
+            exporter.write(new_path.toStdString());
+            //Free all meshes
+            for(unsigned int mesh_i = 0; mesh_i < num_meshes; mesh_i ++){
+                meshes[mesh_i].Destroy();
+            }
+            //Register new resource file
+            processResourceFile(QFileInfo( new_path));
         }
     }
 

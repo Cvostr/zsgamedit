@@ -19,7 +19,7 @@ private:
     lua_State* L;
 public:
     bool created;
-    std::string fpath; //path to file
+    std::string script_content;
     std::string name;
 
     void _InitScript();

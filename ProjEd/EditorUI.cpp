@@ -118,14 +118,11 @@ ObjectCtxMenu::ObjectCtxMenu(EditWindow* win, QWidget* parent ) : QObject(parent
     action_scale = new QAction("Scale", win);
     action_rotate = new QAction("Rotate", win);
 
-    actionCopy = new QAction("Copy", win);
-    actionPaste = new QAction("Paste", win);
 
     store_to_prefab = new QAction("Store to Prefab", win);
 
     object_info = new QAction("Info", win);
     //Adding actions to menu container
-    this->menu->addAction(actionCopy);
     this->menu->addAction(action_dub);
     this->menu->addAction(action_delete);
 
@@ -135,7 +132,6 @@ ObjectCtxMenu::ObjectCtxMenu(EditWindow* win, QWidget* parent ) : QObject(parent
     this->menu->addAction(store_to_prefab);
     this->menu->addAction(object_info);
     //Connect actions to slots
-    QObject::connect(this->actionCopy, SIGNAL(triggered(bool)), this, SLOT(onObjectCopy()));
     QObject::connect(this->action_delete, SIGNAL(triggered(bool)), this, SLOT(onDeleteClicked()));
     QObject::connect(this->action_dub, SIGNAL(triggered(bool)), this, SLOT(onDublicateClicked()));
 

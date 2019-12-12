@@ -429,9 +429,9 @@ void GameObject::Draw(RenderPipeline* pipeline){
             this->onRender(pipeline);
             if(hasMesh()){
                 //Iterate over all bones
-                for(unsigned int bone_i = 0; bone_i < mesh_prop->mesh_ptr->bones.size(); bone_i ++){
+                for(unsigned int bone_i = 0; bone_i < mesh_prop->mesh_ptr->mesh_ptr->bones.size(); bone_i ++){
                     //Obtain bone by pointer
-                    Engine::Bone* b = &mesh_prop->mesh_ptr->bones[bone_i];
+                    Engine::Bone* b = &mesh_prop->mesh_ptr->mesh_ptr->bones[bone_i];
 
                     GameObject* node = nullptr;
                     GameObject* RootNode = mesh_prop->skinning_root_node;
@@ -500,7 +500,7 @@ void GameObject::Draw(RenderPipeline* pipeline){
                 color = ZSRGBCOLOR(255.0f, 255.0f, 0.0f);
             //draw wireframe mesh for picked object
             if(!editwin_ptr->isWorldCamera && hasMesh()) //avoid drawing gizmos during playtime
-                pipeline->getGizmosRenderer()->drawPickedMeshWireframe(mesh_prop->mesh_ptr, transform_ptr->transform_mat, color);
+                pipeline->getGizmosRenderer()->drawPickedMeshWireframe(mesh_prop->mesh_ptr->mesh_ptr, transform_ptr->transform_mat, color);
         }
     }
 }

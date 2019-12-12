@@ -90,7 +90,7 @@ public:
 class MeshProperty : public GameObjectProperty{
 public:
     std::string resource_relpath; //Relative path to resource
-    Engine::Mesh* mesh_ptr; //Pointer to mesh
+    Engine::MeshResource* mesh_ptr; //Pointer to mesh
     bool castShadows;
 
     GameObject* skinning_root_node;
@@ -250,13 +250,11 @@ public:
 
 class AnimationProperty : public GameObjectProperty {
 private:
-
-
 public:
     bool Playing;
     double start_sec;
 
-    Engine::Animation* anim_prop_ptr;
+    Engine::AnimationResource* anim_prop_ptr;
     std::string anim_label;
 
     void addPropertyInterfaceToInspector(InspectorWin* inspector);

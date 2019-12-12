@@ -263,9 +263,6 @@ private:
     QAction* action_scale;
     QAction* action_rotate;
 
-    QAction* actionCopy;
-    QAction* actionPaste;
-
     QAction* store_to_prefab;
 
     QAction* object_info; //Show dialog with detailed object information

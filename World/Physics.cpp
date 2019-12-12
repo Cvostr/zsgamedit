@@ -73,7 +73,8 @@ void PhysicalProperty::init(){
 
 void PhysicalProperty::updateCollisionShape(){
     TransformProperty* transform = this->go_link.updLinkPtr()->getPropertyPtr<TransformProperty>();
-
+    MeshProperty* mesh = this->go_link.updLinkPtr()->getPropertyPtr<MeshProperty>();
+    Engine::Mesh* m = mesh->mesh_ptr->mesh_ptr;
     switch(coll_type){
         case COLLIDER_TYPE_NONE: {
             break;
@@ -95,20 +96,19 @@ void PhysicalProperty::updateCollisionShape(){
             break;
         }
         case COLLIDER_TYPE_CONVEX_HULL:{
-            MeshProperty* mesh = this->go_link.updLinkPtr()->getPropertyPtr<MeshProperty>();
-            shape = new btConvexHullShape(mesh->mesh_ptr->vertices_coord, mesh->mesh_ptr->vertices_num, sizeof (float) * 3);
+
+            shape = new btConvexHullShape(m->vertices_coord, m->vertices_num, sizeof (float) * 3);
             break;
         }
         case COLLIDER_TYPE_MESH:{
-            MeshProperty* mesh = this->go_link.updLinkPtr()->getPropertyPtr<MeshProperty>();
 
-            float* vertices = mesh->mesh_ptr->vertices_coord;
-            int* indices = reinterpret_cast<int*>(mesh->mesh_ptr->indices_arr);
+            float* vertices = m->vertices_coord;
+            int* indices = reinterpret_cast<int*>(m->indices_arr);
 
-            btTriangleIndexVertexArray* va = new btTriangleIndexVertexArray(mesh->mesh_ptr->indices_num / 3,
+            btTriangleIndexVertexArray* va = new btTriangleIndexVertexArray(m->indices_num / 3,
                                                                             indices,
                                                                             3 * sizeof (int),
-                                                                            mesh->mesh_ptr->vertices_num,
+                                                                            m->vertices_num,
                                                                             reinterpret_cast<btScalar*>(vertices),
                                                                             sizeof (ZSVECTOR3));
             shape = new btBvhTriangleMeshShape(va, false);

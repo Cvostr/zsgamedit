@@ -12,6 +12,8 @@
 
 extern EditWindow* _editor_win;
 extern Project* project_ptr;
+//Hack to support resources
+extern ZSGAME_DATA* game_data;
 
 AreaPropertyTitle::AreaPropertyTitle(){
     this->layout.addWidget(&this->line);
@@ -521,8 +523,8 @@ void ResourcePickDialog::onNeedToShow(){
     if(area->resource_type < RESOURCE_TYPE_FILE){ // if it is an resource
         //Iterate over all resources
         for(unsigned int res_i = 0; res_i < resources_num; res_i ++){
-            Resource* resource_ptr = &project_ptr->resources[res_i];
-            if(resource_ptr->type == area->resource_type){ //if type is the same
+            Engine::ZsResource* resource_ptr = game_data->resources->getResourceByIndex(res_i);
+            if(resource_ptr->resource_type == area->resource_type){ //if type is the same
                 QListWidgetItem* item = new QListWidgetItem(QString::fromStdString(resource_ptr->resource_label), this->list); //add resource to list
                 QImage* img = nullptr;
                 std::string fpath;

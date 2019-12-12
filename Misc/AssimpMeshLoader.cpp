@@ -39,7 +39,8 @@ bool Engine::getSizes(std::string file_path, unsigned int* meshes, unsigned int*
 
 
 void Engine::processMesh(aiMesh* mesh, Engine::Mesh* mesh_ptr) {
-    mesh_ptr->mesh_label = std::string(mesh->mName.C_Str());
+    const char* mnam = mesh->mName.C_Str();
+    mesh_ptr->mesh_label = std::string(mnam);
 
     unsigned int vertices = mesh->mNumVertices;
     unsigned int faces = mesh->mNumFaces;

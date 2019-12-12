@@ -459,7 +459,7 @@ void MeshProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
 
 
     if(mesh_ptr){
-        if(mesh_ptr->hasBones()){
+        if(mesh_ptr->mesh_ptr->hasBones()){
             GameobjectPickArea* rtnode = new GameobjectPickArea;
             rtnode->gameobject_ptr_ptr = &this->skinning_root_node;
             rtnode->setLabel("Root Node");
@@ -470,7 +470,7 @@ void MeshProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
 void MeshProperty::updateMeshPtr(){
     if(resource_relpath.length() < 1) return;
 
-    if(resource_relpath.compare("@plane") == 0){
+/*    if(resource_relpath.compare("@plane") == 0){
         this->mesh_ptr = Engine::getPlaneMesh2D();
     }else if(resource_relpath.compare("@isotile") == 0){
         this->mesh_ptr = Engine::getIsoTileMesh2D();
@@ -480,9 +480,10 @@ void MeshProperty::updateMeshPtr(){
         this->mesh_ptr = Engine::getSphereMesh();
     }
     else //If it isn't built in mesh
-    {
-       this->mesh_ptr = world_ptr->getMeshPtrByRelPath(QString::fromStdString(resource_relpath));
-    }
+    {*/
+       //this->mesh_ptr = world_ptr->getMeshPtrByRelPath(QString::fromStdString(resource_relpath));
+    this->mesh_ptr = game_data->resources->getMeshByLabel(resource_relpath);
+    //}
 }
 
 void MeshProperty::onValueChanged(){
@@ -1204,8 +1205,9 @@ void ScriptGroupProperty::onValueChanged(){
         //Iterate over all scripts and use absolute path
     }
     for(unsigned int script_i = 0; script_i < static_cast<unsigned int>(scr_num); script_i ++){
-        //Set absolute path to script object
-        scripts_attached[script_i].fpath = project_ptr->root_path + "/" + path_names[script_i];
+        Engine::ScriptResource* res = game_data->resources->getScriptByLabel(path_names[script_i]);
+        scripts_attached[script_i].script_content = res->script_content;
+
         scripts_attached[script_i].name = path_names[script_i];
     }
 }
@@ -1750,7 +1752,9 @@ AnimationProperty::AnimationProperty(){
 }
 
 void onPlay(){
+    //Call play() on AnimationProperty
     current_anim->play();
+    //Refresh UI
     _inspector_win->updateRequired = true;
 }
 
@@ -1789,6 +1793,9 @@ void AnimationProperty::addPropertyInterfaceToInspector(InspectorWin* inspector)
 void AnimationProperty::play(){
     //if user specified animation, then play it!
     if(current_anim->anim_prop_ptr != nullptr){
+        //Send animation to multithreaded loading, if need
+        current_anim->anim_prop_ptr->load();
+
         current_anim->start_sec = (static_cast<double>(SDL_GetTicks()) / 1000);
         current_anim->Playing = true;
     }
@@ -1800,14 +1807,23 @@ void AnimationProperty::stop(){
 void AnimationProperty::onPreRender(RenderPipeline* pipeline){
     GameObject* obj = go_link.updLinkPtr();
 
-    if(this->anim_prop_ptr != nullptr && Playing){
+    Engine::Animation* anim_prop_ptr = nullptr;
+    //Try to get loading result
+    if(this->anim_prop_ptr != nullptr && Playing && this->anim_prop_ptr->resource_state == STATE_LOADING_PROCESS)
+        current_anim->anim_prop_ptr->load();
+
+    if(this->anim_prop_ptr != nullptr && Playing && this->anim_prop_ptr->resource_state == STATE_LOADED){
+        if(this->anim_prop_ptr != nullptr)
+                anim_prop_ptr = this->anim_prop_ptr->animation_ptr;
+
         //Calcualte current Time
         double curTime = (static_cast<double>(SDL_GetTicks()) / 1000) - this->start_sec;
         //Time in animation ticks
         double Ticks = anim_prop_ptr->TPS * curTime;
+        //Calculate current animation time
         double animTime = fmod(Ticks, anim_prop_ptr->duration);
 
-        for(unsigned int channels_i = 0; channels_i < this->anim_prop_ptr->NumChannels; channels_i ++){
+        for(unsigned int channels_i = 0; channels_i < anim_prop_ptr->NumChannels; channels_i ++){
             Engine::AnimationChannel* ch = &anim_prop_ptr->channels[channels_i];
             GameObject* node = obj->getChildObjectWithNodeLabel(ch->bone_name);
             NodeProperty* prop = node->getPropertyPtr<NodeProperty>();
@@ -1829,8 +1845,8 @@ void AnimationProperty::updateNodeTransform(GameObject* obj, ZSMATRIX4x4 parent)
     //Assign base node transform
     prop->abs = prop->transform_mat;
 
-    if(this->anim_prop_ptr != nullptr && Playing){
-        Engine::AnimationChannel* cha = this->anim_prop_ptr->getChannelByNodeName(prop->node_label);
+    if(this->anim_prop_ptr != nullptr && Playing && this->anim_prop_ptr->resource_state == STATE_LOADED){
+        Engine::AnimationChannel* cha = this->anim_prop_ptr->animation_ptr->getChannelByNodeName(prop->node_label);
         if(cha){
             ZSMATRIX4x4 transl = transpose(getTranslationMat(prop->translation));
             ZSMATRIX4x4 _sca = transpose(getScaleMat(prop->scale));
@@ -1869,5 +1885,6 @@ void AnimationProperty::setAnimation(std::string anim){
 }
 
 void AnimationProperty::updateAnimationPtr(){
-    this->anim_prop_ptr = go_link.world_ptr->getAnimationPtrByRelPath(QString::fromStdString(this->anim_label));
+    anim_prop_ptr = game_data->resources->getAnimationByLabel(this->anim_label);
+    //this->anim_prop_ptr = go_link.world_ptr->getAnimationPtrByRelPath(QString::fromStdString(this->anim_label));
 }

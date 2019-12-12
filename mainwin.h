@@ -79,6 +79,7 @@ public slots:
     void onShowCreateNewProjectWindow();
     void onSelectProjectToOpen();
 
+    void openPreferences();
     void showCtxMenu(QPoint point);
 
     void onDestroy();
@@ -96,6 +97,8 @@ public:
     void addProjectToVector(ProjectConf conf);
 
     void updateListWidgetContent();
+
+
 
     void resizeEvent(QResizeEvent* event);
     virtual void closeEvent ( QCloseEvent * event );
