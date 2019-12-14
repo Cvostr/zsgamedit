@@ -156,9 +156,8 @@ void ThumbnailsMaster::createMaterialThumbnails(){
         unsigned char* texture_data = new unsigned char[THUMBNAIL_IMG_SIZE * THUMBNAIL_IMG_SIZE * 4];
         //Read image to buffer from GL buffer
         glReadPixels(0, 0, THUMBNAIL_IMG_SIZE, THUMBNAIL_IMG_SIZE, GL_RGBA, GL_UNSIGNED_BYTE, &texture_data[0]);
-
+        //Create QT image
         QImage* image = new QImage(texture_data, THUMBNAIL_IMG_SIZE, THUMBNAIL_IMG_SIZE, QImage::Format_RGBA8888);
-        //texture_thumbnails.insert(std::pair<std::string, QImage*>(resource_ptr->file_path.toStdString(), image));
         if(isAvailable(project_ptr->root_path + "/" + resource_ptr->rel_path)){
             QImage* img_old = texture_thumbnails.at(project_ptr->root_path + "/" + resource_ptr->rel_path);
             delete img_old;
@@ -170,10 +169,10 @@ void ThumbnailsMaster::createMaterialThumbnails(){
     }
 }
 
-void ThumbnailsMaster::createMaterialThumbnail(QString name){
+void ThumbnailsMaster::createMaterialThumbnail(std::string name){
     prepareMaterialThumbnailPipeline();
 
-    Engine::ZsResource* resource_ptr = game_data->resources->getMaterialByLabel(name.toStdString());
+    Engine::ZsResource* resource_ptr = game_data->resources->getMaterialByLabel(name);
     if(resource_ptr->resource_type != RESOURCE_TYPE_MATERIAL) return;
 
     Engine::MaterialResource* m_ptr = static_cast<Engine::MaterialResource*>(resource_ptr);
@@ -225,12 +224,14 @@ void ThumbnailsMaster::createMeshesThumbnails(){
     mesh_shader->Use();
 
     //Iterate over all resources
-    for(unsigned int res_i = 0; res_i < project_struct_ptr->resources.size(); res_i ++){
-        Resource* resource_ptr = &this->project_struct_ptr->resources[res_i];
-        if(resource_ptr->type != RESOURCE_TYPE_MESH) continue;
+    for(unsigned int res_i = 0; res_i < game_data->resources->getResourcesSize(); res_i ++){
+        Engine::ZsResource* resource_ptr = game_data->resources->getResourceByIndex(res_i);
+        if(resource_ptr->resource_type != RESOURCE_TYPE_MESH) return;
 
-        //Engine::Mesh* mesh_ptr = static_cast<Engine::Mesh*>(resource_ptr->class_ptr);
-        //DrawMesh(mesh_ptr);
+        Engine::MeshResource* m_ptr = static_cast<Engine::MeshResource*>(resource_ptr);
+        Engine::Mesh* mesh_ptr = m_ptr->mesh_ptr;
+
+        DrawMesh(mesh_ptr);
         //Allocate image buffer
         unsigned char* texture_data = new unsigned char[THUMBNAIL_IMG_SIZE * THUMBNAIL_IMG_SIZE * 4];
         //Read image to buffer from GL buffer

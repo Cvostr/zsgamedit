@@ -1886,5 +1886,4 @@ void AnimationProperty::setAnimation(std::string anim){
 
 void AnimationProperty::updateAnimationPtr(){
     anim_prop_ptr = game_data->resources->getAnimationByLabel(this->anim_label);
-    //this->anim_prop_ptr = go_link.world_ptr->getAnimationPtrByRelPath(QString::fromStdString(this->anim_label));
 }

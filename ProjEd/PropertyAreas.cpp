@@ -507,7 +507,7 @@ void ResourcePickDialog::onNeedToShow(){
     this->extension_mask = area->extension_mask; //send extension mask
     this->list->clear();
     //Receiving pointer to project
-    unsigned int resources_num = static_cast<unsigned int>(project_ptr->resources.size());
+    unsigned int resources_num = game_data->resources->getResourcesSize();
 
     if(area->isShowNoneItem){
         new QListWidgetItem("@none", this->list);

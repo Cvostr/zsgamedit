@@ -188,7 +188,7 @@ void GameObject::saveProperties(std::ofstream* stream){
             ptr->getTerrainData()->saveToFile(fpath.c_str());
             //Write textures relative pathes
             for(int texture_i = 0; texture_i < ptr->textures_size; texture_i ++){
-                HeightmapTexturePair* texture_pair = &ptr->textures[texture_i];
+                HeightmapTexturePair* texture_pair = &ptr->textures[static_cast<unsigned int>(texture_i)];
                 *stream << texture_pair->diffuse_relpath << " " << texture_pair->normal_relpath << "\n"; //Write material relpath
             }
 

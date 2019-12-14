@@ -429,23 +429,20 @@ void EditWindow::onNewScript(){
 void EditWindow::onNewMaterial(){
     std::string matContent = "ZSP_MATERIAL\nGROUP @default\n";
     QString picked_name = this->createNewTextFile(current_dir, "Material", ".zsmat", matContent);
-    //Rgister new material in list
-    Resource resource;
-    resource.file_path = picked_name;
-    resource.rel_path = picked_name; //Preparing to get relative path
-    resource.rel_path.remove(0, project.root_path.size() + 1); //Get relative path by removing length of project root from start
-    resource.resource_label = resource.rel_path.toStdString();
-    resource.type = RESOURCE_TYPE_MATERIAL; //Type of resource is mesh
-    this->project.resources.push_back(resource);
+
+    //Register new material in list
+    //First, get relative path to new material
+    QString rel_path = picked_name; //Preparing to get relative path
+    rel_path = rel_path.remove(0, project.root_path.size() + 1); //Get relative path by removing length of project root from start
 
     Engine::ZsResource* _resource = new Engine::MaterialResource;
     _resource->size = 0;
-    _resource->rel_path = resource.rel_path.toStdString();
+    _resource->rel_path = rel_path.toStdString();
     _resource->blob_path = _resource->rel_path;
-    _resource->resource_label = resource.resource_label;
+    _resource->resource_label = _resource->rel_path;
     game_data->resources->pushResource(_resource);
 
-    thumb_master->createMaterialThumbnail(resource.rel_path);
+    thumb_master->createMaterialThumbnail(_resource->rel_path);
 
     updateFileList(); //Make new file visible
 }
@@ -922,42 +919,26 @@ void EditWindow::processResourceFile(QFileInfo fileInfo){
     if(checkExtension(name, ".dds")){ //If its an texture
         Engine::ZsResource* _resource = new Engine::TextureResource;
 
+        QString rel_path = absfpath;
+        rel_path.remove(0, static_cast<int>(project.root_path.size()) + 1); //Get relative path by removing length of project root from start
 
-        Resource resource;
-        resource.file_path = absfpath; //Writing full path
-        resource.rel_path = resource.file_path; //Preparing to get relative path
-        resource.rel_path.remove(0, project.root_path.size() + 1); //Get relative path by removing length of project root from start
-        resource.resource_label = resource.rel_path.toStdString();
-        resource.type = RESOURCE_TYPE_TEXTURE; //Type is texture
-
-        _resource->rel_path = resource.rel_path.toStdString();
+        _resource->rel_path = rel_path.toStdString();
         _resource->blob_path = _resource->rel_path;
-        _resource->resource_label = resource.resource_label;
+        _resource->resource_label = _resource->rel_path;
         game_data->resources->pushResource(_resource);
-
-        this->project.resources.push_back(resource);
     }
     if(checkExtension(name, ".zs3m")){
         ZS3M::ImportedSceneFile isf;
         isf.loadFromFile(absfpath.toStdString());
 
         for(unsigned int mesh_i = 0; mesh_i < isf.meshes_toWrite.size(); mesh_i ++){
-            Resource resource;
-            resource.file_path = absfpath;
-            resource.rel_path = resource.file_path; //Preparing to get relative path
-            resource.rel_path.remove(0, project.root_path.size() + 1); //Get relative path by removing length of project root from start
-            resource.type = RESOURCE_TYPE_MESH; //Type of resource is mesh
-
-            resource.class_ptr = isf.meshes_toWrite[mesh_i];
-            resource.resource_label = isf.meshes_toWrite[mesh_i]->mesh_label;
-
-            this->project.resources.push_back(resource);
-
+            QString rel_path = absfpath;
+            rel_path.remove(0, static_cast<int>(project.root_path.size()) + 1); //Get relative path by removing length of project root from start
 
             Engine::ZsResource* _resource = new Engine::MeshResource;
-            _resource->rel_path = resource.rel_path.toStdString();
+            _resource->rel_path = rel_path.toStdString();
             _resource->blob_path = _resource->rel_path;
-            _resource->resource_label = resource.resource_label;
+            _resource->resource_label = isf.meshes_toWrite[mesh_i]->mesh_label;
             game_data->resources->pushResource(_resource);
         }
 
@@ -967,21 +948,13 @@ void EditWindow::processResourceFile(QFileInfo fileInfo){
         ZS3M::ImportedAnimationFile* iaf = new ZS3M::ImportedAnimationFile;
         iaf->loadFromFile(absfpath.toStdString());
 
-        Resource resource;
-        resource.file_path = absfpath;
-        resource.rel_path = resource.file_path; //Preparing to get relative path
-        resource.rel_path.remove(0, project.root_path.size() + 1); //Get relative path by removing length of project root from start
-        resource.type = RESOURCE_TYPE_ANIMATION; //Type of resource is mesh
-
-        resource.resource_label = iaf->anim_ptr->name;
-
-        this->project.resources.push_back(resource);
-
+        QString rel_path = absfpath;
+        rel_path.remove(0, static_cast<int>(project.root_path.size()) + 1); //Get relative path by removing length of project root from start
 
         Engine::ZsResource* _resource = new Engine::AnimationResource;
-        _resource->rel_path = resource.rel_path.toStdString();
+        _resource->rel_path = rel_path.toStdString();
         _resource->blob_path = _resource->rel_path;
-        _resource->resource_label = resource.resource_label;
+        _resource->resource_label = iaf->anim_ptr->name;
         game_data->resources->pushResource(_resource);
 
         delete iaf;
@@ -990,54 +963,39 @@ void EditWindow::processResourceFile(QFileInfo fileInfo){
     if(checkExtension(name, ".wav")){ //If its an mesh
         Engine::ZsResource* _resource = new Engine::AudioResource;
 
-        Resource resource;
-        resource.file_path = fileInfo.absoluteFilePath();
-        resource.rel_path = resource.file_path; //Preparing to get relative path
-        resource.rel_path.remove(0, project.root_path.size() + 1); //Get relative path by removing length of project root from start
-        resource.resource_label = resource.rel_path.toStdString();
-        resource.type = RESOURCE_TYPE_AUDIO; //Type of resource is mesh
-        this->project.resources.push_back(resource);
+        QString rel_path = absfpath;
+        rel_path.remove(0, static_cast<int>(project.root_path.size()) + 1); //Get relative path by removing length of project root from start
 
-        _resource->rel_path = resource.rel_path.toStdString();
+        _resource->rel_path = rel_path.toStdString();
         _resource->blob_path = _resource->rel_path;
-        _resource->resource_label = resource.resource_label;
+        _resource->resource_label = _resource->rel_path;
         game_data->resources->pushResource(_resource);
     }
     if(checkExtension(name, ".zsmat")){ //If its an mesh
         Engine::ZsResource* _resource = new Engine::MaterialResource;
 
-        Resource resource;
-        resource.file_path = fileInfo.absoluteFilePath();
-        resource.rel_path = resource.file_path; //Preparing to get relative path
-        resource.rel_path.remove(0, project.root_path.size() + 1); //Get relative path by removing length of project root from start
-        resource.resource_label = resource.rel_path.toStdString();
-        resource.type = RESOURCE_TYPE_MATERIAL; //Type of resource is mesh
+        QString rel_path = absfpath;
+        rel_path.remove(0, static_cast<int>(project.root_path.size()) + 1); //Get relative path by removing length of project root from start
 
         _resource->size = 0;
-        _resource->rel_path = resource.rel_path.toStdString();
+        _resource->rel_path = rel_path.toStdString();
         _resource->blob_path = _resource->rel_path;
-        _resource->resource_label = resource.resource_label;
+        _resource->resource_label = _resource->rel_path;
         game_data->resources->pushResource(_resource);
 
-        this->project.resources.push_back(resource);
     }
     if(checkExtension(name, ".lua") || checkExtension(name, ".zscr")){ //If its an mesh
         Engine::ZsResource* _resource = new Engine::ScriptResource;
 
-        Resource resource;
-        resource.file_path = fileInfo.absoluteFilePath();
-        resource.rel_path = resource.file_path; //Preparing to get relative path
-        resource.rel_path.remove(0, project.root_path.size() + 1); //Get relative path by removing length of project root from start
-        resource.resource_label = resource.rel_path.toStdString();
-        resource.type = RESOURCE_TYPE_SCRIPT; //Type of resource is mesh
+        QString rel_path = absfpath;
+        rel_path.remove(0, static_cast<int>(project.root_path.size()) + 1); //Get relative path by removing length of project root from start
 
         _resource->size = 0;
-        _resource->rel_path = resource.rel_path.toStdString();
+        _resource->rel_path = rel_path.toStdString();
         _resource->blob_path = _resource->rel_path;
-        _resource->resource_label = resource.resource_label;
+        _resource->resource_label = _resource->rel_path;
         game_data->resources->pushResource(_resource);
 
-        this->project.resources.push_back(resource);
     }
 }
 

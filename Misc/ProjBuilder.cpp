@@ -3,6 +3,8 @@
 #include <cstdlib>
 #include <QDir>
 
+extern ZSGAME_DATA* game_data;
+
 void ProjBuilder::showWindow(){
     window->show();
 }
@@ -17,10 +19,10 @@ void ProjBuilder::start(){
     writer->name_prefix = "blob_";
     writer->max_blob_size = 100*1024*1024; //100 megabytes limit
 
-    for(unsigned int res_i = 0; res_i < proj_ptr->resources.size(); res_i ++){ //iterate over all resources
-        Resource* res_ptr = &proj_ptr->resources[res_i];
+    for(unsigned int res_i = 0; res_i < game_data->resources->getResourcesSize(); res_i ++){ //iterate over all resources
+        Engine::ZsResource* res_ptr = game_data->resources->getResourceByIndex(res_i);
         QString type_str;
-        switch(res_ptr->type){
+        switch(res_ptr->resource_type){
             case RESOURCE_TYPE_NONE: type_str = "NONE";
                 break;
             case RESOURCE_TYPE_FILE: type_str = "FILE";
@@ -38,9 +40,9 @@ void ProjBuilder::start(){
             case RESOURCE_TYPE_ANIMATION : type_str = "ANIMATION";
                 break;
         }
-        window->addToOutput("Resource #" + QString::number(res_i) + " type: " + type_str + " " + res_ptr->rel_path);
-        std::string abs_path = (proj_ptr->root_path + "/" + res_ptr->rel_path.toStdString());
-        std::string rel_path = res_ptr->rel_path.toStdString();
+        window->addToOutput("Resource #" + QString::number(res_i) + " type: " + type_str + " " + QString::fromStdString(res_ptr->rel_path));
+        std::string abs_path = (proj_ptr->root_path + "/" + res_ptr->rel_path);
+        std::string rel_path = res_ptr->rel_path;
         writer->writeToBlob(abs_path, rel_path, res_ptr);
     }
 
@@ -122,7 +124,7 @@ unsigned int BlobWriter::getFileSize(std::string file_path){
     return result;
 }
 
-void BlobWriter::writeToBlob(std::string& file_path, std::string& rel_path, Resource* res_ptr){
+void BlobWriter::writeToBlob(std::string& file_path, std::string& rel_path, Engine::ZsResource* res_ptr){
     if(written_bytes >= this->max_blob_size){
         written_bytes = 0;
         this->bl_stream_opened = false;
@@ -158,7 +160,7 @@ void BlobWriter::writeToBlob(std::string& file_path, std::string& rel_path, Reso
     map_stream << "entry " << rel_path << " " << res_ptr->resource_label << " " << blob_path.toStdString() << " "; //write header
     map_stream.write(reinterpret_cast<char*>(&written_bytes), sizeof(uint64_t));
     map_stream.write(reinterpret_cast<char*>(&size), sizeof(unsigned int));
-    map_stream.write(reinterpret_cast<char*>(&res_ptr->type), sizeof(RESOURCE_TYPE));
+    map_stream.write(reinterpret_cast<char*>(&res_ptr->resource_type), sizeof(RESOURCE_TYPE));
     map_stream << "\n";
 
     this->written_bytes += static_cast<unsigned int>(size); //Increase amount of written bytes

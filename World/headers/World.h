@@ -302,10 +302,6 @@ public:
     void trimObjectsList();
     void unpickObject();
 
-    Engine::Mesh* getMeshPtrByRelPath(QString label); //look through all meshes in project ptr
-    Engine::Animation* getAnimationPtrByRelPath(QString label);
-    Engine::Texture* getTexturePtrByRelPath(QString label); //look through all meshes in project ptr
-    Engine::SoundBuffer* getSoundPtrByName(QString label);
     Material* getMaterialPtrByName(QString label);
 
     void saveToFile(QString file);

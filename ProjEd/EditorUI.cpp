@@ -307,30 +307,30 @@ void FileRenameDialog::onRenameButtonPressed(){
     QString rel_path = file_path;
     rel_path = file_path.remove(0, this->win_ptr->project.root_path.size() + 1);
 
-    Resource* res = this->win_ptr->project.getResource(rel_path);
+    //Resource* res = this->win_ptr->project.getResource(rel_path);
     Engine::ZsResource* _res = game_data->resources->getMaterialByLabel(rel_path.toStdString());
-    if(res != nullptr){ //if resource found
+    if(_res != nullptr){ //if resource found
         //Store old relative path
-        QString old_rel_path = res->rel_path;
+        QString old_rel_path = QString::fromStdString(_res->rel_path);
         //No need to do that with mesh resources
-        if(res->type == RESOURCE_TYPE_MESH) return;
+        if(_res->resource_type == RESOURCE_TYPE_MESH) return;
         QString new_relpath = cur_path + edit_field.text();
-        res->rel_path = new_relpath.remove(0, this->win_ptr->project.root_path.size() + 1);
-        res->resource_label = res->rel_path.toStdString();
-        res->file_path = cur_path + edit_field.text();
+        new_relpath = new_relpath.remove(0, this->win_ptr->project.root_path.size() + 1);
+        //res->resource_label = res->rel_path.toStdString();
+        //res->file_path = cur_path + edit_field.text();
 
-        _res->rel_path = res->rel_path.toStdString();
+        _res->rel_path = new_relpath.toStdString();
         _res->blob_path = _res->rel_path;
-        _res->resource_label = res->resource_label;
+        _res->resource_label = _res->rel_path;
 
-        if(res->type == RESOURCE_TYPE_MATERIAL){
+        if(_res->resource_type == RESOURCE_TYPE_MATERIAL){
             //if we renamed material, update its file path
             Material* mat = static_cast<Engine::MaterialResource*>(_res)->material;
-            mat->file_path = res->file_path.toStdString();
+            mat->file_path = (cur_path + edit_field.text()).toStdString();
             //Remove thumbnail with old path
             this->win_ptr->thumb_master->texture_thumbnails.erase(old_rel_path.toStdString());
             //Store thumbnail of new material name
-            win_ptr->thumb_master->createMaterialThumbnail(res->rel_path);
+            win_ptr->thumb_master->createMaterialThumbnail(_res->rel_path);
         }
     }
 }

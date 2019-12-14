@@ -27,7 +27,7 @@ public:
     void initShader();
     void createTexturesThumbnails();
     void createMaterialThumbnails();
-    void createMaterialThumbnail(QString name);
+    void createMaterialThumbnail(std::string name);
     void createMeshesThumbnails();
 
     void DrawTexture(Engine::TextureResource* texture);

@@ -7,6 +7,7 @@
 extern RenderPipeline* renderer;
 extern Material* default3dmat;
 extern Project* project_ptr;
+extern ZSGAME_DATA* game_data;
 
 World::World(){
     objects.reserve(MAX_OBJS);
@@ -579,7 +580,7 @@ GameObject* World::addMeshNode(ZS3M::SceneNode* node){
     //Iterate over all meshes, that inside of node
     for(unsigned int mesh_i = 0; mesh_i < node->mesh_names.size(); mesh_i ++){
         std::string mesh_label = node->mesh_names[mesh_i];
-        Engine::Mesh* mesh_ptr = this->getMeshPtrByRelPath(QString::fromStdString(mesh_label));
+        Engine::MeshResource* mesh_ptr = game_data->resources->getMeshByLabel(mesh_label);
 
         GameObject* mesh_obj = nullptr;
         //if found mesh with name as node, create mesh inside the node
@@ -707,58 +708,6 @@ void World::recoverFromSnapshot(WorldSnapshot* snapshot){
     }
 }
 
-Engine::Mesh* World::getMeshPtrByRelPath(QString label){
-    unsigned int resources_num = static_cast<unsigned int>(project_ptr->resources.size()); //Receive resource amount in project
-
-    for(unsigned int r_it = 0; r_it < resources_num; r_it ++){ //Iteerate over all resources in project
-        Resource* r_ptr = &project_ptr->resources[r_it]; //Obtain pointer to resource
-        //If resource is mesh and has same name as in argument
-        if(r_ptr->type == RESOURCE_TYPE_MESH && r_ptr->resource_label.compare(label.toStdString()) == 0){
-            return static_cast<Engine::Mesh*>(r_ptr->class_ptr);
-        }
-    }
-    return nullptr;
-}
-
-Engine::Animation* World::getAnimationPtrByRelPath(QString label){
-    unsigned int resources_num = static_cast<unsigned int>(project_ptr->resources.size()); //Receive resource amount in project
-
-    for(unsigned int r_it = 0; r_it < resources_num; r_it ++){ //Iteerate over all resources in project
-        Resource* r_ptr = &project_ptr->resources[r_it]; //Obtain pointer to resource
-        //If resource is mesh and has same name as in argument
-        if(r_ptr->type == RESOURCE_TYPE_ANIMATION && r_ptr->resource_label.compare(label.toStdString()) == 0){
-            return static_cast<Engine::Animation*>(r_ptr->class_ptr);
-        }
-    }
-    return nullptr;
-}
-
-
-Engine::Texture* World::getTexturePtrByRelPath(QString label){
-    unsigned int resources_num = static_cast<unsigned int>(project_ptr->resources.size()); //Receive resource amount in project
-
-    for(unsigned int r_it = 0; r_it < resources_num; r_it ++){ //Iteerate over all resources in project
-        Resource* r_ptr = &project_ptr->resources[r_it]; //Obtain pointer to resource
-        //If resource is mesh and has same name as in argument
-        if(r_ptr->type == RESOURCE_TYPE_TEXTURE && r_ptr->rel_path.compare(label) == 0){
-            return static_cast<Engine::Texture*>(r_ptr->class_ptr);
-        }
-    }
-    return nullptr;
-}
-
-Engine::SoundBuffer* World::getSoundPtrByName(QString label){
-    unsigned int resources_num = static_cast<unsigned int>(project_ptr->resources.size()); //Receive resource amount in project
-
-    for(unsigned int r_it = 0; r_it < resources_num; r_it ++){ //Iteerate over all resources in project
-        Resource* r_ptr = &project_ptr->resources[r_it]; //Obtain pointer to resource
-        //If resource is mesh and has same name as in argument
-        if(r_ptr->type == RESOURCE_TYPE_AUDIO && r_ptr->rel_path.compare(label) == 0){
-            return static_cast<Engine::SoundBuffer*>(r_ptr->class_ptr);
-        }
-    }
-    return nullptr;
-}
 
 Material* World::getMaterialPtrByName(QString label){
     unsigned int resources_num = static_cast<unsigned int>(project_ptr->resources.size()); //Receive resource amount in project
