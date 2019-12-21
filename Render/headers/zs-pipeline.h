@@ -23,11 +23,12 @@ enum PIPELINE_STATE {
 
 struct RenderSettings {
     ZSRGBCOLOR ambient_light_color;
-    void* skybox_ptr;
 
+    void* skybox_ptr;
     void* shadowcaster_ptr;
 
     void defaults();
+    void resetPointers();
 
     RenderSettings(){
         defaults();

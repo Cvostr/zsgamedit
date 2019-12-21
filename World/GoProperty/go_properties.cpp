@@ -245,6 +245,7 @@ MeshProperty::MeshProperty(){
     castShadows = true;
 
     this->skinning_root_node = nullptr;
+    this->rootNodeStr = "@none";
 }
 //Transform property functions
 void TransformProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
@@ -469,21 +470,12 @@ void MeshProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
 }
 void MeshProperty::updateMeshPtr(){
     if(resource_relpath.length() < 1) return;
-
-/*    if(resource_relpath.compare("@plane") == 0){
-        this->mesh_ptr = Engine::getPlaneMesh2D();
-    }else if(resource_relpath.compare("@isotile") == 0){
-        this->mesh_ptr = Engine::getIsoTileMesh2D();
-    }else if(resource_relpath.compare("@cube") == 0){
-        this->mesh_ptr = Engine::getCubeMesh3D();
-    }else if(resource_relpath.compare("@sphere") == 0){
-        this->mesh_ptr = Engine::getSphereMesh();
-    }
-    else //If it isn't built in mesh
-    {*/
-       //this->mesh_ptr = world_ptr->getMeshPtrByRelPath(QString::fromStdString(resource_relpath));
     this->mesh_ptr = game_data->resources->getMeshByLabel(resource_relpath);
-    //}
+}
+
+void MeshProperty::onRender(RenderPipeline* pipeline){
+    if(this->skinning_root_node == nullptr)
+        skinning_root_node = world_ptr->getObjectByLabelStr(this->rootNodeStr);
 }
 
 void MeshProperty::onValueChanged(){

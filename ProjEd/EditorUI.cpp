@@ -305,9 +305,8 @@ void FileRenameDialog::onRenameButtonPressed(){
     accept();
 
     QString rel_path = file_path;
-    rel_path = file_path.remove(0, this->win_ptr->project.root_path.size() + 1);
+    rel_path = file_path.remove(0, static_cast<int>(this->win_ptr->project.root_path.size() + 1));
 
-    //Resource* res = this->win_ptr->project.getResource(rel_path);
     Engine::ZsResource* _res = game_data->resources->getMaterialByLabel(rel_path.toStdString());
     if(_res != nullptr){ //if resource found
         //Store old relative path
@@ -315,9 +314,7 @@ void FileRenameDialog::onRenameButtonPressed(){
         //No need to do that with mesh resources
         if(_res->resource_type == RESOURCE_TYPE_MESH) return;
         QString new_relpath = cur_path + edit_field.text();
-        new_relpath = new_relpath.remove(0, this->win_ptr->project.root_path.size() + 1);
-        //res->resource_label = res->rel_path.toStdString();
-        //res->file_path = cur_path + edit_field.text();
+        new_relpath = new_relpath.remove(0, static_cast<int>(this->win_ptr->project.root_path.size() + 1));
 
         _res->rel_path = new_relpath.toStdString();
         _res->blob_path = _res->rel_path;

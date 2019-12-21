@@ -21,6 +21,10 @@ GizmosRenderer* RenderPipeline::getGizmosRenderer(){
 void RenderSettings::defaults(){
     ambient_light_color = ZSRGBCOLOR(255, 255, 255, 255);
 
+    resetPointers();
+}
+
+void RenderSettings::resetPointers(){
     this->skybox_ptr = nullptr;
     this->shadowcaster_ptr = nullptr;
 }

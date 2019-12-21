@@ -17,7 +17,6 @@
 #include <fstream>
 #include <misc/zs3m-master.h>
 #include "../World/headers/Misc.h"
-
 //Hack to support meshes
 extern ZSpireEngine* engine_ptr;
 //Hack to support resources
@@ -433,7 +432,7 @@ void EditWindow::onNewMaterial(){
     //Register new material in list
     //First, get relative path to new material
     QString rel_path = picked_name; //Preparing to get relative path
-    rel_path = rel_path.remove(0, project.root_path.size() + 1); //Get relative path by removing length of project root from start
+    rel_path = rel_path.remove(0, static_cast<int>(project.root_path.size() + 1)); //Get relative path by removing length of project root from start
 
     Engine::ZsResource* _resource = new Engine::MaterialResource;
     _resource->size = 0;
@@ -645,6 +644,8 @@ void EditWindow::runWorld(){
     world.physical_world = new PhysicalWorld(&world.phys_settngs);
 }
 void EditWindow::stopWorld(){
+    //Avoi crash on skybox rendering
+    this->render->getRenderSettings()->resetPointers();
     //Prepare world for stopping
     for(unsigned int object_i = 0; object_i < world.objects.size(); object_i ++){
         GameObject* object_ptr = &world.objects[object_i];
@@ -838,10 +839,12 @@ void EditWindow::toggleCameras(){
 }
 
 void EditWindow::glRender(){
-
+    //iterate over all objects in world
     for(unsigned int obj_i = 0; obj_i < world.objects.size(); obj_i ++){
         GameObject* obj_ptr = &world.objects[obj_i];
+        //if object is alive
         if(obj_ptr->alive){
+            //if object active, and dark theme is on
             if(obj_ptr->active){
                 if(settings.isDarkTheme)
                     obj_ptr->item_ptr->setTextColor(0, QColor(Qt::white));
@@ -893,9 +896,9 @@ void EditWindow::lookForResources(QString path){
 
     for(int i = 0; i < list.size(); i ++){ //iterate all files, skip 2 last . and ..
         QFileInfo fileInfo = list.at(i);  //get iterated file info
-
+        //if it is common file
         if(fileInfo.isFile() == true){
-
+            //try to process file as resource
             processResourceFile(fileInfo);
         }
 
@@ -1024,10 +1027,11 @@ void EditWindow::ImportResource(QString pathToResource){
         unsigned int num_materials = 0;
 
         ZS3M::SceneFileExport exporter;
-
+        //Get amount of meshes, animations, textures, materials in file
         Engine::getSizes(pathToResource.toStdString(), &num_meshes, &num_anims, &num_textures, &num_materials);
         //Allocate array for meshes
         Engine::_ogl_Mesh* meshes = static_cast<Engine::_ogl_Mesh*>(Engine::allocateMesh(num_meshes));
+        //Allocate array for animations
         Engine::Animation* anims = new Engine::Animation[num_anims];
 
         ZS3M::SceneNode rootNode;
@@ -1049,6 +1053,7 @@ void EditWindow::ImportResource(QString pathToResource){
         //if FBX has at least one mesh inside
         if(num_meshes > 0){
             Engine::loadNodeTree(pathToResource.toStdString(), &rootNode);
+            //Set root node to exporter
             exporter.setRootNode(&rootNode);
 
             QString _file_name;
@@ -1362,7 +1367,7 @@ void EditWindow::onMouseMotion(int relX, int relY){
             vec_ptr = &obj_trstate.tprop_ptr->rotation;
         }
         if(obj_trstate.transformMode > 0)
-            *vec_ptr = *vec_ptr + ZSVECTOR3(-relX, -relY,relX) * ZSVECTOR3(obj_trstate.Xcf, obj_trstate.Ycf, obj_trstate.Zcf);
+            *vec_ptr = *vec_ptr + ZSVECTOR3(-relX * sign(edit_camera.camera_front.Z), -relY,relX * sign(edit_camera.camera_front.X)) * ZSVECTOR3(obj_trstate.Xcf, obj_trstate.Ycf, obj_trstate.Zcf);
     }
 }
 

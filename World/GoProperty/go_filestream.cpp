@@ -57,6 +57,10 @@ void GameObject::saveProperties(std::ofstream* stream){
         case GO_PROPERTY_TYPE_MESH:{
             MeshProperty* ptr = static_cast<MeshProperty*>(property_ptr);
             *stream << ptr->resource_relpath << "\n";
+            if(ptr->skinning_root_node != nullptr)
+                *stream << ptr->skinning_root_node->label->toStdString() << "\n";
+            else
+                *stream << "@none\n";
             stream->write(reinterpret_cast<char*>(&ptr->castShadows), sizeof(bool));
             break;
         }
@@ -69,6 +73,7 @@ void GameObject::saveProperties(std::ofstream* stream){
             NodeProperty* ptr = static_cast<NodeProperty*>(property_ptr);
             //Write node name
             *stream << ptr->node_label << "\n";
+            //Write node transform matrix
             for(unsigned int m_i = 0; m_i < 4; m_i ++){
                 for(unsigned int m_j = 0; m_j < 4; m_j ++){
                     float m_v = ptr->transform_mat.m[m_i][m_j];
@@ -287,7 +292,7 @@ void GameObject::loadProperty(std::ifstream* world_stream){
             MeshProperty* lptr = static_cast<MeshProperty*>(prop_ptr);
             //Read mesh name
             *world_stream >> lptr->resource_relpath;
-
+            *world_stream >> lptr->rootNodeStr;
             lptr->updateMeshPtr(); //Pointer will now point to mesh resource
 
             world_stream->seekg(1, std::ofstream::cur);
@@ -331,7 +336,7 @@ void GameObject::loadProperty(std::ifstream* world_stream){
             world_stream->read(reinterpret_cast<char*>(&cl_r), sizeof(float));
             world_stream->read(reinterpret_cast<char*>(&cl_g), sizeof(float));
             world_stream->read(reinterpret_cast<char*>(&cl_b), sizeof(float));
-            ptr->color = ZSRGBCOLOR(cl_r, cl_g, cl_b);
+            ptr->color = ZSRGBCOLOR(static_cast<int>(cl_r), static_cast<int>(cl_g), static_cast<int>(cl_b));
 
             break;
         }

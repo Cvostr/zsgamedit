@@ -72,7 +72,7 @@ public:
     Material* material_ptr;
     //Path to material fil
     std::string material_path;
-
+    //Draw shadows on object
     bool receiveShadows;
 
     void setMaterial(Material* mat);
@@ -93,12 +93,14 @@ public:
     Engine::MeshResource* mesh_ptr; //Pointer to mesh
     bool castShadows;
 
+    std::string rootNodeStr;
     GameObject* skinning_root_node;
 
     void addPropertyInterfaceToInspector(InspectorWin* inspector);
     void updateMeshPtr(); //Updates pointer according to resource_relpath
     void onValueChanged(); //Update mesh    pointer
     void copyTo(GameObjectProperty* dest);
+    void onRender(RenderPipeline* pipeline);
     MeshProperty();
 };
 

@@ -29,9 +29,9 @@ int main(int argc, char *argv[]){
             //Send delta time to all editor managers
             w.edit_win_ptr->updateDeltaTime(deltaTime);
             SDL_Event event;
-            Input::MouseState* mstate = Input::getMouseStatePtr();
             while (SDL_PollEvent(&event))
             {
+                Input::processEventsSDL(&event);
                 if (event.type == SDL_WINDOWEVENT) { //If user caused SDL window to do something
 
                     if(event.window.event == SDL_WINDOWEVENT_MINIMIZED){
@@ -63,15 +63,12 @@ int main(int argc, char *argv[]){
 
                         if (event.button.button == SDL_BUTTON_LEFT) {
                             w.edit_win_ptr->input_state.isLeftBtnHold = false;
-                            mstate->isLButtonDown = false;
                         }
                         if (event.button.button == SDL_BUTTON_RIGHT) {
                             w.edit_win_ptr->input_state.isRightBtnHold = false;
-                            mstate->isRButtonDown = false;
                         }
                         if (event.button.button == SDL_BUTTON_MIDDLE) {
                             w.edit_win_ptr->input_state.isMidBtnHold = false;
-                            mstate->isMidBtnDown = false;
                         }
                     }
                     if (event.type == SDL_MOUSEWHEEL) {
@@ -79,8 +76,6 @@ int main(int argc, char *argv[]){
                     }
                     if (event.type == SDL_KEYDOWN) { //if user pressed a key on keyboard
                         w.edit_win_ptr->onKeyDown(event.key.keysym); //Call press function on EditWindow
-                        Input::addPressedKeyToQueue(event.key.keysym.sym);
-                        Input::addHeldKeyToQueue(event.key.keysym.sym);
 
                         if(event.key.keysym.sym == SDLK_LCTRL) //if it is ctrl
                             w.edit_win_ptr->input_state.isLCtrlHold = true;
@@ -90,7 +85,6 @@ int main(int argc, char *argv[]){
                             w.edit_win_ptr->input_state.isLAltHold = true;
                     }
                     if (event.type == SDL_KEYUP) { //if user pressed a key on keyboard
-                        Input::removeHeldKeyFromQueue(event.key.keysym.sym);
                         if(event.key.keysym.sym == SDLK_LCTRL) //if it is ctrl
                             w.edit_win_ptr->input_state.isLCtrlHold = false;
                         if(event.key.keysym.sym == SDLK_RCTRL) //if it is ctrl
@@ -102,19 +96,14 @@ int main(int argc, char *argv[]){
                         if (event.button.button == SDL_BUTTON_LEFT) {
                             w.edit_win_ptr->input_state.isLeftBtnHold = true;
                             w.edit_win_ptr->onLeftBtnClicked(event.motion.x, event.motion.y);
-
-                            mstate->isLButtonDown = true;
                         }
                         if (event.button.button == SDL_BUTTON_RIGHT) {
                             w.edit_win_ptr->input_state.isRightBtnHold = true;
                             w.edit_win_ptr->onRightBtnClicked(event.motion.x, event.motion.y);
-
-                            mstate->isRButtonDown = true;
                         }
 
                         if (event.button.button == SDL_BUTTON_MIDDLE) {
                             w.edit_win_ptr->input_state.isMidBtnHold = true;
-                            mstate->isMidBtnDown = true;
                         }
                     }
                     if (event.type == SDL_MOUSEMOTION) { //If user moved mouse
@@ -124,11 +113,6 @@ int main(int argc, char *argv[]){
                         //update state in Editor
                         w.edit_win_ptr->input_state.mouseX = event.motion.x;
                         w.edit_win_ptr->input_state.mouseY = event.motion.y;
-                        //update state in ZSENSDK
-                        mstate->mouseX = event.motion.x;
-                        mstate->mouseY = event.motion.y;
-                        mstate->mouseRelX = event.motion.xrel;
-                        mstate->mouseRelY = event.motion.yrel;
                     }
 
                 }

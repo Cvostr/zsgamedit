@@ -512,13 +512,6 @@ void ResourcePickDialog::onNeedToShow(){
     if(area->isShowNoneItem){
         new QListWidgetItem("@none", this->list);
     }
-    //Add default meshes
-    if(area->resource_type == RESOURCE_TYPE_MESH){
-        new QListWidgetItem("@plane", this->list);
-        new QListWidgetItem("@isotile", this->list);
-        new QListWidgetItem("@cube", this->list);
-        new QListWidgetItem("@sphere", this->list);
-    }
 
     if(area->resource_type < RESOURCE_TYPE_FILE){ // if it is an resource
         //Iterate over all resources
@@ -563,7 +556,7 @@ void ResourcePickDialog::findFiles(QString directory){
             QString name = fileInfo.fileName();
             if(name.endsWith(extension_mask)){ //if extension matches
                 QString wlabel = directory + "/" + name;
-                wlabel.remove(0, project_ptr->root_path.size() + 1); //Remove path to project
+                wlabel.remove(0, static_cast<int>(project_ptr->root_path.size()) + 1); //Remove path to project
                 new QListWidgetItem(wlabel, this->list);
             }
         }
@@ -714,6 +707,8 @@ void ComboBoxArea::writeNewValues(){ //Virtual, to check widget state
 QLabelResourcePickWgt::QLabelResourcePickWgt(PropertyEditArea* area_ptr, QWidget* parent) : QLabel (parent){
     setAcceptDrops(true);
     this->area_ptr = area_ptr;
+    //Set size as slim text
+    setMaximumSize(QSize(100000, 50));
 }
 
 void QLabelResourcePickWgt::dragEnterEvent( QDragEnterEvent* event ){
@@ -734,7 +729,7 @@ void QLabelResourcePickWgt::dropEvent( QDropEvent* event ){
                 || (resource_area->resource_type == RESOURCE_TYPE_MATERIAL && (file_dropped[0]->text().endsWith(".zsmat")))){
 
             QString newpath = _editor_win->getCurrentDirectory() + "/" + file_dropped[0]->text();
-            newpath.remove(0, _editor_win->project.root_path.size() + 1);
+            newpath.remove(0, static_cast<int>(_editor_win->project.root_path.size()) + 1);
             //Set new relative path
             *resource_area->rel_path_std = newpath.toStdString();
 

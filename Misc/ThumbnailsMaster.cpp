@@ -75,6 +75,7 @@ void ThumbnailsMaster::createTexturesThumbnails(){
 
         Engine::TextureResource* texture_ptr = static_cast<Engine::TextureResource*>(resource_ptr);
         DrawTexture(texture_ptr);
+        texture_ptr->Release();
         //Allocate image buffer
         unsigned char* texture_data = new unsigned char[THUMBNAIL_IMG_SIZE * THUMBNAIL_IMG_SIZE * 4];
         //Read image to buffer from GL buffer
