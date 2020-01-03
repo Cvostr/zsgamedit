@@ -266,7 +266,7 @@ public:
     void trimObjectsList();
     void unpickObject();
 
-    Material* getMaterialPtrByName(QString label);
+    //Material* getMaterialPtrByName(QString label);
 
     void saveToFile(QString file);
     void openFromFile(QString file, QTreeWidget* w_ptr);

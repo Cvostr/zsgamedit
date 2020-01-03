@@ -18,7 +18,7 @@ ObjTreeWgt::ObjTreeWgt(QWidget* parent) : QTreeWidget (parent){
 }
 
 void ObjTreeWgt::dropEvent(QDropEvent* event){
-    _ed_actions_container->newSnapshotAction(&win_ptr->world); //Add new snapshot action
+    _ed_actions_container->newSnapshotAction(&_editor_win->world); //Add new snapshot action
     _inspector_win->clearContentLayout(); //Prevent variable conflicts
     //User dropped object item
     QList<QTreeWidgetItem*> kids = this->selectedItems(); //Get list of selected object(it is moving object)
@@ -106,22 +106,22 @@ void FileListWgt::mousePressEvent(QMouseEvent *event){
     }
 }
 
-ObjectCtxMenu::ObjectCtxMenu(EditWindow* win, QWidget* parent ) : QObject(parent){
-    this->win_ptr = win;
+ObjectCtxMenu::ObjectCtxMenu(QWidget* parent ) : QObject(parent){
+
     //Allocting menu container
-    this->menu = new QMenu(win);
+    this->menu = new QMenu(_editor_win);
     //Allocating actions
-    this->action_dub = new QAction("Dublicate", win);
-    this->action_delete = new QAction("Delete", win);
+    this->action_dub = new QAction("Dublicate", _editor_win);
+    this->action_delete = new QAction("Delete", _editor_win);
 
-    action_move = new QAction("Move", win);
-    action_scale = new QAction("Scale", win);
-    action_rotate = new QAction("Rotate", win);
+    action_move = new QAction("Move", _editor_win);
+    action_scale = new QAction("Scale", _editor_win);
+    action_rotate = new QAction("Rotate", _editor_win);
 
 
-    store_to_prefab = new QAction("Store to Prefab", win);
+    store_to_prefab = new QAction("Store to Prefab", _editor_win);
 
-    object_info = new QAction("Info", win);
+    object_info = new QAction("Info", _editor_win);
     //Adding actions to menu container
     this->menu->addAction(action_dub);
     this->menu->addAction(action_delete);
@@ -159,27 +159,27 @@ void ObjectCtxMenu::setObjectPtr(GameObject* obj_ptr){
 //Object Ctx menu slots
 void ObjectCtxMenu::onDeleteClicked(){
     //delete all ui from inspector
-    win_ptr->getInspector()->clearContentLayout(); //Prevent variable conflicts
+    _inspector_win->clearContentLayout(); //Prevent variable conflicts
     GameObjectLink link = obj_ptr->getLinkToThisObject();
-    win_ptr->obj_trstate.isTransforming = false; //disabling object transform
-    win_ptr->callObjectDeletion(link);
+    _editor_win->obj_trstate.isTransforming = false; //disabling object transform
+    _editor_win->callObjectDeletion(link);
 }
 void ObjectCtxMenu::onMoveClicked(){
-    win_ptr->obj_trstate.setTransformOnObject(GO_TRANSFORM_MODE_TRANSLATE);
+    _editor_win->obj_trstate.setTransformOnObject(GO_TRANSFORM_MODE_TRANSLATE);
 }
 void ObjectCtxMenu::onScaleClicked(){
-    win_ptr->obj_trstate.setTransformOnObject(GO_TRANSFORM_MODE_SCALE);
+    _editor_win->obj_trstate.setTransformOnObject(GO_TRANSFORM_MODE_SCALE);
 }
 void ObjectCtxMenu::onRotateClicked(){
     //Set state to rotate object
-    win_ptr->obj_trstate.setTransformOnObject(GO_TRANSFORM_MODE_ROTATE);
+    _editor_win->obj_trstate.setTransformOnObject(GO_TRANSFORM_MODE_ROTATE);
 }
 void ObjectCtxMenu::onDublicateClicked(){
     //Make snapshot actions
-    _ed_actions_container->newSnapshotAction(&win_ptr->world);
+    _ed_actions_container->newSnapshotAction(&_editor_win->world);
     _inspector_win->clearContentLayout(); //Prevent variable conflicts
     GameObjectLink link = obj_ptr->getLinkToThisObject();
-    GameObject* result = win_ptr->world.dublicateObject(link.ptr);
+    GameObject* result = _editor_win->world.dublicateObject(link.ptr);
 
     if(result->hasParent){ //if object parented
         result->parent.ptr->item_ptr->addChild(result->item_ptr);
@@ -188,11 +188,11 @@ void ObjectCtxMenu::onDublicateClicked(){
     }
 }
 void ObjectCtxMenu::onStorePrefabPressed(){
-    QString prefab_filepath = win_ptr->getCurrentDirectory() + "/" + *obj_ptr->label + ".prefab";
+    QString prefab_filepath = _editor_win->getCurrentDirectory() + "/" + *obj_ptr->label + ".prefab";
     //Call prefab storing
-    win_ptr->world.storeObjectToPrefab(this->obj_ptr, prefab_filepath);
+    _editor_win->world.storeObjectToPrefab(this->obj_ptr, prefab_filepath);
     //update file list in current directory
-    win_ptr->updateFileList();
+    _editor_win->updateFileList();
 }
 
 void ObjectCtxMenu::onInfoPressed(){
@@ -207,15 +207,13 @@ void ObjectCtxMenu::onInfoPressed(){
     msgBox.exec();
 }
 
-FileCtxMenu::FileCtxMenu(EditWindow* win, QWidget* parent) : QObject(parent){
-    //Store win pointer
-    this->win_ptr = win;
+FileCtxMenu::FileCtxMenu(QWidget* parent) : QObject(parent){
     //Allocate Qt stuff
-    this->menu = new QMenu(win);
+    this->menu = new QMenu(_editor_win);
 
-    this->action_delete = new QAction("Delete", win);
-    this->action_rename = new QAction("Rename", win);
-    this->action_open_in_explorer = new QAction("Open in explorer", win);
+    this->action_delete = new QAction("Delete", _editor_win);
+    this->action_rename = new QAction("Rename", _editor_win);
+    this->action_open_in_explorer = new QAction("Open in explorer", _editor_win);
 
     menu->addAction(action_rename);
     menu->addAction(action_delete);
@@ -238,13 +236,13 @@ void FileCtxMenu::onDeleteClicked(){
     FileDeleteDialog* dialog = new FileDeleteDialog(file_path);
     dialog->exec();
     delete dialog;
-    this->win_ptr->updateFileList();
+    _editor_win->updateFileList();
 }
 void FileCtxMenu::onRename(){
-    FileRenameDialog* dialog = new FileRenameDialog(file_path, file_name, win_ptr);
+    FileRenameDialog* dialog = new FileRenameDialog(file_path, file_name, _editor_win);
     dialog->exec();
     delete dialog;
-    this->win_ptr->updateFileList();
+    _editor_win->updateFileList();
 }
 
 FileDeleteDialog::FileDeleteDialog(QString file_path, QWidget* parent) : QDialog(parent){
@@ -271,7 +269,7 @@ void FileDeleteDialog::onDelButtonPressed(){
     accept();
 }
 
-FileRenameDialog::FileRenameDialog(QString file_path, QString file_name, EditWindow* win_ptr, QWidget* parent) : QDialog(parent){
+FileRenameDialog::FileRenameDialog(QString file_path, QString file_name, QWidget* parent) : QDialog(parent){
     QFile file(file_path);
     rename_message.setText("Rename file  " + file_name + " to ");
     this->file_path = file_path;
@@ -291,8 +289,6 @@ FileRenameDialog::FileRenameDialog(QString file_path, QString file_name, EditWin
     //Connect signals to slots
     QObject::connect(&this->del_btn, SIGNAL(clicked()), this, SLOT(onRenameButtonPressed()));
     QObject::connect(&this->close_btn, SIGNAL(clicked()), this, SLOT(reject()));
-    //Set window pointer
-    this->win_ptr = win_ptr;
 }
 
 void FileRenameDialog::onRenameButtonPressed(){
@@ -305,7 +301,7 @@ void FileRenameDialog::onRenameButtonPressed(){
     accept();
 
     QString rel_path = file_path;
-    rel_path = file_path.remove(0, static_cast<int>(this->win_ptr->project.root_path.size() + 1));
+    rel_path = file_path.remove(0, static_cast<int>(_editor_win->project.root_path.size() + 1));
 
     Engine::ZsResource* _res = game_data->resources->getMaterialByLabel(rel_path.toStdString());
     if(_res != nullptr){ //if resource found
@@ -314,7 +310,7 @@ void FileRenameDialog::onRenameButtonPressed(){
         //No need to do that with mesh resources
         if(_res->resource_type == RESOURCE_TYPE_MESH) return;
         QString new_relpath = cur_path + edit_field.text();
-        new_relpath = new_relpath.remove(0, static_cast<int>(this->win_ptr->project.root_path.size() + 1));
+        new_relpath = new_relpath.remove(0, static_cast<int>(_editor_win->project.root_path.size() + 1));
 
         _res->rel_path = new_relpath.toStdString();
         _res->blob_path = _res->rel_path;
@@ -325,21 +321,11 @@ void FileRenameDialog::onRenameButtonPressed(){
             Material* mat = static_cast<Engine::MaterialResource*>(_res)->material;
             mat->file_path = (cur_path + edit_field.text()).toStdString();
             //Remove thumbnail with old path
-            this->win_ptr->thumb_master->texture_thumbnails.erase(old_rel_path.toStdString());
+            _editor_win->thumb_master->texture_thumbnails.erase(old_rel_path.toStdString());
             //Store thumbnail of new material name
-            win_ptr->thumb_master->createMaterialThumbnail(_res->rel_path);
+            _editor_win->thumb_master->createMaterialThumbnail(_res->rel_path);
         }
     }
-}
-
-Resource* Project::getResource(QString rel_path){
-    for(unsigned int i = 0; i < resources.size(); i ++){
-        Resource* res_ptr = &this->resources[i];
-        if(res_ptr->rel_path.compare(rel_path) == false){
-            return res_ptr;
-        }
-    }
-    return nullptr;
 }
 
 void EditWindow::resizeEvent(QResizeEvent* event){

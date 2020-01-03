@@ -708,21 +708,6 @@ void World::recoverFromSnapshot(WorldSnapshot* snapshot){
     }
 }
 
-
-Material* World::getMaterialPtrByName(QString label){
-    unsigned int resources_num = static_cast<unsigned int>(project_ptr->resources.size()); //Receive resource amount in project
-
-    for(unsigned int r_it = 0; r_it < resources_num; r_it ++){ //Iteerate over all resources in project
-        Resource* r_ptr = &project_ptr->resources[r_it]; //Obtain pointer to resource
-        //If resource is mesh and has same name as in argument
-        if(r_ptr->type == RESOURCE_TYPE_MATERIAL && r_ptr->rel_path.compare(label) == 0){
-            return static_cast<Material*>(r_ptr->class_ptr);
-        }
-    }
-    //if path is incorrect, return default material
-    return default3dmat;
-}
-
 WorldSnapshot::WorldSnapshot(){
 
 }

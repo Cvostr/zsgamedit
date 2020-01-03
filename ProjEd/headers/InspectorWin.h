@@ -135,7 +135,6 @@ public:
     void resizeEvent(QResizeEvent* event);
 
     void* gameobject_ptr;
-    void* editwindow_ptr;
 private:
     Ui::InspectorWin *ui;
 

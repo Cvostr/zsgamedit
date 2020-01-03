@@ -104,8 +104,6 @@ EditWindow::EditWindow(QApplication* app, QWidget *parent) :
     //Allocate file ctx menu
     this->file_ctx_menu = new FileCtxMenu(this);
 
-    this->ui->objsList->win_ptr = this; //putting pointer to window to custom tree view
-    this->ui->fileList->win_ptr = this;
     this->app_ptr = app;
 
     ui->actionCopy->setShortcut(Qt::Key_C | Qt::CTRL);
@@ -598,9 +596,8 @@ bool EditWindow::onCloseProject(){
         SDL_DestroyWindow(window); //Destroy SDL and opengl
         SDL_GL_DeleteContext(glcontext);
 
+        //Clear shader groups
         MtShProps::clearMtShaderGroups();
-        //clear all resources
-        this->project.resources.clear(); //Clear resources list
         //Show main menu window to avoid crash
         MainWin* win = static_cast<MainWin*>(this->mainwin_ptr);
         win->show();
@@ -1146,8 +1143,6 @@ EditWindow* ZSEditor::openEditor(){
     _inspector_win->resize(_editor_win->settings.inspector_win_width, _editor_win->settings.inspector_win_height);
     _inspector_win->show();
 
-    _inspector_win->editwindow_ptr = static_cast<void*>(_editor_win);
-
     _ed_actions_container = new EdActions; //Allocating EdActions
     _ed_actions_container->world_ptr = &_editor_win->world; //Put world pointer
     _ed_actions_container->insp_win = _inspector_win; //Put inspector win pointer
@@ -1229,21 +1224,21 @@ void EditWindow::onMouseWheel(int x, int y){
     //Stop camera moving
     this->edit_camera.stopMoving();
     //If we are in 3D project
-    if(project.perspective == 3){
+    if(project.perspective == PERSP_3D){
         ZSVECTOR3 front = edit_camera.getCameraFrontVec(); //obtain front vector
         ZSVECTOR3 pos = edit_camera.getCameraPosition(); //obtain position
 
         edit_camera.setPosition(pos + front * y);
     }
     //2D project
-    if(project.perspective == 2 && this->input_state.isLCtrlHold &&
+    if(project.perspective == PERSP_2D && this->input_state.isLCtrlHold &&
             edit_camera.orthogonal_factor + static_cast<float>(y) / 50.F >= 0.2f &&
             edit_camera.orthogonal_factor + static_cast<float>(y) / 50.F <= 1.7f){
         edit_camera.orthogonal_factor += static_cast<float>(y) / 50.F;
         edit_camera.updateProjectionMat();
     }
     //Common camera movement
-    if(project.perspective == 2 && !this->input_state.isLCtrlHold)
+    if(project.perspective == PERSP_2D && !this->input_state.isLCtrlHold)
         edit_camera.setPosition(edit_camera.getCameraPosition() + ZSVECTOR3(x * 10, y * 10, 0));
 
 }
@@ -1294,7 +1289,7 @@ void EditWindow::onMouseMotion(int relX, int relY){
 
     }
     //We are in 2D project, move camera by the mouse
-    if(project.perspective == 2 && !isWorldCamera){ //Only affective in 2D
+    if(project.perspective == PERSP_2D && !isWorldCamera){ //Only affective in 2D
         //If middle button of mouse pressed
         if(input_state.isMidBtnHold == true){ //we just move on map
             //Stop camera moving
@@ -1308,7 +1303,7 @@ void EditWindow::onMouseMotion(int relX, int relY){
     }
 
     //We are in 2D project, move camera by the mouse and rotate it
-    if(project.perspective == 3 && !isWorldCamera){//Only affective in 3D
+    if(project.perspective == PERSP_3D && !isWorldCamera){//Only affective in 3D
 
         if(input_state.isMidBtnHold == true){
             this->cam_yaw += relX * 0.16f;
@@ -1334,7 +1329,7 @@ void EditWindow::onMouseMotion(int relX, int relY){
     }
     //Visual transform control
     if(obj_trstate.isTransforming == true && input_state.isLeftBtnHold == true){ //Only affective if object is transforming
-        ZSRGBCOLOR color = render->getColorOfPickedTransformControl(obj_trstate.tprop_ptr->_last_translation,
+        ZSRGBCOLOR color = render->getColorOfPickedTransformControl(
                                                                     this->input_state.mouseX,
                                                                     this->input_state.mouseY,
                                                                     static_cast<void*>(this));

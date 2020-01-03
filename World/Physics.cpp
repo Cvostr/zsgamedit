@@ -45,24 +45,30 @@ void PhysicalProperty::updateCollisionShape(){
     TransformProperty* transform = this->go_link.updLinkPtr()->getPropertyPtr<TransformProperty>();
     MeshProperty* mesh = this->go_link.updLinkPtr()->getPropertyPtr<MeshProperty>();
     Engine::Mesh* m = mesh->mesh_ptr->mesh_ptr;
+
+    ZSVECTOR3 scale = transform->_last_scale;
+    if(isCustomPhysicalSize){
+        scale = cust_size;
+    }
+
     switch(coll_type){
         case COLLIDER_TYPE_NONE: {
             break;
         }
         case COLLIDER_TYPE_CUBE: {
-            shape = new btBoxShape(btVector3(btScalar(transform->_last_scale.X),
-                                         btScalar(transform->_last_scale.Y),
-                                         btScalar(transform->_last_scale.Z)));
+            shape = new btBoxShape(btVector3(btScalar(scale.X),
+                                         btScalar(scale.Y),
+                                         btScalar(scale.Z)));
             break;
         }
         case COLLIDER_TYPE_BOX: {
-            shape = new btBox2dShape(btVector3(btScalar(transform->_last_scale.X),
-                                         btScalar(transform->_last_scale.Y),
+            shape = new btBox2dShape(btVector3(btScalar(scale.X),
+                                         btScalar(scale.Y),
                                          0));
             break;
         }
         case COLLIDER_TYPE_SPHERE:{
-            shape = new btSphereShape(btScalar(transform->_last_scale.Y));
+            shape = new btSphereShape(btScalar(scale.Y));
             break;
         }
         case COLLIDER_TYPE_CONVEX_HULL:{
@@ -119,8 +125,18 @@ void PhysicalProperty::addMassField(InspectorWin* inspector){
     mass_area->go_property = static_cast<void*>(this);
     inspector->addPropertyArea(mass_area);
 }
+
+void PhysicalProperty::addCustomSizeField(InspectorWin* inspector){
+    BoolCheckboxArea* cust = new BoolCheckboxArea;
+    cust->setLabel("Custom size ");
+    cust->go_property = static_cast<void*>(this);
+    cust->bool_ptr = &this->isCustomPhysicalSize;
+    inspector->addPropertyArea(cust);
+}
+
 PhysicalProperty::PhysicalProperty(){
     created = false;
+    isCustomPhysicalSize = false;
 
     rigidBody = nullptr;
 }

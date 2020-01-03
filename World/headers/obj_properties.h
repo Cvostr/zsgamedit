@@ -140,6 +140,9 @@ protected:
     void init();
     void updateCollisionShape();
 public:
+    bool isCustomPhysicalSize;
+    ZSVECTOR3 cust_size;
+
     bool created;
     btRigidBody* rigidBody;
     btCollisionShape* shape;
@@ -147,6 +150,7 @@ public:
     float mass;
     void addColliderRadio(InspectorWin* inspector);
     void addMassField(InspectorWin* inspector);
+    void addCustomSizeField(InspectorWin* inspector);
     void onUpdate(float deltaTime);
     PhysicalProperty();
 };

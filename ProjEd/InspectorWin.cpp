@@ -8,6 +8,8 @@
 #include <QObject>
 #include <thread>
 
+extern EditWindow* _editor_win;
+
 InspectorWin::InspectorWin(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::InspectorWin)
@@ -118,8 +120,7 @@ void InspectorWin::ShowObjectProperties(void* object_ptr){
     clearContentLayout(); //Clears everything in content layout
     GameObject* obj_ptr = static_cast<GameObject*>(object_ptr);
 
-    EditWindow* editwin = static_cast<EditWindow*>(editwindow_ptr);
-    editwin->world.unpickObject();
+    _editor_win->world.unpickObject();
 
     obj_ptr->pick(); //Object is picked now
     //Add setActive() checkbox
@@ -287,9 +288,7 @@ void PropertyCtxMenu::onDeleteClicked(){
     dialog->deleteProperty();
 }
 void PropertyCtxMenu::onPaintClicked(){
-    EditWindow* editwin = static_cast<EditWindow*>(win->editwindow_ptr);
-
-    editwin->ppaint_state.enabled = true;
+    _editor_win->ppaint_state.enabled = true;
 
     GameObject* obj_ptr = static_cast<GameObject*>(this->dialog->g_object_ptr); //cast pointer
 
@@ -298,7 +297,7 @@ void PropertyCtxMenu::onPaintClicked(){
     for(int i = 0; i < static_cast<int>(obj_ptr->props_num); i ++){ //Iterate over all properties in object
         GameObjectProperty* prop_ptr = obj_ptr->properties[i];
         if(getPropertyString(prop_ptr->type).compare(text) == 0){
-            editwin->ppaint_state.prop_ptr = obj_ptr->properties[i];
+            _editor_win->ppaint_state.prop_ptr = obj_ptr->properties[i];
         }
     }
 }

@@ -32,7 +32,7 @@ public:
 
     void DrawTexture(Engine::TextureResource* texture);
     void DrawMaterial(Material* material);
-    void DrawMesh(Engine::Mesh* mesh);
+    void DrawMesh(Engine::MeshResource* mesh);
 
     bool isAvailable(std::string name);
 

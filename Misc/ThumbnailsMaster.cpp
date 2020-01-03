@@ -49,6 +49,7 @@ ThumbnailsMaster::~ThumbnailsMaster(){
     //interate over all textures and clear them
     this->texture_thumbnails.clear();
     texture_shader->Destroy();
+    mesh_shader->Destroy();
 }
 
 void ThumbnailsMaster::initShader(){
@@ -230,9 +231,8 @@ void ThumbnailsMaster::createMeshesThumbnails(){
         if(resource_ptr->resource_type != RESOURCE_TYPE_MESH) return;
 
         Engine::MeshResource* m_ptr = static_cast<Engine::MeshResource*>(resource_ptr);
-        Engine::Mesh* mesh_ptr = m_ptr->mesh_ptr;
 
-        DrawMesh(mesh_ptr);
+        DrawMesh(m_ptr);
         //Allocate image buffer
         unsigned char* texture_data = new unsigned char[THUMBNAIL_IMG_SIZE * THUMBNAIL_IMG_SIZE * 4];
         //Read image to buffer from GL buffer
@@ -244,7 +244,7 @@ void ThumbnailsMaster::createMeshesThumbnails(){
     }
 }
 
-void ThumbnailsMaster::DrawMesh(Engine::Mesh* mesh){
+void ThumbnailsMaster::DrawMesh(Engine::MeshResource* mesh){
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     Engine::Camera cam;
@@ -263,6 +263,11 @@ void ThumbnailsMaster::DrawMesh(Engine::Mesh* mesh){
     renderer->transformBuffer->writeData(sizeof (ZSMATRIX4x4) * 2, sizeof (ZSMATRIX4x4), &model);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
+
+    mesh->Draw();
+    while(mesh->resource_state != STATE_LOADED){
+        mesh->Draw();
+    }
     mesh->Draw();
 }
 

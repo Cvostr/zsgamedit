@@ -22,9 +22,6 @@ typedef struct Project{
     ZSPERSPECTIVE perspective; //3D or 2D
 
     std::string startup_scene;
-
-    std::vector<Resource> resources;
-    Resource* getResource(QString rel_path);
 }Project;
 
 #endif // ZS_TYPES_H

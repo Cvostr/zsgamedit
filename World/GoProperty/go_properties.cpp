@@ -956,7 +956,7 @@ void MaterialProperty::setMaterial(Material* mat){
 }
 
 void MaterialProperty::setMaterial(std::string path){
-    Material* newmat_ptr = go_link.world_ptr->getMaterialPtrByName(QString::fromStdString(path));
+    Material* newmat_ptr = game_data->resources->getMaterialByLabel(path)->material;
     setMaterial(newmat_ptr);
 }
 
@@ -1254,6 +1254,7 @@ void ScriptGroupProperty::copyTo(GameObjectProperty* dest){
 }
 
 void ScriptGroupProperty::shutdown(){
+    //Iterate over all scripts and call _DestroyScript() on each
     for(unsigned int script_i = 0; script_i < static_cast<unsigned int>(scr_num); script_i ++){
         this->scripts_attached[script_i]._DestroyScript();
     }
@@ -1711,17 +1712,7 @@ void NodeProperty::onPreRender(RenderPipeline* pipeline){
 }
 
 void NodeProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
-    //Float3PropertyArea* area_pos = new Float3PropertyArea; //New property area
-    //area_pos->setLabel("Position"); //Its label
-    //area_pos->vector = &this->translation; //Ptr to our vector
-    //area_pos->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
-    //inspector->addPropertyArea(area_pos);
-/*
-    Float3PropertyArea* area_rotation = new Float3PropertyArea; //New property area
-    area_rotation->setLabel("Rotation"); //Its label
-    area_rotation->vector = (ZSVECTOR3*)&this->rotation; //Ptr to our vector
-    area_rotation->go_property = static_cast<void*>(this);
-    inspector->addPropertyArea(area_rotation);*/
+
 }
 
 void NodeProperty::copyTo(GameObjectProperty* dest){
@@ -1819,7 +1810,7 @@ void AnimationProperty::onPreRender(RenderPipeline* pipeline){
             Engine::AnimationChannel* ch = &anim_prop_ptr->channels[channels_i];
             GameObject* node = obj->getChildObjectWithNodeLabel(ch->bone_name);
             NodeProperty* prop = node->getPropertyPtr<NodeProperty>();
-
+            //Calculate interpolated values
             prop->translation = ch->getPostitionInterpolated(animTime);
             prop->scale = ch->getScaleInterpolated(animTime);
             prop->rotation = ch->getRotationInterpolated(animTime);

@@ -21,6 +21,10 @@ void ProjBuilder::start(){
 
     for(unsigned int res_i = 0; res_i < game_data->resources->getResourcesSize(); res_i ++){ //iterate over all resources
         Engine::ZsResource* res_ptr = game_data->resources->getResourceByIndex(res_i);
+        //Not store base resources
+        if(res_ptr->rel_path[0] == '@')
+            continue;
+
         QString type_str;
         switch(res_ptr->resource_type){
             case RESOURCE_TYPE_NONE: type_str = "NONE";

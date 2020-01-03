@@ -268,9 +268,8 @@ private:
     QAction* object_info; //Show dialog with detailed object information
 public:
     bool displayTransforms;
-    EditWindow* win_ptr;
 
-    ObjectCtxMenu(EditWindow* win, QWidget* parent = nullptr);
+    ObjectCtxMenu(QWidget* parent = nullptr);
     void setObjectPtr(GameObject* obj_ptr);
     void show(QPoint point);
     void close();
@@ -291,12 +290,11 @@ private:
 
     QAction* action_open_in_explorer; //Button to delete object
 public:
-    EditWindow* win_ptr;
     QString file_path; //path to selected file
     QString file_name;
     QString directory;
 
-    FileCtxMenu(EditWindow* win, QWidget* parent = nullptr);
+    FileCtxMenu(QWidget* parent = nullptr);
     void show(QPoint point);
     void close();
 };
@@ -321,8 +319,6 @@ public:
 class FileRenameDialog : public QDialog{
     Q_OBJECT
 private:
-    //pointer to window
-    EditWindow* win_ptr;
     QPushButton del_btn;
     QPushButton close_btn;
 
@@ -336,7 +332,7 @@ public:
     QString file_path;
     QString file_name;
 
-    FileRenameDialog(QString file_path, QString file_name, EditWindow* win_ptr, QWidget* parent = nullptr);
+    FileRenameDialog(QString file_path, QString file_nam, QWidget* parent = nullptr);
 };
 
 
@@ -349,7 +345,6 @@ signals:
     void onRightClick(QPoint pos);
     void onLeftClick(QPoint pos);
 public:
-    EditWindow* win_ptr;
     ObjTreeWgt(QWidget* parent = nullptr);
 
     void dropEvent(QDropEvent* event);
@@ -365,7 +360,6 @@ signals:
     void onRightClick(QPoint pos);
     void onLeftClick(QPoint pos);
 public:
-    EditWindow* win_ptr;
     FileListWgt(QWidget* parent = nullptr);
 
     void dropEvent(QDropEvent* event);

@@ -30,29 +30,34 @@ void RenderSettings::resetPointers(){
 }
 
 void RenderPipeline::setup(int bufWidth, int bufHeight){
-    this->tile_shader = Engine::allocShader();
     this->pick_shader = Engine::allocShader();
     this->obj_mark_shader = Engine::allocShader();
     this->ui_shader = Engine::allocShader();
-    this->deffered_light = Engine::allocShader();
-    this->diffuse3d_shader = Engine::allocShader();
-    this->skybox = Engine::allocShader();
-    shadowMap = Engine::allocShader();
-    heightmap = Engine::allocShader();
+
 
     if(this->project_struct_ptr->perspective == PERSP_2D){
+        this->tile_shader = Engine::allocShader();
         this->tile_shader->compileFromFile("Shaders/2d_tile/tile2d.vert", "Shaders/2d_tile/tile2d.frag");
     }
     this->pick_shader->compileFromFile("Shaders/pick/pick.vert", "Shaders/pick/pick.frag");
     this->obj_mark_shader->compileFromFile("Shaders/mark/mark.vert", "Shaders/mark/mark.frag");
     this->ui_shader->compileFromFile("Shaders/ui/ui.vert", "Shaders/ui/ui.frag");
     if(this->project_struct_ptr->perspective == PERSP_3D){
+        //Allocate shaders to render 3D
+        this->diffuse3d_shader = Engine::allocShader();
+        this->deffered_light = Engine::allocShader();
+        this->skybox = Engine::allocShader();
+        shadowMap = Engine::allocShader();
+        heightmap = Engine::allocShader();
+        grass_shader = Engine::allocShader();
+
         this->deffered_light->compileFromFile("Shaders/postprocess/deffered_light/deffered.vert",
                                              "Shaders/postprocess/deffered_light/deffered.frag");
         this->diffuse3d_shader->compileFromFile("Shaders/3d/3d.vert", "Shaders/3d/3d.frag");
         skybox->compileFromFile("Shaders/skybox/skybox.vert", "Shaders/skybox/skybox.frag");
         shadowMap->compileFromFile("Shaders/shadowmap/shadowmap.vert", "Shaders/shadowmap/shadowmap.frag");
         heightmap->compileFromFile("Shaders/heightmap/heightmap.vert", "Shaders/heightmap/heightmap.frag");
+        grass_shader->compileFromFile("Shaders/heightmap/grass.vert", "Shaders/heightmap/grass.grass");
         this->gbuffer.create(bufWidth, bufHeight);
     }
     Engine::setupDefaultMeshes();
@@ -106,15 +111,19 @@ RenderPipeline::~RenderPipeline(){
     shadowBuffer->Destroy();
     terrainUniformBuffer->Destroy();
 
-    this->tile_shader->Destroy();
+    if(this->project_struct_ptr->perspective == PERSP_2D){
+        this->tile_shader->Destroy();
+    }
     this->pick_shader->Destroy();
     this->obj_mark_shader->Destroy();
-    this->deffered_light->Destroy();
-    this->diffuse3d_shader->Destroy();
-    ui_shader->Destroy();
-    skybox->Destroy();
-    shadowMap->Destroy();
-    heightmap->Destroy();
+    if(this->project_struct_ptr->perspective == PERSP_3D){
+        this->deffered_light->Destroy();
+        this->diffuse3d_shader->Destroy();
+        ui_shader->Destroy();
+        skybox->Destroy();
+        shadowMap->Destroy();
+        heightmap->Destroy();
+    }
     Engine::freeDefaultMeshes();
 
     this->gbuffer.Destroy();
@@ -163,7 +172,7 @@ void RenderPipeline::init(){
     initGizmos(this->project_struct_ptr->perspective);
 }
 
-ZSRGBCOLOR RenderPipeline::getColorOfPickedTransformControl(ZSVECTOR3 translation, int mouseX, int mouseY, void* projectedit_ptr){
+ZSRGBCOLOR RenderPipeline::getColorOfPickedTransformControl(int mouseX, int mouseY, void* projectedit_ptr){
 
     EditWindow* editwin_ptr = static_cast<EditWindow*>(projectedit_ptr);
     Engine::Camera* cam_ptr = nullptr; //We'll set it next
@@ -567,8 +576,8 @@ void MaterialProperty::onRender(RenderPipeline* pipeline){
 }
 
 void TerrainProperty::onRender(RenderPipeline* pipeline){
-    /*pipeline->diffuse3d_shader->Use();
-    for(unsigned int texelZ = 0; texelZ < data.W; texelZ ++){
+    //pipeline->grass_shader->Use();
+    /*for(unsigned int texelZ = 0; texelZ < data.W; texelZ ++){
         for(int texelX = 0; texelX < data.H; texelX ++){
             TransformProperty* t_ptr = this->go_link.updLinkPtr()->getTransformProperty();
 

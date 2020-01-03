@@ -60,7 +60,6 @@ private:
     G_BUFFER_GL gbuffer;
 
     Engine::Shader* tile_shader; //Shader to draw tiles
-
     Engine::Shader* pick_shader; //Shader to draw & pick objects
     Engine::Shader* obj_mark_shader; //Shader to draw mark of selected objects
     Engine::Shader* ui_shader;
@@ -74,6 +73,7 @@ private:
     RenderSettings render_settings;
 public:
     Engine::Shader* diffuse3d_shader;
+    Engine::Shader* grass_shader;
 
     Engine::UniformBuffer* transformBuffer;
     Engine::UniformBuffer* lightsBuffer;
@@ -97,7 +97,7 @@ public:
     void render3D(void* projectedit_ptr, Engine::Camera* cam);
     void renderDepth(void* world_ptr);
     unsigned int render_getpickedObj(void* projectedit_ptr, int mouseX, int mouseY);
-    ZSRGBCOLOR getColorOfPickedTransformControl(ZSVECTOR3 translation, int mouseX, int mouseY, void* projectedit_ptr);
+    ZSRGBCOLOR getColorOfPickedTransformControl(int mouseX, int mouseY, void* projectedit_ptr);
 
     void updateShadersCameraInfo(Engine::Camera* cam_ptr);
     void addLight(void* light_ptr);
