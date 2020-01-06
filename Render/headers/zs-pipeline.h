@@ -83,6 +83,7 @@ public:
     Engine::UniformBuffer* tileMaterialUniformBuffer;
     Engine::UniformBuffer* skyboxTransformUniformBuffer;
     Engine::UniformBuffer* uiUniformBuffer;
+    Engine::UniformBuffer* instancedTransformBuffer;
     Engine::UniformBuffer* editorUniformBuffer;
 
     bool depthTest; //if enabled, GL will do depth testing

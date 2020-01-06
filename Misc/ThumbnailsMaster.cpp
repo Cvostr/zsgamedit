@@ -65,12 +65,15 @@ void ThumbnailsMaster::createTexturesThumbnails(){
     initShader();
     glViewport(0, 0, THUMBNAIL_IMG_SIZE, THUMBNAIL_IMG_SIZE);
     texture_shader->Use();
-
+    glClearColor(0,0,0,0);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDisable(GL_CULL_FACE);
     glDisable(GL_DEPTH_TEST);
     glClear(GL_COLOR_BUFFER_BIT);
     //Iterate over all resources
     for(unsigned int res_i = 0; res_i < game_data->resources->getResourcesSize(); res_i ++){
+        glClear(GL_COLOR_BUFFER_BIT);
         Engine::ZsResource* resource_ptr = game_data->resources->getResourceByIndex(res_i);
         if(resource_ptr->resource_type != RESOURCE_TYPE_TEXTURE) continue;
 

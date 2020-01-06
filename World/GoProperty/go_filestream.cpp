@@ -186,6 +186,7 @@ void GameObject::saveProperties(std::ofstream* stream){
             stream->write(reinterpret_cast<char*>(&ptr->MaxHeight), sizeof(float));
             stream->write(reinterpret_cast<char*>(&ptr->castShadows), sizeof(bool));
             stream->write(reinterpret_cast<char*>(&ptr->textures_size), sizeof(int));
+            stream->write(reinterpret_cast<char*>(&ptr->grassType_size), sizeof(int));
 
             *stream << "\n";
 
@@ -241,7 +242,14 @@ void GameObject::saveProperties(std::ofstream* stream){
             break;
         }
         case GO_PROPERTY_TYPE_CHARACTER_CONTROLLER:{
-            break;
+            CharacterControllerProperty* ptr = static_cast<CharacterControllerProperty*>(property_ptr);
+            stream->write(reinterpret_cast<char*>(&ptr->isCustomPhysicalSize), sizeof(bool));
+            if(ptr->isCustomPhysicalSize){
+                stream->write(reinterpret_cast<char*>(&ptr->cust_size.X), sizeof(float));
+                stream->write(reinterpret_cast<char*>(&ptr->cust_size.Y), sizeof(float));
+                stream->write(reinterpret_cast<char*>(&ptr->cust_size.Z), sizeof(float));
+            }
+                break;
         }
         }
     }
@@ -438,6 +446,7 @@ void GameObject::loadProperty(std::ifstream* world_stream){
         world_stream->read(reinterpret_cast<char*>(&ptr->MaxHeight), sizeof(float));
         world_stream->read(reinterpret_cast<char*>(&ptr->castShadows), sizeof(bool));
         world_stream->read(reinterpret_cast<char*>(&ptr->textures_size), sizeof(int));
+        world_stream->read(reinterpret_cast<char*>(&ptr->grassType_size), sizeof(int));
 
         std::string fpath = project_ptr->root_path + "/" + ptr->file_label.toStdString();
         bool result = ptr->getTerrainData()->loadFromFile(fpath.c_str());
@@ -499,6 +508,14 @@ void GameObject::loadProperty(std::ifstream* world_stream){
             break;
         }
         case GO_PROPERTY_TYPE_CHARACTER_CONTROLLER:{
+            CharacterControllerProperty* ptr = static_cast<CharacterControllerProperty*>(prop_ptr);
+            world_stream->seekg(1, std::ofstream::cur); //Skip space
+            world_stream->read(reinterpret_cast<char*>(&ptr->isCustomPhysicalSize), sizeof(bool));
+            if(ptr->isCustomPhysicalSize){
+                world_stream->read(reinterpret_cast<char*>(&ptr->cust_size.X), sizeof(float));
+                world_stream->read(reinterpret_cast<char*>(&ptr->cust_size.Y), sizeof(float));
+                world_stream->read(reinterpret_cast<char*>(&ptr->cust_size.Z), sizeof(float));
+            }
             break;
         }
     }

@@ -132,6 +132,15 @@ void PhysicalProperty::addCustomSizeField(InspectorWin* inspector){
     cust->go_property = static_cast<void*>(this);
     cust->bool_ptr = &this->isCustomPhysicalSize;
     inspector->addPropertyArea(cust);
+
+    if(isCustomPhysicalSize){
+        Float3PropertyArea* cust = new Float3PropertyArea; //New property area
+        cust->setLabel("Scale"); //Its label
+        cust->vector = &this->cust_size; //Ptr to our vector
+        cust->go_property = static_cast<void*>(this);
+        inspector->addPropertyArea(cust);
+
+    }
 }
 
 PhysicalProperty::PhysicalProperty(){
@@ -139,6 +148,18 @@ PhysicalProperty::PhysicalProperty(){
     isCustomPhysicalSize = false;
 
     rigidBody = nullptr;
+}
+
+void PhysicalProperty::copyTo(GameObjectProperty* dest){
+
+    //Do base things
+    GameObjectProperty::copyTo(dest);
+
+    PhysicalProperty* rigi_prop = static_cast<PhysicalProperty*>(dest);
+    rigi_prop->mass = this->mass;
+    rigi_prop->coll_type = this->coll_type;
+    rigi_prop->isCustomPhysicalSize = this->isCustomPhysicalSize;
+    rigi_prop->cust_size = this->cust_size;
 }
 
 void PhysicalProperty::onUpdate(float deltaTime){

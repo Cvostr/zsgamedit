@@ -266,8 +266,6 @@ public:
     void trimObjectsList();
     void unpickObject();
 
-    //Material* getMaterialPtrByName(QString label);
-
     void saveToFile(QString file);
     void openFromFile(QString file, QTreeWidget* w_ptr);
     void writeGameObject(GameObject* object_ptr, std::ofstream* world_stream);

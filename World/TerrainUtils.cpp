@@ -440,7 +440,7 @@ void TerrainData::plantGrass(int originX, int originY, int range, int grass){
             float dist = getDistance(ZSVECTOR3(x, y, 0), ZSVECTOR3(originX, originY, 0));
             if(dist <= range){
                 //calculate modifier
-                //data[y * H + x].grass = grass;
+                data[y * H + x].grass = grass;
             }
         }
     }

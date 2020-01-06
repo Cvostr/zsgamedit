@@ -57,7 +57,7 @@ void RenderPipeline::setup(int bufWidth, int bufHeight){
         skybox->compileFromFile("Shaders/skybox/skybox.vert", "Shaders/skybox/skybox.frag");
         shadowMap->compileFromFile("Shaders/shadowmap/shadowmap.vert", "Shaders/shadowmap/shadowmap.frag");
         heightmap->compileFromFile("Shaders/heightmap/heightmap.vert", "Shaders/heightmap/heightmap.frag");
-        grass_shader->compileFromFile("Shaders/heightmap/grass.vert", "Shaders/heightmap/grass.grass");
+        grass_shader->compileFromFile("Shaders/heightmap/grass.vert", "Shaders/heightmap/grass.frag");
         this->gbuffer.create(bufWidth, bufHeight);
     }
     Engine::setupDefaultMeshes();
@@ -74,13 +74,16 @@ void RenderPipeline::setup(int bufWidth, int bufHeight){
 
     terrainUniformBuffer = Engine::allocUniformBuffer();
     terrainUniformBuffer->init(3, 12 * 16 * 2 + 4 * 3);
-    //Allocate 150 matrices for skinning
-    skinningUniformBuffer = Engine::allocUniformBuffer();
-    skinningUniformBuffer->init(4, sizeof (ZSMATRIX4x4) * 150);
 
-    for(unsigned int i = 0; i < MAX_LIGHTS_AMOUNT; i ++){
-        ZSMATRIX4x4 m = getIdentity();
-        skinningUniformBuffer->writeData(sizeof (ZSMATRIX4x4) * i, sizeof (ZSMATRIX4x4), &m);
+    {
+        //Allocate 150 matrices for skinning
+        skinningUniformBuffer = Engine::allocUniformBuffer();
+        skinningUniformBuffer->init(4, sizeof (ZSMATRIX4x4) * MAX_MESH_BONES);
+
+        for(unsigned int i = 0; i < MAX_MESH_BONES; i ++){
+            ZSMATRIX4x4 m = getIdentity();
+            skinningUniformBuffer->writeData(sizeof (ZSMATRIX4x4) * i, sizeof (ZSMATRIX4x4), &m);
+        }
     }
 
     tileMaterialUniformBuffer = Engine::allocUniformBuffer();
@@ -95,7 +98,19 @@ void RenderPipeline::setup(int bufWidth, int bufHeight){
     editorUniformBuffer = Engine::allocUniformBuffer();
     editorUniformBuffer->init(8, 16);
 
-    MtShProps::genDefaultMtShGroup(diffuse3d_shader, skybox, heightmap, 8);
+    {
+        instancedTransformBuffer = Engine::allocUniformBuffer();
+        instancedTransformBuffer->init(9, sizeof (ZSMATRIX4x4) * 150);
+
+        for(unsigned int i = 0; i < MAX_LIGHTS_AMOUNT; i ++){
+            ZSMATRIX4x4 m = getIdentity();
+            instancedTransformBuffer->writeData(sizeof (ZSMATRIX4x4) * i, sizeof (ZSMATRIX4x4), &m);
+        }
+    }
+
+    if(this->project_struct_ptr->perspective == PERSP_3D){
+        MtShProps::genDefaultMtShGroup(diffuse3d_shader, skybox, heightmap, 9);
+    }
 }
 
 void RenderPipeline::initGizmos(int projectPespective){
@@ -577,21 +592,21 @@ void MaterialProperty::onRender(RenderPipeline* pipeline){
 
 void TerrainProperty::onRender(RenderPipeline* pipeline){
     //pipeline->grass_shader->Use();
-    /*for(unsigned int texelZ = 0; texelZ < data.W; texelZ ++){
+    for(int texelZ = 0; texelZ < data.W; texelZ ++){
         for(int texelX = 0; texelX < data.H; texelX ++){
             TransformProperty* t_ptr = this->go_link.updLinkPtr()->getTransformProperty();
 
-            HeightmapTexel* texel_ptr = &this->data.data[texelZ * data.H + texelX];
-            if(texel_ptr->grass >= 0){
-            ZSVECTOR3 pos = t_ptr->translation + ZSVECTOR3(texelX, texel_ptr->height, texelZ);
-            ZSMATRIX4x4 m = getTranslationMat(pos);
+            HeightmapTexel* texel_ptr = &this->data.data[texelZ * data.W + texelX];
+            //if(texel_ptr->grass >= 0){
+             //   ZSVECTOR3 pos = t_ptr->translation + ZSVECTOR3(texelX, texel_ptr->height, texelZ);
+             //   ZSMATRIX4x4 m = getTranslationMat(pos);
 
-            pipeline->transformBuffer->bind();
-            pipeline->transformBuffer->writeData(sizeof (ZSMATRIX4x4) * 2, sizeof (ZSMATRIX4x4), &m);
-            Engine::getGrassMesh()->Draw();
-            }
+             //   pipeline->transformBuffer->bind();
+             //   pipeline->transformBuffer->writeData(sizeof (ZSMATRIX4x4) * 2, sizeof (ZSMATRIX4x4), &m);
+                //Engine::getGrassMesh()->Draw();
+           // }
         }
-    }*/
+    }
 
     terrainUniformBuffer = pipeline->terrainUniformBuffer;
     transformBuffer = pipeline->transformBuffer;

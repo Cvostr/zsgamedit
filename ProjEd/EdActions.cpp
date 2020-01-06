@@ -1,11 +1,12 @@
 #include "headers/EdActions.h"
 
+extern InspectorWin* _inspector_win;
+
 EdActions::EdActions(){
     this->current_pos = 0; //Default pos is zero
     this->end_pos = 0; //Default tail pos is zero as well
     action_list.resize(0);
     storeActions = false;
-    insp_win = nullptr;
     hasChangesUnsaved = false; //Defaultly, nothing to save
 }
 
@@ -92,7 +93,7 @@ void EdActions::undo(){
         snapshot->clear(); //Clear previous state
         snapshot->snapshot = cur_state_snap; //put previous state to current actions
 
-        this->insp_win->clearContentLayout();
+        _inspector_win->clearContentLayout();
     }
 
     if(act_type == ACT_TYPE_OBJECT){ //if this action is snapshot
@@ -101,7 +102,7 @@ void EdActions::undo(){
         GameObjectSnapshot cur_state_snap; //Declare snapshot to store current state
         snapshot->linkToObj.ptr->putToSnapshot(&cur_state_snap); //Backup current state
 
-        int array_index = snapshot->snapshot.obj_array_ind;
+        unsigned int array_index = static_cast<unsigned int>(snapshot->snapshot.obj_array_ind);
 
         world_ptr->objects[array_index].recoverFromSnapshot(&snapshot->snapshot); //Recover previous state
 
@@ -121,7 +122,7 @@ void EdActions::undo(){
         snapshot->container_ptr->copyTo(dest);
         //Call onValueChanged() on recovered property
         dest->onValueChanged();
-        this->insp_win->updateObjectProperties();
+        _inspector_win->updateObjectProperties();
 
         snapshot->clear();
         snapshot->container_ptr = cur_state_prop;
@@ -144,7 +145,7 @@ void EdActions::redo(){
         snapshot->clear();
         snapshot->snapshot = cur_state_snap;
 
-        this->insp_win->clearContentLayout();
+        _inspector_win->clearContentLayout();
     }
 
     if(act_type == ACT_TYPE_OBJECT){
@@ -153,7 +154,7 @@ void EdActions::redo(){
         GameObjectSnapshot cur_state_snap; //Declare snapshot to store current state
         snapshot->linkToObj.ptr->putToSnapshot(&cur_state_snap); //Backup current state
 
-        int array_index = snapshot->snapshot.obj_array_ind;
+        unsigned int array_index = static_cast<unsigned int>(snapshot->snapshot.obj_array_ind);
 
         world_ptr->objects[array_index].recoverFromSnapshot(&snapshot->snapshot); //Recover previous state
 
@@ -173,7 +174,7 @@ void EdActions::redo(){
         snapshot->container_ptr->copyTo(dest);
         //Call onValueChanged() on recovered property
         dest->onValueChanged();
-        this->insp_win->updateObjectProperties();
+        _inspector_win->updateObjectProperties();
 
         snapshot->clear();
         snapshot->container_ptr = cur_state_prop;

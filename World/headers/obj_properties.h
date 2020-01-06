@@ -148,6 +148,7 @@ public:
     btCollisionShape* shape;
     COLLIDER_TYPE coll_type;
     float mass;
+    void copyTo(GameObjectProperty* dest);
     void addColliderRadio(InspectorWin* inspector);
     void addMassField(InspectorWin* inspector);
     void addCustomSizeField(InspectorWin* inspector);

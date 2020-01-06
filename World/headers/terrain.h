@@ -36,8 +36,11 @@ typedef struct HeightmapGrass{
 typedef struct HeightmapTexel{
     float height;
     unsigned char texture_factors[TERRAIN_TEXTURES_AMOUNT];
+    int grass;
+
 
     HeightmapTexel(){
+        grass = 0;
     }
 }HeightmapTexel;
 

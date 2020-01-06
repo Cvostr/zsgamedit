@@ -491,6 +491,7 @@ void MeshProperty::copyTo(GameObjectProperty* dest){
     MeshProperty* _dest = static_cast<MeshProperty*>(dest);
     _dest->resource_relpath = resource_relpath;
     _dest->mesh_ptr = mesh_ptr;
+    _dest->rootNodeStr = rootNodeStr;
 }
 
 void LightsourceProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
@@ -988,9 +989,10 @@ void ColliderProperty::onUpdate(float deltaTime){
 void ColliderProperty::copyTo(GameObjectProperty* dest){
     if(dest->type != GO_PROPERTY_TYPE_COLLIDER) return;
 
+    PhysicalProperty::copyTo(dest);
+
     ColliderProperty* coll_prop = static_cast<ColliderProperty*>(dest);
     coll_prop->isTrigger = this->isTrigger;
-    coll_prop->coll_type = this->coll_type;
 }
 
 TransformProperty* ColliderProperty::getTransformProperty(){
@@ -1070,8 +1072,8 @@ void RigidbodyProperty::onUpdate(float deltaTime){
 
         if(transform->translation != ZSVECTOR3(curX, curY, curZ))
             transform->translation = ZSVECTOR3(curX, curY, curZ);
-        if(transform->rotation != ZSVECTOR3(rotX, rotY, rotZ))
-            transform->rotation = ZSVECTOR3(rotX, rotY, rotZ);
+        if(transform->rotation != ZSVECTOR3(rotZ, rotY, rotX))
+            transform->rotation = ZSVECTOR3(rotZ, rotY, rotX);
     }
 }
 
@@ -1102,13 +1104,11 @@ void RigidbodyProperty::copyTo(GameObjectProperty* dest){
     if(dest->type != GO_PROPERTY_TYPE_RIGIDBODY) return;
 
     //Do base things
-    GameObjectProperty::copyTo(dest);
+    PhysicalProperty::copyTo(dest);
 
     RigidbodyProperty* rigi_prop = static_cast<RigidbodyProperty*>(dest);
-    rigi_prop->mass = this->mass;
     rigi_prop->gravity = this->gravity;
     rigi_prop->linearVel = this->linearVel;
-    rigi_prop->coll_type = this->coll_type;
     rigi_prop->angularVel = this->angularVel;
 }
 
@@ -1130,16 +1130,29 @@ void CharacterControllerProperty::setLinearVelocity(ZSVECTOR3 lvel){
 }
 
 void CharacterControllerProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
-
+    addCustomSizeField(inspector);
 }
 void CharacterControllerProperty::copyTo(GameObjectProperty* dest){
+    if(dest->type != GO_PROPERTY_TYPE_CHARACTER_CONTROLLER) return;
+
+    //Do base things
+    PhysicalProperty::copyTo(dest);
+
+    CharacterControllerProperty* chara = static_cast<CharacterControllerProperty*>(dest);
 
 }
 void CharacterControllerProperty::onUpdate(float deltaTime){
     if(!created){
         TransformProperty* transform = this->go_link.updLinkPtr()->getPropertyPtr<TransformProperty>();
+
+        ZSVECTOR3 scale = transform->_last_scale;
+        ZSVECTOR3 pos = transform->_last_translation;
+        if(isCustomPhysicalSize){
+            scale = cust_size;
+        }
+
         //if uninitialized
-        this->shape = new btCapsuleShape(transform->_last_scale.X, transform->_last_scale.Y);
+        this->shape = new btCapsuleShape(scale.X, scale.Y);
 
         btVector3 localInertia(0, 0, 0);
 
@@ -1148,9 +1161,9 @@ void CharacterControllerProperty::onUpdate(float deltaTime){
         btTransform startTransform;
         startTransform.setIdentity();
         //Set start transform
-        startTransform.setOrigin(btVector3( btScalar(transform->_last_translation.X),
-                                                    btScalar(transform->_last_translation.Y),
-                                                    btScalar(transform->_last_translation.Z)));
+        startTransform.setOrigin(btVector3( btScalar(pos.X),
+                                                    btScalar(pos.Y),
+                                                    btScalar(pos.Z)));
 
         startTransform.setRotation(btQuaternion(transform->_last_rotation.X, transform->_last_rotation.Y, transform->_last_rotation.Z));
 
@@ -1596,6 +1609,7 @@ void TerrainProperty::onAddToObject(){
 }
 
 void TerrainProperty::getPickedVertexId(int posX, int posY, int screenX, int screenY, unsigned char* data){
+    glClearColor(0,0,0,0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
     //get pointer to material property
@@ -1618,6 +1632,7 @@ void TerrainProperty::getPickedVertexId(int posX, int posY, int screenX, int scr
 }
 
 void TerrainProperty::modifyTerrainVertex(unsigned char* gl_data, bool isCtrlHold){
+    if((gl_data[0] + gl_data[1] + gl_data[2]) == 0) return;
     for(int i = 0; i < Width; i ++){
         for(int y = 0; y < Length; y ++){
             if(i == static_cast<int>(gl_data[0]) * 2 && y == static_cast<int>(gl_data[2]) * 2){

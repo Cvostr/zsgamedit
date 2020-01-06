@@ -29,6 +29,7 @@ EdActions* _ed_actions_container;
 RenderPipeline* renderer;
 
 extern Material* default3dmat;
+extern Material* defaultTerrainMat;
 
 EditWindow::EditWindow(QApplication* app, QWidget *parent) :
     QMainWindow(parent),
@@ -126,8 +127,10 @@ EditWindow::EditWindow(QApplication* app, QWidget *parent) :
     engine_create_info->createWindow = false; //window already created, we don't need one
     engine_create_info->graphicsApi = OGL32; //use opengl
 
+
     engine_ptr = new ZSpireEngine();
     engine_ptr->engine_info = engine_create_info;
+
 }
 
 EditWindow::~EditWindow()
@@ -208,8 +211,13 @@ void EditWindow::init(){
     this->thumb_master = new ThumbnailsMaster;
     this->startManager(thumb_master);
 
+    ZSGAME_DESC* game_desc = new ZSGAME_DESC;
+    game_desc->game_perspective = project.perspective;
+    engine_ptr->desc = game_desc;
+
     game_data = new ZSGAME_DATA;
     game_data->resources = new Engine::ResourceManager;
+
 
     std::string absolute = project.root_path + "/";
     Engine::Loader::setBlobRootDirectory(absolute);
@@ -514,7 +522,7 @@ void EditWindow::addNewCube(){
     mesh->updateMeshPtr();
 
     MaterialProperty* mat = obj->getPropertyPtr<MaterialProperty>();
-    mat->setMaterial(default3dmat);
+    mat->setMaterial("@default");
 
 }
 void EditWindow::addNewLight(){
@@ -561,6 +569,9 @@ void EditWindow::addNewTerrain(){
     //Add terrain property
     obj->addProperty(GO_PROPERTY_TYPE_TERRAIN); //Creates terrain inside
     obj->getPropertyPtr<TerrainProperty>()->onAddToObject();
+
+    MaterialProperty* mat = obj->getPropertyPtr<MaterialProperty>();
+    mat->setMaterial("@defaultHeightmap");
 
     updateFileList();
 
@@ -1145,7 +1156,6 @@ EditWindow* ZSEditor::openEditor(){
 
     _ed_actions_container = new EdActions; //Allocating EdActions
     _ed_actions_container->world_ptr = &_editor_win->world; //Put world pointer
-    _ed_actions_container->insp_win = _inspector_win; //Put inspector win pointer
     _ed_actions_container->setStoreActions(true);
     //Create thumbnails
     _editor_win->thumb_master->createTexturesThumbnails();
@@ -1416,7 +1426,7 @@ void EditWindow::onKeyDown(SDL_Keysym sym){
     }
     if(sym.sym == SDLK_w && !isSceneRun && !input_state.isLCtrlHold){
         ZSVECTOR3 pos = edit_camera.getCameraPosition(); //obtain position
-        if(project.perspective == 2)
+        if(project.perspective == PERSP_2D)
             pos.Y += 2.2f * deltaTime;
         else
             pos = pos + edit_camera.getCameraFrontVec() * 1.2f * deltaTime;
@@ -1424,7 +1434,7 @@ void EditWindow::onKeyDown(SDL_Keysym sym){
     }
     if(sym.sym == SDLK_s && !isSceneRun && !input_state.isLCtrlHold){
         ZSVECTOR3 pos = edit_camera.getCameraPosition(); //obtain position
-        if(project.perspective == 2)
+        if(project.perspective == PERSP_2D)
             pos.Y -= 2.2f * deltaTime;
         else
             pos = pos - edit_camera.getCameraFrontVec() * 1.2f * deltaTime;
