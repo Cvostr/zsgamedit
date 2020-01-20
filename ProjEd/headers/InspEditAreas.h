@@ -44,6 +44,27 @@ public:
     void writeNewValues(); //Virtual, on values changed
 };
 
+class Float2PropertyArea : public PropertyEditArea{
+public:
+
+    QLineEdit x_field; //Text digit field for X coord
+    QLineEdit y_field; //Text digit field for Y coord
+
+    ZSVECTOR2* vector; //Output variable
+
+    QLabel x_label; //To write X separator
+    QLabel y_label; //To write Y separator
+
+    Float2PropertyArea();
+    ~Float2PropertyArea();
+
+    void destroyContent();
+    void setup(); //Virtual
+    void updateValues(); //on text fields or other edited
+    void addToInspector(InspectorWin* win);
+    void writeNewValues(); //Virtual, on values changed
+};
+
 class FloatPropertyArea : public PropertyEditArea{
 public:
 

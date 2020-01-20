@@ -12,8 +12,6 @@
 #include <QMainWindow>
 #include <SDL2/SDL.h>
 
-#define MAX_LIGHTS_AMOUNT 150
-
 enum PIPELINE_STATE {
     PIPELINE_STATE_DEFAULT,
     PIPELINE_STATE_PICKING,

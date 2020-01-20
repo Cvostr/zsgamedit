@@ -20,15 +20,15 @@ enum TERRAIN_MODIFY_TYPE{
 
 typedef struct HeightmapGrass{
     std::string diffuse_relpath;
-    Engine::Texture* diffuse;
+    Engine::TextureResource* diffuse;
 
-    ZSVECTOR3 scale;
+    ZSVECTOR2 scale;
 
     HeightmapGrass(){
         diffuse_relpath = "@none";
         diffuse = nullptr;
 
-        scale = ZSVECTOR3(1.f, 1.f, 1.f);
+        scale = ZSVECTOR2(2.f, 2.f);
     }
 
 }HeightmapGrass;

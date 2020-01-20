@@ -435,10 +435,10 @@ bool GameObject::hasTerrain(){
     return false;
 }
 
-void GameObject::DrawMesh(){
+void GameObject::DrawMesh(RenderPipeline* pipeline){
     MeshProperty* mesh_prop = static_cast<MeshProperty*>(this->getPropertyPtrByType(GO_PROPERTY_TYPE_MESH));
     TerrainProperty* terrain_prop = getPropertyPtr<TerrainProperty>();
     //Draw default mesh
     if(mesh_prop != nullptr) mesh_prop->mesh_ptr->Draw();
-    if(terrain_prop != nullptr) terrain_prop->DrawMesh();
+    if(terrain_prop != nullptr) terrain_prop->DrawMesh(pipeline);
 }

@@ -100,9 +100,9 @@ void RenderPipeline::setup(int bufWidth, int bufHeight){
 
     {
         instancedTransformBuffer = Engine::allocUniformBuffer();
-        instancedTransformBuffer->init(9, sizeof (ZSMATRIX4x4) * 150);
+        instancedTransformBuffer->init(9, sizeof (ZSMATRIX4x4) * INSTANCED_RENDER_BUFFER_SIZE);
 
-        for(unsigned int i = 0; i < MAX_LIGHTS_AMOUNT; i ++){
+        for(unsigned int i = 0; i < INSTANCED_RENDER_BUFFER_SIZE; i ++){
             ZSMATRIX4x4 m = getIdentity();
             instancedTransformBuffer->writeData(sizeof (ZSMATRIX4x4) * i, sizeof (ZSMATRIX4x4), &m);
         }
@@ -442,9 +442,6 @@ void GameObject::Draw(RenderPipeline* pipeline){
 
     if(transform_ptr == nullptr) return;
 
-    //Send transform matrix to transform buffer
-    pipeline->transformBuffer->bind();
-    pipeline->transformBuffer->writeData(sizeof (ZSMATRIX4x4) * 2, sizeof (ZSMATRIX4x4), &transform_ptr->transform_mat);
 
     //Call prerender on each property in object
     if(pipeline->current_state == PIPELINE_STATE_DEFAULT)
@@ -458,6 +455,9 @@ void GameObject::Draw(RenderPipeline* pipeline){
             if(hasMesh()){
                 //Iterate over all bones
                 for(unsigned int bone_i = 0; bone_i < mesh_prop->mesh_ptr->mesh_ptr->bones.size(); bone_i ++){
+                    //Check for buffer overflow
+                    if(bone_i >= MAX_MESH_BONES)
+                        break;
                     //Obtain bone by pointer
                     Engine::Bone* b = &mesh_prop->mesh_ptr->mesh_ptr->bones[bone_i];
 
@@ -483,7 +483,7 @@ void GameObject::Draw(RenderPipeline* pipeline){
                 }
             }
 
-            DrawMesh();
+            DrawMesh(pipeline);
         }
         //If we picking object
         if(pipeline->current_state == PIPELINE_STATE_PICKING) {
@@ -502,7 +502,7 @@ void GameObject::Draw(RenderPipeline* pipeline){
 
             pipeline->editorUniformBuffer->bind();
             pipeline->editorUniformBuffer->writeData(0, 16, &color);
-            DrawMesh();
+            DrawMesh(pipeline);
         }
         if(pipeline->current_state == PIPELINE_STATE_SHADOWDEPTH) {
             TransformProperty* transform_ptr = static_cast<TransformProperty*>(getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
@@ -514,7 +514,7 @@ void GameObject::Draw(RenderPipeline* pipeline){
             bool castShadows = (hasTerrain()) ? getPropertyPtr<TerrainProperty>()->castShadows : mesh_prop->castShadows;
 
             if(castShadows)
-                DrawMesh();
+                DrawMesh(pipeline);
         }
 
 
@@ -591,23 +591,6 @@ void MaterialProperty::onRender(RenderPipeline* pipeline){
 }
 
 void TerrainProperty::onRender(RenderPipeline* pipeline){
-    //pipeline->grass_shader->Use();
-    for(int texelZ = 0; texelZ < data.W; texelZ ++){
-        for(int texelX = 0; texelX < data.H; texelX ++){
-            TransformProperty* t_ptr = this->go_link.updLinkPtr()->getTransformProperty();
-
-            HeightmapTexel* texel_ptr = &this->data.data[texelZ * data.W + texelX];
-            //if(texel_ptr->grass >= 0){
-             //   ZSVECTOR3 pos = t_ptr->translation + ZSVECTOR3(texelX, texel_ptr->height, texelZ);
-             //   ZSMATRIX4x4 m = getTranslationMat(pos);
-
-             //   pipeline->transformBuffer->bind();
-             //   pipeline->transformBuffer->writeData(sizeof (ZSMATRIX4x4) * 2, sizeof (ZSMATRIX4x4), &m);
-                //Engine::getGrassMesh()->Draw();
-           // }
-        }
-    }
-
     terrainUniformBuffer = pipeline->terrainUniformBuffer;
     transformBuffer = pipeline->transformBuffer;
 
@@ -661,6 +644,8 @@ void TerrainProperty::onRender(RenderPipeline* pipeline){
 
     //Apply material shader
     mat->onRender(pipeline);
+
+
 }
 
 void TileProperty::onRender(RenderPipeline* pipeline){

@@ -308,7 +308,7 @@ void TransformProperty::onValueChanged(){
 }
 
 void TransformProperty::onPreRender(RenderPipeline* pipeline){
-    assert(pipeline);
+    //assert(pipeline);
     updateMat();
 }
 
@@ -367,6 +367,13 @@ void TransformProperty::updateMat(){
         //S * R * T
         this->transform_mat = scale_mat * rotation_mat * rotation_mat1 * translation_mat;
     }
+}
+
+void TransformProperty::onRender(RenderPipeline* pipeline){
+    //updateMat();
+    //Send transform matrix to transform buffer
+    pipeline->transformBuffer->bind();
+    pipeline->transformBuffer->writeData(sizeof (ZSMATRIX4x4) * 2, sizeof (ZSMATRIX4x4), &transform_mat);
 }
 
 void TransformProperty::getAbsoluteRotationMatrix(ZSMATRIX4x4& m){
@@ -1380,7 +1387,7 @@ TerrainProperty::TerrainProperty(){
     this->range = 15;
     this->editHeight = 10;
     this->textureid = 1;
-    this->vegetableid = 0;
+    this->vegetableid = 1;
 
     edit_mode = 1;
 
@@ -1524,6 +1531,12 @@ void TerrainProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
             diffuse_area->rel_path_std = &this->grass[static_cast<unsigned int>(i)].diffuse_relpath;
             inspector->addPropertyArea(diffuse_area);
 
+            Float2PropertyArea* GrassSize = new Float2PropertyArea; //New property area
+            GrassSize->setLabel("Heightmap Length"); //Its label
+            GrassSize->vector = &this->grass[static_cast<unsigned int>(i)].scale; //Ptr to our vector
+            GrassSize->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
+            inspector->addPropertyArea(GrassSize);
+
         }
 
         //Add texture picker UI elements
@@ -1531,8 +1544,29 @@ void TerrainProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
     }
 }
 
-void TerrainProperty::DrawMesh(){
+void TerrainProperty::DrawMesh(RenderPipeline* pipeline){
     data.Draw(false);
+
+    pipeline->grass_shader->Use();
+    pipeline->transformBuffer->bind();
+    for(int texelZ = 0; texelZ < data.W; texelZ ++){
+        for(int texelX = 0; texelX < data.H; texelX ++){
+            TransformProperty* t_ptr = this->go_link.updLinkPtr()->getTransformProperty();
+
+            HeightmapTexel* texel_ptr = &this->data.data[texelZ * data.W + texelX];
+            if(texel_ptr->grass > 0){
+                HeightmapGrass* grass = &this->grass[texel_ptr->grass - 1];
+                ZSVECTOR3 pos = t_ptr->translation + ZSVECTOR3(texelZ, texel_ptr->height, texelX);
+                ZSMATRIX4x4 m = getScaleMat(ZSVECTOR3(grass->scale.X, grass->scale.Y, grass->scale.X)) * getTranslationMat(pos);
+
+                grass->diffuse->Use(0);
+
+             //
+                pipeline->transformBuffer->writeData(sizeof (ZSMATRIX4x4) * 2, sizeof (ZSMATRIX4x4), &m);
+                Engine::getGrassMesh()->Draw();
+            }
+        }
+    }
 }
 
 void TerrainProperty::onUpdate(float deltaTime){
@@ -1589,6 +1623,10 @@ void TerrainProperty::onValueChanged(){
         HeightmapTexturePair* pair = &this->textures[i];
         pair->diffuse = game_data->resources->getTextureByLabel(pair->diffuse_relpath);
         pair->normal = game_data->resources->getTextureByLabel(pair->normal_relpath);
+    }
+    for(unsigned int i = 0; i < static_cast<unsigned int>(this->grassType_size); i ++){
+        HeightmapGrass* pair = &this->grass[i];
+        pair->diffuse = game_data->resources->getTextureByLabel(pair->diffuse_relpath);
     }
 }
 

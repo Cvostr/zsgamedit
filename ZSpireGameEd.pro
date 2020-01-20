@@ -26,6 +26,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++11
 
 SOURCES += \
+    ProjEd/ResourcePicker.cpp \
         main.cpp \
         mainwin.cpp \
     ProjEd/ProjectEdit.cpp \

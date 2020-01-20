@@ -247,6 +247,97 @@ void Float3PropertyArea::setup(){
 Float3PropertyArea::~Float3PropertyArea(){
 
 }
+
+//-------------
+void Float2PropertyArea::destroyContent(){
+
+}
+
+//Float3 definations
+Float2PropertyArea::Float2PropertyArea(){
+    vector = nullptr; //set it to null to avoid crash;
+    type = PEA_TYPE_FLOAT3;
+
+    //Allocating separator labels
+    x_label.setText(QString("X"));
+    x_label.setFixedWidth(INSP_DIMENSION_WIDGET_SIZE);
+    y_label.setText(QString("Y"));
+    y_label.setFixedWidth(INSP_DIMENSION_WIDGET_SIZE);
+
+    //Set specific styles to labels
+    x_label.setStyleSheet("QLabel { color : white; background-color: red }");
+    y_label.setStyleSheet("QLabel { color : white; background-color: green }");
+
+    label_widget->setFixedWidth(100);
+
+    QLocale locale(QLocale::English); //Define english locale to set it to double validator later
+    QDoubleValidator* validator = new QDoubleValidator(-100, 100, 6, nullptr); //Define double validator
+    validator->setLocale(locale); //English locale to accept dost instead of commas
+
+    elem_layout->addWidget(&x_label); //Adding X label
+    x_field.setMinimumWidth(60);
+    x_field.setValidator(validator); //Set double validator
+    elem_layout->addWidget(&x_field); //Adding X text field
+
+    elem_layout->addWidget(&y_label);
+    y_field.setMinimumWidth(60);
+    y_field.setValidator(validator);
+    elem_layout->addWidget(&y_field);
+
+}
+
+void Float2PropertyArea::addToInspector(InspectorWin* win){
+    win->connect(&this->y_field, SIGNAL(textEdited(QString)), win, SLOT(onPropertyChange()));
+    win->connect(&this->x_field, SIGNAL(textEdited(QString)), win, SLOT(onPropertyChange()));
+
+    win->getContentLayout()->addLayout(this->elem_layout);
+
+}
+
+void Float2PropertyArea::writeNewValues(){
+    if(this->vector == nullptr) //If vector hasn't been set
+        return; //Go out
+    //Get current values in text fields
+    float vX = this->x_field.text().toFloat();
+    float vY = this->y_field.text().toFloat();
+
+    if(!REAL_NUM_EQ(vector->X, vX) || !REAL_NUM_EQ(vector->Y, vY)){
+        //Store old values
+        GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(this->go_property);
+        getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
+    }
+    //Write new values
+    this->vector->X = vX;
+    this->vector->Y = vY;
+
+    PropertyEditArea::callPropertyUpdate();
+}
+
+void Float2PropertyArea::updateValues(){
+    if(this->vector == nullptr) //If vector hasn't been set
+        return; //Go out
+    //Get current values in textt fields
+    float vX = this->x_field.text().toFloat();
+    float vY = this->y_field.text().toFloat();
+    //if variables content changed
+    if(!REAL_NUM_EQ(vector->X, vX) || !REAL_NUM_EQ(vector->Y, vY)){
+        this->x_field.setText(QString::number(static_cast<double>(vector->X)));
+        this->y_field.setText(QString::number(static_cast<double>(vector->Y)));
+    }
+}
+
+void Float2PropertyArea::setup(){
+    if(this->vector == nullptr)
+        return;
+    x_field.setText(QString::number(static_cast<double>(vector->X)));
+    y_field.setText(QString::number(static_cast<double>(vector->Y)));
+}
+
+Float2PropertyArea::~Float2PropertyArea(){
+
+}
+
+
 //String property area stuff
 StringPropertyArea::StringPropertyArea(){
     type = PEA_TYPE_STRING;
@@ -352,81 +443,7 @@ void FloatPropertyArea::updateValues(){
     }
 }
 
-//Pick resoource area stuff
-PickResourceArea::PickResourceArea(RESOURCE_TYPE resource_type){
-    type = PEA_TYPE_RESPICK;
-    this->rel_path_std = nullptr;
-    this->resource_type = resource_type; //Default type is texture
 
-    isShowNoneItem = false;
-
-    respick_btn = new QPushButton; //Allocation of QPushButton
-    elem_layout->addSpacing(6);
-    relpath_label = new QLabelResourcePickWgt(this); //Allocation of resource relpath text
-    elem_layout->addWidget(relpath_label);
-    //Space between text and button
-    elem_layout->addSpacing(6);
-    elem_layout->addWidget(respick_btn);
-    respick_btn->setText("Select...");
-
-    this->dialog = new ResourcePickDialog; //Allocation of dialog
-    dialog->area = this;
-    dialog->resource_text = this->relpath_label;
-
-}
-PickResourceArea::~PickResourceArea(){
-
-}
-
-void PickResourceArea::destroyContent(){
-    delete respick_btn;
-    delete dialog;
-    delete relpath_label;
-}
-
-void PickResourceArea::addToInspector(InspectorWin* win){
-    QObject::connect(respick_btn,  SIGNAL(clicked()), dialog, SLOT(onNeedToShow())); //On click on this button dialog will be shown
-    win->getContentLayout()->addLayout(elem_layout);
-}
-
-void PickResourceArea::setup(){
-   // QString resource_relpath = *this->rel_path;
-}
-
-void PickResourceArea::updateLabel(){
-    if(this->rel_path_std == nullptr) //If vector hasn't been set
-        return; //Go out
-
-    bool resource_specified = *rel_path_std != "@none";
-
-    if((this->resource_type == RESOURCE_TYPE_MATERIAL || this->resource_type == RESOURCE_TYPE_TEXTURE) && resource_specified){
-        std::string fpath = _editor_win->project.root_path + "/";
-
-        fpath += *rel_path_std;
-
-        QImage* img = nullptr;
-        //Set resource pixmap
-        if(_editor_win->thumb_master->isAvailable(fpath))
-            img = _editor_win->thumb_master->texture_thumbnails.at(fpath);
-        if(img)
-            relpath_label->setPixmap(QPixmap::fromImage(*img));
-        relpath_label->setScaledContents(true);
-
-        relpath_label->setMinimumSize(QSize(50, 50));
-        relpath_label->setMaximumSize(QSize(50, 50));
-    }else{
-        relpath_label->setText(QString::fromStdString(*rel_path_std));
-    }
-}
-
-void PickResourceArea::updateValues(){
-    if(this->rel_path_std == nullptr) //If vector hasn't been set
-        return; //Go out
-    //Get current value in text field
-    QString cur = this->relpath_label->text();
-
-    updateLabel();
-}
 
 IntPropertyArea::IntPropertyArea(){
     type = PEA_TYPE_INT;
@@ -477,115 +494,6 @@ void IntPropertyArea::updateValues(){
     }
 }
 
-void ResourcePickDialog::onResourceSelected(){
-    if(area->rel_path_std == nullptr) return;
-
-    QListWidgetItem* selected = this->list->currentItem();
-    QString resource_path = selected->text(); //Get selected text
-    //Make action
-    GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(area->go_property);
-    getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
-    //Apply resource change
-    *area->rel_path_std = resource_path.toStdString();
-
-    area->PropertyEditArea::callPropertyUpdate();
-    this->resource_text->setText(resource_path);
-    emit accept(); //Close dailog with positive answer
-}
-
-void ResourcePickDialog::onDialogClose(){
-
-}
-
-void ResourcePickDialog::onNeedToShow(){
-
-    if(this->area->resource_type == RESOURCE_TYPE_TEXTURE || this->area->resource_type == RESOURCE_TYPE_MATERIAL || this->area->resource_type == RESOURCE_TYPE_MESH){
-        this->list->setViewMode(QListView::IconMode);
-        this->list->setIconSize(QSize(75, 75));
-    }
-
-    this->extension_mask = area->extension_mask; //send extension mask
-    this->list->clear();
-    //Receiving pointer to project
-    unsigned int resources_num = game_data->resources->getResourcesSize();
-
-    if(area->isShowNoneItem){
-        new QListWidgetItem("@none", this->list);
-    }
-
-    if(area->resource_type < RESOURCE_TYPE_FILE){ // if it is an resource
-        //Iterate over all resources
-        for(unsigned int res_i = 0; res_i < resources_num; res_i ++){
-            Engine::ZsResource* resource_ptr = game_data->resources->getResourceByIndex(res_i);
-            if(resource_ptr->resource_type == area->resource_type){ //if type is the same
-                QListWidgetItem* item = new QListWidgetItem(QString::fromStdString(resource_ptr->resource_label), this->list); //add resource to list
-                QImage* img = nullptr;
-                std::string fpath;
-                if(this->area->resource_type == RESOURCE_TYPE_TEXTURE || this->area->resource_type == RESOURCE_TYPE_MATERIAL)
-                    fpath = _editor_win->project.root_path + "/" + resource_ptr->resource_label;
-
-                if(this->area->resource_type == RESOURCE_TYPE_MESH)
-                    fpath = resource_ptr->resource_label;
-
-                if(_editor_win->thumb_master->isAvailable(fpath))
-                    img = _editor_win->thumb_master->texture_thumbnails.at(fpath);
-                if(img)
-                    item->setIcon(QIcon(QPixmap::fromImage(*img)));
-            }
-        }
-    }else{ //we want to pick common file
-        findFiles(QString::fromStdString(project_ptr->root_path));
-    }
-    this->show();
-    //update label content
-    area->updateLabel();
-}
-
-void ResourcePickDialog::findFiles(QString directory){
-    //Obtain pointer to project
-    QDir _directory (directory); //Creating QDir object
-    _directory.setFilter(QDir::Files | QDir::Dirs | QDir::NoSymLinks | QDir::NoDot | QDir::NoDotDot);
-    _directory.setSorting(QDir::DirsLast); //I want to recursive call this function after all files
-
-    QFileInfoList list = _directory.entryInfoList(); //Get folder content iterator
-
-    for(int i = 0; i < list.size(); i ++){ //iterate all files, skip 2 last . and ..
-        QFileInfo fileInfo = list.at(i);  //get iterated file info
-
-        if(fileInfo.isFile() == true){ //we found a file
-            QString name = fileInfo.fileName();
-            if(name.endsWith(extension_mask)){ //if extension matches
-                QString wlabel = directory + "/" + name;
-                wlabel.remove(0, static_cast<int>(project_ptr->root_path.size()) + 1); //Remove path to project
-                new QListWidgetItem(wlabel, this->list);
-            }
-        }
-
-        if(fileInfo.isDir() == true){ //If it is directory
-            QString newdir_str = directory + "/"+ fileInfo.fileName();
-            findFiles(newdir_str);  //Call this function inside next dir
-        }
-    }
-}
-
-ResourcePickDialog::ResourcePickDialog(QWidget* parent) :
-    QDialog (parent, Qt::WindowTitleHint | Qt::WindowSystemMenuHint){
-    resize(700, 600);
-    contentLayout = new QGridLayout(this); // Alocation of layout
-    list = new QListWidget;
-    this->setWindowTitle("Select Resource");
-
-    contentLayout->addWidget(list);
-    connect(this->list, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(onResourceSelected())); //Connect to slot
-    connect(this, SIGNAL(rejected()), this, SLOT(onDialogClose())); //Connect to slot
-    setLayout(contentLayout);
-
-}
-
-ResourcePickDialog::~ResourcePickDialog(){
-    delete list;
-    delete contentLayout;
-}
 ColorDialogArea::ColorDialogArea(){
     type = PEA_TYPE_COLOR;
     pick_button.setText("Pick color");
@@ -704,64 +612,30 @@ void ComboBoxArea::writeNewValues(){ //Virtual, to check widget state
     PropertyEditArea::callPropertyUpdate();
 }
 
-QLabelResourcePickWgt::QLabelResourcePickWgt(PropertyEditArea* area_ptr, QWidget* parent) : QLabel (parent){
-    setAcceptDrops(true);
-    this->area_ptr = area_ptr;
-    //Set size as slim text
-    setMaximumSize(QSize(100000, 50));
+GameobjectPickArea::GameobjectPickArea(){
+    this->type = PEA_TYPE_GOBJECT_PICK;
+
+    this->property_label = new QLabelResourcePickWgt(this); //Allocation of resource relpath text
+    gameobject_ptr_ptr = nullptr;
+    elem_layout->addWidget(property_label);
+}
+GameobjectPickArea::~GameobjectPickArea(){
+    delete property_label;
 }
 
-void QLabelResourcePickWgt::dragEnterEvent( QDragEnterEvent* event ){
-    event->acceptProposedAction();
-}
-void QLabelResourcePickWgt::dropEvent( QDropEvent* event ){
+void GameobjectPickArea::setup(){
+    GameObject* obj_ptr = *this->gameobject_ptr_ptr;
 
-    assert(event);
-    QList<QListWidgetItem*> file_dropped = _editor_win->getFilesListWidget()->selectedItems();
-    QList<QTreeWidgetItem*> object_dropped = _editor_win->getObjectListWidget()->selectedItems();
-    //We drooped common file
-    if(file_dropped.length() > 0){
-        //Get pointer to resource picker
-        PickResourceArea* resource_area = static_cast<PickResourceArea*>(area_ptr);
-        if(resource_area->rel_path_std == nullptr) return;
-        //if we drooped texture to texture pick area
-        if((resource_area->resource_type == RESOURCE_TYPE_TEXTURE && (file_dropped[0]->text().endsWith(".dds") || file_dropped[0]->text().endsWith(".DDS")))
-                || (resource_area->resource_type == RESOURCE_TYPE_MATERIAL && (file_dropped[0]->text().endsWith(".zsmat")))){
-
-            QString newpath = _editor_win->getCurrentDirectory() + "/" + file_dropped[0]->text();
-            newpath.remove(0, static_cast<int>(_editor_win->project.root_path.size()) + 1);
-            //Set new relative path
-            *resource_area->rel_path_std = newpath.toStdString();
-
-            GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(area_ptr->go_property);
-            getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
-            //Apply resource change
-            area_ptr->PropertyEditArea::callPropertyUpdate();
-        }
-    }
-
-    if(object_dropped.length() > 0){
-        GameObject* obj = _editor_win->world.getObjectByLabel(object_dropped[0]->text(0));
-        //if we picking property
-        if(area_ptr->type == PEA_TYPE_PROPPICK){
-            PropertyPickArea* _area_ptr = static_cast<PropertyPickArea*>(area_ptr);
-            GameObjectProperty* prop = obj->getPropertyPtrByType(_area_ptr->prop_type);
-            if(prop != nullptr){ //Property with that type exist
-                //Writing pointer
-                *_area_ptr->property_ptr_ptr = prop;
-                //Assigning object string ID
-                *(_area_ptr->oj_label_ptr) = prop->go_link.updLinkPtr()->str_id;
-            }
-            _area_ptr->setup();
-        }
-
-        if(area_ptr->type == PEA_TYPE_GOBJECT_PICK){
-            GameobjectPickArea* _area_ptr = static_cast<GameobjectPickArea*>(area_ptr);
-            *_area_ptr->gameobject_ptr_ptr = obj;
-            _area_ptr->setup();
-        }
+    if(obj_ptr != nullptr){
+        property_label->setText(*obj_ptr->label);
+    }else {
+        property_label->setText("<none>");
     }
 }
+void GameobjectPickArea::addToInspector(InspectorWin* win){
+    win->getContentLayout()->addLayout(this->elem_layout);
+}
+
 
 PropertyPickArea::PropertyPickArea(PROPERTY_TYPE type){
     this->prop_type = type;
@@ -796,29 +670,5 @@ void PropertyPickArea::setup(){
 }
 
 void PropertyPickArea::addToInspector(InspectorWin* win){
-    win->getContentLayout()->addLayout(this->elem_layout);
-}
-
-GameobjectPickArea::GameobjectPickArea(){
-    this->type = PEA_TYPE_GOBJECT_PICK;
-
-    this->property_label = new QLabelResourcePickWgt(this); //Allocation of resource relpath text
-    gameobject_ptr_ptr = nullptr;
-    elem_layout->addWidget(property_label);
-}
-GameobjectPickArea::~GameobjectPickArea(){
-    delete property_label;
-}
-
-void GameobjectPickArea::setup(){
-    GameObject* obj_ptr = *this->gameobject_ptr_ptr;
-
-    if(obj_ptr != nullptr){
-        property_label->setText(*obj_ptr->label);
-    }else {
-        property_label->setText("<none>");
-    }
-}
-void GameobjectPickArea::addToInspector(InspectorWin* win){
     win->getContentLayout()->addLayout(this->elem_layout);
 }

@@ -197,6 +197,17 @@ void GameObject::saveProperties(std::ofstream* stream){
                 HeightmapTexturePair* texture_pair = &ptr->textures[static_cast<unsigned int>(texture_i)];
                 *stream << texture_pair->diffuse_relpath << " " << texture_pair->normal_relpath << "\n"; //Write material relpath
             }
+            //Write info about all vegetable types
+            for(int grass_i = 0; grass_i < ptr->grassType_size; grass_i ++){
+                HeightmapGrass* grass_ptr = &ptr->grass[static_cast<unsigned int>(grass_i)];
+                //Write grass diffuse texture
+                *stream << grass_ptr->diffuse_relpath << "\n";
+                //Write grass size
+                stream->write(reinterpret_cast<char*>(&grass_ptr->scale.X), sizeof(float));
+                stream->write(reinterpret_cast<char*>(&grass_ptr->scale.Y), sizeof(float));
+                *stream << "\n";
+            }
+
 
             break;
         }
@@ -463,6 +474,19 @@ void GameObject::loadProperty(std::ifstream* world_stream){
 
             ptr->textures.push_back(texture_pair);
         }
+
+        for(int grass_i = 0; grass_i < ptr->grassType_size; grass_i ++){
+            HeightmapGrass grass;
+            //Write grass diffuse texture
+            *world_stream >> grass.diffuse_relpath ;
+            //Write grass size
+            world_stream->seekg(1, std::ofstream::cur);
+            world_stream->read(reinterpret_cast<char*>(&grass.scale.X), sizeof(float));
+            world_stream->read(reinterpret_cast<char*>(&grass.scale.Y), sizeof(float));
+
+            ptr->grass.push_back(grass);
+        }
+
         ptr->onValueChanged();
 
         break;

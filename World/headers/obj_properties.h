@@ -312,7 +312,7 @@ public:
     void addPropertyInterfaceToInspector(InspectorWin* inspector);
     void onRender(RenderPipeline* pipeline);
 
-    void DrawMesh();
+    void DrawMesh(RenderPipeline* pipeline);
     void onValueChanged();
     void onAddToObject();
     void copyTo(GameObjectProperty* dest);
