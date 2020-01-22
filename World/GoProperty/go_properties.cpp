@@ -36,6 +36,9 @@ GameObjectProperty::~GameObjectProperty(){
 void GameObjectProperty::setActive(bool active){
     this->active = active;
 }
+bool GameObjectProperty::isActive(){
+    return active && go_link.updLinkPtr()->active;
+}
 void GameObjectProperty::copyTo(GameObjectProperty* dest){
     dest->active = this->active;
     dest->world_ptr = this->world_ptr;
@@ -553,7 +556,8 @@ void LightsourceProperty::onValueChanged(){
         _inspector_win->updateRequired = true;
         this->_last_light_type = this->light_type;
     }
-
+    //Update transform pointer (if nullptr)
+    updTransformPtr();
     ZSVECTOR3* rot_vec_ptr = &transform->rotation;
     this->direction = _getDirection(rot_vec_ptr->X, rot_vec_ptr->Y, rot_vec_ptr->Z);
 
@@ -755,7 +759,8 @@ void MaterialProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
     area->rel_path_std = &material_path;
     inspector->addPropertyArea(area);
     //No material, exiting
-    if(material_ptr == nullptr) return;
+    if(material_ptr == nullptr || material_ptr->file_path[0] == '@')
+        return;
 
     if(material_ptr->group_ptr->acceptShadows){
         BoolCheckboxArea* receiveShdws = new BoolCheckboxArea;
@@ -777,7 +782,8 @@ void MaterialProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
     inspector->addPropertyArea(mt_shader_group_area);
 
     //if material isn't set up, exiting
-    if(material_ptr->group_ptr == nullptr) return;
+    if(material_ptr->group_ptr == nullptr)
+        return;
     //If set up, iterating over all items
     for(unsigned int prop_i = 0; prop_i < material_ptr->group_ptr->properties.size(); prop_i ++){
         MaterialShaderProperty* prop_ptr = material_ptr->group_ptr->properties[prop_i];
@@ -827,6 +833,15 @@ void MaterialProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
                 break;
             }
             case MATSHPROP_TYPE_FVEC2:{
+                //Cast pointer
+                Float2MaterialShaderProperty* float2_p = static_cast<Float2MaterialShaderProperty*>(prop_ptr);
+                Float2MtShPropConf* float2_conf = static_cast<Float2MtShPropConf*>(conf_ptr);
+
+                Float2PropertyArea* float2_area = new Float2PropertyArea;
+                float2_area->setLabel(QString::fromStdString(float2_p->prop_caption)); //Its label
+                float2_area->vector = &float2_conf->value;
+                float2_area->go_property = static_cast<void*>(this);
+                inspector->addPropertyArea(float2_area);
                 break;
             }
             case MATSHPROP_TYPE_IVEC2:{
@@ -1358,6 +1373,24 @@ void ShadowCasterProperty::onValueChanged(){
     setTextureSize();
 }
 
+bool ShadowCasterProperty::isRenderAvailable(){
+    if(!this->active)
+        return false;
+    if(!this->initialized)
+        init();
+    if(this->go_link.updLinkPtr() == nullptr)
+        return false;
+    //Get lightsource property of object
+    LightsourceProperty* light = this->go_link.updLinkPtr()->getPropertyPtr<LightsourceProperty>();
+
+    if(light == nullptr)
+        return false;
+        //if light gameobject disabled
+    if(!light->isActive())
+            return false;
+    return true;
+}
+
 void ShadowCasterProperty::copyTo(GameObjectProperty* dest){
     if(dest->type != this->type) return; //if it isn't script group
 
@@ -1555,13 +1588,12 @@ void TerrainProperty::DrawMesh(RenderPipeline* pipeline){
 
             HeightmapTexel* texel_ptr = &this->data.data[texelZ * data.W + texelX];
             if(texel_ptr->grass > 0){
-                HeightmapGrass* grass = &this->grass[texel_ptr->grass - 1];
+                HeightmapGrass* grass = &this->grass[static_cast<unsigned int>(texel_ptr->grass - 1)];
                 ZSVECTOR3 pos = t_ptr->translation + ZSVECTOR3(texelZ, texel_ptr->height, texelX);
                 ZSMATRIX4x4 m = getScaleMat(ZSVECTOR3(grass->scale.X, grass->scale.Y, grass->scale.X)) * getTranslationMat(pos);
 
                 grass->diffuse->Use(0);
 
-             //
                 pipeline->transformBuffer->writeData(sizeof (ZSMATRIX4x4) * 2, sizeof (ZSMATRIX4x4), &m);
                 Engine::getGrassMesh()->Draw();
             }
@@ -1699,6 +1731,8 @@ void TerrainProperty::modifyTerrainVertex(unsigned char* gl_data, bool isCtrlHol
                     req->originY = i;
                     req->range = range;
                     req->grass = vegetableid;
+                    if(mul < 0)
+                        req->grass = 0;
                 }
                 queryTerrainModifyRequest(req);
                 return;

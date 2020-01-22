@@ -71,6 +71,7 @@ public:
     World* world_ptr; //Sometimes may be useful
 
     void setActive(bool active);
+    bool isActive();
 
     GameObjectProperty();
     virtual ~GameObjectProperty();

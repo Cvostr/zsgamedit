@@ -231,6 +231,7 @@ public:
     void Draw(Engine::Camera* cam, RenderPipeline* pipeline);
     void setTexture();
     void setTextureSize();
+    bool isRenderAvailable();
     ShadowCasterProperty();
 };
 

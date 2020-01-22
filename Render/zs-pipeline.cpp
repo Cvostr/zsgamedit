@@ -315,6 +315,7 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr){
             break;
         }
         case PERSP_3D:{
+
             render3D(projectedit_ptr, cam);
             break;
         }
@@ -328,7 +329,7 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr){
 
         float dist = getDistance(cam_ptr->camera_pos, editwin_ptr->obj_trstate.obj_ptr->getTransformProperty()->_last_translation);
 
-        if(this->project_struct_ptr->perspective == 2) dist = 70.0f;
+        if(this->project_struct_ptr->perspective == PERSP_2D) dist = 70.0f;
         getGizmosRenderer()->drawTransformControls(editwin_ptr->obj_trstate.obj_ptr->getTransformProperty()->_last_translation, dist, dist / 10.f);
     }
 
@@ -568,24 +569,24 @@ void MaterialProperty::onRender(RenderPipeline* pipeline){
     if(material_ptr == nullptr) return;
 
     MtShaderPropertiesGroup* group_ptr = material_ptr->group_ptr;
-
     if( group_ptr == nullptr) return ; //if object hasn't property
 
     //Get pointer to shadowcaster
     ShadowCasterProperty* shadowcast = static_cast<ShadowCasterProperty*>(pipeline->getRenderSettings()->shadowcaster_ptr);
     //Bind shadow uniform buffer
     pipeline->shadowBuffer->bind();
-    if(shadowcast != nullptr && this->material_ptr->group_ptr->acceptShadows && this->receiveShadows){
+
+    int recShadows = 1;
+
+    if(shadowcast == nullptr){
+        //In GLSL we should use Integer instead of bool
+        recShadows = 0;
+    }else if(!receiveShadows || !shadowcast->isActive()){
+        recShadows = 0;
+    }else
         shadowcast->setTexture();
-        //In GLSL we should use Integer instead of bool
-        int recShadows = static_cast<int>(this->receiveShadows);
-        pipeline->shadowBuffer->writeData(sizeof (ZSMATRIX4x4) * 2 + 4, 4, &recShadows);
-    }
-    if(!this->receiveShadows || shadowcast == nullptr || !shadowcast->active){
-        //In GLSL we should use Integer instead of bool
-        int recShadows = 0;
-        pipeline->shadowBuffer->writeData(sizeof (ZSMATRIX4x4) * 2 + 4, 4, &recShadows);
-    }
+
+    pipeline->shadowBuffer->writeData(sizeof (ZSMATRIX4x4) * 2 + 4, 4, &recShadows);
 
     material_ptr->applyMatToPipeline();
 }
@@ -688,7 +689,8 @@ void SkyboxProperty::onPreRender(RenderPipeline* pipeline){
 }
 
 void SkyboxProperty::DrawSky(RenderPipeline* pipeline){
-    if(!this->active) return;
+    if(!this->isActive())
+        return;
     if(this->go_link.updLinkPtr() == nullptr) return;
     //Get pointer to Material property
     MaterialProperty* mat = this->go_link.updLinkPtr()->getPropertyPtr<MaterialProperty>();
@@ -705,20 +707,21 @@ void ShadowCasterProperty::onPreRender(RenderPipeline* pipeline){
 }
 
 void ShadowCasterProperty::Draw(Engine::Camera* cam, RenderPipeline* pipeline){
-    if(!this->active) return;
-    if(!this->initialized) init();
-    if(this->go_link.updLinkPtr() == nullptr) return;
+    if(!isRenderAvailable()){
+        glViewport(0, 0, TextureWidth, TextureHeight);
+        glBindFramebuffer(GL_FRAMEBUFFER, shadowBuffer); //Bind framebuffer
+        glClear(GL_DEPTH_BUFFER_BIT);
+        return;
+    }
 
     LightsourceProperty* light = this->go_link.updLinkPtr()->getPropertyPtr<LightsourceProperty>();
-
-    if(light == nullptr) return;
 
     //ZSVECTOR3 cam_pos = cam->getCameraPosition() + cam->getCameraFrontVec() * 20;
     ZSVECTOR3 cam_pos = cam->getCameraPosition() - light->direction * 20;
     this->LightProjectionMat = getOrthogonal(-projection_viewport, projection_viewport, -projection_viewport, projection_viewport, nearPlane, farPlane);
     this->LightViewMat = matrixLookAt(cam_pos, cam_pos + light->direction * -1, ZSVECTOR3(0,1,0));
-
-    glViewport(0, 0, TextureWidth, TextureHeight); //Changing viewport
+    //Changing viewport to texture sizes
+    glViewport(0, 0, TextureWidth, TextureHeight);
 
     glBindFramebuffer(GL_FRAMEBUFFER, shadowBuffer); //Bind framebuffer
     glClear(GL_DEPTH_BUFFER_BIT);
@@ -737,9 +740,9 @@ void ShadowCasterProperty::Draw(Engine::Camera* cam, RenderPipeline* pipeline){
     pipeline->shadowBuffer->writeData(sizeof (ZSMATRIX4x4) * 2 + 8, 4, &this->TextureWidth);
     //Send Height of shadow texture
     pipeline->shadowBuffer->writeData(sizeof (ZSMATRIX4x4) * 2 + 12, 4, &this->TextureHeight);
-
+    //Use shadowmap shader to draw objects
     pipeline->getShadowmapShader()->Use();
-
+    //Render to depth all scene
     pipeline->renderDepth(this->go_link.world_ptr);
 
     glFrontFace(GL_CCW);

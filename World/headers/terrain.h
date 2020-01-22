@@ -38,7 +38,6 @@ typedef struct HeightmapTexel{
     unsigned char texture_factors[TERRAIN_TEXTURES_AMOUNT];
     int grass;
 
-
     HeightmapTexel(){
         grass = 0;
     }
@@ -61,7 +60,8 @@ typedef struct HeightmapTexturePair{
 
     HeightmapTexturePair(){
         diffuse_relpath = normal_relpath = "@none";
-        diffuse = normal = nullptr;
+        diffuse = nullptr;
+        normal = nullptr;
     }
 }HeightmapTexturePair;
 

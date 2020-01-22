@@ -350,6 +350,7 @@ void TerrainData::saveToFile(const char* file_path){
         world_stream.write(reinterpret_cast<char*>(&data[i].height), sizeof(float));
         for(int tex_factor = 0; tex_factor < TERRAIN_TEXTURES_AMOUNT; tex_factor ++)
             world_stream.write(reinterpret_cast<char*>(&data[i].texture_factors[tex_factor]), sizeof(unsigned char));
+        world_stream.write(reinterpret_cast<char*>(&data[i].grass), sizeof(int));
     }
 
     world_stream.close();
@@ -382,6 +383,7 @@ bool TerrainData::loadFromFile(const char* file_path){
         //Iterate over all textures
         for(int tex_factor = 0; tex_factor < TERRAIN_TEXTURES_AMOUNT; tex_factor ++)
             world_stream.read(reinterpret_cast<char*>(&data[i].texture_factors[tex_factor]), sizeof(unsigned char));
+        world_stream.read(reinterpret_cast<char*>(&data[i].grass), sizeof(int));
     }
 
     world_stream.close();
