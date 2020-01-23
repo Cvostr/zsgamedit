@@ -47,7 +47,6 @@ SOURCES += \
     World/GoProperty/tile_properties.cpp \
     Misc/AssimpMeshLoader.cpp \
     Render/GizmosRenderer.cpp \
-    Misc/GlyphManager.cpp \
     Misc/EditorManager.cpp \
     Scripting/zsensdk_input.cpp \
     ProjEd/EditorSettings.cpp \
@@ -75,7 +74,6 @@ HEADERS += \
     Misc/headers/zs_types.h \
     Misc/headers/AssimpMeshLoader.h \
     Render/headers/GizmosRenderer.h \
-    Misc/headers/GlyphManager.h \
     Misc/headers/EditorManager.h \
     ProjEd/headers/EditorSettings.h \
     World/headers/terrain.h \
@@ -143,7 +141,7 @@ win32:DEPENDPATH += $$PWD/../../LIBS/LUABRIDGE
 win32: LIBS += -L$$PWD/../../LIBS/BULLET/STATIC_DEBUG -lBulletSoftBody_Debug -lBulletDynamics_Debug -lBulletCollision_Debug -lLinearMath_Debug
 #-------------------------------------------------- ZSPIRE ENGINE Library ---------------------
 
-unix: LIBS += -L$$PWD/../debug_engine/ -lzsengine -lvulkan -lopenal
+unix: LIBS += -L$$PWD/../debug_engine/ -lzsengine -lvulkan -lopenal -lfreetype
 win32: LIBS += -L$$PWD/../debug_engine/debug/ -lzsengine -lvulkan-1 -lOpenAL_x64
 
 INCLUDEPATH += $$PWD/../zspirengine/headers

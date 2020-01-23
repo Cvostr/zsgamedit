@@ -36,7 +36,7 @@ struct EditorSettings{
     }
 };
 
-class EditorSettingsManager : public EditorComponentManager{
+class EditorSettingsManager : public EngineComponentManager{
 private:
     EditorSettings* settings_ptr;
 public:

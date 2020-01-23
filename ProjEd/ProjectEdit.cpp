@@ -1508,7 +1508,7 @@ void ObjectTransformState::setTransformOnObject(GO_TRANSFORM_MODE transformMode)
     getActionManager()->newPropertyAction(prop_ptr->go_link, GO_PROPERTY_TYPE_TRANSFORM);
 }
 
-void EditWindow::startManager(EditorComponentManager* manager){
+void EditWindow::startManager(EngineComponentManager* manager){
     manager->setDpMetrics(this->settings.gameViewWin_Width, this->settings.gameViewWin_Height);
     manager->setProjectStructPtr(&this->project);
     manager->init();

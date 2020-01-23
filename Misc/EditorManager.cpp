@@ -1,5 +1,5 @@
 #include "headers/EditorManager.h"
-
+/*
 EditorComponentManager::EditorComponentManager(){
 
 }
@@ -24,3 +24,4 @@ void EditorComponentManager::init(){
 void EditorComponentManager::updateWindowSize(int W, int H){
 
 }
+*/

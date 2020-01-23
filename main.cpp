@@ -8,6 +8,7 @@
 static uint64_t NOW = SDL_GetPerformanceCounter();
 static uint64_t last = 0;
 static float deltaTime = 0;
+bool infocus = true;
 
 bool working = true; //Application started and it is working
 
@@ -37,11 +38,14 @@ int main(int argc, char *argv[]){
                     if(event.window.event == SDL_WINDOWEVENT_MINIMIZED){
                         w.edit_win_ptr->hide();
                         w.edit_win_ptr->getInspector()->hide();
+                        infocus = false;
                     }
                     if(event.window.event == SDL_WINDOWEVENT_RESTORED){
                         w.edit_win_ptr->show();
                         w.edit_win_ptr->getInspector()->show();
+                        infocus = true;
                     }
+
                     if(event.window.event == SDL_WINDOWEVENT_RESIZED){
                         w.edit_win_ptr->setGameViewWindowSize(event.window.data1, event.window.data2);
                         //Write new settings
@@ -116,7 +120,7 @@ int main(int argc, char *argv[]){
                     }
 
                 }
-                if(w.edit_win_ptr->ready == true){ //If GL is ready to draw
+                if(w.edit_win_ptr->ready == true && infocus){ //If GL is ready to draw
                     w.edit_win_ptr->getInspector()->updateAreasChanges();
                     w.edit_win_ptr->edit_camera.updateTick(deltaTime); //Update camera, if it is moving
 

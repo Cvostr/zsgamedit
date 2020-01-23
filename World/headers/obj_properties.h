@@ -247,8 +247,6 @@ public:
     //Caclulated node transform
     ZSMATRIX4x4 abs;
 
-    //bool hasBone;
-
     void addPropertyInterfaceToInspector(InspectorWin* inspector);
     void onPreRender(RenderPipeline* pipeline);
     void copyTo(GameObjectProperty* dest);
@@ -297,10 +295,11 @@ public:
     std::vector<HeightmapTexturePair> textures;
     std::vector<HeightmapGrass> grass;
 
-    QString file_label;
+    std::string file_label;
     int Width; //Width of terrain mesh
     int Length; //Height of terrain mesh
     int MaxHeight;
+    float GrassDensity;
     bool castShadows;
     int textures_size;
     int grassType_size;

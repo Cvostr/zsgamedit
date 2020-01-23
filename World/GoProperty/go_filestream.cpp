@@ -179,7 +179,7 @@ void GameObject::saveProperties(std::ofstream* stream){
         }
         case GO_PROPERTY_TYPE_TERRAIN:{
             TerrainProperty* ptr = static_cast<TerrainProperty*>(property_ptr);
-            *stream << ptr->file_label.toStdString() << "\n"; //Write material relpath
+            *stream << ptr->file_label << "\n"; //Write material relpath
             //write dimensions
             stream->write(reinterpret_cast<char*>(&ptr->Width), sizeof(float));
             stream->write(reinterpret_cast<char*>(&ptr->Length), sizeof(float));
@@ -190,7 +190,7 @@ void GameObject::saveProperties(std::ofstream* stream){
 
             *stream << "\n";
 
-            std::string fpath = project_ptr->root_path + "/" + ptr->file_label.toStdString();
+            std::string fpath = project_ptr->root_path + "/" + ptr->file_label;
             ptr->getTerrainData()->saveToFile(fpath.c_str());
             //Write textures relative pathes
             for(int texture_i = 0; texture_i < ptr->textures_size; texture_i ++){
@@ -447,9 +447,7 @@ void GameObject::loadProperty(std::ifstream* world_stream){
     }
     case GO_PROPERTY_TYPE_TERRAIN:{
         TerrainProperty* ptr = static_cast<TerrainProperty*>(prop_ptr);
-        std::string file_path;
-        *world_stream >> file_path; //Write material relpath
-        ptr->file_label = QString::fromStdString(file_path);
+        *world_stream >> ptr->file_label; //Write material relpath
         world_stream->seekg(1, std::ofstream::cur);
         //read dimensions
         world_stream->read(reinterpret_cast<char*>(&ptr->Width), sizeof(float));
@@ -459,7 +457,7 @@ void GameObject::loadProperty(std::ifstream* world_stream){
         world_stream->read(reinterpret_cast<char*>(&ptr->textures_size), sizeof(int));
         world_stream->read(reinterpret_cast<char*>(&ptr->grassType_size), sizeof(int));
 
-        std::string fpath = project_ptr->root_path + "/" + ptr->file_label.toStdString();
+        std::string fpath = project_ptr->root_path + "/" + ptr->file_label;
         bool result = ptr->getTerrainData()->loadFromFile(fpath.c_str());
         if(result) //if loading sucessstd::cout << "Terrain : Probably, missing terrain file" << file_path;
             ptr->getTerrainData()->generateGLMesh();

@@ -97,6 +97,27 @@ public:
     void updateValues();
 };
 
+class Int2PropertyArea : public PropertyEditArea{
+public:
+
+    QLineEdit x_field; //Text digit field for X coord
+    QLineEdit y_field; //Text digit field for Y coord
+
+    int* vector; //Output variable
+
+    QLabel x_label; //To write X separator
+    QLabel y_label; //To write Y separator
+
+    Int2PropertyArea();
+    ~Int2PropertyArea();
+
+    void destroyContent();
+    void setup(); //Virtual
+    void updateValues(); //on text fields or other edited
+    void addToInspector(InspectorWin* win);
+    void writeNewValues(); //Virtual, on values changed
+};
+
 class BoolCheckboxArea : public PropertyEditArea{
 public:
     bool* bool_ptr; //pointer to modifying bool

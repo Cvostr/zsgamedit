@@ -51,7 +51,7 @@ public:
     void Destroy();
 };
 
-class RenderPipeline : public EditorComponentManager{
+class RenderPipeline : public EngineComponentManager{
 private:
     GizmosRenderer* gizmos;
 

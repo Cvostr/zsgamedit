@@ -21,7 +21,7 @@ struct Project;
 #include "../../World/headers/World.h"
 #include "../../Misc/headers/ProjBuilder.h"
 #include "../../Misc/headers/zs_types.h"
-#include "../../Misc/headers/GlyphManager.h"
+#include "misc/GlyphManager.h"
 #include "../../Misc/headers/ThumbnailsMaster.h"
 
 enum GO_TRANSFORM_MODE{
@@ -140,7 +140,7 @@ public slots:
 private:
     QApplication* app_ptr;
     //Vector to store all editor managers
-    std::vector<EditorComponentManager*> managers;
+    std::vector<EngineComponentManager*> managers;
 
     QString current_dir; //current directory path string
     QString scene_path;
@@ -219,7 +219,7 @@ public:
 
     void resizeEvent(QResizeEvent* event);
 
-    void startManager(EditorComponentManager* manager);
+    void startManager(EngineComponentManager* manager);
     void updateDeltaTime(float deltaTime);
     void destroyAllManagers();
     GlyphFontContainer* getFontContainer(std::string label);

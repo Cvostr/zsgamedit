@@ -256,7 +256,7 @@ void Float2PropertyArea::destroyContent(){
 //Float3 definations
 Float2PropertyArea::Float2PropertyArea(){
     vector = nullptr; //set it to null to avoid crash;
-    type = PEA_TYPE_FLOAT3;
+    type = PEA_TYPE_FLOAT2;
 
     //Allocating separator labels
     x_label.setText(QString("X"));
@@ -334,6 +334,96 @@ void Float2PropertyArea::setup(){
 }
 
 Float2PropertyArea::~Float2PropertyArea(){
+
+}
+
+
+//-------------
+void Int2PropertyArea::destroyContent(){
+
+}
+
+//Float3 definations
+Int2PropertyArea::Int2PropertyArea(){
+    vector = nullptr; //set it to null to avoid crash;
+    type = PEA_TYPE_INT2;
+
+    //Allocating separator labels
+    x_label.setText(QString("X"));
+    x_label.setFixedWidth(INSP_DIMENSION_WIDGET_SIZE);
+    y_label.setText(QString("Y"));
+    y_label.setFixedWidth(INSP_DIMENSION_WIDGET_SIZE);
+
+    //Set specific styles to labels
+    x_label.setStyleSheet("QLabel { color : white; background-color: red }");
+    y_label.setStyleSheet("QLabel { color : white; background-color: green }");
+
+    label_widget->setFixedWidth(100);
+
+    QLocale locale(QLocale::English); //Define english locale to set it to double validator later
+    QDoubleValidator* validator = new QDoubleValidator(-100, 100, 6, nullptr); //Define double validator
+    validator->setLocale(locale); //English locale to accept dost instead of commas
+
+    elem_layout->addWidget(&x_label); //Adding X label
+    x_field.setMinimumWidth(60);
+    x_field.setValidator(validator); //Set double validator
+    elem_layout->addWidget(&x_field); //Adding X text field
+
+    elem_layout->addWidget(&y_label);
+    y_field.setMinimumWidth(60);
+    y_field.setValidator(validator);
+    elem_layout->addWidget(&y_field);
+
+}
+
+void Int2PropertyArea::addToInspector(InspectorWin* win){
+    win->connect(&this->y_field, SIGNAL(textEdited(QString)), win, SLOT(onPropertyChange()));
+    win->connect(&this->x_field, SIGNAL(textEdited(QString)), win, SLOT(onPropertyChange()));
+
+    win->getContentLayout()->addLayout(this->elem_layout);
+
+}
+
+void Int2PropertyArea::writeNewValues(){
+    if(this->vector == nullptr) //If vector hasn't been set
+        return; //Go out
+    //Get current values in text fields
+    int vX = this->x_field.text().toInt();
+    int vY = this->y_field.text().toInt();
+
+    if(vector[0] != vX || vector[1] != vY){
+        //Store old values
+        GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(this->go_property);
+        getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
+    }
+    //Write new values
+    this->vector[0] = vX;
+    this->vector[1] = vY;
+
+    PropertyEditArea::callPropertyUpdate();
+}
+
+void Int2PropertyArea::updateValues(){
+    if(this->vector == nullptr) //If vector hasn't been set
+        return; //Go out
+    //Get current values in textt fields
+    int vX = this->x_field.text().toInt();
+    int vY = this->y_field.text().toInt();
+    //if variables content changed
+    if(vector[0] != vX || vector[1] != vY){
+        this->x_field.setText(QString::number(vector[0]));
+        this->y_field.setText(QString::number(vector[1]));
+    }
+}
+
+void Int2PropertyArea::setup(){
+    if(this->vector == nullptr)
+        return;
+    this->x_field.setText(QString::number(vector[0]));
+    this->y_field.setText(QString::number(vector[1]));
+}
+
+Int2PropertyArea::~Int2PropertyArea(){
 
 }
 

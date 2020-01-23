@@ -845,6 +845,15 @@ void MaterialProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
                 break;
             }
             case MATSHPROP_TYPE_IVEC2:{
+                //Cast pointer
+                Int2MaterialShaderProperty* int2_p = static_cast<Int2MaterialShaderProperty*>(prop_ptr);
+                Int2MtShPropConf* int2_conf = static_cast<Int2MtShPropConf*>(conf_ptr);
+
+                Int2PropertyArea* int2_area = new Int2PropertyArea;
+                int2_area->setLabel(QString::fromStdString(int2_p->prop_caption)); //Its label
+                int2_area->vector = &int2_conf->value[0];
+                int2_area->go_property = static_cast<void*>(this);
+                inspector->addPropertyArea(int2_area);
                 break;
             }
             case MATSHPROP_TYPE_INTEGER:{
@@ -1413,6 +1422,7 @@ TerrainProperty::TerrainProperty(){
     this->Width = 500;
     this->Length = 500;
     this->MaxHeight = 500;
+    GrassDensity = 1.0f;
     castShadows = true;
     textures_size = 0;
     grassType_size = 0;
@@ -1549,6 +1559,12 @@ void TerrainProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
         vSize->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
         inspector->addPropertyArea(vSize);
 
+        FloatPropertyArea* fDensity = new FloatPropertyArea; //New property area
+        fDensity->setLabel("Grass density"); //Its label
+        fDensity->value = &this->GrassDensity; //Ptr to our vector
+        fDensity->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
+        inspector->addPropertyArea(fDensity);
+
         for(int i = 0; i < this->grassType_size; i ++){
             QRadioButton* group_radio = new QRadioButton; //allocate first radio
             group_radio->setText("Veg " + QString::number(i));
@@ -1580,13 +1596,19 @@ void TerrainProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
 void TerrainProperty::DrawMesh(RenderPipeline* pipeline){
     data.Draw(false);
 
+    float delta = 1.0f / GrassDensity;
+
     pipeline->grass_shader->Use();
     pipeline->transformBuffer->bind();
-    for(int texelZ = 0; texelZ < data.W; texelZ ++){
-        for(int texelX = 0; texelX < data.H; texelX ++){
+    for(float texelZ = 0; texelZ < data.W; texelZ += delta){
+        for(float texelX = 0; texelX < data.H; texelX += delta){
+
+            int texelXi = floor(texelX);
+            int texelZi = floor(texelZ);
+
             TransformProperty* t_ptr = this->go_link.updLinkPtr()->getTransformProperty();
 
-            HeightmapTexel* texel_ptr = &this->data.data[texelZ * data.W + texelX];
+            HeightmapTexel* texel_ptr = &this->data.data[texelZi * data.W + texelXi];
             if(texel_ptr->grass > 0){
                 HeightmapGrass* grass = &this->grass[static_cast<unsigned int>(texel_ptr->grass - 1)];
                 ZSVECTOR3 pos = t_ptr->translation + ZSVECTOR3(texelZ, texel_ptr->height, texelX);
@@ -1667,13 +1689,13 @@ void TerrainProperty::onAddToObject(){
     genRandomString(&terrain_random_prefix, 4);
 
     //relative path to terrain file
-    this->file_label = *this->go_link.updLinkPtr()->label + "_" + QString::fromStdString(terrain_random_prefix) + ".terrain";
+    this->file_label = this->go_link.updLinkPtr()->label->toStdString() + "_" + terrain_random_prefix + ".terrain";
     //Allocate terrain
     data.alloc(this->Width, this->Length);
     //Generate opengl mesh to draw
     data.generateGLMesh();
     //absolute path to terrain file
-    std::string fpath = project_ptr->root_path + "/" + this->file_label.toStdString();
+    std::string fpath = project_ptr->root_path + "/" + this->file_label;
     //Create and save file
     data.saveToFile(fpath.c_str());
 }
@@ -1773,6 +1795,7 @@ void TerrainProperty::copyTo(GameObjectProperty* dest){
     _dest->Width = this->Width;
     _dest->Length = this->Length;
     _dest->MaxHeight = this->MaxHeight;
+    _dest->GrassDensity = this->GrassDensity;
     _dest->file_label = this->file_label;
     _dest->castShadows = this->castShadows;
     _dest->textures_size = this->textures_size;

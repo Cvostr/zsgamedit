@@ -11,7 +11,7 @@
 #include <map>
 #include <QPixmap>
 
-class ThumbnailsMaster : public EditorComponentManager{
+class ThumbnailsMaster : public EngineComponentManager{
 public:
 
     std::map<std::string, QImage*> texture_thumbnails;
