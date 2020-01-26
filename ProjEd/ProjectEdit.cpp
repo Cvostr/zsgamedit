@@ -217,6 +217,9 @@ void EditWindow::init(){
 
     game_data = new ZSGAME_DATA;
     game_data->resources = new Engine::ResourceManager;
+    startManager(game_data->resources);
+
+    game_data->glyph_manager = this->glyph_manager;
 
 
     std::string absolute = project.root_path + "/";
@@ -455,7 +458,7 @@ void EditWindow::onNewMaterial(){
 void EditWindow::openRenderSettings(){
     _inspector_win->clearContentLayout(); //clear everything, that was before
 
-    RenderSettings* ptr = this->render->getRenderSettings();
+    Engine::RenderSettings* ptr = this->render->getRenderSettings();
 
     ColorDialogArea* lcolor = new ColorDialogArea;
     lcolor->setLabel("Ambient light color");
@@ -617,9 +620,6 @@ bool EditWindow::onCloseProject(){
         _editor_win->close();
         _inspector_win->close();
 
-        //Release all resources
-        //And delete ResourceManager class
-        delete game_data->resources;
         delete game_data;
         Engine::Loader::stop();
         stopTerrainThread();

@@ -59,7 +59,8 @@ typedef struct HeightmapTexturePair{
     Engine::TextureResource* normal;
 
     HeightmapTexturePair(){
-        diffuse_relpath = normal_relpath = "@none";
+        diffuse_relpath = "@none";
+        normal_relpath = "@none";
         diffuse = nullptr;
         normal = nullptr;
     }

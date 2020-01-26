@@ -309,7 +309,7 @@ void World::loadGameObject(GameObject* object_ptr, std::ifstream* world_stream){
 }
 
 void World::saveToFile(QString file){
-    RenderSettings* settings_ptr = renderer->getRenderSettings();
+    Engine::RenderSettings* settings_ptr = renderer->getRenderSettings();
 
     std::string fpath = file.toStdString();
 
@@ -347,7 +347,7 @@ void World::saveToFile(QString file){
 
 
 void World::openFromFile(QString file, QTreeWidget* w_ptr){
-    RenderSettings* settings_ptr = renderer->getRenderSettings();
+    Engine::RenderSettings* settings_ptr = renderer->getRenderSettings();
     this->obj_widget_ptr = w_ptr;
 
     clear(); //Clear all objects

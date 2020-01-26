@@ -1,5 +1,5 @@
-#ifndef ZSPIPELINE_H
-#define ZSPIPELINE_H
+#ifndef ZSPIPELINE_H_1
+#define ZSPIPELINE_H_1
 #define GLEW_STATIC
 #include <GL/glew.h>
 #include <render/zs-shader.h>
@@ -12,6 +12,8 @@
 #include <QMainWindow>
 #include <SDL2/SDL.h>
 
+#include "render/zs-pipeline.h"
+
 enum PIPELINE_STATE {
     PIPELINE_STATE_DEFAULT,
     PIPELINE_STATE_PICKING,
@@ -19,43 +21,12 @@ enum PIPELINE_STATE {
     PIPELINE_STATE_SHADOWDEPTH
 };
 
-struct RenderSettings {
-    ZSRGBCOLOR ambient_light_color;
-
-    void* skybox_ptr;
-    void* shadowcaster_ptr;
-
-    void defaults();
-    void resetPointers();
-
-    RenderSettings(){
-        defaults();
-    }
-};
-
-class G_BUFFER_GL{
-protected:
-    unsigned int depthBuffer;
-    unsigned int gBuffer; //framebuffer
-    unsigned int tDiffuse; //To store RGB diffuse Color A - shininess
-    unsigned int tNormal; //To store normal coordinate
-    unsigned int tPos; //To store position coordinate
-    unsigned int tTransparent; //To store color with alpha
-    unsigned int tMasks;
-public:
-    bool created;
-    G_BUFFER_GL();
-    void create(int width, int height);
-    void bindFramebuffer();
-    void bindTextures();
-    void Destroy();
-};
 
 class RenderPipeline : public EngineComponentManager{
 private:
     GizmosRenderer* gizmos;
 
-    G_BUFFER_GL gbuffer;
+    Engine::G_BUFFER_GL gbuffer;
 
     Engine::Shader* tile_shader; //Shader to draw tiles
     Engine::Shader* pick_shader; //Shader to draw & pick objects
@@ -68,7 +39,7 @@ private:
 
     std::vector<void*> lights_ptr;
 
-    RenderSettings render_settings;
+    Engine::RenderSettings render_settings;
 public:
     Engine::Shader* diffuse3d_shader;
     Engine::Shader* grass_shader;
@@ -105,7 +76,7 @@ public:
     Engine::Camera* cam;
     void* win_ptr;
 
-    RenderSettings* getRenderSettings();
+    Engine::RenderSettings* getRenderSettings();
     GizmosRenderer* getGizmosRenderer();
 
     void renderSprite(Engine::Texture* texture_sprite, int X, int Y, int scaleX, int scaleY);

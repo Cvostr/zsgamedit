@@ -26,6 +26,9 @@ layout (std140) uniform Default3d{
     bool hasHeightMap;
 
     float material_shininess;
+    
+    int _u;
+    int _v;
 };
 
 layout (std140, binding = 0) uniform CamMatrices{
@@ -58,7 +61,7 @@ vec2 processParallaxMapUv(vec2 uv){
 
 void main(){
 
-	vec2 uv = UVCoord;
+	vec2 uv = vec2(UVCoord.x * _u, UVCoord.y * _v);
 	
 	vec3 result = vec3(1.0, 1.0, 1.0); //Default value
 	vec3 Normal = InNormal; //defaultly, use normals from mesh
