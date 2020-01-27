@@ -199,6 +199,19 @@ void EditWindow::init(){
     SDL_GL_SetSwapInterval(1); // Enable vsync
     SDL_SetWindowResizable(window, SDL_TRUE);
     std::cout << "SDL - GL context creation requested!" << std::endl;
+    glewExperimental = GL_TRUE;
+    std::cout << "Calling GLEW creation" << std::endl;
+
+    if (glewInit() != GLEW_OK){
+        std::cout << "OPENGL GLEW: Creation failed ";
+        return;
+    }
+
+    std::cout << "GLEW creation successful" << std::endl;
+
+    ZSGAME_DESC* game_desc = new ZSGAME_DESC;
+    game_desc->game_perspective = project.perspective;
+    engine_ptr->desc = game_desc;
 
     //init render
     render = new RenderPipeline;
@@ -211,9 +224,6 @@ void EditWindow::init(){
     this->thumb_master = new ThumbnailsMaster;
     this->startManager(thumb_master);
 
-    ZSGAME_DESC* game_desc = new ZSGAME_DESC;
-    game_desc->game_perspective = project.perspective;
-    engine_ptr->desc = game_desc;
 
     game_data = new ZSGAME_DATA;
     game_data->resources = new Engine::ResourceManager;

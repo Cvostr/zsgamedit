@@ -22,41 +22,20 @@ enum PIPELINE_STATE {
 };
 
 
-class RenderPipeline : public EngineComponentManager{
+class RenderPipeline : public Engine::RenderPipeline{
 private:
     GizmosRenderer* gizmos;
 
-    Engine::G_BUFFER_GL gbuffer;
 
-    Engine::Shader* tile_shader; //Shader to draw tiles
     Engine::Shader* pick_shader; //Shader to draw & pick objects
     Engine::Shader* obj_mark_shader; //Shader to draw mark of selected objects
-    Engine::Shader* ui_shader;
-    Engine::Shader* deffered_light;
-    Engine::Shader* skybox;
-    Engine::Shader* shadowMap;
-    Engine::Shader* heightmap;
 
-    std::vector<void*> lights_ptr;
 
-    Engine::RenderSettings render_settings;
 public:
-    Engine::Shader* diffuse3d_shader;
-    Engine::Shader* grass_shader;
 
-    Engine::UniformBuffer* transformBuffer;
-    Engine::UniformBuffer* lightsBuffer;
-    Engine::UniformBuffer* shadowBuffer;
-    Engine::UniformBuffer* terrainUniformBuffer;
-    Engine::UniformBuffer* skinningUniformBuffer;
-    Engine::UniformBuffer* tileMaterialUniformBuffer;
-    Engine::UniformBuffer* skyboxTransformUniformBuffer;
-    Engine::UniformBuffer* uiUniformBuffer;
-    Engine::UniformBuffer* instancedTransformBuffer;
+
     Engine::UniformBuffer* editorUniformBuffer;
 
-    bool depthTest; //if enabled, GL will do depth testing
-    bool cullFaces; //if enabled, GL will cull faces
     PIPELINE_STATE current_state;
     void setup(int bufWidth, int bufHeight);
     bool InitGLEW();
@@ -70,13 +49,9 @@ public:
     ZSRGBCOLOR getColorOfPickedTransformControl(int mouseX, int mouseY, void* projectedit_ptr);
 
     void updateShadersCameraInfo(Engine::Camera* cam_ptr);
-    void addLight(void* light_ptr);
-    void removeLights();
-    void setLightsToBuffer();
     Engine::Camera* cam;
     void* win_ptr;
 
-    Engine::RenderSettings* getRenderSettings();
     GizmosRenderer* getGizmosRenderer();
 
     void renderSprite(Engine::Texture* texture_sprite, int X, int Y, int scaleX, int scaleY);
@@ -86,7 +61,6 @@ public:
     void init();
     void updateWindowSize(int W, int H);
 
-    Engine::Shader* getTileShader();
     Engine::Shader* getPickingShader();
     Engine::Shader* getShadowmapShader();
     Engine::Shader* getUiShader();

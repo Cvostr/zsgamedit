@@ -10,10 +10,6 @@ RenderPipeline::RenderPipeline(){
     this->cullFaces = false;
 }
 
-Engine::RenderSettings* RenderPipeline::getRenderSettings(){
-    return &this->render_settings;
-}
-
 GizmosRenderer* RenderPipeline::getGizmosRenderer(){
     return this->gizmos;
 }
@@ -21,85 +17,19 @@ GizmosRenderer* RenderPipeline::getGizmosRenderer(){
 void RenderPipeline::setup(int bufWidth, int bufHeight){
     this->pick_shader = Engine::allocShader();
     this->obj_mark_shader = Engine::allocShader();
-    this->ui_shader = Engine::allocShader();
 
-
-    if(this->project_struct_ptr->perspective == PERSP_2D){
-        this->tile_shader = Engine::allocShader();
-        this->tile_shader->compileFromFile("Shaders/2d_tile/tile2d.vert", "Shaders/2d_tile/tile2d.frag");
-    }
     this->pick_shader->compileFromFile("Shaders/pick/pick.vert", "Shaders/pick/pick.frag");
     this->obj_mark_shader->compileFromFile("Shaders/mark/mark.vert", "Shaders/mark/mark.frag");
-    this->ui_shader->compileFromFile("Shaders/ui/ui.vert", "Shaders/ui/ui.frag");
-    if(this->project_struct_ptr->perspective == PERSP_3D){
-        //Allocate shaders to render 3D
-        this->diffuse3d_shader = Engine::allocShader();
-        this->deffered_light = Engine::allocShader();
-        this->skybox = Engine::allocShader();
-        shadowMap = Engine::allocShader();
-        heightmap = Engine::allocShader();
-        grass_shader = Engine::allocShader();
 
-        this->deffered_light->compileFromFile("Shaders/postprocess/deffered_light/deffered.vert",
-                                             "Shaders/postprocess/deffered_light/deffered.frag");
-        this->diffuse3d_shader->compileFromFile("Shaders/3d/3d.vert", "Shaders/3d/3d.frag");
-        skybox->compileFromFile("Shaders/skybox/skybox.vert", "Shaders/skybox/skybox.frag");
-        shadowMap->compileFromFile("Shaders/shadowmap/shadowmap.vert", "Shaders/shadowmap/shadowmap.frag");
-        heightmap->compileFromFile("Shaders/heightmap/heightmap.vert", "Shaders/heightmap/heightmap.frag");
-        grass_shader->compileFromFile("Shaders/heightmap/grass.vert", "Shaders/heightmap/grass.frag");
+    if(this->project_struct_ptr->perspective == PERSP_3D){
         this->gbuffer.create(bufWidth, bufHeight);
     }
-    Engine::setupDefaultMeshes();
     removeLights();
-    //Initialize transform uniform buffer with connection to 0
-    transformBuffer = Engine::allocUniformBuffer();
-    transformBuffer->init(0, sizeof (ZSMATRIX4x4) * 3 + 16 * 2);
-    //Initialize lighting uniform buffer with connection to 1
-    lightsBuffer = Engine::allocUniformBuffer();
-    lightsBuffer->init(1, 64 * MAX_LIGHTS_AMOUNT + 16 * 2);
-
-    shadowBuffer = Engine::allocUniformBuffer();
-    shadowBuffer->init(2, sizeof (ZSMATRIX4x4) * 2 + 16);
-
-    terrainUniformBuffer = Engine::allocUniformBuffer();
-    terrainUniformBuffer->init(3, 12 * 16 * 2 + 4 * 3);
-
-    {
-        //Allocate 150 matrices for skinning
-        skinningUniformBuffer = Engine::allocUniformBuffer();
-        skinningUniformBuffer->init(4, sizeof (ZSMATRIX4x4) * MAX_MESH_BONES);
-
-        for(unsigned int i = 0; i < MAX_MESH_BONES; i ++){
-            ZSMATRIX4x4 m = getIdentity();
-            skinningUniformBuffer->writeData(sizeof (ZSMATRIX4x4) * i, sizeof (ZSMATRIX4x4), &m);
-        }
-    }
-
-    tileMaterialUniformBuffer = Engine::allocUniformBuffer();
-    tileMaterialUniformBuffer->init(5, 28);
-
-    skyboxTransformUniformBuffer = Engine::allocUniformBuffer();
-    skyboxTransformUniformBuffer->init(6, sizeof (ZSMATRIX4x4) * 2);
-
-    uiUniformBuffer = Engine::allocUniformBuffer();
-    uiUniformBuffer->init(7, sizeof (ZSMATRIX4x4) * 2 + 16 + 16);
 
     editorUniformBuffer = Engine::allocUniformBuffer();
     editorUniformBuffer->init(8, 16);
 
-    {
-        instancedTransformBuffer = Engine::allocUniformBuffer();
-        instancedTransformBuffer->init(9, sizeof (ZSMATRIX4x4) * INSTANCED_RENDER_BUFFER_SIZE);
 
-        for(unsigned int i = 0; i < INSTANCED_RENDER_BUFFER_SIZE; i ++){
-            ZSMATRIX4x4 m = getIdentity();
-            instancedTransformBuffer->writeData(sizeof (ZSMATRIX4x4) * i, sizeof (ZSMATRIX4x4), &m);
-        }
-    }
-
-    if(this->project_struct_ptr->perspective == PERSP_3D){
-        MtShProps::genDefaultMtShGroup(diffuse3d_shader, skybox, heightmap, 9);
-    }
 }
 
 void RenderPipeline::initGizmos(int projectPespective){
@@ -110,25 +40,8 @@ void RenderPipeline::initGizmos(int projectPespective){
 }
 
 RenderPipeline::~RenderPipeline(){
-    transformBuffer->Destroy();
-    lightsBuffer->Destroy();
-    shadowBuffer->Destroy();
-    terrainUniformBuffer->Destroy();
-
-    if(this->project_struct_ptr->perspective == PERSP_2D){
-        this->tile_shader->Destroy();
-    }
     this->pick_shader->Destroy();
     this->obj_mark_shader->Destroy();
-    if(this->project_struct_ptr->perspective == PERSP_3D){
-        this->deffered_light->Destroy();
-        this->diffuse3d_shader->Destroy();
-        ui_shader->Destroy();
-        skybox->Destroy();
-        shadowMap->Destroy();
-        heightmap->Destroy();
-    }
-    Engine::freeDefaultMeshes();
 
     this->gbuffer.Destroy();
     removeLights();
@@ -151,7 +64,7 @@ bool RenderPipeline::InitGLEW(){
 void RenderPipeline::init(){
     glViewport(0, 0, this->WIDTH, this->HEIGHT);
 
-    InitGLEW();
+    //InitGLEW();
 
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     glEnable(GL_LINE_SMOOTH);
@@ -253,34 +166,6 @@ unsigned int RenderPipeline::render_getpickedObj(void* projectedit_ptr, int mous
     return pr_data;
 }
 
-void RenderPipeline::setLightsToBuffer(){
-    lightsBuffer->bind();
-    for(unsigned int light_i = 0; light_i < this->lights_ptr.size(); light_i ++){
-        LightsourceProperty* _light_ptr = static_cast<LightsourceProperty*>(lights_ptr[light_i]);
-        //Set light type to buffer
-        lightsBuffer->writeData(64 * light_i, sizeof (int), &_light_ptr->light_type);
-        //Set light range to buffer
-        lightsBuffer->writeData(64 * light_i + 4, sizeof (float), &_light_ptr->range);
-        //Set lights intensity to buffer
-        lightsBuffer->writeData(64 * light_i + 8, sizeof (float), &_light_ptr->intensity);
-        lightsBuffer->writeData(64 * light_i + 12, sizeof (float), &_light_ptr->spot_angle);
-        lightsBuffer->writeData(64 * light_i + 16, 12, &_light_ptr->last_pos);
-        lightsBuffer->writeData(64 * light_i + 32, 12, &_light_ptr->direction);
-        lightsBuffer->writeData(64 * light_i + 48, 4, &_light_ptr->color.gl_r);
-        lightsBuffer->writeData(64 * light_i + 52, 4, &_light_ptr->color.gl_g);
-        lightsBuffer->writeData(64 * light_i + 56, 4, &_light_ptr->color.gl_b);
-    }
-
-    int ls = static_cast<int>(lights_ptr.size());
-    lightsBuffer->writeData(64 * MAX_LIGHTS_AMOUNT, 4, &ls);
-
-    ZSVECTOR3 ambient_L = ZSVECTOR3(render_settings.ambient_light_color.r / 255.0f,render_settings.ambient_light_color.g / 255.0f, render_settings.ambient_light_color.b / 255.0f);
-    lightsBuffer->writeData(64 * MAX_LIGHTS_AMOUNT + 16, 12, &ambient_L);
-
-    //free lights array
-    this->removeLights();
-}
-
 void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr){
     EditWindow* editwin_ptr = static_cast<EditWindow*>(projectedit_ptr);
     Engine::Camera* cam_ptr = nullptr; //We'll set it next
@@ -306,12 +191,11 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr){
         case PERSP_3D:{
 
             render3D(projectedit_ptr, cam);
+            Engine::getPlaneMesh2D()->Draw(); //Draw screen
             break;
         }
     }
 
-
-    Engine::getPlaneMesh2D()->Draw(); //Draw screen
 
     //if we control this object
     if(editwin_ptr->obj_trstate.isTransforming == true && !editwin_ptr->isWorldCamera){
@@ -643,7 +527,7 @@ void TileProperty::onRender(RenderPipeline* pipeline){
 
     tile_shader->Use();
 
-    pipeline->tileMaterialUniformBuffer->bind();
+    pipeline->tileBuffer->bind();
 
     //Checking for diffuse texture
     if(texture_diffuse != nullptr){
@@ -651,25 +535,25 @@ void TileProperty::onRender(RenderPipeline* pipeline){
     }
 
     int diffuse1_ = texture_diffuse != nullptr;
-    pipeline->tileMaterialUniformBuffer->writeData(20, 4, &diffuse1_);
+    pipeline->tileBuffer->writeData(20, 4, &diffuse1_);
 
     //Checking for transparent texture
     if(texture_transparent != nullptr){
         texture_transparent->Use(1); //Use this texture
     }
     int diffuse2_ = texture_transparent != nullptr;
-    pipeline->tileMaterialUniformBuffer->writeData(24, 4, &diffuse2_);
+    pipeline->tileBuffer->writeData(24, 4, &diffuse2_);
     //calculate animation state
     int anim_state_i = anim_property.isAnimated && anim_state.playing;
     //Sending animation info
     if(anim_property.isAnimated && anim_state.playing == true){ //If tile animated, then send anim state to shader
-        pipeline->tileMaterialUniformBuffer->writeData(16, 4, &anim_state_i);
-        pipeline->tileMaterialUniformBuffer->writeData(0, 4, &anim_property.framesX);
-        pipeline->tileMaterialUniformBuffer->writeData(4, 4, &anim_property.framesY);
-        pipeline->tileMaterialUniformBuffer->writeData(8, 4, &anim_state.cur_frameX);
-        pipeline->tileMaterialUniformBuffer->writeData(12, 4, &anim_state.cur_frameY);
+        pipeline->tileBuffer->writeData(16, 4, &anim_state_i);
+        pipeline->tileBuffer->writeData(0, 4, &anim_property.framesX);
+        pipeline->tileBuffer->writeData(4, 4, &anim_property.framesY);
+        pipeline->tileBuffer->writeData(8, 4, &anim_state.cur_frameX);
+        pipeline->tileBuffer->writeData(12, 4, &anim_state.cur_frameY);
     }else{ //No animation or unplayed
-        pipeline->tileMaterialUniformBuffer->writeData(16, 4, &anim_state_i);
+        pipeline->tileBuffer->writeData(16, 4, &anim_state_i);
     }
 }
 
@@ -798,14 +682,6 @@ void RenderPipeline::updateShadersCameraInfo(Engine::Camera* cam_ptr){
 
 }
 
-void RenderPipeline::addLight(void* light_ptr){
-    this->lights_ptr.push_back(light_ptr);
-}
-
-void RenderPipeline::removeLights(){
-    this->lights_ptr.clear(); //clear ptr vector
-}
-
 void RenderPipeline::renderSprite(Engine::Texture* texture_sprite, int X, int Y, int scaleX, int scaleY){
     this->ui_shader->Use();
     uiUniformBuffer->bind();
@@ -858,10 +734,6 @@ void RenderPipeline::updateWindowSize(int W, int H){
         this->gbuffer.Destroy();
         this->gbuffer.create(W, H);
     }
-}
-
-Engine::Shader* RenderPipeline::getTileShader(){
-    return this->tile_shader;
 }
 
 Engine::Shader* RenderPipeline::getPickingShader(){
