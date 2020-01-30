@@ -189,7 +189,6 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr){
             break;
         }
         case PERSP_3D:{
-
             render3D(projectedit_ptr, cam);
             Engine::getPlaneMesh2D()->Draw(); //Draw screen
             break;
@@ -422,8 +421,8 @@ void GameObject::processObject(RenderPipeline* pipeline){
     //Obtain camera viewport
     Engine::ZSVIEWPORT cam_viewport = pipeline->cam->getViewport();
     //Distance limit
-    int max_dist = static_cast<int>(cam_viewport.endX - cam_viewport.startX);
-    bool difts = isDistanceFits(pipeline->cam->getCameraViewCenterPos(), transform_prop->_last_translation, max_dist);
+    //int max_dist = static_cast<int>(cam_viewport.endX - cam_viewport.startX);
+    //bool difts = isDistanceFits(pipeline->cam->getCameraViewCenterPos(), transform_prop->_last_translation, max_dist);
 
     //if(difts)
         this->Draw(pipeline);
@@ -660,72 +659,6 @@ void ShadowCasterProperty::setTexture(){
     glBindTexture(GL_TEXTURE_2D, this->shadowDepthTexture);
 }
 
-void RenderPipeline::updateShadersCameraInfo(Engine::Camera* cam_ptr){
-    transformBuffer->bind();
-    ZSMATRIX4x4 proj = cam_ptr->getProjMatrix();
-    ZSMATRIX4x4 view = cam_ptr->getViewMatrix();
-    ZSVECTOR3 cam_pos = cam_ptr->getCameraPosition();
-    transformBuffer->writeData(0, sizeof (ZSMATRIX4x4), &proj);
-    transformBuffer->writeData(sizeof (ZSMATRIX4x4), sizeof (ZSMATRIX4x4), &view);
-    transformBuffer->writeData(sizeof (ZSMATRIX4x4) * 3, sizeof(ZSVECTOR3), &cam_pos);
-    //Setting UI camera to UI buffer
-    uiUniformBuffer->bind();
-    proj = cam_ptr->getUiProjMatrix();
-    uiUniformBuffer->writeData(0, sizeof (ZSMATRIX4x4), &proj);
-    //Setting cameras to skybox shader
-    proj = cam_ptr->getProjMatrix();
-    view = cam_ptr->getViewMatrix();
-    view = removeTranslationFromViewMat(view);
-    skyboxTransformUniformBuffer->bind();
-    skyboxTransformUniformBuffer->writeData(0, sizeof (ZSMATRIX4x4), &proj);
-    skyboxTransformUniformBuffer->writeData(sizeof (ZSMATRIX4x4), sizeof (ZSMATRIX4x4), &view);
-
-}
-
-void RenderPipeline::renderSprite(Engine::Texture* texture_sprite, int X, int Y, int scaleX, int scaleY){
-    this->ui_shader->Use();
-    uiUniformBuffer->bind();
-
-    int _render_mode = 1;
-    uiUniformBuffer->writeData(sizeof (ZSMATRIX4x4) * 2 , 4, &_render_mode);
-    //Use texture at 0 slot
-    texture_sprite->Use(0);
-
-    ZSMATRIX4x4 translation = getTranslationMat(X, Y, 0.0f);
-    ZSMATRIX4x4 scale = getScaleMat(scaleX, scaleY, 0.0f);
-    ZSMATRIX4x4 transform = scale * translation;
-
-    //Push glyph transform
-    uiUniformBuffer->writeData(sizeof (ZSMATRIX4x4), sizeof (ZSMATRIX4x4), &transform);
-
-    Engine::getUiSpriteMesh2D()->Draw();
-}
-
-void RenderPipeline::renderGlyph(unsigned int texture_id, int X, int Y, int scaleX, int scaleY, ZSRGBCOLOR color){
-    this->ui_shader->Use();
-    uiUniformBuffer->bind();
-    //tell shader, that we will render glyph
-    int _render_mode = 2;
-    uiUniformBuffer->writeData(sizeof (ZSMATRIX4x4) * 2 , 4, &_render_mode);
-    //sending glyph color
-    uiUniformBuffer->writeData(sizeof (ZSMATRIX4x4) * 2 + 16, 4, &color.gl_r);
-    uiUniformBuffer->writeData(sizeof (ZSMATRIX4x4) * 2 + 4 + 16, 4, &color.gl_g);
-    uiUniformBuffer->writeData(sizeof (ZSMATRIX4x4) * 2 + 8 + 16, 4, &color.gl_b);
-
-    //Use texture at 0 slot
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture_id);
-
-    ZSMATRIX4x4 translation = getTranslationMat(X, Y, 0.0f);
-    ZSMATRIX4x4 scale = getScaleMat(scaleX, scaleY, 0.0f);
-    ZSMATRIX4x4 transform = scale * translation;
-
-    //Push glyph transform
-    uiUniformBuffer->writeData(sizeof (ZSMATRIX4x4), sizeof (ZSMATRIX4x4), &transform);
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
-    Engine::getUiSpriteMesh2D()->Draw();
-}
 
 void RenderPipeline::updateWindowSize(int W, int H){
      glViewport(0, 0, W, H);

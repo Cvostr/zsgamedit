@@ -32,8 +32,6 @@ private:
 
 
 public:
-
-
     Engine::UniformBuffer* editorUniformBuffer;
 
     PIPELINE_STATE current_state;
@@ -48,15 +46,12 @@ public:
     unsigned int render_getpickedObj(void* projectedit_ptr, int mouseX, int mouseY);
     ZSRGBCOLOR getColorOfPickedTransformControl(int mouseX, int mouseY, void* projectedit_ptr);
 
-    void updateShadersCameraInfo(Engine::Camera* cam_ptr);
     Engine::Camera* cam;
     void* win_ptr;
 
     GizmosRenderer* getGizmosRenderer();
 
-    void renderSprite(Engine::Texture* texture_sprite, int X, int Y, int scaleX, int scaleY);
 
-    void renderGlyph(unsigned int texture_id, int X, int Y, int scaleX, int scaleY, ZSRGBCOLOR color);
     //override virtual function from EngineComponentManager
     void init();
     void updateWindowSize(int W, int H);
