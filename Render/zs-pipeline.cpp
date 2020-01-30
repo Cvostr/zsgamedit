@@ -4,6 +4,8 @@
 #include "../ProjEd/headers/ProjectEdit.h"
 #include <iostream>
 
+#define LIGHT_STRUCT_SIZE 64
+
 RenderPipeline::RenderPipeline(){
     this->current_state = PIPELINE_STATE_DEFAULT;
 
@@ -43,7 +45,6 @@ RenderPipeline::~RenderPipeline(){
     this->pick_shader->Destroy();
     this->obj_mark_shader->Destroy();
 
-    this->gbuffer.Destroy();
     removeLights();
     delete gizmos;
 }
@@ -209,7 +210,6 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr){
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    this->ui_shader->Use();
     GlyphFontContainer* c = editwin_ptr->getFontContainer("LiberationMono-Regular.ttf");
     int f[12];
     f[0] = static_cast<int>(L'H');
@@ -223,7 +223,7 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr){
     f[8] = static_cast<int>(L'r');
     f[9] = static_cast<int>(L'l');
     f[10] = static_cast<int>(L'd');
-    //c->DrawString(f, 11, ZSVECTOR2(10,10));
+    c->DrawString(f, 11, ZSVECTOR2(10,10));
 
     SDL_GL_SwapWindow(w); //Send rendered frame
 }
@@ -308,6 +308,37 @@ void RenderPipeline::renderDepth(void* world_ptr){
             obj_ptr->processObject(this); //Draw object
     }
     this->current_state = PIPELINE_STATE_DEFAULT;
+}
+
+void RenderPipeline::setLightsToBuffer(){
+    this->lightsBuffer->bind();
+    for(unsigned int light_i = 0; light_i < this->lights_ptr.size(); light_i ++){
+        LightsourceProperty* _light_ptr = static_cast<LightsourceProperty*>(lights_ptr[light_i]);
+
+        LIGHTSOURCE_TYPE light_type = (_light_ptr->light_type);
+
+        lightsBuffer->writeData(LIGHT_STRUCT_SIZE * light_i, sizeof (LIGHTSOURCE_TYPE), &light_type);
+        if(_light_ptr->light_type > LIGHTSOURCE_TYPE_DIRECTIONAL){
+            lightsBuffer->writeData(LIGHT_STRUCT_SIZE * light_i + 4, sizeof (float), &_light_ptr->range);
+            lightsBuffer->writeData(LIGHT_STRUCT_SIZE * light_i + 12, sizeof (float), &_light_ptr->spot_angle);
+        }
+        lightsBuffer->writeData(LIGHT_STRUCT_SIZE * light_i + 8, sizeof (float), &_light_ptr->intensity);
+
+        lightsBuffer->writeData(LIGHT_STRUCT_SIZE * light_i + 16, 12, &_light_ptr->last_pos);
+        lightsBuffer->writeData(LIGHT_STRUCT_SIZE * light_i + 32, 12, &_light_ptr->direction);
+        lightsBuffer->writeData(LIGHT_STRUCT_SIZE * light_i + 48, sizeof (int), &_light_ptr->color.gl_r);
+        lightsBuffer->writeData(LIGHT_STRUCT_SIZE * light_i + 52, sizeof (int), &_light_ptr->color.gl_g);
+        lightsBuffer->writeData(LIGHT_STRUCT_SIZE * light_i + 56, sizeof (int), &_light_ptr->color.gl_b);
+    }
+
+    int ls = static_cast<int>(lights_ptr.size());
+    lightsBuffer->writeData(LIGHT_STRUCT_SIZE * MAX_LIGHTS_AMOUNT, 4, &ls);
+
+    ZSVECTOR3 ambient_L = ZSVECTOR3(render_settings.ambient_light_color.r / 255.0f,render_settings.ambient_light_color.g / 255.0f, render_settings.ambient_light_color.b / 255.0f);
+    lightsBuffer->writeData(LIGHT_STRUCT_SIZE * MAX_LIGHTS_AMOUNT + 16, 12, &ambient_L);
+
+    //free lights array
+    this->removeLights();
 }
 
 void GameObject::Draw(RenderPipeline* pipeline){

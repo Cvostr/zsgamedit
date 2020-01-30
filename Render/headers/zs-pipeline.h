@@ -32,6 +32,8 @@ private:
 
 
 public:
+    void setLightsToBuffer();
+
     Engine::UniformBuffer* editorUniformBuffer;
 
     PIPELINE_STATE current_state;
@@ -50,8 +52,6 @@ public:
     void* win_ptr;
 
     GizmosRenderer* getGizmosRenderer();
-
-
     //override virtual function from EngineComponentManager
     void init();
     void updateWindowSize(int W, int H);

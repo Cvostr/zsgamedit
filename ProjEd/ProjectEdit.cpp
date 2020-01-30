@@ -230,6 +230,7 @@ void EditWindow::init(){
     startManager(game_data->resources);
 
     game_data->glyph_manager = this->glyph_manager;
+    game_data->pipeline = this->render;
 
 
     std::string absolute = project.root_path + "/";
