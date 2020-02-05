@@ -66,35 +66,42 @@ typedef struct HeightmapTexturePair{
     }
 }HeightmapTexturePair;
 
-
-class TerrainData{
-private:
-    bool created;
+typedef struct TerrainPainting{
     //OpenGL texture IDs of texture masks
     unsigned int texture_mask1;
     unsigned int texture_mask2;
     unsigned int texture_mask3;
-
+    //Memory for paintings
     unsigned char* _texture;
     unsigned char* _texture1;
     unsigned char* _texture2;
+}TerrainPainting;
+
+class TerrainData{
+private:
+    bool created;
+    //Stores IDs for paintings and memory
+    TerrainPainting painting;
 
     HeightmapVertex* vertices;
     unsigned int* indices;
 
 public:
     int W, H;
+
     bool hasHeightmapChanged;
     bool hasPaintingChanged;
+    bool hasGrassChanged;
+    bool hasPhysicShapeChanged;
 
     btBvhTriangleMeshShape* shape;
-    bool hasPhysicShapeChanged;
 
     unsigned int VAO;
     unsigned int VBO;
     unsigned int EBO;
 
     HeightmapTexel* data;
+
 
     void alloc(int W, int H);
     void flatTerrain(int height);

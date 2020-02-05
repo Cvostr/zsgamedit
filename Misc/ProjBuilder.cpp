@@ -43,6 +43,8 @@ void ProjBuilder::start(){
                 break;
             case RESOURCE_TYPE_ANIMATION : type_str = "ANIMATION";
                 break;
+            case RESOURCE_TYPE_FONT : type_str = "FONT";
+                break;
         }
         window->addToOutput("Resource #" + QString::number(res_i) + " type: " + type_str + " " + QString::fromStdString(res_ptr->rel_path));
         std::string abs_path = (proj_ptr->root_path + "/" + res_ptr->rel_path);

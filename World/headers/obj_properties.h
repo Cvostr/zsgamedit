@@ -23,7 +23,7 @@ public:
     std::vector<std::string> path_names;
 
     void onValueChanged();
-    void addPropertyInterfaceToInspector(InspectorWin* inspector);
+    void addPropertyInterfaceToInspector();
     void shutdown();
     void onUpdate(float deltaTime); //calls update in scripts
     void copyTo(GameObjectProperty* dest);
@@ -43,7 +43,7 @@ public:
 
     ZSVECTOR3 last_pos;
 
-    void addPropertyInterfaceToInspector(InspectorWin* inspector);
+    void addPropertyInterfaceToInspector();
     void onValueChanged(); //Update soud buffer pointer and send source props
     void onUpdate(float deltaTime);
     void onObjectDeleted();
@@ -77,7 +77,7 @@ public:
 
     void setMaterial(Material* mat);
     void setMaterial(std::string path);
-    void addPropertyInterfaceToInspector(InspectorWin* inspector);
+    void addPropertyInterfaceToInspector();
     void onValueChanged();
     void copyTo(GameObjectProperty* dest);
     void onAddToObject(); //will update render flag
@@ -96,7 +96,7 @@ public:
     std::string rootNodeStr;
     GameObject* skinning_root_node;
 
-    void addPropertyInterfaceToInspector(InspectorWin* inspector);
+    void addPropertyInterfaceToInspector();
     void updateMeshPtr(); //Updates pointer according to resource_relpath
     void onValueChanged(); //Update mesh    pointer
     void copyTo(GameObjectProperty* dest);
@@ -124,7 +124,7 @@ public:
 
     ZSLIGHTSOURCE_GL_ID id; //glsl uniform index
 
-    void addPropertyInterfaceToInspector(InspectorWin* inspector);
+    void addPropertyInterfaceToInspector();
     void onValueChanged(); //Update mesh pointer
     void copyTo(GameObjectProperty* dest);
     void updTransformPtr();
@@ -159,7 +159,7 @@ public:
 class ColliderProperty : public PhysicalProperty{
 public:
     void onObjectDeleted(); //unregister in world
-    void addPropertyInterfaceToInspector(InspectorWin* inspector);
+    void addPropertyInterfaceToInspector();
     void copyTo(GameObjectProperty* dest);
     void onUpdate(float deltaTime);
     TransformProperty* getTransformProperty();
@@ -175,7 +175,7 @@ public:
     ZSVECTOR3 linearVel;
     ZSVECTOR3 angularVel;
 
-    void addPropertyInterfaceToInspector(InspectorWin* inspector);
+    void addPropertyInterfaceToInspector();
     void copyTo(GameObjectProperty* dest);
     void onUpdate(float deltaTime);
 
@@ -190,7 +190,7 @@ public:
     ZSVECTOR3 linearVel;
     ZSVECTOR3 angularVel;
 
-    void addPropertyInterfaceToInspector(InspectorWin* inspector);
+    void addPropertyInterfaceToInspector();
     void onUpdate(float deltaTime);
     void copyTo(GameObjectProperty* dest);
     void onValueChanged();
@@ -223,7 +223,7 @@ public:
     float farPlane;
     int projection_viewport;
 
-    void addPropertyInterfaceToInspector(InspectorWin* inspector);
+    void addPropertyInterfaceToInspector();
     void onPreRender(RenderPipeline* pipeline);
     void copyTo(GameObjectProperty* dest);
     void onValueChanged();
@@ -247,7 +247,7 @@ public:
     //Caclulated node transform
     ZSMATRIX4x4 abs;
 
-    void addPropertyInterfaceToInspector(InspectorWin* inspector);
+    void addPropertyInterfaceToInspector();
     void onPreRender(RenderPipeline* pipeline);
     void copyTo(GameObjectProperty* dest);
 
@@ -263,7 +263,7 @@ public:
     Engine::AnimationResource* anim_prop_ptr;
     std::string anim_label;
 
-    void addPropertyInterfaceToInspector(InspectorWin* inspector);
+    void addPropertyInterfaceToInspector();
     void onPreRender(RenderPipeline* pipeline);
     void onValueChanged();
     void copyTo(GameObjectProperty* dest);
@@ -309,7 +309,7 @@ public:
     int textureid;
     int vegetableid;
 
-    void addPropertyInterfaceToInspector(InspectorWin* inspector);
+    void addPropertyInterfaceToInspector();
     void onRender(RenderPipeline* pipeline);
 
     void DrawMesh(RenderPipeline* pipeline);
@@ -318,9 +318,9 @@ public:
     void copyTo(GameObjectProperty* dest);
     void onUpdate(float deltaTime);
     TerrainProperty();
-    void onMouseClick(int posX, int posY, int screenX, int screenY, bool isLeftButtonHold, bool isCtrlHold);
-    void onMouseMotion(int posX, int posY, int screenX, int screenY, bool isLeftButtonHold, bool isCtrlHold);
-    void getPickedVertexId(int posX, int posY, int screenX, int screenY, unsigned char* data);
+    void onMouseClick(int posX, int posY, int screenY, bool isLeftButtonHold, bool isCtrlHold);
+    void onMouseMotion(int posX, int posY, int screenY, bool isLeftButtonHold, bool isCtrlHold);
+    void getPickedVertexId(int posX, int posY, int screenY, unsigned char* data);
 
     void modifyTerrainVertex(unsigned char* gl_data, bool isCtrlHold);
 

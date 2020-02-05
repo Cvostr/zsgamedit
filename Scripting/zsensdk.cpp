@@ -140,10 +140,10 @@ void ZSENSDK::bindSDK(lua_State* state){
         .addVariable("PROPERTY_LIGHTSOURCE", &prop_light)
         .addVariable("PROPERTY_TILE", &prop_tile)
 
-        .beginClass <GameObjectProperty>("ObjectProperty")
-        .addFunction("setActive", &GameObjectProperty::setActive)
-        .addData("active", &GameObjectProperty::active, false)
-        .addData("type", &GameObjectProperty::type, false)
+        .beginClass <Engine::GameObjectProperty>("ObjectProperty")
+        .addFunction("setActive", &Engine::GameObjectProperty::setActive)
+        .addData("active", &Engine::GameObjectProperty::active, false)
+        .addData("type", &Engine::GameObjectProperty::type, false)
         .endClass()
 
 
@@ -185,14 +185,14 @@ void ZSENSDK::bindSDK(lua_State* state){
         .endClass()
 
 
-        .deriveClass <LightsourceProperty, GameObjectProperty>("LightSource")
+        .deriveClass <LightsourceProperty, Engine::GameObjectProperty>("LightSource")
         .addData("intensity", &LightsourceProperty::intensity)
         .addData("range", &LightsourceProperty::range)
         .addData("color", &LightsourceProperty::color)
         .addData("spot_angle", &LightsourceProperty::spot_angle)
         .endClass()
 
-        .deriveClass <TransformProperty, GameObjectProperty>("Transform")
+        .deriveClass <TransformProperty, Engine::GameObjectProperty>("Transform")
         .addData("translation", &TransformProperty::translation, false)
         .addData("scale", &TransformProperty::scale, false)
         .addData("rotation", &TransformProperty::rotation, false)
@@ -202,7 +202,7 @@ void ZSENSDK::bindSDK(lua_State* state){
         .endClass()
 
 
-        .deriveClass <AudioSourceProperty, GameObjectProperty>("AudioSource")
+        .deriveClass <AudioSourceProperty, Engine::GameObjectProperty>("AudioSource")
         .addFunction("setAudioFile", &AudioSourceProperty::setAudioFile)
         .addFunction("Play", &AudioSourceProperty::audio_start)
         .addFunction("Stop", &AudioSourceProperty::audio_stop)
@@ -213,7 +213,7 @@ void ZSENSDK::bindSDK(lua_State* state){
         .addFunction("setPitch", &AudioSourceProperty::setPitch)
         .endClass()
 
-        .deriveClass <PhysicalProperty, GameObjectProperty>("Physical")
+        .deriveClass <PhysicalProperty, Engine::GameObjectProperty>("Physical")
         .addData("mass", &PhysicalProperty::mass, false)
         .endClass()
 
@@ -229,19 +229,19 @@ void ZSENSDK::bindSDK(lua_State* state){
          .addFunction("setLinearVelocity", &CharacterControllerProperty::setLinearVelocity)
          .endClass()
 
-        .deriveClass <TileProperty, GameObjectProperty>("Tile2D")
+        .deriveClass <TileProperty, Engine::GameObjectProperty>("Tile2D")
         .addFunction("playAnim", &TileProperty::playAnim)
         .addFunction("setDiffuseTexture", &TileProperty::setDiffuseTexture)
         .addFunction("stopAnim", &TileProperty::stopAnim)
         .endClass()
 
-        .deriveClass <AnimationProperty, GameObjectProperty>("Animation")
+        .deriveClass <AnimationProperty, Engine::GameObjectProperty>("Animation")
         .addFunction("play", &AnimationProperty::play)
         .addFunction("stop", &AnimationProperty::stop)
         .addFunction("setAnimation", &AnimationProperty::setAnimation)
         .endClass()
 
-        .deriveClass <ScriptGroupProperty, GameObjectProperty>("ScriptGroup")
+        .deriveClass <ScriptGroupProperty, Engine::GameObjectProperty>("ScriptGroup")
         .addFunction("getScript", &ScriptGroupProperty::getScriptByName)
         .endClass()
 

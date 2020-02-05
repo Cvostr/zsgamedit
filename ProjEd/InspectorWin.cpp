@@ -144,7 +144,7 @@ void InspectorWin::ShowObjectProperties(void* object_ptr){
         getContentLayout()->addLayout(&prop_title->layout);
         this->registerUiObject(prop_title);
 
-        property_ptr->addPropertyInterfaceToInspector(this); //Add its interface to inspector
+        property_ptr->addPropertyInterfaceToInspector(); //Add its interface to inspector
     }
     addPropButtons(); //add buttons
     gameobject_ptr = static_cast<void*>(obj_ptr);

@@ -902,10 +902,6 @@ RenderPipeline* EditWindow::getRenderPipeline(){
     return render;
 }
 
-GlyphFontContainer* EditWindow::getFontContainer(std::string label){
-    return this->glyph_manager->getFontContainer(label);
-}
-
 void EditWindow::lookForResources(QString path){
     QDir directory (path); //Creating QDir object
     directory.setFilter(QDir::Files | QDir::Dirs | QDir::NoSymLinks | QDir::NoDot | QDir::NoDotDot);
@@ -931,12 +927,16 @@ void EditWindow::lookForResources(QString path){
 void EditWindow::processResourceFile(QFileInfo fileInfo){
     QString name = fileInfo.fileName();
     QString absfpath = fileInfo.absoluteFilePath();
-    if(checkExtension(name, ".ttf")){
-        GlyphFontContainer* gf_container = new GlyphFontContainer(fileInfo.absoluteFilePath().toStdString(), 48, this->glyph_manager);
-        //load font
-        gf_container->loadGlyphs();
-        //register font
-        glyph_manager->addFontContainer(gf_container);
+    if(checkExtension(name, ".ttf")){ //if its font
+        Engine::ZsResource* _resource = new Engine::GlyphResource;
+
+        QString rel_path = absfpath;
+        rel_path.remove(0, static_cast<int>(project.root_path.size()) + 1); //Get relative path by removing length of project root from start
+
+        _resource->rel_path = rel_path.toStdString();
+        _resource->blob_path = _resource->rel_path;
+        _resource->resource_label = _resource->rel_path;
+        game_data->resources->pushResource(_resource);
     }
     if(checkExtension(name, ".dds")){ //If its an texture
         Engine::ZsResource* _resource = new Engine::TextureResource;
@@ -1191,7 +1191,6 @@ void EditWindow::onLeftBtnClicked(int X, int Y){
 
         if(terrain != nullptr && !isWorldCamera)
             terrain->onMouseClick(X, Y,
-                                  settings.gameViewWin_Width,
                                   settings.gameViewWin_Height,
                                   this->input_state.isLeftBtnHold,
                                   this->input_state.isLCtrlHold);
@@ -1271,7 +1270,6 @@ void EditWindow::onMouseMotion(int relX, int relY){
 
         if(terrain != nullptr && !isWorldCamera)
             terrain->onMouseMotion(this->input_state.mouseX, input_state.mouseY,
-                                   settings.gameViewWin_Width,
                                    settings.gameViewWin_Height,
                                    this->input_state.isLeftBtnHold,
                                    this->input_state.isLCtrlHold);

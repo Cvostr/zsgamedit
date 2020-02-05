@@ -16,6 +16,7 @@ void terrain_loop(){
                 case TMT_HEIGHT:{
                     req->terrain->modifyHeight(req->originX, req->originY, req->originHeight, req->range, req->multiplyer);
                     req->terrain->hasHeightmapChanged = true;
+                    req->terrain->hasPhysicShapeChanged = true;
                     break;
                 }
                 case TMT_TEXTURE:{
@@ -88,24 +89,24 @@ void TerrainData::initGL(){
     glGenBuffers(1, &this->VBO);
     glGenBuffers(1, &this->EBO);
 
-    glGenTextures(1, &this->texture_mask1);
-    glBindTexture(GL_TEXTURE_2D, this->texture_mask1);
+    glGenTextures(1, &this->painting.texture_mask1);
+    glBindTexture(GL_TEXTURE_2D, this->painting.texture_mask1);
     // Set texture options
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    glGenTextures(1, &this->texture_mask2);
-    glBindTexture(GL_TEXTURE_2D, this->texture_mask2);
+    glGenTextures(1, &this->painting.texture_mask2);
+    glBindTexture(GL_TEXTURE_2D, this->painting.texture_mask2);
     // Set texture options
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    glGenTextures(1, &this->texture_mask3);
-    glBindTexture(GL_TEXTURE_2D, this->texture_mask3);
+    glGenTextures(1, &this->painting.texture_mask3);
+    glBindTexture(GL_TEXTURE_2D, this->painting.texture_mask3);
     // Set texture options
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -133,7 +134,6 @@ void TerrainData::initPhysics(){
 
     this->shape = new btBvhTriangleMeshShape(va, false);
     hasPhysicShapeChanged = true;
-
 }
 
 void TerrainData::destroyGL(){
@@ -148,11 +148,11 @@ void TerrainData::Draw(bool picking){
     //small optimization in terrain painting
     if(!picking){
         glActiveTexture(GL_TEXTURE24);
-        glBindTexture(GL_TEXTURE_2D, texture_mask1);
+        glBindTexture(GL_TEXTURE_2D, painting.texture_mask1);
         glActiveTexture(GL_TEXTURE25);
-        glBindTexture(GL_TEXTURE_2D, texture_mask2);
+        glBindTexture(GL_TEXTURE_2D, painting.texture_mask2);
         glActiveTexture(GL_TEXTURE26);
-        glBindTexture(GL_TEXTURE_2D, texture_mask3);
+        glBindTexture(GL_TEXTURE_2D, painting.texture_mask3);
     }
     glBindVertexArray(VAO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->EBO);
@@ -162,32 +162,32 @@ void TerrainData::Draw(bool picking){
 
 void TerrainData::updateTextureBuffers(){
     //write temporary array to store texture ids
-    _texture = new unsigned char[W * H * 4];
-    _texture1 = new unsigned char[W * H * 4];
-    _texture2 = new unsigned char[W * H * 4];
+    painting._texture = new unsigned char[W * H * 4];
+    painting._texture1 = new unsigned char[W * H * 4];
+    painting._texture2 = new unsigned char[W * H * 4];
     for(int y = 0; y < H; y ++){
         for(int x = 0; x < W; x ++){
-           _texture[(x * H + y) * 4] = data[x * H + y].texture_factors[0];
-           _texture[(x * H + y) * 4 + 1] = data[x * H + y].texture_factors[1];
-           _texture[(x * H + y) * 4 + 2] = data[x * H + y].texture_factors[2];
-           _texture[(x * H + y) * 4 + 3] = data[x * H + y].texture_factors[3];
+           painting._texture[(x * H + y) * 4] = data[x * H + y].texture_factors[0];
+           painting._texture[(x * H + y) * 4 + 1] = data[x * H + y].texture_factors[1];
+           painting._texture[(x * H + y) * 4 + 2] = data[x * H + y].texture_factors[2];
+           painting._texture[(x * H + y) * 4 + 3] = data[x * H + y].texture_factors[3];
 
-           _texture1[(x * H + y) * 4] = data[x * H + y].texture_factors[4];
-           _texture1[(x * H + y) * 4 + 1] = data[x * H + y].texture_factors[5];
-           _texture1[(x * H + y) * 4 + 2] = data[x * H + y].texture_factors[6];
-           _texture1[(x * H + y) * 4 + 3] = data[x * H + y].texture_factors[7];
+           painting._texture1[(x * H + y) * 4] = data[x * H + y].texture_factors[4];
+           painting._texture1[(x * H + y) * 4 + 1] = data[x * H + y].texture_factors[5];
+           painting._texture1[(x * H + y) * 4 + 2] = data[x * H + y].texture_factors[6];
+           painting._texture1[(x * H + y) * 4 + 3] = data[x * H + y].texture_factors[7];
 
-           _texture2[(x * H + y) * 4] = data[x * H + y].texture_factors[8];
-           _texture2[(x * H + y) * 4 + 1] = data[x * H + y].texture_factors[9];
-           _texture2[(x * H + y) * 4 + 2] = data[x * H + y].texture_factors[10];
-           _texture2[(x * H + y) * 4 + 3] = data[x * H + y].texture_factors[11];
+           painting._texture2[(x * H + y) * 4] = data[x * H + y].texture_factors[8];
+           painting._texture2[(x * H + y) * 4 + 1] = data[x * H + y].texture_factors[9];
+           painting._texture2[(x * H + y) * 4 + 2] = data[x * H + y].texture_factors[10];
+           painting._texture2[(x * H + y) * 4 + 3] = data[x * H + y].texture_factors[11];
         }
     }
 }
 
 void TerrainData::updateTextureBuffersGL(){
     //Create texture masks texture
-    glBindTexture(GL_TEXTURE_2D, this->texture_mask1);
+    glBindTexture(GL_TEXTURE_2D, this->painting.texture_mask1);
     glTexImage2D(
             GL_TEXTURE_2D,
             0,
@@ -197,9 +197,9 @@ void TerrainData::updateTextureBuffersGL(){
             0,
             GL_RGBA,
             GL_UNSIGNED_BYTE,
-            _texture
+            painting._texture
      );
-    glBindTexture(GL_TEXTURE_2D, this->texture_mask2);
+    glBindTexture(GL_TEXTURE_2D, this->painting.texture_mask2);
     glTexImage2D(
             GL_TEXTURE_2D,
             0,
@@ -209,9 +209,9 @@ void TerrainData::updateTextureBuffersGL(){
             0,
             GL_RGBA,
             GL_UNSIGNED_BYTE,
-            _texture1
+            painting._texture1
      );
-    glBindTexture(GL_TEXTURE_2D, this->texture_mask3);
+    glBindTexture(GL_TEXTURE_2D, this->painting.texture_mask3);
     glTexImage2D(
             GL_TEXTURE_2D,
             0,
@@ -221,12 +221,12 @@ void TerrainData::updateTextureBuffersGL(){
             0,
             GL_RGBA,
             GL_UNSIGNED_BYTE,
-            _texture2
+            painting._texture2
      );
 
-    delete [] _texture;
-    delete [] _texture1;
-    delete [] _texture2;
+    delete [] painting._texture;
+    delete [] painting._texture1;
+    delete [] painting._texture2;
 }
 
 void TerrainData::updateGeometryBuffers(){

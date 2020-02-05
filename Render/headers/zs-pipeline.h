@@ -26,7 +26,6 @@ class RenderPipeline : public Engine::RenderPipeline{
 private:
     GizmosRenderer* gizmos;
 
-
     Engine::Shader* pick_shader; //Shader to draw & pick objects
     Engine::Shader* obj_mark_shader; //Shader to draw mark of selected objects
 
@@ -54,7 +53,6 @@ public:
     GizmosRenderer* getGizmosRenderer();
     //override virtual function from EngineComponentManager
     void init();
-    void updateWindowSize(int W, int H);
 
     Engine::Shader* getPickingShader();
     Engine::Shader* getShadowmapShader();

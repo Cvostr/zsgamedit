@@ -6,6 +6,8 @@
 
 #define LIGHT_STRUCT_SIZE 64
 
+extern ZSGAME_DATA* game_data;
+
 RenderPipeline::RenderPipeline(){
     this->current_state = PIPELINE_STATE_DEFAULT;
 
@@ -210,7 +212,7 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr){
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    GlyphFontContainer* c = editwin_ptr->getFontContainer("LiberationMono-Regular.ttf");
+    //GlyphFontContainer* c = game_data->resources->getFontByLabel("LiberationMono-Regular.ttf")->font_ptr;
     int f[12];
     f[0] = static_cast<int>(L'H');
     f[1] = static_cast<int>(L'e');
@@ -223,7 +225,7 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr){
     f[8] = static_cast<int>(L'r');
     f[9] = static_cast<int>(L'l');
     f[10] = static_cast<int>(L'd');
-    c->DrawString(f, 11, ZSVECTOR2(10,10));
+    //c->DrawString(f, 11, ZSVECTOR2(10,10));
 
     SDL_GL_SwapWindow(w); //Send rendered frame
 }
@@ -688,16 +690,6 @@ void ShadowCasterProperty::setTextureSize(){
 void ShadowCasterProperty::setTexture(){
     glActiveTexture(GL_TEXTURE6);
     glBindTexture(GL_TEXTURE_2D, this->shadowDepthTexture);
-}
-
-
-void RenderPipeline::updateWindowSize(int W, int H){
-     glViewport(0, 0, W, H);
-
-    if(gbuffer.created){
-        this->gbuffer.Destroy();
-        this->gbuffer.create(W, H);
-    }
 }
 
 Engine::Shader* RenderPipeline::getPickingShader(){

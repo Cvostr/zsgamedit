@@ -222,7 +222,6 @@ public:
     void startManager(EngineComponentManager* manager);
     void updateDeltaTime(float deltaTime);
     void destroyAllManagers();
-    GlyphFontContainer* getFontContainer(std::string label);
 
     void setGameViewWindowSize(int W, int H);
     void setGameViewWindowMode(unsigned int mode);

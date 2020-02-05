@@ -27,6 +27,7 @@ CONFIG += c++11
 
 SOURCES += \
     ProjEd/ResourcePicker.cpp \
+    World/GoProperty/TerrainComponent.cpp \
         main.cpp \
         mainwin.cpp \
     ProjEd/ProjectEdit.cpp \

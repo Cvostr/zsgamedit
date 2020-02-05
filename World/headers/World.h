@@ -22,6 +22,8 @@
 
 #include <game.h>
 
+#include "world/World.h"
+
 #define OBJ_PROPS_SIZE 11
 #define MAX_OBJS 12000
 
@@ -43,6 +45,7 @@ public:
     GameObjectLink();
 };
 
+
 class ObjectPropertyLink{
 public:
     GameObjectLink object;
@@ -63,27 +66,23 @@ typedef struct WRenderSettings{
 
 }WRenderSettings;
 
-class GameObjectProperty{
+class GameObjectProperty : public Engine::GameObjectProperty{
 public:
-    PROPERTY_TYPE type; //Describe TYPE of property
-    bool active; //Is property working
     GameObjectLink go_link; //link to object, that holds this property
     World* world_ptr; //Sometimes may be useful
 
-    void setActive(bool active);
     bool isActive();
 
     GameObjectProperty();
     virtual ~GameObjectProperty();
 
-    virtual void addPropertyInterfaceToInspector(InspectorWin* inspector);
+    virtual void addPropertyInterfaceToInspector();
     virtual void onValueChanged();
     virtual void copyTo(GameObjectProperty* dest);
     //On object first add
     virtual void onAddToObject();
     virtual void onObjectDeleted();
-    virtual void onUpdate(float deltaTime);
-    virtual void onPreRender(RenderPipeline* pipeline);
+    virtual void onPreRender(RenderPipeline* pipeline = nullptr);
     virtual void onRender(RenderPipeline* pipeline);
     virtual void onTrigger(GameObject* obj);
 };
@@ -94,7 +93,7 @@ public:
     bool isActiveToggle;
     QTreeWidgetItem* list_item_ptr;
 
-    void addPropertyInterfaceToInspector(InspectorWin* inspector);
+    void addPropertyInterfaceToInspector();
     void onValueChanged();
     void copyTo(GameObjectProperty* dest);
 
@@ -116,7 +115,7 @@ public:
     bool boneNode;
 
     void updateMat();
-    void addPropertyInterfaceToInspector(InspectorWin* inspector);
+    void addPropertyInterfaceToInspector();
     void onValueChanged();
     void getAbsoluteParentTransform(ZSVECTOR3& t, ZSVECTOR3& s, ZSVECTOR3& r);
     void onRender(RenderPipeline* pipeline);
@@ -133,7 +132,7 @@ public:
 };
 
 
-class GameObject{
+class GameObject {
 public:
     //Index in objects vector
     int array_index;

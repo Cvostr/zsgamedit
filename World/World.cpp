@@ -669,14 +669,12 @@ void World::recoverFromSnapshot(WorldSnapshot* snapshot){
     this->clear(); //clear world container first
     obj_widget_ptr->clear(); //clear objects tree
     //iterate over all objects in snapshot
-    GameObject* newobj_ptr = nullptr;
-
     for(unsigned int objs_num = 0; objs_num < snapshot->objects.size(); objs_num ++){
         GameObject* obj_ptr = &snapshot->objects[objs_num];
         //Create new object
         GameObject newobj;
         obj_ptr->copyTo(&newobj); //Copy object's settings
-        newobj_ptr = this->addObject(newobj); //add object and store pointer to it's new place
+        this->addObject(newobj); //add object and store pointer to it's new place
     }
     //iterate over all properties in object in snapshot
     for(unsigned int prop_i = 0; prop_i < snapshot->props.size(); prop_i ++){

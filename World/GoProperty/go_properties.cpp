@@ -10,8 +10,6 @@ extern InspectorWin* _inspector_win;
 extern EditWindow* _editor_win;
 extern Project* project_ptr;
 extern ZSGAME_DATA* game_data;
-//selected terrain
-static TerrainProperty* current_terrain_prop;
 //Selected animation
 static AnimationProperty* current_anim;
 
@@ -33,12 +31,6 @@ GameObjectProperty::GameObjectProperty(){
 GameObjectProperty::~GameObjectProperty(){
 
 }
-void GameObjectProperty::setActive(bool active){
-    this->active = active;
-}
-bool GameObjectProperty::isActive(){
-    return active && go_link.updLinkPtr()->active;
-}
 void GameObjectProperty::copyTo(GameObjectProperty* dest){
     dest->active = this->active;
     dest->world_ptr = this->world_ptr;
@@ -51,11 +43,9 @@ void GameObjectProperty::onObjectDeleted(){
 void GameObjectProperty::onAddToObject(){
 
 }
-
-void GameObjectProperty::onUpdate(float deltaTime){
-
+bool GameObjectProperty::isActive(){
+    return active && go_link.updLinkPtr()->active;
 }
-
 void GameObjectProperty::onPreRender(RenderPipeline* pipeline){
     assert(pipeline);
 }
@@ -213,9 +203,7 @@ GameObjectProperty* allocProperty(int type){
 }
 
 //Cast inheritance calls
-void GameObjectProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
-    assert(inspector);
-    std::cout << "addPropertyInterfaceToInspector(" << inspector << ")";
+void GameObjectProperty::addPropertyInterfaceToInspector(){
 }
 
 void GameObjectProperty::onValueChanged(){
@@ -251,26 +239,25 @@ MeshProperty::MeshProperty(){
     this->rootNodeStr = "@none";
 }
 //Transform property functions
-void TransformProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
+void TransformProperty::addPropertyInterfaceToInspector(){
 
     Float3PropertyArea* area_pos = new Float3PropertyArea; //New property area
     area_pos->setLabel("Position"); //Its label
     area_pos->vector = &this->translation; //Ptr to our vector
     area_pos->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
-    inspector->addPropertyArea(area_pos);
+    _inspector_win->addPropertyArea(area_pos);
 
     Float3PropertyArea* area_scale = new Float3PropertyArea; //New property area
     area_scale->setLabel("Scale"); //Its label
     area_scale->vector = &this->scale; //Ptr to our vector
     area_scale->go_property = static_cast<void*>(this);
-    inspector->addPropertyArea(area_scale);
+    _inspector_win->addPropertyArea(area_scale);
 
     Float3PropertyArea* area_rotation = new Float3PropertyArea; //New property area
     area_rotation->setLabel("Rotation"); //Its label
     area_rotation->vector = &this->rotation; //Ptr to our vector
     area_rotation->go_property = static_cast<void*>(this);
-    inspector->addPropertyArea(area_rotation);
-
+    _inspector_win->addPropertyArea(area_rotation);
 }
 
 void TransformProperty::onValueChanged(){
@@ -311,7 +298,6 @@ void TransformProperty::onValueChanged(){
 }
 
 void TransformProperty::onPreRender(RenderPipeline* pipeline){
-    //assert(pipeline);
     updateMat();
 }
 
@@ -422,12 +408,12 @@ void TransformProperty::copyTo(GameObjectProperty* dest){
 }
 
 //Label property functions
-void LabelProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
+void LabelProperty::addPropertyInterfaceToInspector(){
     StringPropertyArea* area = new StringPropertyArea;
     area->setLabel("Label");
     area->value_ptr = &this->label;
     area->go_property = static_cast<void*>(this);
-    inspector->addPropertyArea(area);
+    _inspector_win->addPropertyArea(area);
 }
 
 void LabelProperty::onValueChanged(){
@@ -455,18 +441,18 @@ void LabelProperty::copyTo(GameObjectProperty* dest){
 }
 
 //Mesh property functions
-void MeshProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
+void MeshProperty::addPropertyInterfaceToInspector(){
     PickResourceArea* area = new PickResourceArea(RESOURCE_TYPE_MESH);
     area->setLabel("Mesh");
     area->go_property = static_cast<void*>(this);
     area->rel_path_std = &resource_relpath;
-    inspector->addPropertyArea(area);
+    _inspector_win->addPropertyArea(area);
 
     BoolCheckboxArea* IsCastShadows = new BoolCheckboxArea;
     IsCastShadows->setLabel("Cast shadows ");
     IsCastShadows->go_property = static_cast<void*>(this);
     IsCastShadows->bool_ptr = &this->castShadows;
-    inspector->addPropertyArea(IsCastShadows);
+    _inspector_win->addPropertyArea(IsCastShadows);
 
 
     if(mesh_ptr){
@@ -474,7 +460,7 @@ void MeshProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
             GameobjectPickArea* rtnode = new GameobjectPickArea;
             rtnode->gameobject_ptr_ptr = &this->skinning_root_node;
             rtnode->setLabel("Root Node");
-            inspector->addPropertyArea(rtnode);
+            _inspector_win->addPropertyArea(rtnode);
         }
     }
 }
@@ -504,7 +490,7 @@ void MeshProperty::copyTo(GameObjectProperty* dest){
     _dest->rootNodeStr = rootNodeStr;
 }
 
-void LightsourceProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
+void LightsourceProperty::addPropertyInterfaceToInspector(){
     AreaRadioGroup* group = new AreaRadioGroup; //allocate button layout
     group->value_ptr = reinterpret_cast<uint8_t*>(&this->light_type);
     group->go_property = static_cast<void*>(this);
@@ -520,27 +506,27 @@ void LightsourceProperty::addPropertyInterfaceToInspector(InspectorWin* inspecto
     group->addRadioButton(directional_radio);
     group->addRadioButton(point_radio);
     group->addRadioButton(spot_radio);
-    inspector->registerUiObject(group);
-    inspector->getContentLayout()->addLayout(group->btn_layout);
+    _inspector_win->registerUiObject(group);
+    _inspector_win->getContentLayout()->addLayout(group->btn_layout);
 
     FloatPropertyArea* intensity_area = new FloatPropertyArea;
     intensity_area->setLabel("Intensity"); //Its intensity
     intensity_area->value = &this->intensity;
     intensity_area->go_property = static_cast<void*>(this);
-    inspector->addPropertyArea(intensity_area);
+    _inspector_win->addPropertyArea(intensity_area);
     if(this->light_type > LIGHTSOURCE_TYPE_DIRECTIONAL){
 
         FloatPropertyArea* range_area = new FloatPropertyArea;
         range_area->setLabel("Range"); //Its range
         range_area->value = &this->range;
         range_area->go_property = static_cast<void*>(this);
-        inspector->addPropertyArea(range_area);
+        _inspector_win->addPropertyArea(range_area);
         if(this->light_type == LIGHTSOURCE_TYPE_SPOT){
             FloatPropertyArea* spotangle_area = new FloatPropertyArea;
             spotangle_area->setLabel("Spot Angle"); //Its range
             spotangle_area->value = &this->spot_angle;
             spotangle_area->go_property = static_cast<void*>(this);
-            inspector->addPropertyArea(spotangle_area);
+            _inspector_win->addPropertyArea(spotangle_area);
         }
     }
 
@@ -548,7 +534,7 @@ void LightsourceProperty::addPropertyInterfaceToInspector(InspectorWin* inspecto
     lcolor->setLabel("Light color");
     lcolor->color = &this->color;
     lcolor->go_property = static_cast<void*>(this);
-    inspector->addPropertyArea(lcolor);
+    _inspector_win->addPropertyArea(lcolor);
 }
 void LightsourceProperty::onValueChanged(){
     if(this->_last_light_type != this->light_type){
@@ -625,30 +611,30 @@ AudioSourceProperty::AudioSourceProperty(){
     source.Init();
 }
 
-void AudioSourceProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
+void AudioSourceProperty::addPropertyInterfaceToInspector(){
     PickResourceArea* area = new PickResourceArea(RESOURCE_TYPE_AUDIO);
     area->setLabel("Sound");
     area->go_property = static_cast<void*>(this);
     area->rel_path_std = &resource_relpath;
-    inspector->addPropertyArea(area);
+    _inspector_win->addPropertyArea(area);
 
     BoolCheckboxArea* isLooped = new BoolCheckboxArea;
     isLooped->setLabel("Loop ");
     isLooped->go_property = static_cast<void*>(this);
     isLooped->bool_ptr = &this->source.looped;
-    inspector->addPropertyArea(isLooped);
+    _inspector_win->addPropertyArea(isLooped);
 
     FloatPropertyArea* gain_area = new FloatPropertyArea;
     gain_area->setLabel("Gain"); //Its label
     gain_area->value = &this->source.source_gain;
     gain_area->go_property = static_cast<void*>(this);
-    inspector->addPropertyArea(gain_area);
+    _inspector_win->addPropertyArea(gain_area);
 
     FloatPropertyArea* pitch_area = new FloatPropertyArea;
     pitch_area->setLabel("Pitch"); //Its label
     pitch_area->value = &this->source.source_pitch;
     pitch_area->go_property = static_cast<void*>(this);
-    inspector->addPropertyArea(pitch_area);
+    _inspector_win->addPropertyArea(pitch_area);
 }
 
 void AudioSourceProperty::onValueChanged(){
@@ -751,13 +737,13 @@ MaterialProperty::MaterialProperty(){
     this->material_ptr = nullptr;
 }
 
-void MaterialProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
+void MaterialProperty::addPropertyInterfaceToInspector(){
     //Add area to pick material file
     PickResourceArea* area = new PickResourceArea(RESOURCE_TYPE_MATERIAL);
     area->setLabel("Material");
     area->go_property = static_cast<void*>(this);
     area->rel_path_std = &material_path;
-    inspector->addPropertyArea(area);
+    _inspector_win->addPropertyArea(area);
     //No material, exiting
     if(material_ptr == nullptr || material_ptr->file_path[0] == '@')
         return;
@@ -767,7 +753,7 @@ void MaterialProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
         receiveShdws->setLabel("Receive Shadows ");
         receiveShdws->go_property = static_cast<void*>(this);
         receiveShdws->bool_ptr = &this->receiveShadows;
-        inspector->addPropertyArea(receiveShdws);
+        _inspector_win->addPropertyArea(receiveShdws);
     }
     //Add shader group picker
     ComboBoxArea* mt_shader_group_area = new ComboBoxArea;
@@ -779,7 +765,7 @@ void MaterialProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
         MtShaderPropertiesGroup* ptr = MtShProps::getMtShaderPropertiesGroupByIndex(i);
         mt_shader_group_area->widget.addItem(QString::fromStdString(ptr->groupCaption));
     }
-    inspector->addPropertyArea(mt_shader_group_area);
+    _inspector_win->addPropertyArea(mt_shader_group_area);
 
     //if material isn't set up, exiting
     if(material_ptr->group_ptr == nullptr)
@@ -802,7 +788,7 @@ void MaterialProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
                 area->go_property = static_cast<void*>(this);
                 area->rel_path_std = &texture_conf->path;
                 area->isShowNoneItem = true;
-                inspector->addPropertyArea(area);
+                _inspector_win->addPropertyArea(area);
 
                 break;
             }
@@ -815,7 +801,7 @@ void MaterialProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
                 float_area->setLabel(QString::fromStdString(float_p->prop_caption)); //Its label
                 float_area->value = &float_conf->value;
                 float_area->go_property = static_cast<void*>(this);
-                inspector->addPropertyArea(float_area);
+                _inspector_win->addPropertyArea(float_area);
 
                 break;
             }
@@ -828,7 +814,7 @@ void MaterialProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
                 float3_area->setLabel(QString::fromStdString(float3_p->prop_caption)); //Its label
                 float3_area->vector = &float3_conf->value;
                 float3_area->go_property = static_cast<void*>(this);
-                inspector->addPropertyArea(float3_area);
+                _inspector_win->addPropertyArea(float3_area);
 
                 break;
             }
@@ -841,7 +827,7 @@ void MaterialProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
                 float2_area->setLabel(QString::fromStdString(float2_p->prop_caption)); //Its label
                 float2_area->vector = &float2_conf->value;
                 float2_area->go_property = static_cast<void*>(this);
-                inspector->addPropertyArea(float2_area);
+                _inspector_win->addPropertyArea(float2_area);
                 break;
             }
             case MATSHPROP_TYPE_IVEC2:{
@@ -853,7 +839,7 @@ void MaterialProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
                 int2_area->setLabel(QString::fromStdString(int2_p->prop_caption)); //Its label
                 int2_area->vector = &int2_conf->value[0];
                 int2_area->go_property = static_cast<void*>(this);
-                inspector->addPropertyArea(int2_area);
+                _inspector_win->addPropertyArea(int2_area);
                 break;
             }
             case MATSHPROP_TYPE_INTEGER:{
@@ -865,7 +851,7 @@ void MaterialProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
                 integer_area->setLabel(QString::fromStdString(integer_p->prop_caption)); //Its label
                 integer_area->value = &integer_conf->value;
                 integer_area->go_property = static_cast<void*>(this);
-                inspector->addPropertyArea(integer_area);
+                _inspector_win->addPropertyArea(integer_area);
 
                 break;
             }
@@ -878,7 +864,7 @@ void MaterialProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
                 color_area->setLabel(QString::fromStdString(color_p->prop_caption)); //Its label
                 color_area->color = &color_conf->color;
                 color_area->go_property = static_cast<void*>(this);
-                inspector->addPropertyArea(color_area);
+                _inspector_win->addPropertyArea(color_area);
 
                 break;
             }
@@ -894,7 +880,7 @@ void MaterialProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
                     area->go_property = static_cast<void*>(this);
                     area->rel_path_std = &texture_conf->texture_str[i];
                     area->isShowNoneItem = true;
-                    inspector->addPropertyArea(area);
+                    _inspector_win->addPropertyArea(area);
                 }
 
                 break;
@@ -1001,15 +987,15 @@ void ColliderProperty::onObjectDeleted(){
         this->go_link.world_ptr->physical_world->removeRidigbodyFromWorld(this->rigidBody);
 } //unregister in world
 
-void ColliderProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
-    addColliderRadio(inspector);
+void ColliderProperty::addPropertyInterfaceToInspector(){
+    addColliderRadio(_inspector_win);
 
     //isTrigger checkbox
     BoolCheckboxArea* istrigger = new BoolCheckboxArea;
     istrigger->setLabel("IsTrigger ");
     istrigger->go_property = static_cast<void*>(this);
     istrigger->bool_ptr = &this->isTrigger;
-    inspector->addPropertyArea(istrigger);
+    _inspector_win->addPropertyArea(istrigger);
 }
 
 void ColliderProperty::onUpdate(float deltaTime){
@@ -1057,21 +1043,21 @@ bool GameObject::isRigidbody(){
     return false;
 }
 
-void RigidbodyProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
-    PhysicalProperty::addColliderRadio(inspector);
-    PhysicalProperty::addMassField(inspector);
+void RigidbodyProperty::addPropertyInterfaceToInspector(){
+    PhysicalProperty::addColliderRadio(_inspector_win);
+    PhysicalProperty::addMassField(_inspector_win);
 
     Float3PropertyArea* gravityE = new Float3PropertyArea; //New property area
     gravityE->setLabel("Gravity"); //Its label
     gravityE->vector = &this->gravity; //Ptr to our vector
     gravityE->go_property = static_cast<void*>(this);
-    inspector->addPropertyArea(gravityE);
+    _inspector_win->addPropertyArea(gravityE);
 
     Float3PropertyArea* linearE = new Float3PropertyArea; //New property area
     linearE->setLabel("Linear"); //Its label
     linearE->vector = &this->linearVel; //Ptr to our vector
     linearE->go_property = static_cast<void*>(this);
-    inspector->addPropertyArea(linearE);
+    _inspector_win->addPropertyArea(linearE);
 }
 
 void RigidbodyProperty::onUpdate(float deltaTime){
@@ -1160,8 +1146,8 @@ void CharacterControllerProperty::setLinearVelocity(ZSVECTOR3 lvel){
     rigidBody->activate();
 }
 
-void CharacterControllerProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
-    addCustomSizeField(inspector);
+void CharacterControllerProperty::addPropertyInterfaceToInspector(){
+    addCustomSizeField(_inspector_win);
 }
 void CharacterControllerProperty::copyTo(GameObjectProperty* dest){
     if(dest->type != GO_PROPERTY_TYPE_CHARACTER_CONTROLLER) return;
@@ -1248,13 +1234,13 @@ void ScriptGroupProperty::onValueChanged(){
     }
 }
 
-void ScriptGroupProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
+void ScriptGroupProperty::addPropertyInterfaceToInspector(){
 
     IntPropertyArea* scriptnum_area = new IntPropertyArea;
     scriptnum_area->setLabel("Scripts"); //Its label
     scriptnum_area->value = &this->scr_num;
     scriptnum_area->go_property = static_cast<void*>(this);
-    inspector->addPropertyArea(scriptnum_area);
+    _inspector_win->addPropertyArea(scriptnum_area);
 
     for(int script_i = 0; script_i < scr_num; script_i ++){
         PickResourceArea* area = new PickResourceArea(RESOURCE_TYPE_FILE);
@@ -1262,7 +1248,7 @@ void ScriptGroupProperty::addPropertyInterfaceToInspector(InspectorWin* inspecto
         area->go_property = static_cast<void*>(this);
         area->rel_path_std = &path_names[static_cast<unsigned int>(script_i)];
         area->extension_mask = ".lua";
-        inspector->addPropertyArea(area);
+        _inspector_win->addPropertyArea(area);
     }
 }
 void ScriptGroupProperty::onUpdate(float deltaTime){
@@ -1339,42 +1325,42 @@ ShadowCasterProperty::ShadowCasterProperty(){
     projection_viewport = 20;
 }
 
-void ShadowCasterProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
+void ShadowCasterProperty::addPropertyInterfaceToInspector(){
 
     IntPropertyArea* textureW = new IntPropertyArea; //New property area
     textureW->setLabel("Texture Width"); //Its label
     textureW->value = &this->TextureWidth; //Ptr to our vector
     textureW->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
-    inspector->addPropertyArea(textureW);
+    _inspector_win->addPropertyArea(textureW);
 
     IntPropertyArea* textureH = new IntPropertyArea; //New property area
     textureH->setLabel("Texture Height"); //Its label
     textureH->value = &this->TextureHeight; //Ptr to our vector
     textureH->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
-    inspector->addPropertyArea(textureH);
+    _inspector_win->addPropertyArea(textureH);
 
     FloatPropertyArea* bias = new FloatPropertyArea; //New property area
     bias->setLabel("Shadow bias"); //Its label
     bias->value = &this->shadow_bias; //Ptr to our vector
     bias->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
-    inspector->addPropertyArea(bias);
+    _inspector_win->addPropertyArea(bias);
 
     FloatPropertyArea* _nearPlane = new FloatPropertyArea; //New property area
     _nearPlane->setLabel("Near plane"); //Its label
     _nearPlane->value = &this->nearPlane; //Ptr to our vector
     _nearPlane->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
-    inspector->addPropertyArea(_nearPlane);
+    _inspector_win->addPropertyArea(_nearPlane);
     FloatPropertyArea* _farPlane = new FloatPropertyArea; //New property area
     _farPlane->setLabel("Far plane"); //Its label
     _farPlane->value = &this->farPlane; //Ptr to our vector
     _farPlane->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
-    inspector->addPropertyArea(_farPlane);
+    _inspector_win->addPropertyArea(_farPlane);
 
     IntPropertyArea* _viewport = new IntPropertyArea; //New property area
     _viewport->setLabel("Shadow viewport"); //Its label
     _viewport->value = &this->projection_viewport; //Ptr to our vector
     _viewport->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
-    inspector->addPropertyArea(_viewport);
+    _inspector_win->addPropertyArea(_viewport);
 }
 
 void ShadowCasterProperty::onValueChanged(){
@@ -1416,400 +1402,6 @@ void ShadowCasterProperty::copyTo(GameObjectProperty* dest){
 }
 
 
-TerrainProperty::TerrainProperty(){
-    type = GO_PROPERTY_TYPE_TERRAIN;
-
-    this->Width = 500;
-    this->Length = 500;
-    this->MaxHeight = 500;
-    GrassDensity = 1.0f;
-    castShadows = true;
-    textures_size = 0;
-    grassType_size = 0;
-
-    this->range = 15;
-    this->editHeight = 10;
-    this->textureid = 1;
-    this->vegetableid = 1;
-
-    edit_mode = 1;
-
-    rigidBody = nullptr;
-}
-
-void onClearTerrain(){
-    current_terrain_prop->getTerrainData()->alloc(current_terrain_prop->Width, current_terrain_prop->Length);
-    current_terrain_prop->getTerrainData()->generateGLMesh();
-}
-
-void TerrainProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
-    current_terrain_prop = this;
-
-    IntPropertyArea* HWidth = new IntPropertyArea; //New property area
-    HWidth->setLabel("Heightmap Width"); //Its label
-    HWidth->value = &this->Width; //Ptr to our vector
-    HWidth->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
-    inspector->addPropertyArea(HWidth);
-
-    IntPropertyArea* HLength = new IntPropertyArea; //New property area
-    HLength->setLabel("Heightmap Length"); //Its label
-    HLength->value = &this->Length; //Ptr to our vector
-    HLength->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
-    inspector->addPropertyArea(HLength);
-
-    IntPropertyArea* MHeight = new IntPropertyArea; //New property area
-    MHeight->setLabel("Max Height"); //Its label
-    MHeight->value = &this->MaxHeight; //Ptr to our vector
-    MHeight->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
-    inspector->addPropertyArea(MHeight);
-
-    BoolCheckboxArea* castShdws = new BoolCheckboxArea;
-    castShdws->setLabel("Cast Shadows ");
-    castShdws->go_property = static_cast<void*>(this);
-    castShdws->bool_ptr = &this->castShadows;
-    inspector->addPropertyArea(castShdws);
-
-    //Add button to add objects
-    AreaButton* clear_btn = new AreaButton;
-    clear_btn->onPressFuncPtr = &onClearTerrain;
-    clear_btn->button->setText("Clear"); //Setting text to qt button
-    inspector->getContentLayout()->addWidget(clear_btn->button);
-    clear_btn->insp_ptr = inspector; //Setting inspector pointer
-    inspector->registerUiObject(clear_btn);
-
-    AreaRadioGroup* group = new AreaRadioGroup; //allocate button layout
-    group->value_ptr = reinterpret_cast<uint8_t*>(&this->edit_mode);
-    group->go_property = static_cast<void*>(this);
-
-    QRadioButton* directional_radio = new QRadioButton; //allocate first radio
-    directional_radio->setText("Map");
-    QRadioButton* point_radio = new QRadioButton;
-    point_radio->setText("Texture");
-    QRadioButton* veg_radio = new QRadioButton;
-    veg_radio->setText("Vegetables");
-
-    group->addRadioButton(directional_radio);
-    group->addRadioButton(point_radio);
-    group->addRadioButton(veg_radio);
-    inspector->registerUiObject(group);
-    inspector->getContentLayout()->addLayout(group->btn_layout);
-
-    IntPropertyArea* EditRange = new IntPropertyArea; //New property area
-    EditRange->setLabel("brush range"); //Its label
-    EditRange->value = &this->range; //Ptr to our vector
-    EditRange->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
-    inspector->addPropertyArea(EditRange);
-    //If selected mode is Height paint
-    if(edit_mode == 1){
-
-        FloatPropertyArea* EditHeight = new FloatPropertyArea; //New property area
-        EditHeight->setLabel("brush height"); //Its label
-        EditHeight->value = &this->editHeight; //Ptr to our vector
-        EditHeight->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
-        inspector->addPropertyArea(EditHeight);
-    }
-    //if selected mode is texture paint
-    if(edit_mode == 2){
-
-        AreaRadioGroup* texturegroup_pick = new AreaRadioGroup; //allocate button layout
-        texturegroup_pick->value_ptr = reinterpret_cast<uint8_t*>(&this->textureid);
-        texturegroup_pick->go_property = static_cast<void*>(this);
-
-        IntPropertyArea* tSize = new IntPropertyArea; //New property area
-        tSize->setLabel("Textures"); //Its label
-        tSize->value = &this->textures_size; //Ptr to our vector
-        tSize->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
-        inspector->addPropertyArea(tSize);
-
-        for(int i = 0; i < this->textures_size; i ++){
-            QRadioButton* group_radio = new QRadioButton; //allocate first radio
-            group_radio->setText("Group " + QString::number(i));
-            if(textureid == i + 1)
-                group_radio->setChecked(true);
-            //add created radio button
-            texturegroup_pick->addRadioButton(group_radio);
-            inspector->getContentLayout()->addWidget(group_radio);
-
-            PickResourceArea* diffuse_area = new PickResourceArea(RESOURCE_TYPE_TEXTURE);
-            diffuse_area->setLabel("Diffuse");
-            diffuse_area->go_property = static_cast<void*>(this);
-            diffuse_area->rel_path_std = &textures[static_cast<unsigned int>(i)].diffuse_relpath;
-            inspector->addPropertyArea(diffuse_area);
-
-            PickResourceArea* normal_area = new PickResourceArea(RESOURCE_TYPE_TEXTURE);
-            normal_area->setLabel("Normal");
-            normal_area->go_property = static_cast<void*>(this);
-            normal_area->rel_path_std = &textures[static_cast<unsigned int>(i)].normal_relpath;
-            inspector->addPropertyArea(normal_area);
-        }
-        //Add texture picker UI elements
-        inspector->registerUiObject(texturegroup_pick);
-
-    }
-    //if selected mode is vegetable paint
-    if(edit_mode == 3){
-
-        AreaRadioGroup* vegetablegroup_pick = new AreaRadioGroup; //allocate button layout
-        vegetablegroup_pick->value_ptr = reinterpret_cast<uint8_t*>(&this->vegetableid);
-        vegetablegroup_pick->go_property = static_cast<void*>(this);
-
-        IntPropertyArea* vSize = new IntPropertyArea; //New property area
-        vSize->setLabel("Grass variants"); //Its label
-        vSize->value = &this->grassType_size; //Ptr to our vector
-        vSize->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
-        inspector->addPropertyArea(vSize);
-
-        FloatPropertyArea* fDensity = new FloatPropertyArea; //New property area
-        fDensity->setLabel("Grass density"); //Its label
-        fDensity->value = &this->GrassDensity; //Ptr to our vector
-        fDensity->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
-        inspector->addPropertyArea(fDensity);
-
-        for(int i = 0; i < this->grassType_size; i ++){
-            QRadioButton* group_radio = new QRadioButton; //allocate first radio
-            group_radio->setText("Veg " + QString::number(i));
-            if(vegetableid == i)
-                group_radio->setChecked(true);
-            //add created radio button
-            vegetablegroup_pick->addRadioButton(group_radio);
-            inspector->getContentLayout()->addWidget(group_radio);
-
-            PickResourceArea* diffuse_area = new PickResourceArea(RESOURCE_TYPE_TEXTURE);
-            diffuse_area->setLabel("Diffuse");
-            diffuse_area->go_property = static_cast<void*>(this);
-            diffuse_area->rel_path_std = &this->grass[static_cast<unsigned int>(i)].diffuse_relpath;
-            inspector->addPropertyArea(diffuse_area);
-
-            Float2PropertyArea* GrassSize = new Float2PropertyArea; //New property area
-            GrassSize->setLabel("Heightmap Length"); //Its label
-            GrassSize->vector = &this->grass[static_cast<unsigned int>(i)].scale; //Ptr to our vector
-            GrassSize->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
-            inspector->addPropertyArea(GrassSize);
-
-        }
-
-        //Add texture picker UI elements
-        inspector->registerUiObject(vegetablegroup_pick);
-    }
-}
-
-void TerrainProperty::DrawMesh(RenderPipeline* pipeline){
-    data.Draw(false);
-
-    float delta = 1.0f / GrassDensity;
-
-    pipeline->grass_shader->Use();
-    pipeline->transformBuffer->bind();
-    for(float texelZ = 0; texelZ < data.W; texelZ += delta){
-        for(float texelX = 0; texelX < data.H; texelX += delta){
-
-            int texelXi = floor(texelX);
-            int texelZi = floor(texelZ);
-
-            TransformProperty* t_ptr = this->go_link.updLinkPtr()->getTransformProperty();
-
-            HeightmapTexel* texel_ptr = &this->data.data[texelZi * data.W + texelXi];
-            if(texel_ptr->grass > 0){
-                HeightmapGrass* grass = &this->grass[static_cast<unsigned int>(texel_ptr->grass - 1)];
-                ZSVECTOR3 pos = t_ptr->translation + ZSVECTOR3(texelZ, texel_ptr->height, texelX);
-                ZSMATRIX4x4 m = getScaleMat(ZSVECTOR3(grass->scale.X, grass->scale.Y, grass->scale.X)) * getTranslationMat(pos);
-
-                grass->diffuse->Use(0);
-
-                pipeline->transformBuffer->writeData(sizeof (ZSMATRIX4x4) * 2, sizeof (ZSMATRIX4x4), &m);
-                Engine::getGrassMesh()->Draw();
-            }
-        }
-    }
-}
-
-void TerrainProperty::onUpdate(float deltaTime){
-    if(data.hasPhysicShapeChanged){
-        TransformProperty* transform = this->go_link.updLinkPtr()->getPropertyPtr<TransformProperty>();
-
-        //Declare start transform
-        btTransform startTransform;
-        startTransform.setIdentity();
-        //Set start transform
-        startTransform.setOrigin(btVector3( btScalar(transform->_last_translation.X), btScalar(transform->_last_translation.Y),
-                                                    btScalar(transform->_last_translation.Z)));
-
-
-         //using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
-         btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
-
-         btRigidBody::btRigidBodyConstructionInfo cInfo(0, myMotionState, data.shape, btVector3(0,0,0));
-
-         if(rigidBody != nullptr){
-             world_ptr->physical_world->removeRidigbodyFromWorld(rigidBody);
-             delete rigidBody;
-         }
-         rigidBody = new btRigidBody(cInfo);
-
-         rigidBody->setUserIndex(go_link.updLinkPtr()->array_index);
-         //add rigidbody to world
-         go_link.world_ptr->physical_world->addRidigbodyToWorld(rigidBody);
-
-         data.hasPhysicShapeChanged = false;
-    }
-}
-
-void TerrainProperty::onValueChanged(){
-    //check for limitation of texture groups
-    if(this->textures_size > 12)
-        textures_size = 12;
-
-    if(_last_edit_mode != edit_mode){
-        _last_edit_mode = edit_mode;
-        _inspector_win->updateRequired = true;
-    }
-    //if amount of texture pairs changed
-    if(static_cast<unsigned int>(this->textures_size) != textures.size()){
-        textures.resize(static_cast<unsigned int>(this->textures_size));
-        _inspector_win->updateRequired = true;
-    }
-    //if amount of vegetables changed
-    if(static_cast<unsigned int>(this->grassType_size) != grass.size()){
-        grass.resize(static_cast<unsigned int>(this->grassType_size));
-        _inspector_win->updateRequired = true;
-    }
-    for(unsigned int i = 0; i < static_cast<unsigned int>(this->textures_size); i ++){
-        HeightmapTexturePair* pair = &this->textures[i];
-        pair->diffuse = game_data->resources->getTextureByLabel(pair->diffuse_relpath);
-        pair->normal = game_data->resources->getTextureByLabel(pair->normal_relpath);
-    }
-    for(unsigned int i = 0; i < static_cast<unsigned int>(this->grassType_size); i ++){
-        HeightmapGrass* pair = &this->grass[i];
-        pair->diffuse = game_data->resources->getTextureByLabel(pair->diffuse_relpath);
-    }
-}
-
-void TerrainProperty::onAddToObject(){
-    std::string terrain_random_prefix;
-    genRandomString(&terrain_random_prefix, 4);
-
-    //relative path to terrain file
-    this->file_label = this->go_link.updLinkPtr()->label->toStdString() + "_" + terrain_random_prefix + ".terrain";
-    //Allocate terrain
-    data.alloc(this->Width, this->Length);
-    //Generate opengl mesh to draw
-    data.generateGLMesh();
-    //absolute path to terrain file
-    std::string fpath = project_ptr->root_path + "/" + this->file_label;
-    //Create and save file
-    data.saveToFile(fpath.c_str());
-}
-
-void TerrainProperty::getPickedVertexId(int posX, int posY, int screenX, int screenY, unsigned char* data){
-    glClearColor(0,0,0,0);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glEnable(GL_DEPTH_TEST);
-    //get pointer to material property
-    MaterialProperty* mat = this->go_link.updLinkPtr()->getPropertyPtr<MaterialProperty>();
-    TransformProperty* transform = this->go_link.updLinkPtr()->getPropertyPtr<TransformProperty>();
-    if(mat == nullptr || mat->material_ptr == nullptr) return;
-    //Apply material shader
-    mat->material_ptr->applyMatToPipeline();
-    //Bind terrain buffer and set isPicking to true
-    terrainUniformBuffer->bind();
-    int dtrue = 1;
-    terrainUniformBuffer->writeData(16 * 12 * 2, 4, &dtrue);
-    //Bind transform
-    transformBuffer->bind();
-    transformBuffer->writeData(sizeof (ZSMATRIX4x4) * 2, sizeof (ZSMATRIX4x4), &transform->transform_mat);
-    //Render terrain mesh without textures
-    this->data.Draw(true);
-    //read picked pixel
-    glReadPixels(posX, screenY - posY, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, &data[0]);
-}
-
-void TerrainProperty::modifyTerrainVertex(unsigned char* gl_data, bool isCtrlHold){
-    if((gl_data[0] + gl_data[1] + gl_data[2]) == 0) return;
-    for(int i = 0; i < Width; i ++){
-        for(int y = 0; y < Length; y ++){
-            if(i == static_cast<int>(gl_data[0]) * 2 && y == static_cast<int>(gl_data[2]) * 2){
-                int mul = 1;
-                if(isCtrlHold)
-                    mul *= -1;
-                //apply change
-                HeightmapModifyRequest* req = new HeightmapModifyRequest;
-                req->terrain = &data;
-                if(edit_mode == 1){
-                    req->modify_type = TMT_HEIGHT;
-                    req->originX = y;
-                    req->originY = i;
-                    req->originHeight = editHeight;
-                    req->range = range;
-                    req->multiplyer = mul;
-                }else if(edit_mode == 2){
-                    req->modify_type = TMT_TEXTURE;
-                    req->originX = i;
-                    req->originY = y;
-                    req->range = range;
-                    req->texture = static_cast<unsigned char>(textureid - 1);
-                }else if(edit_mode == 3){
-                    req->modify_type = TMT_GRASS;
-                    req->originX = y;
-                    req->originY = i;
-                    req->range = range;
-                    req->grass = vegetableid;
-                    if(mul < 0)
-                        req->grass = 0;
-                }
-                queryTerrainModifyRequest(req);
-                return;
-            }
-        }
-    }
-}
-
-void TerrainProperty::onMouseClick(int posX, int posY, int screenX, int screenY, bool isLeftButtonHold, bool isCtrlHold){
-    if(isLeftButtonHold){
-        unsigned char _data[4];
-        getPickedVertexId(posX, posY, screenX, screenY, &_data[0]);
-        //find picked texel
-        modifyTerrainVertex(&_data[0], isCtrlHold);
-    }
-}
-
-void TerrainProperty::onMouseMotion(int posX, int posY, int screenX, int screenY, bool isLeftButtonHold, bool isCtrlHold){
-    if(isLeftButtonHold){
-        unsigned char _data[4];
-        getPickedVertexId(posX, posY, screenX, screenY, &_data[0]);
-        //find picked texel
-        modifyTerrainVertex(&_data[0], isCtrlHold);
-    }
-}
-
-TerrainData* TerrainProperty::getTerrainData(){
-    return &data;
-}
-
-void TerrainProperty::copyTo(GameObjectProperty* dest){
-    if(dest->type != this->type) return; //if it isn't script group
-
-    //Do base things
-    GameObjectProperty::copyTo(dest);
-
-    TerrainProperty* _dest = static_cast<TerrainProperty*>(dest);
-    _dest->Width = this->Width;
-    _dest->Length = this->Length;
-    _dest->MaxHeight = this->MaxHeight;
-    _dest->GrassDensity = this->GrassDensity;
-    _dest->file_label = this->file_label;
-    _dest->castShadows = this->castShadows;
-    _dest->textures_size = this->textures_size;
-    _dest->grassType_size = this->grassType_size;
-    //Copying terrain data
-    data.copyTo(&_dest->data);
-    //Copy textures data
-    for(unsigned int t_i = 0; t_i < this->textures.size(); t_i ++)
-        _dest->textures.push_back(textures[t_i]);
-
-    for(unsigned int g_i = 0; g_i < this->grass.size(); g_i ++)
-        _dest->grass.push_back(grass[g_i]);
-}
-
 NodeProperty::NodeProperty(){
     type = GO_PROPERTY_TYPE_NODE;
 
@@ -1821,7 +1413,7 @@ NodeProperty::NodeProperty(){
 void NodeProperty::onPreRender(RenderPipeline* pipeline){
 }
 
-void NodeProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
+void NodeProperty::addPropertyInterfaceToInspector(){
 
 }
 
@@ -1856,30 +1448,30 @@ void onStop(){
     _inspector_win->updateRequired = true;
 }
 
-void AnimationProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
+void AnimationProperty::addPropertyInterfaceToInspector(){
     current_anim = this;
 
     PickResourceArea* area = new PickResourceArea(RESOURCE_TYPE_ANIMATION);
     area->setLabel("Animation");
     area->go_property = static_cast<void*>(this);
     area->rel_path_std = &this->anim_label;
-    inspector->addPropertyArea(area);
+    _inspector_win->addPropertyArea(area);
 
     if(Playing == false){
         AreaButton* btn = new AreaButton;
         btn->onPressFuncPtr = &onPlay;
         btn->button->setText("Play"); //Setting text to qt button
-        inspector->getContentLayout()->addWidget(btn->button);
-        btn->insp_ptr = inspector; //Setting inspector pointer
-        inspector->registerUiObject(btn);
+        _inspector_win->getContentLayout()->addWidget(btn->button);
+        btn->insp_ptr = _inspector_win; //Setting inspector pointer
+        _inspector_win->registerUiObject(btn);
     }
     if(Playing == true){
         AreaButton* stopbtn = new AreaButton;
         stopbtn->onPressFuncPtr = &onStop;
         stopbtn->button->setText("Stop"); //Setting text to qt button
-        inspector->getContentLayout()->addWidget(stopbtn->button);
-        stopbtn->insp_ptr = inspector; //Setting inspector pointer
-        inspector->registerUiObject(stopbtn);
+        _inspector_win->getContentLayout()->addWidget(stopbtn->button);
+        stopbtn->insp_ptr = _inspector_win; //Setting inspector pointer
+        _inspector_win->registerUiObject(stopbtn);
     }
 }
 
