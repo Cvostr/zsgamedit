@@ -49,53 +49,53 @@ TileProperty::TileProperty(){
     this->transparent_relpath = "@none";
 }
 
-void TileGroupProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
+void TileGroupProperty::addPropertyInterfaceToInspector(){
     if(!isCreated){ //If tiles haven't been initialized
         IntPropertyArea* tileSizeXArea = new IntPropertyArea;
         tileSizeXArea->setLabel("Tile Width");
         tileSizeXArea->go_property = static_cast<void*>(this);
         tileSizeXArea->value = &this->geometry.tileWidth;
-        inspector->addPropertyArea(tileSizeXArea);
+        _inspector_win->addPropertyArea(tileSizeXArea);
 
         IntPropertyArea* tileSizeYArea = new IntPropertyArea;
         tileSizeYArea->setLabel("Tile Height");
         tileSizeYArea->go_property = static_cast<void*>(this);
         tileSizeYArea->value = &this->geometry.tileHeight;
-        inspector->addPropertyArea(tileSizeYArea);
+        _inspector_win->addPropertyArea(tileSizeYArea);
 
         IntPropertyArea* tilesAmountX = new IntPropertyArea;
         tilesAmountX->setLabel("Tiles amount X");
         tilesAmountX->go_property = static_cast<void*>(this);
         tilesAmountX->value = &this->tiles_amount_X;
-        inspector->addPropertyArea(tilesAmountX);
+        _inspector_win->addPropertyArea(tilesAmountX);
 
         IntPropertyArea* tilesAmountY = new IntPropertyArea;
         tilesAmountY->setLabel("Tiles amount Y");
         tilesAmountY->go_property = static_cast<void*>(this);
         tilesAmountY->value = &this->tiles_amount_Y;
-        inspector->addPropertyArea(tilesAmountY);
+        _inspector_win->addPropertyArea(tilesAmountY);
         //Resources pick
         PickResourceArea* mesh_area = new PickResourceArea(RESOURCE_TYPE_MESH);
         mesh_area->setLabel("Tiles Mesh");
         mesh_area->go_property = static_cast<void*>(this);
         mesh_area->rel_path_std = &this->mesh_string;
         mesh_area->isShowNoneItem = false;
-        inspector->addPropertyArea(mesh_area);
+        _inspector_win->addPropertyArea(mesh_area);
 
         PickResourceArea* diffuse_area = new PickResourceArea(RESOURCE_TYPE_TEXTURE);
         diffuse_area->setLabel("Tiles Diffuse");
         diffuse_area->go_property = static_cast<void*>(this);
         diffuse_area->rel_path_std = &this->diffuse_relpath;
         diffuse_area->isShowNoneItem = true;
-        inspector->addPropertyArea(diffuse_area);
+        _inspector_win->addPropertyArea(diffuse_area);
 
         //Add button to add objects
         AreaButton* btn = new AreaButton;
         btn->onPressFuncPtr = &onCreateBtnPress;
         btn->button->setText("Process"); //Setting text to qt button
-        inspector->getContentLayout()->addWidget(btn->button);
-        btn->insp_ptr = inspector; //Setting inspector pointer
-        inspector->registerUiObject(btn);
+        _inspector_win->getContentLayout()->addWidget(btn->button);
+        btn->insp_ptr = _inspector_win; //Setting inspector pointer
+        _inspector_win->registerUiObject(btn);
     }else{
         QString out = "";
         out += ("Tiles X : " + QString::number(this->tiles_amount_X) + QString(" \n"));
@@ -105,15 +105,15 @@ void TileGroupProperty::addPropertyInterfaceToInspector(InspectorWin* inspector)
 
         AreaText* group_info = new AreaText;
         group_info->label->setText(out);
-        inspector->getContentLayout()->addWidget(group_info->label);
-        inspector->registerUiObject(group_info);
+        _inspector_win->getContentLayout()->addWidget(group_info->label);
+        _inspector_win->registerUiObject(group_info);
 
         AreaButton* btn = new AreaButton;
         btn->onPressFuncPtr = &onClearBtnPress;
         btn->button->setText("Clear");
-        inspector->getContentLayout()->addWidget(btn->button);
-        btn->insp_ptr = inspector;
-        inspector->registerUiObject(btn);
+        _inspector_win->getContentLayout()->addWidget(btn->button);
+        btn->insp_ptr = _inspector_win;
+        _inspector_win->registerUiObject(btn);
     }
     current_property = this;
 }
@@ -198,44 +198,44 @@ void TileGroupProperty::copyTo(GameObjectProperty* dest){
     _dest->isCreated = isCreated;
 }
 
-void TileProperty::addPropertyInterfaceToInspector(InspectorWin* inspector){
+void TileProperty::addPropertyInterfaceToInspector(){
     BoolCheckboxArea* isAnim = new BoolCheckboxArea;
     isAnim->setLabel("Animated ");
     isAnim->go_property = static_cast<void*>(this);
     isAnim->bool_ptr = &this->anim_property.isAnimated;
-    inspector->addPropertyArea(isAnim);
+    _inspector_win->addPropertyArea(isAnim);
 
     if(this->anim_property.isAnimated){ //if animation turned on
         IntPropertyArea* rowsAmount = new IntPropertyArea;
         rowsAmount->setLabel("Atlas rows");
         rowsAmount->go_property = static_cast<void*>(this);
         rowsAmount->value = &this->anim_property.framesX;
-        inspector->addPropertyArea(rowsAmount);
+        _inspector_win->addPropertyArea(rowsAmount);
 
         IntPropertyArea* colsAmount = new IntPropertyArea;
         colsAmount->setLabel("Atlas cols");
         colsAmount->go_property = static_cast<void*>(this);
         colsAmount->value = &this->anim_property.framesY;
-        inspector->addPropertyArea(colsAmount);
+        _inspector_win->addPropertyArea(colsAmount);
 
         IntPropertyArea* frameTime = new IntPropertyArea;
         frameTime->setLabel("frame time");
         frameTime->go_property = static_cast<void*>(this);
         frameTime->value = &this->anim_property.frame_time;
-        inspector->addPropertyArea(frameTime);
+        _inspector_win->addPropertyArea(frameTime);
     }
 
     PickResourceArea* area = new PickResourceArea(RESOURCE_TYPE_TEXTURE);
     area->setLabel("Texture");
     area->go_property = static_cast<void*>(this);
     area->rel_path_std = &diffuse_relpath;
-    inspector->addPropertyArea(area);
+    _inspector_win->addPropertyArea(area);
 
     PickResourceArea* transparent_area = new PickResourceArea(RESOURCE_TYPE_TEXTURE);
     transparent_area->setLabel("Secondary Diffuse");
     transparent_area->go_property = static_cast<void*>(this);
     transparent_area->rel_path_std = &transparent_relpath;
-    inspector->addPropertyArea(transparent_area);
+    _inspector_win->addPropertyArea(transparent_area);
 }
 
 void TileProperty::onValueChanged(){

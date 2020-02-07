@@ -119,7 +119,7 @@ EditWindow::EditWindow(QApplication* app, QWidget *parent) :
     ui->actionRun->setShortcut(Qt::Key_R | Qt::CTRL);
 
     ui->actionNew_Object->setShortcut(Qt::Key_N | Qt::CTRL);
-    ui->actionToggle_Cameras->setShortcut(Qt::Key_Apostrophe | Qt::CTRL);
+    ui->actionToggle_Cameras->setShortcut(Qt::Key_H | Qt::CTRL);
 
     this->glcontext = nullptr;
 
@@ -850,11 +850,7 @@ void EditWindow::onObjectPaste(){
 
 void EditWindow::toggleCameras(){
     //This slot toggles cameras
-    if(this->isWorldCamera){
-        this->isWorldCamera = false;
-    }else{
-        this->isWorldCamera = true;
-    }
+    this->isWorldCamera = !this->isWorldCamera;
 }
 
 void EditWindow::glRender(){
@@ -1488,6 +1484,9 @@ void EditWindow::onKeyDown(SDL_Keysym sym){
     }
     if(input_state.isLCtrlHold && sym.sym == SDLK_v){
         emit onObjectPaste();
+    }
+    if(input_state.isLCtrlHold && sym.sym == SDLK_h){
+        emit toggleCameras();
     }
 }
 

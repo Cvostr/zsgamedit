@@ -57,7 +57,7 @@ public:
     std::string diffuse_relpath; //Diffuse texture to generate
     std::string mesh_string; //Mesh to generate
 
-    void addPropertyInterfaceToInspector(InspectorWin* inspector);
+    void addPropertyInterfaceToInspector();
     void process();
     void clear();
     void copyTo(GameObjectProperty* dest);
@@ -80,13 +80,13 @@ public:
     TileAnimation anim_property;
     TileAnimationState anim_state;
 
-    void addPropertyInterfaceToInspector(InspectorWin* inspector);
+    void addPropertyInterfaceToInspector();
     void onValueChanged(); //Update texture pointer
     void updTexturePtr();
     void copyTo(GameObjectProperty* dest);
     void onAddToObject();
     void onUpdate(float deltaTime);
-    void onRender(RenderPipeline* pipeline);
+    void onRender(Engine::RenderPipeline* pipeline);
 
     void playAnim();
     void stopAnim();

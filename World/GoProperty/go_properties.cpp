@@ -36,23 +36,10 @@ void GameObjectProperty::copyTo(GameObjectProperty* dest){
     dest->world_ptr = this->world_ptr;
 }
 
-void GameObjectProperty::onObjectDeleted(){
-
-}
-
-void GameObjectProperty::onAddToObject(){
-
-}
 bool GameObjectProperty::isActive(){
-    return active && go_link.updLinkPtr()->active;
-}
-void GameObjectProperty::onPreRender(RenderPipeline* pipeline){
-    assert(pipeline);
+    return active && (go_link.updLinkPtr() != nullptr) ? go_link.ptr->active : false;
 }
 
-void GameObjectProperty::onRender(RenderPipeline* pipeline){
-    assert(pipeline);
-}
 void GameObjectProperty::onTrigger(GameObject* obj){
     assert(obj);
 }
@@ -297,7 +284,7 @@ void TransformProperty::onValueChanged(){
     }
 }
 
-void TransformProperty::onPreRender(RenderPipeline* pipeline){
+void TransformProperty::onPreRender(Engine::RenderPipeline* pipeline){
     updateMat();
 }
 
@@ -358,7 +345,7 @@ void TransformProperty::updateMat(){
     }
 }
 
-void TransformProperty::onRender(RenderPipeline* pipeline){
+void TransformProperty::onRender(Engine::RenderPipeline* pipeline){
     //updateMat();
     //Send transform matrix to transform buffer
     pipeline->transformBuffer->bind();
@@ -469,7 +456,7 @@ void MeshProperty::updateMeshPtr(){
     this->mesh_ptr = game_data->resources->getMeshByLabel(resource_relpath);
 }
 
-void MeshProperty::onRender(RenderPipeline* pipeline){
+void MeshProperty::onRender(Engine::RenderPipeline* pipeline){
     if(this->skinning_root_node == nullptr)
         skinning_root_node = world_ptr->getObjectByLabelStr(this->rootNodeStr);
 }
@@ -543,7 +530,7 @@ void LightsourceProperty::onValueChanged(){
         this->_last_light_type = this->light_type;
     }
     //Update transform pointer (if nullptr)
-    updTransformPtr();
+    updTransformPtr();    void onAddToObject(); //will update render flag
     ZSVECTOR3* rot_vec_ptr = &transform->rotation;
     this->direction = _getDirection(rot_vec_ptr->X, rot_vec_ptr->Y, rot_vec_ptr->Z);
 
@@ -571,7 +558,7 @@ void LightsourceProperty::updTransformPtr(){
 void LightsourceProperty::onObjectDeleted(){
 }
 
-void LightsourceProperty::onPreRender(RenderPipeline* pipeline){
+void LightsourceProperty::onPreRender(Engine::RenderPipeline* pipeline){
     TransformProperty* transform_prop = go_link.updLinkPtr()->getTransformProperty();
 
     updTransformPtr();
@@ -976,10 +963,6 @@ void MaterialProperty::setMaterial(Material* mat){
 void MaterialProperty::setMaterial(std::string path){
     Material* newmat_ptr = game_data->resources->getMaterialByLabel(path)->material;
     setMaterial(newmat_ptr);
-}
-
-void MaterialProperty::onAddToObject(){
-
 }
 
 void ColliderProperty::onObjectDeleted(){
@@ -1410,7 +1393,7 @@ NodeProperty::NodeProperty(){
     rotation = ZSQUATERNION(0.f, 0.f, 0.f, 0.f);
 }
 
-void NodeProperty::onPreRender(RenderPipeline* pipeline){
+void NodeProperty::onPreRender(Engine::RenderPipeline* pipeline){
 }
 
 void NodeProperty::addPropertyInterfaceToInspector(){
@@ -1489,7 +1472,7 @@ void AnimationProperty::stop(){
     Playing = false;
 }
 
-void AnimationProperty::onPreRender(RenderPipeline* pipeline){
+void AnimationProperty::onPreRender(Engine::RenderPipeline* pipeline){
     GameObject* obj = go_link.updLinkPtr();
 
     Engine::Animation* anim_prop_ptr = nullptr;

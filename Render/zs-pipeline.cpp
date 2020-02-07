@@ -67,8 +67,6 @@ bool RenderPipeline::InitGLEW(){
 void RenderPipeline::init(){
     glViewport(0, 0, this->WIDTH, this->HEIGHT);
 
-    //InitGLEW();
-
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     glEnable(GL_LINE_SMOOTH);
     glLineWidth(16.0f);
@@ -469,7 +467,7 @@ void GameObject::processObject(RenderPipeline* pipeline){
     }
 }
 
-void MaterialProperty::onRender(RenderPipeline* pipeline){
+void MaterialProperty::onRender(Engine::RenderPipeline* pipeline){
     //Check for validity of pointer
     if(material_ptr == nullptr) return;
 
@@ -496,7 +494,7 @@ void MaterialProperty::onRender(RenderPipeline* pipeline){
     material_ptr->applyMatToPipeline();
 }
 
-void TerrainProperty::onRender(RenderPipeline* pipeline){
+void TerrainProperty::onRender(Engine::RenderPipeline* pipeline){
     terrainUniformBuffer = pipeline->terrainUniformBuffer;
     transformBuffer = pipeline->transformBuffer;
 
@@ -554,7 +552,7 @@ void TerrainProperty::onRender(RenderPipeline* pipeline){
 
 }
 
-void TileProperty::onRender(RenderPipeline* pipeline){
+void TileProperty::onRender(Engine::RenderPipeline* pipeline){
     Engine::Shader* tile_shader = pipeline->getTileShader();
 
     tile_shader->Use();
@@ -589,7 +587,7 @@ void TileProperty::onRender(RenderPipeline* pipeline){
     }
 }
 
-void SkyboxProperty::onPreRender(RenderPipeline* pipeline){
+void SkyboxProperty::onPreRender(Engine::RenderPipeline* pipeline){
     pipeline->getRenderSettings()->skybox_ptr = static_cast<void*>(this);
 }
 
@@ -607,7 +605,7 @@ void SkyboxProperty::DrawSky(RenderPipeline* pipeline){
     Engine::getSkyboxMesh()->Draw();
 }
 
-void ShadowCasterProperty::onPreRender(RenderPipeline* pipeline){
+void ShadowCasterProperty::onPreRender(Engine::RenderPipeline* pipeline){
     pipeline->getRenderSettings()->shadowcaster_ptr = static_cast<void*>(this);
 }
 

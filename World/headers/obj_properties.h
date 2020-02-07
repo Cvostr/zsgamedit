@@ -80,8 +80,7 @@ public:
     void addPropertyInterfaceToInspector();
     void onValueChanged();
     void copyTo(GameObjectProperty* dest);
-    void onAddToObject(); //will update render flag
-    void onRender(RenderPipeline* pipeline);
+    void onRender(Engine::RenderPipeline* pipeline);
 
     MaterialProperty();
 };
@@ -100,7 +99,7 @@ public:
     void updateMeshPtr(); //Updates pointer according to resource_relpath
     void onValueChanged(); //Update mesh    pointer
     void copyTo(GameObjectProperty* dest);
-    void onRender(RenderPipeline* pipeline);
+    void onRender(Engine::RenderPipeline* pipeline);
     MeshProperty();
 };
 
@@ -129,7 +128,7 @@ public:
     void copyTo(GameObjectProperty* dest);
     void updTransformPtr();
     void onObjectDeleted();
-    void onPreRender(RenderPipeline* pipeline);
+    void onPreRender(Engine::RenderPipeline* pipeline);
 
     LightsourceProperty();
 };
@@ -202,7 +201,7 @@ public:
 
 class SkyboxProperty : public GameObjectProperty{
 public:
-    void onPreRender(RenderPipeline* pipeline);
+    void onPreRender(Engine::RenderPipeline* pipeline);
     void DrawSky(RenderPipeline* pipeline);
     SkyboxProperty();
 };
@@ -224,7 +223,7 @@ public:
     int projection_viewport;
 
     void addPropertyInterfaceToInspector();
-    void onPreRender(RenderPipeline* pipeline);
+    void onPreRender(Engine::RenderPipeline* pipeline);
     void copyTo(GameObjectProperty* dest);
     void onValueChanged();
     void init();
@@ -248,7 +247,7 @@ public:
     ZSMATRIX4x4 abs;
 
     void addPropertyInterfaceToInspector();
-    void onPreRender(RenderPipeline* pipeline);
+    void onPreRender(Engine::RenderPipeline* pipeline);
     void copyTo(GameObjectProperty* dest);
 
     NodeProperty();
@@ -264,7 +263,7 @@ public:
     std::string anim_label;
 
     void addPropertyInterfaceToInspector();
-    void onPreRender(RenderPipeline* pipeline);
+    void onPreRender(Engine::RenderPipeline* pipeline);
     void onValueChanged();
     void copyTo(GameObjectProperty* dest);
 
@@ -310,7 +309,7 @@ public:
     int vegetableid;
 
     void addPropertyInterfaceToInspector();
-    void onRender(RenderPipeline* pipeline);
+    void onRender(Engine::RenderPipeline* pipeline);
 
     void DrawMesh(RenderPipeline* pipeline);
     void onValueChanged();

@@ -25,7 +25,7 @@
 #include "world/World.h"
 
 #define OBJ_PROPS_SIZE 11
-#define MAX_OBJS 12000
+#define MAX_OBJS 15000
 
 class GameObject;
 class World;
@@ -79,11 +79,6 @@ public:
     virtual void addPropertyInterfaceToInspector();
     virtual void onValueChanged();
     virtual void copyTo(GameObjectProperty* dest);
-    //On object first add
-    virtual void onAddToObject();
-    virtual void onObjectDeleted();
-    virtual void onPreRender(RenderPipeline* pipeline = nullptr);
-    virtual void onRender(RenderPipeline* pipeline);
     virtual void onTrigger(GameObject* obj);
 };
 
@@ -118,9 +113,9 @@ public:
     void addPropertyInterfaceToInspector();
     void onValueChanged();
     void getAbsoluteParentTransform(ZSVECTOR3& t, ZSVECTOR3& s, ZSVECTOR3& r);
-    void onRender(RenderPipeline* pipeline);
+    void onRender(Engine::RenderPipeline* pipeline);
     void copyTo(GameObjectProperty* dest);
-    void onPreRender(RenderPipeline* pipeline);
+    void onPreRender(Engine::RenderPipeline* pipeline);
 
     void getAbsoluteRotationMatrix(ZSMATRIX4x4& m);
 
