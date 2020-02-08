@@ -10,7 +10,7 @@ extern Project* project_ptr;
 extern ZSGAME_DATA* game_data;
 
 World::World(){
-    objects.reserve(MAX_OBJS);
+  //  objects.reserve(MAX_OBJS);
 }
 
 int World::getFreeObjectSpaceIndex(){
@@ -652,7 +652,7 @@ void World::putToShapshot(WorldSnapshot* snapshot){
         //Iterate over all properties in object and copy them into snapshot
         for(unsigned int prop_i = 0; prop_i < obj_ptr->props_num; prop_i ++){
             auto prop_ptr = obj_ptr->properties[prop_i];
-            auto new_prop = allocProperty(prop_ptr->type);
+            auto new_prop = _allocProperty(prop_ptr->type);
             new_prop->go_link = prop_ptr->go_link;
             prop_ptr->copyTo(new_prop);
             snapshot->props.push_back(new_prop);

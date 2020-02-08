@@ -121,7 +121,7 @@ void TileGroupProperty::addPropertyInterfaceToInspector(){
 void TileGroupProperty::process(){
     //receive pointer to object that own this property
     getActionManager()->newSnapshotAction(go_link.world_ptr);
-    World* wrld = world_ptr;
+    World* wrld = (World*)world_ptr;
 
     for(int x_i = 0; x_i < tiles_amount_X; x_i ++){
         for(int y_i = 0; y_i < tiles_amount_Y; y_i ++){
@@ -176,7 +176,7 @@ void TileGroupProperty::clear(){
     unsigned int children_am = static_cast<unsigned int>(parent->children.size());
     for(unsigned int ch_i = 0; ch_i < children_am; ch_i ++){
         GameObjectLink link_toremove = parent->children[0];
-        world_ptr->removeObj(link_toremove);
+        ((World*)world_ptr)->removeObj(link_toremove);
         go_link.updLinkPtr();
         parent = go_link.ptr;
     }

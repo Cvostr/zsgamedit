@@ -56,7 +56,7 @@ bool GameObject::addProperty(PROPERTY_TYPE property){
             return false; //Exit function
         }
     }
-    GameObjectProperty* _ptr = allocProperty(property);
+    GameObjectProperty* _ptr = _allocProperty(property);
     if(property == GO_PROPERTY_TYPE_LABEL){
         LabelProperty* ptr = static_cast<LabelProperty*>(_ptr);
         ptr->list_item_ptr = this->item_ptr;
@@ -288,7 +288,7 @@ void GameObject::putToSnapshot(GameObjectSnapshot* snapshot){
     //Copy all properties
     for(unsigned int i = 0; i < this->props_num; i ++){
         GameObjectProperty* prop_ptr = this->properties[i];
-        GameObjectProperty* new_prop_ptr = allocProperty(prop_ptr->type);
+        GameObjectProperty* new_prop_ptr = _allocProperty(prop_ptr->type);
         prop_ptr->copyTo(new_prop_ptr);
         snapshot->properties[snapshot->props_num] = new_prop_ptr;
         snapshot->props_num += 1;
@@ -321,7 +321,7 @@ void GameObject::recoverFromSnapshot(GameObjectSnapshot* snapshot){
         //Pointer to property in snapshot
         GameObjectProperty* prop_ptr = snapshot->properties[i];
         //Pointer to new allocated property
-        GameObjectProperty* new_prop_ptr = allocProperty(prop_ptr->type);
+        GameObjectProperty* new_prop_ptr = _allocProperty(prop_ptr->type);
         //Copy pointer in snapshot to new pointer
         prop_ptr->copyTo(new_prop_ptr);
         this->properties[props_num] = new_prop_ptr;

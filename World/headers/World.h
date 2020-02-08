@@ -24,9 +24,6 @@
 
 #include "world/World.h"
 
-#define OBJ_PROPS_SIZE 11
-#define MAX_OBJS 15000
-
 class GameObject;
 class World;
 class GameObjectProperty;
@@ -69,7 +66,6 @@ typedef struct WRenderSettings{
 class GameObjectProperty : public Engine::GameObjectProperty{
 public:
     GameObjectLink go_link; //link to object, that holds this property
-    World* world_ptr; //Sometimes may be useful
 
     bool isActive();
 
@@ -127,16 +123,16 @@ public:
 };
 
 
-class GameObject {
+class GameObject : public Engine::GameObject{
 public:
     //Index in objects vector
     int array_index;
     //Pointer to string label in property
     QString* label;
     //String, gameobject identified by
-    std::string str_id;
-    bool hasParent; //If object has a parent
-    bool alive; //if object marked as removed
+    //std::string str_id;
+    //bool hasParent; //If object has a parent
+    //bool alive; //if object marked as removed
     bool isPicked; //if user selected this object to edit it
     bool active; //if true, object will be active in scene
     bool IsStatic;
@@ -240,11 +236,9 @@ public:
     void clear();
 };
 
-class World{
+class World : public Engine::World{
 public:
     QTreeWidget* obj_widget_ptr;
-    PhysicalWorldSettings phys_settngs;
-    PhysicalWorld* physical_world;
     Engine::Camera world_camera;
 
     std::vector<GameObject> objects; //Vector, containing all gameobjects
@@ -287,7 +281,7 @@ public:
     World();
 
 };
-GameObjectProperty* allocProperty(int type);
+GameObjectProperty* _allocProperty(PROPERTY_TYPE type);
 QString getPropertyString(int type);
 
 #endif

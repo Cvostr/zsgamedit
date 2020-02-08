@@ -100,7 +100,7 @@ QString getPropertyString(int type){
     return QString("NONE");
 }
 
-GameObjectProperty* allocProperty(int type){
+GameObjectProperty* _allocProperty(PROPERTY_TYPE type){
     GameObjectProperty* _ptr = nullptr;
     switch (type) {
         case GO_PROPERTY_TYPE_TRANSFORM:{ //If type is transfrom
@@ -404,7 +404,7 @@ void LabelProperty::addPropertyInterfaceToInspector(){
 }
 
 void LabelProperty::onValueChanged(){
-    World* world_ptr = this->world_ptr; //Obtain pointer to world object
+    World* world_ptr = static_cast<World*>(this->world_ptr); //Obtain pointer to world object
     //lets chack if object already exist in world
     if(!world_ptr->isObjectLabelUnique(this->label)){
         //If object already exist
@@ -458,7 +458,7 @@ void MeshProperty::updateMeshPtr(){
 
 void MeshProperty::onRender(Engine::RenderPipeline* pipeline){
     if(this->skinning_root_node == nullptr)
-        skinning_root_node = world_ptr->getObjectByLabelStr(this->rootNodeStr);
+        skinning_root_node = ((World*)world_ptr)->getObjectByLabelStr(this->rootNodeStr);
 }
 
 void MeshProperty::onValueChanged(){
