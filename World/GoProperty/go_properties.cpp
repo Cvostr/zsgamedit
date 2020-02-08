@@ -14,7 +14,7 @@ extern ZSGAME_DATA* game_data;
 static AnimationProperty* current_anim;
 
 GameObjectProperty* ObjectPropertyLink::updLinkPtr(){
-    ptr = this->object.updLinkPtr()->getPropertyPtrByType(this->prop_type);
+    ptr = (GameObjectProperty*)this->object.updLinkPtr()->getPropertyPtrByType(this->prop_type);
 
     return ptr;
 }
@@ -31,18 +31,11 @@ GameObjectProperty::GameObjectProperty(){
 GameObjectProperty::~GameObjectProperty(){
 
 }
-void GameObjectProperty::copyTo(GameObjectProperty* dest){
-    dest->active = this->active;
-    dest->world_ptr = this->world_ptr;
-}
 
 bool GameObjectProperty::isActive(){
     return active && (go_link.updLinkPtr() != nullptr) ? go_link.ptr->active : false;
 }
 
-void GameObjectProperty::onTrigger(GameObject* obj){
-    assert(obj);
-}
 QString getPropertyString(int type){
     switch (type) {
         case GO_PROPERTY_TYPE_TRANSFORM:{ //If type is transfrom
@@ -187,14 +180,6 @@ GameObjectProperty* _allocProperty(PROPERTY_TYPE type){
         }
     }
     return _ptr;
-}
-
-//Cast inheritance calls
-void GameObjectProperty::addPropertyInterfaceToInspector(){
-}
-
-void GameObjectProperty::onValueChanged(){
-
 }
 //Inherited constructors
 TransformProperty::TransformProperty(){
@@ -381,7 +366,7 @@ void TransformProperty::getAbsoluteParentTransform(ZSVECTOR3& t, ZSVECTOR3& s, Z
     }
 }
 
-void TransformProperty::copyTo(GameObjectProperty* dest){
+void TransformProperty::copyTo(Engine::GameObjectProperty* dest){
     if(dest->type != this->type) return; //if it isn't transform
     //Do base things
     GameObjectProperty::copyTo(dest);
@@ -416,7 +401,7 @@ void LabelProperty::onValueChanged(){
     this->list_item_ptr->setText(0, this->label);
 }
 
-void LabelProperty::copyTo(GameObjectProperty* dest){
+void LabelProperty::copyTo(Engine::GameObjectProperty* dest){
     if(dest->type != this->type) return; //if it isn't label
 
     //Do base things
@@ -465,7 +450,7 @@ void MeshProperty::onValueChanged(){
     updateMeshPtr();
 }
 
-void MeshProperty::copyTo(GameObjectProperty* dest){
+void MeshProperty::copyTo(Engine::GameObjectProperty* dest){
     if(dest->type != this->type) return; //if it isn't mesh, then exit
 
     //Do base things
@@ -535,7 +520,7 @@ void LightsourceProperty::onValueChanged(){
     this->direction = _getDirection(rot_vec_ptr->X, rot_vec_ptr->Y, rot_vec_ptr->Z);
 
 }
-void LightsourceProperty::copyTo(GameObjectProperty* dest){
+void LightsourceProperty::copyTo(Engine::GameObjectProperty* dest){
     if(dest->type != this->type) return; //if it isn't Lightsource, then exit
 
     //Do base things
@@ -655,7 +640,7 @@ void AudioSourceProperty::onUpdate(float deltaTime){
     }
 }
 
-void AudioSourceProperty::copyTo(GameObjectProperty* dest){
+void AudioSourceProperty::copyTo(Engine::GameObjectProperty* dest){
     if(dest->type != this->type) return; //if it isn't audiosource then exit
 
     AudioSourceProperty* _dest = static_cast<AudioSourceProperty*>(dest);
@@ -941,7 +926,7 @@ void MaterialProperty::onValueChanged(){
     _editor_win->updateFileList();
 }
 
-void MaterialProperty::copyTo(GameObjectProperty* dest){
+void MaterialProperty::copyTo(Engine::GameObjectProperty* dest){
     //MaterialShaderProperty
     if(dest->type != GO_PROPERTY_TYPE_MATERIAL) return;
 
@@ -986,7 +971,7 @@ void ColliderProperty::onUpdate(float deltaTime){
         init();
 }
 
-void ColliderProperty::copyTo(GameObjectProperty* dest){
+void ColliderProperty::copyTo(Engine::GameObjectProperty* dest){
     if(dest->type != GO_PROPERTY_TYPE_COLLIDER) return;
 
     PhysicalProperty::copyTo(dest);
@@ -1100,7 +1085,7 @@ void RigidbodyProperty::setLinearVelocity(ZSVECTOR3 lvel){
     this->rigidBody->setLinearVelocity(btVector3(linearVel.X, linearVel.Y, linearVel.Z));
 }
 
-void RigidbodyProperty::copyTo(GameObjectProperty* dest){
+void RigidbodyProperty::copyTo(Engine::GameObjectProperty* dest){
     if(dest->type != GO_PROPERTY_TYPE_RIGIDBODY) return;
 
     //Do base things
@@ -1132,7 +1117,7 @@ void CharacterControllerProperty::setLinearVelocity(ZSVECTOR3 lvel){
 void CharacterControllerProperty::addPropertyInterfaceToInspector(){
     addCustomSizeField(_inspector_win);
 }
-void CharacterControllerProperty::copyTo(GameObjectProperty* dest){
+void CharacterControllerProperty::copyTo(Engine::GameObjectProperty* dest){
     if(dest->type != GO_PROPERTY_TYPE_CHARACTER_CONTROLLER) return;
 
     //Do base things
@@ -1247,7 +1232,7 @@ void ScriptGroupProperty::onUpdate(float deltaTime){
     }
 }
 
-void ScriptGroupProperty::copyTo(GameObjectProperty* dest){
+void ScriptGroupProperty::copyTo(Engine::GameObjectProperty* dest){
     if(dest->type != this->type) return; //if it isn't script group
 
     //Do base things
@@ -1369,7 +1354,7 @@ bool ShadowCasterProperty::isRenderAvailable(){
     return true;
 }
 
-void ShadowCasterProperty::copyTo(GameObjectProperty* dest){
+void ShadowCasterProperty::copyTo(Engine::GameObjectProperty* dest){
     if(dest->type != this->type) return; //if it isn't script group
 
     //Do base things
@@ -1400,7 +1385,7 @@ void NodeProperty::addPropertyInterfaceToInspector(){
 
 }
 
-void NodeProperty::copyTo(GameObjectProperty* dest){
+void NodeProperty::copyTo(Engine::GameObjectProperty* dest){
     if(dest->type != this->type) return; //if it isn't Node property
 
     //Do base things
@@ -1532,7 +1517,7 @@ void AnimationProperty::updateNodeTransform(GameObject* obj, ZSMATRIX4x4 parent)
 
 }
 
-void AnimationProperty::copyTo(GameObjectProperty *dest){
+void AnimationProperty::copyTo(Engine::GameObjectProperty *dest){
     if(dest->type != this->type) return; //if it isn't animation
 
     //Do base things

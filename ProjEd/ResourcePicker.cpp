@@ -166,7 +166,7 @@ void QLabelResourcePickWgt::dropEvent( QDropEvent* event ){
         //if we picking property
         if(area_ptr->type == PEA_TYPE_PROPPICK){
             PropertyPickArea* _area_ptr = static_cast<PropertyPickArea*>(area_ptr);
-            GameObjectProperty* prop = obj->getPropertyPtrByType(_area_ptr->prop_type);
+            GameObjectProperty* prop = (GameObjectProperty*)obj->getPropertyPtrByType(_area_ptr->prop_type);
             if(prop != nullptr){ //Property with that type exist
                 //Writing pointer
                 *_area_ptr->property_ptr_ptr = prop;

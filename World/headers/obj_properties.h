@@ -26,7 +26,7 @@ public:
     void addPropertyInterfaceToInspector();
     void shutdown();
     void onUpdate(float deltaTime); //calls update in scripts
-    void copyTo(GameObjectProperty* dest);
+    void copyTo(Engine::GameObjectProperty* dest);
 
     ObjectScript* getScriptByName(std::string name);
 
@@ -47,7 +47,7 @@ public:
     void onValueChanged(); //Update soud buffer pointer and send source props
     void onUpdate(float deltaTime);
     void onObjectDeleted();
-    void copyTo(GameObjectProperty* dest);
+    void copyTo(Engine::GameObjectProperty* dest);
 
     void setAudioFile(std::string relpath);
     void updateAudioPtr();
@@ -79,7 +79,7 @@ public:
     void setMaterial(std::string path);
     void addPropertyInterfaceToInspector();
     void onValueChanged();
-    void copyTo(GameObjectProperty* dest);
+    void copyTo(Engine::GameObjectProperty* dest);
     void onRender(Engine::RenderPipeline* pipeline);
 
     MaterialProperty();
@@ -98,7 +98,7 @@ public:
     void addPropertyInterfaceToInspector();
     void updateMeshPtr(); //Updates pointer according to resource_relpath
     void onValueChanged(); //Update mesh    pointer
-    void copyTo(GameObjectProperty* dest);
+    void copyTo(Engine::GameObjectProperty* dest);
     void onRender(Engine::RenderPipeline* pipeline);
     MeshProperty();
 };
@@ -125,7 +125,7 @@ public:
 
     void addPropertyInterfaceToInspector();
     void onValueChanged(); //Update mesh pointer
-    void copyTo(GameObjectProperty* dest);
+    void copyTo(Engine::GameObjectProperty* dest);
     void updTransformPtr();
     void onObjectDeleted();
     void onPreRender(Engine::RenderPipeline* pipeline);
@@ -147,7 +147,7 @@ public:
     btCollisionShape* shape;
     COLLIDER_TYPE coll_type;
     float mass;
-    void copyTo(GameObjectProperty* dest);
+    void copyTo(Engine::GameObjectProperty* dest);
     void addColliderRadio(InspectorWin* inspector);
     void addMassField(InspectorWin* inspector);
     void addCustomSizeField(InspectorWin* inspector);
@@ -159,7 +159,7 @@ class ColliderProperty : public PhysicalProperty{
 public:
     void onObjectDeleted(); //unregister in world
     void addPropertyInterfaceToInspector();
-    void copyTo(GameObjectProperty* dest);
+    void copyTo(Engine::GameObjectProperty* dest);
     void onUpdate(float deltaTime);
     TransformProperty* getTransformProperty();
 
@@ -175,7 +175,7 @@ public:
     ZSVECTOR3 angularVel;
 
     void addPropertyInterfaceToInspector();
-    void copyTo(GameObjectProperty* dest);
+    void copyTo(Engine::GameObjectProperty* dest);
     void onUpdate(float deltaTime);
 
     void setLinearVelocity(ZSVECTOR3 lvel);
@@ -191,7 +191,7 @@ public:
 
     void addPropertyInterfaceToInspector();
     void onUpdate(float deltaTime);
-    void copyTo(GameObjectProperty* dest);
+    void copyTo(Engine::GameObjectProperty* dest);
     void onValueChanged();
 
     void setLinearVelocity(ZSVECTOR3 lvel);
@@ -224,7 +224,7 @@ public:
 
     void addPropertyInterfaceToInspector();
     void onPreRender(Engine::RenderPipeline* pipeline);
-    void copyTo(GameObjectProperty* dest);
+    void copyTo(Engine::GameObjectProperty* dest);
     void onValueChanged();
     void init();
     void Draw(Engine::Camera* cam, RenderPipeline* pipeline);
@@ -248,7 +248,7 @@ public:
 
     void addPropertyInterfaceToInspector();
     void onPreRender(Engine::RenderPipeline* pipeline);
-    void copyTo(GameObjectProperty* dest);
+    void copyTo(Engine::GameObjectProperty* dest);
 
     NodeProperty();
 };
@@ -265,7 +265,7 @@ public:
     void addPropertyInterfaceToInspector();
     void onPreRender(Engine::RenderPipeline* pipeline);
     void onValueChanged();
-    void copyTo(GameObjectProperty* dest);
+    void copyTo(Engine::GameObjectProperty* dest);
 
     void play();
     void stop();
@@ -314,7 +314,7 @@ public:
     void DrawMesh(RenderPipeline* pipeline);
     void onValueChanged();
     void onAddToObject();
-    void copyTo(GameObjectProperty* dest);
+    void copyTo(Engine::GameObjectProperty* dest);
     void onUpdate(float deltaTime);
     TerrainProperty();
     void onMouseClick(int posX, int posY, int screenY, bool isLeftButtonHold, bool isCtrlHold);

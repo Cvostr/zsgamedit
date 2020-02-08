@@ -150,7 +150,7 @@ PhysicalProperty::PhysicalProperty(){
     rigidBody = nullptr;
 }
 
-void PhysicalProperty::copyTo(GameObjectProperty* dest){
+void PhysicalProperty::copyTo(Engine::GameObjectProperty* dest){
 
     //Do base things
     GameObjectProperty::copyTo(dest);

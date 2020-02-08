@@ -378,7 +378,7 @@ TerrainData* TerrainProperty::getTerrainData(){
     return &data;
 }
 
-void TerrainProperty::copyTo(GameObjectProperty* dest){
+void TerrainProperty::copyTo(Engine::GameObjectProperty* dest){
     if(dest->type != this->type) return; //if it isn't script group
 
     //Do base things

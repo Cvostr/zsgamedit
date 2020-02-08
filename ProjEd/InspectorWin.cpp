@@ -133,7 +133,7 @@ void InspectorWin::ShowObjectProperties(void* object_ptr){
     unsigned int props_num = static_cast<unsigned int>(obj_ptr->props_num);
     //iterate over props to show them all
     for(unsigned int prop_it = 0; prop_it < props_num; prop_it ++){ //iterate over all properties and send them to inspector
-        GameObjectProperty* property_ptr = (obj_ptr->properties[prop_it]); //Obtain pointer to object property
+        GameObjectProperty* property_ptr = (GameObjectProperty*)(obj_ptr->properties[prop_it]); //Obtain pointer to object property
 
         AreaPropertyTitle* prop_title = new AreaPropertyTitle;
         prop_title->prop_title.setText(getPropertyString(property_ptr->type));
@@ -214,7 +214,7 @@ void ManageComponentDialog::refresh_list(){
 
     GameObject* obj_ptr = static_cast<GameObject*>(g_object_ptr); //cast pointer
     for(int prop_i = 0; prop_i < static_cast<int>(obj_ptr->props_num); prop_i ++){ //iterate over all properties
-        GameObjectProperty* prop_ptr = obj_ptr->properties[prop_i]; //obtain property pointer
+        GameObjectProperty* prop_ptr = (GameObjectProperty*)obj_ptr->properties[prop_i]; //obtain property pointer
         QListWidgetItem* item = new QListWidgetItem(getPropertyString(prop_ptr->type), &this->property_list);
         if(!prop_ptr->active)
             item->setTextColor(QColor(Qt::gray));
@@ -239,7 +239,7 @@ void ManageComponentDialog::deleteProperty(){
     QString text = item->text(); //get text of pressed item
     int item_ind = 0; //iterator
     for(int i = 0; i < static_cast<int>(obj_ptr->props_num); i ++){ //Iterate over all properties in object
-        GameObjectProperty* prop_ptr = obj_ptr->properties[i];
+        GameObjectProperty* prop_ptr = (GameObjectProperty*)obj_ptr->properties[i];
         if(getPropertyString(prop_ptr->type).compare(text) == 0){
             item_ind = i;
         }
@@ -273,7 +273,7 @@ PropertyCtxMenu::PropertyCtxMenu(InspectorWin* win, ManageComponentDialog* dialo
 void PropertyCtxMenu::show(QPoint point){
     GameObject* obj_ptr = static_cast<GameObject*>(this->win->gameobject_ptr); //cast pointer
 
-    GameObjectProperty* prop_ptr = obj_ptr->properties[this->selected_property_index];
+    GameObjectProperty* prop_ptr = (GameObjectProperty*)obj_ptr->properties[this->selected_property_index];
 
     if(!prop_ptr->active)
         this->toggle_active->setText("Activate");
@@ -295,9 +295,9 @@ void PropertyCtxMenu::onPaintClicked(){
     QListWidgetItem* item = dialog->property_list.currentItem(); //Get pressed item
     QString text = item->text(); //get text of pressed item
     for(int i = 0; i < static_cast<int>(obj_ptr->props_num); i ++){ //Iterate over all properties in object
-        GameObjectProperty* prop_ptr = obj_ptr->properties[i];
+        GameObjectProperty* prop_ptr = (GameObjectProperty*)obj_ptr->properties[i];
         if(getPropertyString(prop_ptr->type).compare(text) == 0){
-            _editor_win->ppaint_state.prop_ptr = obj_ptr->properties[i];
+            _editor_win->ppaint_state.prop_ptr = (GameObjectProperty*)obj_ptr->properties[i];
         }
     }
 }
@@ -305,7 +305,7 @@ void PropertyCtxMenu::onPaintClicked(){
 void PropertyCtxMenu::onActiveToggleClicked(){
     GameObject* obj_ptr = static_cast<GameObject*>(this->win->gameobject_ptr); //cast pointer
     //Calculate property pointer
-    GameObjectProperty* prop_ptr = obj_ptr->properties[this->selected_property_index];
+    GameObjectProperty* prop_ptr = (GameObjectProperty*)obj_ptr->properties[this->selected_property_index];
 
     //Make action
     getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);

@@ -274,7 +274,7 @@ void GameObject::loadProperty(std::ifstream* world_stream){
     world_stream->read(reinterpret_cast<char*>(&type), sizeof(int));
     //Spawn new property with readed type
     addProperty(type);
-    GameObjectProperty* prop_ptr = getPropertyPtrByType(type); //get created property
+    GameObjectProperty* prop_ptr = (GameObjectProperty*)getPropertyPtrByType(type); //get created property
     //since more than 1 properties same type can't be on one gameobject
     world_stream->read(reinterpret_cast<char*>(&prop_ptr->active), sizeof(bool));
     switch(type){

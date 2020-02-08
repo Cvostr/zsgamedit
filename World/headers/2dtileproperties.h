@@ -60,7 +60,7 @@ public:
     void addPropertyInterfaceToInspector();
     void process();
     void clear();
-    void copyTo(GameObjectProperty* dest);
+    void copyTo(Engine::GameObjectProperty* dest);
 
     TileGroupProperty();
 };
@@ -83,7 +83,7 @@ public:
     void addPropertyInterfaceToInspector();
     void onValueChanged(); //Update texture pointer
     void updTexturePtr();
-    void copyTo(GameObjectProperty* dest);
+    void copyTo(Engine::GameObjectProperty* dest);
     void onAddToObject();
     void onUpdate(float deltaTime);
     void onRender(Engine::RenderPipeline* pipeline);

@@ -51,7 +51,7 @@ GameObject::~GameObject(){
 bool GameObject::addProperty(PROPERTY_TYPE property){
     unsigned int props = static_cast<unsigned int>(this->props_num);
     for(unsigned int prop_i = 0; prop_i < props; prop_i ++){
-        GameObjectProperty* property_ptr = this->properties[prop_i];
+        GameObjectProperty* property_ptr = (GameObjectProperty*)this->properties[prop_i];
         if(property_ptr->type == property){ //If object already has one
             return false; //Exit function
         }
@@ -81,7 +81,7 @@ bool GameObject::addLabelProperty(){
 GameObjectProperty* GameObject::getPropertyPtrByType(PROPERTY_TYPE property){
     unsigned int props = static_cast<unsigned int>(this->props_num);
     for(unsigned int prop_i = 0; prop_i < props; prop_i ++){
-        GameObjectProperty* property_ptr = this->properties[prop_i];
+        GameObjectProperty* property_ptr = (GameObjectProperty*)this->properties[prop_i];
         if(property_ptr->type == property){ //If object already has one
             return property_ptr; //return it
         }
@@ -92,7 +92,7 @@ GameObjectProperty* GameObject::getPropertyPtrByType(PROPERTY_TYPE property){
 GameObjectProperty* GameObject::getPropertyPtrByTypeI(int property){
     unsigned int props = static_cast<unsigned int>(this->props_num);
     for(unsigned int prop_i = 0; prop_i < props; prop_i ++){
-        GameObjectProperty* property_ptr = this->properties[prop_i];
+        GameObjectProperty* property_ptr = (GameObjectProperty*)this->properties[prop_i];
         if(property_ptr->type == property){ //If object already has one
             return property_ptr; //return it
         }
@@ -227,7 +227,7 @@ void GameObject::clearAll(bool clearQtWigt){
 
     for(unsigned int prop_i = 0; prop_i < props_num; prop_i ++){ //Walk through all children an remove them
         //Obtain pointer to property
-        GameObjectProperty* prop_ptr = properties[prop_i];
+        GameObjectProperty* prop_ptr = (GameObjectProperty*)properties[prop_i];
         prop_ptr->onObjectDeleted(); //Call on object deletion
         delete prop_ptr; //Destroy property
     }
@@ -287,7 +287,7 @@ void GameObject::putToSnapshot(GameObjectSnapshot* snapshot){
     this->copyTo(&snapshot->reserved_obj);
     //Copy all properties
     for(unsigned int i = 0; i < this->props_num; i ++){
-        GameObjectProperty* prop_ptr = this->properties[i];
+        GameObjectProperty* prop_ptr = (GameObjectProperty*)this->properties[i];
         GameObjectProperty* new_prop_ptr = _allocProperty(prop_ptr->type);
         prop_ptr->copyTo(new_prop_ptr);
         snapshot->properties[snapshot->props_num] = new_prop_ptr;

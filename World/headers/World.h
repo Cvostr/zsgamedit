@@ -29,6 +29,8 @@ class World;
 class GameObjectProperty;
 class GameObjectSnapshot;
 
+
+
 class GameObjectLink{
 public:
     World* world_ptr;
@@ -71,12 +73,9 @@ public:
 
     GameObjectProperty();
     virtual ~GameObjectProperty();
-
-    virtual void addPropertyInterfaceToInspector();
-    virtual void onValueChanged();
-    virtual void copyTo(GameObjectProperty* dest);
-    virtual void onTrigger(GameObject* obj);
 };
+
+//#define GameObjectProperty Engine::GameObjectProperty
 
 class LabelProperty : public GameObjectProperty {
 public:
@@ -86,7 +85,7 @@ public:
 
     void addPropertyInterfaceToInspector();
     void onValueChanged();
-    void copyTo(GameObjectProperty* dest);
+    void copyTo(Engine::GameObjectProperty* dest);
 
     LabelProperty();
 };
@@ -110,7 +109,7 @@ public:
     void onValueChanged();
     void getAbsoluteParentTransform(ZSVECTOR3& t, ZSVECTOR3& s, ZSVECTOR3& r);
     void onRender(Engine::RenderPipeline* pipeline);
-    void copyTo(GameObjectProperty* dest);
+    void copyTo(Engine::GameObjectProperty* dest);
     void onPreRender(Engine::RenderPipeline* pipeline);
 
     void getAbsoluteRotationMatrix(ZSMATRIX4x4& m);
@@ -129,19 +128,12 @@ public:
     int array_index;
     //Pointer to string label in property
     QString* label;
-    //String, gameobject identified by
-    //std::string str_id;
-    //bool hasParent; //If object has a parent
-    //bool alive; //if object marked as removed
     bool isPicked; //if user selected this object to edit it
     bool active; //if true, object will be active in scene
-    bool IsStatic;
-    void* world_ptr; //pointer to world, when object placed
     GameObjectLink parent; //Link to object's parent
 
     unsigned int props_num; //Count of created props
     QTreeWidgetItem* item_ptr;
-    GameObjectProperty* properties[OBJ_PROPS_SIZE]; //Vector to store pointers to all properties
     std::vector<GameObjectLink> children; //Vector to store links to children of object
     int getAliveChildrenAmount(); //Gets current amount of children objects (exclude removed chidren)
     void pick(); //Mark object and its children picked
