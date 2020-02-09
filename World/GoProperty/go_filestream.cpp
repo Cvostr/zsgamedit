@@ -51,14 +51,14 @@ void GameObject::saveProperties(std::ofstream* stream){
         }
         case GO_PROPERTY_TYPE_LABEL:{
             LabelProperty* ptr = static_cast<LabelProperty*>(property_ptr);
-            *stream << ptr->label.toStdString();
+            *stream << ptr->label;
             break;
         }
         case GO_PROPERTY_TYPE_MESH:{
             MeshProperty* ptr = static_cast<MeshProperty*>(property_ptr);
             *stream << ptr->resource_relpath << "\n";
             if(ptr->skinning_root_node != nullptr)
-                *stream << ptr->skinning_root_node->label->toStdString() << "\n";
+                *stream << ptr->skinning_root_node->label_ptr << "\n";
             else
                 *stream << "@none\n";
             stream->write(reinterpret_cast<char*>(&ptr->castShadows), sizeof(bool));
@@ -282,12 +282,11 @@ void GameObject::loadProperty(std::ifstream* world_stream){
             break;
         }
         case GO_PROPERTY_TYPE_LABEL :{
-            std::string label;
-            *world_stream >> label;
             LabelProperty* lptr = static_cast<LabelProperty*>(prop_ptr);
-            this->label = &lptr->label; //Making GameObjects's pointer to string in label property
-            lptr->label = QString::fromStdString(label); //Write loaded string
-            lptr->list_item_ptr->setText(0, lptr->label); //Set text on widget
+            *world_stream >> lptr->label;
+
+            this->label_ptr = &lptr->label; //Making GameObjects's pointer to string in label property
+            lptr->list_item_ptr->setText(0, QString::fromStdString(lptr->label)); //Set text on widget
             break;
         }
         case GO_PROPERTY_TYPE_TRANSFORM :{

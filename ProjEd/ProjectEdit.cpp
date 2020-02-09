@@ -335,7 +335,7 @@ void EditWindow::openFile(QString file_path){
 
         _ed_actions_container->clear();
         setupObjectsHieList(); //Clear everything, at first
-        world.openFromFile(file_path, ui->objsList); //Open this scene
+        world.openFromFile(file_path.toStdString(), ui->objsList); //Open this scene
 
         scene_path = file_path; //Assign scene path
         hasSceneFile = true; //Scene is saved
@@ -353,7 +353,7 @@ void EditWindow::openFile(QString file_path){
 
 void EditWindow::addFileToObjectList(QString file_path){
     if(checkExtension(file_path, ".prefab")){
-        this->world.addObjectsFromPrefab(file_path);
+        this->world.addObjectsFromPrefab(file_path.toStdString());
     }
     if(checkExtension(file_path, ".fbx") || checkExtension(file_path, ".dae") || checkExtension(file_path, ".zs3m")){
         this->world.addMeshGroup(file_path.toStdString());
@@ -391,7 +391,7 @@ void EditWindow::onSceneSaveAs(){
     QString filename = QFileDialog::getSaveFileName(this, tr("Save scene file"), QString::fromStdString(project.root_path), "*.scn");
     if(!filename.endsWith(".scn")) //If filename doesn't end with ".scn"
         filename.append(".scn"); //Add this extension
-    world.saveToFile(filename); //Save to picked file
+    world.saveToFile(filename.toStdString()); //Save to picked file
     scene_path = filename; //Assign scene path
     hasSceneFile = true; //Scene is saved
 
@@ -416,7 +416,7 @@ void EditWindow::onSceneSave(){
         //unset unsavedchanges flag to avoid showing dialog
         _ed_actions_container->hasChangesUnsaved = false;
         //perform scene save
-        world.saveToFile(this->scene_path);
+        world.saveToFile(this->scene_path.toStdString());
     }
 }
 
@@ -528,8 +528,8 @@ void EditWindow::addNewCube(){
     //Set new name to object
     int add_num = 0; //Declaration of addititonal integer
     world.getAvailableNumObjLabel("Cube_", &add_num);
-    *obj->label = "Cube_" + QString::number(add_num);
-    obj->item_ptr->setText(0, *obj->label);
+    *obj->label_ptr = "Cube_" + std::to_string(add_num);
+    obj->item_ptr->setText(0, QString::fromStdString(*obj->label_ptr));
 
     MeshProperty* mesh = static_cast<MeshProperty*>(obj->getPropertyPtrByType(GO_PROPERTY_TYPE_MESH));
     mesh->resource_relpath = "@cube";
@@ -546,8 +546,8 @@ void EditWindow::addNewLight(){
     //Set new name to object
     int add_num = 0; //Declaration of addititonal integer
     world.getAvailableNumObjLabel("Light_", &add_num);
-    *obj->label = "Light_" + QString::number(add_num);
-    obj->item_ptr->setText(0, *obj->label);
+    *obj->label_ptr = "Light_" + std::to_string(add_num);
+    obj->item_ptr->setText(0, QString::fromStdString(*obj->label_ptr));
 }
 
 void EditWindow::addNewTile(){
@@ -558,8 +558,8 @@ void EditWindow::addNewTile(){
     //Set new name to object
     int add_num = 0; //Declaration of addititonal integer
     world.getAvailableNumObjLabel("Tile_", &add_num);
-    *obj->label = "Tile_" + QString::number(add_num);
-    obj->item_ptr->setText(0, *obj->label);
+    *obj->label_ptr = "Tile_" + std::to_string(add_num);
+    obj->item_ptr->setText(0, QString::fromStdString(*obj->label_ptr));
     //Assign @mesh
     MeshProperty* mesh = static_cast<MeshProperty*>(obj->getPropertyPtrByType(GO_PROPERTY_TYPE_MESH));
     mesh->resource_relpath = "@plane";
@@ -578,8 +578,9 @@ void EditWindow::addNewTerrain(){
     //Set new name to object
     int add_num = 0; //Declaration of addititonal integer
     world.getAvailableNumObjLabel("Terrain_", &add_num);
-    *obj->label = "Terrain_" + QString::number(add_num);
-    obj->item_ptr->setText(0, *obj->label);
+    *obj->label_ptr = "Terrain_" + std::to_string(add_num);
+
+    std::vector<GameObject> objects; obj->item_ptr->setText(0, QString::fromStdString(*obj->label_ptr));
     //Add terrain property
     obj->addProperty(GO_PROPERTY_TYPE_TERRAIN); //Creates terrain inside
     obj->getPropertyPtr<TerrainProperty>()->onAddToObject();
@@ -777,7 +778,7 @@ void EditWindow::onObjectListItemClicked(){
 
     QString obj_name = selected_item->text(0); //Get label of clicked obj
 
-    GameObject* obj_ptr = world.getObjectByLabel(obj_name); //Obtain pointer to selected object by label
+    GameObject* obj_ptr = (GameObject*)world.getObjectByLabel(obj_name.toStdString()); //Obtain pointer to selected object by label
 
     obj_trstate.obj_ptr = obj_ptr;
     obj_trstate.tprop_ptr = static_cast<TransformProperty*>(obj_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
@@ -789,7 +790,7 @@ void EditWindow::onObjectCtxMenuShow(QPoint point){
     //We selected empty space
     if(selected_item == nullptr) return;
     QString obj_name = selected_item->text(0); //Get label of clicked obj
-    GameObject* obj_ptr = world.getObjectByLabel(obj_name); //Obtain pointer to selected object by label
+    GameObject* obj_ptr = (GameObject*)world.getObjectByLabel(obj_name.toStdString()); //Obtain pointer to selected object by label
 
     this->obj_ctx_menu->setObjectPtr(obj_ptr);
     this->obj_ctx_menu->show(point);
@@ -812,7 +813,7 @@ void EditWindow::onCameraToObjTeleport(){
 
     QTreeWidgetItem* selected_item = ui->objsList->currentItem(); //Obtain pointer to clicked obj item
     QString obj_name = selected_item->text(0); //Get label of clicked obj
-    GameObject* obj_ptr = world.getObjectByLabel(obj_name); //Obtain pointer to selected object by label
+    GameObject* obj_ptr = (GameObject*)world.getObjectByLabel(obj_name.toStdString()); //Obtain pointer to selected object by label
 
     TransformProperty* transform = obj_ptr->getTransformProperty(); //Obtain pointer to object transform
     //Define to store absolute transform
@@ -839,7 +840,7 @@ void EditWindow::onRedoPressed(){
 void EditWindow::onObjectCopy(){
     QTreeWidgetItem* selected_item = ui->objsList->currentItem(); //Obtain pointer to clicked obj item
     QString obj_name = selected_item->text(0); //Get label of clicked obj
-    GameObject* obj_ptr = world.getObjectByLabel(obj_name); //Obtain pointer to selected object by label
+    GameObject* obj_ptr = (GameObject*)world.getObjectByLabel(obj_name.toStdString()); //Obtain pointer to selected object by label
 
     this->object_buffer = obj_ptr;
 }
@@ -883,7 +884,7 @@ void EditWindow::glRender(){
         stopWorld(); //firstly, stop world
         //load world
         ui->objsList->clear();
-        world.openFromFile(this->sheduled_world, world.obj_widget_ptr);
+        world.openFromFile(this->sheduled_world.toStdString(), world.obj_widget_ptr);
         //run loaded world
         runWorld();
 
@@ -1386,7 +1387,7 @@ void EditWindow::keyPressEvent(QKeyEvent* ke){
         QTreeWidgetItem* object_toRemove = this->ui->objsList->currentItem();
         QListWidgetItem* file_toRemove = this->ui->fileList->currentItem();
         if(object_toRemove != nullptr && ui->objsList->hasFocus()){ //if user wish to delete object
-            GameObject* obj = this->world.getObjectByLabel(object_toRemove->text(0));
+            GameObject* obj = (GameObject*)this->world.getObjectByLabel(object_toRemove->text(0).toStdString());
             _inspector_win->clearContentLayout(); //Prevent variable conflicts
             GameObjectLink link = obj->getLinkToThisObject();
             obj_trstate.isTransforming = false; //disabling object transform

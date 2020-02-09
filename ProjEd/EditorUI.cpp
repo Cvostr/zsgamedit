@@ -28,14 +28,14 @@ void ObjTreeWgt::dropEvent(QDropEvent* event){
         //Block internal move to avoid bugs
         _editor_win->getObjectListWidget()->setDragDropMode(QAbstractItemView::InternalMove);
 
-        GameObject* obj_ptr = world_ptr->getObjectByLabel(kids.at(0)->text(0)); //Receiving pointer to moving object
+        GameObject* obj_ptr = (GameObject*)world_ptr->getObjectByLabel(kids.at(0)->text(0).toStdString()); //Receiving pointer to moving object
 
         QTreeWidgetItem* pparent = kids.at(0)->parent(); //parent of moved object
         if(pparent == nullptr){ //If object hadn't any parent
             //this->removeItemWidget(obj_ptr->item_ptr, 0);
         }else{ //If object already parented
             GameObjectLink link = obj_ptr->getLinkToThisObject();
-            GameObject* pparent_go = world_ptr->getObjectByLabel(pparent->text(0));
+            GameObject* pparent_go = (GameObject*)world_ptr->getObjectByLabel(pparent->text(0).toStdString());
             pparent_go->removeChildObject(link); //Remove object from previous parent
         }
         if(file_dropped.length() == 0) //if we didn't move a file
@@ -43,7 +43,7 @@ void ObjTreeWgt::dropEvent(QDropEvent* event){
 
         QTreeWidgetItem* nparent = obj_ptr->item_ptr->parent(); //new parent
         if(nparent != nullptr){ //If we moved obj to another parent
-            GameObject* nparent_go = world_ptr->getObjectByLabel(nparent->text(0));
+            GameObject* nparent_go = (GameObject*)world_ptr->getObjectByLabel(nparent->text(0).toStdString());
             nparent_go->addChildObject(obj_ptr->getLinkToThisObject());
         }else{ //Object hasn't received a parent
             if(pparent != nullptr){//We unparented object
@@ -188,7 +188,7 @@ void ObjectCtxMenu::onDublicateClicked(){
     }
 }
 void ObjectCtxMenu::onStorePrefabPressed(){
-    QString prefab_filepath = _editor_win->getCurrentDirectory() + "/" + *obj_ptr->label + ".prefab";
+    QString prefab_filepath = _editor_win->getCurrentDirectory() + "/" + QString::fromStdString(*obj_ptr->label_ptr) + ".prefab";
     //Call prefab storing
     _editor_win->world.storeObjectToPrefab(this->obj_ptr, prefab_filepath);
     //update file list in current directory
@@ -197,7 +197,7 @@ void ObjectCtxMenu::onStorePrefabPressed(){
 
 void ObjectCtxMenu::onInfoPressed(){
     QString out = "";
-    out += ("Label : " + *obj_ptr->label + QString(" \n"));
+    out += ("Label : " + QString::fromStdString(*obj_ptr->label_ptr) + QString(" \n"));
     out += "STR ID : " + QString::fromStdString(obj_ptr->str_id) + QString(" \n");
     out += "ARRAY ID : " + QString::number(obj_ptr->array_index) + QString(" \n");
 

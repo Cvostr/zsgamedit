@@ -10,7 +10,6 @@ extern Project* project_ptr;
 extern ZSGAME_DATA* game_data;
 
 World::World(){
-  //  objects.reserve(MAX_OBJS);
 }
 
 int World::getFreeObjectSpaceIndex(){
@@ -86,10 +85,10 @@ GameObject* World::dublicateObject(GameObject* original, bool parent){
     LabelProperty* label_prop = new_obj->getLabelProperty(); //Obtain pointer to label property
     std::string to_paste;
     genRandomString(&to_paste, 3);
-    label_prop->label = label_prop->label + "_" + QString::fromStdString(to_paste);
+    label_prop->label = label_prop->label + "_" + to_paste;
     label_prop->list_item_ptr = new_obj->item_ptr; //Setting to label new qt item
-    new_obj->label = &label_prop->label;
-    new_obj->item_ptr->setText(0, label_prop->label);
+    new_obj->label_ptr = &label_prop->label;
+    new_obj->item_ptr->setText(0, QString::fromStdString(label_prop->label));
     //Dublicate chilldren object
     unsigned int children_amount = static_cast<unsigned int>(original->children.size());
     //Iterate over all children
@@ -126,27 +125,23 @@ GameObject* World::newObject(){
 
     obj.world_ptr = this;
     obj.addLabelProperty();
-    obj.label = &obj.getLabelProperty()->label;
-    *obj.label = "GameObject_" + QString::number(add_num); //Assigning label to object
-    obj.item_ptr->setText(0, *obj.label);
+    obj.label_ptr = &obj.getLabelProperty()->label;
+    *obj.label_ptr = "GameObject_" + std::to_string(add_num); //Assigning label to object
+    obj.item_ptr->setText(0, QString::fromStdString(*obj.label_ptr));
 
     obj.addProperty(GO_PROPERTY_TYPE_TRANSFORM);
     return this->addObject(obj); //Return pointer to new object
 }
 
-GameObject* World::getObjectByLabel(QString label){
+Engine::GameObject* World::getObjectByLabel(std::string label){
     unsigned int objs_num = static_cast<unsigned int>(this->objects.size());
     for(unsigned int obj_it = 0; obj_it < objs_num; obj_it ++){ //Iterate over all objs in scene
         GameObject* obj_ptr = &this->objects[obj_it]; //Get pointer to checking object
         if(!obj_ptr->alive) continue;
-        if(obj_ptr->label->compare(label) == 0) //if labels are same
+        if(obj_ptr->label_ptr->compare(label) == 0) //if labels are same
             return obj_ptr; //Return founded object
     }
     return nullptr; //if we haven't found one
-}
-
-GameObject* World::getObjectByLabelStr(std::string label){
-    return getObjectByLabel(QString::fromStdString(label));
 }
 
 GameObject* World::getObjectByStringId(std::string id){
@@ -159,14 +154,14 @@ GameObject* World::getObjectByStringId(std::string id){
     return nullptr; //if we haven't found one
 }
 
-void World::getAvailableNumObjLabel(QString label, int* result){
+void World::getAvailableNumObjLabel(std::string label, int* result){
      unsigned int objs_num = static_cast<unsigned int>(this->objects.size());
-     QString tocheck_str = label + QString::number(*result); //Calculating compare string
+     std::string tocheck_str = label + std::to_string(*result); //Calculating compare string
      bool hasEqualName = false; //true if we already have this obj
      for(unsigned int obj_it = 0; obj_it < objs_num; obj_it ++){ //Iterate over all objs in scene
          GameObject* obj_ptr = &this->objects[obj_it]; //Get pointer to checking object
-         if(obj_ptr->label == nullptr || !obj_ptr->alive) continue;
-         if(obj_ptr->label->compare(tocheck_str) == 0) //If label on object is same
+         if(obj_ptr->label_ptr == nullptr || !obj_ptr->alive) continue;
+         if(obj_ptr->label_ptr->compare(tocheck_str) == 0) //If label on object is same
              hasEqualName = true; //Then we founded equal name
      }
      if(hasEqualName == true){
@@ -175,14 +170,14 @@ void World::getAvailableNumObjLabel(QString label, int* result){
      }
 }
 
-bool World::isObjectLabelUnique(QString label){
+bool World::isObjectLabelUnique(std::string label){
     unsigned int objs_num = static_cast<unsigned int>(this->objects.size());
     int ret_amount = 0;
     for(unsigned int obj_it = 0; obj_it < objs_num; obj_it ++){ //Iterate over all objs in scene
         GameObject* obj_ptr = &this->objects[obj_it]; //Get pointer to checking object
         //if object was destroyed
         if(!obj_ptr->alive) continue;
-        if(obj_ptr->label->compare(label) == 0){
+        if(obj_ptr->label_ptr->compare(label) == 0){
             ret_amount += 1;
             if(ret_amount > 1) return false;
         }
@@ -308,13 +303,11 @@ void World::loadGameObject(GameObject* object_ptr, std::ifstream* world_stream){
     }
 }
 
-void World::saveToFile(QString file){
+void World::saveToFile(std::string file){
     Engine::RenderSettings* settings_ptr = renderer->getRenderSettings();
 
-    std::string fpath = file.toStdString();
-
     std::ofstream world_stream;
-    world_stream.open(fpath.c_str(), std::ofstream::binary);
+    world_stream.open(file, std::ofstream::binary);
     int version = 1;
     int obj_num = static_cast<int>(this->objects.size());
     world_stream << "ZSP_SCENE ";
@@ -346,15 +339,14 @@ void World::saveToFile(QString file){
 }
 
 
-void World::openFromFile(QString file, QTreeWidget* w_ptr){
+void World::openFromFile(std::string file, QTreeWidget* w_ptr){
     Engine::RenderSettings* settings_ptr = renderer->getRenderSettings();
     this->obj_widget_ptr = w_ptr;
 
     clear(); //Clear all objects
-    std::string fpath = file.toStdString(); //Turn QString to std::string
 
     std::ifstream world_stream;
-    world_stream.open(fpath.c_str(), std::ifstream::binary); //Opening to read binary data
+    world_stream.open(file, std::ifstream::binary); //Opening to read binary data
 
     std::string test_header;
     world_stream >> test_header; //Read header
@@ -458,10 +450,10 @@ void World::writeObjectToPrefab(GameObject* object_ptr, std::ofstream* stream){
     }
 }
 
-void World::addObjectsFromPrefab(QString file){
+void World::addObjectsFromPrefab(std::string file){
     std::ifstream prefab_stream;
     //opening prefab stream
-    prefab_stream.open(file.toStdString(), std::ifstream::binary);
+    prefab_stream.open(file, std::ifstream::binary);
 
     std::string header;
     //reading headers
@@ -487,12 +479,12 @@ void World::addObjectsFromPrefab(QString file){
     processPrefabObject(&mObjects[0], &mObjects);
     //iterate over all objects and push them to world
     for(unsigned int obj_i = 0; obj_i < mObjects.size(); obj_i ++){
-        QString label = *mObjects[obj_i].label;
+        std::string label = *mObjects[obj_i].label_ptr;
         int add_num = 0; //Declaration of addititonal integer
         getAvailableNumObjLabel(label, &add_num);
 
-        *mObjects[obj_i].label += QString::number(add_num); //Set new label to object
-        mObjects[obj_i].item_ptr->setText(0, *mObjects[obj_i].label); //Set text on widget
+        *mObjects[obj_i].label_ptr += std::to_string(add_num); //Set new label to object
+        mObjects[obj_i].item_ptr->setText(0, QString::fromStdString(*mObjects[obj_i].label_ptr)); //Set text on widget
 
         this->addObject(mObjects[obj_i]);
     }
@@ -504,10 +496,6 @@ void World::addObjectsFromPrefab(QString file){
         object_ptr->parent.world_ptr = this;
         object_ptr->parent.updLinkPtr()->item_ptr->addChild(object_ptr->item_ptr);
     }
-}
-
-void World::addObjectsFromPrefabStr(std::string file){
-    addObjectsFromPrefab(QString::fromStdString(file));
 }
 
 void World::addMeshGroup(std::string file_path){
@@ -542,7 +530,7 @@ void World::addMeshGroup(std::string file_path){
 GameObject* World::addMeshNode(ZS3M::SceneNode* node){
     GameObject obj; //Creating base gameobject
     int add_num = 0; //Declaration of addititonal integer
-    getAvailableNumObjLabel(QString::fromStdString(node->node_label), &add_num);
+    getAvailableNumObjLabel(node->node_label, &add_num);
     //Setting base variables
     obj.world_ptr = this;
     obj.addLabelProperty();
@@ -551,9 +539,9 @@ GameObject* World::addMeshNode(ZS3M::SceneNode* node){
     //Add node property to support skinning
     obj.addProperty(GO_PROPERTY_TYPE_NODE);
 
-    obj.label = &obj.getLabelProperty()->label;
-    *obj.label = QString::fromStdString(node->node_label) + QString::number(add_num); //Assigning label to object
-    obj.item_ptr->setText(0, *obj.label);
+    obj.label_ptr = &obj.getLabelProperty()->label;
+    *obj.label_ptr = node->node_label + std::to_string(add_num); //Assigning label to object
+    obj.item_ptr->setText(0, QString::fromStdString(*obj.label_ptr));
 
     TransformProperty* transform_prop = static_cast<TransformProperty*>(obj.getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
     transform_prop->setScale(node->node_scaling);
@@ -591,15 +579,15 @@ GameObject* World::addMeshNode(ZS3M::SceneNode* node){
             mesh_obj = new GameObject;
 
             int add_num = 0; //Declaration of addititonal integer
-            getAvailableNumObjLabel(QString::fromStdString(mesh_label), &add_num);
+            getAvailableNumObjLabel(mesh_label, &add_num);
 
             mesh_obj->world_ptr = this;
             mesh_obj->addLabelProperty();
             mesh_obj->addProperty(GO_PROPERTY_TYPE_TRANSFORM);
 
-            mesh_obj->label = &mesh_obj->getLabelProperty()->label;
-            *mesh_obj->label = QString::fromStdString(mesh_label) + QString::number(add_num); //Assigning label to object
-            mesh_obj->item_ptr->setText(0, *mesh_obj->label);
+            mesh_obj->label_ptr = &mesh_obj->getLabelProperty()->label;
+            *mesh_obj->label_ptr = mesh_label + std::to_string(add_num); //Assigning label to object
+            mesh_obj->item_ptr->setText(0, QString::fromStdString(*mesh_obj->label_ptr));
             //Add to world object and parent it
             mesh_obj = this->addObject(*mesh_obj);
             node_object->addChildObject(mesh_obj->getLinkToThisObject(), false);
@@ -687,8 +675,8 @@ void World::recoverFromSnapshot(WorldSnapshot* snapshot){
         prop_ptr->copyTo(new_prop);
         if(prop_ptr->type == GO_PROPERTY_TYPE_LABEL){ //If it is label, we have to do extra stuff
             LabelProperty* label_p = static_cast<LabelProperty*>(new_prop);
-            obj_ptr->label = &label_p->label;
-            obj_ptr->item_ptr->setText(0, *obj_ptr->label); //set text to qt widget
+            obj_ptr->label_ptr = &label_p->label;
+            obj_ptr->item_ptr->setText(0, QString::fromStdString(label_p->label)); //set text to qt widget
             label_p->list_item_ptr = obj_ptr->item_ptr; //send item to LabelProperty
         }
 

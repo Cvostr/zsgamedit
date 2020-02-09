@@ -75,12 +75,9 @@ public:
     virtual ~GameObjectProperty();
 };
 
-//#define GameObjectProperty Engine::GameObjectProperty
-
 class LabelProperty : public GameObjectProperty {
 public:
-    QString label; //Label of gameobject
-    bool isActiveToggle;
+    std::string label; //Label of gameobject
     QTreeWidgetItem* list_item_ptr;
 
     void addPropertyInterfaceToInspector();
@@ -102,8 +99,6 @@ public:
     ZSVECTOR3 _last_scale;
     ZSVECTOR3 _last_rotation;
 
-    bool boneNode;
-
     void updateMat();
     void addPropertyInterfaceToInspector();
     void onValueChanged();
@@ -124,39 +119,18 @@ public:
 
 class GameObject : public Engine::GameObject{
 public:
-    //Index in objects vector
-    int array_index;
-    //Pointer to string label in property
-    QString* label;
     bool isPicked; //if user selected this object to edit it
-    bool active; //if true, object will be active in scene
     GameObjectLink parent; //Link to object's parent
 
-    unsigned int props_num; //Count of created props
+    //unsigned int props_num; //Count of created props
     QTreeWidgetItem* item_ptr;
     std::vector<GameObjectLink> children; //Vector to store links to children of object
     int getAliveChildrenAmount(); //Gets current amount of children objects (exclude removed chidren)
     void pick(); //Mark object and its children picked
 
-    void setActive(bool active); //toggle gameobject active property
-    void setLabel(std::string label);
-    std::string getLabel();
-
     bool addProperty(PROPERTY_TYPE property); //Adds property with property ID
     bool addTransformProperty();
     bool addLabelProperty();
-
-    template<typename T>
-    T* getPropertyPtr(){
-        unsigned int props = static_cast<unsigned int>(this->props_num);
-        for(unsigned int prop_i = 0; prop_i < props; prop_i ++){
-            auto property_ptr = this->properties[prop_i];
-            if(typeid ( *property_ptr) == typeid(T)){ //If object already has one
-                return static_cast<T*>(property_ptr); //return it
-            }
-        }
-        return nullptr;
-    }
 
     //returns pointer to property by property type
     GameObjectProperty* getPropertyPtrByType(PROPERTY_TYPE property);
@@ -237,11 +211,10 @@ public:
 
     GameObject* addObject(GameObject obj);
     GameObject* newObject(); //Add new object to world
-    GameObject* getObjectByLabel(QString label);
-    GameObject* getObjectByLabelStr(std::string label);
+    Engine::GameObject* getObjectByLabel(std::string label);
     GameObject* getObjectByStringId(std::string id);
     int getFreeObjectSpaceIndex();
-    bool isObjectLabelUnique(QString label); //Get amount of objects with this label
+    bool isObjectLabelUnique(std::string label); //Get amount of objects with this label
     void removeObj(GameObjectLink& link); //Remove object from world
     void removeObjPtr(GameObject* obj); //Remove object from world
     GameObject* dublicateObject(GameObject* original, bool parent = true);
@@ -249,15 +222,14 @@ public:
     void trimObjectsList();
     void unpickObject();
 
-    void saveToFile(QString file);
-    void openFromFile(QString file, QTreeWidget* w_ptr);
+    void saveToFile(std::string file);
+    void openFromFile(std::string file, QTreeWidget* w_ptr);
     void writeGameObject(GameObject* object_ptr, std::ofstream* world_stream);
     void loadGameObject(GameObject* object_ptr, std::ifstream* world_stream);
 
     void storeObjectToPrefab(GameObject* object_ptr, QString file);
     void writeObjectToPrefab(GameObject* object_ptr, std::ofstream* stream);
-    void addObjectsFromPrefab(QString file);
-    void addObjectsFromPrefabStr(std::string file);
+    void addObjectsFromPrefab(std::string file);
     void processPrefabObject(GameObject* object_ptr, std::vector<GameObject>* objects_array);
 
     void addMeshGroup(std::string file_path);
@@ -268,7 +240,7 @@ public:
     void putToShapshot(WorldSnapshot* snapshot);
     void recoverFromSnapshot(WorldSnapshot* snapshot);
 
-    void getAvailableNumObjLabel(QString label, int* result);
+    void getAvailableNumObjLabel(std::string label, int* result);
 
     World();
 

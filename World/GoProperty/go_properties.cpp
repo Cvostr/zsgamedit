@@ -395,10 +395,10 @@ void LabelProperty::onValueChanged(){
         //If object already exist
         int label_add = 0;
         world_ptr->getAvailableNumObjLabel(this->label, &label_add);
-        label = label + "_" + QString::number(label_add);
+        label = label + "_" + std::to_string(label_add);
     }
 
-    this->list_item_ptr->setText(0, this->label);
+    this->list_item_ptr->setText(0, QString::fromStdString(this->label));
 }
 
 void LabelProperty::copyTo(Engine::GameObjectProperty* dest){
@@ -409,7 +409,7 @@ void LabelProperty::copyTo(Engine::GameObjectProperty* dest){
 
     LabelProperty* _dest = static_cast<LabelProperty*>(dest);
     _dest->label = label;
-    _dest->isActiveToggle = isActiveToggle;
+    //_dest->isActiveToggle = isActiveToggle;
 }
 
 //Mesh property functions
@@ -443,7 +443,7 @@ void MeshProperty::updateMeshPtr(){
 
 void MeshProperty::onRender(Engine::RenderPipeline* pipeline){
     if(this->skinning_root_node == nullptr)
-        skinning_root_node = ((World*)world_ptr)->getObjectByLabelStr(this->rootNodeStr);
+        skinning_root_node = (GameObject*)((World*)world_ptr)->getObjectByLabel(this->rootNodeStr);
 }
 
 void MeshProperty::onValueChanged(){

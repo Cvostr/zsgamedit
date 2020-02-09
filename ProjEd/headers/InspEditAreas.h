@@ -7,7 +7,7 @@
 class StringPropertyArea : public PropertyEditArea{
 public:
 
-    QString* value_ptr; //Modifying string
+    std::string* value_ptr; //Modifying string
     QLineEdit edit_field;
 
     StringPropertyArea();

@@ -28,21 +28,10 @@ void GameObjectLink::crack(){
 }
 
 GameObject::GameObject(){
-    this->hasParent = false; //No parent by default
-    this->world_ptr = nullptr;
     item_ptr = new QTreeWidgetItem; //Allocate tree widget item
     genRandomString(&this->str_id, 15); //Generate random string ID
-    //render_type = GO_RENDER_TYPE_NONE; //No render by default
-    alive = true; //Object exist by default
     IsStatic = false; //Object is dynamic by default
     isPicked = false;
-    active = true;
-    props_num = 0;
-    label = nullptr;
-
-    for(unsigned int prop_i = 0; prop_i < OBJ_PROPS_SIZE; prop_i ++){ //iterate over all property pointers and clear them
-        properties[prop_i] = nullptr;
-    }
 }
 
 GameObject::~GameObject(){
@@ -330,8 +319,8 @@ void GameObject::recoverFromSnapshot(GameObjectSnapshot* snapshot){
 
         if(prop_ptr->type == GO_PROPERTY_TYPE_LABEL){ //If it is label, we have to do extra stuff
             LabelProperty* label_p = static_cast<LabelProperty*>(new_prop_ptr);
-            this->label = &label_p->label;
-            this->item_ptr->setText(0, *this->label);
+            this->label_ptr = &label_p->label;
+            this->item_ptr->setText(0, QString::fromStdString(*this->label_ptr));
             label_p->list_item_ptr = this->item_ptr;
         }
     }
@@ -393,19 +382,6 @@ void GameObject::pick(){
     for(unsigned int chil_i = 0; chil_i < children_am; chil_i++){
         children[chil_i].ptr->pick(); //child and his children are picked now
     }
-}
-
-void GameObject::setActive(bool active){
-    this->active = active;
-}
-
-void GameObject::setLabel(std::string label){
-    this->getLabelProperty()->label = QString::fromStdString(label);
-    this->getLabelProperty()->onValueChanged();
-}
-
-std::string GameObject::getLabel(){
-    return this->label->toStdString();
 }
 
 void GameObject::copyTo(GameObject* dest){

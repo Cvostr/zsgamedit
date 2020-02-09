@@ -437,7 +437,7 @@ StringPropertyArea::StringPropertyArea(){
 }
 
 void StringPropertyArea::setup(){
-    this->edit_field.setText(*this->value_ptr);
+    this->edit_field.setText(QString::fromStdString(*this->value_ptr));
 }
 
 void StringPropertyArea::destroyContent(){
@@ -458,7 +458,7 @@ void StringPropertyArea::writeNewValues(){
     if(this->value_ptr == nullptr) //If vector hasn't been set
         return; //Go out
     //Get current values in textt fields
-    QString current = this->edit_field.text();
+    std::string current = this->edit_field.text().toStdString();
     if(*value_ptr != current){ //if value changed, then make Action
         GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(this->go_property);
         getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
@@ -472,10 +472,10 @@ void StringPropertyArea::updateValues(){
     if(this->value_ptr == nullptr) //If vector hasn't been set
         return; //Go out
     //Get current values in textt fields
-    QString str = this->edit_field.text();
+    std::string str = this->edit_field.text().toStdString();
 
     if(value_ptr->compare(str)){
-        this->edit_field.setText(*value_ptr);
+        this->edit_field.setText(QString::fromStdString(*value_ptr));
     }
 }
 
@@ -717,7 +717,7 @@ void GameobjectPickArea::setup(){
     GameObject* obj_ptr = *this->gameobject_ptr_ptr;
 
     if(obj_ptr != nullptr){
-        property_label->setText(*obj_ptr->label);
+        property_label->setText(QString::fromStdString(*obj_ptr->label_ptr));
     }else {
         property_label->setText("<none>");
     }
@@ -753,7 +753,7 @@ void PropertyPickArea::setup(){
     GameObjectProperty* property = *property_ptr_ptr;
     if(property != nullptr){
         GameObject* obj = property->go_link.updLinkPtr();
-        property_label->setText(*obj->label + "<" +getPropertyString(this->prop_type) + ">");
+        property_label->setText(QString::fromStdString(*obj->label_ptr) + "<" +getPropertyString(this->prop_type) + ">");
     }else {
         property_label->setText("<none>");
     }

@@ -41,7 +41,7 @@ void ObjectScript::_callStart(GameObject* obj, World* world) {
     int result = 0;
     if (start.isFunction() == true) { //If function found
         try {
-            result = start(obj, world); //Call script onStart()
+            result = start((Engine::GameObject*)obj, world); //Call script onStart()
         }
         catch (luabridge::LuaException e) {
            SCRIPT_LOG << "Error occured in script (onStart) " << name << " " << e.what() << std::endl;
