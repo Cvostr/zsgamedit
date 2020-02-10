@@ -120,7 +120,7 @@ void TileGroupProperty::addPropertyInterfaceToInspector(){
 
 void TileGroupProperty::process(){
     //receive pointer to object that own this property
-    getActionManager()->newSnapshotAction(go_link.world_ptr);
+    getActionManager()->newSnapshotAction((World*)go_link.world_ptr);
     World* wrld = (World*)world_ptr;
 
     for(int x_i = 0; x_i < tiles_amount_X; x_i ++){
@@ -133,19 +133,18 @@ void TileGroupProperty::process(){
 #endif
             GameObject* obj = wrld->newObject(); //Invoke new object creation
 
-            go_link.updLinkPtr();
-            GameObject* parent = go_link.ptr;
-            TransformProperty* parent_transform = parent->getTransformProperty();
-            LabelProperty* parent_label = parent->getLabelProperty();
+            GameObject* parent = ((World*)world_ptr)->updateLink(&go_link);
+            TransformProperty* parent_transform = parent->getPropertyPtr<TransformProperty>();
+            LabelProperty* parent_label = parent->getPropertyPtr<LabelProperty>();
 
             //obj->render_type = GO_RENDER_TYPE_TILE;
             obj->addProperty(GO_PROPERTY_TYPE_MESH); //Adding mesh
             obj->addProperty(GO_PROPERTY_TYPE_TILE); //Adding tile
             //Receive properties ptrs
-            TransformProperty* transform = obj->getTransformProperty();
-            LabelProperty* label = obj->getLabelProperty();
-            TileProperty* tile_prop = static_cast<TileProperty*>(obj->getPropertyPtrByType(GO_PROPERTY_TYPE_TILE));
-            MeshProperty* mesh_prop = static_cast<MeshProperty*>(obj->getPropertyPtrByType(GO_PROPERTY_TYPE_MESH));
+            TransformProperty* transform = obj->getPropertyPtr<TransformProperty>();
+            LabelProperty* label = obj->getPropertyPtr<LabelProperty>();
+            TileProperty* tile_prop = static_cast<TileProperty*>(obj->getPropertyPtr<TileProperty>());
+            MeshProperty* mesh_prop = static_cast<MeshProperty*>(obj->getPropertyPtr<MeshProperty>());
 
             mesh_prop->resource_relpath = this->mesh_string; //Default plane as mesh
             mesh_prop->updateMeshPtr(); //Update mesh pointer in property
@@ -168,17 +167,17 @@ void TileGroupProperty::process(){
 }
 
 void TileGroupProperty::clear(){
-    go_link.updLinkPtr();
+    ((World*)world_ptr)->updateLink(&this->go_link);
     //Create snapshot
-    getActionManager()->newSnapshotAction(go_link.world_ptr);
+    getActionManager()->newSnapshotAction((World*)go_link.world_ptr);
 
-    GameObject* parent = go_link.ptr;
+    GameObject* parent = ((World*)world_ptr)->updateLink(&go_link);
     unsigned int children_am = static_cast<unsigned int>(parent->children.size());
     for(unsigned int ch_i = 0; ch_i < children_am; ch_i ++){
-        GameObjectLink link_toremove = parent->children[0];
+        Engine::GameObjectLink link_toremove = parent->children[0];
         ((World*)world_ptr)->removeObj(link_toremove);
-        go_link.updLinkPtr();
-        parent = go_link.ptr;
+        ((World*)world_ptr)->updateLink(&this->go_link);
+        parent = (GameObject*)go_link.ptr;
     }
 
     isCreated = false;

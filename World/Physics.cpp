@@ -4,7 +4,7 @@
 #include "ProjEd/headers/InspEditAreas.h"
 
 void PhysicalProperty::init(){
-    TransformProperty* transform = this->go_link.updLinkPtr()->getPropertyPtr<TransformProperty>();
+    TransformProperty* transform = ((World*)world_ptr)->updateLink(&go_link)->getPropertyPtr<TransformProperty>();
     //Set collision shape
     updateCollisionShape();
 
@@ -34,7 +34,7 @@ void PhysicalProperty::init(){
 
      rigidBody = new btRigidBody(cInfo);
 
-     rigidBody->setUserIndex(go_link.updLinkPtr()->array_index);
+     rigidBody->setUserIndex(((World*)world_ptr)->updateLink(&this->go_link)->array_index);
      //add rigidbody to world
      go_link.world_ptr->physical_world->addRidigbodyToWorld(rigidBody);
 
@@ -42,8 +42,8 @@ void PhysicalProperty::init(){
 }
 
 void PhysicalProperty::updateCollisionShape(){
-    TransformProperty* transform = this->go_link.updLinkPtr()->getPropertyPtr<TransformProperty>();
-    MeshProperty* mesh = this->go_link.updLinkPtr()->getPropertyPtr<MeshProperty>();
+    TransformProperty* transform = ((World*)world_ptr)->updateLink(&this->go_link)->getPropertyPtr<TransformProperty>();
+    MeshProperty* mesh = ((World*)world_ptr)->updateLink(&this->go_link)->getPropertyPtr<MeshProperty>();
     Engine::Mesh* m = mesh->mesh_ptr->mesh_ptr;
 
     ZSVECTOR3 scale = transform->_last_scale;

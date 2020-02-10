@@ -34,7 +34,7 @@ void ObjTreeWgt::dropEvent(QDropEvent* event){
         if(pparent == nullptr){ //If object hadn't any parent
             //this->removeItemWidget(obj_ptr->item_ptr, 0);
         }else{ //If object already parented
-            GameObjectLink link = obj_ptr->getLinkToThisObject();
+            Engine::GameObjectLink link = obj_ptr->getLinkToThisObject();
             GameObject* pparent_go = (GameObject*)world_ptr->getObjectByLabel(pparent->text(0).toStdString());
             pparent_go->removeChildObject(link); //Remove object from previous parent
         }
@@ -160,7 +160,7 @@ void ObjectCtxMenu::setObjectPtr(GameObject* obj_ptr){
 void ObjectCtxMenu::onDeleteClicked(){
     //delete all ui from inspector
     _inspector_win->clearContentLayout(); //Prevent variable conflicts
-    GameObjectLink link = obj_ptr->getLinkToThisObject();
+    Engine::GameObjectLink link = obj_ptr->getLinkToThisObject();
     _editor_win->obj_trstate.isTransforming = false; //disabling object transform
     _editor_win->callObjectDeletion(link);
 }
@@ -178,11 +178,11 @@ void ObjectCtxMenu::onDublicateClicked(){
     //Make snapshot actions
     _ed_actions_container->newSnapshotAction(&_editor_win->world);
     _inspector_win->clearContentLayout(); //Prevent variable conflicts
-    GameObjectLink link = obj_ptr->getLinkToThisObject();
-    GameObject* result = _editor_win->world.dublicateObject(link.ptr);
+    Engine::GameObjectLink link = obj_ptr->getLinkToThisObject();
+    GameObject* result = _editor_win->world.dublicateObject((GameObject*)link.ptr);
 
     if(result->hasParent){ //if object parented
-        result->parent.ptr->item_ptr->addChild(result->item_ptr);
+        ((GameObject*)result->parent.ptr)->item_ptr->addChild(result->item_ptr);
     }else{
         _editor_win->getObjectListWidget()->addTopLevelItem(result->item_ptr);
     }

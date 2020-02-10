@@ -234,7 +234,7 @@ public:
     explicit EditWindow(QApplication* app, QWidget *parent = nullptr);
     ~EditWindow();
 
-    void callObjectDeletion(GameObjectLink link);
+    void callObjectDeletion(Engine::GameObjectLink link);
 private:
 
 };

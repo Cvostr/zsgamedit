@@ -116,11 +116,11 @@ ZSRGBCOLOR RenderPipeline::getColorOfPickedTransformControl(int mouseX, int mous
 
     if(editwin_ptr->obj_trstate.isTransforming == true && !editwin_ptr->isWorldCamera){
         //Calclate distance between camera and object
-        float dist = getDistance(cam_ptr->camera_pos, editwin_ptr->obj_trstate.obj_ptr->getTransformProperty()->_last_translation);
+        float dist = getDistance(cam_ptr->camera_pos, editwin_ptr->obj_trstate.obj_ptr->getPropertyPtr<TransformProperty>()->_last_translation);
 
         if(this->project_struct_ptr->perspective == 2) dist = 85.0f;
         //Draw gizmos
-        getGizmosRenderer()->drawTransformControls(editwin_ptr->obj_trstate.obj_ptr->getTransformProperty()->_last_translation, dist, dist / 10.f);
+        getGizmosRenderer()->drawTransformControls(editwin_ptr->obj_trstate.obj_ptr->getPropertyPtr<TransformProperty>()->_last_translation, dist, dist / 10.f);
     }
 
     unsigned char data[4];
@@ -200,10 +200,10 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr){
     //if we control this object
     if(editwin_ptr->obj_trstate.isTransforming == true && !editwin_ptr->isWorldCamera){
 
-        float dist = getDistance(cam_ptr->camera_pos, editwin_ptr->obj_trstate.obj_ptr->getTransformProperty()->_last_translation);
+        float dist = getDistance(cam_ptr->camera_pos, editwin_ptr->obj_trstate.obj_ptr->getPropertyPtr<TransformProperty>()->_last_translation);
 
         if(this->project_struct_ptr->perspective == PERSP_2D) dist = 70.0f;
-        getGizmosRenderer()->drawTransformControls(editwin_ptr->obj_trstate.obj_ptr->getTransformProperty()->_last_translation, dist, dist / 10.f);
+        getGizmosRenderer()->drawTransformControls(editwin_ptr->obj_trstate.obj_ptr->getPropertyPtr<TransformProperty>()->_last_translation, dist, dist / 10.f);
     }
 
     glDisable(GL_DEPTH_TEST);
@@ -460,8 +460,8 @@ void GameObject::processObject(RenderPipeline* pipeline){
 
     for(unsigned int obj_i = 0; obj_i < this->children.size(); obj_i ++){
         if(!children[obj_i].isEmpty()){ //if link isn't broken
-            children[obj_i].updLinkPtr();
-            GameObject* child_ptr = this->children[obj_i].ptr;
+            ((World*)world_ptr)->updateLink(&children[obj_i]);
+            GameObject* child_ptr = (GameObject*)this->children[obj_i].ptr;
             child_ptr->processObject(pipeline);
         }
     }
@@ -513,7 +513,7 @@ void TerrainProperty::onRender(Engine::RenderPipeline* pipeline){
     //Binding terrain buffer
     pipeline->terrainUniformBuffer->bind();
 
-    MaterialProperty* mat = this->go_link.updLinkPtr()->getPropertyPtr<MaterialProperty>();
+    MaterialProperty* mat = ((World*)world_ptr)->updateLink(&go_link)->getPropertyPtr<MaterialProperty>();
     if(mat == nullptr) return;
 
     int dtrue = 1;
@@ -594,9 +594,9 @@ void SkyboxProperty::onPreRender(Engine::RenderPipeline* pipeline){
 void SkyboxProperty::DrawSky(RenderPipeline* pipeline){
     if(!this->isActive())
         return;
-    if(this->go_link.updLinkPtr() == nullptr) return;
+    if(((World*)world_ptr)->updateLink(&this->go_link) == nullptr) return;
     //Get pointer to Material property
-    MaterialProperty* mat = this->go_link.updLinkPtr()->getPropertyPtr<MaterialProperty>();
+    MaterialProperty* mat = ((World*)world_ptr)->updateLink(&this->go_link)->getPropertyPtr<MaterialProperty>();
     if(mat == nullptr) return;
     //Apply material shader
     mat->onRender(pipeline);
@@ -617,7 +617,7 @@ void ShadowCasterProperty::Draw(Engine::Camera* cam, RenderPipeline* pipeline){
         return;
     }
 
-    LightsourceProperty* light = this->go_link.updLinkPtr()->getPropertyPtr<LightsourceProperty>();
+    LightsourceProperty* light = ((World*)world_ptr)->updateLink(&this->go_link)->getPropertyPtr<LightsourceProperty>();
 
     //ZSVECTOR3 cam_pos = cam->getCameraPosition() + cam->getCameraFrontVec() * 20;
     ZSVECTOR3 cam_pos = cam->getCameraPosition() - light->direction * 20;

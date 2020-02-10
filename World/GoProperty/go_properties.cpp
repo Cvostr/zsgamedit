@@ -13,8 +13,8 @@ extern ZSGAME_DATA* game_data;
 //Selected animation
 static AnimationProperty* current_anim;
 
-GameObjectProperty* ObjectPropertyLink::updLinkPtr(){
-    ptr = (GameObjectProperty*)this->object.updLinkPtr()->getPropertyPtrByType(this->prop_type);
+Engine::GameObjectProperty* ObjectPropertyLink::updLinkPtr(){
+    ptr = ((World*)this->object.world_ptr)->updateLink(&object)->getPropertyPtrByType(this->prop_type);
 
     return ptr;
 }
@@ -33,7 +33,7 @@ GameObjectProperty::~GameObjectProperty(){
 }
 
 bool GameObjectProperty::isActive(){
-    return active && (go_link.updLinkPtr() != nullptr) ? go_link.ptr->active : false;
+    return active && (((World*)world_ptr)->updateLink(&go_link) != nullptr) ? go_link.ptr->active : false;
 }
 
 QString getPropertyString(int type){
@@ -235,10 +235,10 @@ void TransformProperty::addPropertyInterfaceToInspector(){
 void TransformProperty::onValueChanged(){
     updateMat();
 
-    if(go_link.updLinkPtr() == nullptr) return;
+    if(((World*)world_ptr)->updateLink(&this->go_link) == nullptr) return;
 
-    ColliderProperty* coll = this->go_link.updLinkPtr()->getPropertyPtr<ColliderProperty>();
-    RigidbodyProperty* rigid = this->go_link.updLinkPtr()->getPropertyPtr<RigidbodyProperty>();
+    ColliderProperty* coll = ((World*)world_ptr)->updateLink(&this->go_link)->getPropertyPtr<ColliderProperty>();
+    RigidbodyProperty* rigid = ((World*)world_ptr)->updateLink(&this->go_link)->getPropertyPtr<RigidbodyProperty>();
 
     PhysicalProperty* phys = nullptr;
 
@@ -248,7 +248,7 @@ void TransformProperty::onValueChanged(){
         phys = coll;
     }
 
-    if(go_link.updLinkPtr()->isRigidbody()){
+    if(((World*)world_ptr)->updateLink(&this->go_link)->isRigidbody()){
         if(!phys->created) return;
         btTransform startTransform;
         startTransform.setIdentity();
@@ -293,11 +293,11 @@ void TransformProperty::updateMat(){
     ZSVECTOR3 p_scale = ZSVECTOR3(1,1,1);
     ZSVECTOR3 p_rotation = ZSVECTOR3(0,0,0);
 
-    GameObject* ptr = go_link.updLinkPtr(); //Pointer to object with this property
+    GameObject* ptr = ((World*)world_ptr)->updateLink(&go_link); //Pointer to object with this property
     if(ptr != nullptr){ //if object exist
         if(ptr->hasParent){ //if object dependent
             //Get parent's transform property
-            TransformProperty* property = static_cast<TransformProperty*>(ptr->parent.updLinkPtr()->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
+            TransformProperty* property = ((World*)world_ptr)->updateLink(&ptr->parent)->getPropertyPtr<TransformProperty>();
             //Calculate parent transform offset
             property->getAbsoluteParentTransform(p_translation, p_scale, p_rotation);
         }
@@ -338,12 +338,12 @@ void TransformProperty::onRender(Engine::RenderPipeline* pipeline){
 }
 
 void TransformProperty::getAbsoluteRotationMatrix(ZSMATRIX4x4& m){
-    GameObject* ptr = go_link.updLinkPtr(); //Pointer to object with this property
+    GameObject* ptr = ((World*)world_ptr)->updateLink(&go_link); //Pointer to object with this property
 
     if(ptr == nullptr) return;
 
     if(ptr->hasParent == true){
-        GameObject* parent_p = ptr->parent.ptr;
+        GameObject* parent_p = (GameObject*)ptr->parent.ptr;
         TransformProperty* property = static_cast<TransformProperty*>(parent_p->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
 
         ZSMATRIX4x4 rotation_mat1 = getRotationMat(property->rotation, ptr->getTransformProperty()->translation);
@@ -353,14 +353,14 @@ void TransformProperty::getAbsoluteRotationMatrix(ZSMATRIX4x4& m){
 }
 
 void TransformProperty::getAbsoluteParentTransform(ZSVECTOR3& t, ZSVECTOR3& s, ZSVECTOR3& r){
-    GameObject* ptr = go_link.updLinkPtr(); //Pointer to object with this property
+    GameObject* ptr = ((World*)world_ptr)->updateLink(&go_link); //Pointer to object with this property
 
     t = t + this->translation;
     s = s * this->scale;
     r = r + this->rotation;
 
     if(ptr->hasParent){
-        GameObject* parent_p = ptr->parent.ptr;
+        GameObject* parent_p = (GameObject*)ptr->parent.ptr;
         TransformProperty* property = static_cast<TransformProperty*>(parent_p->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
         property->getAbsoluteParentTransform(t, s, r);
     }
@@ -535,7 +535,7 @@ void LightsourceProperty::copyTo(Engine::GameObjectProperty* dest){
 
 void LightsourceProperty::updTransformPtr(){
     if(transform == nullptr){
-        transform = this->go_link.updLinkPtr()->getTransformProperty();
+        transform = ((World*)world_ptr)->updateLink(&this->go_link)->getPropertyPtr<TransformProperty>();
         this->last_pos = transform->_last_translation; //Store old value
     }
 }
@@ -544,7 +544,7 @@ void LightsourceProperty::onObjectDeleted(){
 }
 
 void LightsourceProperty::onPreRender(Engine::RenderPipeline* pipeline){
-    TransformProperty* transform_prop = go_link.updLinkPtr()->getTransformProperty();
+    TransformProperty* transform_prop = ((World*)world_ptr)->updateLink(&go_link)->getPropertyPtr<TransformProperty>();
 
     updTransformPtr();
 
@@ -631,7 +631,7 @@ void AudioSourceProperty::onUpdate(float deltaTime){
         isPlaySheduled = false;
     }
 
-    TransformProperty* transform = go_link.updLinkPtr()->getTransformProperty();
+    TransformProperty* transform = ((World*)world_ptr)->updateLink(&go_link)->getPropertyPtr<TransformProperty>();
     //if object position changed
     if(transform->translation != this->last_pos){
         //apply new position to openal audio source
@@ -981,7 +981,7 @@ void ColliderProperty::copyTo(Engine::GameObjectProperty* dest){
 }
 
 TransformProperty* ColliderProperty::getTransformProperty(){
-    return go_link.updLinkPtr()->getTransformProperty();
+    return ((World*)world_ptr)->updateLink(&this->go_link)->getPropertyPtr<TransformProperty>();
 }
 
 ColliderProperty::ColliderProperty(){
@@ -1039,7 +1039,7 @@ void RigidbodyProperty::onUpdate(float deltaTime){
     else{
         PhysicalProperty::onUpdate(deltaTime);
 
-        TransformProperty* transform = this->go_link.updLinkPtr()->getPropertyPtr<TransformProperty>();
+        TransformProperty* transform = ((World*)world_ptr)->updateLink(&this->go_link)->getPropertyPtr<TransformProperty>();
         btVector3 current_pos = rigidBody->getCenterOfMassPosition();
         btQuaternion current_rot = rigidBody->getWorldTransform().getRotation();
         //get current position
@@ -1128,7 +1128,7 @@ void CharacterControllerProperty::copyTo(Engine::GameObjectProperty* dest){
 }
 void CharacterControllerProperty::onUpdate(float deltaTime){
     if(!created){
-        TransformProperty* transform = this->go_link.updLinkPtr()->getPropertyPtr<TransformProperty>();
+        TransformProperty* transform = ((World*)world_ptr)->updateLink(&go_link)->getPropertyPtr<TransformProperty>();
 
         ZSVECTOR3 scale = transform->_last_scale;
         ZSVECTOR3 pos = transform->_last_translation;
@@ -1159,7 +1159,7 @@ void CharacterControllerProperty::onUpdate(float deltaTime){
 
          rigidBody = new btRigidBody(cInfo);
 
-         rigidBody->setUserIndex(go_link.updLinkPtr()->array_index);
+         rigidBody->setUserIndex(((World*)world_ptr)->updateLink(&this->go_link)->array_index);
          //add rigidbody to world
          go_link.world_ptr->physical_world->addRidigbodyToWorld(rigidBody);
         //Set zero values
@@ -1168,7 +1168,7 @@ void CharacterControllerProperty::onUpdate(float deltaTime){
 
          created = true;
     }else{
-        TransformProperty* transform = this->go_link.updLinkPtr()->getPropertyPtr<TransformProperty>();
+        TransformProperty* transform = ((World*)world_ptr)->updateLink(&this->go_link)->getPropertyPtr<TransformProperty>();
         btVector3 current_pos = rigidBody->getCenterOfMassPosition();
 
         //get current position
@@ -1225,7 +1225,7 @@ void ScriptGroupProperty::onUpdate(float deltaTime){
         //if script isn't created, then create it.
         if(!script_ptr->created){
             script_ptr->_InitScript();
-            script_ptr->_callStart(this->go_link.updLinkPtr(), go_link.world_ptr);
+            script_ptr->_callStart(((World*)world_ptr)->updateLink(&go_link), (World*)go_link.world_ptr);
         }
 
         script_ptr->_callDraw(deltaTime); //Run onDraw() function in script
@@ -1341,10 +1341,10 @@ bool ShadowCasterProperty::isRenderAvailable(){
         return false;
     if(!this->initialized)
         init();
-    if(this->go_link.updLinkPtr() == nullptr)
+    if(((World*)world_ptr)->updateLink(&this->go_link) == nullptr)
         return false;
     //Get lightsource property of object
-    LightsourceProperty* light = this->go_link.updLinkPtr()->getPropertyPtr<LightsourceProperty>();
+    LightsourceProperty* light = ((World*)world_ptr)->updateLink(&this->go_link)->getPropertyPtr<LightsourceProperty>();
 
     if(light == nullptr)
         return false;
@@ -1376,9 +1376,6 @@ NodeProperty::NodeProperty(){
     scale = ZSVECTOR3(1.f, 1.f, 1.f);
     translation = ZSVECTOR3(0.f, 0.f, 0.f);
     rotation = ZSQUATERNION(0.f, 0.f, 0.f, 0.f);
-}
-
-void NodeProperty::onPreRender(Engine::RenderPipeline* pipeline){
 }
 
 void NodeProperty::addPropertyInterfaceToInspector(){
@@ -1458,7 +1455,7 @@ void AnimationProperty::stop(){
 }
 
 void AnimationProperty::onPreRender(Engine::RenderPipeline* pipeline){
-    GameObject* obj = go_link.updLinkPtr();
+    GameObject* obj = ((World*)world_ptr)->updateLink(&go_link);
 
     Engine::Animation* anim_prop_ptr = nullptr;
     //Try to get loading result
@@ -1512,7 +1509,7 @@ void AnimationProperty::updateNodeTransform(GameObject* obj, ZSMATRIX4x4 parent)
     prop->abs = parent * prop->abs;
 
     for(unsigned int i = 0; i < obj->children.size(); i ++){
-        updateNodeTransform(obj->children[i].updLinkPtr(), prop->abs);
+        updateNodeTransform(((World*)world_ptr)->updateLink(&obj->children[i]), prop->abs);
     }
 
 }

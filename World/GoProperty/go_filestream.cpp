@@ -58,7 +58,7 @@ void GameObject::saveProperties(std::ofstream* stream){
             MeshProperty* ptr = static_cast<MeshProperty*>(property_ptr);
             *stream << ptr->resource_relpath << "\n";
             if(ptr->skinning_root_node != nullptr)
-                *stream << ptr->skinning_root_node->label_ptr << "\n";
+                *stream << *ptr->skinning_root_node->label_ptr << "\n";
             else
                 *stream << "@none\n";
             stream->write(reinterpret_cast<char*>(&ptr->castShadows), sizeof(bool));

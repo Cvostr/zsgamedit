@@ -247,7 +247,6 @@ public:
     ZSMATRIX4x4 abs;
 
     void addPropertyInterfaceToInspector();
-    void onPreRender(Engine::RenderPipeline* pipeline);
     void copyTo(Engine::GameObjectProperty* dest);
 
     NodeProperty();

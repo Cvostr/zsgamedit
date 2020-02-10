@@ -171,7 +171,7 @@ void QLabelResourcePickWgt::dropEvent( QDropEvent* event ){
                 //Writing pointer
                 *_area_ptr->property_ptr_ptr = prop;
                 //Assigning object string ID
-                *(_area_ptr->oj_label_ptr) = prop->go_link.updLinkPtr()->str_id;
+                *(_area_ptr->oj_label_ptr) = _editor_win->world.updateLink(&prop->go_link)->str_id;
             }
             _area_ptr->setup();
         }

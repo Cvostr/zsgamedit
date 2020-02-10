@@ -10,6 +10,14 @@ extern Project* project_ptr;
 extern ZSGAME_DATA* game_data;
 
 World::World(){
+    objects.resize(MAX_OBJS);
+    objects.resize(0);
+}
+
+GameObject* World::updateLink(Engine::GameObjectLink* link){
+    link->ptr = getObjectByStringId(link->obj_str_id);
+
+    return (GameObject*)link->ptr;
 }
 
 int World::getFreeObjectSpaceIndex(){
@@ -70,7 +78,7 @@ GameObject* World::dublicateObject(GameObject* original, bool parent){
     }
 
     if(original->hasParent){ //if original has parent
-        TransformProperty* transform = new_obj->getTransformProperty();
+        TransformProperty* transform = new_obj->getPropertyPtr<TransformProperty>();
         ZSVECTOR3 p_translation = ZSVECTOR3(0,0,0);
         ZSVECTOR3 p_scale = ZSVECTOR3(1,1,1);
         ZSVECTOR3 p_rotation = ZSVECTOR3(0,0,0);
@@ -82,7 +90,7 @@ GameObject* World::dublicateObject(GameObject* original, bool parent){
             original->parent.ptr->addChildObject(new_obj->getLinkToThisObject());
     }
     //Set new name for object
-    LabelProperty* label_prop = new_obj->getLabelProperty(); //Obtain pointer to label property
+    LabelProperty* label_prop = new_obj->getPropertyPtr<LabelProperty>(); //Obtain pointer to label property
     std::string to_paste;
     genRandomString(&to_paste, 3);
     label_prop->label = label_prop->label + "_" + to_paste;
@@ -94,9 +102,9 @@ GameObject* World::dublicateObject(GameObject* original, bool parent){
     //Iterate over all children
     for(unsigned int child_i = 0; child_i < children_amount; child_i ++){
         //Get pointer to original child object
-        GameObjectLink link = original->children[child_i];
+        Engine::GameObjectLink link = original->children[child_i];
         //create new child obect by dublication of original
-        GameObject* new_child = dublicateObject(link.ptr, false);
+        GameObject* new_child = dublicateObject((GameObject*)link.ptr, false);
         //parenting
         new_obj->addChildObject(new_child->getLinkToThisObject());
         //UI parenting
@@ -107,11 +115,11 @@ GameObject* World::dublicateObject(GameObject* original, bool parent){
 }
 
 GameObject* World::Instantiate(GameObject* original){
-    GameObjectLink link = original->getLinkToThisObject();
-    GameObject* result = this->dublicateObject(link.ptr);
+    Engine::GameObjectLink link = original->getLinkToThisObject();
+    GameObject* result = this->dublicateObject((GameObject*)link.ptr);
 
     if(result->hasParent){ //if object parented
-        result->parent.ptr->item_ptr->addChild(result->item_ptr);
+        ((GameObject*)result->parent.ptr)->item_ptr->addChild(result->item_ptr);
     }else{
         obj_widget_ptr->addTopLevelItem(result->item_ptr);
     }
@@ -124,7 +132,7 @@ GameObject* World::newObject(){
     getAvailableNumObjLabel("GameObject_", &add_num);
 
     obj.world_ptr = this;
-    obj.addLabelProperty();
+    obj.addProperty(GO_PROPERTY_TYPE_LABEL);
     obj.label_ptr = &obj.getLabelProperty()->label;
     *obj.label_ptr = "GameObject_" + std::to_string(add_num); //Assigning label to object
     obj.item_ptr->setText(0, QString::fromStdString(*obj.label_ptr));
@@ -185,25 +193,25 @@ bool World::isObjectLabelUnique(std::string label){
     return true;
 }
 
-void World::removeObj(GameObjectLink& link){
-    GameObjectLink l = link;
-    l.updLinkPtr();
+void World::removeObj(Engine::GameObjectLink& link){
+    Engine::GameObjectLink l = link;
+    updateLink(&l);
     l.ptr->alive = false; //Mark object as dead
 
     unsigned int children_num = static_cast<unsigned int>(l.ptr->children.size());
 
     for(unsigned int ch_i = 0; ch_i < children_num; ch_i ++){ //Walk through all children an remove them
-        GameObjectLink link = l.ptr->children[0]; //Remove first of children because of trim
+        Engine::GameObjectLink link = l.ptr->children[0]; //Remove first of children because of trim
         removeObj(link);
     }
     //Remove all content in heap, related to object class object
-    l.ptr->clearAll();
+    ((GameObject*)l.ptr)->clearAll();
     if(l.ptr->hasParent == true){ //If object parented by other obj
-        GameObject* parent = l.ptr->parent.updLinkPtr(); //Receive pointer to object's parent
+        GameObject* parent = updateLink(&l); //Receive pointer to object's parent
 
         unsigned int children_am = static_cast<unsigned int>(parent->children.size()); //get children amount
         for(unsigned int i = 0; i < children_am; i++){ //Iterate over all children in object
-            GameObjectLink* link_ptr = &parent->children[i];
+            Engine::GameObjectLink* link_ptr = &parent->children[i];
             if(l.obj_str_id.compare(link_ptr->obj_str_id) == 0){ //if str_id in requested link compares to iteratable link
                 parent->children[i].crack(); //Make link broken
             }
@@ -213,7 +221,7 @@ void World::removeObj(GameObjectLink& link){
 }
 
 void World::removeObjPtr(GameObject* obj){
-    GameObjectLink link = obj->getLinkToThisObject();
+    Engine::GameObjectLink link = obj->getLinkToThisObject();
     //call object remove
     removeObj(link);
 }
@@ -253,7 +261,7 @@ void World::writeGameObject(GameObject* object_ptr, std::ofstream* world_stream)
 
             unsigned int children_am = static_cast<unsigned int>(object_ptr->children.size());
             for(unsigned int chi_i = 0; chi_i < children_am; chi_i ++){ //iterate over all children
-                GameObjectLink* link_ptr = &object_ptr->children[chi_i]; //Gettin pointer to child
+                Engine::GameObjectLink* link_ptr = &object_ptr->children[chi_i]; //Gettin pointer to child
                 if(!link_ptr->isEmpty()){ //If this link isn't broken (after child removal)
                     *world_stream << link_ptr->obj_str_id << " "; //Writing child's string id
                 }
@@ -291,7 +299,7 @@ void World::loadGameObject(GameObject* object_ptr, std::ifstream* world_stream){
                 std::string child_str_id;
                 *world_stream >> child_str_id; //Reading child string id
 
-                GameObjectLink link;
+                Engine::GameObjectLink link;
                 link.world_ptr = this; //Setting world pointer
                 link.obj_str_id = child_str_id; //Setting string ID
                 object_ptr->children.push_back(link); //Adding to object
@@ -390,8 +398,8 @@ void World::openFromFile(std::string file, QTreeWidget* w_ptr){
     for(unsigned int obj_i = 0; obj_i < this->objects.size(); obj_i ++){
         GameObject* obj_ptr = &this->objects[obj_i];
         for(unsigned int chi_i = 0; chi_i < obj_ptr->children.size(); chi_i ++){ //Now iterate over all children
-            GameObjectLink* child_ptr = &obj_ptr->children[chi_i];
-            GameObject* child_go_ptr = child_ptr->updLinkPtr();
+            Engine::GameObjectLink* child_ptr = &obj_ptr->children[chi_i];
+            GameObject* child_go_ptr = updateLink(child_ptr);
 
             child_go_ptr->parent = obj_ptr->getLinkToThisObject();
             child_go_ptr->hasParent = true;
@@ -403,7 +411,7 @@ void World::openFromFile(std::string file, QTreeWidget* w_ptr){
         if(obj_ptr->parent.isEmpty()){ //If object has no parent
             w_ptr->addTopLevelItem(obj_ptr->item_ptr);
         }else{ //It has a parent
-            GameObject* parent_ptr = obj_ptr->parent.ptr; //Get parent pointer
+            GameObject* parent_ptr = (GameObject*)obj_ptr->parent.ptr; //Get parent pointer
             parent_ptr->item_ptr->addChild(obj_ptr->item_ptr); //Connect Qt Tree Items
         }
     }
@@ -415,13 +423,14 @@ void World::processPrefabObject(GameObject* object_ptr, std::vector<GameObject>*
     for(unsigned int prop_i = 0; prop_i < props_amount; prop_i ++){
         GameObjectProperty* prop_ptr = (GameObjectProperty*)object_ptr->properties[prop_i];
         prop_ptr->go_link.obj_str_id = object_ptr->str_id; //set new string id
-        prop_ptr->go_link.updLinkPtr();
+
+        updateLink(&prop_ptr->go_link);
     }
 
     unsigned int children_amount = static_cast<unsigned int>(object_ptr->children.size());
 
     for(unsigned int chi_i = 0; chi_i < children_amount; chi_i ++){
-        GameObjectLink link = object_ptr->children[chi_i];
+        Engine::GameObjectLink link = object_ptr->children[chi_i];
         //find object with same string name as in link
         for(unsigned int obj_i = 0; obj_i < objects_array->size(); obj_i ++){
             GameObject* _object_ptr = &objects_array->at(obj_i);
@@ -445,8 +454,8 @@ void World::writeObjectToPrefab(GameObject* object_ptr, std::ofstream* stream){
     unsigned int children_am = static_cast<unsigned int>(object_ptr->children.size());
     //iterate over all children and write them
     for(unsigned int ch_i = 0; ch_i < children_am; ch_i ++){
-        GameObjectLink link = object_ptr->children[ch_i];
-        writeObjectToPrefab(link.updLinkPtr(), stream);
+        Engine::GameObjectLink link = object_ptr->children[ch_i];
+        writeObjectToPrefab(updateLink(&link), stream);
     }
 }
 
@@ -494,7 +503,8 @@ void World::addObjectsFromPrefab(std::string file){
     for(unsigned int obj_i = 1; obj_i < mObjects.size(); obj_i ++){
         GameObject* object_ptr = this->getObjectByStringId(mObjects[obj_i].str_id);
         object_ptr->parent.world_ptr = this;
-        object_ptr->parent.updLinkPtr()->item_ptr->addChild(object_ptr->item_ptr);
+        updateLink(&object_ptr->parent)->item_ptr->addChild(object_ptr->item_ptr);
+        //updLinkPtr()
     }
 }
 
@@ -533,7 +543,7 @@ GameObject* World::addMeshNode(ZS3M::SceneNode* node){
     getAvailableNumObjLabel(node->node_label, &add_num);
     //Setting base variables
     obj.world_ptr = this;
-    obj.addLabelProperty();
+    obj.addProperty(GO_PROPERTY_TYPE_LABEL);
     //Add common base property Transform
     obj.addProperty(GO_PROPERTY_TYPE_TRANSFORM);
     //Add node property to support skinning
@@ -582,7 +592,7 @@ GameObject* World::addMeshNode(ZS3M::SceneNode* node){
             getAvailableNumObjLabel(mesh_label, &add_num);
 
             mesh_obj->world_ptr = this;
-            mesh_obj->addLabelProperty();
+            mesh_obj->addProperty(GO_PROPERTY_TYPE_LABEL);
             mesh_obj->addProperty(GO_PROPERTY_TYPE_TRANSFORM);
 
             mesh_obj->label_ptr = &mesh_obj->getLabelProperty()->label;
@@ -667,9 +677,9 @@ void World::recoverFromSnapshot(WorldSnapshot* snapshot){
     //iterate over all properties in object in snapshot
     for(unsigned int prop_i = 0; prop_i < snapshot->props.size(); prop_i ++){
         auto prop_ptr = snapshot->props[prop_i];
-        GameObjectLink link = prop_ptr->go_link; //Define a link to created object
+        Engine::GameObjectLink link = prop_ptr->go_link; //Define a link to created object
         link.world_ptr = this; //Set an new world pointer
-        GameObject* obj_ptr = link.updLinkPtr(); //Calculate pointer to new object
+        GameObject* obj_ptr = updateLink(&link); //Calculate pointer to new object
         obj_ptr->addProperty(prop_ptr->type); //Add new property to created object
         auto new_prop = obj_ptr->getPropertyPtrByType(prop_ptr->type);
         prop_ptr->copyTo(new_prop);
@@ -688,7 +698,7 @@ void World::recoverFromSnapshot(WorldSnapshot* snapshot){
             obj_widget_ptr->addTopLevelItem(obj_ptr->item_ptr); //add to top of widget
             continue;
         }
-        GameObject* parent_p = obj_ptr->parent.updLinkPtr();
+        GameObject* parent_p = updateLink(&obj_ptr->parent);
         parent_p->children.push_back(obj_ptr->getLinkToThisObject());
         parent_p->item_ptr->addChild(obj_ptr->item_ptr);
     }

@@ -198,7 +198,7 @@ void TerrainProperty::DrawMesh(RenderPipeline* pipeline){
             int texelXi = floor(texelX);
             int texelZi = floor(texelZ);
 
-            TransformProperty* t_ptr = this->go_link.updLinkPtr()->getTransformProperty();
+            TransformProperty* t_ptr = ((GameObject*)(this->go_link.ptr))->getPropertyPtr<TransformProperty>();
 
             HeightmapTexel* texel_ptr = &this->data.data[texelZi * data.W + texelXi];
             if(texel_ptr->grass > 0){
@@ -218,7 +218,7 @@ void TerrainProperty::DrawMesh(RenderPipeline* pipeline){
 void TerrainProperty::onUpdate(float deltaTime){
     if(data.hasPhysicShapeChanged){
         //data.initPhysics();
-        TransformProperty* transform = this->go_link.updLinkPtr()->getPropertyPtr<TransformProperty>();
+        TransformProperty* transform = ((World*)world_ptr)->updateLink(&this->go_link)->getPropertyPtr<TransformProperty>();
 
         //Declare start transform
         btTransform startTransform;
@@ -239,7 +239,7 @@ void TerrainProperty::onUpdate(float deltaTime){
          }
          rigidBody = new btRigidBody(cInfo);
 
-         rigidBody->setUserIndex(go_link.updLinkPtr()->array_index);
+         rigidBody->setUserIndex(((World*)world_ptr)->updateLink(&this->go_link)->array_index);
          //add rigidbody to world
          go_link.world_ptr->physical_world->addRidigbodyToWorld(rigidBody);
 
@@ -282,7 +282,7 @@ void TerrainProperty::onAddToObject(){
     genRandomString(&terrain_random_prefix, 4);
 
     //relative path to terrain file
-    this->file_label = *this->go_link.updLinkPtr()->label_ptr + "_" + terrain_random_prefix + ".terrain";
+    this->file_label = *((World*)world_ptr)->updateLink(&this->go_link)->label_ptr + "_" + terrain_random_prefix + ".terrain";
     //Allocate terrain
     data.alloc(this->Width, this->Length);
     //Generate opengl mesh to draw
@@ -298,8 +298,8 @@ void TerrainProperty::getPickedVertexId(int posX, int posY, int screenY, unsigne
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
     //get pointer to material property
-    MaterialProperty* mat = this->go_link.updLinkPtr()->getPropertyPtr<MaterialProperty>();
-    TransformProperty* transform = this->go_link.updLinkPtr()->getPropertyPtr<TransformProperty>();
+    MaterialProperty* mat = ((World*)world_ptr)->updateLink(&this->go_link)->getPropertyPtr<MaterialProperty>();
+    TransformProperty* transform = ((World*)world_ptr)->updateLink(&this->go_link)->getPropertyPtr<TransformProperty>();
     if(mat == nullptr || mat->material_ptr == nullptr) return;
     //Apply material shader
     mat->material_ptr->applyMatToPipeline();

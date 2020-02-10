@@ -1,4 +1,4 @@
-#ifndef WORLD_H
+﻿#ifndef WORLD_H
 #define WORLD_H
 
 #include <vector>
@@ -29,46 +29,18 @@ class World;
 class GameObjectProperty;
 class GameObjectSnapshot;
 
-
-
-class GameObjectLink{
-public:
-    World* world_ptr;
-    std::string obj_str_id;
-    GameObject* ptr;
-
-    GameObject* updLinkPtr(); //Updates pointer to object and returns it
-    bool isEmpty(); //Check, if this link doesn't link to some object
-    void crack(); //Make this link empty
-
-    GameObjectLink();
-};
-
-
 class ObjectPropertyLink{
 public:
-    GameObjectLink object;
+    Engine::GameObjectLink object;
     PROPERTY_TYPE prop_type;
-    GameObjectProperty* ptr;
+    Engine::GameObjectProperty* ptr;
 
-    GameObjectProperty* updLinkPtr();
+    Engine::GameObjectProperty* updLinkPtr();
     ObjectPropertyLink();
 };
 
-typedef struct WRenderSettings{
-    ZSRGBCOLOR ambient_color;
-    ObjectPropertyLink skybox_prop_link;
-
-    WRenderSettings(){
-        ambient_color = ZSRGBCOLOR(255, 255, 255, 255);
-    }
-
-}WRenderSettings;
-
 class GameObjectProperty : public Engine::GameObjectProperty{
 public:
-    GameObjectLink go_link; //link to object, that holds this property
-
     bool isActive();
 
     GameObjectProperty();
@@ -120,29 +92,19 @@ public:
 class GameObject : public Engine::GameObject{
 public:
     bool isPicked; //if user selected this object to edit it
-    GameObjectLink parent; //Link to object's parent
-
-    //unsigned int props_num; //Count of created props
     QTreeWidgetItem* item_ptr;
-    std::vector<GameObjectLink> children; //Vector to store links to children of object
     int getAliveChildrenAmount(); //Gets current amount of children objects (exclude removed chidren)
     void pick(); //Mark object and its children picked
 
     bool addProperty(PROPERTY_TYPE property); //Adds property with property ID
-    bool addTransformProperty();
-    bool addLabelProperty();
 
     //returns pointer to property by property type
     GameObjectProperty* getPropertyPtrByType(PROPERTY_TYPE property);
     GameObjectProperty* getPropertyPtrByTypeI(int property);
-    LabelProperty* getLabelProperty();
-    TransformProperty* getTransformProperty();
-    GameObjectLink getLinkToThisObject();
-    //remove deleted children from vector
-    void trimChildrenArray();
+    Engine::GameObjectLink getLinkToThisObject();
 
-    void addChildObject(GameObjectLink link, bool updTransform = true);
-    void removeChildObject(GameObjectLink link);
+    void addChildObject(Engine::GameObjectLink link, bool updTransform = true);
+    void removeChildObject(Engine::GameObjectLink link);
 
     GameObject* getChildObjectWithNodeLabel(std::string label);
     void setMeshSkinningRootNodeRecursively(GameObject* rootNode);
@@ -169,8 +131,6 @@ public:
 
     void putToSnapshot(GameObjectSnapshot* snapshot);
     void recoverFromSnapshot(GameObjectSnapshot* snapshot);
-    //if user unchecked active checkbox
-    void uncheckInactive();
 
     GameObject(); //Default constructor
     ~GameObject();
@@ -179,11 +139,11 @@ public:
 class GameObjectSnapshot{
 public:
     GameObject reserved_obj; //class object
-    std::vector<GameObjectLink> children; //Vector to store links to children of object
+    std::vector<Engine::GameObjectLink> children; //Vector to store links to children of object
     std::vector<GameObjectSnapshot> children_snapshots;
     GameObjectProperty* properties[OBJ_PROPS_SIZE]; //pointers to properties of object
 
-    GameObjectLink parent_link;
+    Engine::GameObjectLink parent_link;
 
     int props_num; //number of properties
 
@@ -215,12 +175,14 @@ public:
     GameObject* getObjectByStringId(std::string id);
     int getFreeObjectSpaceIndex();
     bool isObjectLabelUnique(std::string label); //Get amount of objects with this label
-    void removeObj(GameObjectLink& link); //Remove object from world
+    void removeObj(Engine::GameObjectLink& link); //Remove object from world
     void removeObjPtr(GameObject* obj); //Remove object from world
     GameObject* dublicateObject(GameObject* original, bool parent = true);
     GameObject* Instantiate(GameObject* original);
     void trimObjectsList();
     void unpickObject();
+
+    GameObject* updateLink(Engine::GameObjectLink* link);
 
     void saveToFile(std::string file);
     void openFromFile(std::string file, QTreeWidget* w_ptr);

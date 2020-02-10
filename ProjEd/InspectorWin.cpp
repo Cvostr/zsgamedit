@@ -274,6 +274,8 @@ void PropertyCtxMenu::show(QPoint point){
     GameObject* obj_ptr = static_cast<GameObject*>(this->win->gameobject_ptr); //cast pointer
 
     GameObjectProperty* prop_ptr = (GameObjectProperty*)obj_ptr->properties[this->selected_property_index];
+    //No actions with label property
+    if(prop_ptr->type == GO_PROPERTY_TYPE_LABEL) return;
 
     if(!prop_ptr->active)
         this->toggle_active->setText("Activate");

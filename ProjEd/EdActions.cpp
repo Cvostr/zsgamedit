@@ -54,26 +54,26 @@ void EdActions::newSnapshotAction(World* world_ptr){
     putNewAction(new_action);
 }
 
-void EdActions::newPropertyAction(GameObjectLink link, PROPERTY_TYPE property_type){
+void EdActions::newPropertyAction(Engine::GameObjectLink link, PROPERTY_TYPE property_type){
     EdPropertyAction* new_action = new EdPropertyAction; //Allocate memory for action class
     new_action->linkToObj = link; //Store link to object
-    new_action->linkToObj.updLinkPtr();
+    ((World*)new_action->linkToObj.world_ptr)->updateLink(&new_action->linkToObj);
     new_action->prop_type = property_type; //Sore property type
     new_action->container_ptr = _allocProperty(property_type); //Allocate property
-    GameObjectProperty* origin_prop = (GameObjectProperty*)link.updLinkPtr()->getPropertyPtrByType(property_type);
+    GameObjectProperty* origin_prop = ((World*)link.world_ptr)->updateLink(&link)->getPropertyPtrByType(property_type);
     origin_prop->copyTo(new_action->container_ptr);
 
     putNewAction(new_action);
 }
 
-void EdActions::newGameObjectAction(GameObjectLink link){
+void EdActions::newGameObjectAction(Engine::GameObjectLink link){
     EdObjectAction* new_action = new EdObjectAction;
 
-    GameObject* obj_ptr = link.updLinkPtr();
+    GameObject* obj_ptr = world_ptr->updateLink(&link);
 
     obj_ptr->putToSnapshot(&new_action->snapshot);
     new_action->linkToObj = link;
-    new_action->linkToObj.updLinkPtr();
+    ((World*)link.world_ptr)->updateLink(&new_action->linkToObj);
 
     putNewAction(new_action);
 }
@@ -100,7 +100,7 @@ void EdActions::undo(){
         EdObjectAction* snapshot = static_cast<EdObjectAction*>(this->action_list[current_pos - 1]);
 
         GameObjectSnapshot cur_state_snap; //Declare snapshot to store current state
-        snapshot->linkToObj.ptr->putToSnapshot(&cur_state_snap); //Backup current state
+        ((GameObject*)snapshot->linkToObj.ptr)->putToSnapshot(&cur_state_snap); //Backup current state
 
         unsigned int array_index = static_cast<unsigned int>(snapshot->snapshot.obj_array_ind);
 
@@ -113,7 +113,7 @@ void EdActions::undo(){
     if(act_type == ACT_TYPE_PROPERTY){ //if this action is property
         EdPropertyAction* snapshot = static_cast<EdPropertyAction*>(this->action_list[current_pos - 1]);
         //Declare pointer to destination
-        GameObjectProperty* dest = (GameObjectProperty*)snapshot->linkToObj.updLinkPtr()->getPropertyPtrByType(snapshot->prop_type);
+        GameObjectProperty* dest = ((World*)snapshot->linkToObj.world_ptr)->updateLink(&snapshot->linkToObj)->getPropertyPtrByType(snapshot->prop_type);
         //Backup current property data
         GameObjectProperty* cur_state_prop = _allocProperty(snapshot->prop_type); //Allocate property for current state
         dest->copyTo(cur_state_prop); //Copy current property data to buffer
@@ -152,7 +152,7 @@ void EdActions::redo(){
         EdObjectAction* snapshot = static_cast<EdObjectAction*>(this->action_list[current_pos ]);
 
         GameObjectSnapshot cur_state_snap; //Declare snapshot to store current state
-        snapshot->linkToObj.ptr->putToSnapshot(&cur_state_snap); //Backup current state
+        ((GameObject*)snapshot->linkToObj.ptr)->putToSnapshot(&cur_state_snap); //Backup current state
 
         unsigned int array_index = static_cast<unsigned int>(snapshot->snapshot.obj_array_ind);
 
@@ -165,7 +165,7 @@ void EdActions::redo(){
     if(act_type == ACT_TYPE_PROPERTY){ //if this action is property
         EdPropertyAction* snapshot = static_cast<EdPropertyAction*>(this->action_list[current_pos]);
         //Declare pointer to destination
-        GameObjectProperty* dest = (GameObjectProperty*)snapshot->linkToObj.updLinkPtr()->getPropertyPtrByType(snapshot->prop_type);
+        GameObjectProperty* dest =  ((World*)snapshot->linkToObj.world_ptr)->updateLink(&snapshot->linkToObj)->getPropertyPtrByType(snapshot->prop_type);
         //Backup current property data
         GameObjectProperty* cur_state_prop = _allocProperty(snapshot->prop_type); //Allocate property for current state
         dest->copyTo(cur_state_prop); //Copy current property data to buffer

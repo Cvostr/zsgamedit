@@ -232,7 +232,6 @@ void EditWindow::init(){
     game_data->glyph_manager = this->glyph_manager;
     game_data->pipeline = this->render;
 
-
     std::string absolute = project.root_path + "/";
     Engine::Loader::setBlobRootDirectory(absolute);
     Engine::Loader::start();
@@ -815,7 +814,7 @@ void EditWindow::onCameraToObjTeleport(){
     QString obj_name = selected_item->text(0); //Get label of clicked obj
     GameObject* obj_ptr = (GameObject*)world.getObjectByLabel(obj_name.toStdString()); //Obtain pointer to selected object by label
 
-    TransformProperty* transform = obj_ptr->getTransformProperty(); //Obtain pointer to object transform
+    TransformProperty* transform = obj_ptr->getPropertyPtr<TransformProperty>(); //Obtain pointer to object transform
     //Define to store absolute transform
     ZSVECTOR3 _t = ZSVECTOR3(0.0f);
     ZSVECTOR3 _s = ZSVECTOR3(1.0f);
@@ -1389,7 +1388,7 @@ void EditWindow::keyPressEvent(QKeyEvent* ke){
         if(object_toRemove != nullptr && ui->objsList->hasFocus()){ //if user wish to delete object
             GameObject* obj = (GameObject*)this->world.getObjectByLabel(object_toRemove->text(0).toStdString());
             _inspector_win->clearContentLayout(); //Prevent variable conflicts
-            GameObjectLink link = obj->getLinkToThisObject();
+            Engine::GameObjectLink link = obj->getLinkToThisObject();
             obj_trstate.isTransforming = false; //disabling object transform
             callObjectDeletion(link); //removing object
         }
@@ -1458,7 +1457,7 @@ void EditWindow::onKeyDown(SDL_Keysym sym){
     }
 
     if(sym.sym == SDLK_DELETE){
-        GameObjectLink link = this->obj_trstate.obj_ptr->getLinkToThisObject();
+        Engine::GameObjectLink link = this->obj_trstate.obj_ptr->getLinkToThisObject();
         callObjectDeletion(link);
     }
     //If we pressed CTRL + O
@@ -1491,7 +1490,7 @@ void EditWindow::onKeyDown(SDL_Keysym sym){
     }
 }
 
-void EditWindow::callObjectDeletion(GameObjectLink link){
+void EditWindow::callObjectDeletion(Engine::GameObjectLink link){
     //Create new Object action
     _ed_actions_container->newGameObjectAction(link);
 
@@ -1513,7 +1512,7 @@ void ObjectTransformState::setTransformOnObject(GO_TRANSFORM_MODE transformMode)
     this->transformMode = transformMode;
     this->isTransforming = true;
     //Add property action
-    GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(obj_ptr->getTransformProperty());
+    GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(obj_ptr->getPropertyPtr<TransformProperty>());
     getActionManager()->newPropertyAction(prop_ptr->go_link, GO_PROPERTY_TYPE_TRANSFORM);
 }
 

@@ -31,7 +31,7 @@ class EdPropertyAction : public EdAction{
 public:
     GameObjectProperty* container_ptr;
 
-    GameObjectLink linkToObj;
+    Engine::GameObjectLink linkToObj;
     PROPERTY_TYPE prop_type;
 
     void clear();
@@ -41,7 +41,7 @@ public:
 class EdObjectAction : public EdAction{
 public:
     GameObjectSnapshot snapshot;
-    GameObjectLink linkToObj;
+    Engine::GameObjectLink linkToObj;
 
     void clear();
     EdObjectAction();
@@ -60,8 +60,8 @@ public:
     void setStoreActions(bool store);
 
     void newSnapshotAction(World* world_ptr);
-    void newPropertyAction(GameObjectLink link, PROPERTY_TYPE property_type);
-    void newGameObjectAction(GameObjectLink link);
+    void newPropertyAction(Engine::GameObjectLink link, PROPERTY_TYPE property_type);
+    void newGameObjectAction(Engine::GameObjectLink link);
 
     void putNewAction(EdAction* action);
 
