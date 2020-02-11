@@ -18,22 +18,9 @@ Engine::GameObjectProperty* ObjectPropertyLink::updLinkPtr(){
 
     return ptr;
 }
+
 ObjectPropertyLink::ObjectPropertyLink(){
 
-}
-
-GameObjectProperty::GameObjectProperty(){
-    type = GO_PROPERTY_TYPE_NONE;
-    active = true; //Inactive by default
-    world_ptr = nullptr; //World ponter is nullptr
-}
-
-GameObjectProperty::~GameObjectProperty(){
-
-}
-
-bool GameObjectProperty::isActive(){
-    return active && (((World*)world_ptr)->updateLink(&go_link) != nullptr) ? go_link.ptr->active : false;
 }
 
 QString getPropertyString(int type){
@@ -93,89 +80,89 @@ QString getPropertyString(int type){
     return QString("NONE");
 }
 
-GameObjectProperty* _allocProperty(PROPERTY_TYPE type){
-    GameObjectProperty* _ptr = nullptr;
+Engine::GameObjectProperty* _allocProperty(PROPERTY_TYPE type){
+    Engine::GameObjectProperty* _ptr = nullptr;
     switch (type) {
         case GO_PROPERTY_TYPE_TRANSFORM:{ //If type is transfrom
-            _ptr = static_cast<GameObjectProperty*>(new TransformProperty); //Allocation of transform in heap
+            _ptr = static_cast<Engine::GameObjectProperty*>(new TransformProperty); //Allocation of transform in heap
             break;
         }
         case GO_PROPERTY_TYPE_NODE:{ //If type is transfrom
-            _ptr = static_cast<GameObjectProperty*>(new NodeProperty); //Allocation of transform in heap
+            _ptr = static_cast<Engine::GameObjectProperty*>(new NodeProperty); //Allocation of transform in heap
             break;
         }
         case GO_PROPERTY_TYPE_ANIMATION:{ //If type is transfrom
-            _ptr = static_cast<GameObjectProperty*>(new AnimationProperty); //Allocation of transform in heap
+            _ptr = static_cast<Engine::GameObjectProperty*>(new AnimationProperty); //Allocation of transform in heap
             break;
         }
         case GO_PROPERTY_TYPE_LABEL:{
             LabelProperty* ptr = new LabelProperty;
-            _ptr = static_cast<GameObjectProperty*>(ptr);
+            _ptr = static_cast<Engine::GameObjectProperty*>(ptr);
             break;
         }
         case GO_PROPERTY_TYPE_MESH:{
             MeshProperty* ptr = new MeshProperty;
-            _ptr = static_cast<GameObjectProperty*>(ptr);
+            _ptr = static_cast<Engine::GameObjectProperty*>(ptr);
             break;
         }
         case GO_PROPERTY_TYPE_LIGHTSOURCE:{
             LightsourceProperty* ptr = new LightsourceProperty;
-            _ptr = static_cast<GameObjectProperty*>(ptr);
+            _ptr = static_cast<Engine::GameObjectProperty*>(ptr);
             break;
         }
         case GO_PROPERTY_TYPE_SCRIPTGROUP:{
             ScriptGroupProperty* ptr = new ScriptGroupProperty;
-            _ptr = static_cast<GameObjectProperty*>(ptr);
+            _ptr = static_cast<Engine::GameObjectProperty*>(ptr);
             break;
         }
         case GO_PROPERTY_TYPE_AUDSOURCE:{
             AudioSourceProperty* ptr = new AudioSourceProperty;
-            _ptr = static_cast<GameObjectProperty*>(ptr);
+            _ptr = static_cast<Engine::GameObjectProperty*>(ptr);
             break;
         }
         case GO_PROPERTY_TYPE_MATERIAL:{
             MaterialProperty* ptr = new MaterialProperty;
-            _ptr = static_cast<GameObjectProperty*>(ptr);
+            _ptr = static_cast<Engine::GameObjectProperty*>(ptr);
             break;
         }
         case GO_PROPERTY_TYPE_COLLIDER:{
             ColliderProperty* ptr = new ColliderProperty;
-            _ptr = static_cast<GameObjectProperty*>(ptr);
+            _ptr = static_cast<Engine::GameObjectProperty*>(ptr);
             break;
         }
         case GO_PROPERTY_TYPE_RIGIDBODY:{
             RigidbodyProperty* ptr = new RigidbodyProperty;
-            _ptr = static_cast<GameObjectProperty*>(ptr);
+            _ptr = static_cast<Engine::GameObjectProperty*>(ptr);
             break;
         }
         case GO_PROPERTY_TYPE_SKYBOX:{
             SkyboxProperty* ptr = new SkyboxProperty;
-            _ptr = static_cast<GameObjectProperty*>(ptr);
+            _ptr = static_cast<Engine::GameObjectProperty*>(ptr);
             break;
         }
         case GO_PROPERTY_TYPE_SHADOWCASTER:{
             ShadowCasterProperty* ptr = new ShadowCasterProperty;
-            _ptr = static_cast<GameObjectProperty*>(ptr);
+            _ptr = static_cast<Engine::GameObjectProperty*>(ptr);
             break;
         }
         case GO_PROPERTY_TYPE_TERRAIN:{
             TerrainProperty* ptr = new TerrainProperty;
-            _ptr = static_cast<GameObjectProperty*>(ptr);
+            _ptr = static_cast<Engine::GameObjectProperty*>(ptr);
             break;
         }
         case GO_PROPERTY_TYPE_CHARACTER_CONTROLLER:{
             CharacterControllerProperty* ptr = new CharacterControllerProperty;
-            _ptr = static_cast<GameObjectProperty*>(ptr);
+            _ptr = static_cast<Engine::GameObjectProperty*>(ptr);
             break;
         }
         case GO_PROPERTY_TYPE_TILE_GROUP:{
             TileGroupProperty* ptr = new TileGroupProperty;
-            _ptr = static_cast<GameObjectProperty*>(ptr);
+            _ptr = static_cast<Engine::GameObjectProperty*>(ptr);
             break;
         }
         case GO_PROPERTY_TYPE_TILE:{
             TileProperty* ptr = new TileProperty;
-            _ptr = static_cast<GameObjectProperty*>(ptr);
+            _ptr = static_cast<Engine::GameObjectProperty*>(ptr);
             break;
         }
     }
@@ -271,6 +258,9 @@ void TransformProperty::onValueChanged(){
 
 void TransformProperty::onPreRender(Engine::RenderPipeline* pipeline){
     updateMat();
+    //Send transform matrix to transform buffer
+    pipeline->transformBuffer->bind();
+    pipeline->transformBuffer->writeData(sizeof (ZSMATRIX4x4) * 2, sizeof (ZSMATRIX4x4), &transform_mat);
 }
 
 void TransformProperty::setTranslation(ZSVECTOR3 new_translation){
@@ -328,13 +318,6 @@ void TransformProperty::updateMat(){
         //S * R * T
         this->transform_mat = scale_mat * rotation_mat * rotation_mat1 * translation_mat;
     }
-}
-
-void TransformProperty::onRender(Engine::RenderPipeline* pipeline){
-    //updateMat();
-    //Send transform matrix to transform buffer
-    pipeline->transformBuffer->bind();
-    pipeline->transformBuffer->writeData(sizeof (ZSMATRIX4x4) * 2, sizeof (ZSMATRIX4x4), &transform_mat);
 }
 
 void TransformProperty::getAbsoluteRotationMatrix(ZSMATRIX4x4& m){

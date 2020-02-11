@@ -476,12 +476,12 @@ void EditWindow::openRenderSettings(){
     _inspector_win->addPropertyArea(lcolor);
 
     PropertyPickArea* sky_ppickarea = new PropertyPickArea(GO_PROPERTY_TYPE_SKYBOX);
-    sky_ppickarea->property_ptr_ptr = reinterpret_cast<GameObjectProperty**>(&ptr->skybox_ptr);
+    sky_ppickarea->property_ptr_ptr = reinterpret_cast<Engine::GameObjectProperty**>(&ptr->skybox_ptr);
     sky_ppickarea->setLabel("Skybox");
     _inspector_win->addPropertyArea(sky_ppickarea);
 
     PropertyPickArea* shadow_ppickarea = new PropertyPickArea(GO_PROPERTY_TYPE_SHADOWCASTER);
-    shadow_ppickarea->property_ptr_ptr = reinterpret_cast<GameObjectProperty**>(&ptr->shadowcaster_ptr);
+    shadow_ppickarea->property_ptr_ptr = reinterpret_cast<Engine::GameObjectProperty**>(&ptr->shadowcaster_ptr);
     shadow_ppickarea->setLabel("Shadowcaster");
     _inspector_win->addPropertyArea(shadow_ppickarea);
 }
@@ -1285,13 +1285,13 @@ void EditWindow::onMouseMotion(int relX, int relY){
 
             ppaint_state.last_obj = static_cast<int>(clicked); //Set clicked as last object ID
             //Obtain pointer to object's property
-            GameObjectProperty* prop_ptr = (GameObjectProperty*)obj_ptr->getPropertyPtrByType(this->ppaint_state.prop_ptr->type);
+            Engine::GameObjectProperty* prop_ptr = obj_ptr->getPropertyPtrByType(this->ppaint_state.prop_ptr->type);
 
             if (prop_ptr == nullptr) { //if no property with that type in object
                 //add new property
                 obj_ptr->addProperty(this->ppaint_state.prop_ptr->type);
                 //update pointer
-                prop_ptr = (GameObjectProperty*)obj_ptr->getPropertyPtrByType(this->ppaint_state.prop_ptr->type);
+                prop_ptr = obj_ptr->getPropertyPtrByType(this->ppaint_state.prop_ptr->type);
             }
 
             getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
@@ -1512,7 +1512,7 @@ void ObjectTransformState::setTransformOnObject(GO_TRANSFORM_MODE transformMode)
     this->transformMode = transformMode;
     this->isTransforming = true;
     //Add property action
-    GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(obj_ptr->getPropertyPtr<TransformProperty>());
+    Engine::GameObjectProperty* prop_ptr = static_cast<Engine::GameObjectProperty*>(obj_ptr->getPropertyPtr<TransformProperty>());
     getActionManager()->newPropertyAction(prop_ptr->go_link, GO_PROPERTY_TYPE_TRANSFORM);
 }
 

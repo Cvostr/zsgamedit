@@ -46,7 +46,7 @@ typedef struct TileAnimationState{
     }
 }TileAnimationState;
 
-class TileGroupProperty : public GameObjectProperty{
+class TileGroupProperty : public Engine::GameObjectProperty{
 public:
     int tiles_amount_X; //Tiles to add
     int tiles_amount_Y;
@@ -65,7 +65,7 @@ public:
     TileGroupProperty();
 };
 
-class TileProperty : public GameObjectProperty{
+class TileProperty : public Engine::GameObjectProperty{
 private:
     bool lastAnimState;
 public:

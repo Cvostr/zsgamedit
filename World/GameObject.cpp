@@ -14,12 +14,12 @@ GameObject::~GameObject(){
 bool GameObject::addProperty(PROPERTY_TYPE property){
     unsigned int props = static_cast<unsigned int>(this->props_num);
     for(unsigned int prop_i = 0; prop_i < props; prop_i ++){
-        GameObjectProperty* property_ptr = (GameObjectProperty*)this->properties[prop_i];
+        Engine::GameObjectProperty* property_ptr = this->properties[prop_i];
         if(property_ptr->type == property){ //If object already has one
             return false; //Exit function
         }
     }
-    GameObjectProperty* _ptr = _allocProperty(property);
+    Engine::GameObjectProperty* _ptr = _allocProperty(property);
     if(property == GO_PROPERTY_TYPE_LABEL){
         LabelProperty* ptr = static_cast<LabelProperty*>(_ptr);
         ptr->list_item_ptr = this->item_ptr;
@@ -31,28 +31,6 @@ bool GameObject::addProperty(PROPERTY_TYPE property){
     this->properties[props_num] = _ptr; //Store property in gameobject
     this->props_num += 1;
     return true;
-}
-
-GameObjectProperty* GameObject::getPropertyPtrByType(PROPERTY_TYPE property){
-    unsigned int props = static_cast<unsigned int>(this->props_num);
-    for(unsigned int prop_i = 0; prop_i < props; prop_i ++){
-        GameObjectProperty* property_ptr = (GameObjectProperty*)this->properties[prop_i];
-        if(property_ptr->type == property){ //If object already has one
-            return property_ptr; //return it
-        }
-    }
-    return nullptr;
-}
-
-GameObjectProperty* GameObject::getPropertyPtrByTypeI(int property){
-    unsigned int props = static_cast<unsigned int>(this->props_num);
-    for(unsigned int prop_i = 0; prop_i < props; prop_i ++){
-        GameObjectProperty* property_ptr = (GameObjectProperty*)this->properties[prop_i];
-        if(property_ptr->type == property){ //If object already has one
-            return property_ptr; //return it
-        }
-    }
-    return nullptr;
 }
 
 Engine::GameObjectLink GameObject::getLinkToThisObject(){
@@ -160,7 +138,7 @@ void GameObject::clearAll(bool clearQtWigt){
 
     for(unsigned int prop_i = 0; prop_i < props_num; prop_i ++){ //Walk through all children an remove them
         //Obtain pointer to property
-        GameObjectProperty* prop_ptr = (GameObjectProperty*)properties[prop_i];
+        Engine::GameObjectProperty* prop_ptr = properties[prop_i];
         prop_ptr->onObjectDeleted(); //Call on object deletion
         delete prop_ptr; //Destroy property
     }
@@ -171,45 +149,11 @@ void GameObject::clearAll(bool clearQtWigt){
     }
 }
 
-void GameObject::removeProperty(int index){
-    GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(this->properties[index]);
-    prop_ptr->onObjectDeleted();
-    this->properties[index] = nullptr; //set as deleted
-
-    for(unsigned int i = static_cast<unsigned int>(index); i < props_num - 1; i ++){
-        properties[i] = properties[i + 1];
-    }
-
-    props_num -= 1;
-}
-
-void GameObject::onUpdate(int deltaTime){
-    for(unsigned int i = 0; i < props_num; i ++){ //iterate over all properties
-        if(!properties[i]->active) continue; //if property is inactive, then skip it
-        properties[i]->onUpdate(deltaTime); //and call onUpdate on each property
-    }
-}
-
 void GameObject::onTrigger(GameObject* obj){
     for(unsigned int i = 0; i < props_num; i ++){ //iterate over all properties
         properties[i]->onTrigger(obj); //and call onUpdate on each property
     }
 }
-
-void GameObject::onPreRender(RenderPipeline* pipeline){
-    for(unsigned int i = 0; i < props_num; i ++){ //iterate over all properties
-        if(!properties[i]->active) continue; //if property is inactive, then skip it
-        properties[i]->onPreRender(pipeline); //and call onUpdate on each property
-    }
-}
-
-void GameObject::onRender(RenderPipeline* pipeline){
-    for(unsigned int i = 0; i < props_num; i ++){ //iterate over all properties
-        if(!properties[i]->active) continue; //if property is inactive, then skip it
-        properties[i]->onRender(pipeline); //and call onUpdate on each property
-    }
-}
-
 
 void GameObject::putToSnapshot(GameObjectSnapshot* snapshot){
     snapshot->props_num = 0;
@@ -220,8 +164,8 @@ void GameObject::putToSnapshot(GameObjectSnapshot* snapshot){
     this->copyTo(&snapshot->reserved_obj);
     //Copy all properties
     for(unsigned int i = 0; i < this->props_num; i ++){
-        GameObjectProperty* prop_ptr = (GameObjectProperty*)this->properties[i];
-        GameObjectProperty* new_prop_ptr = _allocProperty(prop_ptr->type);
+        Engine::GameObjectProperty* prop_ptr = this->properties[i];
+        Engine::GameObjectProperty* new_prop_ptr = _allocProperty(prop_ptr->type);
         prop_ptr->copyTo(new_prop_ptr);
         snapshot->properties[snapshot->props_num] = new_prop_ptr;
         snapshot->props_num += 1;
@@ -252,9 +196,9 @@ void GameObject::recoverFromSnapshot(GameObjectSnapshot* snapshot){
     //iterate over all properties in snapshot
     for(unsigned int i = 0; i < static_cast<unsigned int>(snapshot->props_num); i ++){
         //Pointer to property in snapshot
-        GameObjectProperty* prop_ptr = snapshot->properties[i];
+        Engine::GameObjectProperty* prop_ptr = snapshot->properties[i];
         //Pointer to new allocated property
-        GameObjectProperty* new_prop_ptr = _allocProperty(prop_ptr->type);
+        Engine::GameObjectProperty* new_prop_ptr = _allocProperty(prop_ptr->type);
         //Copy pointer in snapshot to new pointer
         prop_ptr->copyTo(new_prop_ptr);
         this->properties[props_num] = new_prop_ptr;

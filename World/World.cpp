@@ -421,7 +421,7 @@ void World::processPrefabObject(GameObject* object_ptr, std::vector<GameObject>*
     unsigned int props_amount = object_ptr->props_num;
     //iterate over all props and update gameobject links
     for(unsigned int prop_i = 0; prop_i < props_amount; prop_i ++){
-        GameObjectProperty* prop_ptr = (GameObjectProperty*)object_ptr->properties[prop_i];
+        Engine::GameObjectProperty* prop_ptr = object_ptr->properties[prop_i];
         prop_ptr->go_link.obj_str_id = object_ptr->str_id; //set new string id
 
         updateLink(&prop_ptr->go_link);
@@ -649,7 +649,7 @@ void World::putToShapshot(WorldSnapshot* snapshot){
         if(obj_ptr->alive == false) continue;
         //Iterate over all properties in object and copy them into snapshot
         for(unsigned int prop_i = 0; prop_i < obj_ptr->props_num; prop_i ++){
-            auto prop_ptr = (GameObjectProperty*)obj_ptr->properties[prop_i];
+            auto prop_ptr = obj_ptr->properties[prop_i];
             auto new_prop = _allocProperty(prop_ptr->type);
             new_prop->go_link = prop_ptr->go_link;
             prop_ptr->copyTo(new_prop);

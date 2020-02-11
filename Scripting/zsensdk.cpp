@@ -153,9 +153,9 @@ void ZSENSDK::bindSDK(lua_State* state){
         .addFunction("setActive", &Engine::GameObject::setActive)
         .addData("active", &Engine::GameObject::active, false)
         .addData("propsNum", &Engine::GameObject::props_num, false)
-        //.addFunction("getProperty", &GameObject::getPropertyPtrByTypeI)
+        .addFunction("getProperty", &Engine::GameObject::getPropertyPtrByTypeI)
         //.addFunction("addProperty", &GameObject::addProperty)
-        //.addFunction("removeProperty", &GameObject::removeProperty)
+        .addFunction("removeProperty", &Engine::GameObject::removeProperty)
 
         .addFunction("transform", &Engine::GameObject::getPropertyPtr<TransformProperty>)
         .addFunction("mesh", &Engine::GameObject::getPropertyPtr<MeshProperty>)

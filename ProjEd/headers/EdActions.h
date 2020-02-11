@@ -29,7 +29,7 @@ public:
 
 class EdPropertyAction : public EdAction{
 public:
-    GameObjectProperty* container_ptr;
+    Engine::GameObjectProperty* container_ptr;
 
     Engine::GameObjectLink linkToObj;
     PROPERTY_TYPE prop_type;

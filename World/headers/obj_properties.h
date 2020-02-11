@@ -15,7 +15,7 @@ enum LIGHTSOURCE_TYPE {
 
 typedef uint8_t ZSLIGHTSOURCE_GL_ID;
 
-class ScriptGroupProperty : public GameObjectProperty {
+class ScriptGroupProperty : public Engine::GameObjectProperty {
 public:
     int scr_num; //to update amount via IntPropertyArea
 
@@ -33,7 +33,7 @@ public:
     ScriptGroupProperty();
 };
 
-class AudioSourceProperty : public GameObjectProperty{
+class AudioSourceProperty : public Engine::GameObjectProperty{
 private:
     bool isPlaySheduled;
 public:
@@ -63,7 +63,7 @@ public:
     AudioSourceProperty();
 };
 
-class MaterialProperty : public GameObjectProperty{
+class MaterialProperty : public Engine::GameObjectProperty{
 private:
     std::string group_label;
 
@@ -86,7 +86,7 @@ public:
 };
 
 
-class MeshProperty : public GameObjectProperty{
+class MeshProperty : public Engine::GameObjectProperty{
 public:
     std::string resource_relpath; //Relative path to resource
     Engine::MeshResource* mesh_ptr; //Pointer to mesh
@@ -104,7 +104,7 @@ public:
 };
 
 
-class LightsourceProperty : public GameObjectProperty{
+class LightsourceProperty : public Engine::GameObjectProperty{
 private:
     LIGHTSOURCE_TYPE _last_light_type;
 public:
@@ -133,7 +133,7 @@ public:
     LightsourceProperty();
 };
 
-class PhysicalProperty : public GameObjectProperty{
+class PhysicalProperty : public Engine::GameObjectProperty{
 protected:
 
     void init();
@@ -199,14 +199,14 @@ public:
     RigidbodyProperty();
 };
 
-class SkyboxProperty : public GameObjectProperty{
+class SkyboxProperty : public Engine::GameObjectProperty{
 public:
     void onPreRender(Engine::RenderPipeline* pipeline);
     void DrawSky(RenderPipeline* pipeline);
     SkyboxProperty();
 };
 
-class ShadowCasterProperty : public GameObjectProperty{
+class ShadowCasterProperty : public Engine::GameObjectProperty{
 private:
     bool initialized;
     unsigned int shadowBuffer;
@@ -234,7 +234,7 @@ public:
     ShadowCasterProperty();
 };
 
-class NodeProperty : public GameObjectProperty {
+class NodeProperty : public Engine::GameObjectProperty {
 public:
     std::string node_label;
 
@@ -252,7 +252,7 @@ public:
     NodeProperty();
 };
 
-class AnimationProperty : public GameObjectProperty {
+class AnimationProperty : public Engine::GameObjectProperty {
 private:
 public:
     bool Playing;
@@ -277,7 +277,7 @@ public:
     AnimationProperty();
 };
 
-class TerrainProperty : public GameObjectProperty{
+class TerrainProperty : public Engine::GameObjectProperty{
 
 private:
     TerrainData data;

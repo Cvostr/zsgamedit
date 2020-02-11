@@ -19,7 +19,7 @@ void ResourcePickDialog::onResourceSelected(){
     QListWidgetItem* selected = this->list->currentItem();
     QString resource_path = selected->text(); //Get selected text
     //Make action
-    GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(area->go_property);
+    Engine::GameObjectProperty* prop_ptr = static_cast<Engine::GameObjectProperty*>(area->go_property);
     getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
     //Apply resource change
     *area->rel_path_std = resource_path.toStdString();
@@ -154,7 +154,7 @@ void QLabelResourcePickWgt::dropEvent( QDropEvent* event ){
             //Set new relative path
             *resource_area->rel_path_std = newpath.toStdString();
 
-            GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(area_ptr->go_property);
+            Engine::GameObjectProperty* prop_ptr = static_cast<Engine::GameObjectProperty*>(area_ptr->go_property);
             getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
             //Apply resource change
             area_ptr->PropertyEditArea::callPropertyUpdate();
@@ -166,7 +166,7 @@ void QLabelResourcePickWgt::dropEvent( QDropEvent* event ){
         //if we picking property
         if(area_ptr->type == PEA_TYPE_PROPPICK){
             PropertyPickArea* _area_ptr = static_cast<PropertyPickArea*>(area_ptr);
-            GameObjectProperty* prop = (GameObjectProperty*)obj->getPropertyPtrByType(_area_ptr->prop_type);
+            Engine::GameObjectProperty* prop = obj->getPropertyPtrByType(_area_ptr->prop_type);
             if(prop != nullptr){ //Property with that type exist
                 //Writing pointer
                 *_area_ptr->property_ptr_ptr = prop;

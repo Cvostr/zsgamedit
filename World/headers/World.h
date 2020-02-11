@@ -39,15 +39,9 @@ public:
     ObjectPropertyLink();
 };
 
-class GameObjectProperty : public Engine::GameObjectProperty{
-public:
-    bool isActive();
 
-    GameObjectProperty();
-    virtual ~GameObjectProperty();
-};
 
-class LabelProperty : public GameObjectProperty {
+class LabelProperty : public Engine::GameObjectProperty {
 public:
     std::string label; //Label of gameobject
     QTreeWidgetItem* list_item_ptr;
@@ -59,7 +53,7 @@ public:
     LabelProperty();
 };
 
-class TransformProperty : public GameObjectProperty {
+class TransformProperty : public Engine::GameObjectProperty {
 public:
     ZSMATRIX4x4 transform_mat;
 
@@ -75,7 +69,6 @@ public:
     void addPropertyInterfaceToInspector();
     void onValueChanged();
     void getAbsoluteParentTransform(ZSVECTOR3& t, ZSVECTOR3& s, ZSVECTOR3& r);
-    void onRender(Engine::RenderPipeline* pipeline);
     void copyTo(Engine::GameObjectProperty* dest);
     void onPreRender(Engine::RenderPipeline* pipeline);
 
@@ -98,9 +91,6 @@ public:
 
     bool addProperty(PROPERTY_TYPE property); //Adds property with property ID
 
-    //returns pointer to property by property type
-    GameObjectProperty* getPropertyPtrByType(PROPERTY_TYPE property);
-    GameObjectProperty* getPropertyPtrByTypeI(int property);
     Engine::GameObjectLink getLinkToThisObject();
 
     void addChildObject(Engine::GameObjectLink link, bool updTransform = true);
@@ -108,9 +98,6 @@ public:
 
     GameObject* getChildObjectWithNodeLabel(std::string label);
     void setMeshSkinningRootNodeRecursively(GameObject* rootNode);
-
-    //Remove property with type
-    void removeProperty(int index);
 
     void saveProperties(std::ofstream* stream); //Writes properties content at end of stream
     void loadProperty(std::ifstream* world_stream); //Loads one property from stream
@@ -121,10 +108,6 @@ public:
     void DrawMesh(RenderPipeline* pipeline);
     bool hasMesh(); //Check if gameobject has mesh property and mesh inside
     bool hasTerrain(); //Check if gameobject has terrain inside
-    void onUpdate(int deltaTime); //calls onUpdate on all properties
-    //calls onPreRender on all properties
-    void onPreRender(RenderPipeline* pipeline);
-    void onRender(RenderPipeline* pipeline);
     void onTrigger(GameObject* obj);
      //true, if object has rigidbody component
     bool isRigidbody();
@@ -141,7 +124,7 @@ public:
     GameObject reserved_obj; //class object
     std::vector<Engine::GameObjectLink> children; //Vector to store links to children of object
     std::vector<GameObjectSnapshot> children_snapshots;
-    GameObjectProperty* properties[OBJ_PROPS_SIZE]; //pointers to properties of object
+    Engine::GameObjectProperty* properties[OBJ_PROPS_SIZE]; //pointers to properties of object
 
     Engine::GameObjectLink parent_link;
 
@@ -156,7 +139,7 @@ public:
 class WorldSnapshot{
 public:
     std::vector<GameObject> objects;
-    std::vector<GameObjectProperty*> props;
+    std::vector<Engine::GameObjectProperty*> props;
 
     WorldSnapshot();
     void clear();
@@ -207,7 +190,7 @@ public:
     World();
 
 };
-GameObjectProperty* _allocProperty(PROPERTY_TYPE type);
+Engine::GameObjectProperty* _allocProperty(PROPERTY_TYPE type);
 QString getPropertyString(int type);
 
 #endif

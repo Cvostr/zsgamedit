@@ -230,7 +230,7 @@ class PropertyPickArea : public PropertyEditArea{
 public:
     PROPERTY_TYPE prop_type;
 
-    GameObjectProperty** property_ptr_ptr; //output value
+    Engine::GameObjectProperty** property_ptr_ptr; //output value
     std::string* oj_label_ptr;
 
     QPushButton pick_button; //button to show color pick dialog

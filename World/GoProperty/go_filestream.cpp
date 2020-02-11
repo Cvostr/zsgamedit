@@ -12,7 +12,7 @@ void GameObject::saveProperties(std::ofstream* stream){
     unsigned int props_num = static_cast<unsigned int>(this->props_num);
 
     for(unsigned int prop_i = 0; prop_i < props_num; prop_i ++){
-        GameObjectProperty* property_ptr = static_cast<GameObjectProperty*>(this->properties[prop_i]);
+        Engine::GameObjectProperty* property_ptr = this->properties[prop_i];
         *stream << "\nG_PROPERTY ";
         stream->write(reinterpret_cast<char*>(&property_ptr->type), sizeof(int));
         stream->write(reinterpret_cast<char*>(&property_ptr->active), sizeof(bool));
@@ -274,7 +274,7 @@ void GameObject::loadProperty(std::ifstream* world_stream){
     world_stream->read(reinterpret_cast<char*>(&type), sizeof(int));
     //Spawn new property with readed type
     addProperty(type);
-    GameObjectProperty* prop_ptr = (GameObjectProperty*)getPropertyPtrByType(type); //get created property
+    Engine::GameObjectProperty* prop_ptr = getPropertyPtrByType(type); //get created property
     //since more than 1 properties same type can't be on one gameobject
     world_stream->read(reinterpret_cast<char*>(&prop_ptr->active), sizeof(bool));
     switch(type){

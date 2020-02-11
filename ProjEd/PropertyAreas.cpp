@@ -37,7 +37,7 @@ AreaButton::AreaButton(){
 }
 
 void AreaRadioGroup::onRadioClicked(){
-    GameObjectProperty* property_ptr = static_cast<GameObjectProperty*>(this->go_property);
+    Engine::GameObjectProperty* property_ptr = static_cast<Engine::GameObjectProperty*>(this->go_property);
     //make EdAction
     getActionManager()->newPropertyAction(property_ptr->go_link, property_ptr->type);
 
@@ -138,7 +138,7 @@ void PropertyEditArea::writeNewValues(){
 
 void PropertyEditArea::callPropertyUpdate(){
     if(go_property != nullptr){ //If parent property has defined
-        GameObjectProperty* property_ptr = static_cast<GameObjectProperty*>(this->go_property);
+        Engine::GameObjectProperty* property_ptr = static_cast<Engine::GameObjectProperty*>(this->go_property);
         property_ptr->onValueChanged(); //Then call changed
     }
 }
@@ -210,7 +210,7 @@ void Float3PropertyArea::writeNewValues(){
 
     if(!REAL_NUM_EQ(vector->X, vX) || !REAL_NUM_EQ(vector->Y, vY) || !REAL_NUM_EQ(vector->Z, vZ)){
         //Store old values
-        GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(this->go_property);
+        Engine::GameObjectProperty* prop_ptr = static_cast<Engine::GameObjectProperty*>(this->go_property);
         getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
     }
     //Write new values
@@ -303,7 +303,7 @@ void Float2PropertyArea::writeNewValues(){
 
     if(!REAL_NUM_EQ(vector->X, vX) || !REAL_NUM_EQ(vector->Y, vY)){
         //Store old values
-        GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(this->go_property);
+        Engine::GameObjectProperty* prop_ptr = static_cast<Engine::GameObjectProperty*>(this->go_property);
         getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
     }
     //Write new values
@@ -393,7 +393,7 @@ void Int2PropertyArea::writeNewValues(){
 
     if(vector[0] != vX || vector[1] != vY){
         //Store old values
-        GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(this->go_property);
+        Engine::GameObjectProperty* prop_ptr = static_cast<Engine::GameObjectProperty*>(this->go_property);
         getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
     }
     //Write new values
@@ -460,7 +460,7 @@ void StringPropertyArea::writeNewValues(){
     //Get current values in textt fields
     std::string current = this->edit_field.text().toStdString();
     if(*value_ptr != current){ //if value changed, then make Action
-        GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(this->go_property);
+        Engine::GameObjectProperty* prop_ptr = static_cast<Engine::GameObjectProperty*>(this->go_property);
         getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
     }
     *value_ptr = current;
@@ -514,7 +514,7 @@ void FloatPropertyArea::writeNewValues(){
 
     if(!REAL_NUM_EQ(*this->value, value)){ //if value changed, then make Action
         //Store old values
-        GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(this->go_property);
+        Engine::GameObjectProperty* prop_ptr = static_cast<Engine::GameObjectProperty*>(this->go_property);
         getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
     }
     *this->value = value;
@@ -565,7 +565,7 @@ void IntPropertyArea::writeNewValues(){
     //Get current values in text fields
     int value = this->int_field->text().toInt();
     if(*this->value != value){
-        GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(this->go_property);
+        Engine::GameObjectProperty* prop_ptr = static_cast<Engine::GameObjectProperty*>(this->go_property);
         getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
     }
     *this->value = value;
@@ -627,7 +627,7 @@ void ZSColorPickDialog::onNeedToShow(){
     _color.updateGL();
 
     //Store old values
-    GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(this->area_ptr->go_property);
+    Engine::GameObjectProperty* prop_ptr = static_cast<Engine::GameObjectProperty*>(this->area_ptr->go_property);
     if(prop_ptr != nullptr){
         getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
     }
@@ -653,7 +653,7 @@ void BoolCheckboxArea::writeNewValues(){
     if(bool_ptr == nullptr) return; //pointer not set, exiting
 
     if(go_property != nullptr && (*this->bool_ptr != checkbox.isChecked())){
-        GameObjectProperty* prop_ptr = static_cast<GameObjectProperty*>(this->go_property);
+        Engine::GameObjectProperty* prop_ptr = static_cast<Engine::GameObjectProperty*>(this->go_property);
         getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
     }
 
@@ -750,7 +750,7 @@ void PropertyPickArea::setPropertyLink(ObjectPropertyLink* link){
 void PropertyPickArea::setup(){
     if(this->property_ptr_ptr == nullptr) return;
 
-    GameObjectProperty* property = *property_ptr_ptr;
+    Engine::GameObjectProperty* property = *property_ptr_ptr;
     if(property != nullptr){
         GameObject* obj = (GameObject*)property->go_link.ptr;
         property_label->setText(QString::fromStdString(*obj->label_ptr) + "<" +getPropertyString(this->prop_type) + ">");

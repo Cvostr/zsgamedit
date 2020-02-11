@@ -76,7 +76,7 @@ struct ObjectTransformState{
 
 struct PropertyPaintState{
     bool enabled;
-    GameObjectProperty* prop_ptr;
+    Engine::GameObjectProperty* prop_ptr;
 
     float time;
     int last_obj = 0;
