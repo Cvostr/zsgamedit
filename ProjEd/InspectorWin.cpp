@@ -312,11 +312,7 @@ void PropertyCtxMenu::onActiveToggleClicked(){
     //Make action
     getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
     //Change state
-    if(prop_ptr->active)
-        prop_ptr->active = false;
-    else {
-        prop_ptr->active = true;
-    }
+    prop_ptr->active = !prop_ptr->active;
 
     this->win->updateObjectProperties();
     dialog->refresh_list();

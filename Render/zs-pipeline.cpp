@@ -373,11 +373,11 @@ void GameObject::Draw(RenderPipeline* pipeline){
                         //if RootNode is specified
                         node = mesh_prop->skinning_root_node->getChildObjectWithNodeLabel(b->bone_name);
                         //Get root transform
-                        rootNodeTransform = (RootNode->getPropertyPtr<NodeProperty>()->transform_mat);
+                        rootNodeTransform = (RootNode->getPropertyPtr<Engine::NodeProperty>()->transform_mat);
                     }
 
                     if(node != nullptr){
-                        NodeProperty* nd = node->getPropertyPtr<NodeProperty>();
+                        Engine::NodeProperty* nd = node->getPropertyPtr<Engine::NodeProperty>();
                         //Calculate result matrix
                         ZSMATRIX4x4 matrix = transpose(invert(rootNodeTransform) * nd->abs * b->offset);
                         //Send skinned matrix to skinning uniform buffer

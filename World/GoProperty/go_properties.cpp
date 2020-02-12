@@ -88,7 +88,7 @@ Engine::GameObjectProperty* _allocProperty(PROPERTY_TYPE type){
             break;
         }
         case GO_PROPERTY_TYPE_NODE:{ //If type is transfrom
-            _ptr = static_cast<Engine::GameObjectProperty*>(new NodeProperty); //Allocation of transform in heap
+            _ptr = static_cast<Engine::GameObjectProperty*>(new Engine::NodeProperty); //Allocation of transform in heap
             break;
         }
         case GO_PROPERTY_TYPE_ANIMATION:{ //If type is transfrom
@@ -426,7 +426,7 @@ void MeshProperty::updateMeshPtr(){
 
 void MeshProperty::onRender(Engine::RenderPipeline* pipeline){
     if(this->skinning_root_node == nullptr)
-        skinning_root_node = (GameObject*)((World*)world_ptr)->getObjectByLabel(this->rootNodeStr);
+        skinning_root_node = (GameObject*)((World*)world_ptr)->getObjectByLabel(this->rootNodeStr);skinning_root_node = (GameObject*)((World*)world_ptr)->getObjectByLabel(this->rootNodeStr);
 }
 
 void MeshProperty::onValueChanged(){
@@ -1352,30 +1352,6 @@ void ShadowCasterProperty::copyTo(Engine::GameObjectProperty* dest){
     _dest->projection_viewport = this->projection_viewport;
 }
 
-
-NodeProperty::NodeProperty(){
-    type = GO_PROPERTY_TYPE_NODE;
-
-    scale = ZSVECTOR3(1.f, 1.f, 1.f);
-    translation = ZSVECTOR3(0.f, 0.f, 0.f);
-    rotation = ZSQUATERNION(0.f, 0.f, 0.f, 0.f);
-}
-
-void NodeProperty::addPropertyInterfaceToInspector(){
-
-}
-
-void NodeProperty::copyTo(Engine::GameObjectProperty* dest){
-    if(dest->type != this->type) return; //if it isn't Node property
-
-    //Do base things
-    GameObjectProperty::copyTo(dest);
-    NodeProperty* _dest = static_cast<NodeProperty*>(dest);
-
-    _dest->transform_mat = this->transform_mat;
-    _dest->node_label = this->node_label;
-}
-
 AnimationProperty::AnimationProperty(){
     type = GO_PROPERTY_TYPE_ANIMATION;
     this->anim_label = "@none";
@@ -1459,7 +1435,7 @@ void AnimationProperty::onPreRender(Engine::RenderPipeline* pipeline){
         for(unsigned int channels_i = 0; channels_i < anim_prop_ptr->NumChannels; channels_i ++){
             Engine::AnimationChannel* ch = &anim_prop_ptr->channels[channels_i];
             GameObject* node = obj->getChildObjectWithNodeLabel(ch->bone_name);
-            NodeProperty* prop = node->getPropertyPtr<NodeProperty>();
+            Engine::NodeProperty* prop = node->getPropertyPtr<Engine::NodeProperty>();
             //Calculate interpolated values
             prop->translation = ch->getPostitionInterpolated(animTime);
             prop->scale = ch->getScaleInterpolated(animTime);
@@ -1473,7 +1449,7 @@ void AnimationProperty::onPreRender(Engine::RenderPipeline* pipeline){
 void AnimationProperty::updateNodeTransform(GameObject* obj, ZSMATRIX4x4 parent){
 
     if(!obj) return;
-    NodeProperty* prop = obj->getPropertyPtr<NodeProperty>();
+    Engine::NodeProperty* prop = obj->getPropertyPtr<Engine::NodeProperty>();
     if(!prop) return;
     //Assign base node transform
     prop->abs = prop->transform_mat;

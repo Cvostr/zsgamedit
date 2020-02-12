@@ -36,7 +36,7 @@ bool GameObject::addProperty(PROPERTY_TYPE property){
 Engine::GameObjectLink GameObject::getLinkToThisObject(){
     Engine::GameObjectLink link; //Definition of result link
     link.obj_str_id = this->str_id; //Placing string id
-    link.world_ptr = static_cast<World*>(this->world_ptr); //Placing world pointer
+    link.world_ptr = (this->world_ptr); //Placing world pointer
 
     link.ptr = static_cast<World*>(world_ptr)->getObjectByStringId(link.obj_str_id);
     return link;
@@ -109,7 +109,7 @@ GameObject* GameObject::getChildObjectWithNodeLabel(std::string label){
     //Iterate over all children in current object
     for (unsigned int i = 0; i < this->children.size(); i ++) {
         Engine::GameObjectLink* l = &this->children[i];
-        NodeProperty* node_p = ((World*)world_ptr)->updateLink(l)->getPropertyPtr<NodeProperty>();
+        Engine::NodeProperty* node_p = ((World*)world_ptr)->updateLink(l)->getPropertyPtr<Engine::NodeProperty>();
         //if node's name match
         if(!node_p->node_label.compare(label))
             //Then return object with this node
@@ -146,12 +146,6 @@ void GameObject::clearAll(bool clearQtWigt){
     children.clear();
     if(item_ptr != nullptr && clearQtWigt == true){ //if Qt tree widget item not cleared
         delete item_ptr; //Destroy Qt tree widget item to remove object from tree
-    }
-}
-
-void GameObject::onTrigger(GameObject* obj){
-    for(unsigned int i = 0; i < props_num; i ++){ //iterate over all properties
-        properties[i]->onTrigger(obj); //and call onUpdate on each property
     }
 }
 
@@ -269,15 +263,6 @@ void GameObject::pick(){
     for(unsigned int chil_i = 0; chil_i < children_am; chil_i++){
         ((GameObject*)children[chil_i].ptr)->pick(); //child and his children are picked now
     }
-}
-
-void GameObject::copyTo(GameObject* dest){
-    dest->array_index = this->array_index;
-    dest->alive = this->alive;
-    dest->active = this->active;
-    dest->hasParent = this->hasParent;
-    dest->parent = this->parent;
-    dest->str_id = this->str_id;
 }
 
 bool GameObject::hasMesh(){

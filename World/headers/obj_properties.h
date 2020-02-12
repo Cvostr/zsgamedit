@@ -6,6 +6,8 @@
 #include <render/zs-materials.h>
 #include "../../World/headers/terrain.h"
 
+#include "world/go_properties.h"
+
 enum LIGHTSOURCE_TYPE {
     LIGHTSOURCE_TYPE_NONE,
     LIGHTSOURCE_TYPE_DIRECTIONAL,
@@ -232,24 +234,6 @@ public:
     void setTextureSize();
     bool isRenderAvailable();
     ShadowCasterProperty();
-};
-
-class NodeProperty : public Engine::GameObjectProperty {
-public:
-    std::string node_label;
-
-    ZSVECTOR3 translation;
-    ZSVECTOR3 scale;
-    ZSQUATERNION rotation;
-    //Node transform from file
-    ZSMATRIX4x4 transform_mat;
-    //Caclulated node transform
-    ZSMATRIX4x4 abs;
-
-    void addPropertyInterfaceToInspector();
-    void copyTo(Engine::GameObjectProperty* dest);
-
-    NodeProperty();
 };
 
 class AnimationProperty : public Engine::GameObjectProperty {

@@ -558,7 +558,7 @@ GameObject* World::addMeshNode(ZS3M::SceneNode* node){
     transform_prop->setTranslation(node->node_translation);
     transform_prop->updateMat();
 
-    NodeProperty* node_prop = static_cast<NodeProperty*>(obj.getPropertyPtrByType(GO_PROPERTY_TYPE_NODE));
+    Engine::NodeProperty* node_prop = static_cast<Engine::NodeProperty*>(obj.getPropertyPtrByType(GO_PROPERTY_TYPE_NODE));
     node_prop->node_label = node->node_label;
     //Set original node transform
     node_prop->transform_mat = node->node_transform;

@@ -81,7 +81,6 @@ public:
     TransformProperty();
 };
 
-
 class GameObject : public Engine::GameObject{
 public:
     bool isPicked; //if user selected this object to edit it
@@ -102,13 +101,11 @@ public:
     void saveProperties(std::ofstream* stream); //Writes properties content at end of stream
     void loadProperty(std::ifstream* world_stream); //Loads one property from stream
     void clearAll(bool clearQtWigt = true); //Release all associated memory with this object
-    void copyTo(GameObject* dest);
     void processObject(RenderPipeline* pipeline); //On render pipeline wish to work with object
     void Draw(RenderPipeline* pipeline); //On render pipeline wish to draw the object
     void DrawMesh(RenderPipeline* pipeline);
     bool hasMesh(); //Check if gameobject has mesh property and mesh inside
     bool hasTerrain(); //Check if gameobject has terrain inside
-    void onTrigger(GameObject* obj);
      //true, if object has rigidbody component
     bool isRigidbody();
 

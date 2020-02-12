@@ -70,7 +70,7 @@ void GameObject::saveProperties(std::ofstream* stream){
             break;
         }
         case GO_PROPERTY_TYPE_NODE:{
-            NodeProperty* ptr = static_cast<NodeProperty*>(property_ptr);
+            Engine::NodeProperty* ptr = static_cast<Engine::NodeProperty*>(property_ptr);
             //Write node name
             *stream << ptr->node_label << "\n";
             //Write node transform matrix
@@ -326,7 +326,7 @@ void GameObject::loadProperty(std::ifstream* world_stream){
             break;
         }
         case GO_PROPERTY_TYPE_NODE:{
-            NodeProperty* ptr = static_cast<NodeProperty*>(prop_ptr);
+            Engine::NodeProperty* ptr = static_cast<Engine::NodeProperty*>(prop_ptr);
             //Read node name
             *world_stream >> ptr->node_label;
             //Skip 1 byte
