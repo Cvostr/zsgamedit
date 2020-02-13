@@ -31,8 +31,6 @@ private:
 
 
 public:
-    void setLightsToBuffer();
-
     Engine::UniformBuffer* editorUniformBuffer;
 
     PIPELINE_STATE current_state;

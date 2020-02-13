@@ -8,15 +8,6 @@
 
 #include "world/go_properties.h"
 
-enum LIGHTSOURCE_TYPE {
-    LIGHTSOURCE_TYPE_NONE,
-    LIGHTSOURCE_TYPE_DIRECTIONAL,
-    LIGHTSOURCE_TYPE_POINT,
-    LIGHTSOURCE_TYPE_SPOT
-};
-
-typedef uint8_t ZSLIGHTSOURCE_GL_ID;
-
 class ScriptGroupProperty : public Engine::GameObjectProperty {
 public:
     int scr_num; //to update amount via IntPropertyArea
@@ -35,35 +26,6 @@ public:
     ScriptGroupProperty();
 };
 
-class AudioSourceProperty : public Engine::GameObjectProperty{
-private:
-    bool isPlaySheduled;
-public:
-    std::string resource_relpath; //Relative path to resource
-    Engine::AudioResource* buffer_ptr;
-    Engine::SoundSource source;
-
-    ZSVECTOR3 last_pos;
-
-    void addPropertyInterfaceToInspector();
-    void onValueChanged(); //Update soud buffer pointer and send source props
-    void onUpdate(float deltaTime);
-    void onObjectDeleted();
-    void copyTo(Engine::GameObjectProperty* dest);
-
-    void setAudioFile(std::string relpath);
-    void updateAudioPtr();
-    void audio_start();
-    void audio_pause();
-    void audio_stop();
-
-    float getGain();
-    float getPitch();
-    void setGain(float gain);
-    void setPitch(float pitch);
-
-    AudioSourceProperty();
-};
 
 class MaterialProperty : public Engine::GameObjectProperty{
 private:
@@ -85,35 +47,6 @@ public:
     void onRender(Engine::RenderPipeline* pipeline);
 
     MaterialProperty();
-};
-
-class LightsourceProperty : public Engine::GameObjectProperty{
-private:
-    LIGHTSOURCE_TYPE _last_light_type;
-public:
-    LIGHTSOURCE_TYPE light_type; //type of lightsource
-    Engine::TransformProperty* transform; //pointer to object's transform
-
-    ZSVECTOR3 direction; //direction for directional & spotlight in quats
-    //To compare differences
-    ZSVECTOR3 last_pos; //transform* last position
-    ZSVECTOR3 last_rot; //transform* last rotation
-
-    ZSRGBCOLOR color; //Color of light
-    float intensity; //Light's intensity
-    float range; //Light's range
-    float spot_angle;
-
-    ZSLIGHTSOURCE_GL_ID id; //glsl uniform index
-
-    void addPropertyInterfaceToInspector();
-    void onValueChanged(); //Update mesh pointer
-    void copyTo(Engine::GameObjectProperty* dest);
-    void updTransformPtr();
-    void onObjectDeleted();
-    void onPreRender(Engine::RenderPipeline* pipeline);
-
-    LightsourceProperty();
 };
 
 class CharacterControllerProperty : public Engine::PhysicalProperty{
@@ -167,30 +100,7 @@ public:
     ShadowCasterProperty();
 };
 
-class AnimationProperty : public Engine::GameObjectProperty {
-private:
-public:
-    bool Playing;
-    double start_sec;
 
-    Engine::AnimationResource* anim_prop_ptr;
-    std::string anim_label;
-
-    void addPropertyInterfaceToInspector();
-    void onPreRender(Engine::RenderPipeline* pipeline);
-    void onValueChanged();
-    void copyTo(Engine::GameObjectProperty* dest);
-
-    void play();
-    void stop();
-    void setAnimation(std::string anim);
-
-    void updateAnimationPtr();
-    void updateNodeTransform(GameObject* obj, ZSMATRIX4x4 parent);
-
-
-    AnimationProperty();
-};
 
 class TerrainProperty : public Engine::GameObjectProperty{
 

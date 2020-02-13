@@ -133,7 +133,7 @@ void TileGroupProperty::process(){
 #endif
             GameObject* obj = wrld->newObject(); //Invoke new object creation
 
-            GameObject* parent = ((World*)world_ptr)->updateLink(&go_link);
+            GameObject* parent = (GameObject*)go_link.updLinkPtr();
             Engine::TransformProperty* parent_transform = parent->getPropertyPtr<Engine::TransformProperty>();
             LabelProperty* parent_label = parent->getPropertyPtr<LabelProperty>();
 
@@ -167,16 +167,16 @@ void TileGroupProperty::process(){
 }
 
 void TileGroupProperty::clear(){
-    ((World*)world_ptr)->updateLink(&this->go_link);
+    this->go_link.updLinkPtr();
     //Create snapshot
     getActionManager()->newSnapshotAction((World*)go_link.world_ptr);
 
-    GameObject* parent = ((World*)world_ptr)->updateLink(&go_link);
+    GameObject* parent = (GameObject*)go_link.updLinkPtr();
     unsigned int children_am = static_cast<unsigned int>(parent->children.size());
     for(unsigned int ch_i = 0; ch_i < children_am; ch_i ++){
         Engine::GameObjectLink link_toremove = parent->children[0];
-        ((World*)world_ptr)->removeObj(link_toremove);
-        ((World*)world_ptr)->updateLink(&this->go_link);
+        link_toremove.updLinkPtr();
+        this->go_link.updLinkPtr();
         parent = (GameObject*)go_link.ptr;
     }
 

@@ -65,7 +65,7 @@ void GameObject::saveProperties(std::ofstream* stream){
             break;
         }
         case GO_PROPERTY_TYPE_ANIMATION:{
-            AnimationProperty* ptr = static_cast<AnimationProperty*>(property_ptr);
+            Engine::AnimationProperty* ptr = static_cast<Engine::AnimationProperty*>(property_ptr);
             *stream << ptr->anim_label << "\n";
             break;
         }
@@ -83,8 +83,8 @@ void GameObject::saveProperties(std::ofstream* stream){
             break;
         }
         case GO_PROPERTY_TYPE_LIGHTSOURCE:{
-            LightsourceProperty* ptr = static_cast<LightsourceProperty*>(property_ptr);
-            LIGHTSOURCE_TYPE type = ptr->light_type;
+            Engine::LightsourceProperty* ptr = static_cast<Engine::LightsourceProperty*>(property_ptr);
+            Engine::LIGHTSOURCE_TYPE type = ptr->light_type;
             float intensity = ptr->intensity;
             float range = ptr->range;
 
@@ -92,7 +92,7 @@ void GameObject::saveProperties(std::ofstream* stream){
             float color_g = ptr->color.g;
             float color_b = ptr->color.b;
 
-            stream->write(reinterpret_cast<char*>(&type), sizeof(LIGHTSOURCE_TYPE));
+            stream->write(reinterpret_cast<char*>(&type), sizeof(Engine::LIGHTSOURCE_TYPE));
             stream->write(reinterpret_cast<char*>(&intensity), sizeof(float));
             stream->write(reinterpret_cast<char*>(&range), sizeof(float));
             stream->write(reinterpret_cast<char*>(&ptr->spot_angle), sizeof(float));
@@ -104,7 +104,7 @@ void GameObject::saveProperties(std::ofstream* stream){
             break;
         }
         case GO_PROPERTY_TYPE_AUDSOURCE:{
-            AudioSourceProperty* ptr = static_cast<AudioSourceProperty*>(property_ptr);
+            Engine::AudioSourceProperty* ptr = static_cast<Engine::AudioSourceProperty*>(property_ptr);
             if(ptr->resource_relpath.empty()) //check if object has no audioclip
                 *stream << "@none";
             else
@@ -319,7 +319,7 @@ void GameObject::loadProperty(std::ifstream* world_stream){
             break;
         }
         case GO_PROPERTY_TYPE_ANIMATION:{
-            AnimationProperty* ptr = static_cast<AnimationProperty*>(prop_ptr);
+            Engine::AnimationProperty* ptr = static_cast<Engine::AnimationProperty*>(prop_ptr);
             //Read animation clip name
             *world_stream >> ptr->anim_label;
             ptr->updateAnimationPtr();
@@ -341,10 +341,10 @@ void GameObject::loadProperty(std::ifstream* world_stream){
             break;
         }
         case GO_PROPERTY_TYPE_LIGHTSOURCE:{
-            LightsourceProperty* ptr = static_cast<LightsourceProperty*>(prop_ptr);
+            Engine::LightsourceProperty* ptr = static_cast<Engine::LightsourceProperty*>(prop_ptr);
             world_stream->seekg(1, std::ofstream::cur);
 
-            world_stream->read(reinterpret_cast<char*>(&ptr->light_type), sizeof(LIGHTSOURCE_TYPE));
+            world_stream->read(reinterpret_cast<char*>(&ptr->light_type), sizeof(Engine::LIGHTSOURCE_TYPE));
             world_stream->read(reinterpret_cast<char*>(&ptr->intensity), sizeof(float));
             world_stream->read(reinterpret_cast<char*>(&ptr->range), sizeof(float));
             world_stream->read(reinterpret_cast<char*>(&ptr->spot_angle), sizeof(float));
@@ -379,7 +379,7 @@ void GameObject::loadProperty(std::ifstream* world_stream){
         break;
     }
     case GO_PROPERTY_TYPE_AUDSOURCE:{
-        AudioSourceProperty* lptr = static_cast<AudioSourceProperty*>(prop_ptr);
+        Engine::AudioSourceProperty* lptr = static_cast<Engine::AudioSourceProperty*>(prop_ptr);
         //Reading audio clip label
         *world_stream >> lptr->resource_relpath;
 

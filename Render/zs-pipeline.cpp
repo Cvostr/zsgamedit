@@ -310,37 +310,6 @@ void RenderPipeline::renderDepth(void* world_ptr){
     this->current_state = PIPELINE_STATE_DEFAULT;
 }
 
-void RenderPipeline::setLightsToBuffer(){
-    this->lightsBuffer->bind();
-    for(unsigned int light_i = 0; light_i < this->lights_ptr.size(); light_i ++){
-        LightsourceProperty* _light_ptr = static_cast<LightsourceProperty*>(lights_ptr[light_i]);
-
-        LIGHTSOURCE_TYPE light_type = (_light_ptr->light_type);
-
-        lightsBuffer->writeData(LIGHT_STRUCT_SIZE * light_i, sizeof (LIGHTSOURCE_TYPE), &light_type);
-        if(_light_ptr->light_type > LIGHTSOURCE_TYPE_DIRECTIONAL){
-            lightsBuffer->writeData(LIGHT_STRUCT_SIZE * light_i + 4, sizeof (float), &_light_ptr->range);
-            lightsBuffer->writeData(LIGHT_STRUCT_SIZE * light_i + 12, sizeof (float), &_light_ptr->spot_angle);
-        }
-        lightsBuffer->writeData(LIGHT_STRUCT_SIZE * light_i + 8, sizeof (float), &_light_ptr->intensity);
-
-        lightsBuffer->writeData(LIGHT_STRUCT_SIZE * light_i + 16, 12, &_light_ptr->last_pos);
-        lightsBuffer->writeData(LIGHT_STRUCT_SIZE * light_i + 32, 12, &_light_ptr->direction);
-        lightsBuffer->writeData(LIGHT_STRUCT_SIZE * light_i + 48, sizeof (int), &_light_ptr->color.gl_r);
-        lightsBuffer->writeData(LIGHT_STRUCT_SIZE * light_i + 52, sizeof (int), &_light_ptr->color.gl_g);
-        lightsBuffer->writeData(LIGHT_STRUCT_SIZE * light_i + 56, sizeof (int), &_light_ptr->color.gl_b);
-    }
-
-    int ls = static_cast<int>(lights_ptr.size());
-    lightsBuffer->writeData(LIGHT_STRUCT_SIZE * MAX_LIGHTS_AMOUNT, 4, &ls);
-
-    ZSVECTOR3 ambient_L = ZSVECTOR3(render_settings.ambient_light_color.r / 255.0f,render_settings.ambient_light_color.g / 255.0f, render_settings.ambient_light_color.b / 255.0f);
-    lightsBuffer->writeData(LIGHT_STRUCT_SIZE * MAX_LIGHTS_AMOUNT + 16, 12, &ambient_L);
-
-    //free lights array
-    this->removeLights();
-}
-
 void GameObject::Draw(RenderPipeline* pipeline){
     Engine::TransformProperty* transform_ptr = static_cast<Engine::TransformProperty*>(getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
 
@@ -460,7 +429,7 @@ void GameObject::processObject(RenderPipeline* pipeline){
 
     for(unsigned int obj_i = 0; obj_i < this->children.size(); obj_i ++){
         if(!children[obj_i].isEmpty()){ //if link isn't broken
-            ((World*)world_ptr)->updateLink(&children[obj_i]);
+            children[obj_i].updLinkPtr();
             GameObject* child_ptr = (GameObject*)this->children[obj_i].ptr;
             child_ptr->processObject(pipeline);
         }
@@ -513,7 +482,7 @@ void TerrainProperty::onRender(Engine::RenderPipeline* pipeline){
     //Binding terrain buffer
     pipeline->terrainUniformBuffer->bind();
 
-    MaterialProperty* mat = ((World*)world_ptr)->updateLink(&go_link)->getPropertyPtr<MaterialProperty>();
+    MaterialProperty* mat = go_link.updLinkPtr()->getPropertyPtr<MaterialProperty>();
     if(mat == nullptr) return;
 
     int dtrue = 1;
@@ -594,9 +563,9 @@ void SkyboxProperty::onPreRender(Engine::RenderPipeline* pipeline){
 void SkyboxProperty::DrawSky(RenderPipeline* pipeline){
     if(!this->isActive())
         return;
-    if(((World*)world_ptr)->updateLink(&this->go_link) == nullptr) return;
+    if(this->go_link.updLinkPtr() == nullptr) return;
     //Get pointer to Material property
-    MaterialProperty* mat = ((World*)world_ptr)->updateLink(&this->go_link)->getPropertyPtr<MaterialProperty>();
+    MaterialProperty* mat = this->go_link.updLinkPtr()->getPropertyPtr<MaterialProperty>();
     if(mat == nullptr) return;
     //Apply material shader
     mat->onRender(pipeline);
@@ -617,7 +586,7 @@ void ShadowCasterProperty::Draw(Engine::Camera* cam, RenderPipeline* pipeline){
         return;
     }
 
-    LightsourceProperty* light = ((World*)world_ptr)->updateLink(&this->go_link)->getPropertyPtr<LightsourceProperty>();
+    Engine::LightsourceProperty* light = this->go_link.updLinkPtr()->getPropertyPtr<Engine::LightsourceProperty>();
 
     //ZSVECTOR3 cam_pos = cam->getCameraPosition() + cam->getCameraFrontVec() * 20;
     ZSVECTOR3 cam_pos = cam->getCameraPosition() - light->direction * 20;

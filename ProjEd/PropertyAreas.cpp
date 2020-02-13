@@ -48,7 +48,8 @@ void AreaRadioGroup::onRadioClicked(){
     }
 
     property_ptr->onValueChanged();
-
+    if(updateInspectorOnChange)
+        _editor_win->getInspector()->updateRequired = true;
 }
 
 void AreaRadioGroup::addRadioButton(QRadioButton* btn){
@@ -65,6 +66,7 @@ AreaRadioGroup::AreaRadioGroup(){
     btn_layout = new QVBoxLayout; //allocate layout object
     this->value_ptr = nullptr;
     this->go_property = nullptr;
+    updateInspectorOnChange = false;
 }
 
 AreaRadioGroup::~AreaRadioGroup(){

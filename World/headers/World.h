@@ -62,8 +62,6 @@ public:
 
     bool addProperty(PROPERTY_TYPE property); //Adds property with property ID
 
-    Engine::GameObjectLink getLinkToThisObject();
-
     void addChildObject(Engine::GameObjectLink link, bool updTransform = true);
     void removeChildObject(Engine::GameObjectLink link);
 

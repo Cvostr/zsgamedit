@@ -26,29 +26,20 @@ bool GameObject::addProperty(PROPERTY_TYPE property){
     }
 
     _ptr->go_link = this->getLinkToThisObject();
-    static_cast<World*>(this->world_ptr) ->updateLink(&_ptr->go_link);
+    _ptr->go_link.updLinkPtr();
     _ptr->world_ptr = static_cast<World*>(this->world_ptr); //Assign pointer to world
     this->properties[props_num] = _ptr; //Store property in gameobject
     this->props_num += 1;
     return true;
 }
 
-Engine::GameObjectLink GameObject::getLinkToThisObject(){
-    Engine::GameObjectLink link; //Definition of result link
-    link.obj_str_id = this->str_id; //Placing string id
-    link.world_ptr = (this->world_ptr); //Placing world pointer
-
-    link.ptr = static_cast<World*>(world_ptr)->getGameObjectByStrId(link.obj_str_id);
-    return link;
-}
-
 void GameObject::addChildObject(Engine::GameObjectLink link, bool updTransform){
     Engine::GameObjectLink _link = link;
-    ((World*)world_ptr)->updateLink(&_link); //Calculating object pointer
+    _link.updLinkPtr(); //Calculating object pointer
     _link.ptr->hasParent = true; //Object now has a parent (if it has't before)
     _link.ptr->parent.obj_str_id = this->getLinkToThisObject().obj_str_id; //Assigning pointer to new parent
     _link.ptr->parent.world_ptr = this->getLinkToThisObject().world_ptr;
-    ((World*)world_ptr)->updateLink(&_link.ptr->parent);
+    _link.ptr->parent.updLinkPtr();
 
     //Updating child's transform
     //Now check, if it is possible
@@ -71,12 +62,13 @@ void GameObject::addChildObject(Engine::GameObjectLink link, bool updTransform){
 
     this->children.push_back(_link);
 }
+
 void GameObject::removeChildObject(Engine::GameObjectLink link){
     unsigned int children_am = static_cast<unsigned int>(children.size()); //get children amount
     for(unsigned int i = 0; i < children_am; i++){ //Iterate over all children in object
         Engine::GameObjectLink* link_ptr = &children[i];
         if(link.obj_str_id.compare(link_ptr->obj_str_id) == 0){ //if str_id in requested link compares to iteratable link
-            GameObject* ptr = ((World*)world_ptr)->updateLink(link_ptr);
+            GameObject* ptr = (GameObject*)link_ptr->updLinkPtr();
             children[i].crack(); //Make link broken
 
             //Updating child's transform
@@ -110,7 +102,7 @@ void GameObject::setMeshSkinningRootNodeRecursively(GameObject* rootNode){
         mesh->skinning_root_node = rootNode;
 
     for(unsigned int ch_i = 0; ch_i < children.size(); ch_i ++){
-        GameObject* obj_ptr = ((World*)world_ptr)->updateLink(&children[ch_i]);
+        GameObject* obj_ptr = (GameObject*)children[ch_i].updLinkPtr();
         obj_ptr->setMeshSkinningRootNodeRecursively(rootNode);
     }
 }
@@ -191,10 +183,10 @@ void GameObject::recoverFromSnapshot(GameObjectSnapshot* snapshot){
 
 
     if(this->hasParent){ //if object was parented
-        ((World*)world_ptr)->updateLink(&snapshot->parent_link)->children.push_back(this->getLinkToThisObject());
+        snapshot->parent_link.updLinkPtr()->children.push_back(this->getLinkToThisObject());
         this->parent = snapshot->parent_link;
 
-        ((World*)world_ptr)->updateLink(&parent)->item_ptr->addChild(this->item_ptr);
+        ((GameObject*)parent.updLinkPtr())->item_ptr->addChild(this->item_ptr);
     }else{
         static_cast<World*>(this->world_ptr)->obj_widget_ptr->addTopLevelItem(this->item_ptr);
     }
@@ -202,7 +194,7 @@ void GameObject::recoverFromSnapshot(GameObjectSnapshot* snapshot){
 
     for(unsigned int i = 0; i < snapshot->children.size(); i ++){
         Engine::GameObjectLink link = snapshot->children[i];
-        ((World*)world_ptr)->updateLink(&link)->recoverFromSnapshot(&snapshot->children_snapshots[i]);
+        ((GameObject*)link.updLinkPtr())->recoverFromSnapshot(&snapshot->children_snapshots[i]);
     }
 
 

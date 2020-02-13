@@ -15,8 +15,7 @@ World::World(){
 }
 
 GameObject* World::updateLink(Engine::GameObjectLink* link){
-    link->ptr = getGameObjectByStrId(link->obj_str_id);
-
+    link->ptr = getGameObjectByStrId( link->obj_str_id);
     return (GameObject*)link->ptr;
 }
 
@@ -143,27 +142,6 @@ GameObject* World::newObject(){
     obj.addProperty(GO_PROPERTY_TYPE_TRANSFORM);
     return this->addObject(obj); //Return pointer to new object
 }
-/*
-Engine::GameObject* World::getObjectByLabel(std::string label){
-    unsigned int objs_num = static_cast<unsigned int>(this->objects.size());
-    for(unsigned int obj_it = 0; obj_it < objs_num; obj_it ++){ //Iterate over all objs in scene
-        Engine::GameObject* obj_ptr = this->objects[obj_it]; //Get pointer to checking object
-        if(!obj_ptr->alive) continue;
-        if(obj_ptr->label_ptr->compare(label) == 0) //if labels are same
-            return obj_ptr; //Return founded object
-    }
-    return nullptr; //if we haven't found one
-}*/
-/*
-Engine::GameObject* World::getObjectByStringId(std::string id){
-    unsigned int objs_num = static_cast<unsigned int>(this->objects.size());
-    for(unsigned int obj_it = 0; obj_it < objs_num; obj_it ++){ //Iterate over all objs in scene
-        Engine::GameObject* obj_ptr = this->objects[obj_it]; //Get pointer to checking object
-        if(obj_ptr->str_id.compare(id) == 0) //if labels are same
-            return obj_ptr; //Return founded object
-    }
-    return nullptr; //if we haven't found one
-}*/
 
 void World::getAvailableNumObjLabel(std::string label, int* result){
      unsigned int objs_num = static_cast<unsigned int>(this->objects.size());
@@ -198,7 +176,7 @@ bool World::isObjectLabelUnique(std::string label){
 
 void World::removeObj(Engine::GameObjectLink& link){
     Engine::GameObjectLink l = link;
-    updateLink(&l);
+    l.updLinkPtr();
     l.ptr->alive = false; //Mark object as dead
 
     unsigned int children_num = static_cast<unsigned int>(l.ptr->children.size());
@@ -210,7 +188,7 @@ void World::removeObj(Engine::GameObjectLink& link){
     //Remove all content in heap, related to object class object
     ((GameObject*)l.ptr)->clearAll();
     if(l.ptr->hasParent == true){ //If object parented by other obj
-        GameObject* parent = updateLink(&l); //Receive pointer to object's parent
+        Engine::GameObject* parent = l.updLinkPtr(); //Receive pointer to object's parent
 
         unsigned int children_am = static_cast<unsigned int>(parent->children.size()); //get children amount
         for(unsigned int i = 0; i < children_am; i++){ //Iterate over all children in object
@@ -402,7 +380,7 @@ void World::openFromFile(std::string file, QTreeWidget* w_ptr){
         GameObject* obj_ptr = (GameObject*)this->objects[obj_i];
         for(unsigned int chi_i = 0; chi_i < obj_ptr->children.size(); chi_i ++){ //Now iterate over all children
             Engine::GameObjectLink* child_ptr = &obj_ptr->children[chi_i];
-            GameObject* child_go_ptr = updateLink(child_ptr);
+            Engine::GameObject* child_go_ptr = child_ptr->updLinkPtr();
 
             child_go_ptr->parent = obj_ptr->getLinkToThisObject();
             child_go_ptr->hasParent = true;
@@ -427,7 +405,7 @@ void World::processPrefabObject(GameObject* object_ptr, std::vector<GameObject>*
         Engine::GameObjectProperty* prop_ptr = object_ptr->properties[prop_i];
         prop_ptr->go_link.obj_str_id = object_ptr->str_id; //set new string id
 
-        updateLink(&prop_ptr->go_link);
+        prop_ptr->go_link.updLinkPtr();
     }
 
     unsigned int children_amount = static_cast<unsigned int>(object_ptr->children.size());
@@ -458,7 +436,7 @@ void World::writeObjectToPrefab(GameObject* object_ptr, std::ofstream* stream){
     //iterate over all children and write them
     for(unsigned int ch_i = 0; ch_i < children_am; ch_i ++){
         Engine::GameObjectLink link = object_ptr->children[ch_i];
-        writeObjectToPrefab(updateLink(&link), stream);
+        writeObjectToPrefab((GameObject*)link.updLinkPtr(), stream);
     }
 }
 
@@ -506,7 +484,7 @@ void World::addObjectsFromPrefab(std::string file){
     for(unsigned int obj_i = 1; obj_i < mObjects.size(); obj_i ++){
         Engine::GameObject* object_ptr = this->getGameObjectByStrId(mObjects[obj_i].str_id);
         object_ptr->parent.world_ptr = this;
-        updateLink(&object_ptr->parent)->item_ptr->addChild(((GameObject*)object_ptr)->item_ptr);
+        ((GameObject*)object_ptr->parent.updLinkPtr())->item_ptr->addChild(((GameObject*)object_ptr)->item_ptr);
         //updLinkPtr()
     }
 }

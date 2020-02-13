@@ -11,10 +11,10 @@ extern EditWindow* _editor_win;
 extern Project* project_ptr;
 extern ZSGAME_DATA* game_data;
 //Selected animation
-static AnimationProperty* current_anim;
+static Engine::AnimationProperty* current_anim;
 
 Engine::GameObjectProperty* ObjectPropertyLink::updLinkPtr(){
-    ptr = ((World*)this->object.world_ptr)->updateLink(&object)->getPropertyPtrByType(this->prop_type);
+    ptr = object.updLinkPtr()->getPropertyPtrByType(this->prop_type);
 
     return ptr;
 }
@@ -92,7 +92,7 @@ Engine::GameObjectProperty* _allocProperty(PROPERTY_TYPE type){
             break;
         }
         case GO_PROPERTY_TYPE_ANIMATION:{ //If type is transfrom
-            _ptr = static_cast<Engine::GameObjectProperty*>(new AnimationProperty); //Allocation of transform in heap
+            _ptr = static_cast<Engine::GameObjectProperty*>(new Engine::AnimationProperty); //Allocation of transform in heap
             break;
         }
         case GO_PROPERTY_TYPE_LABEL:{
@@ -101,13 +101,11 @@ Engine::GameObjectProperty* _allocProperty(PROPERTY_TYPE type){
             break;
         }
         case GO_PROPERTY_TYPE_MESH:{
-            Engine::MeshProperty* ptr = new Engine::MeshProperty;
-            _ptr = static_cast<Engine::GameObjectProperty*>(ptr);
+            _ptr = static_cast<Engine::GameObjectProperty*>(new Engine::MeshProperty);
             break;
         }
         case GO_PROPERTY_TYPE_LIGHTSOURCE:{
-            LightsourceProperty* ptr = new LightsourceProperty;
-            _ptr = static_cast<Engine::GameObjectProperty*>(ptr);
+            _ptr = static_cast<Engine::GameObjectProperty*>(new Engine::LightsourceProperty);
             break;
         }
         case GO_PROPERTY_TYPE_SCRIPTGROUP:{
@@ -116,8 +114,7 @@ Engine::GameObjectProperty* _allocProperty(PROPERTY_TYPE type){
             break;
         }
         case GO_PROPERTY_TYPE_AUDSOURCE:{
-            AudioSourceProperty* ptr = new AudioSourceProperty;
-            _ptr = static_cast<Engine::GameObjectProperty*>(ptr);
+            _ptr = static_cast<Engine::GameObjectProperty*>(new Engine::AudioSourceProperty);
             break;
         }
         case GO_PROPERTY_TYPE_MATERIAL:{
@@ -126,13 +123,11 @@ Engine::GameObjectProperty* _allocProperty(PROPERTY_TYPE type){
             break;
         }
         case GO_PROPERTY_TYPE_COLLIDER:{
-            Engine::ColliderProperty* ptr = new Engine::ColliderProperty;
-            _ptr = static_cast<Engine::GameObjectProperty*>(ptr);
+            _ptr = static_cast<Engine::GameObjectProperty*>(new Engine::ColliderProperty);
             break;
         }
         case GO_PROPERTY_TYPE_RIGIDBODY:{
-            Engine::RigidbodyProperty* ptr = new Engine::RigidbodyProperty;
-            _ptr = static_cast<Engine::GameObjectProperty*>(ptr);
+            _ptr = static_cast<Engine::GameObjectProperty*>(new Engine::RigidbodyProperty);
             break;
         }
         case GO_PROPERTY_TYPE_SKYBOX:{
@@ -296,10 +291,11 @@ void Engine::MeshProperty::onValueChanged(){
     updateMeshPtr();
 }
 
-void LightsourceProperty::addPropertyInterfaceToInspector(){
+void Engine::LightsourceProperty::addPropertyInterfaceToInspector(){
     AreaRadioGroup* group = new AreaRadioGroup; //allocate button layout
     group->value_ptr = reinterpret_cast<uint8_t*>(&this->light_type);
     group->go_property = static_cast<void*>(this);
+    group->updateInspectorOnChange = true;
 
     QRadioButton* directional_radio = new QRadioButton; //allocate first radio
     directional_radio->setText("Directional");
@@ -342,82 +338,8 @@ void LightsourceProperty::addPropertyInterfaceToInspector(){
     lcolor->go_property = static_cast<void*>(this);
     _inspector_win->addPropertyArea(lcolor);
 }
-void LightsourceProperty::onValueChanged(){
-    if(this->_last_light_type != this->light_type){
-        //We need to change UI
-        _inspector_win->updateRequired = true;
-        this->_last_light_type = this->light_type;
-    }
-    //Update transform pointer (if nullptr)
-    updTransformPtr();    void onAddToObject(); //will update render flag
-    ZSVECTOR3* rot_vec_ptr = &transform->rotation;
-    this->direction = _getDirection(rot_vec_ptr->X, rot_vec_ptr->Y, rot_vec_ptr->Z);
 
-}
-void LightsourceProperty::copyTo(Engine::GameObjectProperty* dest){
-    if(dest->type != this->type) return; //if it isn't Lightsource, then exit
-
-    //Do base things
-    GameObjectProperty::copyTo(dest);
-
-    LightsourceProperty* _dest = static_cast<LightsourceProperty*>(dest);
-    _dest->color = color;
-    _dest->intensity = intensity;
-    _dest->range = range;
-    _dest->light_type = light_type;
-}
-
-void LightsourceProperty::updTransformPtr(){
-    if(transform == nullptr){
-        transform = this->go_link.updLinkPtr()->getPropertyPtr<Engine::TransformProperty>();
-        this->last_pos = transform->abs_translation; //Store old value
-    }
-}
-
-void LightsourceProperty::onObjectDeleted(){
-}
-
-void LightsourceProperty::onPreRender(Engine::RenderPipeline* pipeline){
-    Engine::TransformProperty* transform_prop = go_link.updLinkPtr()->getPropertyPtr<Engine::TransformProperty>();
-
-    updTransformPtr();
-
-    pipeline->addLight(static_cast<void*>(this)); //put light pointer to vector
-
-    //check, if light transformation changed
-    if((this->last_pos != transform_prop->abs_translation || this->last_rot != transform_prop->rotation)){
-        this->onValueChanged();
-        //store new transform values
-        this->last_pos = transform_prop->abs_translation;
-        this->last_rot = transform_prop->rotation;
-    }
-}
-
-LightsourceProperty::LightsourceProperty(){
-    type = GO_PROPERTY_TYPE_LIGHTSOURCE;
-    active = true;
-    light_type = LIGHTSOURCE_TYPE_DIRECTIONAL; //base type is directional
-
-    intensity = 1.0f; //base light instensity is 1
-    range = 10.0f;
-    spot_angle = 12.5f;
-    transform = nullptr;
-}
-
-AudioSourceProperty::AudioSourceProperty(){
-    type = GO_PROPERTY_TYPE_AUDSOURCE;
-
-    buffer_ptr = nullptr;
-    this->resource_relpath = "@none";
-    isPlaySheduled = false;
-
-    this->source.source_gain = 1.0f;
-    this->source.source_pitch = 1.0f;
-
-    source.Init();
-}
-
-void AudioSourceProperty::addPropertyInterfaceToInspector(){
+void Engine::AudioSourceProperty::addPropertyInterfaceToInspector(){
     PickResourceArea* area = new PickResourceArea(RESOURCE_TYPE_AUDIO);
     area->setLabel("Sound");
     area->go_property = static_cast<void*>(this);
@@ -443,98 +365,6 @@ void AudioSourceProperty::addPropertyInterfaceToInspector(){
     _inspector_win->addPropertyArea(pitch_area);
 }
 
-void AudioSourceProperty::onValueChanged(){
-    updateAudioPtr();
-
-    this->source.apply_settings();
-}
-
-void AudioSourceProperty::updateAudioPtr(){
-    this->buffer_ptr = game_data->resources->getAudioByLabel(resource_relpath);
-
-    if(buffer_ptr == nullptr) return;
-
-    this->source.setAlBuffer(this->buffer_ptr->buffer);
-}
-
-void AudioSourceProperty::onUpdate(float deltaTime){
-    if(buffer_ptr->resource_state == STATE_LOADING_PROCESS)
-        this->buffer_ptr->load();
-    if(buffer_ptr->resource_state == STATE_LOADED && isPlaySheduled){
-        audio_start();
-        isPlaySheduled = false;
-    }
-
-    Engine::TransformProperty* transform = go_link.updLinkPtr()->getPropertyPtr<Engine::TransformProperty>();
-    //if object position changed
-    if(transform->translation != this->last_pos){
-        //apply new position to openal audio source
-        this->source.setPosition(transform->translation);
-        this->last_pos = transform->translation;
-    }
-}
-
-void AudioSourceProperty::copyTo(Engine::GameObjectProperty* dest){
-    if(dest->type != this->type) return; //if it isn't audiosource then exit
-
-    AudioSourceProperty* _dest = static_cast<AudioSourceProperty*>(dest);
-
-    //Do base things
-    GameObjectProperty::copyTo(dest);
-
-    _dest->source.Init();
-    _dest->resource_relpath = this->resource_relpath;
-    _dest->source.source_gain = this->source.source_gain;
-    _dest->source.source_pitch = this->source.source_pitch;
-    _dest->source.setPosition(this->source.source_pos);
-    _dest->buffer_ptr = this->buffer_ptr;
-    //_dest->source.setAlBuffer(this->buffer_ptr);
-}
-void AudioSourceProperty::setAudioFile(std::string relpath){
-    this->resource_relpath = relpath;
-    this->updateAudioPtr();
-}
-void AudioSourceProperty::audio_start(){
-    if(buffer_ptr->resource_state == STATE_LOADED){
-        //Update source buffer
-        if(buffer_ptr == nullptr) return;
-        this->source.setAlBuffer(this->buffer_ptr->buffer);
-        //play source
-        this->source.play();
-
-    }else {
-        this->buffer_ptr->load();
-        isPlaySheduled = true;
-    }
-}
-
-void AudioSourceProperty::audio_stop(){
-    this->source.stop();
-}
-
-void AudioSourceProperty::audio_pause(){
-    this->source.pause();
-}
-
-float AudioSourceProperty::getGain(){
-    return source.source_gain;
-}
-float AudioSourceProperty::getPitch(){
-    return source.source_pitch;
-}
-void AudioSourceProperty::setGain(float gain){
-    source.source_gain = gain;
-    source.apply_settings();
-}
-void AudioSourceProperty::setPitch(float pitch){
-    source.source_pitch = pitch;
-    source.apply_settings();
-}
-
-void AudioSourceProperty::onObjectDeleted(){
-    this->source.stop(); //Stop at first
-    this->source.Destroy();
-}
 
 MaterialProperty::MaterialProperty(){
     type = GO_PROPERTY_TYPE_MATERIAL;
@@ -891,7 +721,7 @@ void CharacterControllerProperty::onUpdate(float deltaTime){
 
          rigidBody = new btRigidBody(cInfo);
 
-         rigidBody->setUserIndex(((World*)world_ptr)->updateLink(&this->go_link)->array_index);
+         rigidBody->setUserIndex(this->go_link.updLinkPtr()->array_index);
          //add rigidbody to world
          go_link.world_ptr->physical_world->addRidigbodyToWorld(rigidBody);
         //Set zero values
@@ -900,7 +730,7 @@ void CharacterControllerProperty::onUpdate(float deltaTime){
 
          created = true;
     }else{
-        Engine::TransformProperty* transform = ((World*)world_ptr)->updateLink(&this->go_link)->getPropertyPtr<Engine::TransformProperty>();
+        Engine::TransformProperty* transform = this->go_link.updLinkPtr()->getPropertyPtr<Engine::TransformProperty>();
         btVector3 current_pos = rigidBody->getCenterOfMassPosition();
 
         //get current position
@@ -1076,7 +906,7 @@ bool ShadowCasterProperty::isRenderAvailable(){
     if(this->go_link.updLinkPtr() == nullptr)
         return false;
     //Get lightsource property of object
-    LightsourceProperty* light = this->go_link.updLinkPtr()->getPropertyPtr<LightsourceProperty>();
+    Engine::LightsourceProperty* light = this->go_link.updLinkPtr()->getPropertyPtr<Engine::LightsourceProperty>();
 
     if(light == nullptr)
         return false;
@@ -1101,14 +931,6 @@ void ShadowCasterProperty::copyTo(Engine::GameObjectProperty* dest){
     _dest->projection_viewport = this->projection_viewport;
 }
 
-AnimationProperty::AnimationProperty(){
-    type = GO_PROPERTY_TYPE_ANIMATION;
-    this->anim_label = "@none";
-    anim_prop_ptr = nullptr;
-    Playing = false;
-    start_sec = 0;
-}
-
 void onPlay(){
     //Call play() on AnimationProperty
     current_anim->play();
@@ -1121,7 +943,7 @@ void onStop(){
     _inspector_win->updateRequired = true;
 }
 
-void AnimationProperty::addPropertyInterfaceToInspector(){
+void Engine::AnimationProperty::addPropertyInterfaceToInspector(){
     current_anim = this;
 
     PickResourceArea* area = new PickResourceArea(RESOURCE_TYPE_ANIMATION);
@@ -1148,100 +970,6 @@ void AnimationProperty::addPropertyInterfaceToInspector(){
     }
 }
 
-void AnimationProperty::play(){
-    //if user specified animation, then play it!
-    if(current_anim->anim_prop_ptr != nullptr){
-        //Send animation to multithreaded loading, if need
-        current_anim->anim_prop_ptr->load();
-
-        current_anim->start_sec = (static_cast<double>(SDL_GetTicks()) / 1000);
-        current_anim->Playing = true;
-    }
-}
-void AnimationProperty::stop(){
-    Playing = false;
-}
-
-void AnimationProperty::onPreRender(Engine::RenderPipeline* pipeline){
-    GameObject* obj = (GameObject*)go_link.updLinkPtr();
-
-    Engine::Animation* anim_prop_ptr = nullptr;
-    //Try to get loading result
-    if(this->anim_prop_ptr != nullptr && Playing && this->anim_prop_ptr->resource_state == STATE_LOADING_PROCESS)
-        current_anim->anim_prop_ptr->load();
-
-    if(this->anim_prop_ptr != nullptr && Playing && this->anim_prop_ptr->resource_state == STATE_LOADED){
-        if(this->anim_prop_ptr != nullptr)
-                anim_prop_ptr = this->anim_prop_ptr->animation_ptr;
-
-        //Calcualte current Time
-        double curTime = (static_cast<double>(SDL_GetTicks()) / 1000) - this->start_sec;
-        //Time in animation ticks
-        double Ticks = anim_prop_ptr->TPS * curTime;
-        //Calculate current animation time
-        double animTime = fmod(Ticks, anim_prop_ptr->duration);
-
-        for(unsigned int channels_i = 0; channels_i < anim_prop_ptr->NumChannels; channels_i ++){
-            Engine::AnimationChannel* ch = &anim_prop_ptr->channels[channels_i];
-            Engine::GameObject* node = obj->getChildObjectWithNodeLabel(ch->bone_name);
-            Engine::NodeProperty* prop = node->getPropertyPtr<Engine::NodeProperty>();
-            //Calculate interpolated values
-            prop->translation = ch->getPostitionInterpolated(animTime);
-            prop->scale = ch->getScaleInterpolated(animTime);
-            prop->rotation = ch->getRotationInterpolated(animTime);
-        }
-    }
-    ZSMATRIX4x4 identity_matrix = getIdentity();
-    updateNodeTransform(obj, identity_matrix);
-}
-
-void AnimationProperty::updateNodeTransform(GameObject* obj, ZSMATRIX4x4 parent){
-
-    if(!obj) return;
-    Engine::NodeProperty* prop = obj->getPropertyPtr<Engine::NodeProperty>();
-    if(!prop) return;
-    //Assign base node transform
-    prop->abs = prop->transform_mat;
-
-    if(this->anim_prop_ptr != nullptr && Playing && this->anim_prop_ptr->resource_state == STATE_LOADED){
-        Engine::AnimationChannel* cha = this->anim_prop_ptr->animation_ptr->getChannelByNodeName(prop->node_label);
-        if(cha){
-            ZSMATRIX4x4 transl = transpose(getTranslationMat(prop->translation));
-            ZSMATRIX4x4 _sca = transpose(getScaleMat(prop->scale));
-            ZSMATRIX4x4 rot = (getRotationMat(prop->rotation));
-            //Multiply all matrices
-            prop->abs = transl * rot * _sca;
-        }
-    }
-    //Apply parent transform
-    prop->abs = parent * prop->abs;
-
-    for(unsigned int i = 0; i < obj->children.size(); i ++){
-        updateNodeTransform(((World*)world_ptr)->updateLink(&obj->children[i]), prop->abs);
-    }
-
-}
-
-void AnimationProperty::copyTo(Engine::GameObjectProperty *dest){
-    if(dest->type != this->type) return; //if it isn't animation
-
-    //Do base things
-    GameObjectProperty::copyTo(dest);
-    AnimationProperty* _dest = static_cast<AnimationProperty*>(dest);
-
-    _dest->anim_label = this->anim_label;
-    _dest->anim_prop_ptr = this->anim_prop_ptr;
-}
-
-void AnimationProperty::onValueChanged(){
+void Engine::AnimationProperty::onValueChanged(){
     updateAnimationPtr();
-}
-
-void AnimationProperty::setAnimation(std::string anim){
-    this->anim_label = anim;
-    updateAnimationPtr();
-}
-
-void AnimationProperty::updateAnimationPtr(){
-    anim_prop_ptr = game_data->resources->getAnimationByLabel(this->anim_label);
 }

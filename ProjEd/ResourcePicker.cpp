@@ -162,7 +162,7 @@ void QLabelResourcePickWgt::dropEvent( QDropEvent* event ){
     }
 
     if(object_dropped.length() > 0){
-        GameObject* obj = (GameObject*)_editor_win->world.getObjectByLabel(object_dropped[0]->text(0).toStdString());
+        GameObject* obj = (GameObject*)_editor_win->world.getGameObjectByLabel(object_dropped[0]->text(0).toStdString());
         //if we picking property
         if(area_ptr->type == PEA_TYPE_PROPPICK){
             PropertyPickArea* _area_ptr = static_cast<PropertyPickArea*>(area_ptr);
@@ -171,7 +171,7 @@ void QLabelResourcePickWgt::dropEvent( QDropEvent* event ){
                 //Writing pointer
                 *_area_ptr->property_ptr_ptr = prop;
                 //Assigning object string ID
-                *(_area_ptr->oj_label_ptr) = _editor_win->world.updateLink(&prop->go_link)->str_id;
+                *(_area_ptr->oj_label_ptr) = prop->go_link.updLinkPtr()->str_id;
             }
             _area_ptr->setup();
         }

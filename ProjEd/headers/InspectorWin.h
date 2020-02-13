@@ -65,6 +65,7 @@ class AreaRadioGroup : public QObject{
 public slots:
     void onRadioClicked();
 public:
+    bool updateInspectorOnChange;
     void* go_property; //Ponter to property, that created this group
     QVBoxLayout* btn_layout; //layout to contain everything
     std::vector<QRadioButton*> rad_buttons;

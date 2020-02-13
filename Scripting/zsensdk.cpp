@@ -159,13 +159,13 @@ void ZSENSDK::bindSDK(lua_State* state){
 
         .addFunction("transform", &Engine::GameObject::getPropertyPtr<Engine::TransformProperty>)
         .addFunction("mesh", &Engine::GameObject::getPropertyPtr<Engine::MeshProperty>)
-        .addFunction("audio", &Engine::GameObject::getPropertyPtr<AudioSourceProperty>)
-        .addFunction("light", &Engine::GameObject::getPropertyPtr<LightsourceProperty>)
+        .addFunction("audio", &Engine::GameObject::getPropertyPtr<Engine::AudioSourceProperty>)
+        .addFunction("light", &Engine::GameObject::getPropertyPtr<Engine::LightsourceProperty>)
         .addFunction("tile", &Engine::GameObject::getPropertyPtr<TileProperty>)
         .addFunction("script", &Engine::GameObject::getPropertyPtr<ScriptGroupProperty>)
         .addFunction("rigidbody", &Engine::GameObject::getPropertyPtr<Engine::RigidbodyProperty>)
         .addFunction("character", &Engine::GameObject::getPropertyPtr<CharacterControllerProperty>)
-        .addFunction("animation", &Engine::GameObject::getPropertyPtr<AnimationProperty>)
+        .addFunction("animation", &Engine::GameObject::getPropertyPtr<Engine::AnimationProperty>)
         .endClass()
 
         .beginClass <Engine::World>("World")
@@ -185,11 +185,11 @@ void ZSENSDK::bindSDK(lua_State* state){
         .endClass()
 
 
-        .deriveClass <LightsourceProperty, Engine::GameObjectProperty>("LightSource")
-        .addData("intensity", &LightsourceProperty::intensity)
-        .addData("range", &LightsourceProperty::range)
-        .addData("color", &LightsourceProperty::color)
-        .addData("spot_angle", &LightsourceProperty::spot_angle)
+        .deriveClass <Engine::LightsourceProperty, Engine::GameObjectProperty>("LightSource")
+        .addData("intensity", &Engine::LightsourceProperty::intensity)
+        .addData("range", &Engine::LightsourceProperty::range)
+        .addData("color", &Engine::LightsourceProperty::color)
+        .addData("spot_angle", &Engine::LightsourceProperty::spot_angle)
         .endClass()
 
         .deriveClass <Engine::TransformProperty, Engine::GameObjectProperty>("Transform")
@@ -202,15 +202,15 @@ void ZSENSDK::bindSDK(lua_State* state){
         .endClass()
 
 
-        .deriveClass <AudioSourceProperty, Engine::GameObjectProperty>("AudioSource")
-        .addFunction("setAudioFile", &AudioSourceProperty::setAudioFile)
-        .addFunction("Play", &AudioSourceProperty::audio_start)
-        .addFunction("Stop", &AudioSourceProperty::audio_stop)
-        .addFunction("Pause", &AudioSourceProperty::audio_pause)
-        .addFunction("getGain", &AudioSourceProperty::getGain)
-        .addFunction("getPitch", &AudioSourceProperty::getPitch)
-        .addFunction("setGain", &AudioSourceProperty::setGain)
-        .addFunction("setPitch", &AudioSourceProperty::setPitch)
+        .deriveClass <Engine::AudioSourceProperty, Engine::GameObjectProperty>("AudioSource")
+        .addFunction("setAudioFile", &Engine::AudioSourceProperty::setAudioFile)
+        .addFunction("Play", &Engine::AudioSourceProperty::audio_start)
+        .addFunction("Stop", &Engine::AudioSourceProperty::audio_stop)
+        .addFunction("Pause", &Engine::AudioSourceProperty::audio_pause)
+        .addFunction("getGain", &Engine::AudioSourceProperty::getGain)
+        .addFunction("getPitch", &Engine::AudioSourceProperty::getPitch)
+        .addFunction("setGain", &Engine::AudioSourceProperty::setGain)
+        .addFunction("setPitch", &Engine::AudioSourceProperty::setPitch)
         .endClass()
 
         .deriveClass <Engine::PhysicalProperty, Engine::GameObjectProperty>("Physical")
@@ -235,10 +235,10 @@ void ZSENSDK::bindSDK(lua_State* state){
         .addFunction("stopAnim", &TileProperty::stopAnim)
         .endClass()
 
-        .deriveClass <AnimationProperty, Engine::GameObjectProperty>("Animation")
-        .addFunction("play", &AnimationProperty::play)
-        .addFunction("stop", &AnimationProperty::stop)
-        .addFunction("setAnimation", &AnimationProperty::setAnimation)
+        .deriveClass <Engine::AnimationProperty, Engine::GameObjectProperty>("Animation")
+        .addFunction("play", &Engine::AnimationProperty::play)
+        .addFunction("stop", &Engine::AnimationProperty::stop)
+        .addFunction("setAnimation", &Engine::AnimationProperty::setAnimation)
         .endClass()
 
         .deriveClass <ScriptGroupProperty, Engine::GameObjectProperty>("ScriptGroup")
