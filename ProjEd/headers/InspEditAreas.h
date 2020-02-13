@@ -250,7 +250,7 @@ class GameobjectPickArea : public PropertyEditArea{
 public:
     PROPERTY_TYPE prop_type;
 
-    GameObject** gameobject_ptr_ptr; //output value
+    Engine::GameObject** gameobject_ptr_ptr; //output value
     QPushButton pick_button; //button to show color pick dialog
     QLabelResourcePickWgt* property_label;
     GameobjectPickArea();

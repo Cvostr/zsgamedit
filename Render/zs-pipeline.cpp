@@ -116,11 +116,11 @@ ZSRGBCOLOR RenderPipeline::getColorOfPickedTransformControl(int mouseX, int mous
 
     if(editwin_ptr->obj_trstate.isTransforming == true && !editwin_ptr->isWorldCamera){
         //Calclate distance between camera and object
-        float dist = getDistance(cam_ptr->camera_pos, editwin_ptr->obj_trstate.obj_ptr->getPropertyPtr<TransformProperty>()->_last_translation);
+        float dist = getDistance(cam_ptr->camera_pos, editwin_ptr->obj_trstate.obj_ptr->getPropertyPtr<Engine::TransformProperty>()->abs_translation);
 
         if(this->project_struct_ptr->perspective == 2) dist = 85.0f;
         //Draw gizmos
-        getGizmosRenderer()->drawTransformControls(editwin_ptr->obj_trstate.obj_ptr->getPropertyPtr<TransformProperty>()->_last_translation, dist, dist / 10.f);
+        getGizmosRenderer()->drawTransformControls(editwin_ptr->obj_trstate.obj_ptr->getPropertyPtr<Engine::TransformProperty>()->abs_translation, dist, dist / 10.f);
     }
 
     unsigned char data[4];
@@ -148,7 +148,7 @@ unsigned int RenderPipeline::render_getpickedObj(void* projectedit_ptr, int mous
 
     //Iterate over all objects in the world
     for(unsigned int obj_i = 0; obj_i < world_ptr->objects.size(); obj_i ++){
-        GameObject* obj_ptr = &world_ptr->objects[obj_i];
+        GameObject* obj_ptr = (GameObject*)world_ptr->objects[obj_i];
         if(!obj_ptr->hasParent)
             obj_ptr->processObject(this);
     }
@@ -200,10 +200,10 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr){
     //if we control this object
     if(editwin_ptr->obj_trstate.isTransforming == true && !editwin_ptr->isWorldCamera){
 
-        float dist = getDistance(cam_ptr->camera_pos, editwin_ptr->obj_trstate.obj_ptr->getPropertyPtr<TransformProperty>()->_last_translation);
+        float dist = getDistance(cam_ptr->camera_pos, editwin_ptr->obj_trstate.obj_ptr->getPropertyPtr<Engine::TransformProperty>()->abs_translation);
 
         if(this->project_struct_ptr->perspective == PERSP_2D) dist = 70.0f;
-        getGizmosRenderer()->drawTransformControls(editwin_ptr->obj_trstate.obj_ptr->getPropertyPtr<TransformProperty>()->_last_translation, dist, dist / 10.f);
+        getGizmosRenderer()->drawTransformControls(editwin_ptr->obj_trstate.obj_ptr->getPropertyPtr<Engine::TransformProperty>()->abs_translation, dist, dist / 10.f);
     }
 
     glDisable(GL_DEPTH_TEST);
@@ -240,7 +240,7 @@ void RenderPipeline::render2D(void* projectedit_ptr){
 
     //Iterate over all objects in the world
     for(unsigned int obj_i = 0; obj_i < world_ptr->objects.size(); obj_i ++){
-        GameObject* obj_ptr = &world_ptr->objects[obj_i];
+        GameObject* obj_ptr = (GameObject*)world_ptr->objects[obj_i];
         if(!obj_ptr->hasParent) //if it is a root object
             obj_ptr->processObject(this); //Draw object
     }
@@ -278,7 +278,7 @@ void RenderPipeline::render3D(void* projectedit_ptr, Engine::Camera* cam)
 
     //Iterate over all objects in the world
     for(unsigned int obj_i = 0; obj_i < world_ptr->objects.size(); obj_i ++){
-        GameObject* obj_ptr = &world_ptr->objects[obj_i];
+        GameObject* obj_ptr = (GameObject*)world_ptr->objects[obj_i];
         if(!obj_ptr->hasParent) //if it is a root object
             obj_ptr->processObject(this); //Draw object
     }
@@ -303,7 +303,7 @@ void RenderPipeline::renderDepth(void* world_ptr){
     this->current_state = PIPELINE_STATE_SHADOWDEPTH;
     //Iterate over all objects in the world
     for(unsigned int obj_i = 0; obj_i < _world_ptr->objects.size(); obj_i ++){
-        GameObject* obj_ptr = &_world_ptr->objects[obj_i];
+        GameObject* obj_ptr = (GameObject*)_world_ptr->objects[obj_i];
         if(!obj_ptr->hasParent) //if it is a root object
             obj_ptr->processObject(this); //Draw object
     }
@@ -342,7 +342,7 @@ void RenderPipeline::setLightsToBuffer(){
 }
 
 void GameObject::Draw(RenderPipeline* pipeline){
-    TransformProperty* transform_ptr = static_cast<TransformProperty*>(getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
+    Engine::TransformProperty* transform_ptr = static_cast<Engine::TransformProperty*>(getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
 
     if(transform_ptr == nullptr) return;
 
@@ -351,7 +351,7 @@ void GameObject::Draw(RenderPipeline* pipeline){
     if(pipeline->current_state == PIPELINE_STATE_DEFAULT)
         this->onPreRender(pipeline);
     //Getting pointer to mesh
-    MeshProperty* mesh_prop = static_cast<MeshProperty*>(this->getPropertyPtrByType(GO_PROPERTY_TYPE_MESH));
+    Engine::MeshProperty* mesh_prop = static_cast<Engine::MeshProperty*>(this->getPropertyPtrByType(GO_PROPERTY_TYPE_MESH));
     if(hasMesh() || hasTerrain()){// if object has mesh
         //If we are in default draw mode
         if(pipeline->current_state == PIPELINE_STATE_DEFAULT){
@@ -365,13 +365,13 @@ void GameObject::Draw(RenderPipeline* pipeline){
                     //Obtain bone by pointer
                     Engine::Bone* b = &mesh_prop->mesh_ptr->mesh_ptr->bones[bone_i];
 
-                    GameObject* node = nullptr;
-                    GameObject* RootNode = mesh_prop->skinning_root_node;
+                    Engine::GameObject* node = nullptr;
+                    GameObject* RootNode = (GameObject*)mesh_prop->skinning_root_node;
                     ZSMATRIX4x4 rootNodeTransform;
 
                     if(RootNode != nullptr){
                         //if RootNode is specified
-                        node = mesh_prop->skinning_root_node->getChildObjectWithNodeLabel(b->bone_name);
+                        node = (mesh_prop->skinning_root_node)->getChildObjectWithNodeLabel(b->bone_name);
                         //Get root transform
                         rootNodeTransform = (RootNode->getPropertyPtr<Engine::NodeProperty>()->transform_mat);
                     }
@@ -391,7 +391,7 @@ void GameObject::Draw(RenderPipeline* pipeline){
         }
         //If we picking object
         if(pipeline->current_state == PIPELINE_STATE_PICKING) {
-            TransformProperty* transform_ptr = static_cast<TransformProperty*>(getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
+            Engine::TransformProperty* transform_ptr = static_cast<Engine::TransformProperty*>(getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
 
             unsigned char* to_send = reinterpret_cast<unsigned char*>(&array_index);
             float r = static_cast<float>(to_send[0]);
@@ -409,7 +409,7 @@ void GameObject::Draw(RenderPipeline* pipeline){
             DrawMesh(pipeline);
         }
         if(pipeline->current_state == PIPELINE_STATE_SHADOWDEPTH) {
-            TransformProperty* transform_ptr = static_cast<TransformProperty*>(getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
+            Engine::TransformProperty* transform_ptr = static_cast<Engine::TransformProperty*>(getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
             //set transform to camera buffer
             pipeline->transformBuffer->bind();
             pipeline->transformBuffer->writeData(sizeof (ZSMATRIX4x4) * 2, sizeof (ZSMATRIX4x4), &transform_ptr->transform_mat);
@@ -424,7 +424,7 @@ void GameObject::Draw(RenderPipeline* pipeline){
 
         if(this->isPicked == true && pipeline->current_state != PIPELINE_STATE_PICKING && pipeline->current_state != PIPELINE_STATE_SHADOWDEPTH){
             EditWindow* editwin_ptr = static_cast<EditWindow*>(pipeline->win_ptr);
-            TransformProperty* transform_ptr = static_cast<TransformProperty*>(getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
+            Engine::TransformProperty* transform_ptr = static_cast<Engine::TransformProperty*>(getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
             ZSRGBCOLOR color = ZSRGBCOLOR(static_cast<int>(0.23f * 255.0f),
                                       static_cast<int>(0.23f * 255.0f),
                                       static_cast<int>(0.54f * 255.0f));
@@ -444,7 +444,7 @@ void GameObject::processObject(RenderPipeline* pipeline){
     EditWindow* editwin_ptr = static_cast<EditWindow*>(pipeline->win_ptr);
     if(active == false) return; //if object is inactive, not to render it
 
-    TransformProperty* transform_prop = static_cast<TransformProperty*>(this->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
+    Engine::TransformProperty* transform_prop = static_cast<Engine::TransformProperty*>(this->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
     //Call update on every property in objects
     if(editwin_ptr->isSceneRun && pipeline->current_state == PIPELINE_STATE_DEFAULT)
         this->onUpdate(static_cast<int>(pipeline->deltaTime));

@@ -38,7 +38,7 @@ Engine::GameObjectLink GameObject::getLinkToThisObject(){
     link.obj_str_id = this->str_id; //Placing string id
     link.world_ptr = (this->world_ptr); //Placing world pointer
 
-    link.ptr = static_cast<World*>(world_ptr)->getObjectByStringId(link.obj_str_id);
+    link.ptr = static_cast<World*>(world_ptr)->getGameObjectByStrId(link.obj_str_id);
     return link;
 }
 
@@ -52,8 +52,8 @@ void GameObject::addChildObject(Engine::GameObjectLink link, bool updTransform){
 
     //Updating child's transform
     //Now check, if it is possible
-    TransformProperty* Pobj_transform = static_cast<TransformProperty*>(getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
-    TransformProperty* Cobj_transform = static_cast<TransformProperty*>(link.ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
+    Engine::TransformProperty* Pobj_transform = static_cast<Engine::TransformProperty*>(getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
+    Engine::TransformProperty* Cobj_transform = static_cast<Engine::TransformProperty*>(link.ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
 
     if(updTransform && Pobj_transform != nullptr && Cobj_transform != nullptr){ //If both objects have transform property
 
@@ -81,8 +81,8 @@ void GameObject::removeChildObject(Engine::GameObjectLink link){
 
             //Updating child's transform
             //Now check, if it is possible
-            TransformProperty* Pobj_transform = static_cast<TransformProperty*>(getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
-            TransformProperty* Cobj_transform = static_cast<TransformProperty*>(ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
+            Engine::TransformProperty* Pobj_transform = static_cast<Engine::TransformProperty*>(getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
+            Engine::TransformProperty* Cobj_transform = static_cast<Engine::TransformProperty*>(ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
 
             if(Pobj_transform != nullptr && Cobj_transform != nullptr){ //If both objects have mesh property
 
@@ -104,26 +104,8 @@ void GameObject::removeChildObject(Engine::GameObjectLink link){
     trimChildrenArray(); //Remove broken link from vector
 }
 
-GameObject* GameObject::getChildObjectWithNodeLabel(std::string label){
-    //This function works recursively
-    //Iterate over all children in current object
-    for (unsigned int i = 0; i < this->children.size(); i ++) {
-        Engine::GameObjectLink* l = &this->children[i];
-        Engine::NodeProperty* node_p = ((World*)world_ptr)->updateLink(l)->getPropertyPtr<Engine::NodeProperty>();
-        //if node's name match
-        if(!node_p->node_label.compare(label))
-            //Then return object with this node
-            return ((World*)world_ptr)->updateLink(l);
-        //call function from this child
-        GameObject* obj_ch = ((World*)world_ptr)->updateLink(l)->getChildObjectWithNodeLabel(label);
-        if(obj_ch != nullptr) return obj_ch;
-
-    }
-    return nullptr;
-}
-
 void GameObject::setMeshSkinningRootNodeRecursively(GameObject* rootNode){
-    MeshProperty* mesh = getPropertyPtr<MeshProperty>();
+    Engine::MeshProperty* mesh = getPropertyPtr<Engine::MeshProperty>();
     if(mesh)
         mesh->skinning_root_node = rootNode;
 
@@ -265,15 +247,6 @@ void GameObject::pick(){
     }
 }
 
-bool GameObject::hasMesh(){
-    MeshProperty* mesh_prop = static_cast<MeshProperty*>(this->getPropertyPtrByType(GO_PROPERTY_TYPE_MESH));
-    if(mesh_prop != nullptr){
-        if(!mesh_prop->active) return false;
-        if(mesh_prop->mesh_ptr != nullptr) return true;
-    }
-    return false;
-}
-
 bool GameObject::hasTerrain(){
     TerrainProperty* terrain = getPropertyPtr<TerrainProperty>();
     if(terrain != nullptr){
@@ -284,7 +257,7 @@ bool GameObject::hasTerrain(){
 }
 
 void GameObject::DrawMesh(RenderPipeline* pipeline){
-    MeshProperty* mesh_prop = static_cast<MeshProperty*>(this->getPropertyPtrByType(GO_PROPERTY_TYPE_MESH));
+    Engine::MeshProperty* mesh_prop = static_cast<Engine::MeshProperty*>(this->getPropertyPtrByType(GO_PROPERTY_TYPE_MESH));
     TerrainProperty* terrain_prop = getPropertyPtr<TerrainProperty>();
     //Draw default mesh
     if(mesh_prop != nullptr) mesh_prop->mesh_ptr->Draw();

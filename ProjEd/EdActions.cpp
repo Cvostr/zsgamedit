@@ -104,7 +104,7 @@ void EdActions::undo(){
 
         unsigned int array_index = static_cast<unsigned int>(snapshot->snapshot.obj_array_ind);
 
-        world_ptr->objects[array_index].recoverFromSnapshot(&snapshot->snapshot); //Recover previous state
+        ((GameObject*)world_ptr->objects[array_index])->recoverFromSnapshot(&snapshot->snapshot); //Recover previous state
 
         snapshot->clear(); //Clear previous state
         snapshot->snapshot = cur_state_snap; //put previous state to current actions
@@ -156,7 +156,7 @@ void EdActions::redo(){
 
         unsigned int array_index = static_cast<unsigned int>(snapshot->snapshot.obj_array_ind);
 
-        world_ptr->objects[array_index].recoverFromSnapshot(&snapshot->snapshot); //Recover previous state
+        ((GameObject*)world_ptr->objects[array_index])->recoverFromSnapshot(&snapshot->snapshot); //Recover previous state
 
         snapshot->clear(); //Clear previous state
         snapshot->snapshot = cur_state_snap; //put previous state to current actions

@@ -10,12 +10,12 @@ extern Project* project_ptr;
 extern ZSGAME_DATA* game_data;
 
 World::World(){
-    objects.resize(MAX_OBJS);
-    objects.resize(0);
+    //objects.resize(MAX_OBJS);
+    //objects.resize(0);
 }
 
 GameObject* World::updateLink(Engine::GameObjectLink* link){
-    link->ptr = getObjectByStringId(link->obj_str_id);
+    link->ptr = getGameObjectByStrId(link->obj_str_id);
 
     return (GameObject*)link->ptr;
 }
@@ -24,7 +24,7 @@ int World::getFreeObjectSpaceIndex(){
     unsigned int index_to_push = static_cast<unsigned int>(objects.size()); //Set free index to objects amount
     unsigned int objects_num = static_cast<unsigned int>(this->objects.size());
     for(unsigned int objs_i = 0; objs_i < objects_num; objs_i ++){
-        if(objects[objs_i].alive == false){ //if object deleted
+        if(objects[objs_i]->alive == false){ //if object deleted
             index_to_push = objs_i; //set free index to index of deleted object
         }
     }
@@ -38,22 +38,25 @@ int World::getFreeObjectSpaceIndex(){
 
 GameObject* World::addObject(GameObject obj){
 
+    GameObject* newobj = new GameObject;
+    *newobj = obj;
+
     int index_to_push = -1;
     unsigned int objects_num = static_cast<unsigned int>(this->objects.size());
     for(unsigned int objs_i = 0; objs_i < objects_num; objs_i ++){
-        if(objects[objs_i].alive == false){
+        if(objects[objs_i]->alive == false){
             index_to_push = static_cast<int>(objs_i);
         }
     }
 
     GameObject* ptr = nullptr;
     if(index_to_push == -1){ //if all indeces are busy
-        this->objects.push_back(obj); //Push object to vector's end
-        ptr = &objects[objects.size() - 1];
+        this->objects.push_back(newobj); //Push object to vector's end
+        ptr = (GameObject*)objects[objects.size() - 1];
         ptr->array_index = static_cast<int>(objects.size() - 1);
     }else{ //if vector has an empty space
-        objects[static_cast<unsigned int>(index_to_push)] = obj;
-        ptr = &objects[static_cast<unsigned int>(index_to_push)];
+        objects[static_cast<unsigned int>(index_to_push)] = newobj;
+        ptr = (GameObject*)objects[static_cast<unsigned int>(index_to_push)];
         ptr->array_index = index_to_push;
     }
     ptr->world_ptr = this;
@@ -78,7 +81,7 @@ GameObject* World::dublicateObject(GameObject* original, bool parent){
     }
 
     if(original->hasParent){ //if original has parent
-        TransformProperty* transform = new_obj->getPropertyPtr<TransformProperty>();
+        Engine::TransformProperty* transform = new_obj->getPropertyPtr<Engine::TransformProperty>();
         ZSVECTOR3 p_translation = ZSVECTOR3(0,0,0);
         ZSVECTOR3 p_scale = ZSVECTOR3(1,1,1);
         ZSVECTOR3 p_rotation = ZSVECTOR3(0,0,0);
@@ -140,34 +143,34 @@ GameObject* World::newObject(){
     obj.addProperty(GO_PROPERTY_TYPE_TRANSFORM);
     return this->addObject(obj); //Return pointer to new object
 }
-
+/*
 Engine::GameObject* World::getObjectByLabel(std::string label){
     unsigned int objs_num = static_cast<unsigned int>(this->objects.size());
     for(unsigned int obj_it = 0; obj_it < objs_num; obj_it ++){ //Iterate over all objs in scene
-        GameObject* obj_ptr = &this->objects[obj_it]; //Get pointer to checking object
+        Engine::GameObject* obj_ptr = this->objects[obj_it]; //Get pointer to checking object
         if(!obj_ptr->alive) continue;
         if(obj_ptr->label_ptr->compare(label) == 0) //if labels are same
             return obj_ptr; //Return founded object
     }
     return nullptr; //if we haven't found one
-}
-
-GameObject* World::getObjectByStringId(std::string id){
+}*/
+/*
+Engine::GameObject* World::getObjectByStringId(std::string id){
     unsigned int objs_num = static_cast<unsigned int>(this->objects.size());
     for(unsigned int obj_it = 0; obj_it < objs_num; obj_it ++){ //Iterate over all objs in scene
-        GameObject* obj_ptr = &this->objects[obj_it]; //Get pointer to checking object
+        Engine::GameObject* obj_ptr = this->objects[obj_it]; //Get pointer to checking object
         if(obj_ptr->str_id.compare(id) == 0) //if labels are same
             return obj_ptr; //Return founded object
     }
     return nullptr; //if we haven't found one
-}
+}*/
 
 void World::getAvailableNumObjLabel(std::string label, int* result){
      unsigned int objs_num = static_cast<unsigned int>(this->objects.size());
      std::string tocheck_str = label + std::to_string(*result); //Calculating compare string
      bool hasEqualName = false; //true if we already have this obj
      for(unsigned int obj_it = 0; obj_it < objs_num; obj_it ++){ //Iterate over all objs in scene
-         GameObject* obj_ptr = &this->objects[obj_it]; //Get pointer to checking object
+         Engine::GameObject* obj_ptr = this->objects[obj_it]; //Get pointer to checking object
          if(obj_ptr->label_ptr == nullptr || !obj_ptr->alive) continue;
          if(obj_ptr->label_ptr->compare(tocheck_str) == 0) //If label on object is same
              hasEqualName = true; //Then we founded equal name
@@ -182,7 +185,7 @@ bool World::isObjectLabelUnique(std::string label){
     unsigned int objs_num = static_cast<unsigned int>(this->objects.size());
     int ret_amount = 0;
     for(unsigned int obj_it = 0; obj_it < objs_num; obj_it ++){ //Iterate over all objs in scene
-        GameObject* obj_ptr = &this->objects[obj_it]; //Get pointer to checking object
+        Engine::GameObject* obj_ptr = this->objects[obj_it]; //Get pointer to checking object
         //if object was destroyed
         if(!obj_ptr->alive) continue;
         if(obj_ptr->label_ptr->compare(label) == 0){
@@ -227,7 +230,7 @@ void World::removeObjPtr(GameObject* obj){
 }
 void World::trimObjectsList(){
     for (unsigned int i = 0; i < objects.size(); i ++) { //Iterating over all objects
-        if(objects[i].alive == false){ //If object marked as deleted
+        if(objects[i]->alive == false){ //If object marked as deleted
             for (unsigned int obj_i = i + 1; obj_i < objects.size(); obj_i ++) { //Iterate over all next chidren
                 objects[obj_i - 1] = objects[obj_i]; //Move it to previous place
 
@@ -239,8 +242,8 @@ void World::trimObjectsList(){
 
 void World::unpickObject(){
     for (unsigned int i = 0; i < objects.size(); i ++) { //Iterating over all objects
-        if(objects[i].isPicked == true){ //If object marked as deleted
-            objects[i].isPicked = false; //Mark object as unpicked
+        if(((GameObject*)objects[i])->isPicked == true){ //If object marked as deleted
+            ((GameObject*)objects[i])->isPicked = false; //Mark object as unpicked
         }
     }
 }
@@ -332,7 +335,7 @@ void World::saveToFile(std::string file){
 
     //Iterate over all objects and write them
     for(unsigned int obj_i = 0; obj_i < static_cast<unsigned int>(obj_num); obj_i ++){ //Iterate over all game objects
-        GameObject* object_ptr = static_cast<GameObject*>(&this->objects[obj_i]);
+        GameObject* object_ptr = static_cast<GameObject*>(this->objects[obj_i]);
         //Write GameObject
         writeGameObject(object_ptr, &world_stream);
     }
@@ -381,7 +384,7 @@ void World::openFromFile(std::string file, QTreeWidget* w_ptr){
             std::string obj_label;
             world_stream >> obj_label;
             //find object
-            GameObject* obj_ptr = this->getObjectByStringId(obj_label);
+            Engine::GameObject* obj_ptr = this->getGameObjectByStrId(obj_label);
             settings_ptr->skybox_ptr = obj_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_SKYBOX);
         }
 
@@ -396,7 +399,7 @@ void World::openFromFile(std::string file, QTreeWidget* w_ptr){
     //We finished reading file
     //Now iterate over all objects in world and set dependencies
     for(unsigned int obj_i = 0; obj_i < this->objects.size(); obj_i ++){
-        GameObject* obj_ptr = &this->objects[obj_i];
+        GameObject* obj_ptr = (GameObject*)this->objects[obj_i];
         for(unsigned int chi_i = 0; chi_i < obj_ptr->children.size(); chi_i ++){ //Now iterate over all children
             Engine::GameObjectLink* child_ptr = &obj_ptr->children[chi_i];
             GameObject* child_go_ptr = updateLink(child_ptr);
@@ -407,7 +410,7 @@ void World::openFromFile(std::string file, QTreeWidget* w_ptr){
     }
     //Now add all objects to inspector tree
     for(unsigned int obj_i = 0; obj_i < this->objects.size(); obj_i ++){
-        GameObject* obj_ptr = &this->objects[obj_i];
+        GameObject* obj_ptr = (GameObject*)this->objects[obj_i];
         if(obj_ptr->parent.isEmpty()){ //If object has no parent
             w_ptr->addTopLevelItem(obj_ptr->item_ptr);
         }else{ //It has a parent
@@ -498,12 +501,12 @@ void World::addObjectsFromPrefab(std::string file){
         this->addObject(mObjects[obj_i]);
     }
     //Add first object to top of tree
-    this->obj_widget_ptr->addTopLevelItem(this->getObjectByStringId(mObjects[0].str_id)->item_ptr);
+    this->obj_widget_ptr->addTopLevelItem(((GameObject*)this->getGameObjectByStrId(mObjects[0].str_id))->item_ptr);
 
     for(unsigned int obj_i = 1; obj_i < mObjects.size(); obj_i ++){
-        GameObject* object_ptr = this->getObjectByStringId(mObjects[obj_i].str_id);
+        Engine::GameObject* object_ptr = this->getGameObjectByStrId(mObjects[obj_i].str_id);
         object_ptr->parent.world_ptr = this;
-        updateLink(&object_ptr->parent)->item_ptr->addChild(object_ptr->item_ptr);
+        updateLink(&object_ptr->parent)->item_ptr->addChild(((GameObject*)object_ptr)->item_ptr);
         //updLinkPtr()
     }
 }
@@ -553,7 +556,7 @@ GameObject* World::addMeshNode(ZS3M::SceneNode* node){
     *obj.label_ptr = node->node_label + std::to_string(add_num); //Assigning label to object
     obj.item_ptr->setText(0, QString::fromStdString(*obj.label_ptr));
 
-    TransformProperty* transform_prop = static_cast<TransformProperty*>(obj.getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
+    Engine::TransformProperty* transform_prop = static_cast<Engine::TransformProperty*>(obj.getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
     transform_prop->setScale(node->node_scaling);
     transform_prop->setTranslation(node->node_translation);
     transform_prop->updateMat();
@@ -608,7 +611,7 @@ GameObject* World::addMeshNode(ZS3M::SceneNode* node){
         mesh_obj->addProperty(GO_PROPERTY_TYPE_MATERIAL); //add material property
 
         //configure mesh
-        MeshProperty* mesh_prop_ptr = static_cast<MeshProperty*>(mesh_obj->getPropertyPtrByType(GO_PROPERTY_TYPE_MESH));
+        Engine::MeshProperty* mesh_prop_ptr = static_cast<Engine::MeshProperty*>(mesh_obj->getPropertyPtrByType(GO_PROPERTY_TYPE_MESH));
         mesh_prop_ptr->resource_relpath = mesh_label;
 
         mesh_prop_ptr->updateMeshPtr();
@@ -634,7 +637,7 @@ void World::storeObjectToPrefab(GameObject* object_ptr, QString file){
 void World::clear(){
     //iterate over all objects and purge them all
     for(unsigned int objs_i = 0; objs_i < objects.size(); objs_i ++){
-        GameObject* obj_ptr = &objects[objs_i];
+        GameObject* obj_ptr = (GameObject*)objects[objs_i];
         obj_ptr->alive = false;
         obj_ptr->clearAll(false);
     }
@@ -645,7 +648,7 @@ void World::putToShapshot(WorldSnapshot* snapshot){
     //iterate over all objects in scene
     for(unsigned int objs_num = 0; objs_num < this->objects.size(); objs_num ++){
         //Obtain pointer to object
-        GameObject* obj_ptr = &this->objects[objs_num];
+        GameObject* obj_ptr = (GameObject*)this->objects[objs_num];
         if(obj_ptr->alive == false) continue;
         //Iterate over all properties in object and copy them into snapshot
         for(unsigned int prop_i = 0; prop_i < obj_ptr->props_num; prop_i ++){
@@ -693,7 +696,7 @@ void World::recoverFromSnapshot(WorldSnapshot* snapshot){
     }
     //iterate over all objects
     for(unsigned int objs_num = 0; objs_num < snapshot->objects.size(); objs_num ++){
-        GameObject* obj_ptr = &objects[objs_num];
+        GameObject* obj_ptr = (GameObject*)objects[objs_num];
         if(!obj_ptr->hasParent) { //if object is unparented
             obj_widget_ptr->addTopLevelItem(obj_ptr->item_ptr); //add to top of widget
             continue;

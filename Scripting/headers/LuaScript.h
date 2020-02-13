@@ -25,7 +25,7 @@ public:
     void _InitScript();
     void _DestroyScript();
 
-    void _callStart(GameObject* obj, World* world);
+    void _callStart(Engine::GameObject* obj, Engine::World* world);
     void _callDraw(float deltaTime);
     void callDrawUI();
     void onTrigger();

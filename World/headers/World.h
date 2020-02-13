@@ -53,34 +53,6 @@ public:
     LabelProperty();
 };
 
-class TransformProperty : public Engine::GameObjectProperty {
-public:
-    ZSMATRIX4x4 transform_mat;
-
-    ZSVECTOR3 translation;
-    ZSVECTOR3 scale;
-    ZSVECTOR3 rotation;
-    //Absolute values
-    ZSVECTOR3 _last_translation;
-    ZSVECTOR3 _last_scale;
-    ZSVECTOR3 _last_rotation;
-
-    void updateMat();
-    void addPropertyInterfaceToInspector();
-    void onValueChanged();
-    void getAbsoluteParentTransform(ZSVECTOR3& t, ZSVECTOR3& s, ZSVECTOR3& r);
-    void copyTo(Engine::GameObjectProperty* dest);
-    void onPreRender(Engine::RenderPipeline* pipeline);
-
-    void getAbsoluteRotationMatrix(ZSMATRIX4x4& m);
-
-    void setTranslation(ZSVECTOR3 new_translation);
-    void setScale(ZSVECTOR3 new_scale);
-    void setRotation(ZSVECTOR3 new_rotation);
-
-    TransformProperty();
-};
-
 class GameObject : public Engine::GameObject{
 public:
     bool isPicked; //if user selected this object to edit it
@@ -95,7 +67,6 @@ public:
     void addChildObject(Engine::GameObjectLink link, bool updTransform = true);
     void removeChildObject(Engine::GameObjectLink link);
 
-    GameObject* getChildObjectWithNodeLabel(std::string label);
     void setMeshSkinningRootNodeRecursively(GameObject* rootNode);
 
     void saveProperties(std::ofstream* stream); //Writes properties content at end of stream
@@ -104,10 +75,8 @@ public:
     void processObject(RenderPipeline* pipeline); //On render pipeline wish to work with object
     void Draw(RenderPipeline* pipeline); //On render pipeline wish to draw the object
     void DrawMesh(RenderPipeline* pipeline);
-    bool hasMesh(); //Check if gameobject has mesh property and mesh inside
+
     bool hasTerrain(); //Check if gameobject has terrain inside
-     //true, if object has rigidbody component
-    bool isRigidbody();
 
     void putToSnapshot(GameObjectSnapshot* snapshot);
     void recoverFromSnapshot(GameObjectSnapshot* snapshot);
@@ -145,14 +114,9 @@ public:
 class World : public Engine::World{
 public:
     QTreeWidget* obj_widget_ptr;
-    Engine::Camera world_camera;
-
-    std::vector<GameObject> objects; //Vector, containing all gameobjects
 
     GameObject* addObject(GameObject obj);
     GameObject* newObject(); //Add new object to world
-    Engine::GameObject* getObjectByLabel(std::string label);
-    GameObject* getObjectByStringId(std::string id);
     int getFreeObjectSpaceIndex();
     bool isObjectLabelUnique(std::string label); //Get amount of objects with this label
     void removeObj(Engine::GameObjectLink& link); //Remove object from world
@@ -187,6 +151,9 @@ public:
     World();
 
 };
+
+#define getObjectByLabel getGameObjectByLabel
+
 Engine::GameObjectProperty* _allocProperty(PROPERTY_TYPE type);
 QString getPropertyString(int type);
 

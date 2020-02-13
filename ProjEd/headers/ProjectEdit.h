@@ -58,7 +58,7 @@ struct ObjectTransformState{
     bool isTransforming; //To draw controls or not
     bool isModifying;
     GameObject* obj_ptr;
-    TransformProperty* tprop_ptr; //Pointer to transform property of obj_ptr
+    Engine::TransformProperty* tprop_ptr; //Pointer to transform property of obj_ptr
     GO_TRANSFORM_MODE transformMode;
 
     int Xcf = 0, Ycf = 0, Zcf = 0;

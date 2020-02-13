@@ -714,7 +714,7 @@ GameobjectPickArea::~GameobjectPickArea(){
 }
 
 void GameobjectPickArea::setup(){
-    GameObject* obj_ptr = *this->gameobject_ptr_ptr;
+    Engine::GameObject* obj_ptr = *this->gameobject_ptr_ptr;
 
     if(obj_ptr != nullptr){
         property_label->setText(QString::fromStdString(*obj_ptr->label_ptr));

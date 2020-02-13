@@ -87,31 +87,12 @@ public:
     MaterialProperty();
 };
 
-
-class MeshProperty : public Engine::GameObjectProperty{
-public:
-    std::string resource_relpath; //Relative path to resource
-    Engine::MeshResource* mesh_ptr; //Pointer to mesh
-    bool castShadows;
-
-    std::string rootNodeStr;
-    GameObject* skinning_root_node;
-
-    void addPropertyInterfaceToInspector();
-    void updateMeshPtr(); //Updates pointer according to resource_relpath
-    void onValueChanged(); //Update mesh    pointer
-    void copyTo(Engine::GameObjectProperty* dest);
-    void onRender(Engine::RenderPipeline* pipeline);
-    MeshProperty();
-};
-
-
 class LightsourceProperty : public Engine::GameObjectProperty{
 private:
     LIGHTSOURCE_TYPE _last_light_type;
 public:
     LIGHTSOURCE_TYPE light_type; //type of lightsource
-    TransformProperty* transform; //pointer to object's transform
+    Engine::TransformProperty* transform; //pointer to object's transform
 
     ZSVECTOR3 direction; //direction for directional & spotlight in quats
     //To compare differences
@@ -135,42 +116,7 @@ public:
     LightsourceProperty();
 };
 
-class PhysicalProperty : public Engine::GameObjectProperty{
-protected:
-
-    void init();
-    void updateCollisionShape();
-public:
-    bool isCustomPhysicalSize;
-    ZSVECTOR3 cust_size;
-
-    bool created;
-    btRigidBody* rigidBody;
-    btCollisionShape* shape;
-    COLLIDER_TYPE coll_type;
-    float mass;
-    void copyTo(Engine::GameObjectProperty* dest);
-    void addColliderRadio(InspectorWin* inspector);
-    void addMassField(InspectorWin* inspector);
-    void addCustomSizeField(InspectorWin* inspector);
-    void onUpdate(float deltaTime);
-    PhysicalProperty();
-};
-
-class ColliderProperty : public PhysicalProperty{
-public:
-    void onObjectDeleted(); //unregister in world
-    void addPropertyInterfaceToInspector();
-    void copyTo(Engine::GameObjectProperty* dest);
-    void onUpdate(float deltaTime);
-    TransformProperty* getTransformProperty();
-
-    bool isTrigger;
-
-    ColliderProperty();
-};
-
-class CharacterControllerProperty : public PhysicalProperty{
+class CharacterControllerProperty : public Engine::PhysicalProperty{
 public:
     ZSVECTOR3 gravity;
     ZSVECTOR3 linearVel;
@@ -185,21 +131,6 @@ public:
     CharacterControllerProperty();
 };
 
-class RigidbodyProperty : public PhysicalProperty{
-public:
-    ZSVECTOR3 gravity;
-    ZSVECTOR3 linearVel;
-    ZSVECTOR3 angularVel;
-
-    void addPropertyInterfaceToInspector();
-    void onUpdate(float deltaTime);
-    void copyTo(Engine::GameObjectProperty* dest);
-    void onValueChanged();
-
-    void setLinearVelocity(ZSVECTOR3 lvel);
-
-    RigidbodyProperty();
-};
 
 class SkyboxProperty : public Engine::GameObjectProperty{
 public:

@@ -134,17 +134,17 @@ void TileGroupProperty::process(){
             GameObject* obj = wrld->newObject(); //Invoke new object creation
 
             GameObject* parent = ((World*)world_ptr)->updateLink(&go_link);
-            TransformProperty* parent_transform = parent->getPropertyPtr<TransformProperty>();
+            Engine::TransformProperty* parent_transform = parent->getPropertyPtr<Engine::TransformProperty>();
             LabelProperty* parent_label = parent->getPropertyPtr<LabelProperty>();
 
             //obj->render_type = GO_RENDER_TYPE_TILE;
             obj->addProperty(GO_PROPERTY_TYPE_MESH); //Adding mesh
             obj->addProperty(GO_PROPERTY_TYPE_TILE); //Adding tile
             //Receive properties ptrs
-            TransformProperty* transform = obj->getPropertyPtr<TransformProperty>();
+            Engine::TransformProperty* transform = obj->getPropertyPtr<Engine::TransformProperty>();
             LabelProperty* label = obj->getPropertyPtr<LabelProperty>();
-            TileProperty* tile_prop = static_cast<TileProperty*>(obj->getPropertyPtr<TileProperty>());
-            MeshProperty* mesh_prop = static_cast<MeshProperty*>(obj->getPropertyPtr<MeshProperty>());
+            TileProperty* tile_prop = obj->getPropertyPtr<TileProperty>();
+            Engine::MeshProperty* mesh_prop = obj->getPropertyPtr<Engine::MeshProperty>();
 
             mesh_prop->resource_relpath = this->mesh_string; //Default plane as mesh
             mesh_prop->updateMeshPtr(); //Update mesh pointer in property

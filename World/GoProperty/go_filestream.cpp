@@ -23,7 +23,7 @@ void GameObject::saveProperties(std::ofstream* stream){
             break;
         }
         case GO_PROPERTY_TYPE_TRANSFORM:{
-            TransformProperty* ptr = static_cast<TransformProperty*>(property_ptr);
+            Engine::TransformProperty* ptr = static_cast<Engine::TransformProperty*>(property_ptr);
             float posX = ptr->translation.X;
             float posY = ptr->translation.Y;
             float posZ = ptr->translation.Z;
@@ -55,7 +55,7 @@ void GameObject::saveProperties(std::ofstream* stream){
             break;
         }
         case GO_PROPERTY_TYPE_MESH:{
-            MeshProperty* ptr = static_cast<MeshProperty*>(property_ptr);
+            Engine::MeshProperty* ptr = static_cast<Engine::MeshProperty*>(property_ptr);
             *stream << ptr->resource_relpath << "\n";
             if(ptr->skinning_root_node != nullptr)
                 *stream << *ptr->skinning_root_node->label_ptr << "\n";
@@ -140,7 +140,7 @@ void GameObject::saveProperties(std::ofstream* stream){
             break;
         }
         case GO_PROPERTY_TYPE_COLLIDER:{
-            ColliderProperty* ptr = static_cast<ColliderProperty*>(property_ptr);
+            Engine::ColliderProperty* ptr = static_cast<Engine::ColliderProperty*>(property_ptr);
             //write collider type
             stream->write(reinterpret_cast<char*>(&ptr->coll_type), sizeof(COLLIDER_TYPE));
             //write isTrigger boolean
@@ -150,7 +150,7 @@ void GameObject::saveProperties(std::ofstream* stream){
             break;
         }
         case GO_PROPERTY_TYPE_RIGIDBODY:{
-            RigidbodyProperty* ptr = static_cast<RigidbodyProperty*>(property_ptr);
+            Engine::RigidbodyProperty* ptr = static_cast<Engine::RigidbodyProperty*>(property_ptr);
             //write collider type
             stream->write(reinterpret_cast<char*>(&ptr->coll_type), sizeof(COLLIDER_TYPE));
             //write isTrigger boolean
@@ -291,7 +291,7 @@ void GameObject::loadProperty(std::ifstream* world_stream){
         }
         case GO_PROPERTY_TYPE_TRANSFORM :{
             world_stream->seekg(1, std::ofstream::cur); //Skip space
-            TransformProperty* t_ptr = static_cast<TransformProperty*>(prop_ptr);
+            Engine::TransformProperty* t_ptr = static_cast<Engine::TransformProperty*>(prop_ptr);
             world_stream->read(reinterpret_cast<char*>(&t_ptr->translation.X), sizeof(float));
             world_stream->read(reinterpret_cast<char*>(&t_ptr->translation.Y), sizeof(float));
             world_stream->read(reinterpret_cast<char*>(&t_ptr->translation.Z), sizeof(float));
@@ -307,7 +307,7 @@ void GameObject::loadProperty(std::ifstream* world_stream){
             break;
         }
         case GO_PROPERTY_TYPE_MESH :{
-            MeshProperty* lptr = static_cast<MeshProperty*>(prop_ptr);
+            Engine::MeshProperty* lptr = static_cast<Engine::MeshProperty*>(prop_ptr);
             //Read mesh name
             *world_stream >> lptr->resource_relpath;
             *world_stream >> lptr->rootNodeStr;
@@ -407,7 +407,7 @@ void GameObject::loadProperty(std::ifstream* world_stream){
         break;
     }
     case GO_PROPERTY_TYPE_COLLIDER:{
-        ColliderProperty* ptr = static_cast<ColliderProperty*>(prop_ptr);
+        Engine::ColliderProperty* ptr = static_cast<Engine::ColliderProperty*>(prop_ptr);
         world_stream->seekg(1, std::ofstream::cur);
         //read collider type
         world_stream->read(reinterpret_cast<char*>(&ptr->coll_type), sizeof(COLLIDER_TYPE));
@@ -417,7 +417,7 @@ void GameObject::loadProperty(std::ifstream* world_stream){
         break;
     }
     case GO_PROPERTY_TYPE_RIGIDBODY:{
-        RigidbodyProperty* ptr = static_cast<RigidbodyProperty*>(prop_ptr);
+        Engine::RigidbodyProperty* ptr = static_cast<Engine::RigidbodyProperty*>(prop_ptr);
         world_stream->seekg(1, std::ofstream::cur);
         //read collider type
         world_stream->read(reinterpret_cast<char*>(&ptr->coll_type), sizeof(COLLIDER_TYPE));

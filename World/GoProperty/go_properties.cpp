@@ -84,7 +84,7 @@ Engine::GameObjectProperty* _allocProperty(PROPERTY_TYPE type){
     Engine::GameObjectProperty* _ptr = nullptr;
     switch (type) {
         case GO_PROPERTY_TYPE_TRANSFORM:{ //If type is transfrom
-            _ptr = static_cast<Engine::GameObjectProperty*>(new TransformProperty); //Allocation of transform in heap
+            _ptr = static_cast<Engine::GameObjectProperty*>(new Engine::TransformProperty); //Allocation of transform in heap
             break;
         }
         case GO_PROPERTY_TYPE_NODE:{ //If type is transfrom
@@ -101,7 +101,7 @@ Engine::GameObjectProperty* _allocProperty(PROPERTY_TYPE type){
             break;
         }
         case GO_PROPERTY_TYPE_MESH:{
-            MeshProperty* ptr = new MeshProperty;
+            Engine::MeshProperty* ptr = new Engine::MeshProperty;
             _ptr = static_cast<Engine::GameObjectProperty*>(ptr);
             break;
         }
@@ -126,12 +126,12 @@ Engine::GameObjectProperty* _allocProperty(PROPERTY_TYPE type){
             break;
         }
         case GO_PROPERTY_TYPE_COLLIDER:{
-            ColliderProperty* ptr = new ColliderProperty;
+            Engine::ColliderProperty* ptr = new Engine::ColliderProperty;
             _ptr = static_cast<Engine::GameObjectProperty*>(ptr);
             break;
         }
         case GO_PROPERTY_TYPE_RIGIDBODY:{
-            RigidbodyProperty* ptr = new RigidbodyProperty;
+            Engine::RigidbodyProperty* ptr = new Engine::RigidbodyProperty;
             _ptr = static_cast<Engine::GameObjectProperty*>(ptr);
             break;
         }
@@ -168,16 +168,6 @@ Engine::GameObjectProperty* _allocProperty(PROPERTY_TYPE type){
     }
     return _ptr;
 }
-//Inherited constructors
-TransformProperty::TransformProperty(){
-    type = GO_PROPERTY_TYPE_TRANSFORM; //Type of property is transform
-    active = true; //property is active
-
-    this->transform_mat = getIdentity(); //Result matrix is identity by default
-    this->translation = ZSVECTOR3(0.0f, 0.0f, 0.0f); //Position is zero by default
-    this->scale = ZSVECTOR3(1.0f, 1.0f, 1.0f); //Scale is 1 by default
-    this->rotation = ZSVECTOR3(0.0f, 0.0f, 0.0f); //Rotation is 0 by default
-}
 
 LabelProperty::LabelProperty(){
     type = GO_PROPERTY_TYPE_LABEL; //its an label
@@ -185,20 +175,8 @@ LabelProperty::LabelProperty(){
     list_item_ptr = nullptr;
 }
 
-MeshProperty::MeshProperty(){
-    type = GO_PROPERTY_TYPE_MESH;
-    active = true;
-
-    mesh_ptr = nullptr; //set it to 0x0 to check later
-    this->resource_relpath = "@none";
-
-    castShadows = true;
-
-    this->skinning_root_node = nullptr;
-    this->rootNodeStr = "@none";
-}
 //Transform property functions
-void TransformProperty::addPropertyInterfaceToInspector(){
+void Engine::TransformProperty::addPropertyInterfaceToInspector(){
 
     Float3PropertyArea* area_pos = new Float3PropertyArea; //New property area
     area_pos->setLabel("Position"); //Its label
@@ -219,13 +197,13 @@ void TransformProperty::addPropertyInterfaceToInspector(){
     _inspector_win->addPropertyArea(area_rotation);
 }
 
-void TransformProperty::onValueChanged(){
+void Engine::TransformProperty::onValueChanged(){
     updateMat();
 
-    if(((World*)world_ptr)->updateLink(&this->go_link) == nullptr) return;
+    if((this->go_link.updLinkPtr()) == nullptr) return;
 
-    ColliderProperty* coll = ((World*)world_ptr)->updateLink(&this->go_link)->getPropertyPtr<ColliderProperty>();
-    RigidbodyProperty* rigid = ((World*)world_ptr)->updateLink(&this->go_link)->getPropertyPtr<RigidbodyProperty>();
+    ColliderProperty* coll = this->go_link.updLinkPtr()->getPropertyPtr<ColliderProperty>();
+    RigidbodyProperty* rigid = this->go_link.updLinkPtr()->getPropertyPtr<RigidbodyProperty>();
 
     PhysicalProperty* phys = nullptr;
 
@@ -235,131 +213,25 @@ void TransformProperty::onValueChanged(){
         phys = coll;
     }
 
-    if(((World*)world_ptr)->updateLink(&this->go_link)->isRigidbody()){
+    if(this->go_link.updLinkPtr()->isRigidbody()){
         if(!phys->created) return;
         btTransform startTransform;
         startTransform.setIdentity();
-        startTransform.setOrigin(btVector3( btScalar(_last_translation.X),
-                                                    btScalar(_last_translation.Y),
-                                                    btScalar(_last_translation.Z)));
+        startTransform.setOrigin(btVector3( btScalar(abs_translation.X),
+                                                    btScalar(abs_translation.Y),
+                                                    btScalar(abs_translation.Z)));
 
-        startTransform.setRotation(btQuaternion(_last_rotation.X, _last_rotation.Y, _last_rotation.Z));
+        startTransform.setRotation(btQuaternion(abs_rotation.X, abs_rotation.Y, abs_rotation.Z));
 
 
         phys->rigidBody->setWorldTransform(startTransform);
         phys->rigidBody->getMotionState()->setWorldTransform(startTransform);
 
-        phys->shape->setLocalScaling(btVector3(btScalar(_last_scale.X),
-                                               btScalar(_last_scale.Y),
-                                               btScalar(_last_scale.Z)));
+        phys->shape->setLocalScaling(btVector3(btScalar(abs_scale.X),
+                                               btScalar(abs_scale.Y),
+                                               btScalar(abs_scale.Z)));
 
     }
-}
-
-void TransformProperty::onPreRender(Engine::RenderPipeline* pipeline){
-    updateMat();
-    //Send transform matrix to transform buffer
-    pipeline->transformBuffer->bind();
-    pipeline->transformBuffer->writeData(sizeof (ZSMATRIX4x4) * 2, sizeof (ZSMATRIX4x4), &transform_mat);
-}
-
-void TransformProperty::setTranslation(ZSVECTOR3 new_translation){
-    this->translation = new_translation;
-    onValueChanged();
-}
-
-void TransformProperty::setScale(ZSVECTOR3 new_scale){
-    this->scale = new_scale;
-    onValueChanged();
-}
-void TransformProperty::setRotation(ZSVECTOR3 new_rotation){
-    this->rotation = new_rotation;
-    onValueChanged();
-}
-
-void TransformProperty::updateMat(){
-    //Variables to store
-    ZSVECTOR3 p_translation = ZSVECTOR3(0,0,0);
-    ZSVECTOR3 p_scale = ZSVECTOR3(1,1,1);
-    ZSVECTOR3 p_rotation = ZSVECTOR3(0,0,0);
-
-    GameObject* ptr = ((World*)world_ptr)->updateLink(&go_link); //Pointer to object with this property
-    if(ptr != nullptr){ //if object exist
-        if(ptr->hasParent){ //if object dependent
-            //Get parent's transform property
-            TransformProperty* property = ((World*)world_ptr)->updateLink(&ptr->parent)->getPropertyPtr<TransformProperty>();
-            //Calculate parent transform offset
-            property->getAbsoluteParentTransform(p_translation, p_scale, p_rotation);
-        }
-    }
-    //If at least one coordinate changed
-    if(this->translation + p_translation == this->_last_translation
-            && this->scale * p_scale == this->_last_scale
-            && this->rotation + p_rotation == this->_last_rotation) {
-        return; //No changes, nothing to be done
-    }else{
-        //Store last pos to work with collisions
-
-
-        //rewrite last values
-        this->_last_translation = this->translation + p_translation;
-        this->_last_scale = this->scale * p_scale;
-        this->_last_rotation = this->rotation + p_rotation;
-
-        //Calculate translation matrix
-        ZSMATRIX4x4 translation_mat = getTranslationMat(_last_translation);
-        //Calculate scale matrix
-        ZSMATRIX4x4 scale_mat = getScaleMat(_last_scale);
-        //Calculate rotation matrix
-        ZSMATRIX4x4 rotation_mat1 = getIdentity();
-        getAbsoluteRotationMatrix(rotation_mat1);
-
-        ZSMATRIX4x4 rotation_mat = getRotationMat(this->rotation);
-        //S * R * T
-        this->transform_mat = scale_mat * rotation_mat * rotation_mat1 * translation_mat;
-    }
-}
-
-void TransformProperty::getAbsoluteRotationMatrix(ZSMATRIX4x4& m){
-    GameObject* ptr = ((World*)world_ptr)->updateLink(&go_link); //Pointer to object with this property
-
-    if(ptr == nullptr) return;
-
-    if(ptr->hasParent == true){
-        GameObject* parent_p = (GameObject*)ptr->parent.ptr;
-        TransformProperty* property = static_cast<TransformProperty*>(parent_p->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
-
-        ZSMATRIX4x4 rotation_mat1 = getRotationMat(property->rotation, ptr->getTransformProperty()->translation);
-        m = rotation_mat1 * m;
-        property->getAbsoluteRotationMatrix(m);
-    }
-}
-
-void TransformProperty::getAbsoluteParentTransform(ZSVECTOR3& t, ZSVECTOR3& s, ZSVECTOR3& r){
-    GameObject* ptr = ((World*)world_ptr)->updateLink(&go_link); //Pointer to object with this property
-
-    t = t + this->translation;
-    s = s * this->scale;
-    r = r + this->rotation;
-
-    if(ptr->hasParent){
-        GameObject* parent_p = (GameObject*)ptr->parent.ptr;
-        TransformProperty* property = static_cast<TransformProperty*>(parent_p->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
-        property->getAbsoluteParentTransform(t, s, r);
-    }
-}
-
-void TransformProperty::copyTo(Engine::GameObjectProperty* dest){
-    if(dest->type != this->type) return; //if it isn't transform
-    //Do base things
-    GameObjectProperty::copyTo(dest);
-
-    //cast pointer and send data
-    TransformProperty* _dest = static_cast<TransformProperty*>(dest);
-    _dest->translation = translation;
-    _dest->scale = scale;
-    _dest->rotation = rotation;
-    _dest->transform_mat = transform_mat;
 }
 
 //Label property functions
@@ -392,11 +264,10 @@ void LabelProperty::copyTo(Engine::GameObjectProperty* dest){
 
     LabelProperty* _dest = static_cast<LabelProperty*>(dest);
     _dest->label = label;
-    //_dest->isActiveToggle = isActiveToggle;
 }
 
 //Mesh property functions
-void MeshProperty::addPropertyInterfaceToInspector(){
+void Engine::MeshProperty::addPropertyInterfaceToInspector(){
     PickResourceArea* area = new PickResourceArea(RESOURCE_TYPE_MESH);
     area->setLabel("Mesh");
     area->go_property = static_cast<void*>(this);
@@ -419,30 +290,10 @@ void MeshProperty::addPropertyInterfaceToInspector(){
         }
     }
 }
-void MeshProperty::updateMeshPtr(){
-    if(resource_relpath.length() < 1) return;
-    this->mesh_ptr = game_data->resources->getMeshByLabel(resource_relpath);
-}
 
-void MeshProperty::onRender(Engine::RenderPipeline* pipeline){
-    if(this->skinning_root_node == nullptr)
-        skinning_root_node = (GameObject*)((World*)world_ptr)->getObjectByLabel(this->rootNodeStr);skinning_root_node = (GameObject*)((World*)world_ptr)->getObjectByLabel(this->rootNodeStr);
-}
 
-void MeshProperty::onValueChanged(){
+void Engine::MeshProperty::onValueChanged(){
     updateMeshPtr();
-}
-
-void MeshProperty::copyTo(Engine::GameObjectProperty* dest){
-    if(dest->type != this->type) return; //if it isn't mesh, then exit
-
-    //Do base things
-    GameObjectProperty::copyTo(dest);
-
-    MeshProperty* _dest = static_cast<MeshProperty*>(dest);
-    _dest->resource_relpath = resource_relpath;
-    _dest->mesh_ptr = mesh_ptr;
-    _dest->rootNodeStr = rootNodeStr;
 }
 
 void LightsourceProperty::addPropertyInterfaceToInspector(){
@@ -518,8 +369,8 @@ void LightsourceProperty::copyTo(Engine::GameObjectProperty* dest){
 
 void LightsourceProperty::updTransformPtr(){
     if(transform == nullptr){
-        transform = ((World*)world_ptr)->updateLink(&this->go_link)->getPropertyPtr<TransformProperty>();
-        this->last_pos = transform->_last_translation; //Store old value
+        transform = this->go_link.updLinkPtr()->getPropertyPtr<Engine::TransformProperty>();
+        this->last_pos = transform->abs_translation; //Store old value
     }
 }
 
@@ -527,17 +378,17 @@ void LightsourceProperty::onObjectDeleted(){
 }
 
 void LightsourceProperty::onPreRender(Engine::RenderPipeline* pipeline){
-    TransformProperty* transform_prop = ((World*)world_ptr)->updateLink(&go_link)->getPropertyPtr<TransformProperty>();
+    Engine::TransformProperty* transform_prop = go_link.updLinkPtr()->getPropertyPtr<Engine::TransformProperty>();
 
     updTransformPtr();
 
     pipeline->addLight(static_cast<void*>(this)); //put light pointer to vector
 
     //check, if light transformation changed
-    if((this->last_pos != transform_prop->_last_translation || this->last_rot != transform_prop->rotation)){
+    if((this->last_pos != transform_prop->abs_translation || this->last_rot != transform_prop->rotation)){
         this->onValueChanged();
         //store new transform values
-        this->last_pos = transform_prop->_last_translation;
+        this->last_pos = transform_prop->abs_translation;
         this->last_rot = transform_prop->rotation;
     }
 }
@@ -614,7 +465,7 @@ void AudioSourceProperty::onUpdate(float deltaTime){
         isPlaySheduled = false;
     }
 
-    TransformProperty* transform = ((World*)world_ptr)->updateLink(&go_link)->getPropertyPtr<TransformProperty>();
+    Engine::TransformProperty* transform = go_link.updLinkPtr()->getPropertyPtr<Engine::TransformProperty>();
     //if object position changed
     if(transform->translation != this->last_pos){
         //apply new position to openal audio source
@@ -933,13 +784,8 @@ void MaterialProperty::setMaterial(std::string path){
     setMaterial(newmat_ptr);
 }
 
-void ColliderProperty::onObjectDeleted(){
-    if(created)
-        this->go_link.world_ptr->physical_world->removeRidigbodyFromWorld(this->rigidBody);
-} //unregister in world
-
-void ColliderProperty::addPropertyInterfaceToInspector(){
-    addColliderRadio(_inspector_win);
+void Engine::ColliderProperty::addPropertyInterfaceToInspector(){
+    addColliderRadio();
 
     //isTrigger checkbox
     BoolCheckboxArea* istrigger = new BoolCheckboxArea;
@@ -948,55 +794,9 @@ void ColliderProperty::addPropertyInterfaceToInspector(){
     istrigger->bool_ptr = &this->isTrigger;
     _inspector_win->addPropertyArea(istrigger);
 }
-
-void ColliderProperty::onUpdate(float deltaTime){
-    if(!created)
-        init();
-}
-
-void ColliderProperty::copyTo(Engine::GameObjectProperty* dest){
-    if(dest->type != GO_PROPERTY_TYPE_COLLIDER) return;
-
-    PhysicalProperty::copyTo(dest);
-
-    ColliderProperty* coll_prop = static_cast<ColliderProperty*>(dest);
-    coll_prop->isTrigger = this->isTrigger;
-}
-
-TransformProperty* ColliderProperty::getTransformProperty(){
-    return ((World*)world_ptr)->updateLink(&this->go_link)->getPropertyPtr<TransformProperty>();
-}
-
-ColliderProperty::ColliderProperty(){
-    type = GO_PROPERTY_TYPE_COLLIDER;
-
-    isTrigger = false;
-    coll_type = COLLIDER_TYPE_CUBE;
-    created = false;
-    mass = 0.0f; //collider is static
-}
-
-RigidbodyProperty::RigidbodyProperty(){
-
-    mass = 1.0f;
-    created = false;
-    type = GO_PROPERTY_TYPE_RIGIDBODY;
-    coll_type = COLLIDER_TYPE_CUBE;
-
-    gravity = ZSVECTOR3(0.f, -10.f, 0.f);
-    linearVel = ZSVECTOR3(0.f, 0.f, 0.f);
-}
-
-bool GameObject::isRigidbody(){
-    if(getPropertyPtrByType(GO_PROPERTY_TYPE_RIGIDBODY) != nullptr || getPropertyPtrByType(GO_PROPERTY_TYPE_COLLIDER) != nullptr)
-        return true;
-
-    return false;
-}
-
-void RigidbodyProperty::addPropertyInterfaceToInspector(){
-    PhysicalProperty::addColliderRadio(_inspector_win);
-    PhysicalProperty::addMassField(_inspector_win);
+void Engine::RigidbodyProperty::addPropertyInterfaceToInspector(){
+    PhysicalProperty::addColliderRadio();
+    PhysicalProperty::addMassField();
 
     Float3PropertyArea* gravityE = new Float3PropertyArea; //New property area
     gravityE->setLabel("Gravity"); //Its label
@@ -1011,41 +811,7 @@ void RigidbodyProperty::addPropertyInterfaceToInspector(){
     _inspector_win->addPropertyArea(linearE);
 }
 
-void RigidbodyProperty::onUpdate(float deltaTime){
-    if(!created){
-        //if uninitialized
-        init();
-
-        this->rigidBody->setGravity(btVector3(gravity.X, gravity.Y, gravity.Z));
-        this->rigidBody->setLinearVelocity(btVector3(linearVel.X, linearVel.Y, linearVel.Z));
-    }
-    else{
-        PhysicalProperty::onUpdate(deltaTime);
-
-        TransformProperty* transform = ((World*)world_ptr)->updateLink(&this->go_link)->getPropertyPtr<TransformProperty>();
-        btVector3 current_pos = rigidBody->getCenterOfMassPosition();
-        btQuaternion current_rot = rigidBody->getWorldTransform().getRotation();
-        //get current position
-        float curX = current_pos.getX();
-        float curY = current_pos.getY();
-        float curZ = current_pos.getZ();
-
-        float rotX = 0, rotY = 0, rotZ = 0;
-        //Convert quaternion to euler
-        current_rot.getEulerZYX(rotX, rotY, rotZ);
-        //Convert radians to degrees
-        rotX = rotX / ZS_PI * 180.0f;
-        rotY = rotY / ZS_PI * 180.0f;
-        rotZ = rotZ / ZS_PI * 180.0f;
-
-        if(transform->translation != ZSVECTOR3(curX, curY, curZ))
-            transform->translation = ZSVECTOR3(curX, curY, curZ);
-        if(transform->rotation != ZSVECTOR3(rotZ, rotY, rotX))
-            transform->rotation = ZSVECTOR3(rotZ, rotY, rotX);
-    }
-}
-
-void RigidbodyProperty::onValueChanged(){
+void Engine::RigidbodyProperty::onValueChanged(){
     if(!created) return;
     bool isDynamic = (mass != 0.f);
 
@@ -1062,23 +828,6 @@ void RigidbodyProperty::onValueChanged(){
     this->rigidBody->setCollisionShape(shape);
 }
 
-void RigidbodyProperty::setLinearVelocity(ZSVECTOR3 lvel){
-    if(!created) return;
-    this->linearVel = lvel;
-    this->rigidBody->setLinearVelocity(btVector3(linearVel.X, linearVel.Y, linearVel.Z));
-}
-
-void RigidbodyProperty::copyTo(Engine::GameObjectProperty* dest){
-    if(dest->type != GO_PROPERTY_TYPE_RIGIDBODY) return;
-
-    //Do base things
-    PhysicalProperty::copyTo(dest);
-
-    RigidbodyProperty* rigi_prop = static_cast<RigidbodyProperty*>(dest);
-    rigi_prop->gravity = this->gravity;
-    rigi_prop->linearVel = this->linearVel;
-    rigi_prop->angularVel = this->angularVel;
-}
 
 CharacterControllerProperty::CharacterControllerProperty(){
     type = GO_PROPERTY_TYPE_CHARACTER_CONTROLLER;
@@ -1098,7 +847,7 @@ void CharacterControllerProperty::setLinearVelocity(ZSVECTOR3 lvel){
 }
 
 void CharacterControllerProperty::addPropertyInterfaceToInspector(){
-    addCustomSizeField(_inspector_win);
+    addCustomSizeField();
 }
 void CharacterControllerProperty::copyTo(Engine::GameObjectProperty* dest){
     if(dest->type != GO_PROPERTY_TYPE_CHARACTER_CONTROLLER) return;
@@ -1111,10 +860,10 @@ void CharacterControllerProperty::copyTo(Engine::GameObjectProperty* dest){
 }
 void CharacterControllerProperty::onUpdate(float deltaTime){
     if(!created){
-        TransformProperty* transform = ((World*)world_ptr)->updateLink(&go_link)->getPropertyPtr<TransformProperty>();
+        Engine::TransformProperty* transform = go_link.updLinkPtr()->getPropertyPtr<Engine::TransformProperty>();
 
-        ZSVECTOR3 scale = transform->_last_scale;
-        ZSVECTOR3 pos = transform->_last_translation;
+        ZSVECTOR3 scale = transform->abs_scale;
+        ZSVECTOR3 pos = transform->abs_translation;
         if(isCustomPhysicalSize){
             scale = cust_size;
         }
@@ -1133,7 +882,7 @@ void CharacterControllerProperty::onUpdate(float deltaTime){
                                                     btScalar(pos.Y),
                                                     btScalar(pos.Z)));
 
-        startTransform.setRotation(btQuaternion(transform->_last_rotation.X, transform->_last_rotation.Y, transform->_last_rotation.Z));
+        startTransform.setRotation(btQuaternion(transform->abs_rotation.X, transform->abs_rotation.Y, transform->abs_rotation.Z));
 
          //using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
          btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
@@ -1151,7 +900,7 @@ void CharacterControllerProperty::onUpdate(float deltaTime){
 
          created = true;
     }else{
-        TransformProperty* transform = ((World*)world_ptr)->updateLink(&this->go_link)->getPropertyPtr<TransformProperty>();
+        Engine::TransformProperty* transform = ((World*)world_ptr)->updateLink(&this->go_link)->getPropertyPtr<Engine::TransformProperty>();
         btVector3 current_pos = rigidBody->getCenterOfMassPosition();
 
         //get current position
@@ -1208,7 +957,7 @@ void ScriptGroupProperty::onUpdate(float deltaTime){
         //if script isn't created, then create it.
         if(!script_ptr->created){
             script_ptr->_InitScript();
-            script_ptr->_callStart(((World*)world_ptr)->updateLink(&go_link), (World*)go_link.world_ptr);
+            script_ptr->_callStart(go_link.updLinkPtr(), go_link.world_ptr);
         }
 
         script_ptr->_callDraw(deltaTime); //Run onDraw() function in script
@@ -1324,10 +1073,10 @@ bool ShadowCasterProperty::isRenderAvailable(){
         return false;
     if(!this->initialized)
         init();
-    if(((World*)world_ptr)->updateLink(&this->go_link) == nullptr)
+    if(this->go_link.updLinkPtr() == nullptr)
         return false;
     //Get lightsource property of object
-    LightsourceProperty* light = ((World*)world_ptr)->updateLink(&this->go_link)->getPropertyPtr<LightsourceProperty>();
+    LightsourceProperty* light = this->go_link.updLinkPtr()->getPropertyPtr<LightsourceProperty>();
 
     if(light == nullptr)
         return false;
@@ -1414,7 +1163,7 @@ void AnimationProperty::stop(){
 }
 
 void AnimationProperty::onPreRender(Engine::RenderPipeline* pipeline){
-    GameObject* obj = ((World*)world_ptr)->updateLink(&go_link);
+    GameObject* obj = (GameObject*)go_link.updLinkPtr();
 
     Engine::Animation* anim_prop_ptr = nullptr;
     //Try to get loading result
@@ -1434,7 +1183,7 @@ void AnimationProperty::onPreRender(Engine::RenderPipeline* pipeline){
 
         for(unsigned int channels_i = 0; channels_i < anim_prop_ptr->NumChannels; channels_i ++){
             Engine::AnimationChannel* ch = &anim_prop_ptr->channels[channels_i];
-            GameObject* node = obj->getChildObjectWithNodeLabel(ch->bone_name);
+            Engine::GameObject* node = obj->getChildObjectWithNodeLabel(ch->bone_name);
             Engine::NodeProperty* prop = node->getPropertyPtr<Engine::NodeProperty>();
             //Calculate interpolated values
             prop->translation = ch->getPostitionInterpolated(animTime);

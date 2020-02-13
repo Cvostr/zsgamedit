@@ -504,14 +504,14 @@ GameObject* EditWindow::onAddNewGameObject(){
     int free_ind = world.getFreeObjectSpaceIndex();
     //if we have no free space inside array
     if(free_ind == static_cast<int>(world.objects.size())){
-        GameObject obj;
-        obj.alive = false;
-        obj.world_ptr = &world;
-        obj.array_index = free_ind;
+        GameObject* obj = new GameObject;
+        obj->alive = false;
+        obj->world_ptr = &world;
+        obj->array_index = free_ind;
         world.objects.push_back(obj);
     }
     //Create action
-    _ed_actions_container->newGameObjectAction(world.objects[static_cast<unsigned int>(free_ind)].getLinkToThisObject());
+    _ed_actions_container->newGameObjectAction(((GameObject*)world.objects[static_cast<unsigned int>(free_ind)])->getLinkToThisObject());
 
     GameObject* obj_ptr = this->world.newObject(); //Add new object to world
     ui->objsList->addTopLevelItem(obj_ptr->item_ptr); //New object will not have parents, so will be spawned at top
@@ -530,7 +530,7 @@ void EditWindow::addNewCube(){
     *obj->label_ptr = "Cube_" + std::to_string(add_num);
     obj->item_ptr->setText(0, QString::fromStdString(*obj->label_ptr));
 
-    MeshProperty* mesh = static_cast<MeshProperty*>(obj->getPropertyPtrByType(GO_PROPERTY_TYPE_MESH));
+    Engine::MeshProperty* mesh = obj->getPropertyPtr<Engine::MeshProperty>();
     mesh->resource_relpath = "@cube";
     mesh->updateMeshPtr();
 
@@ -560,12 +560,12 @@ void EditWindow::addNewTile(){
     *obj->label_ptr = "Tile_" + std::to_string(add_num);
     obj->item_ptr->setText(0, QString::fromStdString(*obj->label_ptr));
     //Assign @mesh
-    MeshProperty* mesh = static_cast<MeshProperty*>(obj->getPropertyPtrByType(GO_PROPERTY_TYPE_MESH));
+    Engine::MeshProperty* mesh = obj->getPropertyPtr<Engine::MeshProperty>();
     mesh->resource_relpath = "@plane";
     mesh->updateMeshPtr();
     //Assign new scale
-    TransformProperty* transform =
-            static_cast<TransformProperty*>(obj->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
+    Engine::TransformProperty* transform =
+            static_cast<Engine::TransformProperty*>(obj->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
     transform->scale = ZSVECTOR3(100, 100, 1);
     transform->updateMat();
 }
@@ -667,7 +667,7 @@ void EditWindow::stopWorld(){
     this->render->getRenderSettings()->resetPointers();
     //Prepare world for stopping
     for(unsigned int object_i = 0; object_i < world.objects.size(); object_i ++){
-        GameObject* object_ptr = &world.objects[object_i];
+        GameObject* object_ptr = (GameObject*)world.objects[object_i];
         //Obtain script
         ScriptGroupProperty* script_ptr = static_cast<ScriptGroupProperty*>(object_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_SCRIPTGROUP));
         if(script_ptr != nullptr)
@@ -777,10 +777,10 @@ void EditWindow::onObjectListItemClicked(){
 
     QString obj_name = selected_item->text(0); //Get label of clicked obj
 
-    GameObject* obj_ptr = (GameObject*)world.getObjectByLabel(obj_name.toStdString()); //Obtain pointer to selected object by label
+    GameObject* obj_ptr = (GameObject*)world.getGameObjectByLabel(obj_name.toStdString()); //Obtain pointer to selected object by label
 
     obj_trstate.obj_ptr = obj_ptr;
-    obj_trstate.tprop_ptr = static_cast<TransformProperty*>(obj_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
+    obj_trstate.tprop_ptr = static_cast<Engine::TransformProperty*>(obj_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
     _inspector_win->ShowObjectProperties(static_cast<void*>(obj_ptr));
 }
 //Objects list right pressed
@@ -789,7 +789,7 @@ void EditWindow::onObjectCtxMenuShow(QPoint point){
     //We selected empty space
     if(selected_item == nullptr) return;
     QString obj_name = selected_item->text(0); //Get label of clicked obj
-    GameObject* obj_ptr = (GameObject*)world.getObjectByLabel(obj_name.toStdString()); //Obtain pointer to selected object by label
+    GameObject* obj_ptr = (GameObject*)world.getGameObjectByLabel(obj_name.toStdString()); //Obtain pointer to selected object by label
 
     this->obj_ctx_menu->setObjectPtr(obj_ptr);
     this->obj_ctx_menu->show(point);
@@ -814,7 +814,7 @@ void EditWindow::onCameraToObjTeleport(){
     QString obj_name = selected_item->text(0); //Get label of clicked obj
     GameObject* obj_ptr = (GameObject*)world.getObjectByLabel(obj_name.toStdString()); //Obtain pointer to selected object by label
 
-    TransformProperty* transform = obj_ptr->getPropertyPtr<TransformProperty>(); //Obtain pointer to object transform
+    Engine::TransformProperty* transform = obj_ptr->getPropertyPtr<Engine::TransformProperty>(); //Obtain pointer to object transform
     //Define to store absolute transform
     ZSVECTOR3 _t = ZSVECTOR3(0.0f);
     ZSVECTOR3 _s = ZSVECTOR3(1.0f);
@@ -856,7 +856,7 @@ void EditWindow::toggleCameras(){
 void EditWindow::glRender(){
     //iterate over all objects in world
     for(unsigned int obj_i = 0; obj_i < world.objects.size(); obj_i ++){
-        GameObject* obj_ptr = &world.objects[obj_i];
+        GameObject* obj_ptr = (GameObject*)world.objects[obj_i];
         //if object is alive
         if(obj_ptr->alive){
             //if object active, and dark theme is on
@@ -1204,10 +1204,10 @@ void EditWindow::onLeftBtnClicked(int X, int Y){
         world.unpickObject();
         return;
     }
-    GameObject* obj_ptr = &world.objects[clicked]; //Obtain pointer to selected object by label
+    GameObject* obj_ptr = (GameObject*)world.objects[clicked]; //Obtain pointer to selected object by label
 
     obj_trstate.obj_ptr = obj_ptr;
-    obj_trstate.tprop_ptr = static_cast<TransformProperty*>(obj_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
+    obj_trstate.tprop_ptr = static_cast<Engine::TransformProperty*>(obj_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
     _inspector_win->ShowObjectProperties(static_cast<void*>(obj_ptr));
     this->ui->objsList->setCurrentItem(obj_ptr->item_ptr); //item selected in tree
 }
@@ -1223,7 +1223,7 @@ void EditWindow::onRightBtnClicked(int X, int Y){
 
     if(clicked > world.objects.size() || clicked >= 256 * 256 * 256)
         return;
-    GameObject* obj_ptr = &world.objects[clicked]; //Obtain pointer to selected object by label
+    GameObject* obj_ptr = (GameObject*)world.objects[clicked]; //Obtain pointer to selected object by label
 
     world.unpickObject(); //Clear isPicked property from all objects
     obj_ptr->pick(); //mark object picked
@@ -1281,7 +1281,7 @@ void EditWindow::onMouseMotion(int relX, int relY){
             if(clicked > world.objects.size() || clicked >= 256 * 256 * 256 || ppaint_state.last_obj == static_cast<int>(clicked))
                 return;
 
-            GameObject* obj_ptr = &world.objects[clicked]; //Obtain pointer to selected object by label
+            GameObject* obj_ptr = (GameObject*)world.objects[clicked]; //Obtain pointer to selected object by label
 
             ppaint_state.last_obj = static_cast<int>(clicked); //Set clicked as last object ID
             //Obtain pointer to object's property
@@ -1505,14 +1505,14 @@ EdActions* getActionManager(){
 
 void ObjectTransformState::setTransformOnObject(GO_TRANSFORM_MODE transformMode){
     //Calculate pointer to transform property
-    this->tprop_ptr = static_cast<TransformProperty*>(obj_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
+    this->tprop_ptr = static_cast<Engine::TransformProperty*>(obj_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
     //We haven't found transform property
     if(tprop_ptr == nullptr) return;
 
     this->transformMode = transformMode;
     this->isTransforming = true;
     //Add property action
-    Engine::GameObjectProperty* prop_ptr = static_cast<Engine::GameObjectProperty*>(obj_ptr->getPropertyPtr<TransformProperty>());
+    Engine::GameObjectProperty* prop_ptr = static_cast<Engine::GameObjectProperty*>(obj_ptr->getPropertyPtr<Engine::TransformProperty>());
     getActionManager()->newPropertyAction(prop_ptr->go_link, GO_PROPERTY_TYPE_TRANSFORM);
 }
 

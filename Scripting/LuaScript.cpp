@@ -35,13 +35,13 @@ void ObjectScript::_DestroyScript(){
     created = false;
 }
 
-void ObjectScript::_callStart(GameObject* obj, World* world) {
+void ObjectScript::_callStart(Engine::GameObject* obj, Engine::World* world) {
 
     luabridge::LuaRef start = luabridge::getGlobal(L, "onStart");
     int result = 0;
     if (start.isFunction() == true) { //If function found
         try {
-            result = start((Engine::GameObject*)obj, world); //Call script onStart()
+            result = start(obj, world); //Call script onStart()
         }
         catch (luabridge::LuaException e) {
            SCRIPT_LOG << "Error occured in script (onStart) " << name << " " << e.what() << std::endl;

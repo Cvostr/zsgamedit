@@ -198,7 +198,7 @@ void TerrainProperty::DrawMesh(RenderPipeline* pipeline){
             int texelXi = floor(texelX);
             int texelZi = floor(texelZ);
 
-            TransformProperty* t_ptr = ((GameObject*)(this->go_link.ptr))->getPropertyPtr<TransformProperty>();
+            Engine::TransformProperty* t_ptr = ((GameObject*)(this->go_link.ptr))->getPropertyPtr<Engine::TransformProperty>();
 
             HeightmapTexel* texel_ptr = &this->data.data[texelZi * data.W + texelXi];
             if(texel_ptr->grass > 0){
@@ -218,14 +218,14 @@ void TerrainProperty::DrawMesh(RenderPipeline* pipeline){
 void TerrainProperty::onUpdate(float deltaTime){
     if(data.hasPhysicShapeChanged){
         //data.initPhysics();
-        TransformProperty* transform = ((World*)world_ptr)->updateLink(&this->go_link)->getPropertyPtr<TransformProperty>();
+        Engine::TransformProperty* transform = ((World*)world_ptr)->updateLink(&this->go_link)->getPropertyPtr<Engine::TransformProperty>();
 
         //Declare start transform
         btTransform startTransform;
         startTransform.setIdentity();
         //Set start transform
-        startTransform.setOrigin(btVector3( btScalar(transform->_last_translation.X), btScalar(transform->_last_translation.Y),
-                                                    btScalar(transform->_last_translation.Z)));
+        startTransform.setOrigin(btVector3( btScalar(transform->abs_translation.X), btScalar(transform->abs_translation.Y),
+                                                    btScalar(transform->abs_translation.Z)));
 
 
          //using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
@@ -299,7 +299,7 @@ void TerrainProperty::getPickedVertexId(int posX, int posY, int screenY, unsigne
     glEnable(GL_DEPTH_TEST);
     //get pointer to material property
     MaterialProperty* mat = ((World*)world_ptr)->updateLink(&this->go_link)->getPropertyPtr<MaterialProperty>();
-    TransformProperty* transform = ((World*)world_ptr)->updateLink(&this->go_link)->getPropertyPtr<TransformProperty>();
+    Engine::TransformProperty* transform = ((World*)world_ptr)->updateLink(&this->go_link)->getPropertyPtr<Engine::TransformProperty>();
     if(mat == nullptr || mat->material_ptr == nullptr) return;
     //Apply material shader
     mat->material_ptr->applyMatToPipeline();
