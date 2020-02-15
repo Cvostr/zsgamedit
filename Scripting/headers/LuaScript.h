@@ -1,7 +1,6 @@
 #ifndef zs_luascript
 #define zs_luascript
 
-#include <QString>
 extern "C" {
 #include <lua5.3/lua.h>
 #include <lua5.3/lualib.h>
@@ -10,7 +9,6 @@ extern "C" {
 #include <LuaBridge/LuaBridge.h>
 
 #include "../../World/headers/World.h"
-
 
 
 class ObjectScript {

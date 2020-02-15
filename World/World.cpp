@@ -594,7 +594,7 @@ GameObject* World::addMeshNode(ZS3M::SceneNode* node){
 
         mesh_prop_ptr->updateMeshPtr();
         //configure material
-        MaterialProperty* mat_prop_ptr = static_cast<MaterialProperty*>(mesh_obj->getPropertyPtrByType(GO_PROPERTY_TYPE_MATERIAL));
+        Engine::MaterialProperty* mat_prop_ptr = static_cast<Engine::MaterialProperty*>(mesh_obj->getPropertyPtrByType(GO_PROPERTY_TYPE_MATERIAL));
         mat_prop_ptr->setMaterial("@none");
 
     }

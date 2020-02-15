@@ -62,9 +62,6 @@ public:
 
     bool addProperty(PROPERTY_TYPE property); //Adds property with property ID
 
-    void addChildObject(Engine::GameObjectLink link, bool updTransform = true);
-    void removeChildObject(Engine::GameObjectLink link);
-
     void setMeshSkinningRootNodeRecursively(GameObject* rootNode);
 
     void saveProperties(std::ofstream* stream); //Writes properties content at end of stream

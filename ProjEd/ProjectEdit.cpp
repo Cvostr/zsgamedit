@@ -534,7 +534,7 @@ void EditWindow::addNewCube(){
     mesh->resource_relpath = "@cube";
     mesh->updateMeshPtr();
 
-    MaterialProperty* mat = obj->getPropertyPtr<MaterialProperty>();
+    Engine::MaterialProperty* mat = obj->getPropertyPtr<Engine::MaterialProperty>();
     mat->setMaterial("@default");
 
 }
@@ -584,7 +584,7 @@ void EditWindow::addNewTerrain(){
     obj->addProperty(GO_PROPERTY_TYPE_TERRAIN); //Creates terrain inside
     obj->getPropertyPtr<TerrainProperty>()->onAddToObject();
 
-    MaterialProperty* mat = obj->getPropertyPtr<MaterialProperty>();
+    Engine::MaterialProperty* mat = obj->getPropertyPtr<Engine::MaterialProperty>();
     mat->setMaterial("@defaultHeightmap");
 
     updateFileList();

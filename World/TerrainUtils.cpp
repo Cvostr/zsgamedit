@@ -132,7 +132,7 @@ void TerrainData::initPhysics(){
     if(shape != nullptr)
         delete shape;
 
-    this->shape = new btBvhTriangleMeshShape(va, false);
+    this->shape = new btBvhTriangleMeshShape(va, true,  true);
     hasPhysicShapeChanged = true;
 }
 
@@ -276,7 +276,7 @@ void TerrainData::updateGeometryBuffers(){
         vNormalize(&v1->normal);
     }
     //generate tangent, bitangent
-    processTangentSpace(vertices, indices, (W - 1) * (H - 1) * 2 * 3, W * H);
+    processTangentSpace(vertices, indices, (W - 1) * (H - 1) * 2 * 3);
 }
 void TerrainData::updateGeometryBuffersGL(){
     glBindVertexArray(this->VAO); //Bind vertex array
@@ -448,7 +448,7 @@ void TerrainData::plantGrass(int originX, int originY, int range, int grass){
     }
 }
 
-void TerrainData::processTangentSpace(HeightmapVertex* vert_array, unsigned int* indices_array, int indices_num, int vertex_num){
+void TerrainData::processTangentSpace(HeightmapVertex* vert_array, unsigned int* indices_array, int indices_num){
     for(int ind_i = 0; ind_i < indices_num ; ind_i += 3){
         HeightmapVertex v1 = vert_array[indices_array[ind_i]];
         HeightmapVertex v2 = vert_array[indices_array[ind_i + 1]];

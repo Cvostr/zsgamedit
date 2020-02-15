@@ -116,7 +116,7 @@ void GameObject::saveProperties(std::ofstream* stream){
             break;
         }
         case GO_PROPERTY_TYPE_MATERIAL:{
-            MaterialProperty* ptr = static_cast<MaterialProperty*>(property_ptr);
+            Engine::MaterialProperty* ptr = static_cast<Engine::MaterialProperty*>(property_ptr);
             //Write path to material string
             if(ptr->material_ptr != nullptr)
                 *stream << ptr->material_path << "\n"; //Write material relpath
@@ -145,6 +145,13 @@ void GameObject::saveProperties(std::ofstream* stream){
             stream->write(reinterpret_cast<char*>(&ptr->coll_type), sizeof(COLLIDER_TYPE));
             //write isTrigger boolean
             stream->write(reinterpret_cast<char*>(&ptr->isTrigger), sizeof(bool));
+
+            stream->write(reinterpret_cast<char*>(&ptr->isCustomPhysicalSize), sizeof(bool));
+            if(ptr->isCustomPhysicalSize){
+                stream->write(reinterpret_cast<char*>(&ptr->cust_size.X), sizeof(float));
+                stream->write(reinterpret_cast<char*>(&ptr->cust_size.Y), sizeof(float));
+                stream->write(reinterpret_cast<char*>(&ptr->cust_size.Z), sizeof(float));
+            }
             *stream << "\n"; //write divider
 
             break;
@@ -167,7 +174,7 @@ void GameObject::saveProperties(std::ofstream* stream){
             break;
         }
         case GO_PROPERTY_TYPE_SHADOWCASTER:{
-            ShadowCasterProperty* ptr = static_cast<ShadowCasterProperty*>(property_ptr);
+            Engine::ShadowCasterProperty* ptr = static_cast<Engine::ShadowCasterProperty*>(property_ptr);
             //write collider type
             stream->write(reinterpret_cast<char*>(&ptr->TextureWidth), sizeof(int));
             stream->write(reinterpret_cast<char*>(&ptr->TextureHeight), sizeof(int));
@@ -253,7 +260,7 @@ void GameObject::saveProperties(std::ofstream* stream){
             break;
         }
         case GO_PROPERTY_TYPE_CHARACTER_CONTROLLER:{
-            CharacterControllerProperty* ptr = static_cast<CharacterControllerProperty*>(property_ptr);
+            Engine::CharacterControllerProperty* ptr = static_cast<Engine::CharacterControllerProperty*>(property_ptr);
             stream->write(reinterpret_cast<char*>(&ptr->isCustomPhysicalSize), sizeof(bool));
             if(ptr->isCustomPhysicalSize){
                 stream->write(reinterpret_cast<char*>(&ptr->cust_size.X), sizeof(float));
@@ -395,7 +402,7 @@ void GameObject::loadProperty(std::ifstream* world_stream){
         break;
     }
     case GO_PROPERTY_TYPE_MATERIAL:{
-        MaterialProperty* ptr = static_cast<MaterialProperty*>(prop_ptr);
+        Engine::MaterialProperty* ptr = static_cast<Engine::MaterialProperty*>(prop_ptr);
         //reading path
         *world_stream >> ptr->material_path;
 
@@ -413,6 +420,13 @@ void GameObject::loadProperty(std::ifstream* world_stream){
         world_stream->read(reinterpret_cast<char*>(&ptr->coll_type), sizeof(COLLIDER_TYPE));
         //read isTrigger boolean
         world_stream->read(reinterpret_cast<char*>(&ptr->isTrigger), sizeof(bool));
+
+        world_stream->read(reinterpret_cast<char*>(&ptr->isCustomPhysicalSize), sizeof(bool));
+        if(ptr->isCustomPhysicalSize){
+            world_stream->read(reinterpret_cast<char*>(&ptr->cust_size.X), sizeof(float));
+            world_stream->read(reinterpret_cast<char*>(&ptr->cust_size.Y), sizeof(float));
+            world_stream->read(reinterpret_cast<char*>(&ptr->cust_size.Z), sizeof(float));
+        }
 
         break;
     }
@@ -433,7 +447,7 @@ void GameObject::loadProperty(std::ifstream* world_stream){
         break;
     }
     case GO_PROPERTY_TYPE_SHADOWCASTER:{
-        ShadowCasterProperty* ptr = static_cast<ShadowCasterProperty*>(prop_ptr);
+        Engine::ShadowCasterProperty* ptr = static_cast<Engine::ShadowCasterProperty*>(prop_ptr);
         world_stream->seekg(1, std::ofstream::cur);
         //write collider type
         world_stream->read(reinterpret_cast<char*>(&ptr->TextureWidth), sizeof(int));
@@ -529,7 +543,7 @@ void GameObject::loadProperty(std::ifstream* world_stream){
             break;
         }
         case GO_PROPERTY_TYPE_CHARACTER_CONTROLLER:{
-            CharacterControllerProperty* ptr = static_cast<CharacterControllerProperty*>(prop_ptr);
+            Engine::CharacterControllerProperty* ptr = static_cast<Engine::CharacterControllerProperty*>(prop_ptr);
             world_stream->seekg(1, std::ofstream::cur); //Skip space
             world_stream->read(reinterpret_cast<char*>(&ptr->isCustomPhysicalSize), sizeof(bool));
             if(ptr->isCustomPhysicalSize){

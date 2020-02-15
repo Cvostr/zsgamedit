@@ -118,8 +118,7 @@ Engine::GameObjectProperty* _allocProperty(PROPERTY_TYPE type){
             break;
         }
         case GO_PROPERTY_TYPE_MATERIAL:{
-            MaterialProperty* ptr = new MaterialProperty;
-            _ptr = static_cast<Engine::GameObjectProperty*>(ptr);
+            _ptr = static_cast<Engine::GameObjectProperty*>(new Engine::MaterialProperty);
             break;
         }
         case GO_PROPERTY_TYPE_COLLIDER:{
@@ -131,13 +130,11 @@ Engine::GameObjectProperty* _allocProperty(PROPERTY_TYPE type){
             break;
         }
         case GO_PROPERTY_TYPE_SKYBOX:{
-            SkyboxProperty* ptr = new SkyboxProperty;
-            _ptr = static_cast<Engine::GameObjectProperty*>(ptr);
+            _ptr = static_cast<Engine::GameObjectProperty*>(new Engine::SkyboxProperty);
             break;
         }
         case GO_PROPERTY_TYPE_SHADOWCASTER:{
-            ShadowCasterProperty* ptr = new ShadowCasterProperty;
-            _ptr = static_cast<Engine::GameObjectProperty*>(ptr);
+            _ptr = static_cast<Engine::GameObjectProperty*>(new Engine::ShadowCasterProperty);
             break;
         }
         case GO_PROPERTY_TYPE_TERRAIN:{
@@ -146,8 +143,7 @@ Engine::GameObjectProperty* _allocProperty(PROPERTY_TYPE type){
             break;
         }
         case GO_PROPERTY_TYPE_CHARACTER_CONTROLLER:{
-            CharacterControllerProperty* ptr = new CharacterControllerProperty;
-            _ptr = static_cast<Engine::GameObjectProperty*>(ptr);
+            _ptr = static_cast<Engine::GameObjectProperty*>(new Engine::CharacterControllerProperty);
             break;
         }
         case GO_PROPERTY_TYPE_TILE_GROUP:{
@@ -286,11 +282,6 @@ void Engine::MeshProperty::addPropertyInterfaceToInspector(){
     }
 }
 
-
-void Engine::MeshProperty::onValueChanged(){
-    updateMeshPtr();
-}
-
 void Engine::LightsourceProperty::addPropertyInterfaceToInspector(){
     AreaRadioGroup* group = new AreaRadioGroup; //allocate button layout
     group->value_ptr = reinterpret_cast<uint8_t*>(&this->light_type);
@@ -365,15 +356,7 @@ void Engine::AudioSourceProperty::addPropertyInterfaceToInspector(){
     _inspector_win->addPropertyArea(pitch_area);
 }
 
-
-MaterialProperty::MaterialProperty(){
-    type = GO_PROPERTY_TYPE_MATERIAL;
-
-    receiveShadows = true;
-    this->material_ptr = nullptr;
-}
-
-void MaterialProperty::addPropertyInterfaceToInspector(){
+void Engine::MaterialProperty::addPropertyInterfaceToInspector(){
     //Add area to pick material file
     PickResourceArea* area = new PickResourceArea(RESOURCE_TYPE_MATERIAL);
     area->setLabel("Material");
@@ -524,7 +507,7 @@ void MaterialProperty::addPropertyInterfaceToInspector(){
         }
     }
 }
-void MaterialProperty::onValueChanged(){
+void Engine::MaterialProperty::onValueChanged(){
 
     Engine::MaterialResource* newmat_ptr_res = game_data->resources->getMaterialByLabel(this->material_path);
     Material* newmat_ptr = nullptr;
@@ -590,30 +573,6 @@ void MaterialProperty::onValueChanged(){
     _editor_win->updateFileList();
 }
 
-void MaterialProperty::copyTo(Engine::GameObjectProperty* dest){
-    //MaterialShaderProperty
-    if(dest->type != GO_PROPERTY_TYPE_MATERIAL) return;
-
-    //Do base things
-    GameObjectProperty::copyTo(dest);
-
-    MaterialProperty* mat_prop = static_cast<MaterialProperty*>(dest);
-    mat_prop->material_path = this->material_path;
-    mat_prop->material_ptr = this->material_ptr;
-    mat_prop->group_label = this->group_label;
-}
-
-void MaterialProperty::setMaterial(Material* mat){
-    this->material_ptr = mat;
-    this->material_path = mat->file_path;
-    this->group_label = mat->group_ptr->groupCaption;
-}
-
-void MaterialProperty::setMaterial(std::string path){
-    Material* newmat_ptr = game_data->resources->getMaterialByLabel(path)->material;
-    setMaterial(newmat_ptr);
-}
-
 void Engine::ColliderProperty::addPropertyInterfaceToInspector(){
     addColliderRadio();
 
@@ -623,6 +582,8 @@ void Engine::ColliderProperty::addPropertyInterfaceToInspector(){
     istrigger->go_property = static_cast<void*>(this);
     istrigger->bool_ptr = &this->isTrigger;
     _inspector_win->addPropertyArea(istrigger);
+    //Show custom size field
+    addCustomSizeField();
 }
 void Engine::RigidbodyProperty::addPropertyInterfaceToInspector(){
     PhysicalProperty::addColliderRadio();
@@ -641,107 +602,8 @@ void Engine::RigidbodyProperty::addPropertyInterfaceToInspector(){
     _inspector_win->addPropertyArea(linearE);
 }
 
-void Engine::RigidbodyProperty::onValueChanged(){
-    if(!created) return;
-    bool isDynamic = (mass != 0.f);
-
-    btVector3 localInertia(0, 0, 0);
-    if (isDynamic)
-        shape->calculateLocalInertia(mass, localInertia);
-    //SET mass to bullet rigidbody
-    this->rigidBody->setMassProps(mass, localInertia);
-    this->rigidBody->setGravity(btVector3(gravity.X, gravity.Y, gravity.Z));
-    this->rigidBody->setLinearVelocity(btVector3(linearVel.X, linearVel.Y, linearVel.Z));
-
-    delete shape;
-    updateCollisionShape();
-    this->rigidBody->setCollisionShape(shape);
-}
-
-
-CharacterControllerProperty::CharacterControllerProperty(){
-    type = GO_PROPERTY_TYPE_CHARACTER_CONTROLLER;
-    created = false;
-
-    gravity = ZSVECTOR3(0.f, -10.f, 0.f);
-    linearVel = ZSVECTOR3(0.f, -10.f, 0.f);
-
-    mass = 10;
-}
-
-void CharacterControllerProperty::setLinearVelocity(ZSVECTOR3 lvel){
-    if(!created) return;
-    this->linearVel = lvel;
-    this->rigidBody->setLinearVelocity(btVector3(linearVel.X, linearVel.Y, linearVel.Z));
-    rigidBody->activate();
-}
-
-void CharacterControllerProperty::addPropertyInterfaceToInspector(){
+void Engine::CharacterControllerProperty::addPropertyInterfaceToInspector(){
     addCustomSizeField();
-}
-void CharacterControllerProperty::copyTo(Engine::GameObjectProperty* dest){
-    if(dest->type != GO_PROPERTY_TYPE_CHARACTER_CONTROLLER) return;
-
-    //Do base things
-    PhysicalProperty::copyTo(dest);
-
-    CharacterControllerProperty* chara = static_cast<CharacterControllerProperty*>(dest);
-
-}
-void CharacterControllerProperty::onUpdate(float deltaTime){
-    if(!created){
-        Engine::TransformProperty* transform = go_link.updLinkPtr()->getPropertyPtr<Engine::TransformProperty>();
-
-        ZSVECTOR3 scale = transform->abs_scale;
-        ZSVECTOR3 pos = transform->abs_translation;
-        if(isCustomPhysicalSize){
-            scale = cust_size;
-        }
-
-        //if uninitialized
-        this->shape = new btCapsuleShape(scale.X, scale.Y);
-
-        btVector3 localInertia(0, 0, 0);
-
-        //shape->calculateLocalInertia(mass, localInertia);
-        //Declare start transform
-        btTransform startTransform;
-        startTransform.setIdentity();
-        //Set start transform
-        startTransform.setOrigin(btVector3( btScalar(pos.X),
-                                                    btScalar(pos.Y),
-                                                    btScalar(pos.Z)));
-
-        startTransform.setRotation(btQuaternion(transform->abs_rotation.X, transform->abs_rotation.Y, transform->abs_rotation.Z));
-
-         //using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
-         btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
-
-         btRigidBody::btRigidBodyConstructionInfo cInfo(mass, myMotionState, shape, localInertia);
-
-         rigidBody = new btRigidBody(cInfo);
-
-         rigidBody->setUserIndex(this->go_link.updLinkPtr()->array_index);
-         //add rigidbody to world
-         go_link.world_ptr->physical_world->addRidigbodyToWorld(rigidBody);
-        //Set zero values
-        this->rigidBody->setGravity(btVector3(gravity.X, gravity.Y, gravity.Z));
-        this->rigidBody->setLinearVelocity(btVector3(linearVel.X, linearVel.Y, linearVel.Z));
-
-         created = true;
-    }else{
-        Engine::TransformProperty* transform = this->go_link.updLinkPtr()->getPropertyPtr<Engine::TransformProperty>();
-        btVector3 current_pos = rigidBody->getCenterOfMassPosition();
-
-        //get current position
-        float curX = current_pos.getX();
-        float curY = current_pos.getY();
-        float curZ = current_pos.getZ();
-
-        if(transform->translation != ZSVECTOR3(curX, curY, curZ))
-            transform->translation = ZSVECTOR3(curX, curY, curZ);
-
-    }
 }
 
 void ScriptGroupProperty::onValueChanged(){
@@ -834,28 +696,7 @@ ScriptGroupProperty::ScriptGroupProperty(){
     this->scripts_attached.resize(static_cast<unsigned int>(this->scr_num));
 }
 
-
-SkyboxProperty::SkyboxProperty(){
-    type = GO_PROPERTY_TYPE_SKYBOX;
-}
-
-ShadowCasterProperty::ShadowCasterProperty(){
-    type = GO_PROPERTY_TYPE_SHADOWCASTER;
-
-    initialized = false;
-
-    TextureWidth = 2048;
-    TextureHeight = 2048;
-
-    shadow_bias = 0.005f;
-
-    nearPlane = 1.0f;
-    farPlane = 75.0f;
-
-    projection_viewport = 20;
-}
-
-void ShadowCasterProperty::addPropertyInterfaceToInspector(){
+void Engine::ShadowCasterProperty::addPropertyInterfaceToInspector(){
 
     IntPropertyArea* textureW = new IntPropertyArea; //New property area
     textureW->setLabel("Texture Width"); //Its label
@@ -891,44 +732,6 @@ void ShadowCasterProperty::addPropertyInterfaceToInspector(){
     _viewport->value = &this->projection_viewport; //Ptr to our vector
     _viewport->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
     _inspector_win->addPropertyArea(_viewport);
-}
-
-void ShadowCasterProperty::onValueChanged(){
-    //Update shadowmap texture
-    setTextureSize();
-}
-
-bool ShadowCasterProperty::isRenderAvailable(){
-    if(!this->active)
-        return false;
-    if(!this->initialized)
-        init();
-    if(this->go_link.updLinkPtr() == nullptr)
-        return false;
-    //Get lightsource property of object
-    Engine::LightsourceProperty* light = this->go_link.updLinkPtr()->getPropertyPtr<Engine::LightsourceProperty>();
-
-    if(light == nullptr)
-        return false;
-        //if light gameobject disabled
-    if(!light->isActive())
-            return false;
-    return true;
-}
-
-void ShadowCasterProperty::copyTo(Engine::GameObjectProperty* dest){
-    if(dest->type != this->type) return; //if it isn't script group
-
-    //Do base things
-    GameObjectProperty::copyTo(dest);
-
-    ShadowCasterProperty* _dest = static_cast<ShadowCasterProperty*>(dest);
-    _dest->farPlane = this->farPlane;
-    _dest->nearPlane = this->nearPlane;
-    _dest->shadow_bias = this->shadow_bias;
-    _dest->TextureWidth = this->TextureWidth;
-    _dest->TextureHeight = this->TextureHeight;
-    _dest->projection_viewport = this->projection_viewport;
 }
 
 void onPlay(){
@@ -968,8 +771,4 @@ void Engine::AnimationProperty::addPropertyInterfaceToInspector(){
         stopbtn->insp_ptr = _inspector_win; //Setting inspector pointer
         _inspector_win->registerUiObject(stopbtn);
     }
-}
-
-void Engine::AnimationProperty::onValueChanged(){
-    updateAnimationPtr();
 }

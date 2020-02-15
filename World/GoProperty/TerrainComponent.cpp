@@ -298,7 +298,7 @@ void TerrainProperty::getPickedVertexId(int posX, int posY, int screenY, unsigne
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
     //get pointer to material property
-    MaterialProperty* mat = this->go_link.updLinkPtr()->getPropertyPtr<MaterialProperty>();
+    Engine::MaterialProperty* mat = this->go_link.updLinkPtr()->getPropertyPtr<Engine::MaterialProperty>();
     Engine::TransformProperty* transform = this->go_link.updLinkPtr()->getPropertyPtr<Engine::TransformProperty>();
     if(mat == nullptr || mat->material_ptr == nullptr) return;
     //Apply material shader

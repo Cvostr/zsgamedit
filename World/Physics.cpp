@@ -43,6 +43,7 @@ void Engine::PhysicalProperty::addCustomSizeField(){
     cust->setLabel("Custom size ");
     cust->go_property = static_cast<void*>(this);
     cust->bool_ptr = &this->isCustomPhysicalSize;
+    cust->updateInspectorOnChange = true;
     _inspector_win->addPropertyArea(cust);
 
     if(isCustomPhysicalSize){

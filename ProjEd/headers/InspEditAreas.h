@@ -120,6 +120,7 @@ public:
 
 class BoolCheckboxArea : public PropertyEditArea{
 public:
+    bool updateInspectorOnChange;
     bool* bool_ptr; //pointer to modifying bool
     QCheckBox checkbox; //pressing checkbox
 

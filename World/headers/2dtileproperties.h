@@ -66,8 +66,6 @@ public:
 };
 
 class TileProperty : public Engine::GameObjectProperty{
-private:
-    bool lastAnimState;
 public:
     TileGeometry geometry;
     //Defines color texture

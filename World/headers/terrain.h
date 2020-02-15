@@ -3,7 +3,6 @@
 
 #define TERRAIN_TEXTURES_AMOUNT 12
 
-#include <QString>
 #include <render/zs-texture.h>
 #include <render/zs-math.h>
 #include <engine/resources.h>
@@ -111,7 +110,7 @@ public:
     void destroyGL();
     void Draw(bool picking = false);
     void generateGLMesh();
-    void processTangentSpace(HeightmapVertex* vert_array, unsigned int* indices_array, int indices_num, int vertex_num);
+    void processTangentSpace(HeightmapVertex* vert_array, unsigned int* indices_array, int indices_num);
     void saveToFile(const char* file_path);
     bool loadFromFile(const char* file_path);
 

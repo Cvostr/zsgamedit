@@ -40,7 +40,6 @@ TileGroupProperty::TileGroupProperty(){
 TileProperty::TileProperty(){
     type = GO_PROPERTY_TYPE_TILE;
     active = true;
-    lastAnimState = false;
 
     this->texture_diffuse = nullptr;
     this->diffuse_relpath = "@none";
@@ -202,6 +201,7 @@ void TileProperty::addPropertyInterfaceToInspector(){
     isAnim->setLabel("Animated ");
     isAnim->go_property = static_cast<void*>(this);
     isAnim->bool_ptr = &this->anim_property.isAnimated;
+    isAnim->updateInspectorOnChange = true;
     _inspector_win->addPropertyArea(isAnim);
 
     if(this->anim_property.isAnimated){ //if animation turned on
@@ -239,11 +239,6 @@ void TileProperty::addPropertyInterfaceToInspector(){
 
 void TileProperty::onValueChanged(){
     updTexturePtr();
-
-    if(lastAnimState != this->anim_property.isAnimated){
-        _inspector_win->updateRequired = true;
-        lastAnimState = this->anim_property.isAnimated;
-    }
 }
 
 void TileProperty::updTexturePtr(){

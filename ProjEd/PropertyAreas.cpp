@@ -645,6 +645,7 @@ BoolCheckboxArea::BoolCheckboxArea(){
     bool_ptr = nullptr;
 
     elem_layout->addWidget(&this->checkbox);
+    updateInspectorOnChange = false;
 }
 void BoolCheckboxArea::addToInspector(InspectorWin* win){
     win->connect(&this->checkbox, SIGNAL(stateChanged(int)), win, SLOT(onPropertyChange()));
@@ -659,11 +660,11 @@ void BoolCheckboxArea::writeNewValues(){
         getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
     }
 
-    if(this->checkbox.isChecked()){ //if user checked it
-        *bool_ptr = true;
-    }else{ //unchecked
-        *bool_ptr = false;
-    }
+    if((this->checkbox.isChecked() != *bool_ptr) && updateInspectorOnChange)
+        _editor_win->getInspector()->updateRequired = true;
+
+    *bool_ptr = this->checkbox.isChecked();
+
     PropertyEditArea::callPropertyUpdate();
 }
 void BoolCheckboxArea::setup(){

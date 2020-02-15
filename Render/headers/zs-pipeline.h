@@ -14,12 +14,7 @@
 
 #include "render/zs-pipeline.h"
 
-enum PIPELINE_STATE {
-    PIPELINE_STATE_DEFAULT,
-    PIPELINE_STATE_PICKING,
-    PIPELINE_STATE_MARKED,
-    PIPELINE_STATE_SHADOWDEPTH
-};
+
 
 
 class RenderPipeline : public Engine::RenderPipeline{
@@ -33,7 +28,6 @@ private:
 public:
     Engine::UniformBuffer* editorUniformBuffer;
 
-    PIPELINE_STATE current_state;
     void setup(int bufWidth, int bufHeight);
     bool InitGLEW();
     void initGizmos(int projectPespective);

@@ -9,9 +9,7 @@
 extern ZSGAME_DATA* game_data;
 
 RenderPipeline::RenderPipeline(){
-    this->current_state = PIPELINE_STATE_DEFAULT;
 
-    this->cullFaces = false;
 }
 
 GizmosRenderer* RenderPipeline::getGizmosRenderer(){
@@ -253,7 +251,7 @@ void RenderPipeline::render3D(void* projectedit_ptr, Engine::Camera* cam)
     World* world_ptr = &editwin_ptr->world;
     Engine::Camera* cam_ptr = cam; //We'll set it next
 
-    ShadowCasterProperty* shadowcast = static_cast<ShadowCasterProperty*>(this->render_settings.shadowcaster_ptr);
+    Engine::ShadowCasterProperty* shadowcast = static_cast<Engine::ShadowCasterProperty*>(this->render_settings.shadowcaster_ptr);
     if(shadowcast != nullptr){ //we have shadowcaster
         shadowcast->Draw(cam_ptr, this); //draw shadowcaster
     }
@@ -266,7 +264,7 @@ void RenderPipeline::render3D(void* projectedit_ptr, Engine::Camera* cam)
     glViewport(0, 0, this->WIDTH, this->HEIGHT);
 
 
-    SkyboxProperty* skybox = static_cast<SkyboxProperty*>(this->render_settings.skybox_ptr);
+    Engine::SkyboxProperty* skybox = static_cast<Engine::SkyboxProperty*>(this->render_settings.skybox_ptr);
     if(skybox != nullptr)
         skybox->DrawSky(this);
 
@@ -436,33 +434,6 @@ void GameObject::processObject(RenderPipeline* pipeline){
     }
 }
 
-void MaterialProperty::onRender(Engine::RenderPipeline* pipeline){
-    //Check for validity of pointer
-    if(material_ptr == nullptr) return;
-
-    MtShaderPropertiesGroup* group_ptr = material_ptr->group_ptr;
-    if( group_ptr == nullptr) return ; //if object hasn't property
-
-    //Get pointer to shadowcaster
-    ShadowCasterProperty* shadowcast = static_cast<ShadowCasterProperty*>(pipeline->getRenderSettings()->shadowcaster_ptr);
-    //Bind shadow uniform buffer
-    pipeline->shadowBuffer->bind();
-
-    int recShadows = 1;
-
-    if(shadowcast == nullptr){
-        //In GLSL we should use Integer instead of bool
-        recShadows = 0;
-    }else if(!receiveShadows || !shadowcast->isActive()){
-        recShadows = 0;
-    }else
-        shadowcast->setTexture();
-
-    pipeline->shadowBuffer->writeData(sizeof (ZSMATRIX4x4) * 2 + 4, 4, &recShadows);
-
-    material_ptr->applyMatToPipeline();
-}
-
 void TerrainProperty::onRender(Engine::RenderPipeline* pipeline){
     terrainUniformBuffer = pipeline->terrainUniformBuffer;
     transformBuffer = pipeline->transformBuffer;
@@ -482,7 +453,7 @@ void TerrainProperty::onRender(Engine::RenderPipeline* pipeline){
     //Binding terrain buffer
     pipeline->terrainUniformBuffer->bind();
 
-    MaterialProperty* mat = go_link.updLinkPtr()->getPropertyPtr<MaterialProperty>();
+    Engine::MaterialProperty* mat = go_link.updLinkPtr()->getPropertyPtr<Engine::MaterialProperty>();
     if(mat == nullptr) return;
 
     int dtrue = 1;
@@ -517,7 +488,6 @@ void TerrainProperty::onRender(Engine::RenderPipeline* pipeline){
 
     //Apply material shader
     mat->onRender(pipeline);
-
 
 }
 
@@ -556,115 +526,9 @@ void TileProperty::onRender(Engine::RenderPipeline* pipeline){
     }
 }
 
-void SkyboxProperty::onPreRender(Engine::RenderPipeline* pipeline){
-    pipeline->getRenderSettings()->skybox_ptr = static_cast<void*>(this);
-}
-
-void SkyboxProperty::DrawSky(RenderPipeline* pipeline){
-    if(!this->isActive())
-        return;
-    if(this->go_link.updLinkPtr() == nullptr) return;
-    //Get pointer to Material property
-    MaterialProperty* mat = this->go_link.updLinkPtr()->getPropertyPtr<MaterialProperty>();
-    if(mat == nullptr) return;
-    //Apply material shader
-    mat->onRender(pipeline);
-    //Draw skybox cube
-    glDisable(GL_DEPTH_TEST);
-    Engine::getSkyboxMesh()->Draw();
-}
-
-void ShadowCasterProperty::onPreRender(Engine::RenderPipeline* pipeline){
-    pipeline->getRenderSettings()->shadowcaster_ptr = static_cast<void*>(this);
-}
-
-void ShadowCasterProperty::Draw(Engine::Camera* cam, RenderPipeline* pipeline){
-    if(!isRenderAvailable()){
-        glViewport(0, 0, TextureWidth, TextureHeight);
-        glBindFramebuffer(GL_FRAMEBUFFER, shadowBuffer); //Bind framebuffer
-        glClear(GL_DEPTH_BUFFER_BIT);
-        return;
-    }
-
-    Engine::LightsourceProperty* light = this->go_link.updLinkPtr()->getPropertyPtr<Engine::LightsourceProperty>();
-
-    //ZSVECTOR3 cam_pos = cam->getCameraPosition() + cam->getCameraFrontVec() * 20;
-    ZSVECTOR3 cam_pos = cam->getCameraPosition() - light->direction * 20;
-    this->LightProjectionMat = getOrthogonal(-projection_viewport, projection_viewport, -projection_viewport, projection_viewport, nearPlane, farPlane);
-    this->LightViewMat = matrixLookAt(cam_pos, cam_pos + light->direction * -1, ZSVECTOR3(0,1,0));
-    //Changing viewport to texture sizes
-    glViewport(0, 0, TextureWidth, TextureHeight);
-
-    glBindFramebuffer(GL_FRAMEBUFFER, shadowBuffer); //Bind framebuffer
-    glClear(GL_DEPTH_BUFFER_BIT);
-    glEnable(GL_DEPTH_TEST);
-    glFrontFace(GL_CW);
-    glDisable(GL_CULL_FACE);
-    //Bind shadow uniform buffer
-    pipeline->shadowBuffer->bind();
-    //Bind ortho shadow projection
-    pipeline->shadowBuffer->writeData(0, sizeof (ZSMATRIX4x4), &LightProjectionMat);
-    //Bind shadow view matrix
-    pipeline->shadowBuffer->writeData(sizeof (ZSMATRIX4x4), sizeof (ZSMATRIX4x4), &LightViewMat);
-    //Send BIAS value
-    pipeline->shadowBuffer->writeData(sizeof (ZSMATRIX4x4) * 2, 4, &shadow_bias);
-    //Send Width of shadow texture
-    pipeline->shadowBuffer->writeData(sizeof (ZSMATRIX4x4) * 2 + 8, 4, &this->TextureWidth);
-    //Send Height of shadow texture
-    pipeline->shadowBuffer->writeData(sizeof (ZSMATRIX4x4) * 2 + 12, 4, &this->TextureHeight);
-    //Use shadowmap shader to draw objects
-    pipeline->getShadowmapShader()->Use();
-    //Render to depth all scene
-    pipeline->renderDepth(this->go_link.world_ptr);
-
-    glFrontFace(GL_CCW);
-}
-
-void ShadowCasterProperty::init(){
-    glGenFramebuffers(1, &this->shadowBuffer);//Generate framebuffer for texture
-    glGenTextures(1, &this->shadowDepthTexture); //Generate texture
-
-    glBindTexture(GL_TEXTURE_2D, shadowDepthTexture);
-    //Configuring texture
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, this->TextureWidth, this->TextureHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-    float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
-
-    //Binding framebuffer
-    glBindFramebuffer(GL_FRAMEBUFFER, shadowBuffer);
-    //Connecting depth texture to framebuffer
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, this->shadowDepthTexture, 0);
-    //We won't render color
-    glDrawBuffer(false);
-    glReadBuffer(false);
-    //Unbind framebuffer
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-    this->initialized = true;
-}
-
-void ShadowCasterProperty::setTextureSize(){
-    glDeleteTextures(1, &this->shadowDepthTexture);
-    glDeleteFramebuffers(1, &shadowBuffer);
-
-    init();
-}
-
-void ShadowCasterProperty::setTexture(){
-    glActiveTexture(GL_TEXTURE6);
-    glBindTexture(GL_TEXTURE_2D, this->shadowDepthTexture);
-}
 
 Engine::Shader* RenderPipeline::getPickingShader(){
     return this->pick_shader;
-}
-
-Engine::Shader* RenderPipeline::getShadowmapShader(){
-    return this->shadowMap;
 }
 
 Engine::Shader* RenderPipeline::getUiShader(){
