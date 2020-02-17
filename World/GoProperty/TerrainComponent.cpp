@@ -3,38 +3,17 @@
 #include "../headers/Misc.h"
 
 //selected terrain
-static TerrainProperty* current_terrain_prop;
+static Engine::TerrainProperty* current_terrain_prop;
 extern ZSGAME_DATA* game_data;
 extern Project* project_ptr;
 extern InspectorWin* _inspector_win;
-
-TerrainProperty::TerrainProperty(){
-    type = GO_PROPERTY_TYPE_TERRAIN;
-
-    this->Width = 500;
-    this->Length = 500;
-    this->MaxHeight = 500;
-    GrassDensity = 1.0f;
-    castShadows = true;
-    textures_size = 0;
-    grassType_size = 0;
-
-    this->range = 15;
-    this->editHeight = 10;
-    this->textureid = 1;
-    this->vegetableid = 1;
-
-    edit_mode = 1;
-
-    rigidBody = nullptr;
-}
 
 void onClearTerrain(){
     current_terrain_prop->getTerrainData()->alloc(current_terrain_prop->Width, current_terrain_prop->Length);
     current_terrain_prop->getTerrainData()->generateGLMesh();
 }
 
-void TerrainProperty::addPropertyInterfaceToInspector(){
+void Engine::TerrainProperty::addPropertyInterfaceToInspector(){
     current_terrain_prop = this;
 
     IntPropertyArea* HWidth = new IntPropertyArea; //New property area
@@ -72,6 +51,7 @@ void TerrainProperty::addPropertyInterfaceToInspector(){
     AreaRadioGroup* group = new AreaRadioGroup; //allocate button layout
     group->value_ptr = reinterpret_cast<uint8_t*>(&this->edit_mode);
     group->go_property = static_cast<void*>(this);
+    group->updateInspectorOnChange = true;
 
     QRadioButton* directional_radio = new QRadioButton; //allocate first radio
     directional_radio->setText("Map");
@@ -185,7 +165,7 @@ void TerrainProperty::addPropertyInterfaceToInspector(){
     }
 }
 
-void TerrainProperty::DrawMesh(RenderPipeline* pipeline){
+void Engine::TerrainProperty::DrawMesh(RenderPipeline* pipeline){
     data.Draw(false);
 
     float delta = 1.0f / GrassDensity;
@@ -198,7 +178,7 @@ void TerrainProperty::DrawMesh(RenderPipeline* pipeline){
             int texelXi = floor(texelX);
             int texelZi = floor(texelZ);
 
-            Engine::TransformProperty* t_ptr = ((GameObject*)(this->go_link.ptr))->getPropertyPtr<Engine::TransformProperty>();
+            Engine::TransformProperty* t_ptr = (this->go_link.updLinkPtr())->getPropertyPtr<Engine::TransformProperty>();
 
             HeightmapTexel* texel_ptr = &this->data.data[texelZi * data.W + texelXi];
             if(texel_ptr->grass > 0){
@@ -215,9 +195,9 @@ void TerrainProperty::DrawMesh(RenderPipeline* pipeline){
     }
 }
 
-void TerrainProperty::onUpdate(float deltaTime){
-    if(data.hasPhysicShapeChanged){
-        //data.initPhysics();
+void Engine::TerrainProperty::onUpdate(float deltaTime){
+    if(data.shape == nullptr || data.hasPhysicShapeChanged){
+        data.initPhysics();
         Engine::TransformProperty* transform = this->go_link.updLinkPtr()->getPropertyPtr<Engine::TransformProperty>();
 
         //Declare start transform
@@ -247,15 +227,11 @@ void TerrainProperty::onUpdate(float deltaTime){
     }
 }
 
-void TerrainProperty::onValueChanged(){
+void Engine::TerrainProperty::onValueChanged(){
     //check for limitation of texture groups
     if(this->textures_size > 12)
         textures_size = 12;
 
-    if(_last_edit_mode != edit_mode){
-        _last_edit_mode = edit_mode;
-        _inspector_win->updateRequired = true;
-    }
     //if amount of texture pairs changed
     if(static_cast<unsigned int>(this->textures_size) != textures.size()){
         textures.resize(static_cast<unsigned int>(this->textures_size));
@@ -277,7 +253,7 @@ void TerrainProperty::onValueChanged(){
     }
 }
 
-void TerrainProperty::onAddToObject(){
+void Engine::TerrainProperty::onAddToObject(){
     std::string terrain_random_prefix;
     genRandomString(&terrain_random_prefix, 4);
 
@@ -293,7 +269,7 @@ void TerrainProperty::onAddToObject(){
     data.saveToFile(fpath.c_str());
 }
 
-void TerrainProperty::getPickedVertexId(int posX, int posY, int screenY, unsigned char* data){
+void Engine::TerrainProperty::getPickedVertexId(int posX, int posY, int screenY, unsigned char* data){
     glClearColor(0,0,0,0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
@@ -316,7 +292,7 @@ void TerrainProperty::getPickedVertexId(int posX, int posY, int screenY, unsigne
     glReadPixels(posX, screenY - posY, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, &data[0]);
 }
 
-void TerrainProperty::modifyTerrainVertex(unsigned char* gl_data, bool isCtrlHold){
+void Engine::TerrainProperty::modifyTerrainVertex(unsigned char* gl_data, bool isCtrlHold){
     if((gl_data[0] + gl_data[1] + gl_data[2]) == 0) return;
     for(int i = 0; i < Width; i ++){
         for(int y = 0; y < Length; y ++){
@@ -356,49 +332,11 @@ void TerrainProperty::modifyTerrainVertex(unsigned char* gl_data, bool isCtrlHol
     }
 }
 
-void TerrainProperty::onMouseClick(int posX, int posY, int screenY, bool isLeftButtonHold, bool isCtrlHold){
+void Engine::TerrainProperty::onMouseMotion(int posX, int posY, int screenY, bool isLeftButtonHold, bool isCtrlHold){
     if(isLeftButtonHold){
         unsigned char _data[4];
         getPickedVertexId(posX, posY, screenY, &_data[0]);
         //find picked texel
         modifyTerrainVertex(&_data[0], isCtrlHold);
     }
-}
-
-void TerrainProperty::onMouseMotion(int posX, int posY, int screenY, bool isLeftButtonHold, bool isCtrlHold){
-    if(isLeftButtonHold){
-        unsigned char _data[4];
-        getPickedVertexId(posX, posY, screenY, &_data[0]);
-        //find picked texel
-        modifyTerrainVertex(&_data[0], isCtrlHold);
-    }
-}
-
-TerrainData* TerrainProperty::getTerrainData(){
-    return &data;
-}
-
-void TerrainProperty::copyTo(Engine::GameObjectProperty* dest){
-    if(dest->type != this->type) return; //if it isn't script group
-
-    //Do base things
-    GameObjectProperty::copyTo(dest);
-
-    TerrainProperty* _dest = static_cast<TerrainProperty*>(dest);
-    _dest->Width = this->Width;
-    _dest->Length = this->Length;
-    _dest->MaxHeight = this->MaxHeight;
-    _dest->GrassDensity = this->GrassDensity;
-    _dest->file_label = this->file_label;
-    _dest->castShadows = this->castShadows;
-    _dest->textures_size = this->textures_size;
-    _dest->grassType_size = this->grassType_size;
-    //Copying terrain data
-    data.copyTo(&_dest->data);
-    //Copy textures data
-    for(unsigned int t_i = 0; t_i < this->textures.size(); t_i ++)
-        _dest->textures.push_back(textures[t_i]);
-
-    for(unsigned int g_i = 0; g_i < this->grass.size(); g_i ++)
-        _dest->grass.push_back(grass[g_i]);
 }

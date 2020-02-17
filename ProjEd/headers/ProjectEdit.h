@@ -57,7 +57,7 @@ struct EditorInputState{
 struct ObjectTransformState{
     bool isTransforming; //To draw controls or not
     bool isModifying;
-    GameObject* obj_ptr;
+    Engine::GameObject* obj_ptr;
     Engine::TransformProperty* tprop_ptr; //Pointer to transform property of obj_ptr
     GO_TRANSFORM_MODE transformMode;
 
@@ -252,7 +252,7 @@ public slots:
     void onStorePrefabPressed();
     void onInfoPressed();
 private:
-    GameObject* obj_ptr;
+    Engine::GameObject* obj_ptr;
     QMenu* menu; //Menu object to contain everything
 
     QAction* action_dub; //Button to dublicate object
@@ -269,7 +269,7 @@ public:
     bool displayTransforms;
 
     ObjectCtxMenu(QWidget* parent = nullptr);
-    void setObjectPtr(GameObject* obj_ptr);
+    void setObjectPtr(Engine::GameObject* obj_ptr);
     void show(QPoint point);
     void close();
 };

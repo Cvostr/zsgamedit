@@ -161,7 +161,7 @@ void ZSENSDK::bindSDK(lua_State* state){
         .addFunction("mesh", &Engine::GameObject::getPropertyPtr<Engine::MeshProperty>)
         .addFunction("audio", &Engine::GameObject::getPropertyPtr<Engine::AudioSourceProperty>)
         .addFunction("light", &Engine::GameObject::getPropertyPtr<Engine::LightsourceProperty>)
-        .addFunction("tile", &Engine::GameObject::getPropertyPtr<TileProperty>)
+        .addFunction("tile", &Engine::GameObject::getPropertyPtr<Engine::TileProperty>)
         .addFunction("script", &Engine::GameObject::getPropertyPtr<ScriptGroupProperty>)
         .addFunction("rigidbody", &Engine::GameObject::getPropertyPtr<Engine::RigidbodyProperty>)
         .addFunction("character", &Engine::GameObject::getPropertyPtr<Engine::CharacterControllerProperty>)
@@ -229,10 +229,10 @@ void ZSENSDK::bindSDK(lua_State* state){
          .addFunction("setLinearVelocity", &Engine::CharacterControllerProperty::setLinearVelocity)
          .endClass()
 
-        .deriveClass <TileProperty, Engine::GameObjectProperty>("Tile2D")
-        .addFunction("playAnim", &TileProperty::playAnim)
-        .addFunction("setDiffuseTexture", &TileProperty::setDiffuseTexture)
-        .addFunction("stopAnim", &TileProperty::stopAnim)
+        .deriveClass <Engine::TileProperty, Engine::GameObjectProperty>("Tile2D")
+        .addFunction("playAnim", &Engine::TileProperty::playAnim)
+        .addFunction("setDiffuseTexture", &Engine::TileProperty::setDiffuseTexture)
+        .addFunction("stopAnim", &Engine::TileProperty::stopAnim)
         .endClass()
 
         .deriveClass <Engine::AnimationProperty, Engine::GameObjectProperty>("Animation")

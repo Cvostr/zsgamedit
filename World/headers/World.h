@@ -71,8 +71,6 @@ public:
     void Draw(RenderPipeline* pipeline); //On render pipeline wish to draw the object
     void DrawMesh(RenderPipeline* pipeline);
 
-    bool hasTerrain(); //Check if gameobject has terrain inside
-
     void putToSnapshot(GameObjectSnapshot* snapshot);
     void recoverFromSnapshot(GameObjectSnapshot* snapshot);
 
@@ -146,8 +144,6 @@ public:
     World();
 
 };
-
-#define getObjectByLabel getGameObjectByLabel
 
 Engine::GameObjectProperty* _allocProperty(PROPERTY_TYPE type);
 QString getPropertyString(int type);

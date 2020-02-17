@@ -582,7 +582,7 @@ void EditWindow::addNewTerrain(){
     std::vector<GameObject> objects; obj->item_ptr->setText(0, QString::fromStdString(*obj->label_ptr));
     //Add terrain property
     obj->addProperty(GO_PROPERTY_TYPE_TERRAIN); //Creates terrain inside
-    obj->getPropertyPtr<TerrainProperty>()->onAddToObject();
+    obj->getPropertyPtr<Engine::TerrainProperty>()->onAddToObject();
 
     Engine::MaterialProperty* mat = obj->getPropertyPtr<Engine::MaterialProperty>();
     mat->setMaterial("@defaultHeightmap");
@@ -777,7 +777,7 @@ void EditWindow::onObjectListItemClicked(){
 
     QString obj_name = selected_item->text(0); //Get label of clicked obj
 
-    GameObject* obj_ptr = (GameObject*)world.getGameObjectByLabel(obj_name.toStdString()); //Obtain pointer to selected object by label
+    Engine::GameObject* obj_ptr = world.getGameObjectByLabel(obj_name.toStdString()); //Obtain pointer to selected object by label
 
     obj_trstate.obj_ptr = obj_ptr;
     obj_trstate.tprop_ptr = static_cast<Engine::TransformProperty*>(obj_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
@@ -789,7 +789,7 @@ void EditWindow::onObjectCtxMenuShow(QPoint point){
     //We selected empty space
     if(selected_item == nullptr) return;
     QString obj_name = selected_item->text(0); //Get label of clicked obj
-    GameObject* obj_ptr = (GameObject*)world.getGameObjectByLabel(obj_name.toStdString()); //Obtain pointer to selected object by label
+    Engine::GameObject* obj_ptr = world.getGameObjectByLabel(obj_name.toStdString()); //Obtain pointer to selected object by label
 
     this->obj_ctx_menu->setObjectPtr(obj_ptr);
     this->obj_ctx_menu->show(point);
@@ -812,7 +812,7 @@ void EditWindow::onCameraToObjTeleport(){
 
     QTreeWidgetItem* selected_item = ui->objsList->currentItem(); //Obtain pointer to clicked obj item
     QString obj_name = selected_item->text(0); //Get label of clicked obj
-    GameObject* obj_ptr = (GameObject*)world.getObjectByLabel(obj_name.toStdString()); //Obtain pointer to selected object by label
+    Engine::GameObject* obj_ptr = world.getGameObjectByLabel(obj_name.toStdString()); //Obtain pointer to selected object by label
 
     Engine::TransformProperty* transform = obj_ptr->getPropertyPtr<Engine::TransformProperty>(); //Obtain pointer to object transform
     //Define to store absolute transform
@@ -839,7 +839,7 @@ void EditWindow::onRedoPressed(){
 void EditWindow::onObjectCopy(){
     QTreeWidgetItem* selected_item = ui->objsList->currentItem(); //Obtain pointer to clicked obj item
     QString obj_name = selected_item->text(0); //Get label of clicked obj
-    GameObject* obj_ptr = (GameObject*)world.getObjectByLabel(obj_name.toStdString()); //Obtain pointer to selected object by label
+    GameObject* obj_ptr = (GameObject*)world.getGameObjectByLabel(obj_name.toStdString()); //Obtain pointer to selected object by label
 
     this->object_buffer = obj_ptr;
 }
@@ -1183,10 +1183,10 @@ void EditWindow::onLeftBtnClicked(int X, int Y){
     //Terrain painting
     if(_inspector_win->gameobject_ptr != nullptr){
         GameObject* obj = static_cast<GameObject*>(_inspector_win->gameobject_ptr);
-        TerrainProperty* terrain = obj->getPropertyPtr<TerrainProperty>();
+        Engine::TerrainProperty* terrain = obj->getPropertyPtr<Engine::TerrainProperty>();
 
         if(terrain != nullptr && !isWorldCamera)
-            terrain->onMouseClick(X, Y,
+            terrain->onMouseMotion(X, Y,
                                   settings.gameViewWin_Height,
                                   this->input_state.isLeftBtnHold,
                                   this->input_state.isLCtrlHold);
@@ -1262,7 +1262,7 @@ void EditWindow::onMouseMotion(int relX, int relY){
     //Terrain painting
     if(_inspector_win->gameobject_ptr != nullptr){
         GameObject* obj = static_cast<GameObject*>(_inspector_win->gameobject_ptr);
-        TerrainProperty* terrain = obj->getPropertyPtr<TerrainProperty>();
+        Engine::TerrainProperty* terrain = obj->getPropertyPtr<Engine::TerrainProperty>();
 
         if(terrain != nullptr && !isWorldCamera)
             terrain->onMouseMotion(this->input_state.mouseX, input_state.mouseY,
@@ -1386,7 +1386,7 @@ void EditWindow::keyPressEvent(QKeyEvent* ke){
         QTreeWidgetItem* object_toRemove = this->ui->objsList->currentItem();
         QListWidgetItem* file_toRemove = this->ui->fileList->currentItem();
         if(object_toRemove != nullptr && ui->objsList->hasFocus()){ //if user wish to delete object
-            GameObject* obj = (GameObject*)this->world.getObjectByLabel(object_toRemove->text(0).toStdString());
+            GameObject* obj = (GameObject*)this->world.getGameObjectByLabel(object_toRemove->text(0).toStdString());
             _inspector_win->clearContentLayout(); //Prevent variable conflicts
             Engine::GameObjectLink link = obj->getLinkToThisObject();
             obj_trstate.isTransforming = false; //disabling object transform

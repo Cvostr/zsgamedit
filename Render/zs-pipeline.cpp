@@ -382,7 +382,7 @@ void GameObject::Draw(RenderPipeline* pipeline){
             pipeline->transformBuffer->writeData(sizeof (ZSMATRIX4x4) * 2, sizeof (ZSMATRIX4x4), &transform_ptr->transform_mat);
 
             //Get castShadows boolean from several properties
-            bool castShadows = (hasTerrain()) ? getPropertyPtr<TerrainProperty>()->castShadows : mesh_prop->castShadows;
+            bool castShadows = (hasTerrain()) ? getPropertyPtr<Engine::TerrainProperty>()->castShadows : mesh_prop->castShadows;
 
             if(castShadows)
                 DrawMesh(pipeline);
@@ -400,6 +400,7 @@ void GameObject::Draw(RenderPipeline* pipeline){
             //draw wireframe mesh for picked object
             if(!editwin_ptr->isWorldCamera && hasMesh()) //avoid drawing gizmos during playtime
                 pipeline->getGizmosRenderer()->drawPickedMeshWireframe(mesh_prop->mesh_ptr->mesh_ptr, transform_ptr->transform_mat, color);
+            pipeline->getGizmosRenderer()->drawObjectRigidbodyShape(getPhysicalProperty());
         }
     }
 }
@@ -434,7 +435,7 @@ void GameObject::processObject(RenderPipeline* pipeline){
     }
 }
 
-void TerrainProperty::onRender(Engine::RenderPipeline* pipeline){
+void Engine::TerrainProperty::onRender(Engine::RenderPipeline* pipeline){
     terrainUniformBuffer = pipeline->terrainUniformBuffer;
     transformBuffer = pipeline->transformBuffer;
 
@@ -490,42 +491,6 @@ void TerrainProperty::onRender(Engine::RenderPipeline* pipeline){
     mat->onRender(pipeline);
 
 }
-
-void TileProperty::onRender(Engine::RenderPipeline* pipeline){
-    Engine::Shader* tile_shader = pipeline->getTileShader();
-
-    tile_shader->Use();
-
-    pipeline->tileBuffer->bind();
-
-    //Checking for diffuse texture
-    if(texture_diffuse != nullptr){
-        texture_diffuse->Use(0); //Use this texture
-    }
-
-    int diffuse1_ = texture_diffuse != nullptr;
-    pipeline->tileBuffer->writeData(20, 4, &diffuse1_);
-
-    //Checking for transparent texture
-    if(texture_transparent != nullptr){
-        texture_transparent->Use(1); //Use this texture
-    }
-    int diffuse2_ = texture_transparent != nullptr;
-    pipeline->tileBuffer->writeData(24, 4, &diffuse2_);
-    //calculate animation state
-    int anim_state_i = anim_property.isAnimated && anim_state.playing;
-    //Sending animation info
-    if(anim_property.isAnimated && anim_state.playing == true){ //If tile animated, then send anim state to shader
-        pipeline->tileBuffer->writeData(16, 4, &anim_state_i);
-        pipeline->tileBuffer->writeData(0, 4, &anim_property.framesX);
-        pipeline->tileBuffer->writeData(4, 4, &anim_property.framesY);
-        pipeline->tileBuffer->writeData(8, 4, &anim_state.cur_frameX);
-        pipeline->tileBuffer->writeData(12, 4, &anim_state.cur_frameY);
-    }else{ //No animation or unplayed
-        pipeline->tileBuffer->writeData(16, 4, &anim_state_i);
-    }
-}
-
 
 Engine::Shader* RenderPipeline::getPickingShader(){
     return this->pick_shader;

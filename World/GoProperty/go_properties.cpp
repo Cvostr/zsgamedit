@@ -138,8 +138,7 @@ Engine::GameObjectProperty* _allocProperty(PROPERTY_TYPE type){
             break;
         }
         case GO_PROPERTY_TYPE_TERRAIN:{
-            TerrainProperty* ptr = new TerrainProperty;
-            _ptr = static_cast<Engine::GameObjectProperty*>(ptr);
+            _ptr = static_cast<Engine::GameObjectProperty*>(new Engine::TerrainProperty);
             break;
         }
         case GO_PROPERTY_TYPE_CHARACTER_CONTROLLER:{
@@ -152,8 +151,7 @@ Engine::GameObjectProperty* _allocProperty(PROPERTY_TYPE type){
             break;
         }
         case GO_PROPERTY_TYPE_TILE:{
-            TileProperty* ptr = new TileProperty;
-            _ptr = static_cast<Engine::GameObjectProperty*>(ptr);
+            _ptr = static_cast<Engine::GameObjectProperty*>(new Engine::TileProperty);
             break;
         }
     }
@@ -189,20 +187,9 @@ void Engine::TransformProperty::addPropertyInterfaceToInspector(){
 }
 
 void Engine::TransformProperty::onValueChanged(){
-    updateMat();
-
     if((this->go_link.updLinkPtr()) == nullptr) return;
 
-    ColliderProperty* coll = this->go_link.updLinkPtr()->getPropertyPtr<ColliderProperty>();
-    RigidbodyProperty* rigid = this->go_link.updLinkPtr()->getPropertyPtr<RigidbodyProperty>();
-
-    PhysicalProperty* phys = nullptr;
-
-    if(coll == nullptr)
-        phys = rigid;
-    else {
-        phys = coll;
-    }
+    PhysicalProperty* phys = static_cast<PhysicalProperty*>(go_link.updLinkPtr()->getPhysicalProperty());
 
     if(this->go_link.updLinkPtr()->isRigidbody()){
         if(!phys->created) return;

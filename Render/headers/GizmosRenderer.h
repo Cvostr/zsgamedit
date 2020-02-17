@@ -20,6 +20,7 @@ public:
     void drawPickedMeshWireframe(Engine::Mesh* mesh_ptr, ZSMATRIX4x4 transform, ZSRGBCOLOR color);
     void drawCube(ZSMATRIX4x4 transform, ZSRGBCOLOR color);
     void drawTransformControls(ZSVECTOR3 position, float tall, float dim);
+    void drawObjectRigidbodyShape(void* phys_property);
 
     void glFeaturesOff();
     void glFeaturesOn();

@@ -142,7 +142,7 @@ win32:DEPENDPATH += $$PWD/../../LIBS/LUABRIDGE
 win32: LIBS += -L$$PWD/../../LIBS/BULLET/STATIC_DEBUG -lBulletSoftBody_Debug -lBulletDynamics_Debug -lBulletCollision_Debug -lLinearMath_Debug
 #-------------------------------------------------- ZSPIRE ENGINE Library ---------------------
 
-unix: LIBS += -L$$PWD/../debug_engine/ -lzsengine -lvulkan -lopenal -lfreetype
+unix: LIBS += -L$$PWD/../debug_engine/ -lzsengine -lvulkan -lopenal -lfreetype -lBulletCollision
 win32: LIBS += -L$$PWD/../debug_engine/debug/ -lzsengine -lvulkan-1 -lOpenAL_x64
 
 INCLUDEPATH += $$PWD/../zspirengine/headers

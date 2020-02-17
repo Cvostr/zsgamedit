@@ -176,18 +176,9 @@ void GameObject::pick(){
     }
 }
 
-bool GameObject::hasTerrain(){
-    TerrainProperty* terrain = getPropertyPtr<TerrainProperty>();
-    if(terrain != nullptr){
-        if(!terrain->active) return false;
-        return true;
-    }
-    return false;
-}
-
 void GameObject::DrawMesh(RenderPipeline* pipeline){
     Engine::MeshProperty* mesh_prop = static_cast<Engine::MeshProperty*>(this->getPropertyPtrByType(GO_PROPERTY_TYPE_MESH));
-    TerrainProperty* terrain_prop = getPropertyPtr<TerrainProperty>();
+    Engine::TerrainProperty* terrain_prop = getPropertyPtr<Engine::TerrainProperty>();
     //Draw default mesh
     if(mesh_prop != nullptr) mesh_prop->mesh_ptr->Draw();
     if(terrain_prop != nullptr) terrain_prop->DrawMesh(pipeline);

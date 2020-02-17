@@ -185,7 +185,7 @@ void GameObject::saveProperties(std::ofstream* stream){
             break;
         }
         case GO_PROPERTY_TYPE_TERRAIN:{
-            TerrainProperty* ptr = static_cast<TerrainProperty*>(property_ptr);
+            Engine::TerrainProperty* ptr = static_cast<Engine::TerrainProperty*>(property_ptr);
             *stream << ptr->file_label << "\n"; //Write material relpath
             //write dimensions
             stream->write(reinterpret_cast<char*>(&ptr->Width), sizeof(float));
@@ -237,7 +237,7 @@ void GameObject::saveProperties(std::ofstream* stream){
             break;
         }
         case GO_PROPERTY_TYPE_TILE:{
-            TileProperty* ptr = static_cast<TileProperty*>(property_ptr);
+            Engine::TileProperty* ptr = static_cast<Engine::TileProperty*>(property_ptr);
             if(ptr->diffuse_relpath.empty()) //check if object has no texture
                 *stream << "@none";
             else
@@ -459,7 +459,7 @@ void GameObject::loadProperty(std::ifstream* world_stream){
         break;
     }
     case GO_PROPERTY_TYPE_TERRAIN:{
-        TerrainProperty* ptr = static_cast<TerrainProperty*>(prop_ptr);
+        Engine::TerrainProperty* ptr = static_cast<Engine::TerrainProperty*>(prop_ptr);
         *world_stream >> ptr->file_label; //Write material relpath
         world_stream->seekg(1, std::ofstream::cur);
         //read dimensions
@@ -522,7 +522,7 @@ void GameObject::loadProperty(std::ifstream* world_stream){
         break;
     }
     case GO_PROPERTY_TYPE_TILE:{
-        TileProperty* lptr = static_cast<TileProperty*>(prop_ptr);
+        Engine::TileProperty* lptr = static_cast<Engine::TileProperty*>(prop_ptr);
         //Read diffuse texture string
         *world_stream >> lptr->diffuse_relpath;
         //Read transparent texture string
