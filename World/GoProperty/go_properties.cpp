@@ -109,8 +109,7 @@ Engine::GameObjectProperty* _allocProperty(PROPERTY_TYPE type){
             break;
         }
         case GO_PROPERTY_TYPE_SCRIPTGROUP:{
-            ScriptGroupProperty* ptr = new ScriptGroupProperty;
-            _ptr = static_cast<Engine::GameObjectProperty*>(ptr);
+            _ptr = static_cast<Engine::GameObjectProperty*>(new Engine::ScriptGroupProperty);
             break;
         }
         case GO_PROPERTY_TYPE_AUDSOURCE:{
@@ -184,32 +183,6 @@ void Engine::TransformProperty::addPropertyInterfaceToInspector(){
     area_rotation->vector = &this->rotation; //Ptr to our vector
     area_rotation->go_property = static_cast<void*>(this);
     _inspector_win->addPropertyArea(area_rotation);
-}
-
-void Engine::TransformProperty::onValueChanged(){
-    if((this->go_link.updLinkPtr()) == nullptr) return;
-
-    PhysicalProperty* phys = static_cast<PhysicalProperty*>(go_link.updLinkPtr()->getPhysicalProperty());
-
-    if(this->go_link.updLinkPtr()->isRigidbody()){
-        if(!phys->created) return;
-        btTransform startTransform;
-        startTransform.setIdentity();
-        startTransform.setOrigin(btVector3( btScalar(abs_translation.X),
-                                                    btScalar(abs_translation.Y),
-                                                    btScalar(abs_translation.Z)));
-
-        startTransform.setRotation(btQuaternion(abs_rotation.X, abs_rotation.Y, abs_rotation.Z));
-
-
-        phys->rigidBody->setWorldTransform(startTransform);
-        phys->rigidBody->getMotionState()->setWorldTransform(startTransform);
-
-        phys->shape->setLocalScaling(btVector3(btScalar(abs_scale.X),
-                                               btScalar(abs_scale.Y),
-                                               btScalar(abs_scale.Z)));
-
-    }
 }
 
 //Label property functions
@@ -593,7 +566,7 @@ void Engine::CharacterControllerProperty::addPropertyInterfaceToInspector(){
     addCustomSizeField();
 }
 
-void ScriptGroupProperty::onValueChanged(){
+void Engine::ScriptGroupProperty::onValueChanged(){
     //if size changed
     if(static_cast<int>(path_names.size()) != this->scr_num){
         path_names.resize(static_cast<unsigned int>(scr_num));
@@ -613,7 +586,7 @@ void ScriptGroupProperty::onValueChanged(){
     }
 }
 
-void ScriptGroupProperty::addPropertyInterfaceToInspector(){
+void Engine::ScriptGroupProperty::addPropertyInterfaceToInspector(){
 
     IntPropertyArea* scriptnum_area = new IntPropertyArea;
     scriptnum_area->setLabel("Scripts"); //Its label
@@ -629,58 +602,6 @@ void ScriptGroupProperty::addPropertyInterfaceToInspector(){
         area->extension_mask = ".lua";
         _inspector_win->addPropertyArea(area);
     }
-}
-void ScriptGroupProperty::onUpdate(float deltaTime){
-    for(unsigned int script_i = 0; script_i < this->scripts_attached.size(); script_i ++){
-        ObjectScript* script_ptr = &this->scripts_attached[script_i]; //Obtain pointer to script
-        //if script isn't created, then create it.
-        if(!script_ptr->created){
-            script_ptr->_InitScript();
-            script_ptr->_callStart(go_link.updLinkPtr(), go_link.world_ptr);
-        }
-
-        script_ptr->_callDraw(deltaTime); //Run onDraw() function in script
-    }
-}
-
-void ScriptGroupProperty::copyTo(Engine::GameObjectProperty* dest){
-    if(dest->type != this->type) return; //if it isn't script group
-
-    //Do base things
-    GameObjectProperty::copyTo(dest);
-
-    ScriptGroupProperty* _dest = static_cast<ScriptGroupProperty*>(dest);
-    _dest->scr_num = this->scr_num;
-
-    //resize data vectors
-    _dest->scripts_attached.resize(static_cast<unsigned int>(scr_num));
-    _dest->path_names.resize(static_cast<unsigned int>(scr_num));
-    //Copy data
-    for(unsigned int script_i = 0; script_i < static_cast<unsigned int>(scr_num); script_i ++){
-        _dest->scripts_attached[script_i] = this->scripts_attached[script_i];
-        _dest->path_names[script_i] = this->path_names[script_i];
-    }
-}
-
-void ScriptGroupProperty::shutdown(){
-    //Iterate over all scripts and call _DestroyScript() on each
-    for(unsigned int script_i = 0; script_i < static_cast<unsigned int>(scr_num); script_i ++){
-        this->scripts_attached[script_i]._DestroyScript();
-    }
-}
-
-ObjectScript* ScriptGroupProperty::getScriptByName(std::string name){
-    for(unsigned int script_i = 0; script_i < static_cast<unsigned int>(scr_num); script_i ++){
-        if(!name.compare(scripts_attached[script_i].name))
-            return &scripts_attached[script_i];
-    }
-    return nullptr;
-}
-ScriptGroupProperty::ScriptGroupProperty(){
-    type = GO_PROPERTY_TYPE_SCRIPTGROUP;
-
-    scr_num = 0;
-    this->scripts_attached.resize(static_cast<unsigned int>(this->scr_num));
 }
 
 void Engine::ShadowCasterProperty::addPropertyInterfaceToInspector(){

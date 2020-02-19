@@ -1,5 +1,6 @@
-﻿#include "headers/LuaScript.h"
+﻿#include <Scripting/LuaScript.h>
 #include "headers/zsensdk.h"
+#include <Scripting/zsensdk.h>
 #include "../World/headers/obj_properties.h"
 #include "../World/headers/2dtileproperties.h"
 #include <render/zs-math.h>
@@ -25,23 +26,6 @@ static unsigned int prop_tile = GO_PROPERTY_TYPE_TILE;
 extern EditWindow* _editor_win;
 extern Project* project_ptr;
 
-void ZSENSDK::Debug::Log(std::string text){
-    std::cout << "SCRIPT: " << text << std::endl;
-}
-
-ZSVECTOR3 ZSENSDK::Math::vnormalize(ZSVECTOR3 vec){
-    ZSVECTOR3 result = vec;
-    vNormalize(&result);
-    return result;
-}
-
-ZSVECTOR3 ZSENSDK::Math::vadd(ZSVECTOR3 v1, ZSVECTOR3 v2){
-    return v1 + v2;
-}
-
-ZSVECTOR3 ZSENSDK::Math::vmul(ZSVECTOR3 v1, float m){
-    return v1 * m;
-}
 
 void ZSENSDK::_Engine::loadWorldFromFile(std::string file){
     QString load = QString::fromStdString(project_ptr->root_path) + "/" + QString::fromStdString(file);
@@ -59,74 +43,7 @@ void ZSENSDK::bindSDK(lua_State* state){
         .addFunction("setWindowMode", &ZSENSDK::Window::setWindowMode)
         .endNamespace();
 
-    luabridge::getGlobalNamespace(state)
-        .beginNamespace("debug")
-        .addFunction("Log", &ZSENSDK::Debug::Log)
-        .endNamespace();
 
-    luabridge::getGlobalNamespace(state)
-        .beginNamespace("input")
-        .addFunction("isKeyPressed", &Input::isKeyPressed)
-        .addFunction("isKeyHold", &Input::isKeyHold)
-        .addFunction("getMouseState", &Input::getMouseState)
-        //Add mouse state class
-        .beginClass <Input::MouseState>("MouseState")
-        .addData("cursorX", &Input::MouseState::mouseX)
-        .addData("cursorY", &Input::MouseState::mouseY)
-        .addData("relX", &Input::MouseState::mouseRelX)
-        .addData("relY", &Input::MouseState::mouseRelY)
-        .addData("isLButtonDown", &Input::MouseState::isLButtonDown)
-        .addData("isRButtonDown", &Input::MouseState::isRButtonDown)
-        .addData("isMidButtonDown", &Input::MouseState::isMidBtnDown)
-        .endClass()
-
-        .endNamespace();
-
-    luabridge::getGlobalNamespace(state).beginClass <ZSVECTOR3>("Vec3")
-        .addData("x", &ZSVECTOR3::X)
-        .addData("y", &ZSVECTOR3::Y)
-        .addData("z", &ZSVECTOR3::Z)
-        .addConstructor <void(*) (float, float, float)>()
-        .endClass();
-
-    luabridge::getGlobalNamespace(state)
-        .addFunction("length", &getLength)
-        .addFunction("distance", &getDistance)
-        .addFunction("normalize", &ZSENSDK::Math::vnormalize)
-        .addFunction("v_add", &ZSENSDK::Math::vadd)
-        .addFunction("sum", &ZSENSDK::Math::vadd)
-        .addFunction("mul", &ZSENSDK::Math::vmul)
-        .addFunction("v_cross", &vCross);
-
-     luabridge::getGlobalNamespace(state).beginClass <Engine::ZSVIEWPORT>("CmViewport")
-        .addData("startX", &Engine::ZSVIEWPORT::startX)
-        .addData("startY", &Engine::ZSVIEWPORT::startY)
-        .addData("endX", &Engine::ZSVIEWPORT::endX)
-        .addData("endY", &Engine::ZSVIEWPORT::endY)
-        .addConstructor <void(*) (unsigned int, unsigned int, unsigned int, unsigned int)>()
-        .endClass();
-
-    luabridge::getGlobalNamespace(state).beginClass <Engine::Camera>("Camera")
-            .addFunction("setPosition", &Engine::Camera::setPosition)
-            .addFunction("setFront", &Engine::Camera::setFront)
-            .addData("pos", &Engine::Camera::camera_pos, false)
-            .addData("front", &Engine::Camera::camera_front, false)
-            .addData("up", &Engine::Camera::camera_up, false)
-            .addFunction("setProjection", &Engine::Camera::setProjectionType)
-            .addFunction("setZplanes", &Engine::Camera::setZplanes)
-            .addFunction("setViewport", &Engine::Camera::setViewport)
-            .addData("viewport", &Engine::Camera::viewport, false)
-            .addData("Fov", &Engine::Camera::FOV, false)
-            .addData("nearZ", &Engine::Camera::nearZ, false)
-            .addData("farZ", &Engine::Camera::farZ, false)
-        .endClass();
-
-    luabridge::getGlobalNamespace(state).beginClass <ZSRGBCOLOR>("RGBColor")
-        .addData("r", &ZSRGBCOLOR::r)
-        .addData("g", &ZSRGBCOLOR::g)
-        .addData("b", &ZSRGBCOLOR::b)
-        .addConstructor <void(*) (float, float, float, float)>()
-        .endClass();
 
     luabridge::getGlobalNamespace(state)
         .beginNamespace("engine")
@@ -140,13 +57,7 @@ void ZSENSDK::bindSDK(lua_State* state){
         .addVariable("PROPERTY_LIGHTSOURCE", &prop_light)
         .addVariable("PROPERTY_TILE", &prop_tile)
 
-        .beginClass <Engine::GameObjectProperty>("ObjectProperty")
-        .addFunction("setActive", &Engine::GameObjectProperty::setActive)
-        .addData("active", &Engine::GameObjectProperty::active, false)
-        .addData("type", &Engine::GameObjectProperty::type, false)
-        .endClass()
-
-
+/*
         .beginClass <Engine::GameObject>("GameObject")
         .addFunction("getLabel", &Engine::GameObject::getLabel)
         .addFunction("setLabel", &Engine::GameObject::setLabel)
@@ -154,7 +65,6 @@ void ZSENSDK::bindSDK(lua_State* state){
         .addData("active", &Engine::GameObject::active, false)
         .addData("propsNum", &Engine::GameObject::props_num, false)
         .addFunction("getProperty", &Engine::GameObject::getPropertyPtrByTypeI)
-        //.addFunction("addProperty", &GameObject::addProperty)
         .addFunction("removeProperty", &Engine::GameObject::removeProperty)
 
         .addFunction("transform", &Engine::GameObject::getPropertyPtr<Engine::TransformProperty>)
@@ -174,75 +84,10 @@ void ZSENSDK::bindSDK(lua_State* state){
         //.addFunction("addFromPrefab", &World::addObjectsFromPrefab)
         //.addFunction("removeObject", &World::removeObjPtr)
         .addData("camera", &Engine::World::world_camera, true)
-        .endClass()
+        .endClass()*/
 
-         //Usual script
-        .beginClass <ObjectScript>("Script")
-        .addFunction("onStart", &ObjectScript::_callStart)
-        .addFunction("onFrame", &ObjectScript::_callDraw)
-        .addFunction("func", &ObjectScript::func)
-        .addFunction("funcA", &ObjectScript::_func)
-        .endClass()
-
-
-        .deriveClass <Engine::LightsourceProperty, Engine::GameObjectProperty>("LightSource")
-        .addData("intensity", &Engine::LightsourceProperty::intensity)
-        .addData("range", &Engine::LightsourceProperty::range)
-        .addData("color", &Engine::LightsourceProperty::color)
-        .addData("spot_angle", &Engine::LightsourceProperty::spot_angle)
-        .endClass()
-
-        .deriveClass <Engine::TransformProperty, Engine::GameObjectProperty>("Transform")
-        .addData("translation", &Engine::TransformProperty::translation, false)
-        .addData("scale", &Engine::TransformProperty::scale, false)
-        .addData("rotation", &Engine::TransformProperty::rotation, false)
-        .addFunction("setPosition", &Engine::TransformProperty::setTranslation)
-        .addFunction("setScale", &Engine::TransformProperty::setScale)
-        .addFunction("setRotation", &Engine::TransformProperty::setRotation)
-        .endClass()
-
-
-        .deriveClass <Engine::AudioSourceProperty, Engine::GameObjectProperty>("AudioSource")
-        .addFunction("setAudioFile", &Engine::AudioSourceProperty::setAudioFile)
-        .addFunction("Play", &Engine::AudioSourceProperty::audio_start)
-        .addFunction("Stop", &Engine::AudioSourceProperty::audio_stop)
-        .addFunction("Pause", &Engine::AudioSourceProperty::audio_pause)
-        .addFunction("getGain", &Engine::AudioSourceProperty::getGain)
-        .addFunction("getPitch", &Engine::AudioSourceProperty::getPitch)
-        .addFunction("setGain", &Engine::AudioSourceProperty::setGain)
-        .addFunction("setPitch", &Engine::AudioSourceProperty::setPitch)
-        .endClass()
-
-        .deriveClass <Engine::PhysicalProperty, Engine::GameObjectProperty>("Physical")
-        .addData("mass", &Engine::PhysicalProperty::mass, false)
-        .endClass()
-
-        .deriveClass <Engine::RigidbodyProperty, Engine::PhysicalProperty>("Rigidbody")
-        .addData("gravity", &Engine::RigidbodyProperty::gravity, false)
-        .addData("linearVelocity", &Engine::RigidbodyProperty::linearVel, false)
-        .addFunction("setLinearVelocity", &Engine::RigidbodyProperty::setLinearVelocity)
-        .endClass()
-
-         .deriveClass <Engine::CharacterControllerProperty, Engine::PhysicalProperty>("CharacterController")
-         .addData("gravity", &Engine::CharacterControllerProperty::gravity, false)
-         .addData("linearVelocity", &Engine::CharacterControllerProperty::linearVel, false)
-         .addFunction("setLinearVelocity", &Engine::CharacterControllerProperty::setLinearVelocity)
-         .endClass()
-
-        .deriveClass <Engine::TileProperty, Engine::GameObjectProperty>("Tile2D")
-        .addFunction("playAnim", &Engine::TileProperty::playAnim)
-        .addFunction("setDiffuseTexture", &Engine::TileProperty::setDiffuseTexture)
-        .addFunction("stopAnim", &Engine::TileProperty::stopAnim)
-        .endClass()
-
-        .deriveClass <Engine::AnimationProperty, Engine::GameObjectProperty>("Animation")
-        .addFunction("play", &Engine::AnimationProperty::play)
-        .addFunction("stop", &Engine::AnimationProperty::stop)
-        .addFunction("setAnimation", &Engine::AnimationProperty::setAnimation)
-        .endClass()
-
-        .deriveClass <ScriptGroupProperty, Engine::GameObjectProperty>("ScriptGroup")
-        .addFunction("getScript", &ScriptGroupProperty::getScriptByName)
+        .deriveClass <Engine::ScriptGroupProperty, Engine::GameObjectProperty>("ScriptGroup")
+        .addFunction("getScript", &Engine::ScriptGroupProperty::getScriptByName)
         .endClass()
 
         .endNamespace();

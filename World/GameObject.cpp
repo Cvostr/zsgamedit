@@ -4,7 +4,7 @@
 
 GameObject::GameObject(){
     item_ptr = new QTreeWidgetItem; //Allocate tree widget item
-    genRandomString(&this->str_id, 15); //Generate random string ID
+
     isPicked = false;
 }
 
@@ -172,7 +172,7 @@ void GameObject::pick(){
     this->isPicked = true;
     unsigned int children_am = static_cast<unsigned int>(this->children.size());
     for(unsigned int chil_i = 0; chil_i < children_am; chil_i++){
-        ((GameObject*)children[chil_i].ptr)->pick(); //child and his children are picked now
+        ((GameObject*)children[chil_i].updLinkPtr())->pick(); //child and his children are picked now
     }
 }
 

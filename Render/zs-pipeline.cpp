@@ -430,6 +430,7 @@ void GameObject::processObject(RenderPipeline* pipeline){
         if(!children[obj_i].isEmpty()){ //if link isn't broken
             children[obj_i].updLinkPtr();
             GameObject* child_ptr = (GameObject*)this->children[obj_i].ptr;
+            if(child_ptr == nullptr) return;
             child_ptr->processObject(pipeline);
         }
     }

@@ -107,7 +107,7 @@ void GizmosRenderer::drawObjectRigidbodyShape(void* phys_property){
     ZSMATRIX4x4 rotation_mat1 = getIdentity();
     transform->getAbsoluteRotationMatrix(rotation_mat1);
     ZSMATRIX4x4 rotation_mat = getRotationMat(transform->abs_rotation);
-    ZSMATRIX4x4 transform_mat = getScaleMat(scale) * rotation_mat * rotation_mat1 * getTranslationMat(transform->abs_translation);
+    ZSMATRIX4x4 transform_mat = getScaleMat(scale) * rotation_mat * rotation_mat1 * getTranslationMat(transform->abs_translation + property->transform_offset);
 
     transformBuffer->writeData(sizeof (ZSMATRIX4x4) * 2, sizeof (ZSMATRIX4x4), &transform_mat);
     //If mesh exist, then draw

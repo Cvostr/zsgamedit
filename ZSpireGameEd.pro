@@ -49,7 +49,6 @@ SOURCES += \
     Misc/AssimpMeshLoader.cpp \
     Render/GizmosRenderer.cpp \
     Misc/EditorManager.cpp \
-    Scripting/zsensdk_input.cpp \
     ProjEd/EditorSettings.cpp \
     World/TerrainUtils.cpp \
     World/Physics.cpp \
@@ -67,7 +66,6 @@ HEADERS += \
     ProjEd/headers/EdActions.h \
     Misc/headers/ProjBuilder.h \
     include_engine.h \
-    Scripting/headers/LuaScript.h \
     Scripting/headers/zsensdk.h \
     World/headers/obj_properties.h \
     ProjEd/headers/InspEditAreas.h \

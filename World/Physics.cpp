@@ -53,6 +53,12 @@ void Engine::PhysicalProperty::addCustomSizeField(){
         cust->go_property = static_cast<void*>(this);
         _inspector_win->addPropertyArea(cust);
 
+        Float3PropertyArea* cust_transform = new Float3PropertyArea; //New property area
+        cust_transform->setLabel("Transf offset"); //Its label
+        cust_transform->vector = &this->transform_offset; //Ptr to our vector
+        cust_transform->go_property = static_cast<void*>(this);
+        _inspector_win->addPropertyArea(cust_transform);
+
     }
 }
 

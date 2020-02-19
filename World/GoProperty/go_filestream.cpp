@@ -128,7 +128,7 @@ void GameObject::saveProperties(std::ofstream* stream){
             break;
         }
         case GO_PROPERTY_TYPE_SCRIPTGROUP:{
-            ScriptGroupProperty* ptr = static_cast<ScriptGroupProperty*>(property_ptr);
+            Engine::ScriptGroupProperty* ptr = static_cast<Engine::ScriptGroupProperty*>(property_ptr);
             int script_num = static_cast<int>(ptr->scr_num);
             //write amount of scripts
             stream->write(reinterpret_cast<char*>(&script_num), sizeof(int));
@@ -151,6 +151,9 @@ void GameObject::saveProperties(std::ofstream* stream){
                 stream->write(reinterpret_cast<char*>(&ptr->cust_size.X), sizeof(float));
                 stream->write(reinterpret_cast<char*>(&ptr->cust_size.Y), sizeof(float));
                 stream->write(reinterpret_cast<char*>(&ptr->cust_size.Z), sizeof(float));
+                stream->write(reinterpret_cast<char*>(&ptr->transform_offset.X), sizeof(float));
+                stream->write(reinterpret_cast<char*>(&ptr->transform_offset.Y), sizeof(float));
+                stream->write(reinterpret_cast<char*>(&ptr->transform_offset.Z), sizeof(float));
             }
             *stream << "\n"; //write divider
 
@@ -366,7 +369,7 @@ void GameObject::loadProperty(std::ifstream* world_stream){
             break;
         }
     case GO_PROPERTY_TYPE_SCRIPTGROUP:{
-        ScriptGroupProperty* ptr = static_cast<ScriptGroupProperty*>(prop_ptr);
+        Engine::ScriptGroupProperty* ptr = static_cast<Engine::ScriptGroupProperty*>(prop_ptr);
         world_stream->seekg(1, std::ofstream::cur);
         //Read scripts number
         world_stream->read(reinterpret_cast<char*>(&ptr->scr_num), sizeof(int));
@@ -426,6 +429,10 @@ void GameObject::loadProperty(std::ifstream* world_stream){
             world_stream->read(reinterpret_cast<char*>(&ptr->cust_size.X), sizeof(float));
             world_stream->read(reinterpret_cast<char*>(&ptr->cust_size.Y), sizeof(float));
             world_stream->read(reinterpret_cast<char*>(&ptr->cust_size.Z), sizeof(float));
+
+            world_stream->read(reinterpret_cast<char*>(&ptr->transform_offset.X), sizeof(float));
+            world_stream->read(reinterpret_cast<char*>(&ptr->transform_offset.Y), sizeof(float));
+            world_stream->read(reinterpret_cast<char*>(&ptr->transform_offset.Z), sizeof(float));
         }
 
         break;

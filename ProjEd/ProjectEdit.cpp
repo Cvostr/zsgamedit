@@ -667,9 +667,9 @@ void EditWindow::stopWorld(){
     this->render->getRenderSettings()->resetPointers();
     //Prepare world for stopping
     for(unsigned int object_i = 0; object_i < world.objects.size(); object_i ++){
-        GameObject* object_ptr = (GameObject*)world.objects[object_i];
+        Engine::GameObject* object_ptr = world.objects[object_i];
         //Obtain script
-        ScriptGroupProperty* script_ptr = static_cast<ScriptGroupProperty*>(object_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_SCRIPTGROUP));
+        Engine::ScriptGroupProperty* script_ptr = static_cast<Engine::ScriptGroupProperty*>(object_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_SCRIPTGROUP));
         if(script_ptr != nullptr)
             script_ptr->shutdown(); //stop all scripts
     }
@@ -778,6 +778,8 @@ void EditWindow::onObjectListItemClicked(){
     QString obj_name = selected_item->text(0); //Get label of clicked obj
 
     Engine::GameObject* obj_ptr = world.getGameObjectByLabel(obj_name.toStdString()); //Obtain pointer to selected object by label
+    //if no object with this name found, then go out
+    if(obj_ptr == nullptr) return;
 
     obj_trstate.obj_ptr = obj_ptr;
     obj_trstate.tprop_ptr = static_cast<Engine::TransformProperty*>(obj_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
@@ -1202,6 +1204,7 @@ void EditWindow::onLeftBtnClicked(int X, int Y){
 
     if(clicked > world.objects.size() || clicked >= 256 * 256 * 256){
         world.unpickObject();
+        obj_trstate.obj_ptr = nullptr;
         return;
     }
     GameObject* obj_ptr = (GameObject*)world.objects[clicked]; //Obtain pointer to selected object by label
@@ -1386,7 +1389,7 @@ void EditWindow::keyPressEvent(QKeyEvent* ke){
         QTreeWidgetItem* object_toRemove = this->ui->objsList->currentItem();
         QListWidgetItem* file_toRemove = this->ui->fileList->currentItem();
         if(object_toRemove != nullptr && ui->objsList->hasFocus()){ //if user wish to delete object
-            GameObject* obj = (GameObject*)this->world.getGameObjectByLabel(object_toRemove->text(0).toStdString());
+            Engine::GameObject* obj = this->world.getGameObjectByLabel(object_toRemove->text(0).toStdString());
             _inspector_win->clearContentLayout(); //Prevent variable conflicts
             Engine::GameObjectLink link = obj->getLinkToThisObject();
             obj_trstate.isTransforming = false; //disabling object transform
@@ -1457,8 +1460,10 @@ void EditWindow::onKeyDown(SDL_Keysym sym){
     }
 
     if(sym.sym == SDLK_DELETE){
-        Engine::GameObjectLink link = this->obj_trstate.obj_ptr->getLinkToThisObject();
-        callObjectDeletion(link);
+        if(this->obj_trstate.obj_ptr != nullptr){
+            Engine::GameObjectLink link = this->obj_trstate.obj_ptr->getLinkToThisObject();
+            callObjectDeletion(link);
+        }
     }
     //If we pressed CTRL + O
     if(input_state.isLCtrlHold && sym.sym == SDLK_o){

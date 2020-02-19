@@ -10,8 +10,6 @@ extern Project* project_ptr;
 extern ZSGAME_DATA* game_data;
 
 World::World(){
-    //objects.resize(MAX_OBJS);
-    //objects.resize(0);
 }
 
 GameObject* World::updateLink(Engine::GameObjectLink* link){
@@ -179,15 +177,15 @@ void World::removeObj(Engine::GameObjectLink& link){
     l.updLinkPtr();
     l.ptr->alive = false; //Mark object as dead
 
-    unsigned int children_num = static_cast<unsigned int>(l.ptr->children.size());
+    unsigned int children_num = static_cast<unsigned int>(l.updLinkPtr()->children.size());
 
     for(unsigned int ch_i = 0; ch_i < children_num; ch_i ++){ //Walk through all children an remove them
-        Engine::GameObjectLink link = l.ptr->children[0]; //Remove first of children because of trim
+        Engine::GameObjectLink link = l.updLinkPtr()->children[0]; //Remove first of children because of trim
         removeObj(link);
     }
     //Remove all content in heap, related to object class object
-    ((GameObject*)l.ptr)->clearAll();
-    if(l.ptr->hasParent == true){ //If object parented by other obj
+    updateLink(&l)->clearAll();
+    if(l.updLinkPtr()->hasParent == true){ //If object parented by other obj
         Engine::GameObject* parent = l.updLinkPtr(); //Receive pointer to object's parent
 
         unsigned int children_am = static_cast<unsigned int>(parent->children.size()); //get children amount
@@ -199,23 +197,13 @@ void World::removeObj(Engine::GameObjectLink& link){
         }
         parent->trimChildrenArray(); //Remove cracked link from vector
     }
+   // trimObjectsList();
 }
 
 void World::removeObjPtr(GameObject* obj){
     Engine::GameObjectLink link = obj->getLinkToThisObject();
     //call object remove
     removeObj(link);
-}
-void World::trimObjectsList(){
-    for (unsigned int i = 0; i < objects.size(); i ++) { //Iterating over all objects
-        if(objects[i]->alive == false){ //If object marked as deleted
-            for (unsigned int obj_i = i + 1; obj_i < objects.size(); obj_i ++) { //Iterate over all next chidren
-                objects[obj_i - 1] = objects[obj_i]; //Move it to previous place
-
-            }
-            objects.resize(objects.size() - 1); //remove last position
-        }
-    }
 }
 
 void World::unpickObject(){
@@ -381,6 +369,8 @@ void World::openFromFile(std::string file, QTreeWidget* w_ptr){
         for(unsigned int chi_i = 0; chi_i < obj_ptr->children.size(); chi_i ++){ //Now iterate over all children
             Engine::GameObjectLink* child_ptr = &obj_ptr->children[chi_i];
             Engine::GameObject* child_go_ptr = child_ptr->updLinkPtr();
+
+            if(child_go_ptr == nullptr) continue;
 
             child_go_ptr->parent = obj_ptr->getLinkToThisObject();
             child_go_ptr->hasParent = true;

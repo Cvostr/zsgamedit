@@ -116,7 +116,6 @@ public:
     void removeObjPtr(GameObject* obj); //Remove object from world
     GameObject* dublicateObject(GameObject* original, bool parent = true);
     GameObject* Instantiate(GameObject* original);
-    void trimObjectsList();
     void unpickObject();
 
     GameObject* updateLink(Engine::GameObjectLink* link);
