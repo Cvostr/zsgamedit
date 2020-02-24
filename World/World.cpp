@@ -2,7 +2,7 @@
 #include "../ProjEd/headers/ProjectEdit.h"
 #include "headers/Misc.h"
 #include <QLineEdit>
-#include "headers/obj_properties.h"
+#include <world/go_properties.h>
 
 extern RenderPipeline* renderer;
 extern Material* default3dmat;

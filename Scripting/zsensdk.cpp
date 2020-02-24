@@ -1,7 +1,10 @@
 ﻿#include <Scripting/LuaScript.h>
 #include "headers/zsensdk.h"
 #include <Scripting/zsensdk.h>
-#include "../World/headers/obj_properties.h"
+#include "../World/headers/World.h"
+#include <render/zs-materials.h>
+#include "../World/headers/terrain.h"
+#include "world/go_properties.h"
 #include "../World/headers/2dtileproperties.h"
 #include <render/zs-math.h>
 #include "../ProjEd/headers/ProjectEdit.h"

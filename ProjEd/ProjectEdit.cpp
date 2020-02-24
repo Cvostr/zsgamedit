@@ -1,7 +1,11 @@
 ﻿#include "headers/ProjectEdit.h"
 #include "headers/InspectorWin.h"
 #include "headers/InspEditAreas.h"
-#include "../World/headers/obj_properties.h"
+#include "../World/headers/World.h"
+#include <Scripting/LuaScript.h>
+#include <render/zs-materials.h>
+#include "../World/headers/terrain.h"
+#include "world/go_properties.h"
 #include "../World/headers/2dtileproperties.h"
 #include "../Misc/headers/AssimpMeshLoader.h"
 #include "ui_editor.h"
@@ -168,6 +172,10 @@ void EditWindow::init(){
         //Set base windows values
         this->settings.gameView_win_pos_x = this->width();
         this->settings.gameView_win_pos_y = 0;
+        //For windows, fix bug with invisible window title
+#ifdef _WIN32
+        this->settings.gameView_win_pos_y = 0;
+#endif
 
         this->settings.editor_win_width = this->width();
         this->settings.editor_win_height = this->height();
@@ -951,14 +959,14 @@ void EditWindow::processResourceFile(QFileInfo fileInfo){
         ZS3M::ImportedSceneFile isf;
         isf.loadFromFile(absfpath.toStdString());
 
-        for(unsigned int mesh_i = 0; mesh_i < isf.meshes_toWrite.size(); mesh_i ++){
+        for(unsigned int mesh_i = 0; mesh_i < isf.meshes_toRead.size(); mesh_i ++){
             QString rel_path = absfpath;
             rel_path.remove(0, static_cast<int>(project.root_path.size()) + 1); //Get relative path by removing length of project root from start
 
             Engine::ZsResource* _resource = new Engine::MeshResource;
             _resource->rel_path = rel_path.toStdString();
             _resource->blob_path = _resource->rel_path;
-            _resource->resource_label = isf.meshes_toWrite[mesh_i]->mesh_label;
+            _resource->resource_label = isf.meshes_toRead[mesh_i]->mesh_label;
             game_data->resources->pushResource(_resource);
         }
 

@@ -10,7 +10,8 @@
 #endif
 
 #include "../headers/2dtileproperties.h"
-#include "../headers/obj_properties.h"
+#include "../headers/World.h"
+#include "world/go_properties.h"
 #include "../../ProjEd/headers/InspEditAreas.h"
 
 extern InspectorWin* _inspector_win;

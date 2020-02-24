@@ -1,5 +1,5 @@
 #include "../headers/World.h"
-#include "../headers/obj_properties.h"
+#include "world/go_properties.h"
 #include "../headers/2dtileproperties.h"
 #include "../../ProjEd/headers/ProjectEdit.h"
 #include <render/zs-mesh.h>

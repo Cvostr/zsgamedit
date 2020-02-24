@@ -67,7 +67,6 @@ HEADERS += \
     Misc/headers/ProjBuilder.h \
     include_engine.h \
     Scripting/headers/zsensdk.h \
-    World/headers/obj_properties.h \
     ProjEd/headers/InspEditAreas.h \
     triggers.h \
     Misc/headers/zs_types.h \

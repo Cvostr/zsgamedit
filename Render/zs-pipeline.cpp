@@ -1,5 +1,6 @@
 #include "headers/zs-pipeline.h"
-#include "../World/headers/obj_properties.h"
+#include "../World/headers/World.h"
+#include "world/go_properties.h"
 #include "../World/headers/2dtileproperties.h"
 #include "../ProjEd/headers/ProjectEdit.h"
 #include <iostream>
@@ -309,7 +310,7 @@ void RenderPipeline::renderDepth(void* world_ptr){
 }
 
 void GameObject::Draw(RenderPipeline* pipeline){
-    Engine::TransformProperty* transform_ptr = static_cast<Engine::TransformProperty*>(getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
+    Engine::TransformProperty* transform_ptr = getTransformProperty();
 
     if(transform_ptr == nullptr) return;
 
@@ -318,7 +319,7 @@ void GameObject::Draw(RenderPipeline* pipeline){
     if(pipeline->current_state == PIPELINE_STATE_DEFAULT)
         this->onPreRender(pipeline);
     //Getting pointer to mesh
-    Engine::MeshProperty* mesh_prop = static_cast<Engine::MeshProperty*>(this->getPropertyPtrByType(GO_PROPERTY_TYPE_MESH));
+    Engine::MeshProperty* mesh_prop = getPropertyPtr<Engine::MeshProperty>();
     if(hasMesh() || hasTerrain()){// if object has mesh
         //If we are in default draw mode
         if(pipeline->current_state == PIPELINE_STATE_DEFAULT){

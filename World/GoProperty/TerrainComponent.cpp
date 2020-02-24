@@ -1,4 +1,5 @@
-#include "../headers/obj_properties.h"
+#include <world/go_properties.h>
+#include "../headers/terrain.h"
 #include "../../ProjEd/headers/InspEditAreas.h"
 #include "../headers/Misc.h"
 

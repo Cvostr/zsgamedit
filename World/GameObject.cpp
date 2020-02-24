@@ -1,6 +1,6 @@
 #include "headers/World.h"
 #include "headers/Misc.h"
-#include "headers/obj_properties.h"
+#include <world/go_properties.h>
 
 GameObject::GameObject(){
     item_ptr = new QTreeWidgetItem; //Allocate tree widget item

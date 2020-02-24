@@ -1,7 +1,11 @@
 #ifndef DTILEPROPERTIES
 #define DTILEPROPERTIES
 
-#include "obj_properties.h"
+#include "World.h"
+#include <Scripting/LuaScript.h>
+#include <render/zs-materials.h>
+#include "../../World/headers/terrain.h"
+#include "world/go_properties.h"
 #include <world/tile_properties.h>
 
 class TileGroupProperty : public Engine::GameObjectProperty{

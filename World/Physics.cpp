@@ -1,6 +1,6 @@
 #include <world/Physics.h>
 #include "headers/World.h"
-#include "headers/obj_properties.h"
+#include <world/go_properties.h>
 #include "ProjEd/headers/InspEditAreas.h"
 
 extern InspectorWin* _inspector_win;

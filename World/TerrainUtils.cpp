@@ -1,7 +1,9 @@
-#include "../World/headers/obj_properties.h"
+#include <world/go_properties.h>
+#include "headers/terrain.h"
 #include <GL/glew.h>
 #include "../World/headers/Misc.h"
 #include <fstream>
+#include <list>
 #include <thread>
 
 static bool terrain_thread_working = true;

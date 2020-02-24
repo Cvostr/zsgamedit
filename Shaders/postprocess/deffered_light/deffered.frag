@@ -60,6 +60,7 @@ void main(){
         vec3 camToFragDirection = normalize(cam_position - FragPos);
     
         for(int lg = 0; lg < lights_amount; lg ++){
+        
             if(lights[lg].type == LIGHTSOURCE_DIR){
                 float lightcoeff = max(dot(Normal, normalize(lights[lg].dir)), 0.0) * lights[lg].intensity;
                 vec3 rlight = lightcoeff * lights[lg].color;
