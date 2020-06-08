@@ -1,0 +1,159 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{BB413EDD-0302-455A-A1A8-67185BB556D5}</ProjectGuid>
+    <Keyword>QtVS_v302</Keyword>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <QtMsBuild Condition="'$(QtMsBuild)'=='' OR !Exists('$(QtMsBuild)\qt.targets')">$(MSBuildProjectDirectory)\QtMsBuild</QtMsBuild>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <Target Name="QtMsBuildNotFound" BeforeTargets="CustomBuild;ClCompile" Condition="!Exists('$(QtMsBuild)\qt.targets') or !Exists('$(QtMsBuild)\qt.props')">
+    <Message Importance="High" Text="QtMsBuild: could not locate qt.targets, qt.props; project may not build correctly." />
+  </Target>
+  <ImportGroup Label="ExtensionSettings" />
+  <ImportGroup Label="Shared" />
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>..\LIBS\BULLET;..\LIBS;..\engine\code\headers;$(IncludePath)</IncludePath>
+    <LibraryPath>E:\zspire\LIBS\BULLET\libsDBG;..\x64\Debug;..\LIBS;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IncludePath>..\engine\code\headers;..\LIBS\BULLET;..\LIBS;$(IncludePath)</IncludePath>
+    <LibraryPath>..\x64\Release;..\LIBS\BULLET\libsREL;..\LIBS;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <ImportGroup Condition="Exists('$(QtMsBuild)\qt_defaults.props')">
+    <Import Project="$(QtMsBuild)\qt_defaults.props" />
+  </ImportGroup>
+  <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <QtInstall>msvc2019_64</QtInstall>
+    <QtModules>core;gui;opengl;openglextensions;widgets</QtModules>
+  </PropertyGroup>
+  <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <QtInstall>msvc2019_64</QtInstall>
+    <QtModules>core;gui;opengl;openglextensions;widgets</QtModules>
+  </PropertyGroup>
+  <ImportGroup Condition="Exists('$(QtMsBuild)\qt.props')">
+    <Import Project="$(QtMsBuild)\qt.props" />
+  </ImportGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>Disabled</Optimization>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>assimp.lib;freetype.lib;glew32s.lib;OpenGL32.lib;lua53.lib;OpenAL_x64.lib;SDL2.lib;SDL2main.lib;SDL2test.lib;vulkan-1.lib;engine.lib;LinearMath.lib;BulletDynamics.lib;BulletCollision.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <DebugInformationFormat />
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <AdditionalDependencies>assimp.lib;freetype.lib;glew32s.lib;OpenGL32.lib;lua53.lib;OpenAL_x64.lib;SDL2.lib;SDL2main.lib;SDL2test.lib;vulkan-1.lib;engine.lib;LinearMath.lib;BulletDynamics.lib;BulletCollision.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <QtRcc Include="game_editor.qrc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="code\main.cpp" />
+    <ClCompile Include="code\mainwin.cpp" />
+    <ClCompile Include="code\Misc\AssimpMeshLoader.cpp" />
+    <ClCompile Include="code\Misc\ProjBuilder.cpp" />
+    <ClCompile Include="code\Misc\ThumbnailsMaster.cpp" />
+    <ClCompile Include="code\ProjEd\EdActions.cpp" />
+    <ClCompile Include="code\ProjEd\EditorFilemanager.cpp" />
+    <ClCompile Include="code\ProjEd\EditorResources.cpp" />
+    <ClCompile Include="code\ProjEd\EditorSettings.cpp" />
+    <ClCompile Include="code\ProjEd\EditorUI.cpp" />
+    <ClCompile Include="code\ProjEd\InspectorWin.cpp" />
+    <ClCompile Include="code\ProjEd\ProjCreateWin.cpp" />
+    <ClCompile Include="code\ProjEd\ProjectEdit.cpp" />
+    <ClCompile Include="code\ProjEd\PropertyAreas.cpp" />
+    <ClCompile Include="code\ProjEd\ResourcePicker.cpp" />
+    <ClCompile Include="code\Render\GizmosRenderer.cpp" />
+    <ClCompile Include="code\Render\zs-pipeline.cpp" />
+    <ClCompile Include="code\World\GameObject.cpp" />
+    <ClCompile Include="code\World\GoProperty\go_filestream.cpp" />
+    <ClCompile Include="code\World\GoProperty\go_properties.cpp" />
+    <ClCompile Include="code\World\GoProperty\TerrainComponent.cpp" />
+    <ClCompile Include="code\World\GoProperty\tile_properties.cpp" />
+    <ClCompile Include="code\World\Misc.cpp" />
+    <ClCompile Include="code\World\Physics.cpp" />
+    <ClCompile Include="code\World\TerrainUtils.cpp" />
+    <ClCompile Include="code\World\World.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtUic Include="code\mainwin.ui" />
+    <QtUic Include="code\ProjEd\ui\buildconsole.ui" />
+    <QtUic Include="code\ProjEd\ui\editor.ui" />
+    <QtUic Include="code\ProjEd\ui\inspector_win.ui" />
+    <QtUic Include="code\ProjEd\ui\proj_create_win.ui" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="code\include_engine.h" />
+    <ClInclude Include="code\ProjEd\headers\ResourceImport.h" />
+    <ClInclude Include="code\triggers.h" />
+    <QtMoc Include="code\mainwin.h" />
+    <ClInclude Include="code\Misc\headers\AssimpMeshLoader.h" />
+    <ClInclude Include="code\Misc\headers\EditorManager.h" />
+    <ClInclude Include="code\Misc\headers\ThumbnailsMaster.h" />
+    <ClInclude Include="code\Misc\headers\zs_types.h" />
+    <ClInclude Include="code\ProjEd\headers\EdActions.h" />
+    <ClInclude Include="code\ProjEd\headers\EditorSettings.h" />
+    <ClInclude Include="code\Render\headers\GizmosRenderer.h" />
+    <ClInclude Include="code\Render\headers\zs-pipeline.h" />
+    <ClInclude Include="code\World\headers\2dtileproperties.h" />
+    <ClInclude Include="code\World\headers\Misc.h" />
+    <ClInclude Include="code\World\headers\terrain.h" />
+    <ClInclude Include="code\World\headers\World.h" />
+    <QtMoc Include="code\ProjEd\headers\ProjectEdit.h" />
+    <QtMoc Include="code\ProjEd\headers\ProjCreateWin.h" />
+    <QtMoc Include="code\ProjEd\headers\InspEditAreas.h" />
+    <QtMoc Include="code\ProjEd\headers\InspectorWin.h" />
+    <QtMoc Include="code\Misc\headers\ProjBuilder.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">
+    <Import Project="$(QtMsBuild)\qt.targets" />
+  </ImportGroup>
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

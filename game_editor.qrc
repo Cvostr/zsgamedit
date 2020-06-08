@@ -1,0 +1,14 @@
+<RCC>
+    <qresource prefix="/game_editor"/>
+    <qresource prefix="/icons">
+        <file>res/icons/dir.png</file>
+        <file>res/icons/audio-clip.png</file>
+        <file>res/icons/3dmodel.png</file>
+        <file>res/icons/unknown.png</file>
+        <file>res/icons/script.png</file>
+        <file>res/icons/3d_scene.png</file>
+        <file>res/icons/dir_back.png</file>
+        <file>res/icons/bone.png</file>
+        <file>res/icons/none.png</file>
+    </qresource>
+</RCC>

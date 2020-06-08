@@ -19,14 +19,14 @@ layout (std140, binding = 0) uniform CamMatrices{
 };
 
 layout (std140, binding = 9) uniform InstMatrices{
-    uniform mat4 transform[400];
+    uniform mat4 inst_transform[1000];
 };
 
 void main(){
 	UVCoord = uv;
 	InNormal = normal;
 	
-	FragPos = (object_transform * vec4(position, 1.0)).xyz;
+	FragPos = (object_transform * inst_transform[gl_InstanceID] * vec4(position, 1.0)).xyz;
 
 	//Calculate TBN
 	vec3 TangentVec = normalize(vec3(object_transform * vec4(tangent, 0)));

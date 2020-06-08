@@ -118,120 +118,124 @@ float getFactor(int id, vec2 uv){
     return factor;
 }
 
-vec3 getDiffuse(int id, vec2 uv, int multiplyer){
+vec3 getDiffuse(int id, vec2 uv){
     switch(id){
         case 0:{
-            return texture(diffuse0, uv * multiplyer).xyz;
+            return texture(diffuse0, uv).xyz;
             break;
         }
         case 1:{
-            return texture(diffuse1, uv * multiplyer).xyz;
+            return texture(diffuse1, uv).xyz;
             break;
         }
         case 2:{
-            return texture(diffuse2, uv * multiplyer).xyz;
+            return texture(diffuse2, uv).xyz;
             break;
         }
         case 3:{
-            return texture(diffuse3, uv * multiplyer).xyz;
+            return texture(diffuse3, uv).xyz;
             break;
         }
         case 4:{
-            return texture(diffuse4, uv * multiplyer).xyz;
+            return texture(diffuse4, uv).xyz;
             break;
         }
         case 5:{
-            return texture(diffuse5, uv * multiplyer).xyz;
+            return texture(diffuse5, uv).xyz;
             break;
         }
         case 6:{
-            return texture(diffuse6, uv * multiplyer).xyz;
+            return texture(diffuse6, uv).xyz;
             break;
         }
         case 7:{
-            return texture(diffuse7, uv * multiplyer).xyz;
+            return texture(diffuse7, uv).xyz;
             break;
         }case 8:{
-            return texture(diffuse8, uv * multiplyer).xyz;
+            return texture(diffuse8, uv).xyz;
             break;
         }case 9:{
-            return texture(diffuse9, uv * multiplyer).xyz;
+            return texture(diffuse9, uv).xyz;
             break;
         }
         case 10:{
-            return texture(diffuse10, uv * multiplyer).xyz;
+            return texture(diffuse10, uv).xyz;
             break;
         }
         case 11:{
-            return texture(diffuse11, uv * multiplyer).xyz;
+            return texture(diffuse11, uv).xyz;
             break;
         }
         
     }
 }
 
-vec3 getNormal(int id, vec2 uv, int multiplyer){
+vec3 getNormal(int id, vec2 uv){
     switch(id){
         case 0:{
-            return texture(normal0, uv * multiplyer).xyz;
+            return texture(normal0, uv).xyz;
             break;
         }
         case 1:{
-            return texture(normal1, uv * multiplyer).xyz;
+            return texture(normal1, uv).xyz;
             break;
         }
         case 2:{
-            return texture(normal2, uv * multiplyer).xyz;
+            return texture(normal2, uv).xyz;
             break;
         }
         case 3:{
-            return texture(normal3, uv * multiplyer).xyz;
+            return texture(normal3, uv).xyz;
             break;
         }
         case 4:{
-            return texture(normal4, uv * multiplyer).xyz;
+            return texture(normal4, uv).xyz;
             break;
         }
         case 5:{
-            return texture(normal5, uv * multiplyer).xyz;
+            return texture(normal5, uv).xyz;
             break;
         }
         case 6:{
-            return texture(normal6, uv * multiplyer).xyz;
+            return texture(normal6, uv).xyz;
             break;
         }
         case 7:{
-            return texture(normal7, uv * multiplyer).xyz;
+            return texture(normal7, uv).xyz;
             break;
         }
         case 8:{
-            return texture(normal8, uv * multiplyer).xyz;
+            return texture(normal8, uv).xyz;
             break;
         }
         case 9:{
-            return texture(normal9, uv * multiplyer).xyz;
+            return texture(normal9, uv).xyz;
             break;
         }
         case 10:{
-            return texture(normal10, uv * multiplyer).xyz;
+            return texture(normal10, uv).xyz;
             break;
         }
         case 11:{
-            return texture(normal11, uv * multiplyer).xyz;
+            return texture(normal11, uv).xyz;
             break;
         }
         
     }
 }
 
-vec3 getFragment(vec2 uv, int multiplyer){
+vec3 getFragment(vec2 uv){
     vec3 result = vec3(0,0,0);
+
+    vec2 nuv = uv;
+    nuv.x *= terrain_Width / 50;
+    nuv.y *= terrain_Height / 50;
 
     for(int i = 0; i < TEXTURES_AMOUNT; i ++){
         if(hasDiffuse[i] == false) continue;
     
         float factor = getFactor(i, uv);
-        vec3 diffuse = getDiffuse(i, uv, multiplyer);
+        vec3 diffuse = getDiffuse(i, nuv);
         
         result = mix(result, diffuse, factor);
     }
@@ -239,13 +243,17 @@ vec3 getFragment(vec2 uv, int multiplyer){
     return result;
 }
 
-vec3 getFragmentNormal(vec2 uv, int multiplyer){
+vec3 getFragmentNormal(vec2 uv){
     vec3 result = InNormal;
+
+    vec2 nuv = uv;
+    nuv.x *= terrain_Width / 50;
+    nuv.y *= terrain_Height / 50;
 
     for(int i = 0; i < TEXTURES_AMOUNT; i ++){
         if(hasNormal[i] == false) continue;
         float factor = getFactor(i, uv);
-        vec3 normal = getNormal(i, uv, multiplyer);
+        vec3 normal = getNormal(i, nuv);
         
         normal = normalize(normal * 2 - 1);
 		normal = normalize(TBN * normal);
@@ -297,10 +305,10 @@ void main(){
     if(isPicking == 0){
 	   
 	    tPos = FragPos;
-	    tNormal = getFragmentNormal(uv, 8); //defaultly, use normals from mesh
+	    tNormal = getFragmentNormal(uv); //defaultly, use normals from mesh
 	    tMasks = vec4(1.0, 0, 0, 0);
         
         _shadow();
-		FragColor = vec4(getFragment(uv, 8), 0);
+		FragColor = vec4(getFragment(uv), 0);
 	}	
 }

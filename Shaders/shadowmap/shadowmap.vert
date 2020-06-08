@@ -16,10 +16,14 @@ layout (location = 10) in vec4 Weights2;
 //Amount of bones, that control this vertex
 layout (location = 11) in int bones;
 
+layout (location = 0) out vec3 frag;
+
 layout (std140, binding = 2) uniform ShadowData{
 //Shadowmapping stuff
-    uniform mat4 LightProjectionMat; // 16 * 4
-    uniform mat4 LightViewMat; // 16 * 4
+    uniform mat4 LightProjViewMat; // 16 * 4
+    uniform mat4 LightProjViewMat1; // 16 * 4
+    uniform mat4 LightProjViewMat2; // 16 * 4
+    uniform mat4 LightProjViewMat3; // 16 * 4
     uniform float shadow_bias; //4
     uniform bool hasShadowMap; //4
     uniform int shadowmap_Width; //4
@@ -34,7 +38,11 @@ layout (std140, binding = 0) uniform CamMatrices{
 };
 
 layout (std140, binding = 4) uniform BonesData{
-    uniform mat4 bone_transform[150];
+    uniform mat4 bone_transform[200];
+};
+//Cascaded projection matrices are stored here
+layout (std140, binding = 9) uniform InstMatrices{
+    uniform mat4 inst_transform[1000];
 };
 
 mat4 getBoneTransform(){
@@ -82,6 +90,8 @@ void main(){
 	if(bones > 0)
 		bone_t = getBoneTransform();
 
-	gl_Position = LightProjectionMat * LightViewMat * object_transform * bone_t * vec4(position, 1.0);
+    vec4 pos = LightProjViewMat * object_transform * bone_t * vec4(position, 1.0);
+
+	gl_Position = pos;
 	
 }
