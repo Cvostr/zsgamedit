@@ -83,14 +83,15 @@ void TerrainData::saveToFile(const char* file_path){
     //write dimensions
     world_stream.write(reinterpret_cast<char*>(&this->W), sizeof(int));
     world_stream.write(reinterpret_cast<char*>(&this->H), sizeof(int));
-
+    //Write vertex to file
     for(int i = 0; i < W * H; i ++){
+        //Write vertex height
         world_stream.write(reinterpret_cast<char*>(&data[i].height), sizeof(float));
         for(int tex_factor = 0; tex_factor < TERRAIN_TEXTURES_AMOUNT; tex_factor ++)
             world_stream.write(reinterpret_cast<char*>(&data[i].texture_factors[tex_factor]), sizeof(unsigned char));
         world_stream.write(reinterpret_cast<char*>(&data[i].grass), sizeof(int));
     }
-
+    //Close stream
     world_stream.close();
 }
 
@@ -119,6 +120,7 @@ void TerrainData::modifyTexture(int originX, int originY, int range, unsigned ch
         for(int x = 0; x < H; x ++){
             //if pixel is in circle
             float dist = getDistance(ZSVECTOR3(x, y, 0), ZSVECTOR3(originX, originY, 0));
+            //if vertex is inside circle
             if(dist <= range - modif){
                 for(unsigned char texture_f = 0; texture_f < TERRAIN_TEXTURES_AMOUNT; texture_f ++){
                     if(texture_f != texture)

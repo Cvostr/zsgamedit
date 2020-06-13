@@ -10,9 +10,11 @@
 static uint64_t NOW = SDL_GetPerformanceCounter();
 static uint64_t last = 0;
 static float deltaTime = 0;
-bool infocus = true;
 
+bool infocus = true;
 bool working = true; //Application started and it is working
+
+QApplication* a;
 
 int main(int argc, char *argv[]){
 #ifdef SHOW_WIN_CONSOLE
@@ -22,13 +24,13 @@ int main(int argc, char *argv[]){
     }
 #endif
 
-    QApplication a(argc, argv);
-    MainWin w(&a);
+    a = new QApplication(argc, argv);
+    MainWin w(a);
     w.show();
 
     while (working) {
         //Work on application
-        a.processEvents();
+        a->processEvents();
         if(w.edit_win_ptr != nullptr){ //Check if project editor window is created
             //Time calculation
             if(w.edit_win_ptr->ready){

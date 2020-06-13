@@ -138,6 +138,6 @@ public:
 };
 
 Engine::GameObjectProperty* _allocProperty(PROPERTY_TYPE type);
-QString getPropertyString(int type);
+QString getPropertyString(PROPERTY_TYPE type);
 
 #endif

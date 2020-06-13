@@ -2,6 +2,68 @@
 #include <QDir>
 #include "ui_editor.h"
 
+//Hack to support resources
+extern ZSGAME_DATA* game_data;
+
+QString EditWindow::getCurrentDirectory() {
+    return this->current_dir;
+}
+
+bool EditWindow::checkExtension(QString fpath, QString ext) {
+    return fpath.toLower().endsWith(ext);
+}
+
+void EditWindow::setViewDirectory(QString dir_path) {
+
+    this->current_dir = dir_path;
+    this->updateFileList();
+}
+
+void EditWindow::assignIconFile(QListWidgetItem* item) {
+    //Set base icon
+    item->setIcon(QIcon(":/icons/res/icons/unknown.png"));
+
+    //File is plaintext
+    if (checkExtension(item->text(), (".txt")) || checkExtension(item->text(), (".inf"))) {
+        item->setIcon(QIcon::fromTheme("text-x-generic"));
+    }
+    if (checkExtension(item->text(), (".dds"))) {
+        QString path = this->current_dir + "/" + item->text();
+        //Check, if we have thumbnail for this texture
+        if (thumb_master->isAvailable(path.toStdString())) {
+            //Thumbnail exists
+            QImage* img = thumb_master->texture_thumbnails.at(path.toStdString());
+            item->setIcon(QIcon(QPixmap::fromImage(*img)));
+        }
+    }
+
+    if (checkExtension(item->text(), ".scn"))
+        item->setIcon(QIcon(":/icons/res/icons/3d_scene.png"));
+    //File is .FBX .DAE .ZS3M scene
+    if (checkExtension(item->text(), (".fbx")) || checkExtension(item->text(), (".dae")) || checkExtension(item->text(), (".zs3m"))) {
+        item->setIcon(QIcon(":/icons/res/icons/3dmodel.png"));
+    }
+    //File is .zsanim animation
+    if (checkExtension(item->text(), (".zsanim"))) {
+        item->setIcon(QIcon(":/icons/res/icons/bone.png"));
+    }
+    //File is .WAV sound
+    if (checkExtension(item->text(), (".wav"))) {
+        item->setIcon(QIcon(":/icons/res/icons/audio-clip.png"));
+    }
+    if (checkExtension(item->text(), (".lua"))) {
+        item->setIcon(QIcon(":/icons/res/icons/script.png"));
+    }
+    //File is .ZSMAT material
+    if (checkExtension(item->text(), (".zsmat"))) {
+        QString path = this->current_dir + "/" + item->text();
+        if (thumb_master->isAvailable(path.toStdString())) {
+            QImage* img = thumb_master->texture_thumbnails.at(path.toStdString());
+            item->setIcon(QIcon(QPixmap::fromImage(*img)));
+        }
+    }
+}
+
 void EditWindow::updateFileList() {
     ui->fileList->clear(); //Clear widget content
 
@@ -79,4 +141,31 @@ void EditWindow::onFileCtxMenuShow(QPoint point) {
         this->file_ctx_menu->directory = this->current_dir; //set dirctory
         this->file_ctx_menu->show(point); //show menu
     }
+}
+void EditWindow::onNewScript() {
+    std::string scriptContent = "onStart = function(g_object, world)\n  return 0\nend\n\n";
+    scriptContent += "onFrame = function(frameTime)\n  return 0\nend";
+    this->createNewTextFile(current_dir, "Script", ".lua", scriptContent.c_str(), scriptContent.size());
+
+    updateFileList(); //Make new file visible
+}
+void EditWindow::onNewMaterial() {
+    char* matContent = "ZSP_MATERIAL\nGROUP @default\nENTRY i_uv_repeat \x0\x0\x0\x1\x0\x0\x0\x1\n";
+    QString picked_name = this->createNewTextFile(current_dir, "Material", ".zsmat", matContent, 56);
+
+    //Register new material in list
+    //First, get relative path to new material
+    QString rel_path = picked_name; //Preparing to get relative path
+    rel_path = rel_path.remove(0, static_cast<int>(project.root_path.size() + 1)); //Get relative path by removing length of project root from start
+
+    Engine::ZsResource* _resource = new Engine::MaterialResource;
+    _resource->size = 0;
+    _resource->rel_path = rel_path.toStdString();
+    _resource->blob_path = _resource->rel_path;
+    _resource->resource_label = _resource->rel_path;
+    game_data->resources->pushResource(_resource);
+
+    thumb_master->createMaterialThumbnail(_resource->rel_path);
+
+    updateFileList(); //Make new file visible
 }

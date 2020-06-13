@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <QDir>
 
+extern QApplication* a;
 extern ZSGAME_DATA* game_data;
 
 void ProjBuilder::showWindow(){
@@ -47,6 +48,8 @@ void ProjBuilder::start(){
                 break;
         }
         window->addToOutput("Resource #" + QString::number(res_i) + " type: " + type_str + " " + QString::fromStdString(res_ptr->rel_path));
+        //Update window content
+        a->processEvents();
         std::string abs_path = (proj_ptr->root_path + "/" + res_ptr->rel_path);
         std::string rel_path = res_ptr->rel_path;
         writer->writeToBlob(abs_path, rel_path, res_ptr);
@@ -54,7 +57,30 @@ void ProjBuilder::start(){
 
     window->addToOutput("All Resources are Written!");
 
+    copyOtherFiles();
+
     delete writer;
+}
+
+void ProjBuilder::copyOtherFiles() {
+    _copyOtherFilesDir(QString::fromStdString(this->proj_ptr->root_path));
+}
+
+void ProjBuilder::_copyOtherFilesDir(const QString dir) {
+    QDir directory(dir);
+
+    directory.setFilter(QDir::Files | QDir::Dirs | QDir::NoSymLinks | QDir::NoDot | QDir::NoDotDot);
+    directory.setSorting(QDir::DirsFirst | QDir::Name | QDir::Reversed);
+
+    QFileInfoList list = directory.entryInfoList(); //Get folder content iterator
+    
+    for (int i = 0; i < list.size(); i++) { //iterate all files, skip 2 last . and ..
+        QFileInfo fileInfo = list.at(i);  //get iterated file info
+        
+        if (fileInfo.isDir())
+            _copyOtherFilesDir(fileInfo.absoluteFilePath());
+        
+    }
 }
 
 ProjBuilder::ProjBuilder(Project* proj){
@@ -103,12 +129,11 @@ void BuilderWindow::addToOutput(QString text){
 BlobWriter::BlobWriter(QString map_path, BuilderWindow* window){
     this->map_path = map_path;
     this->map_stream.open(map_path.toStdString(), std::ofstream::binary);
-
+    //Store pointer to qt window
     this->window = window;
-
+    //Set all stats to zero
     bl_stream_opened = false;
     written_bytes = 0;
-
     created_blobs = 0;
 }
 
@@ -119,18 +144,20 @@ BlobWriter::~BlobWriter(){
 
 unsigned int BlobWriter::getFileSize(std::string file_path){
     std::ifstream file_stream;
+    //Open file from end
     file_stream.open(file_path, std::iostream::binary | std::iostream::ate);
-
+    //if file doesn't exist, then exit function with 0
     if (file_stream.fail()) return 0;
-
+    //get file size
     unsigned int result = static_cast<unsigned int>(file_stream.tellg());
-
+    //Clse file stream
     file_stream.close();
 
     return result;
 }
 
 void BlobWriter::writeToBlob(std::string& file_path, std::string& rel_path, Engine::ZsResource* res_ptr){
+    //check, if we got over the blob limit
     if(written_bytes >= this->max_blob_size){
         written_bytes = 0;
         this->bl_stream_opened = false;
@@ -145,20 +172,20 @@ void BlobWriter::writeToBlob(std::string& file_path, std::string& rel_path, Engi
         bl_stream_opened = true;
         created_blobs += 1;
     }
-
+    //Get resource file size
     unsigned int size = getFileSize(file_path);
-    unsigned char* data = new unsigned char[size]; //allocate memory
+    //allocate memory for resource file
+    unsigned char* data = new unsigned char[size]; 
     //open input stream of resource file
     std::ifstream file_stream;
     file_stream.open(file_path, std::ifstream::binary);
     //read resource file
     file_stream.read(reinterpret_cast<char*>(data), size);
     file_stream.close();
-
     //Write data
     blob_stream.write(reinterpret_cast<char*>(data), size);
-
-    delete[] data; //free data
+    //free data
+    delete[] data; 
 
     QString blob_path = this->name_prefix + QString::number(created_blobs - 1);
 

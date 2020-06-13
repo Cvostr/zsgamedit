@@ -26,63 +26,65 @@ Engine::GameObjectProperty* ObjectPropertyLink::updLinkPtr(){
 }
 
 ObjectPropertyLink::ObjectPropertyLink(){
-
+    prop_type = PROPERTY_TYPE::GO_PROPERTY_TYPE_NONE;
+    ptr = nullptr;
 }
 
-QString getPropertyString(int type){
-    switch (type) {
-        case GO_PROPERTY_TYPE_TRANSFORM:{ //If type is transfrom
+QString getPropertyString(PROPERTY_TYPE type){
+    PROPERTY_TYPE _type = static_cast<PROPERTY_TYPE>(type);
+    switch (_type) {
+        case PROPERTY_TYPE::GO_PROPERTY_TYPE_TRANSFORM:{ //If type is transfrom
             return QString("Transform");
         }
-        case GO_PROPERTY_TYPE_LABEL:{
+        case PROPERTY_TYPE::GO_PROPERTY_TYPE_LABEL:{
             return QString("Label");
         }
-        case GO_PROPERTY_TYPE_MESH:{
+        case PROPERTY_TYPE::GO_PROPERTY_TYPE_MESH:{
             return QString("Mesh");
         }
-        case GO_PROPERTY_TYPE_LIGHTSOURCE:{
+        case PROPERTY_TYPE::GO_PROPERTY_TYPE_LIGHTSOURCE:{
             return QString("Light");
         }
-        case GO_PROPERTY_TYPE_SCRIPTGROUP:{
+        case PROPERTY_TYPE::GO_PROPERTY_TYPE_SCRIPTGROUP:{
             return QString("Script Group");
         }
-        case GO_PROPERTY_TYPE_AUDSOURCE:{
+        case PROPERTY_TYPE::GO_PROPERTY_TYPE_AUDSOURCE:{
             return QString("Audio Source");
         }
-        case GO_PROPERTY_TYPE_MATERIAL:{
+        case PROPERTY_TYPE::GO_PROPERTY_TYPE_MATERIAL:{
             return QString("Material");
         }
-        case GO_PROPERTY_TYPE_COLLIDER:{
+        case PROPERTY_TYPE::GO_PROPERTY_TYPE_COLLIDER:{
             return QString("Collider");
         }
-        case GO_PROPERTY_TYPE_RIGIDBODY:{
+        case PROPERTY_TYPE::GO_PROPERTY_TYPE_RIGIDBODY:{
             return QString("Rigidbody");
         }
-        case GO_PROPERTY_TYPE_SHADOWCASTER:{
+        case PROPERTY_TYPE::GO_PROPERTY_TYPE_SHADOWCASTER:{
             return QString("Shadow Caster");
         }
-        case GO_PROPERTY_TYPE_TILE_GROUP:{
+        case PROPERTY_TYPE::GO_PROPERTY_TYPE_TILE_GROUP:{
             return QString("Tile Group");
         }
-        case GO_PROPERTY_TYPE_TILE:{
+        case PROPERTY_TYPE::GO_PROPERTY_TYPE_TILE:{
             return QString("Tile");
         }
-        case GO_PROPERTY_TYPE_SKYBOX:{
+        case PROPERTY_TYPE::GO_PROPERTY_TYPE_SKYBOX:{
             return QString("Skybox");
         }
-        case GO_PROPERTY_TYPE_TERRAIN:{
+        case PROPERTY_TYPE::GO_PROPERTY_TYPE_TERRAIN:{
             return QString("Terrain");
         }
-        case GO_PROPERTY_TYPE_NODE:{
+        case PROPERTY_TYPE::GO_PROPERTY_TYPE_NODE:{
             return QString("Node");
         }
-        case GO_PROPERTY_TYPE_ANIMATION:{
+        case PROPERTY_TYPE::GO_PROPERTY_TYPE_ANIMATION:{
             return QString("Animation");
         }
-        case GO_PROPERTY_TYPE_CHARACTER_CONTROLLER:{
+        case PROPERTY_TYPE::GO_PROPERTY_TYPE_CHARACTER_CONTROLLER:{
             return QString("Character Controller");
         }
-        case GO_PROPERTY_TYPE_TRIGGER: {
+        case PROPERTY_TYPE::GO_PROPERTY_TYPE_TRIGGER: {
             return QString("Trigger");
         }
     }
@@ -92,77 +94,77 @@ QString getPropertyString(int type){
 Engine::GameObjectProperty* _allocProperty(PROPERTY_TYPE type){
     Engine::GameObjectProperty* _ptr = nullptr;
     switch (type) {
-        case GO_PROPERTY_TYPE_TRANSFORM:{ //If type is transfrom
+        case PROPERTY_TYPE::GO_PROPERTY_TYPE_TRANSFORM:{ //If type is transfrom
             _ptr = static_cast<Engine::GameObjectProperty*>(new Engine::TransformProperty); //Allocation of transform in heap
             break;
         }
-        case GO_PROPERTY_TYPE_NODE:{ //If type is transfrom
+        case PROPERTY_TYPE::GO_PROPERTY_TYPE_NODE:{ //If type is transfrom
             _ptr = static_cast<Engine::GameObjectProperty*>(new Engine::NodeProperty); //Allocation of transform in heap
             break;
         }
-        case GO_PROPERTY_TYPE_ANIMATION:{ //If type is transfrom
+        case PROPERTY_TYPE::GO_PROPERTY_TYPE_ANIMATION:{ //If type is transfrom
             _ptr = static_cast<Engine::GameObjectProperty*>(new Engine::AnimationProperty); //Allocation of transform in heap
             break;
         }
-        case GO_PROPERTY_TYPE_LABEL:{
+        case PROPERTY_TYPE::GO_PROPERTY_TYPE_LABEL:{
             LabelProperty* ptr = new LabelProperty;
             _ptr = static_cast<Engine::GameObjectProperty*>(ptr);
             break;
         }
-        case GO_PROPERTY_TYPE_MESH:{
+        case PROPERTY_TYPE::GO_PROPERTY_TYPE_MESH:{
             _ptr = static_cast<Engine::GameObjectProperty*>(new Engine::MeshProperty);
             break;
         }
-        case GO_PROPERTY_TYPE_LIGHTSOURCE:{
+        case PROPERTY_TYPE::GO_PROPERTY_TYPE_LIGHTSOURCE:{
             _ptr = static_cast<Engine::GameObjectProperty*>(new Engine::LightsourceProperty);
             break;
         }
-        case GO_PROPERTY_TYPE_SCRIPTGROUP:{
+        case PROPERTY_TYPE::GO_PROPERTY_TYPE_SCRIPTGROUP:{
             _ptr = static_cast<Engine::GameObjectProperty*>(new Engine::ScriptGroupProperty);
             break;
         }
-        case GO_PROPERTY_TYPE_AUDSOURCE:{
+        case PROPERTY_TYPE::GO_PROPERTY_TYPE_AUDSOURCE:{
             _ptr = static_cast<Engine::GameObjectProperty*>(new Engine::AudioSourceProperty);
             break;
         }
-        case GO_PROPERTY_TYPE_MATERIAL:{
+        case PROPERTY_TYPE::GO_PROPERTY_TYPE_MATERIAL:{
             _ptr = static_cast<Engine::GameObjectProperty*>(new Engine::MaterialProperty);
             break;
         }
-        case GO_PROPERTY_TYPE_COLLIDER:{
+        case PROPERTY_TYPE::GO_PROPERTY_TYPE_COLLIDER:{
             _ptr = static_cast<Engine::GameObjectProperty*>(new Engine::ColliderProperty);
             break;
         }
-        case GO_PROPERTY_TYPE_RIGIDBODY:{
+        case PROPERTY_TYPE::GO_PROPERTY_TYPE_RIGIDBODY:{
             _ptr = static_cast<Engine::GameObjectProperty*>(new Engine::RigidbodyProperty);
             break;
         }
-        case GO_PROPERTY_TYPE_SKYBOX:{
+        case PROPERTY_TYPE::GO_PROPERTY_TYPE_SKYBOX:{
             _ptr = static_cast<Engine::GameObjectProperty*>(new Engine::SkyboxProperty);
             break;
         }
-        case GO_PROPERTY_TYPE_SHADOWCASTER:{
+        case PROPERTY_TYPE::GO_PROPERTY_TYPE_SHADOWCASTER:{
             _ptr = static_cast<Engine::GameObjectProperty*>(new Engine::ShadowCasterProperty);
             break;
         }
-        case GO_PROPERTY_TYPE_TERRAIN:{
+        case PROPERTY_TYPE::GO_PROPERTY_TYPE_TERRAIN:{
             _ptr = static_cast<Engine::GameObjectProperty*>(new Engine::TerrainProperty);
             break;
         }
-        case GO_PROPERTY_TYPE_CHARACTER_CONTROLLER:{
+        case PROPERTY_TYPE::GO_PROPERTY_TYPE_CHARACTER_CONTROLLER:{
             _ptr = static_cast<Engine::GameObjectProperty*>(new Engine::CharacterControllerProperty);
             break;
         }
-        case GO_PROPERTY_TYPE_TRIGGER: {
+        case PROPERTY_TYPE::GO_PROPERTY_TYPE_TRIGGER: {
             _ptr = static_cast<Engine::GameObjectProperty*>(new Engine::TriggerProperty);
             break;
         }
-        case GO_PROPERTY_TYPE_TILE_GROUP:{
+        case PROPERTY_TYPE::GO_PROPERTY_TYPE_TILE_GROUP:{
             TileGroupProperty* ptr = new TileGroupProperty;
             _ptr = static_cast<Engine::GameObjectProperty*>(ptr);
             break;
         }
-        case GO_PROPERTY_TYPE_TILE:{
+        case PROPERTY_TYPE::GO_PROPERTY_TYPE_TILE:{
             _ptr = static_cast<Engine::GameObjectProperty*>(new Engine::TileProperty);
             break;
         }
@@ -171,7 +173,7 @@ Engine::GameObjectProperty* _allocProperty(PROPERTY_TYPE type){
 }
 
 LabelProperty::LabelProperty(){
-    type = GO_PROPERTY_TYPE_LABEL; //its an label
+    type = PROPERTY_TYPE::GO_PROPERTY_TYPE_LABEL; //its an label
     active = true;
     list_item_ptr = nullptr;
 }
@@ -583,6 +585,11 @@ void Engine::RigidbodyProperty::addPropertyInterfaceToInspector(){
 }
 
 void Engine::CharacterControllerProperty::addPropertyInterfaceToInspector(){
+    addCustomSizeField();
+}
+
+void Engine::TriggerProperty::addPropertyInterfaceToInspector() {
+    addColliderRadio();
     addCustomSizeField();
 }
 

@@ -136,7 +136,7 @@ unsigned int RenderPipeline::render_getpickedObj(void* projectedit_ptr, int mous
 
         //If we picking object
         if (current_state == PIPELINE_STATE::PIPELINE_STATE_PICKING) {
-            Engine::TransformProperty* transform_ptr = static_cast<Engine::TransformProperty*>(obj_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
+            Engine::TransformProperty* transform_ptr = obj_ptr->getTransformProperty();
 
             unsigned char* to_send = reinterpret_cast<unsigned char*>(&obj_ptr->array_index);
             float r = static_cast<float>(to_send[0]);
@@ -309,7 +309,7 @@ void RenderPipeline::processObjects(void* _world_ptr) {
             glDisable(GL_CULL_FACE);
 
             EditWindow* editwin_ptr = static_cast<EditWindow*>(win_ptr);
-            Engine::TransformProperty* transform_ptr = static_cast<Engine::TransformProperty*>(obj_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
+            Engine::TransformProperty* transform_ptr = obj_ptr->getTransformProperty();
             Engine::MeshProperty* mesh_prop = obj_ptr->getPropertyPtr<Engine::MeshProperty>();
             ZSRGBCOLOR color = ZSRGBCOLOR(static_cast<int>(0.23f * 255.0f),
                 static_cast<int>(0.23f * 255.0f),

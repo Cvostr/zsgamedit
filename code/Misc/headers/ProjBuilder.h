@@ -64,6 +64,8 @@ private:
     BlobWriter* writer;
 
     void prepareDirectory(); //Prepare output directory
+    void copyOtherFiles();
+    void _copyOtherFilesDir(const QString dir);
 public:
     void showWindow();
     void start();

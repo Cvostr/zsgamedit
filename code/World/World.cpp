@@ -35,10 +35,11 @@ int World::getFreeObjectSpaceIndex(){
 }
 
 GameObject* World::addObject(GameObject obj){
-
+    //Allocate new Object
     GameObject* newobj = new GameObject;
+    //Assign object's data to new object
     *newobj = obj;
-
+    //Try to find, if there is a free space in array for new object
     int index_to_push = -1;
     unsigned int objects_num = static_cast<unsigned int>(this->objects.size());
     for(unsigned int objs_i = 0; objs_i < objects_num; objs_i ++){
@@ -133,12 +134,12 @@ GameObject* World::newObject(){
     getAvailableNumObjLabel("GameObject_", &add_num);
 
     obj.world_ptr = this;
-    obj.addProperty(GO_PROPERTY_TYPE_LABEL);
+    obj.addProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_LABEL);
     obj.label_ptr = &obj.getLabelProperty()->label;
     *obj.label_ptr = "GameObject_" + std::to_string(add_num); //Assigning label to object
     obj.item_ptr->setText(0, QString::fromStdString(*obj.label_ptr));
 
-    obj.addProperty(GO_PROPERTY_TYPE_TRANSFORM);
+    obj.addProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_TRANSFORM);
     return this->addObject(obj); //Return pointer to new object
 }
 
@@ -218,7 +219,7 @@ void World::loadGameObject(GameObject* object_ptr, std::ifstream* world_stream){
     *world_stream >> object_ptr->str_id;
 
     world_stream->seekg(1, std::ofstream::cur);
-
+    //Read object flags
     world_stream->read(reinterpret_cast<char*>(&object_ptr->active), sizeof(bool));
     world_stream->read(reinterpret_cast<char*>(&object_ptr->IsStatic), sizeof(bool));
 
@@ -267,15 +268,13 @@ void World::saveToFile(std::string file){
     world_stream.write(reinterpret_cast<char*>(&settings_ptr->ambient_light_color.b), sizeof(int)); //Writing B component of amb color
     world_stream << "\n_END\n";
 
-
-
     //Iterate over all objects and write them
     for(unsigned int obj_i = 0; obj_i < static_cast<unsigned int>(obj_num); obj_i ++){ //Iterate over all game objects
         GameObject* object_ptr = static_cast<GameObject*>(this->objects[obj_i]);
         //Write GameObject
         writeGameObject(object_ptr, &world_stream);
     }
-
+    //Close stream
     world_stream.close();
 
 }
@@ -464,7 +463,7 @@ void World::addMeshGroup(std::string file_path){
     GameObject* rootobj = addMeshNode(node);
     this->obj_widget_ptr->addTopLevelItem(rootobj->item_ptr);
     //Add animation property to root object for correct skinning support
-    rootobj->addProperty(GO_PROPERTY_TYPE_ANIMATION);
+    rootobj->addProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_ANIMATION);
     //Set rootNode to meshProperty on all children objects
     rootobj->setMeshSkinningRootNodeRecursively(rootobj);
 }
@@ -475,22 +474,22 @@ GameObject* World::addMeshNode(ZS3M::SceneNode* node){
     getAvailableNumObjLabel(node->node_label, &add_num);
     //Setting base variables
     obj.world_ptr = this;
-    obj.addProperty(GO_PROPERTY_TYPE_LABEL);
+    obj.addProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_LABEL);
     //Add common base property Transform
-    obj.addProperty(GO_PROPERTY_TYPE_TRANSFORM);
+    obj.addProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_TRANSFORM);
     //Add node property to support skinning
-    obj.addProperty(GO_PROPERTY_TYPE_NODE);
+    obj.addProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_NODE);
 
     obj.label_ptr = &obj.getLabelProperty()->label;
     *obj.label_ptr = node->node_label + std::to_string(add_num); //Assigning label to object
     obj.item_ptr->setText(0, QString::fromStdString(*obj.label_ptr));
 
-    Engine::TransformProperty* transform_prop = static_cast<Engine::TransformProperty*>(obj.getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
+    Engine::TransformProperty* transform_prop = obj.getTransformProperty();
     transform_prop->setScale(node->node_scaling);
     transform_prop->setTranslation(node->node_translation);
-    transform_prop->updateMat();
+    transform_prop->updateMatrix();
 
-    Engine::NodeProperty* node_prop = static_cast<Engine::NodeProperty*>(obj.getPropertyPtrByType(GO_PROPERTY_TYPE_NODE));
+    Engine::NodeProperty* node_prop = static_cast<Engine::NodeProperty*>(obj.getPropertyPtrByType(PROPERTY_TYPE::GO_PROPERTY_TYPE_NODE));
     node_prop->node_label = node->node_label;
     //Set original node transform
     node_prop->transform_mat = node->node_transform;
@@ -524,8 +523,8 @@ GameObject* World::addMeshNode(ZS3M::SceneNode* node){
             getAvailableNumObjLabel(mesh_label, &add_num);
 
             mesh_obj->world_ptr = this;
-            mesh_obj->addProperty(GO_PROPERTY_TYPE_LABEL);
-            mesh_obj->addProperty(GO_PROPERTY_TYPE_TRANSFORM);
+            mesh_obj->addProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_LABEL);
+            mesh_obj->addProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_TRANSFORM);
 
             mesh_obj->label_ptr = &mesh_obj->getLabelProperty()->label;
             *mesh_obj->label_ptr = mesh_label + std::to_string(add_num); //Assigning label to object
@@ -536,16 +535,16 @@ GameObject* World::addMeshNode(ZS3M::SceneNode* node){
             node_object->item_ptr->addChild(mesh_obj->item_ptr);
         }
 
-        mesh_obj->addProperty(GO_PROPERTY_TYPE_MESH); //add mesh property
-        mesh_obj->addProperty(GO_PROPERTY_TYPE_MATERIAL); //add material property
+        mesh_obj->addProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_MESH); //add mesh property
+        mesh_obj->addProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_MATERIAL); //add material property
 
         //configure mesh
-        Engine::MeshProperty* mesh_prop_ptr = static_cast<Engine::MeshProperty*>(mesh_obj->getPropertyPtrByType(GO_PROPERTY_TYPE_MESH));
+        Engine::MeshProperty* mesh_prop_ptr = static_cast<Engine::MeshProperty*>(mesh_obj->getPropertyPtrByType(PROPERTY_TYPE::GO_PROPERTY_TYPE_MESH));
         mesh_prop_ptr->resource_relpath = mesh_label;
 
         mesh_prop_ptr->updateMeshPtr();
         //configure material
-        Engine::MaterialProperty* mat_prop_ptr = static_cast<Engine::MaterialProperty*>(mesh_obj->getPropertyPtrByType(GO_PROPERTY_TYPE_MATERIAL));
+        Engine::MaterialProperty* mat_prop_ptr = static_cast<Engine::MaterialProperty*>(mesh_obj->getPropertyPtrByType(PROPERTY_TYPE::GO_PROPERTY_TYPE_MATERIAL));
         mat_prop_ptr->setMaterial("@default");
 
     }
@@ -605,7 +604,7 @@ void World::recoverFromSnapshot(WorldSnapshot* snapshot){
         obj_ptr->addProperty(prop_ptr->type); //Add new property to created object
         auto new_prop = obj_ptr->getPropertyPtrByType(prop_ptr->type);
         prop_ptr->copyTo(new_prop);
-        if(prop_ptr->type == GO_PROPERTY_TYPE_LABEL){ //If it is label, we have to do extra stuff
+        if(prop_ptr->type == PROPERTY_TYPE::GO_PROPERTY_TYPE_LABEL){ //If it is label, we have to do extra stuff
             LabelProperty* label_p = static_cast<LabelProperty*>(new_prop);
             obj_ptr->label_ptr = &label_p->label;
             obj_ptr->item_ptr->setText(0, QString::fromStdString(label_p->label)); //set text to qt widget

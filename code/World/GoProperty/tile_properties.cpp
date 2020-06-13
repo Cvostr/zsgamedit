@@ -27,7 +27,7 @@ void onClearBtnPress(){
 }
 
 TileGroupProperty::TileGroupProperty(){
-    type = GO_PROPERTY_TYPE_TILE_GROUP; //Set correct type
+    type = PROPERTY_TYPE::GO_PROPERTY_TYPE_TILE_GROUP; //Set correct type
     active = true; //And it is active
 
     this->isCreated = false;
@@ -127,8 +127,8 @@ void TileGroupProperty::process(){
             LabelProperty* parent_label = parent->getPropertyPtr<LabelProperty>();
 
             //obj->render_type = GO_RENDER_TYPE_TILE;
-            obj->addProperty(GO_PROPERTY_TYPE_MESH); //Adding mesh
-            obj->addProperty(GO_PROPERTY_TYPE_TILE); //Adding tile
+            obj->addProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_MESH); //Adding mesh
+            obj->addProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_TILE); //Adding tile
             //Receive properties ptrs
             Engine::TransformProperty* transform = obj->getPropertyPtr<Engine::TransformProperty>();
             LabelProperty* label = obj->getPropertyPtr<LabelProperty>();

@@ -275,7 +275,7 @@ void PropertyCtxMenu::show(QPoint point){
 
     Engine::GameObjectProperty* prop_ptr = obj_ptr->properties[this->selected_property_index];
     //No actions with label property
-    if(prop_ptr->type == GO_PROPERTY_TYPE_LABEL) return;
+    if(prop_ptr->type == PROPERTY_TYPE::GO_PROPERTY_TYPE_LABEL) return;
 
     if(!prop_ptr->active)
         this->toggle_active->setText("Activate");
@@ -331,10 +331,10 @@ AddGoComponentDialog::AddGoComponentDialog(QWidget* parent)
     contentLayout->addWidget(&property_list, 0, 0);
     //Iterate over all base properties and add them to list
     for(int i = 1; i <= 16; i ++){
-        new QListWidgetItem(getPropertyString(i), &this->property_list);
+        new QListWidgetItem(getPropertyString((PROPERTY_TYPE)i), &this->property_list);
     }
-    new QListWidgetItem(getPropertyString(1000), &this->property_list);
-    new QListWidgetItem(getPropertyString(1001), &this->property_list);
+    new QListWidgetItem(getPropertyString((PROPERTY_TYPE)1000), &this->property_list);
+    new QListWidgetItem(getPropertyString((PROPERTY_TYPE)1001), &this->property_list);
 
     //contentLayout->addWidget(comp_type, 0, 0);
     contentLayout->addWidget(add_btn, 1, 0);
@@ -352,7 +352,7 @@ AddGoComponentDialog::AddGoComponentDialog(QWidget* parent)
 void AddGoComponentDialog::onAddButtonPressed(){
     QString component_label = this->property_list.currentItem()->text();
     for(int i = 1; i <= 1001; i ++){
-        if(getPropertyString(i).compare(component_label) == false){
+        if(getPropertyString((PROPERTY_TYPE)i).compare(component_label) == false){
             GameObject* object_ptr = static_cast<GameObject*>(this->g_object_ptr);
             object_ptr->addProperty(static_cast<PROPERTY_TYPE>(i));
 

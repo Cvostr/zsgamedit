@@ -276,56 +276,6 @@ void EditWindow::init(){
     project_ptr = &this->project;
 }
 
-void EditWindow::assignIconFile(QListWidgetItem* item){
-    //Set base icon
-    item->setIcon(QIcon(":/icons/res/icons/unknown.png"));
-
-    //File is plaintext
-    if(checkExtension(item->text(), (".txt")) || checkExtension(item->text(), (".inf"))){
-        item->setIcon(QIcon::fromTheme("text-x-generic"));
-    }
-    if(checkExtension(item->text(), (".dds"))){
-        QString path = this->current_dir + "/" + item->text();
-        //Check, if we have thumbnail for this texture
-        if(thumb_master->isAvailable(path.toStdString())){
-            //Thumbnail exists
-            QImage* img = thumb_master->texture_thumbnails.at(path.toStdString());
-            item->setIcon(QIcon(QPixmap::fromImage(*img)));
-        }
-    }
-
-    if (checkExtension(item->text(), ".scn"))
-        item->setIcon(QIcon(":/icons/res/icons/3d_scene.png"));
-    //File is .FBX .DAE .ZS3M scene
-    if(checkExtension(item->text(), (".fbx")) || checkExtension(item->text(), (".dae")) || checkExtension(item->text(), (".zs3m"))){
-        item->setIcon(QIcon(":/icons/res/icons/3dmodel.png"));        
-    }
-    //File is .zsanim animation
-    if(checkExtension(item->text(), (".zsanim"))){
-        item->setIcon(QIcon(":/icons/res/icons/bone.png"));
-    }
-    //File is .WAV sound
-    if(checkExtension(item->text(), (".wav"))){
-        item->setIcon(QIcon(":/icons/res/icons/audio-clip.png"));
-    }
-    if(checkExtension(item->text(), (".lua"))){
-        item->setIcon(QIcon(":/icons/res/icons/script.png"));
-    }
-    //File is .ZSMAT material
-    if(checkExtension(item->text(), (".zsmat"))){
-        QString path = this->current_dir + "/" + item->text();
-        if(thumb_master->isAvailable(path.toStdString())){
-            QImage* img = thumb_master->texture_thumbnails.at(path.toStdString());
-            item->setIcon(QIcon(QPixmap::fromImage(*img)));
-        }
-    }
-}
-
-void EditWindow::setViewDirectory(QString dir_path){
-
-    this->current_dir = dir_path;
-    this->updateFileList();
-}
 //Slots
 void EditWindow::openFile(QString file_path){
 
@@ -369,14 +319,6 @@ void EditWindow::addFileToObjectList(QString file_path){
     if(checkExtension(file_path, ".fbx") || checkExtension(file_path, ".dae") || checkExtension(file_path, ".zs3m")){
         this->world.addMeshGroup(file_path.toStdString());
     }
-}
-
-bool EditWindow::checkExtension(QString fpath, QString ext){
-    return fpath.toLower().endsWith(ext);
-}
-
-QString EditWindow::getCurrentDirectory(){
-    return this->current_dir;
 }
 
 QString EditWindow::createNewTextFile(QString directory, QString name, QString ext, const char* content, uint32_t size){
@@ -434,8 +376,9 @@ void EditWindow::onSceneSave(){
 void EditWindow::onNewScene(){
     setupObjectsHieList();
     world.clear();
-
+    //if Scene is Running
     if(isSceneRun == true)
+        //Then call onRunProject() to stop it, first
         emit onRunProject();
 
     ppaint_state.enabled = false;
@@ -449,33 +392,6 @@ void EditWindow::onNewScene(){
     hasSceneFile = false; //We have new scene
 }
 
-void EditWindow::onNewScript(){
-    std::string scriptContent = "onStart = function(g_object, world)\n  return 0\nend\n\n";
-            scriptContent +=  "onFrame = function(frameTime)\n  return 0\nend";
-    this->createNewTextFile(current_dir, "Script", ".lua", scriptContent.c_str(), scriptContent.size());
-
-    updateFileList(); //Make new file visible
-}
-void EditWindow::onNewMaterial(){
-    char* matContent = "ZSP_MATERIAL\nGROUP @default\nENTRY i_uv_repeat \x0\x0\x0\x1\x0\x0\x0\x1\n";
-    QString picked_name = this->createNewTextFile(current_dir, "Material", ".zsmat", matContent, 56);
-
-    //Register new material in list
-    //First, get relative path to new material
-    QString rel_path = picked_name; //Preparing to get relative path
-    rel_path = rel_path.remove(0, static_cast<int>(project.root_path.size() + 1)); //Get relative path by removing length of project root from start
-
-    Engine::ZsResource* _resource = new Engine::MaterialResource;
-    _resource->size = 0;
-    _resource->rel_path = rel_path.toStdString();
-    _resource->blob_path = _resource->rel_path;
-    _resource->resource_label = _resource->rel_path;
-    game_data->resources->pushResource(_resource);
-
-    thumb_master->createMaterialThumbnail(_resource->rel_path);
-
-    updateFileList(); //Make new file visible
-}
 
 void EditWindow::openRenderSettings(){
     _inspector_win->clearContentLayout(); //clear everything, that was before
@@ -515,17 +431,18 @@ GameObject* EditWindow::onAddNewGameObject(){
     }
     //Create action
     _ed_actions_container->newGameObjectAction(((GameObject*)world.objects[static_cast<unsigned int>(free_ind)])->getLinkToThisObject());
-
-    GameObject* obj_ptr = this->world.newObject(); //Add new object to world
-    ui->objsList->addTopLevelItem(obj_ptr->item_ptr); //New object will not have parents, so will be spawned at top
+    //Add new object to world
+    GameObject* obj_ptr = this->world.newObject(); 
+    //New object will not have parents, so will be spawned at top
+    ui->objsList->addTopLevelItem(obj_ptr->item_ptr); 
 
     return obj_ptr;
 }
 
 void EditWindow::addNewCube(){
     GameObject* obj = onAddNewGameObject();
-    obj->addProperty(GO_PROPERTY_TYPE_MESH);
-    obj->addProperty(GO_PROPERTY_TYPE_MATERIAL);
+    obj->addProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_MESH);
+    obj->addProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_MATERIAL);
 
     //Set new name to object
     int add_num = 0; //Declaration of addititonal integer
@@ -543,7 +460,7 @@ void EditWindow::addNewCube(){
 }
 void EditWindow::addNewLight(){
     GameObject* obj = onAddNewGameObject();
-    obj->addProperty(GO_PROPERTY_TYPE_LIGHTSOURCE);
+    obj->addProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_LIGHTSOURCE);
 
     //Set new name to object
     int add_num = 0; //Declaration of addititonal integer
@@ -554,8 +471,8 @@ void EditWindow::addNewLight(){
 
 void EditWindow::addNewTile(){
     GameObject* obj = onAddNewGameObject();
-    obj->addProperty(GO_PROPERTY_TYPE_TILE); //Creates tile inside
-    obj->addProperty(GO_PROPERTY_TYPE_MESH); //Creates mesh inside
+    obj->addProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_TILE); //Creates tile inside
+    obj->addProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_MESH); //Creates mesh inside
 
     //Set new name to object
     int add_num = 0; //Declaration of addititonal integer
@@ -567,26 +484,25 @@ void EditWindow::addNewTile(){
     mesh->resource_relpath = "@plane";
     mesh->updateMeshPtr();
     //Assign new scale
-    Engine::TransformProperty* transform =
-            static_cast<Engine::TransformProperty*>(obj->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
+    Engine::TransformProperty* transform = obj->getPropertyPtr<Engine::TransformProperty>();
     transform->scale = ZSVECTOR3(100, 100, 1);
-    transform->updateMat();
+    transform->updateMatrix();
 }
 void EditWindow::addNewTerrain(){
     GameObject* obj = onAddNewGameObject();
-
-    obj->addProperty(GO_PROPERTY_TYPE_MATERIAL); //Creates material inside
+    //Creates material inside
+    obj->addProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_MATERIAL);
 
     //Set new name to object
     int add_num = 0; //Declaration of addititonal integer
     world.getAvailableNumObjLabel("Terrain_", &add_num);
     *obj->label_ptr = "Terrain_" + std::to_string(add_num);
-
-    std::vector<GameObject> objects; obj->item_ptr->setText(0, QString::fromStdString(*obj->label_ptr));
+    //Update object label on widget
+    obj->item_ptr->setText(0, QString::fromStdString(*obj->label_ptr));
     //Add terrain property
-    obj->addProperty(GO_PROPERTY_TYPE_TERRAIN); //Creates terrain inside
+    obj->addProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_TERRAIN); //Creates terrain inside
     obj->getPropertyPtr<Engine::TerrainProperty>()->onAddToObject();
-
+    //Get pointer to MaterialProperty and set to id Default Terrain Material 
     Engine::MaterialProperty* mat = obj->getPropertyPtr<Engine::MaterialProperty>();
     mat->setMaterial("@defaultHeightmap");
 
@@ -635,7 +551,9 @@ bool EditWindow::onCloseProject(){
         _inspector_win->close();
 
         delete game_data;
+        //Terminate Loader Thread
         Engine::Loader::stop();
+        //Terminate Terrain Thread
         stopTerrainThread();
 
         destroyAllManagers();
@@ -672,7 +590,7 @@ void EditWindow::stopWorld(){
     for(unsigned int object_i = 0; object_i < world.objects.size(); object_i ++){
         Engine::GameObject* object_ptr = world.objects[object_i];
         //Obtain script
-        Engine::ScriptGroupProperty* script_ptr = static_cast<Engine::ScriptGroupProperty*>(object_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_SCRIPTGROUP));
+        Engine::ScriptGroupProperty* script_ptr = static_cast<Engine::ScriptGroupProperty*>(object_ptr->getPropertyPtrByType(PROPERTY_TYPE::GO_PROPERTY_TYPE_SCRIPTGROUP));
         if(script_ptr != nullptr)
             script_ptr->shutdown(); //stop all scripts
     }
@@ -728,7 +646,7 @@ void EditWindow::onObjectListItemClicked(){
     if(obj_ptr == nullptr) return;
 
     obj_trstate.obj_ptr = obj_ptr;
-    obj_trstate.tprop_ptr = static_cast<Engine::TransformProperty*>(obj_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
+    obj_trstate.tprop_ptr = obj_ptr->getTransformProperty();
     _inspector_win->ShowObjectProperties(static_cast<void*>(obj_ptr));
 }
 //Objects list right pressed
@@ -811,27 +729,28 @@ void EditWindow::glRender(){
                 obj_ptr->item_ptr->setTextColor(0, QColor(Qt::gray));
         }
     }
-
+    //Update inspector position variables
     this->settings.inspector_win_pos_X = _inspector_win->pos().x();
     this->settings.inspector_win_pos_Y = _inspector_win->pos().y();
-
+    //if scene is running
     if(isSceneRun){
         //Update physics
         world.physical_world->stepSimulation(deltaTime);
     }
-
+    //if user opened another scene and it had not been opened
     if(hasSheduledWorld){
         stopWorld(); //firstly, stop world
-        //load world
+        //Clear object list
         ui->objsList->clear();
+        //load world
         world.openFromFile(this->sheduled_world.toStdString(), world.obj_widget_ptr);
         //run loaded world
         runWorld();
 
         hasSheduledWorld = false;
     }
-
-    if(ready == true && !hasSheduledWorld) //if opengl ready, then render scene
+    //if opengl ready, then render scene
+    if(ready == true && !hasSheduledWorld)
         render->render(this->window, static_cast<void*>(this));
 }
 
@@ -917,7 +836,7 @@ void EditWindow::onLeftBtnClicked(int X, int Y){
     GameObject* obj_ptr = (GameObject*)world.objects[clicked]; //Obtain pointer to selected object by label
 
     obj_trstate.obj_ptr = obj_ptr;
-    obj_trstate.tprop_ptr = static_cast<Engine::TransformProperty*>(obj_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
+    obj_trstate.tprop_ptr = obj_ptr->getTransformProperty();
     _inspector_win->ShowObjectProperties(static_cast<void*>(obj_ptr));
     this->ui->objsList->setCurrentItem(obj_ptr->item_ptr); //item selected in tree
 }
@@ -927,15 +846,16 @@ void EditWindow::onRightBtnClicked(int X, int Y){
 
     //Stop camera moving
     this->edit_camera.stopMoving();
-
-    this->obj_trstate.isTransforming = false; //disabling object transform
+    //disabling object transform
+    this->obj_trstate.isTransforming = false; 
     unsigned int clicked = render->render_getpickedObj(static_cast<void*>(this), X, Y);
-
+    //Check, if picked ID more than object size or ID is incorrect
     if(clicked > world.objects.size() || clicked >= 256 * 256 * 256)
         return;
-    GameObject* obj_ptr = (GameObject*)world.objects[clicked]; //Obtain pointer to selected object by label
-
-    world.unpickObject(); //Clear isPicked property from all objects
+    //Obtain pointer to selected object by label
+    GameObject* obj_ptr = (GameObject*)world.objects[clicked]; 
+     //Clear isPicked property from all objects
+    world.unpickObject();
     obj_ptr->pick(); //mark object picked
     this->obj_trstate.obj_ptr = obj_ptr;
 
@@ -1029,15 +949,15 @@ void EditWindow::onMouseMotion(int relX, int relY){
 
     //We are in 2D project, move camera by the mouse and rotate it
     if(project.perspective == PERSP_3D && !isWorldCamera){//Only affective in 3D
-
+        //IF mouse wheel is held
         if(input_state.isMidBtnHold == true){
             this->cam_yaw += relX * 0.16f;
             cam_pitch += relY * 0.16f;
-
-                if (cam_pitch > 89.0f)
-                    cam_pitch = 89.0f;
-                if (cam_pitch < -89.0f)
-                    cam_pitch = -89.0f;
+            //Limit camera look
+            if (cam_pitch > 89.0f)
+                cam_pitch = 89.0f;
+            if (cam_pitch < -89.0f)
+                cam_pitch = -89.0f;
 
             ZSVECTOR3 front;
             front.X = static_cast<float>((cos(DegToRad(cam_yaw)) * cos(DegToRad(cam_pitch))));
@@ -1048,8 +968,9 @@ void EditWindow::onMouseMotion(int relX, int relY){
         }
     }
     if(obj_trstate.isModifying && input_state.isLeftBtnHold == false){
+        //if we in editing mode and user clicked mouse left button
+        //then exit editing mode
         obj_trstate.isModifying = false;
-
 
     }
     //Visual transform control
@@ -1219,7 +1140,7 @@ void ObjectTransformState::setTransformOnObject(GO_TRANSFORM_MODE transformMode)
     //if object pointer is null, then go out!
     if (obj_ptr == nullptr) return;
     //Calculate pointer to transform property
-    this->tprop_ptr = static_cast<Engine::TransformProperty*>(obj_ptr->getPropertyPtrByType(GO_PROPERTY_TYPE_TRANSFORM));
+    this->tprop_ptr = obj_ptr->getTransformProperty();
     //We haven't found transform property
     if(tprop_ptr == nullptr) return;
 
@@ -1227,7 +1148,7 @@ void ObjectTransformState::setTransformOnObject(GO_TRANSFORM_MODE transformMode)
     this->isTransforming = true;
     //Add property action
     Engine::GameObjectProperty* prop_ptr = static_cast<Engine::GameObjectProperty*>(obj_ptr->getPropertyPtr<Engine::TransformProperty>());
-    getActionManager()->newPropertyAction(prop_ptr->go_link, GO_PROPERTY_TYPE_TRANSFORM);
+    getActionManager()->newPropertyAction(prop_ptr->go_link, PROPERTY_TYPE::GO_PROPERTY_TYPE_TRANSFORM);
 }
 
 void EditWindow::startManager(EngineComponentManager* manager){

@@ -18,7 +18,7 @@ bool GameObject::addProperty(PROPERTY_TYPE property){
         }
     }
     Engine::GameObjectProperty* _ptr = _allocProperty(property);
-    if(property == GO_PROPERTY_TYPE_LABEL){
+    if(property == PROPERTY_TYPE::GO_PROPERTY_TYPE_LABEL){
         LabelProperty* ptr = static_cast<LabelProperty*>(_ptr);
         ptr->list_item_ptr = this->item_ptr;
     }
@@ -91,7 +91,7 @@ void GameObject::recoverFromSnapshot(GameObjectSnapshot* snapshot){
         new_prop_ptr->go_link = this->getLinkToThisObject();
         props_num += 1;
 
-        if(prop_ptr->type == GO_PROPERTY_TYPE_LABEL){ //If it is label, we have to do extra stuff
+        if(prop_ptr->type == PROPERTY_TYPE::GO_PROPERTY_TYPE_LABEL){ //If it is label, we have to do extra stuff
             LabelProperty* label_p = static_cast<LabelProperty*>(new_prop_ptr);
             this->label_ptr = &label_p->label;
             this->item_ptr->setText(0, QString::fromStdString(*this->label_ptr));

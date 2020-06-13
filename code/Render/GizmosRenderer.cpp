@@ -115,14 +115,16 @@ void GizmosRenderer::drawObjectRigidbodyShape(void* phys_property){
 }
 
 void GizmosRenderer::glFeaturesOff(){
-        glDisable(GL_DEPTH_TEST);
-
+    //Disable DEPTH TEST for current pipeline
+    glDisable(GL_DEPTH_TEST);
+    //Disable Face Culling
     if(this->cullFaceEnabled == true)
         glDisable(GL_CULL_FACE);
 }
 void GizmosRenderer::glFeaturesOn(){
-        glEnable(GL_DEPTH_TEST);
-
+    //Enable DEPTH TEST for current pipeline
+    glEnable(GL_DEPTH_TEST);
+    //Enable Face Culling
     if(this->cullFaceEnabled == true)
         glEnable(GL_CULL_FACE);
 }
