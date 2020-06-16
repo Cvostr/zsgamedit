@@ -116,6 +116,7 @@ void GameObject::recoverFromSnapshot(GameObjectSnapshot* snapshot){
 }
 
 void GameObjectSnapshot::clear(){
+    //free array of children
     this->children.clear();
 
     for(unsigned int prop = 0; prop < static_cast<unsigned int>(this->props_num); prop ++){

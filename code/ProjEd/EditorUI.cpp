@@ -107,25 +107,22 @@ void FileListWgt::mousePressEvent(QMouseEvent *event){
 }
 
 ObjectCtxMenu::ObjectCtxMenu(QWidget* parent ) : QObject(parent){
-
+    obj_ptr = nullptr;
     //Allocting menu container
     this->menu = new QMenu(_editor_win);
     //Allocating actions
     this->action_dub = new QAction("Dublicate", _editor_win);
     this->action_delete = new QAction("Delete", _editor_win);
-
+    //Add menu items
     action_move = new QAction("Move", _editor_win);
     action_scale = new QAction("Scale", _editor_win);
     action_rotate = new QAction("Rotate", _editor_win);
-
-
     store_to_prefab = new QAction("Store to Prefab", _editor_win);
 
     object_info = new QAction("Info", _editor_win);
     //Adding actions to menu container
     this->menu->addAction(action_dub);
     this->menu->addAction(action_delete);
-
     this->menu->addAction(action_move);
     this->menu->addAction(action_scale);
     this->menu->addAction(action_rotate);
@@ -134,11 +131,9 @@ ObjectCtxMenu::ObjectCtxMenu(QWidget* parent ) : QObject(parent){
     //Connect actions to slots
     QObject::connect(this->action_delete, SIGNAL(triggered(bool)), this, SLOT(onDeleteClicked()));
     QObject::connect(this->action_dub, SIGNAL(triggered(bool)), this, SLOT(onDublicateClicked()));
-
     QObject::connect(this->action_move, SIGNAL(triggered(bool)), this, SLOT(onMoveClicked()));
     QObject::connect(this->action_scale, SIGNAL(triggered(bool)), this, SLOT(onScaleClicked()));
     QObject::connect(this->action_rotate, SIGNAL(triggered(bool)), this, SLOT(onRotateClicked()));
-
     QObject::connect(this->store_to_prefab, SIGNAL(triggered(bool)), this, SLOT(onStorePrefabPressed()));
     QObject::connect(this->object_info, SIGNAL(triggered(bool)), this, SLOT(onInfoPressed()));
 

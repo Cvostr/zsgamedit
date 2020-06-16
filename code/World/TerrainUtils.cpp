@@ -14,16 +14,22 @@ unsigned int requests_num = 0;
 
 void terrain_loop(){
     while(terrain_thread_working){
+        //check, if there are some operation pending
         if(requests_num > 0){
-            HeightmapModifyRequest* req = terrain_mdf_requests[MAX_REQUESTS - 1 - (--requests_num)];
-
+            unsigned int current = MAX_REQUESTS - 1 - (--requests_num);
+            HeightmapModifyRequest* req = terrain_mdf_requests[current];
+            //switch over all modify types
             switch(req->modify_type){
                 case TMT_HEIGHT:{
+                    //if height of terrain changed
+                    //Change height
                     req->terrain->modifyHeight(req->originX, req->originY, req->originHeight, req->range, req->multiplyer);
+                    //Recalculate terrain mesh
                     req->terrain->updateGeometryBuffers(false);
                     req->terrain->hasHeightmapChanged = true;
                     req->terrain->hasPhysicShapeChanged = true;
                     req->terrain->hasGrassChanged = true;
+                    //Recalculate grass transforms
                     req->terrain->updateGrassBuffers();
                     break;
                 }

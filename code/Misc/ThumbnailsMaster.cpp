@@ -211,7 +211,7 @@ void ThumbnailsMaster::createMaterialThumbnail(std::string name){
 void ThumbnailsMaster::DrawTexture(Engine::TextureResource* texture){
     //use texture
     texture->Use(0);
-    while(texture->resource_state != STATE_LOADED){
+    while(texture->resource_state != RESOURCE_STATE::STATE_LOADED){
         texture->Use(0);
     }
     texture->Use(0);
@@ -273,7 +273,7 @@ void ThumbnailsMaster::DrawMesh(Engine::MeshResource* mesh){
 
 
     mesh->Draw();
-    while(mesh->resource_state != STATE_LOADED){
+    while(mesh->resource_state != RESOURCE_STATE::STATE_LOADED){
         mesh->Draw();
     }
     mesh->Draw();

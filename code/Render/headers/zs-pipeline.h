@@ -20,6 +20,7 @@ private:
 
     Engine::Shader* pick_shader; //Shader to draw & pick objects
     Engine::Shader* obj_mark_shader; //Shader to draw mark of selected objects
+
 public:
     Engine::UniformBuffer* editorUniformBuffer;
 

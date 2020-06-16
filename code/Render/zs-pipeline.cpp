@@ -23,16 +23,13 @@ void RenderPipeline::setup(int bufWidth, int bufHeight){
 
     this->pick_shader->compileFromFile("Shaders/pick/pick.vert", "Shaders/pick/pick.frag");
     this->obj_mark_shader->compileFromFile("Shaders/mark/mark.vert", "Shaders/mark/mark.frag");
+    //create geometry buffer
+    create_G_Buffer(bufWidth, bufHeight);
 
-    if(this->project_struct_ptr->perspective == PERSP_3D){
-        this->gbuffer.create(bufWidth, bufHeight);
-    }
     removeLights();
 
     editorUniformBuffer = Engine::allocUniformBuffer();
     editorUniformBuffer->init(8, 16);
-
-
 }
 
 void RenderPipeline::initGizmos(int projectPespective){
@@ -64,7 +61,7 @@ bool RenderPipeline::InitGLEW(){
 }
 
 void RenderPipeline::init(){
-    glViewport(0, 0, this->WIDTH, this->HEIGHT);
+    setFullscreenViewport(this->WIDTH, this->HEIGHT);
 
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     glEnable(GL_LINE_SMOOTH);
@@ -118,7 +115,7 @@ unsigned int RenderPipeline::render_getpickedObj(void* projectedit_ptr, int mous
 
     glClearColor(1,1,1,1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glDisable(GL_BLEND);
+    setBlendingState(false);
     pick_shader->Use();
     //Picking state
     this->current_state = PIPELINE_STATE::PIPELINE_STATE_PICKING;
@@ -209,7 +206,7 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr){
     }
 
     glDisable(GL_DEPTH_TEST);
-    glEnable(GL_BLEND);
+    setBlendingState(true);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     //GlyphFontContainer* c = game_data->resources->getFontByLabel("LiberationMono-Regular.ttf")->font_ptr;
@@ -263,11 +260,11 @@ void RenderPipeline::render3D(void* projectedit_ptr, Engine::Camera* cam)
     }
 
     //Active Geometry framebuffer
-    gbuffer.bindFramebuffer();
+    gbuffer->bind();
     glClearColor(0,0,0,1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glDisable(GL_BLEND); //Disable blending to render Skybox and shadows
-    glViewport(0, 0, this->WIDTH, this->HEIGHT);
+    setBlendingState(false); //Disable blending to render Skybox and shadows
+    setFullscreenViewport(this->WIDTH, this->HEIGHT);
 
     if (this->render_settings.skybox_obj_ptr != nullptr) {
         Engine::SkyboxProperty* skybox
@@ -287,7 +284,7 @@ void RenderPipeline::render3D(void* projectedit_ptr, Engine::Camera* cam)
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0); //Back to default framebuffer
     glClear(GL_COLOR_BUFFER_BIT); //Clear screen
-    gbuffer.bindTextures(); //Bind gBuffer textures
+    gbuffer->bindTextures(10); //Bind gBuffer textures
     deffered_light->Use(); //use deffered shader
     //Send lights to OpenGL uniform buffer
     setLightsToBuffer();

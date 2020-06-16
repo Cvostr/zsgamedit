@@ -457,7 +457,7 @@ void GameObject::loadProperty(std::ifstream* world_stream){
         world_stream->seekg(1, std::ofstream::cur);
         //read collider type
         world_stream->read(reinterpret_cast<char*>(&ptr->coll_type), sizeof(COLLIDER_TYPE));
-
+        //read isCustomPhysicalSize boolean
         world_stream->read(reinterpret_cast<char*>(&ptr->isCustomPhysicalSize), sizeof(bool));
         if (ptr->isCustomPhysicalSize) {
             world_stream->read(reinterpret_cast<char*>(&ptr->cust_size.X), sizeof(float));
@@ -596,5 +596,6 @@ void GameObject::loadProperty(std::ifstream* world_stream){
             }
             break;
         }
+
     }
 }
