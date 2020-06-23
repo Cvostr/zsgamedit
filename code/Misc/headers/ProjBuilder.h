@@ -5,6 +5,7 @@
 #include "../../Misc/headers/zs_types.h"
 
 #include <QDialog>
+#include <QTextBrowser>
 #include <QMainWindow>
 #include <QGridLayout>
 #include <QResizeEvent>
@@ -24,7 +25,7 @@ private:
     QString outputTextBuf;
 public:
     explicit BuilderWindow(QWidget* parent = nullptr);
-    QLabel* getTextWgt();
+    QTextBrowser* getTextWgt();
     void addToOutput(QString text);
 
     void resizeEvent(QResizeEvent* event);

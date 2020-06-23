@@ -55,42 +55,45 @@ void ProjBuilder::start(){
         writer->writeToBlob(abs_path, res_ptr);
     }
 
+    copyOtherFiles();
+    //Add ending message
     window->addToOutput("All Resources are Written!");
 
-    copyOtherFiles();
-
+   
     delete writer;
 }
 
 void ProjBuilder::copyOtherFiles() {
+    //Call _copyOtherFilesDir() from root directory
     _copyOtherFilesDir(QString::fromStdString(this->proj_ptr->root_path));
 }
 
 void ProjBuilder::_copyOtherFilesDir(const QString dir) {
     QDir directory(dir);
-
     directory.setFilter(QDir::Files | QDir::Dirs | QDir::NoSymLinks | QDir::NoDot | QDir::NoDotDot);
     directory.setSorting(QDir::DirsFirst | QDir::Name | QDir::Reversed);
-
-    QFileInfoList list = directory.entryInfoList(); //Get folder content iterator
-    
-    for (int i = 0; i < list.size(); i++) { //iterate all files, skip 2 last . and ..
-        QFileInfo fileInfo = list.at(i);  //get iterated file info
-        
+    //Get folder content iterator
+    QFileInfoList list = directory.entryInfoList(); 
+    //iterate all files, skip 2 last . and ..
+    for (int i = 0; i < list.size(); i++) { 
+        //get iterated file info
+        QFileInfo fileInfo = list.at(i);  
+        //Check, if file is directory
         if (fileInfo.isDir())
             _copyOtherFilesDir(fileInfo.absoluteFilePath());
-        
-        if (fileInfo.fileName().endsWith(".terrain")) {
+        //Check file extension
+        if (fileInfo.fileName().endsWith(".terrain") || fileInfo.fileName().endsWith(".scn")) {
+            //if file is terrain or scene
             QString abs_path = fileInfo.absoluteFilePath();
-
+            //Make relative path from absolute
             QString rel_path;
             rel_path = abs_path.remove(0, static_cast<int>(proj_ptr->root_path.size() + 1));
-
+            //Create temporary resource class
             Engine::ZsResource resource;
             resource.rel_path = rel_path.toStdString();
             resource.resource_label = rel_path.toStdString();
             resource.resource_type = RESOURCE_TYPE_NONE;
-
+            //Write resource to map and blob`
             writer->writeToBlob(fileInfo.absoluteFilePath().toStdString(), &resource);
         }
     }
@@ -114,6 +117,7 @@ void ProjBuilder::prepareDirectory(){
 BuilderWindow::BuilderWindow(QWidget* parent) : QMainWindow(parent),
 ui(new Ui::BuilderWindow){
     ui->setupUi(this);
+    ui->outputText->resize(this->size().width() - 40, this->size().height() - 40);
 }
 
 BuilderWindow::~BuilderWindow(){
@@ -126,11 +130,10 @@ void BuilderWindow::resizeEvent(QResizeEvent* event){
     int new_width = event->size().width();
     int new_height = event->size().height();
 
-    ui->scrollArea->resize(new_width - 20, new_height);
-    //ui->outputText->resize(new_width - 40, new_height - 20);
+    ui->outputText->resize(new_width - 40, new_height - 40);
 }
 
-QLabel* BuilderWindow::getTextWgt(){
+QTextBrowser* BuilderWindow::getTextWgt(){
     return ui->outputText;
 }
 void BuilderWindow::addToOutput(QString text){

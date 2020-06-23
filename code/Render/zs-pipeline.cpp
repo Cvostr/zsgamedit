@@ -191,6 +191,7 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr){
         case PERSP_3D:{
             render3D(projectedit_ptr, cam);
             Engine::getPlaneMesh2D()->Draw(); //Draw screen
+            
             break;
         }
     }
@@ -205,7 +206,7 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr){
         getGizmosRenderer()->drawTransformControls(editwin_ptr->obj_trstate.obj_ptr->getPropertyPtr<Engine::TransformProperty>()->abs_translation, dist, dist / 10.f);
     }
 
-    glDisable(GL_DEPTH_TEST);
+    setDepthState(false);
     setBlendingState(true);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -231,7 +232,7 @@ void RenderPipeline::render2D(void* projectedit_ptr){
     World* world_ptr = &editwin_ptr->world;
 
     glClearColor(0,0,0,1);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    ClearFBufferGL(true, true);
     glEnable(GL_BLEND); //Disable blending to render Skybox and shadows
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glViewport(0, 0, this->WIDTH, this->HEIGHT);
@@ -262,7 +263,7 @@ void RenderPipeline::render3D(void* projectedit_ptr, Engine::Camera* cam)
     //Active Geometry framebuffer
     gbuffer->bind();
     glClearColor(0,0,0,1);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    ClearFBufferGL(true, true);
     setBlendingState(false); //Disable blending to render Skybox and shadows
     setFullscreenViewport(this->WIDTH, this->HEIGHT);
 
@@ -272,6 +273,8 @@ void RenderPipeline::render3D(void* projectedit_ptr, Engine::Camera* cam)
         if (skybox != nullptr)
             skybox->DrawSky(this);
     }
+
+    gizmos->drawGrid();
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
@@ -283,7 +286,7 @@ void RenderPipeline::render3D(void* projectedit_ptr, Engine::Camera* cam)
     glDisable(GL_CULL_FACE);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0); //Back to default framebuffer
-    glClear(GL_COLOR_BUFFER_BIT); //Clear screen
+    ClearFBufferGL(true, false); //Clear screen
     gbuffer->bindTextures(10); //Bind gBuffer textures
     deffered_light->Use(); //use deffered shader
     //Send lights to OpenGL uniform buffer
@@ -314,11 +317,14 @@ void RenderPipeline::processObjects(void* _world_ptr) {
             if (editwin_ptr->obj_trstate.isTransforming == true)
                 color = ZSRGBCOLOR(255.0f, 255.0f, 0.0f);
             //draw wireframe mesh for picked object
-            if (!editwin_ptr->isWorldCamera && obj_ptr->hasMesh()) //avoid drawing gizmos during playtime
+            if (!editwin_ptr->isWorldCamera && obj_ptr->hasMesh() && obj_ptr->active) { //avoid drawing gizmos during playtime
+                //Draw pick mesh
                 getGizmosRenderer()->drawPickedMeshWireframe(mesh_prop->mesh_ptr->mesh_ptr, transform_ptr->transform_mat, color);
-            getGizmosRenderer()->drawObjectRigidbodyShape(obj_ptr->getPhysicalProperty());
-
-            glEnable(GL_DEPTH_TEST);
+                //Draw collider
+                getGizmosRenderer()->drawObjectRigidbodyShape(obj_ptr->getPhysicalProperty());
+            }
+            //Return Depth and face cull back
+            setDepthState(true);
             glEnable(GL_CULL_FACE);
         }
     }

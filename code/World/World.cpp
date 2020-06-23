@@ -231,11 +231,11 @@ void World::loadGameObject(GameObject* object_ptr, std::ifstream* world_stream){
         }
         if(prefix.compare("G_CHI") == 0) { //Ops, it is chidren header
             unsigned int amount;
-            //world_stream >> amount; //Reading children amount
             world_stream->seekg(1, std::ofstream::cur);
+            //Reading children amount
             world_stream->read(reinterpret_cast<char*>(&amount), sizeof(int));
-
-            for(unsigned int ch_i = 0; ch_i < amount; ch_i ++){ //Iterate over all written children to file
+            //Iterate over all written children to file
+            for(unsigned int ch_i = 0; ch_i < amount; ch_i ++){
                 std::string child_str_id;
                 *world_stream >> child_str_id; //Reading child string id
 

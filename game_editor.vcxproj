@@ -40,7 +40,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>..\LIBS\BULLET;..\LIBS;..\engine\code\headers;$(IncludePath)</IncludePath>
-    <LibraryPath>E:\zspire\LIBS\BULLET\libsDBG;..\x64\Debug;..\LIBS;$(LibraryPath)</LibraryPath>
+    <LibraryPath>..\LIBS\BULLET\libsDBG;..\x64\Debug;..\LIBS;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>..\engine\code\headers;..\LIBS\BULLET;..\LIBS;$(IncludePath)</IncludePath>

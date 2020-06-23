@@ -633,8 +633,6 @@ void EditWindow::onRunProject(){
     }
 }
 
-
-
 void EditWindow::onObjectListItemClicked(){
     this->obj_trstate.isTransforming = false; //disabling object transform
     QTreeWidgetItem* selected_item = ui->objsList->currentItem(); //Obtain pointer to clicked obj item

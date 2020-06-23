@@ -14,6 +14,26 @@ GizmosRenderer::GizmosRenderer(Engine::Shader* mark_shader,
 
     this->transformBuffer = buf;
     this->editorBuffer = editor;
+    //Create grid strokes transforms
+    int red = GRID_STROKE_COUNT * GRID_DIST * -0.5f;
+    for (int i = 0; i < GRID_STROKE_COUNT; i++) {
+        ZSMATRIX4x4 transform = getIdentity();
+
+        transform = transform * getScaleMat(GRID_STROKE_WIDTH, 100, GRID_STROKE_WIDTH);
+        transform = transform * getRotationMat(ZSVECTOR3(90, 0, 0));
+        transform = transform * getTranslationMat(red + GRID_DIST * i, 0, 0);
+
+        grid_strokes_transf[i] = transform;
+    }
+    for (int i = GRID_STROKE_COUNT; i < GRID_STROKE_COUNT * 2; i++) {
+        ZSMATRIX4x4 transform = getIdentity();
+
+        transform = transform * getScaleMat(GRID_STROKE_WIDTH, 100, GRID_STROKE_WIDTH);
+        transform = transform * getRotationMat(ZSVECTOR3(0, 0, 90));
+        transform = transform * getTranslationMat(0, 0, red + GRID_DIST * (i - GRID_STROKE_COUNT));
+
+        grid_strokes_transf[i] = transform;
+    }
 }
 
 void GizmosRenderer::drawPickedMeshWireframe(Engine::Mesh *mesh_ptr, ZSMATRIX4x4 transform, ZSRGBCOLOR color){
@@ -127,4 +147,19 @@ void GizmosRenderer::glFeaturesOn(){
     //Enable Face Culling
     if(this->cullFaceEnabled == true)
         glEnable(GL_CULL_FACE);
+}
+
+void GizmosRenderer::drawGrid() {
+    for (int i = 0; i < GRID_STROKE_COUNT * 2; i++) {
+        this->mark_shader_ptr->Use();
+        transformBuffer->bind();
+        transformBuffer->writeData(sizeof(ZSMATRIX4x4) * 2, sizeof(ZSMATRIX4x4), &grid_strokes_transf[i]);
+
+        editorBuffer->bind();
+        ZSVECTOR4 v = ZSVECTOR4(0.3f, 0.3f, 0.3f, 1);
+        editorBuffer->writeData(0, 16, &v);
+
+        Engine::getCubeMesh3D()->Draw();
+    
+    }
 }

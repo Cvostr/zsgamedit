@@ -585,7 +585,23 @@ void Engine::RigidbodyProperty::addPropertyInterfaceToInspector(){
 }
 
 void Engine::CharacterControllerProperty::addPropertyInterfaceToInspector(){
-    addCustomSizeField();
+    FloatPropertyArea* widthField = new FloatPropertyArea; //New property area
+    widthField->setLabel("Width"); //Its label
+    widthField->value = &this->width; //Ptr to our vector
+    widthField->go_property = static_cast<void*>(this);
+    _inspector_win->addPropertyArea(widthField);
+
+    FloatPropertyArea* heightField = new FloatPropertyArea; //New property area
+    heightField->setLabel("Height"); //Its label
+    heightField->value = &this->height; //Ptr to our vector
+    heightField->go_property = static_cast<void*>(this);
+    _inspector_win->addPropertyArea(heightField);
+
+    Float3PropertyArea* transformOffsetField = new Float3PropertyArea; //New property area
+    transformOffsetField->setLabel("Transform Offset"); //Its label
+    transformOffsetField->vector = &this->transform_offset; //Ptr to our vector
+    transformOffsetField->go_property = static_cast<void*>(this);
+    _inspector_win->addPropertyArea(transformOffsetField);
 }
 
 void Engine::TriggerProperty::addPropertyInterfaceToInspector() {

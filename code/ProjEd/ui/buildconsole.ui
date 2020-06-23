@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>529</width>
+    <width>518</width>
     <height>485</height>
    </rect>
   </property>
@@ -20,56 +20,15 @@
    <string>Build Project</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QScrollArea" name="scrollArea">
+   <widget class="QTextBrowser" name="outputText">
     <property name="geometry">
      <rect>
-      <x>0</x>
-      <y>0</y>
-      <width>511</width>
-      <height>441</height>
+      <x>10</x>
+      <y>10</y>
+      <width>491</width>
+      <height>421</height>
      </rect>
     </property>
-    <property name="mouseTracking">
-     <bool>true</bool>
-    </property>
-    <property name="verticalScrollBarPolicy">
-     <enum>Qt::ScrollBarAsNeeded</enum>
-    </property>
-    <property name="widgetResizable">
-     <bool>true</bool>
-    </property>
-    <widget class="QWidget" name="scrollAreaWidgetContents">
-     <property name="geometry">
-      <rect>
-       <x>0</x>
-       <y>0</y>
-       <width>509</width>
-       <height>439</height>
-      </rect>
-     </property>
-     <widget class="QLabel" name="outputText">
-      <property name="geometry">
-       <rect>
-        <x>20</x>
-        <y>20</y>
-        <width>461</width>
-        <height>321</height>
-       </rect>
-      </property>
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
-        <horstretch>200</horstretch>
-        <verstretch>200</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="text">
-       <string>TextLabel</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
-      </property>
-     </widget>
-    </widget>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -77,8 +36,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>529</width>
-     <height>22</height>
+     <width>518</width>
+     <height>21</height>
     </rect>
    </property>
   </widget>
