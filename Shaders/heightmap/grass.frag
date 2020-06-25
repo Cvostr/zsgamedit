@@ -2,11 +2,13 @@
 
 #define TEXTURES_AMOUNT 12
 
+layout(location = 0) out vec4 FragColor;
 layout (location = 1) out vec3 tNormal;
 layout (location = 2) out vec3 tPos;
+layout(location = 3) out vec4 tTransparent;
 layout (location = 4) out vec4 tMasks;
 
-layout(location = 0) out vec4 FragColor;
+
 
 layout (location = 0) in vec3 FragPos;
 layout (location = 1) in vec3 InNormal;

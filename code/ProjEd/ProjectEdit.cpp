@@ -240,6 +240,7 @@ void EditWindow::init(){
 
     game_data->glyph_manager = this->glyph_manager;
     game_data->pipeline = this->render;
+    game_data->isEditor = true;
 
     std::string absolute = project.root_path + "/";
     Engine::Loader::setBlobRootDirectory(absolute);
@@ -629,6 +630,7 @@ void EditWindow::onRunProject(){
         run_world_snapshot.clear(); //Clear snapshot to free up memory
         //Change button text
         this->ui->actionRun->setText("Run");
+        //Destroy physical world object
         delete world.physical_world;
     }
 }

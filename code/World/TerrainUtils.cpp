@@ -93,8 +93,10 @@ void TerrainData::saveToFile(const char* file_path){
     for(int i = 0; i < W * H; i ++){
         //Write vertex height
         world_stream.write(reinterpret_cast<char*>(&data[i].height), sizeof(float));
+        //Write Texture Factors
         for(int tex_factor = 0; tex_factor < TERRAIN_TEXTURES_AMOUNT; tex_factor ++)
             world_stream.write(reinterpret_cast<char*>(&data[i].texture_factors[tex_factor]), sizeof(unsigned char));
+        //Write Grass Data
         world_stream.write(reinterpret_cast<char*>(&data[i].grass), sizeof(int));
     }
     //Close stream

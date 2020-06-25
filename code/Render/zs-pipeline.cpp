@@ -252,13 +252,8 @@ void RenderPipeline::render3D(void* projectedit_ptr, Engine::Camera* cam)
     World* world_ptr = &editwin_ptr->world;
     Engine::Camera* cam_ptr = cam; //We'll set it next
 
-    if (this->render_settings.shadowcaster_obj_ptr != nullptr) {
-        Engine::ShadowCasterProperty* shadowcast =
-            static_cast<Engine::GameObject*>(this->render_settings.shadowcaster_obj_ptr)->getPropertyPtr<Engine::ShadowCasterProperty>();
-        if (shadowcast != nullptr) { //we have shadowcaster
-            shadowcast->Draw(cam_ptr, this); //draw shadowcaster
-        }
-    }
+    //Render shadows, first
+    TryRenderShadows(cam);
 
     //Active Geometry framebuffer
     gbuffer->bind();
@@ -267,23 +262,19 @@ void RenderPipeline::render3D(void* projectedit_ptr, Engine::Camera* cam)
     setBlendingState(false); //Disable blending to render Skybox and shadows
     setFullscreenViewport(this->WIDTH, this->HEIGHT);
 
-    if (this->render_settings.skybox_obj_ptr != nullptr) {
-        Engine::SkyboxProperty* skybox
-            = static_cast<Engine::GameObject*>(this->render_settings.skybox_obj_ptr)->getPropertyPtr<Engine::SkyboxProperty>();
-        if (skybox != nullptr)
-            skybox->DrawSky(this);
-    }
+    TryRenderSkybox();
 
     gizmos->drawGrid();
 
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
+    setDepthState(true);
+    setFaceCullState(true);
     //Render objects
     processObjects(world_ptr);
 
-    //Turn everything off to draw deffered plane correctly
-    glDisable(GL_DEPTH_TEST);
-    glDisable(GL_CULL_FACE);
+    //Disable depth rendering to draw plane correctly
+    setDepthState(false);
+    //Disable face culling
+    setFaceCullState(false);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0); //Back to default framebuffer
     ClearFBufferGL(true, false); //Clear screen
