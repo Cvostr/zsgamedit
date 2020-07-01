@@ -44,7 +44,7 @@ void ResourcePickDialog::onNeedToShow(){
     this->list->clear();
     //Receiving pointer to project
     unsigned int resources_num = game_data->resources->getResourcesSize();
-
+    //Add None item, if requested
     if(area->isShowNoneItem){
         QListWidgetItem* none = new QListWidgetItem("@none", this->list);
         none->setIcon(QIcon(":/icons/res/icons/none.png"));
@@ -106,7 +106,7 @@ void ResourcePickDialog::findFiles(QString directory){
 }
 
 ResourcePickDialog::ResourcePickDialog(QWidget* parent) :
-    QDialog (parent, Qt::WindowTitleHint | Qt::WindowSystemMenuHint){
+    QDialog (parent, Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint){
     resize(700, 600);
     contentLayout = new QGridLayout(this); // Alocation of layout
     list = new QListWidget;

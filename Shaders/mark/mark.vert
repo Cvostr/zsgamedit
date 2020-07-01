@@ -54,11 +54,11 @@ mat4 getBoneTransform(){
     _weights[11] = Weights2.w;
     
     mat4 result = mat4(0.0);
-    
+    //Summarize bone transforms
     for(int i = 0; i < bones; i++){
         result += bone_transform[_ids[i]] * _weights[i];
     }
-	
+	//Return resulting transform
     return result;
 }
 

@@ -2,18 +2,22 @@
 #include <world/go_properties.h>
 
 GizmosRenderer::GizmosRenderer(Engine::Shader* mark_shader,
+                               Engine::Shader* grid_shader,
                                bool cullFaceEnabled,
                                int projectPerspective,
                                Engine::UniformBuffer* buf,
-                               Engine::UniformBuffer* editor){
+                               Engine::UniformBuffer* editor,
+                               Engine::UniformBuffer* inst){
     //set shader pointer
     this->mark_shader_ptr = mark_shader;
+    this->grid_shader_ptr = grid_shader;
 
     this->cullFaceEnabled = cullFaceEnabled;
     this->projectPerspective = projectPerspective;
 
     this->transformBuffer = buf;
     this->editorBuffer = editor;
+    this->instBuffer = inst;
     //Create grid strokes transforms
     int red = GRID_STROKE_COUNT * GRID_DIST * -0.5f;
     for (int i = 0; i < GRID_STROKE_COUNT; i++) {
@@ -150,16 +154,19 @@ void GizmosRenderer::glFeaturesOn(){
 }
 
 void GizmosRenderer::drawGrid() {
+
+    editorBuffer->bind();
+    ZSVECTOR4 v = ZSVECTOR4(0.3f, 0.3f, 0.3f, 1);
+    editorBuffer->writeData(0, 16, &v);
+
+    instBuffer->bind();
+    //Send all transforms to instance buffer
     for (int i = 0; i < GRID_STROKE_COUNT * 2; i++) {
-        this->mark_shader_ptr->Use();
-        transformBuffer->bind();
-        transformBuffer->writeData(sizeof(ZSMATRIX4x4) * 2, sizeof(ZSMATRIX4x4), &grid_strokes_transf[i]);
-
-        editorBuffer->bind();
-        ZSVECTOR4 v = ZSVECTOR4(0.3f, 0.3f, 0.3f, 1);
-        editorBuffer->writeData(0, 16, &v);
-
-        Engine::getCubeMesh3D()->Draw();
-    
+        instBuffer->writeData(sizeof(ZSMATRIX4x4) * i, sizeof(ZSMATRIX4x4), &grid_strokes_transf[i]);
     }
+
+    this->grid_shader_ptr->Use();
+       
+    Engine::getCubeMesh3D()->DrawInstanced(GRID_STROKE_COUNT * 2);
+    
 }

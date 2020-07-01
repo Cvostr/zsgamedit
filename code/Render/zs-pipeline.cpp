@@ -10,7 +10,13 @@
 extern ZSGAME_DATA* game_data;
 
 RenderPipeline::RenderPipeline(){
-
+    this->pick_shader = nullptr;
+    this->obj_mark_shader = nullptr;
+    this->obj_grid_shader = nullptr;
+    editorUniformBuffer = nullptr;
+    gizmos = nullptr;
+    cam = nullptr;
+    win_ptr = nullptr;
 }
 
 GizmosRenderer* RenderPipeline::getGizmosRenderer(){
@@ -20,9 +26,11 @@ GizmosRenderer* RenderPipeline::getGizmosRenderer(){
 void RenderPipeline::setup(int bufWidth, int bufHeight){
     this->pick_shader = Engine::allocShader();
     this->obj_mark_shader = Engine::allocShader();
+    this->obj_grid_shader = Engine::allocShader();
 
     this->pick_shader->compileFromFile("Shaders/pick/pick.vert", "Shaders/pick/pick.frag");
     this->obj_mark_shader->compileFromFile("Shaders/mark/mark.vert", "Shaders/mark/mark.frag");
+    this->obj_grid_shader->compileFromFile("Shaders/mark/grid.vert", "Shaders/mark/mark.frag");
     //create geometry buffer
     create_G_Buffer(bufWidth, bufHeight);
 
@@ -33,10 +41,13 @@ void RenderPipeline::setup(int bufWidth, int bufHeight){
 }
 
 void RenderPipeline::initGizmos(int projectPespective){
-    gizmos = new GizmosRenderer(obj_mark_shader, this->cullFaces,
+    gizmos = new GizmosRenderer(obj_mark_shader, 
+                                obj_grid_shader,
+                                this->cullFaces,
                                 projectPespective,
                                 transformBuffer,
-                                editorUniformBuffer);
+                                editorUniformBuffer,
+                                this->instancedTransformBuffer);
 }
 
 RenderPipeline::~RenderPipeline(){
@@ -91,8 +102,8 @@ ZSRGBCOLOR RenderPipeline::getColorOfPickedTransformControl(int mouseX, int mous
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     //Picking state
 
-    glDisable(GL_DEPTH_TEST);
-    glDisable(GL_CULL_FACE);
+    setDepthState(false);
+    setFaceCullState(false);
 
     if(editwin_ptr->obj_trstate.isTransforming == true && !editwin_ptr->isWorldCamera){
         //Calclate distance between camera and object
@@ -114,16 +125,16 @@ unsigned int RenderPipeline::render_getpickedObj(void* projectedit_ptr, int mous
     World* world_ptr = &editwin_ptr->world;
 
     glClearColor(1,1,1,1);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    this->ClearFBufferGL(true, true);
     setBlendingState(false);
     pick_shader->Use();
     //Picking state
     this->current_state = PIPELINE_STATE::PIPELINE_STATE_PICKING;
 
-        glEnable(GL_DEPTH_TEST);
+    setDepthState(true);
 
-    if(cullFaces == true) // if face cull is enabled, then disable it
-        glEnable(GL_CULL_FACE);
+    if (cullFaces == true)
+        setFaceCullState(true);
 
     //Iterate over all objects in the world
     for(unsigned int obj_i = 0; obj_i < world_ptr->objects.size(); obj_i ++){

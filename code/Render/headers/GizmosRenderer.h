@@ -14,9 +14,10 @@ class GizmosRenderer{
 private:
     //pointer to mark shader
     Engine::Shader* mark_shader_ptr;
+    Engine::Shader* grid_shader_ptr;
     Engine::UniformBuffer* transformBuffer;
     Engine::UniformBuffer* editorBuffer;
-    bool depthTestEnabled;
+    Engine::UniformBuffer* instBuffer;
     bool cullFaceEnabled;
     int projectPerspective;
     ZSMATRIX4x4 grid_strokes_transf[GRID_STROKE_COUNT * 2];
@@ -32,10 +33,12 @@ public:
     void glFeaturesOn();
 
     GizmosRenderer(Engine::Shader* mark_shader,
+                   Engine::Shader* grid_shader,
                    bool cullFaceEnabled,
                    int projectPerspective,
                    Engine::UniformBuffer* buf,
-                   Engine::UniformBuffer* editor);
+                   Engine::UniformBuffer* editor,
+                   Engine::UniformBuffer* inst);
 };
 
 

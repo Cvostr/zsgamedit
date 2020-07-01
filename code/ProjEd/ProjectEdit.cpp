@@ -416,7 +416,6 @@ void EditWindow::openPhysicsSettings(){
     float3_area->vector = &ptr->gravity;
     float3_area->go_property = static_cast<void*>(this);
     _inspector_win->addPropertyArea(float3_area);
-
 }
 
 GameObject* EditWindow::onAddNewGameObject(){
@@ -450,11 +449,11 @@ void EditWindow::addNewCube(){
     world.getAvailableNumObjLabel("Cube_", &add_num);
     *obj->label_ptr = "Cube_" + std::to_string(add_num);
     obj->item_ptr->setText(0, QString::fromStdString(*obj->label_ptr));
-
+    //Set MESH properties
     Engine::MeshProperty* mesh = obj->getPropertyPtr<Engine::MeshProperty>();
     mesh->resource_relpath = "@cube";
     mesh->updateMeshPtr();
-
+    //Set MATERIAL properties
     Engine::MaterialProperty* mat = obj->getPropertyPtr<Engine::MaterialProperty>();
     mat->setMaterial("@default");
 
