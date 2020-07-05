@@ -21,6 +21,7 @@
 #include <fstream>
 #include <misc/zs3m-master.h>
 #include "../World/headers/Misc.h"
+#include "headers/LocStringEditWin.h"
 //Hack to support meshes
 extern ZSpireEngine* engine_ptr;
 //Hack to support resources
@@ -55,6 +56,7 @@ EditWindow::EditWindow(QApplication* app, QWidget *parent) :
     QObject::connect(ui->actionCreateScene, SIGNAL(triggered()), this, SLOT(onNewScene()));
     QObject::connect(ui->actionCreateMaterial, SIGNAL(triggered()), this, SLOT(onNewMaterial()));
     QObject::connect(ui->actionCreateScript, SIGNAL(triggered()), this, SLOT(onNewScript()));
+    QObject::connect(ui->actionLocStringFile, SIGNAL(triggered()), this, SLOT(onNewLocalizedStringFile()));
 
     QObject::connect(ui->actionImport_Resource, SIGNAL(triggered()), this, SLOT(onImportResource()));
     QObject::connect(ui->actionClose_project, SIGNAL(triggered()), this, SLOT(onCloseProject()));
@@ -303,7 +305,11 @@ void EditWindow::openFile(QString file_path){
         hasSceneFile = true; //Scene is saved
         this->edit_camera.setPosition(ZSVECTOR3(0.0f, 0.0f, 0.0f)); //Set camera to 0
         _inspector_win->clearContentLayout(); //Clear content, if not empty
-    }else{
+    }else if(file_path.endsWith(".lcstr")){
+        LocStringEditWindow* lsew = new LocStringEditWindow;
+        lsew->showWindowWithFile(file_path.toStdString());
+    }
+    else{
 #ifdef _WIN32
         QDesktopServices::openUrl(QUrl::fromLocalFile("file://" + file_path));
 #endif

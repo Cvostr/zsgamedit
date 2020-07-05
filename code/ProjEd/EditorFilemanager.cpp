@@ -1,4 +1,5 @@
 #include "headers/ProjectEdit.h"
+
 #include <QDir>
 #include "ui_editor.h"
 
@@ -53,6 +54,9 @@ void EditWindow::assignIconFile(QListWidgetItem* item) {
     }
     if (checkExtension(item->text(), (".lua"))) {
         item->setIcon(QIcon(":/icons/res/icons/script.png"));
+    }
+    if (checkExtension(item->text(), (".prefab"))) {
+        item->setIcon(QIcon(":/icons/res/icons/package.png"));
     }
     //File is .ZSMAT material
     if (checkExtension(item->text(), (".zsmat"))) {
@@ -166,6 +170,13 @@ void EditWindow::onNewMaterial() {
     game_data->resources->pushResource(_resource);
 
     thumb_master->createMaterialThumbnail(_resource->rel_path);
+
+    updateFileList(); //Make new file visible
+}
+
+void EditWindow::onNewLocalizedStringFile() {
+    char* matContent = "ZSLOCALIZEDSTRINGSBINARY\x0\x0\x0\x0\x0\x0\x0\x0";
+    QString picked_name = this->createNewTextFile(current_dir, "LocString", ".lcstr", matContent, 33);
 
     updateFileList(); //Make new file visible
 }

@@ -10,5 +10,6 @@
         <file>res/icons/dir_back.png</file>
         <file>res/icons/bone.png</file>
         <file>res/icons/none.png</file>
+        <file>res/icons/package.png</file>
     </qresource>
 </RCC>

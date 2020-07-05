@@ -15,6 +15,7 @@ CreateProjectWindow::CreateProjectWindow(QWidget *parent) :
    QObject::connect(ui->dirBrouseBtn, SIGNAL(clicked()),this, SLOT(onBrowsePathButtonPressed()));
 
    ui->projPersp2D->setChecked(true); //2D picked by default
+   mainwin_ptr = nullptr;
 }
 
 CreateProjectWindow::~CreateProjectWindow()

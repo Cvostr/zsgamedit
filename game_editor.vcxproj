@@ -104,6 +104,12 @@
     <ClCompile Include="code\ProjEd\EditorSettings.cpp" />
     <ClCompile Include="code\ProjEd\EditorUI.cpp" />
     <ClCompile Include="code\ProjEd\InspectorWin.cpp" />
+    <ClCompile Include="code\ProjEd\LocStringEditWin.cpp">
+      <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">input</DynamicSource>
+      <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Filename).moc</QtMocFileName>
+      <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Release|x64'">input</DynamicSource>
+      <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Filename).moc</QtMocFileName>
+    </ClCompile>
     <ClCompile Include="code\ProjEd\ProjCreateWin.cpp" />
     <ClCompile Include="code\ProjEd\ProjectEdit.cpp" />
     <ClCompile Include="code\ProjEd\PropertyAreas.cpp" />
@@ -125,10 +131,12 @@
     <QtUic Include="code\ProjEd\ui\buildconsole.ui" />
     <QtUic Include="code\ProjEd\ui\editor.ui" />
     <QtUic Include="code\ProjEd\ui\inspector_win.ui" />
+    <QtUic Include="code\ProjEd\ui\LocStringFileEdit.ui" />
     <QtUic Include="code\ProjEd\ui\proj_create_win.ui" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="code\include_engine.h" />
+    <QtMoc Include="code\ProjEd\headers\LocStringEditWin.h" />
     <ClInclude Include="code\ProjEd\headers\ResourceImport.h" />
     <ClInclude Include="code\triggers.h" />
     <QtMoc Include="code\mainwin.h" />
