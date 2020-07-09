@@ -52,9 +52,14 @@ ThumbnailsMaster::~ThumbnailsMaster(){
             // Accessing KEY from element
             std::string word = element.first;
             // Accessing VALUE from element.
-            delete element.second;
-            
+            delete element.second; 
         });
+
+    std::vector<unsigned char*>::iterator ptr;
+    for (ptr = memory_buffers.begin(); ptr < memory_buffers.end(); ptr++) {
+        delete *ptr;
+    }
+
     this->texture_thumbnails.clear();
     texture_shader->Destroy();
     mesh_shader->Destroy();
@@ -90,6 +95,7 @@ void ThumbnailsMaster::createTexturesThumbnails(){
         //texture_ptr->Release();
         //Allocate image buffer
         unsigned char* texture_data = new unsigned char[THUMBNAIL_IMG_SIZE * THUMBNAIL_IMG_SIZE * 4];
+        memory_buffers.push_back(texture_data);
         //Read image to buffer from GL buffer
         glReadPixels(0, 0, THUMBNAIL_IMG_SIZE, THUMBNAIL_IMG_SIZE, GL_RGBA, GL_UNSIGNED_BYTE, &texture_data[0]);
 
@@ -166,6 +172,7 @@ void ThumbnailsMaster::createMaterialThumbnails(){
         DrawMaterial(material_ptr);
         //Allocate image buffer
         unsigned char* texture_data = new unsigned char[THUMBNAIL_IMG_SIZE * THUMBNAIL_IMG_SIZE * 4];
+        memory_buffers.push_back(texture_data);
         //Read image to buffer from GL buffer
         glReadPixels(0, 0, THUMBNAIL_IMG_SIZE, THUMBNAIL_IMG_SIZE, GL_RGBA, GL_UNSIGNED_BYTE, &texture_data[0]);
         //Create QT image
@@ -192,11 +199,12 @@ void ThumbnailsMaster::createMaterialThumbnail(std::string name){
 
     DrawMaterial(material_ptr);
     //Allocate image buffer
-    unsigned char* texture_data = new unsigned char[512 * 512 * 4];
+    unsigned char* texture_data = new unsigned char[THUMBNAIL_IMG_SIZE * THUMBNAIL_IMG_SIZE * 4];
+    memory_buffers.push_back(texture_data);
     //Read image to buffer from GL buffer
-    glReadPixels(0, 0, 512, 512, GL_RGBA, GL_UNSIGNED_BYTE, &texture_data[0]);
+    glReadPixels(0, 0, THUMBNAIL_IMG_SIZE, THUMBNAIL_IMG_SIZE, GL_RGBA, GL_UNSIGNED_BYTE, &texture_data[0]);
 
-    QImage* image = new QImage(texture_data, 512, 512, QImage::Format_RGBA8888);
+    QImage* image = new QImage(texture_data, THUMBNAIL_IMG_SIZE, THUMBNAIL_IMG_SIZE, QImage::Format_RGBA8888);
     if(isAvailable(project_ptr->root_path + "/" + resource_ptr->rel_path)){
         QImage* img_old = texture_thumbnails.at(project_ptr->root_path + "/" + resource_ptr->rel_path);
         delete img_old;
@@ -244,6 +252,7 @@ void ThumbnailsMaster::createMeshesThumbnails(){
         DrawMesh(m_ptr);
         //Allocate image buffer
         unsigned char* texture_data = new unsigned char[THUMBNAIL_IMG_SIZE * THUMBNAIL_IMG_SIZE * 4];
+        memory_buffers.push_back(texture_data);
         //Read image to buffer from GL buffer
         glReadPixels(0, 0, THUMBNAIL_IMG_SIZE, THUMBNAIL_IMG_SIZE, GL_RGBA, GL_UNSIGNED_BYTE, &texture_data[0]);
 

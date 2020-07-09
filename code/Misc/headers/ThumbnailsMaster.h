@@ -9,12 +9,14 @@
 #include "../../Render/headers/zs-pipeline.h"
 #include "EditorManager.h"
 #include <map>
+#include <vector>
 #include <QPixmap>
 
 class ThumbnailsMaster : public EngineComponentManager{
 public:
 
     std::map<std::string, QImage*> texture_thumbnails;
+    std::vector<unsigned char*> memory_buffers;
 
     Engine::Shader* texture_shader;
     Engine::Shader* mesh_shader;

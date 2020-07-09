@@ -70,7 +70,7 @@ EditWindow::EditWindow(QApplication* app, QWidget *parent) :
     QObject::connect(ui->actionPaste, SIGNAL(triggered()), this, SLOT(onObjectPaste()));
 
     QObject::connect(ui->objsList, SIGNAL(itemClicked(QTreeWidgetItem*,int)),
-                this, SLOT(onObjectListItemClicked())); //Signal comes, when user clicks on File->Save As
+                this, SLOT(onObjectListItemClicked())); //Signal comes, when user clicks on GameObject
 
     QObject::connect(ui->objsList, SIGNAL(onRightClick(QPoint)), this, SLOT(onObjectCtxMenuShow(QPoint)));
     QObject::connect(ui->objsList, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(onCameraToObjTeleport()));

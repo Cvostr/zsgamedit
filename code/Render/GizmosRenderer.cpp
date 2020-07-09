@@ -40,6 +40,10 @@ GizmosRenderer::GizmosRenderer(Engine::Shader* mark_shader,
     }
 }
 
+GizmosRenderer::~GizmosRenderer() {
+
+}
+
 void GizmosRenderer::drawPickedMeshWireframe(Engine::Mesh *mesh_ptr, ZSMATRIX4x4 transform, ZSRGBCOLOR color){
     glFeaturesOff();
 

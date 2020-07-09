@@ -14,7 +14,7 @@
    <string>Strings</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QTreeView" name="treeView">
+   <widget class="QTreeWidget" name="stringsList">
     <property name="geometry">
      <rect>
       <x>0</x>
@@ -23,6 +23,11 @@
       <height>271</height>
      </rect>
     </property>
+    <column>
+     <property name="text">
+      <string notr="true">1</string>
+     </property>
+    </column>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">

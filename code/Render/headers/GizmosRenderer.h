@@ -39,6 +39,7 @@ public:
                    Engine::UniformBuffer* buf,
                    Engine::UniformBuffer* editor,
                    Engine::UniformBuffer* inst);
+    ~GizmosRenderer();
 };
 
 
