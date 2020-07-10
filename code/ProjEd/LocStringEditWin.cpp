@@ -2,6 +2,7 @@
 #include "ui_LocStringFileEdit.h"
 #include <fstream>
 #include <QTreeWidget>
+#include <QResizeEvent>
 
 using namespace ZSPIRE;
 using namespace std;
@@ -23,9 +24,21 @@ LocStringEditWindow::LocStringEditWindow(QWidget* parent) :
 		this, SLOT(onStringsListItemClicked()));
 	QObject::connect(ui->stringsList, SIGNAL(doubleClicked(QModelIndex)),
 		this, SLOT(onStringsListItemDoubleClicked()));
+
+	ui->actionSave->setShortcut(Qt::Key_S | Qt::CTRL);
+	ui->actionNew_String->setShortcut(Qt::Key_N | Qt::CTRL);
 }
 LocStringEditWindow::~LocStringEditWindow() {
 
+}
+
+void LocStringEditWindow::resizeEvent(QResizeEvent* event) {
+	QMainWindow::resizeEvent(event);
+
+	int new_width = event->size().width();
+	int new_height = event->size().height();
+
+	ui->stringsList->resize(new_width, new_height);
 }
 
 void LocStringEditWindow::showWindowWithFile(std::string file) {
@@ -79,8 +92,12 @@ void LocStringEditWindow::onStringsListItemDoubleClicked() {
 	}
 	int ID = __t.toInt();
 	//Call String edit dialog
-	StringEditDialog* sed = new StringEditDialog(lsf->getStringById(ID), lsf, this);
+	LocString* string = lsf->getStringById(ID);
+	StringEditDialog* sed = new StringEditDialog(string, lsf, this);
 	sed->exec();
+	//Update list item text
+	item->setText(0, QString::number(string->ID) + " " + QString::fromStdString(string->str_ID));
+
 	delete sed;
 }
 
@@ -183,16 +200,33 @@ StringEditDialog::StringEditDialog(LocString* str, ZSPIRE::LocaleStringsFile* ls
 	this->str = str;
 	this->lsf = lsf;
 
+	setWindowTitle("Editing " + QString::fromStdString(str->str_ID));
+
 	//Allocation of main layout
 	contentLayout = new QGridLayout;
 	setLayout(contentLayout);
+	
 
+	line = new QFrame;
+	line->setFrameShape(QFrame::HLine);
+	line->setFrameShadow(QFrame::Sunken);
+	contentLayout->addWidget(line, 1, 0);
+
+	//Allocate StringEditDialogLine for String ID
+	str_id_line = new StringEditDialogLine;
+
+	str_id_line->label->setText("String ID");
+	contentLayout->addWidget(str_id_line->label, 0, 0);
+	str_id_line->edit->setText(QString::fromStdString(str->str_ID));
+	contentLayout->addWidget(str_id_line->edit, 0, 1);
+
+	//Allocate array of lines in size of languages amount
 	lines = new StringEditDialogLine[lsf->getLanguagesCount()];
 	for (unsigned int lstr_i = 0; lstr_i < lsf->getLanguagesCount(); lstr_i++) {
 		lines[lstr_i].label->setText(captions[lstr_i]);
 
-		contentLayout->addWidget(lines[lstr_i].label, lstr_i, 0);
-		contentLayout->addWidget(lines[lstr_i].edit, lstr_i, 1);
+		contentLayout->addWidget(lines[lstr_i].label, lstr_i + 2, 0);
+		contentLayout->addWidget(lines[lstr_i].edit, lstr_i + 2, 1);
 		//Set String to text field
 		lines[lstr_i].edit->setText(QString::fromStdU32String(str->STR[lstr_i]));
 	}
@@ -201,15 +235,18 @@ StringEditDialog::StringEditDialog(LocString* str, ZSPIRE::LocaleStringsFile* ls
 	apply_btn = new QPushButton;
 	apply_btn->setText("Apply");
 	connect(apply_btn, SIGNAL(clicked()), this, SLOT(onApply()));
-	contentLayout->addWidget(apply_btn, LANGS_COUNT, 0);
+	contentLayout->addWidget(apply_btn, LANGS_COUNT + 2, 0);
 }
 StringEditDialog::~StringEditDialog() {
 	delete contentLayout;
 	delete apply_btn;
+	delete str_id_line;
 	delete[] lines;
 }
 
 void StringEditDialog::onApply() {
+	str->str_ID = str_id_line->edit->text().toStdString();
+	//Send all modified strings
 	for (unsigned int lstr_i = 0; lstr_i < lsf->getLanguagesCount(); lstr_i++) {
 		str->STR[lstr_i] = lines[lstr_i].edit->text().toStdU32String();
 	}

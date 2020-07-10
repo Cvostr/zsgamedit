@@ -28,6 +28,7 @@ public:
     void addStringToUiList(ZSPIRE::LocString* str);
     void showWindowWithFile(std::string file);
 
+    void resizeEvent(QResizeEvent* event);
     explicit LocStringEditWindow(QWidget* parent = nullptr);
     ~LocStringEditWindow();
 
@@ -78,7 +79,10 @@ private:
     QGridLayout* contentLayout;
     QPushButton* apply_btn;
 
+    StringEditDialogLine* str_id_line;
     StringEditDialogLine* lines;
+
+    QFrame* line; //line to divide String ID field and other fields
 public slots:
     void onApply();
 
