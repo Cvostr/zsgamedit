@@ -48,8 +48,10 @@ public:
     void onValueChanged();
     void onObjectDeleted();
     void copyTo(Engine::GameObjectProperty* dest);
+    void loadPropertyFromMemory(const char* data, Engine::GameObject* obj);
 
     LabelProperty();
+    ~LabelProperty();
 };
 
 class GameObject : public Engine::GameObject{
@@ -62,7 +64,6 @@ public:
     void setMeshSkinningRootNodeRecursively(GameObject* rootNode);
 
     void saveProperties(std::ofstream* stream); //Writes properties content at end of stream
-    void loadProperty(std::ifstream* world_stream); //Loads one property from stream
 
     void putToSnapshot(GameObjectSnapshot* snapshot);
     void recoverFromSnapshot(GameObjectSnapshot* snapshot);
@@ -114,15 +115,23 @@ public:
     GameObject* Instantiate(GameObject* original);
     
     GameObject* updateLink(Engine::GameObjectLink* link);
-
+    //Save loaded world to file
     void saveToFile(std::string file);
+    //open world from file
     void openFromFile(std::string file, QTreeWidget* w_ptr);
+    //Load world from bytes
+    void loadFromMemory(const char* bytes, unsigned int size, QTreeWidget* w_ptr);
+    //Write gameobject data to specified stream
     void writeGameObject(GameObject* object_ptr, std::ofstream* world_stream);
-    void loadGameObject(GameObject* object_ptr, std::ifstream* world_stream);
+
+    void loadGameObjectFromMemory(GameObject* object_ptr, const char* bytes, unsigned int left_bytes);
 
     void storeObjectToPrefab(GameObject* object_ptr, QString file);
     void writeObjectToPrefab(GameObject* object_ptr, std::ofstream* stream);
+
     void addObjectsFromPrefab(std::string file);
+    void addObjectsFromPrefab(char* data, unsigned int size);
+
     void processPrefabObject(GameObject* object_ptr, std::vector<GameObject>* objects_array);
 
     void addMeshGroup(std::string file_path);

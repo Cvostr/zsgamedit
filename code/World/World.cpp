@@ -212,45 +212,6 @@ void World::writeGameObject(GameObject* object_ptr, std::ofstream* world_stream)
     }
 }
 
-void World::loadGameObject(GameObject* object_ptr, std::ifstream* world_stream){
-    std::string prefix;
-
-    object_ptr->world_ptr = this; //Writing pointer to world
-    *world_stream >> object_ptr->str_id;
-
-    world_stream->seekg(1, std::ofstream::cur);
-    //Read object flags
-    world_stream->read(reinterpret_cast<char*>(&object_ptr->active), sizeof(bool));
-    world_stream->read(reinterpret_cast<char*>(&object_ptr->IsStatic), sizeof(bool));
-
-    //Then do the same sh*t, iterate until "G_END" came up
-    while(true){
-        *world_stream >> prefix; //Read prefix
-        if(prefix.compare("G_END") == 0){ //If end reached
-            break; //Then end this infinity loop
-        }
-        if(prefix.compare("G_CHI") == 0) { //Ops, it is chidren header
-            unsigned int amount;
-            world_stream->seekg(1, std::ofstream::cur);
-            //Reading children amount
-            world_stream->read(reinterpret_cast<char*>(&amount), sizeof(int));
-            //Iterate over all written children to file
-            for(unsigned int ch_i = 0; ch_i < amount; ch_i ++){
-                std::string child_str_id;
-                *world_stream >> child_str_id; //Reading child string id
-
-                Engine::GameObjectLink link;
-                link.world_ptr = this; //Setting world pointer
-                link.obj_str_id = child_str_id; //Setting string ID
-                object_ptr->children.push_back(link); //Adding to object
-            }
-        }
-        if(prefix.compare("G_PROPERTY") == 0){ //We found an property, zaeb*s'
-            object_ptr->loadProperty(world_stream);
-        }
-    }
-}
-
 void World::saveToFile(std::string file){
     Engine::RenderSettings* settings_ptr = renderer->getRenderSettings();
 
@@ -276,9 +237,154 @@ void World::saveToFile(std::string file){
     }
     //Close stream
     world_stream.close();
-
 }
 
+void World::loadGameObjectFromMemory(GameObject* object_ptr, const char* bytes, unsigned int left_bytes) {
+    std::string prefix;
+    unsigned int iter = 1;
+    object_ptr->world_ptr = this; //Assign pointer to world
+    object_ptr->str_id.clear(); //Clear old string id
+    while (bytes[iter] != ' ') {
+        object_ptr->str_id += bytes[iter];
+        iter++;
+    }
+    iter++;
+    //Read ACTIVE and STATIC flags
+    memcpy(&object_ptr->active, bytes + iter, sizeof(bool));
+    iter += sizeof(bool);
+    memcpy(&object_ptr->IsStatic, bytes + iter, sizeof(bool));
+    iter += sizeof(bool);
+    //Then do the same sh*t, iterate until "G_END" came up
+    while (iter < left_bytes) {
+        prefix.clear();
+        //Read prefix
+        while (bytes[iter] == ' ' || bytes[iter] == '\n') {
+            iter++;
+        }
+        while (bytes[iter] != ' ' && bytes[iter] != '\n' && iter < left_bytes) {
+            if (bytes[iter] != '\0')
+                prefix += bytes[iter];
+            iter++;
+        }
+
+        if (prefix.compare("G_END") == 0) { //If end reached
+            break; //Then end this infinity loop
+        }
+        if (prefix.compare("G_CHI") == 0) { //Ops, it is chidren header
+            unsigned int amount = 0;
+            iter++;
+            //Read amount of children of object
+            memcpy(&amount, bytes + iter, sizeof(int));
+            iter += sizeof(int);
+            //Iterate over these children
+            for (unsigned int ch_i = 0; ch_i < amount; ch_i++) { //Iterate over all written children to file
+                std::string child_str_id;
+                //Reading child string id
+                while (bytes[iter] == ' ' || bytes[iter] == '\n') {
+                    iter++;
+                }
+                while (bytes[iter] != ' ' && bytes[iter] != '\n') {
+                    child_str_id += bytes[iter];
+                    iter++;
+                }
+                //Create link for object
+                Engine::GameObjectLink link;
+                link.world_ptr = this; //Setting world pointer
+                link.obj_str_id = child_str_id; //Setting string ID
+                object_ptr->children.push_back(link); //Adding to object
+            }
+        }
+        if (prefix.compare("G_PROPERTY") == 0) { //We found an property, zaeb*s'
+            //Call function to load that property
+            PROPERTY_TYPE type;
+            iter++; //Skip space
+            memcpy(&type, bytes + iter, sizeof(int));
+            iter += sizeof(int);
+            //Spawn new property with readed type
+            object_ptr->addProperty(type);
+            auto prop_ptr = object_ptr->getPropertyPtrByType(type); //get created property
+            //Read ACTIVE flag
+            memcpy(&prop_ptr->active, bytes + iter, sizeof(bool));
+            iter += sizeof(bool);
+            //Load property
+            prop_ptr->loadPropertyFromMemory(bytes + iter, object_ptr);
+        }
+    }
+}
+
+void World::loadFromMemory(const char* bytes, unsigned int size, QTreeWidget* w_ptr) {
+    Engine::RenderSettings* settings_ptr = renderer->getRenderSettings();
+    this->obj_widget_ptr = w_ptr;
+
+    unsigned int iter = 0;
+    std::string test_header;
+    //Read header
+    while (bytes[iter] != ' ') {
+        test_header += bytes[iter];
+        iter++;
+    }
+
+    if (test_header.compare("ZSP_SCENE") != 0) //If it isn't zspire scene
+        return; //Go out, we have nothing to do
+    iter++;
+    int version = 0; //define version on world file
+    int objs_num = 0; //define number of objects
+    memcpy(&version, bytes + iter, sizeof(int));
+    iter += 4;
+    memcpy(&objs_num, bytes + iter, sizeof(int));
+    iter += 5;
+
+    while (iter < size) { //until file is over
+        std::string prefix;
+        //read prefix
+        while (bytes[iter] == ' ' || bytes[iter] == '\n') {
+            iter++;
+        }
+        while (bytes[iter] != ' ' && bytes[iter] != '\n') {
+            prefix += bytes[iter];
+            iter++;
+        }
+
+        if (prefix.compare("RENDER_SETTINGS_AMB_COLOR") == 0) { //if it is render setting of ambient light color
+            iter++;
+            memcpy(&settings_ptr->ambient_light_color.r, bytes + iter, sizeof(int));
+            iter += 4;
+            memcpy(&settings_ptr->ambient_light_color.g, bytes + iter, sizeof(int));
+            iter += 4;
+            memcpy(&settings_ptr->ambient_light_color.b, bytes + iter, sizeof(int));
+            iter += 4;
+        }
+
+        if (prefix.compare("G_OBJECT") == 0) { //if it is game object
+            GameObject obj;
+            //Call function to load object
+            loadGameObjectFromMemory(&obj, bytes + iter, size - iter);
+            //Add object to scene
+            this->addObject(obj);
+        }
+    }
+    //Now iterate over all objects and set depencies
+    for (unsigned int obj_i = 0; obj_i < this->objects.size(); obj_i++) {
+        Engine::GameObject* obj_ptr = this->objects[obj_i];
+        for (unsigned int chi_i = 0; chi_i < obj_ptr->children.size(); chi_i++) { //Now iterate over all children
+            Engine::GameObjectLink* child_ptr = &obj_ptr->children[chi_i];
+            Engine::GameObject* child_go_ptr = child_ptr->updLinkPtr();
+            child_go_ptr->parent = obj_ptr->getLinkToThisObject();
+            child_go_ptr->hasParent = true;
+        }
+    }
+    //Now add all objects to inspector tree
+    for (unsigned int obj_i = 0; obj_i < this->objects.size(); obj_i++) {
+        GameObject* obj_ptr = (GameObject*)this->objects[obj_i];
+        if (obj_ptr->parent.isEmpty()) { //If object has no parent
+            w_ptr->addTopLevelItem(obj_ptr->item_ptr);
+        }
+        else { //It has a parent
+            GameObject* parent_ptr = (GameObject*)obj_ptr->parent.ptr; //Get parent pointer
+            parent_ptr->item_ptr->addChild(obj_ptr->item_ptr); //Connect Qt Tree Items
+        }
+    }
+}
 
 void World::openFromFile(std::string file, QTreeWidget* w_ptr){
     Engine::RenderSettings* settings_ptr = renderer->getRenderSettings();
@@ -289,62 +395,21 @@ void World::openFromFile(std::string file, QTreeWidget* w_ptr){
     //Clear all objects
     clear(); 
 
+
     std::ifstream world_stream;
-    world_stream.open(file, std::ifstream::binary); //Opening to read binary data
+    world_stream.open(file, std::ifstream::binary | std::ifstream::ate); //Opening to read binary data
 
-    std::string test_header;
-    world_stream >> test_header; //Read header
-    if(test_header.compare("ZSP_SCENE") != 0) //If it isn't zspire scene
-        return; //Go out, we have nothing to do
-    world_stream.seekg(1, std::ifstream::cur);
-    int version = 0;
-    int objs_num = 0;
-    world_stream.read(reinterpret_cast<char*>(&version), sizeof(int)); //reading version
-    world_stream.read(reinterpret_cast<char*>(&objs_num), sizeof(int)); //reading objects count
+    unsigned int size = static_cast<unsigned int>(world_stream.tellg());
 
-    while(!world_stream.eof()){ //While file not finished reading
-        std::string prefix;
-        world_stream >> prefix; //Read prefix
+    world_stream.seekg(0);
+    char* data = new char[size];
+    world_stream.read(data, size);
+    //Process World
+    loadFromMemory(data, size, w_ptr);
+    //Free allocated data
+    delete[] data;
+    
 
-        if(prefix.compare("RENDER_SETTINGS_AMB_COLOR") == 0){ //if it is render setting of ambient light color
-            world_stream.seekg(1, std::ifstream::cur);
-            world_stream.read(reinterpret_cast<char*>(&settings_ptr->ambient_light_color.r), sizeof(int)); //Writing R component of amb color
-            world_stream.read(reinterpret_cast<char*>(&settings_ptr->ambient_light_color.g), sizeof(int)); //Writing G component of amb color
-            world_stream.read(reinterpret_cast<char*>(&settings_ptr->ambient_light_color.b), sizeof(int)); //Writing B component of amb color
-        }
-
-        if(prefix.compare("G_OBJECT") == 0){ //if it is game object
-            GameObject object; //firstly, define an object
-
-            World::loadGameObject(&object, &world_stream);
-
-            this->addObject(object); //Add object to world
-        }
-    }
-    //We finished reading file
-    //Now iterate over all objects in world and set dependencies
-    for(unsigned int obj_i = 0; obj_i < this->objects.size(); obj_i ++){
-        GameObject* obj_ptr = (GameObject*)this->objects[obj_i];
-        for(unsigned int chi_i = 0; chi_i < obj_ptr->children.size(); chi_i ++){ //Now iterate over all children
-            Engine::GameObjectLink* child_ptr = &obj_ptr->children[chi_i];
-            Engine::GameObject* child_go_ptr = child_ptr->updLinkPtr();
-
-            if(child_go_ptr == nullptr) continue;
-
-            child_go_ptr->parent = obj_ptr->getLinkToThisObject();
-            child_go_ptr->hasParent = true;
-        }
-    }
-    //Now add all objects to inspector tree
-    for(unsigned int obj_i = 0; obj_i < this->objects.size(); obj_i ++){
-        GameObject* obj_ptr = (GameObject*)this->objects[obj_i];
-        if(obj_ptr->parent.isEmpty()){ //If object has no parent
-            w_ptr->addTopLevelItem(obj_ptr->item_ptr);
-        }else{ //It has a parent
-            GameObject* parent_ptr = (GameObject*)obj_ptr->parent.ptr; //Get parent pointer
-            parent_ptr->item_ptr->addChild(obj_ptr->item_ptr); //Connect Qt Tree Items
-        }
-    }
     //Disable HACK
     setLabelPropertyDeleteWidget(true);
 }
@@ -391,27 +456,35 @@ void World::writeObjectToPrefab(GameObject* object_ptr, std::ofstream* stream){
     }
 }
 
-void World::addObjectsFromPrefab(std::string file){
-    std::ifstream prefab_stream;
-    //opening prefab stream
-    prefab_stream.open(file, std::ifstream::binary);
+void World::addObjectsFromPrefab(char* data, unsigned int size) {
+    unsigned int iter = 0;
+    std::string test_header;
+    //Read header
+    while (data[iter] != ' ' && data[iter] != '\n') {
+        test_header += data[iter];
+        iter++;
+    }
 
-    std::string header;
-    //reading headers
-    prefab_stream >> header;
-    //testing header
-    if(header.compare("ZSPIRE_PREFAB")) return;
-
-    std::string prefix;
-
+    if (test_header.compare("ZSPIRE_PREFAB") != 0) //If it isn't zspire scene
+        return; //Go out, we have nothing to do
+    iter++;
+    //array for objects
     std::vector<GameObject> mObjects;
 
-    while(!prefab_stream.eof()){
-        prefab_stream >> prefix;
-
-        if(!prefix.compare("G_OBJECT")){
+    while (iter < size) { //until file is over
+        std::string prefix;
+        //read prefix
+        while (data[iter] == ' ' || data[iter] == '\n') {
+            iter++;
+        }
+        while (data[iter] != ' ' && data[iter] != '\n') {
+            prefix += data[iter];
+            iter++;
+        }
+        //if we found an object
+        if (!prefix.compare("G_OBJECT")) {
             GameObject obj;
-            this->loadGameObject(&obj, &prefab_stream);
+            this->loadGameObjectFromMemory(&obj, data + iter, size - iter);
             mObjects.push_back(obj);
         }
     }
@@ -419,7 +492,7 @@ void World::addObjectsFromPrefab(std::string file){
     genRandomString(&mObjects[0].str_id, 15); //generate new string ID for first object
     processPrefabObject(&mObjects[0], &mObjects);
     //iterate over all objects and push them to world
-    for(unsigned int obj_i = 0; obj_i < mObjects.size(); obj_i ++){
+    for (unsigned int obj_i = 0; obj_i < mObjects.size(); obj_i++) {
         std::string label = *mObjects[obj_i].label_ptr;
         int add_num = 0; //Declaration of addititonal integer
         getAvailableNumObjLabel(label, &add_num);
@@ -432,11 +505,31 @@ void World::addObjectsFromPrefab(std::string file){
     //Add first object to top of tree
     this->obj_widget_ptr->addTopLevelItem(((GameObject*)this->getGameObjectByStrId(mObjects[0].str_id))->item_ptr);
 
-    for(unsigned int obj_i = 1; obj_i < mObjects.size(); obj_i ++){
+    for (unsigned int obj_i = 1; obj_i < mObjects.size(); obj_i++) {
         Engine::GameObject* object_ptr = this->getGameObjectByStrId(mObjects[obj_i].str_id);
         object_ptr->parent.world_ptr = this;
         ((GameObject*)object_ptr->parent.updLinkPtr())->item_ptr->addChild(((GameObject*)object_ptr)->item_ptr);
     }
+}
+
+void World::addObjectsFromPrefab(std::string file){
+    std::ifstream prefab_stream;
+    //opening prefab stream
+    prefab_stream.open(file, std::ifstream::binary | std::ifstream::ate);
+
+    if (!prefab_stream.is_open()) {
+        std::cout << "Error opening PREFAB file " << file;
+        return;
+    }
+
+    unsigned int size = prefab_stream.tellg();
+    char* data = new char[size];
+    prefab_stream.seekg(0);
+    prefab_stream.read(data, size);
+    //Load prefab from bytes
+    addObjectsFromPrefab(data, size);
+    //free readed bytes
+    delete[] data;
 }
 
 void World::addMeshGroup(std::string file_path){

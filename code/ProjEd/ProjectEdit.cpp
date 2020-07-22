@@ -222,6 +222,7 @@ void EditWindow::init(){
     ZSGAME_DESC* game_desc = new ZSGAME_DESC;
     game_desc->game_perspective = project.perspective;
     engine_ptr->desc = game_desc;
+    game_desc->game_dir = project.root_path;
 
     //init render
     render = new RenderPipeline;

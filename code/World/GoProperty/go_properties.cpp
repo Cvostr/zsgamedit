@@ -177,7 +177,9 @@ LabelProperty::LabelProperty(){
     active = true;
     list_item_ptr = nullptr;
 }
+LabelProperty::~LabelProperty() {
 
+}
 //Transform property functions
 void Engine::TransformProperty::addPropertyInterfaceToInspector(){
 
@@ -235,6 +237,18 @@ void LabelProperty::copyTo(Engine::GameObjectProperty* dest){
 
     LabelProperty* _dest = static_cast<LabelProperty*>(dest);
     _dest->label = label;
+}
+
+void LabelProperty::loadPropertyFromMemory(const char* data, Engine::GameObject* obj) {
+    unsigned int offset = 1;
+    std::string label;
+    while (data[offset] != ' ' && data[offset] != '\n') {
+        label += data[offset];
+        offset++;
+    }
+    this->label = label; //Write loaded string
+    obj->label_ptr = &this->label; //Making GameObjects's pointer to string in label property
+    list_item_ptr->setText(0, QString::fromStdString(label)); //Set text on widget
 }
 
 //Mesh property functions
