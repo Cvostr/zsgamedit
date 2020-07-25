@@ -1,7 +1,7 @@
 #include "headers/LocStringEditWin.h"
 #include "ui_LocStringFileEdit.h"
 #include <fstream>
-#include <QTreeWidget>
+#include <qmessagebox.h>
 #include <QResizeEvent>
 
 using namespace ZSPIRE;
@@ -39,6 +39,25 @@ void LocStringEditWindow::resizeEvent(QResizeEvent* event) {
 	int new_height = event->size().height();
 
 	ui->stringsList->resize(new_width, new_height);
+}
+
+void LocStringEditWindow::keyPressEvent(QKeyEvent* ke) {
+	if (ke->key() == Qt::Key_Delete) { //User pressed delete button
+		QTreeWidgetItem* item = ui->stringsList->currentItem();
+
+		QMessageBox::StandardButton reply = QMessageBox::Yes;
+			reply = QMessageBox::question(this, "String deletion", 
+				"Are you sure to delete " + item->text(0) + " ?",
+				QMessageBox::Yes | QMessageBox::No);
+		if (reply == QMessageBox::Yes) {
+			int ID = getStringID(item);
+			//perform removing
+			lsf->removeString(lsf->getStringById(ID));
+			delete item;
+		}
+	}
+
+	QMainWindow::keyPressEvent(ke); // base class implementation
 }
 
 void LocStringEditWindow::showWindowWithFile(std::string file) {
@@ -80,19 +99,24 @@ void LocStringEditWindow::onStringsListItemClicked() {
 	item->setExpanded(true);
 }
 
-void LocStringEditWindow::onStringsListItemDoubleClicked() {
-	QTreeWidgetItem* item = ui->stringsList->currentItem();
+unsigned int LocStringEditWindow::getStringID(QTreeWidgetItem* id) {
 	//This code below gets digits from Item string and transform that to int
-	QString text = item->text(0);
+	QString text = id->text(0);
 	QString __t;
 	int iter = 0;
 	while (text[iter] != " ") {
 		__t += text[iter];
 		iter++;
 	}
-	int ID = __t.toInt();
+	unsigned int ID = __t.toUInt();
+	//return result
+	return ID;
+}
+
+void LocStringEditWindow::onStringsListItemDoubleClicked() {
+	QTreeWidgetItem* item = ui->stringsList->currentItem();
 	//Call String edit dialog
-	LocString* string = lsf->getStringById(ID);
+	LocString* string = lsf->getStringById(getStringID(item));
 	StringEditDialog* sed = new StringEditDialog(string, lsf, this);
 	sed->exec();
 	//Update list item text

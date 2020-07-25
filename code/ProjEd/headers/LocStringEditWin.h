@@ -9,6 +9,7 @@
 #include <QPushButton>
 #include <QLabel>
 #include <QLineEdit>
+#include <QTreeWidget>
 #include <engine/LocaleStringsFile.h>
 
 namespace Ui {
@@ -27,8 +28,10 @@ public slots:
 public:
     void addStringToUiList(ZSPIRE::LocString* str);
     void showWindowWithFile(std::string file);
+    unsigned int getStringID(QTreeWidgetItem* id);
 
     void resizeEvent(QResizeEvent* event);
+    void keyPressEvent(QKeyEvent*);
     explicit LocStringEditWindow(QWidget* parent = nullptr);
     ~LocStringEditWindow();
 
