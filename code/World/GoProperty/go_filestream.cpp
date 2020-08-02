@@ -89,18 +89,18 @@ void GameObject::saveProperties(std::ofstream* stream){
                 float intensity = ptr->intensity;
                 float range = ptr->range;
 
-                float color_r = ptr->color.r;
-                float color_g = ptr->color.g;
-                float color_b = ptr->color.b;
+                int color_r = ptr->color.r;
+                int color_g = ptr->color.g;
+                int color_b = ptr->color.b;
 
                 stream->write(reinterpret_cast<char*>(&type), sizeof(Engine::LIGHTSOURCE_TYPE));
                 stream->write(reinterpret_cast<char*>(&intensity), sizeof(float));
                 stream->write(reinterpret_cast<char*>(&range), sizeof(float));
                 stream->write(reinterpret_cast<char*>(&ptr->spot_angle), sizeof(float));
 
-                stream->write(reinterpret_cast<char*>(&color_r), sizeof(float));
-                stream->write(reinterpret_cast<char*>(&color_g), sizeof(float));
-                stream->write(reinterpret_cast<char*>(&color_b), sizeof(float));
+                stream->write(reinterpret_cast<char*>(&color_r), sizeof(int));
+                stream->write(reinterpret_cast<char*>(&color_g), sizeof(int));
+                stream->write(reinterpret_cast<char*>(&color_b), sizeof(int));
 
                 break;
             }
@@ -129,7 +129,7 @@ void GameObject::saveProperties(std::ofstream* stream){
                 break;
             }
             case PROPERTY_TYPE::GO_PROPERTY_TYPE_SCRIPTGROUP:{
-                Engine::ScriptGroupProperty* ptr = static_cast<Engine::ScriptGroupProperty*>(property_ptr);
+                /*Engine::ScriptGroupProperty* ptr = static_cast<Engine::ScriptGroupProperty*>(property_ptr);
                 int script_num = static_cast<int>(ptr->scr_num);
                 //write amount of scripts
                 stream->write(reinterpret_cast<char*>(&script_num), sizeof(int));
@@ -137,7 +137,7 @@ void GameObject::saveProperties(std::ofstream* stream){
                 for(unsigned int script_w_i = 0; script_w_i < static_cast<unsigned int>(script_num); script_w_i ++){
                      *stream << ptr->path_names[script_w_i] << "\n";
                 }
-
+                */
                 break;
             }
             case PROPERTY_TYPE::GO_PROPERTY_TYPE_COLLIDER:{

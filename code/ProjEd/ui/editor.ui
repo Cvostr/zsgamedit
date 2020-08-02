@@ -93,7 +93,7 @@
      <x>0</x>
      <y>0</y>
      <width>392</width>
-     <height>21</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -141,10 +141,18 @@
     <addaction name="actionRender_settings"/>
     <addaction name="actionPhysics_Settings"/>
    </widget>
+   <widget class="QMenu" name="menuWindow">
+    <property name="title">
+     <string>Window</string>
+    </property>
+    <addaction name="actionInspectorWin"/>
+    <addaction name="actionConsole_log"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuCreate"/>
    <addaction name="menuObjects"/>
+   <addaction name="menuWindow"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionUndo">
@@ -260,6 +268,16 @@
   <action name="actionLocStringFile">
    <property name="text">
     <string>Localized String File</string>
+   </property>
+  </action>
+  <action name="actionInspectorWin">
+   <property name="text">
+    <string>Inspector</string>
+   </property>
+  </action>
+  <action name="actionConsole_log">
+   <property name="text">
+    <string>Console log</string>
    </property>
   </action>
  </widget>

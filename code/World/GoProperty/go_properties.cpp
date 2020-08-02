@@ -120,7 +120,7 @@ Engine::GameObjectProperty* _allocProperty(PROPERTY_TYPE type){
             break;
         }
         case PROPERTY_TYPE::GO_PROPERTY_TYPE_SCRIPTGROUP:{
-            _ptr = static_cast<Engine::GameObjectProperty*>(new Engine::ScriptGroupProperty);
+            _ptr = static_cast<Engine::GameObjectProperty*>(new Engine::ZPScriptProperty);
             break;
         }
         case PROPERTY_TYPE::GO_PROPERTY_TYPE_AUDSOURCE:{
@@ -623,43 +623,19 @@ void Engine::TriggerProperty::addPropertyInterfaceToInspector() {
     addCustomSizeField();
 }
 
-void Engine::ScriptGroupProperty::onValueChanged(){
-    //if size changed
-    if(static_cast<int>(path_names.size()) != this->scr_num){
-        path_names.resize(static_cast<unsigned int>(scr_num));
-        //Update inspector interface
-        _inspector_win->updateRequired = true;
-    }
-
-    if(static_cast<int>(scripts_attached.size()) != this->scr_num){ //if size changed
-        this->scripts_attached.resize(static_cast<unsigned int>(this->scr_num));
-        //Iterate over all scripts and use absolute path
-    }
-    for(unsigned int script_i = 0; script_i < static_cast<unsigned int>(scr_num); script_i ++){
-        Engine::ScriptResource* res = game_data->resources->getScriptByLabel(path_names[script_i]);
-        if(res != nullptr) //if script exists
-            scripts_attached[script_i].script_content = res->script_content; //Store its content
-
-        scripts_attached[script_i].name = path_names[script_i];
-    }
+void Engine::ZPScriptProperty::onValueChanged(){
+    script_res = game_data->resources->getScriptByLabel(script_path);
 }
 
-void Engine::ScriptGroupProperty::addPropertyInterfaceToInspector(){
-
-    IntPropertyArea* scriptnum_area = new IntPropertyArea;
-    scriptnum_area->setLabel("Scripts"); //Its label
-    scriptnum_area->value = &this->scr_num;
-    scriptnum_area->go_property = static_cast<void*>(this);
-    _inspector_win->addPropertyArea(scriptnum_area);
-
-    for(int script_i = 0; script_i < scr_num; script_i ++){
-        PickResourceArea* area = new PickResourceArea(RESOURCE_TYPE_FILE);
+void Engine::ZPScriptProperty::addPropertyInterfaceToInspector(){
+    
+    //for(int script_i = 0; script_i < scr_num; script_i ++){
+        PickResourceArea* area = new PickResourceArea(RESOURCE_TYPE_SCRIPT);
         area->setLabel("Lua Script");
         area->go_property = static_cast<void*>(this);
-        area->rel_path_std = &path_names[static_cast<unsigned int>(script_i)];
-        area->extension_mask = ".lua";
+        area->rel_path_std = &script_path;
         _inspector_win->addPropertyArea(area);
-    }
+   // }
 }
 
 void Engine::ShadowCasterProperty::addPropertyInterfaceToInspector(){

@@ -3,6 +3,7 @@
 #include "headers/Misc.h"
 #include <QLineEdit>
 #include <world/go_properties.h>
+#include <iostream>
 
 extern RenderPipeline* renderer;
 extern Material* default3dmat;

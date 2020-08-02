@@ -1,8 +1,9 @@
 ﻿#include "headers/ProjectEdit.h"
 #include "headers/InspectorWin.h"
+#include "headers/ConsoleLog.h"
 #include "headers/InspEditAreas.h"
 #include "../World/headers/World.h"
-#include <Scripting/LuaScript.h>
+#include <Scripting/AngelScript.hpp>
 #include <render/zs-materials.h>
 #include "../World/headers/terrain.h"
 #include "world/go_properties.h"
@@ -18,7 +19,6 @@
 #include <QDesktopServices>
 #include <QMessageBox>
 #include "../mainwin.h"
-#include <fstream>
 #include <misc/zs3m-master.h>
 #include "../World/headers/Misc.h"
 #include "headers/LocStringEditWin.h"
@@ -29,6 +29,7 @@ extern ZSGAME_DATA* game_data;
 
 EditWindow* _editor_win;
 InspectorWin* _inspector_win;
+ConsoleLog* _console_log_win;
 Project* project_ptr;
 EdActions* _ed_actions_container;
 RenderPipeline* renderer;
@@ -84,6 +85,8 @@ EditWindow::EditWindow(QApplication* app, QWidget *parent) :
     QObject::connect(ui->actionRender_settings, SIGNAL(triggered()), this, SLOT(openRenderSettings()));
     QObject::connect(ui->actionPhysics_Settings, SIGNAL(triggered()), this, SLOT(openPhysicsSettings()));
 
+    QObject::connect(ui->actionConsole_log, SIGNAL(triggered()), this, SLOT(onOpenConsoleLog()));
+
     ready = false; //Firstly set it to 0
     hasSceneFile = false; //No scene loaded by default
     isSceneRun = false; //Not running by default
@@ -123,6 +126,7 @@ EditWindow::EditWindow(QApplication* app, QWidget *parent) :
 
     ui->actionBuild->setShortcut(Qt::Key_B | Qt::CTRL);
     ui->actionRun->setShortcut(Qt::Key_R | Qt::CTRL);
+    ui->actionConsole_log->setShortcut(Qt::Key_L | Qt::CTRL);
 
     ui->actionNew_Object->setShortcut(Qt::Key_N | Qt::CTRL);
     ui->actionToggle_Cameras->setShortcut(Qt::Key_H | Qt::CTRL);
@@ -136,7 +140,6 @@ EditWindow::EditWindow(QApplication* app, QWidget *parent) :
 
     engine_ptr = new ZSpireEngine();
     engine_ptr->engine_info = engine_create_info;
-
 }
 
 EditWindow::~EditWindow()
@@ -241,8 +244,11 @@ void EditWindow::init(){
     game_data->resources = new Engine::ResourceManager;
     startManager(game_data->resources);
 
+    game_data->script_manager = new Engine::AGScriptMgr;
     game_data->glyph_manager = this->glyph_manager;
     game_data->pipeline = this->render;
+    game_data->out_manager = new Engine::OutputManager;
+    game_data->out_manager->consoleLogWorking = true;
     game_data->isEditor = true;
 
     std::string absolute = project.root_path + "/";
@@ -589,19 +595,14 @@ void EditWindow::runWorld(){
     isWorldCamera = true;
     renderer->allowOnUpdate = true;
 
+    world.call_onStart();
     world.physical_world = new PhysicalWorld(&world.phys_settngs);
 }
 void EditWindow::stopWorld(){
     //Avoi crash on skybox rendering
     this->render->getRenderSettings()->resetPointers();
     //Prepare world for stopping
-    for(unsigned int object_i = 0; object_i < world.objects.size(); object_i ++){
-        Engine::GameObject* object_ptr = world.objects[object_i];
-        //Obtain script
-        Engine::ScriptGroupProperty* script_ptr = static_cast<Engine::ScriptGroupProperty*>(object_ptr->getPropertyPtrByType(PROPERTY_TYPE::GO_PROPERTY_TYPE_SCRIPTGROUP));
-        if(script_ptr != nullptr)
-            script_ptr->shutdown(); //stop all scripts
-    }
+    
     //Set storing actions to undo changes
     _ed_actions_container->setStoreActions(true);
     //Clear Inspector Win
@@ -768,6 +769,7 @@ RenderPipeline* EditWindow::getRenderPipeline(){
 EditWindow* ZSEditor::openProject(QApplication* app, Project& project){
     _editor_win = new EditWindow(app); //Creating class object
     _inspector_win = new InspectorWin();
+    _console_log_win = new ConsoleLog;
     //Send project datas to editor window class
     _editor_win->project = project;
     //Update widget content
@@ -812,6 +814,11 @@ EditWindow* ZSEditor::openEditor(){
 
 InspectorWin* EditWindow::getInspector(){
     return _inspector_win;
+}
+
+void EditWindow::onOpenConsoleLog() {
+    _console_log_win->show();
+    _console_log_win->updateLogsList();
 }
 
 void EditWindow::onLeftBtnClicked(int X, int Y){
@@ -1127,6 +1134,9 @@ void EditWindow::onKeyDown(SDL_Keysym sym){
     }
     if(input_state.isLCtrlHold && sym.sym == SDLK_h){
         emit toggleCameras();
+    }
+    if (input_state.isLCtrlHold && sym.sym == SDLK_l) {
+        emit onOpenConsoleLog();
     }
 }
 

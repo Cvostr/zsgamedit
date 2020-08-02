@@ -72,7 +72,7 @@
       <SubSystem>Windows</SubSystem>
       <OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>assimp.lib;freetype.lib;glew32s.lib;OpenGL32.lib;lua53.lib;OpenAL_x64.lib;SDL2.lib;SDL2main.lib;SDL2test.lib;vulkan-1.lib;engine.lib;LinearMath.lib;BulletDynamics.lib;BulletCollision.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>assimp.lib;freetype.lib;glew32s.lib;OpenGL32.lib;lua53.lib;OpenAL_x64.lib;SDL2.lib;SDL2main.lib;SDL2test.lib;vulkan-1.lib;engine.lib;LinearMath.lib;BulletDynamics.lib;BulletCollision.lib;angelscript64d.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -98,6 +98,12 @@
     <ClCompile Include="code\Misc\AssimpMeshLoader.cpp" />
     <ClCompile Include="code\Misc\ProjBuilder.cpp" />
     <ClCompile Include="code\Misc\ThumbnailsMaster.cpp" />
+    <ClCompile Include="code\ProjEd\ConsoleLog.cpp">
+      <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">input</DynamicSource>
+      <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Filename).moc</QtMocFileName>
+      <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Release|x64'">input</DynamicSource>
+      <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Filename).moc</QtMocFileName>
+    </ClCompile>
     <ClCompile Include="code\ProjEd\EdActions.cpp" />
     <ClCompile Include="code\ProjEd\EditorFilemanager.cpp" />
     <ClCompile Include="code\ProjEd\EditorResources.cpp" />
@@ -122,13 +128,14 @@
     <ClCompile Include="code\World\GoProperty\TerrainComponent.cpp" />
     <ClCompile Include="code\World\GoProperty\tile_properties.cpp" />
     <ClCompile Include="code\World\Misc.cpp" />
-    <ClCompile Include="code\World\Physics.cpp" />
+    <ClCompile Include="code\World\PhysicsPropertyUI.cpp" />
     <ClCompile Include="code\World\TerrainUtils.cpp" />
     <ClCompile Include="code\World\World.cpp" />
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="code\mainwin.ui" />
     <QtUic Include="code\ProjEd\ui\buildconsole.ui" />
+    <QtUic Include="code\ProjEd\ui\ConsoleLogWindow.ui" />
     <QtUic Include="code\ProjEd\ui\editor.ui" />
     <QtUic Include="code\ProjEd\ui\inspector_win.ui" />
     <QtUic Include="code\ProjEd\ui\LocStringFileEdit.ui" />
@@ -137,6 +144,7 @@
   <ItemGroup>
     <ClInclude Include="code\include_engine.h" />
     <QtMoc Include="code\ProjEd\headers\LocStringEditWin.h" />
+    <QtMoc Include="code\ProjEd\headers\ConsoleLog.h" />
     <ClInclude Include="code\ProjEd\headers\ResourceImport.h" />
     <ClInclude Include="code\triggers.h" />
     <QtMoc Include="code\mainwin.h" />

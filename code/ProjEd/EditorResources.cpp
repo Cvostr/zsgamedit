@@ -109,7 +109,7 @@ void EditWindow::processResourceFile(QFileInfo fileInfo) {
         game_data->resources->pushResource(_resource);
 
     }
-    if (checkExtension(name, ".lua") || checkExtension(name, ".zscr")) { //If its an mesh
+    if (checkExtension(name, ".as") || checkExtension(name, ".zscr")) { //If its an mesh
         Engine::ZsResource* _resource = new Engine::ScriptResource;
 
         QString rel_path = absfpath;
