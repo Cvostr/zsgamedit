@@ -8,6 +8,7 @@ EdActions::EdActions(){
     action_list.resize(0);
     storeActions = false;
     hasChangesUnsaved = false; //Defaultly, nothing to save
+    world_ptr = nullptr;
 }
 
 EdAction::EdAction(){
@@ -60,10 +61,15 @@ void EdActions::newPropertyAction(Engine::GameObjectLink link, PROPERTY_TYPE pro
     new_action->linkToObj.updLinkPtr();
     new_action->prop_type = property_type; //Sore property type
     new_action->container_ptr = _allocProperty(property_type); //Allocate property
+    //Get pointer to all property
     Engine::GameObjectProperty* origin_prop = link.updLinkPtr()->getPropertyPtrByType(property_type);
-    origin_prop->copyTo(new_action->container_ptr);
-
-    putNewAction(new_action);
+    //Check, if property is found
+    if (origin_prop != nullptr) {
+        //Store property data
+        origin_prop->copyTo(new_action->container_ptr);
+        //Add new action to list
+        putNewAction(new_action);
+    }
 }
 
 void EdActions::newGameObjectAction(Engine::GameObjectLink link){
@@ -80,7 +86,7 @@ void EdActions::newGameObjectAction(Engine::GameObjectLink link){
 
 void EdActions::undo(){
     if(current_pos == 0) return; //if no actions done
-    int act_type = this->action_list[current_pos - 1]->type; //getting action type
+    int act_type = this->action_list[static_cast<unsigned int>(current_pos - 1)]->type; //getting action type
 
     if(act_type == ACT_TYPE_SNAPSHOT){ //if this action is snapshot
         EdSnapshotAction* snapshot = static_cast<EdSnapshotAction*>(this->action_list[current_pos - 1]);

@@ -133,6 +133,7 @@ public:
     void updateAreasChanges();
     void ShowObjectProperties(void* object_ptr);
     void updateObjectProperties();
+    void addPropertyInterfaceToInspector(Engine::GameObjectProperty* property_ptr);
 
     void resizeEvent(QResizeEvent* event);
 
@@ -158,7 +159,7 @@ public:
     QLineEdit* comp_type;
     void* g_object_ptr; //Pointer to object, when we'll add components
 
-    AddGoComponentDialog(QWidget* parent = nullptr);
+    AddGoComponentDialog(void* game_object_ptr, QWidget* parent = nullptr);
     ~AddGoComponentDialog();
 };
 

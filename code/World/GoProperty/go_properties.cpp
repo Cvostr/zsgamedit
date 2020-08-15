@@ -45,8 +45,8 @@ QString getPropertyString(PROPERTY_TYPE type){
         case PROPERTY_TYPE::GO_PROPERTY_TYPE_LIGHTSOURCE:{
             return QString("Light");
         }
-        case PROPERTY_TYPE::GO_PROPERTY_TYPE_SCRIPTGROUP:{
-            return QString("Script Group");
+        case PROPERTY_TYPE::GO_PROPERTY_TYPE_AGSCRIPT:{
+            return QString("Angel Script");
         }
         case PROPERTY_TYPE::GO_PROPERTY_TYPE_AUDSOURCE:{
             return QString("Audio Source");
@@ -119,7 +119,7 @@ Engine::GameObjectProperty* _allocProperty(PROPERTY_TYPE type){
             _ptr = static_cast<Engine::GameObjectProperty*>(new Engine::LightsourceProperty);
             break;
         }
-        case PROPERTY_TYPE::GO_PROPERTY_TYPE_SCRIPTGROUP:{
+        case PROPERTY_TYPE::GO_PROPERTY_TYPE_AGSCRIPT:{
             _ptr = static_cast<Engine::GameObjectProperty*>(new Engine::ZPScriptProperty);
             break;
         }
@@ -623,19 +623,73 @@ void Engine::TriggerProperty::addPropertyInterfaceToInspector() {
     addCustomSizeField();
 }
 
-void Engine::ZPScriptProperty::onValueChanged(){
+void Engine::ZPScriptProperty::onValueChanged() {
+    std::string old_res_name;
+    if (script_res != nullptr)
+        old_res_name = script_res->resource_label;
+    //update resource pointer
     script_res = game_data->resources->getScriptByLabel(script_path);
+    script = new AGScript(game_data->script_manager, go_link.updLinkPtr(), "angel");
+    //Compare strings
+    if (old_res_name.compare(script_path) != 0) {
+        //Strings differ
+        makeGlobalVarsList();
+        //update interface
+        _inspector_win->updateRequired = true;
+    }
 }
 
 void Engine::ZPScriptProperty::addPropertyInterfaceToInspector(){
-    
-    //for(int script_i = 0; script_i < scr_num; script_i ++){
-        PickResourceArea* area = new PickResourceArea(RESOURCE_TYPE_SCRIPT);
-        area->setLabel("Lua Script");
-        area->go_property = static_cast<void*>(this);
-        area->rel_path_std = &script_path;
-        _inspector_win->addPropertyArea(area);
-   // }
+   
+    PickResourceArea* area = new PickResourceArea(RESOURCE_TYPE_SCRIPT);
+    area->setLabel("Angel Script");
+    area->go_property = static_cast<void*>(this);
+    area->rel_path_std = &script_path;
+    _inspector_win->addPropertyArea(area);
+
+    for (unsigned int var_i = 0; var_i < this->vars.size(); var_i++) {
+        GlobVarHandle* handle = vars[var_i];
+        if (handle->typeID == asTYPEID_INT32) {
+            GVH_INT32* intHandle = static_cast<GVH_INT32*>(handle);
+            IntPropertyArea* intH = new IntPropertyArea; //New property area
+            intH->setLabel(QString::fromStdString(handle->name)); //Its label
+            intH->value = &intHandle->value; //Ptr to our vector
+            intH->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
+            _inspector_win->addPropertyArea(intH);
+        }
+        if (handle->typeID == asTYPEID_FLOAT) {
+            GVH_FLOAT* floatHandle = static_cast<GVH_FLOAT*>(handle);
+            FloatPropertyArea* floatH = new FloatPropertyArea; //New property area
+            floatH->setLabel(QString::fromStdString(handle->name)); //Its label
+            floatH->value = &floatHandle->value; //Ptr to our vector
+            floatH->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
+            _inspector_win->addPropertyArea(floatH);
+        }
+        if (handle->typeID == asTYPEID_BOOL) {
+            GVH_BOOL* boolHandle = static_cast<GVH_BOOL*>(handle);
+            BoolCheckboxArea* boolH = new BoolCheckboxArea; //New property area
+            boolH->setLabel(QString::fromStdString(handle->name)); //Its label
+            boolH->bool_ptr = &boolHandle->value; //Ptr to our vector
+            boolH->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
+            _inspector_win->addPropertyArea(boolH);
+        }
+        if (handle->typeID == AG_VECTOR3) {
+            GVH_VEC3* boolHandle = static_cast<GVH_VEC3*>(handle);
+            Float3PropertyArea* vec3H = new Float3PropertyArea; //New property area
+            vec3H->setLabel(QString::fromStdString(handle->name)); //Its label
+            vec3H->vector = &boolHandle->value; //Ptr to our vector
+            vec3H->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
+            _inspector_win->addPropertyArea(vec3H);
+        }
+        if (handle->typeID == AG_STRING) {
+            GVH_STR* strHandle = static_cast<GVH_STR*>(handle);
+            StringPropertyArea* area = new StringPropertyArea;
+            area->setLabel(QString::fromStdString(handle->name));
+            area->value_ptr = &strHandle->value;
+            area->go_property = static_cast<void*>(this);
+            _inspector_win->addPropertyArea(area);
+        }
+    }
 }
 
 void Engine::ShadowCasterProperty::addPropertyInterfaceToInspector(){
@@ -676,14 +730,14 @@ void Engine::ShadowCasterProperty::addPropertyInterfaceToInspector(){
     _inspector_win->addPropertyArea(_viewport);
 }
 
-void onPlay(){
+void onAnimPlay(){
     //Call play() on AnimationProperty
     current_anim->play();
     //Refresh UI
     _inspector_win->updateRequired = true;
 }
 
-void onStop(){
+void onAnimStop(){
     current_anim->stop();
     _inspector_win->updateRequired = true;
 }
@@ -699,7 +753,7 @@ void Engine::AnimationProperty::addPropertyInterfaceToInspector(){
 
     if(Playing == false){
         AreaButton* btn = new AreaButton;
-        btn->onPressFuncPtr = &onPlay;
+        btn->onPressFuncPtr = &onAnimPlay;
         btn->button->setText("Play"); //Setting text to qt button
         _inspector_win->getContentLayout()->addWidget(btn->button);
         btn->insp_ptr = _inspector_win; //Setting inspector pointer
@@ -707,7 +761,7 @@ void Engine::AnimationProperty::addPropertyInterfaceToInspector(){
     }
     if(Playing == true){
         AreaButton* stopbtn = new AreaButton;
-        stopbtn->onPressFuncPtr = &onStop;
+        stopbtn->onPressFuncPtr = &onAnimStop;
         stopbtn->button->setText("Stop"); //Setting text to qt button
         _inspector_win->getContentLayout()->addWidget(stopbtn->button);
         stopbtn->insp_ptr = _inspector_win; //Setting inspector pointer

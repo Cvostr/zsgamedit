@@ -104,8 +104,10 @@
       <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Release|x64'">input</DynamicSource>
       <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Filename).moc</QtMocFileName>
     </ClCompile>
+    <ClCompile Include="code\ProjEd\DialogsMaster.cpp" />
     <ClCompile Include="code\ProjEd\EdActions.cpp" />
     <ClCompile Include="code\ProjEd\EditorFilemanager.cpp" />
+    <ClCompile Include="code\ProjEd\EditorInput.cpp" />
     <ClCompile Include="code\ProjEd\EditorResources.cpp" />
     <ClCompile Include="code\ProjEd\EditorSettings.cpp" />
     <ClCompile Include="code\ProjEd\EditorUI.cpp" />
@@ -145,6 +147,7 @@
     <ClInclude Include="code\include_engine.h" />
     <QtMoc Include="code\ProjEd\headers\LocStringEditWin.h" />
     <QtMoc Include="code\ProjEd\headers\ConsoleLog.h" />
+    <ClInclude Include="code\ProjEd\headers\DialogsMaster.h" />
     <ClInclude Include="code\ProjEd\headers\ResourceImport.h" />
     <ClInclude Include="code\triggers.h" />
     <QtMoc Include="code\mainwin.h" />

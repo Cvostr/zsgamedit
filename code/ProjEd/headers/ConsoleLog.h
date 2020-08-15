@@ -26,7 +26,6 @@ public:
     explicit ConsoleLog(QWidget* parent = nullptr);
     ~ConsoleLog();
 
-
 private:
     QTabWidget* tabs;
     QListWidget* logs_list;

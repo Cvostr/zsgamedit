@@ -52,7 +52,7 @@ void EditWindow::assignIconFile(QListWidgetItem* item) {
     if (checkExtension(item->text(), (".wav"))) {
         item->setIcon(QIcon(":/icons/res/icons/audio-clip.png"));
     }
-    if (checkExtension(item->text(), (".lua"))) {
+    if (checkExtension(item->text(), (".as"))) {
         item->setIcon(QIcon(":/icons/res/icons/script.png"));
     }
     if (checkExtension(item->text(), (".prefab"))) {
@@ -147,9 +147,8 @@ void EditWindow::onFileCtxMenuShow(QPoint point) {
     }
 }
 void EditWindow::onNewScript() {
-    std::string scriptContent = "onStart = function(g_object, world)\n  return 0\nend\n\n";
-    scriptContent += "onFrame = function(frameTime)\n  return 0\nend";
-    this->createNewTextFile(current_dir, "Script", ".lua", scriptContent.c_str(), scriptContent.size());
+    std::string scriptContent = "class angel : ZPScript{\n\tangel(GameObject@ o)\n{\n\n}\n\tvoid Start() {\n}\n\tvoid Update(){\n}\n}";
+    this->createNewTextFile(current_dir, "Script", ".as", scriptContent.c_str(), scriptContent.size());
 
     updateFileList(); //Make new file visible
 }

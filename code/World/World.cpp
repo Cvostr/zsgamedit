@@ -16,7 +16,7 @@ World::World(){
 
 GameObject* World::updateLink(Engine::GameObjectLink* link){
     link->ptr = getGameObjectByStrId( link->obj_str_id);
-    return (GameObject*)link->ptr;
+    return static_cast<GameObject*>(link->ptr);
 }
 
 int World::getFreeObjectSpaceIndex(){
@@ -52,11 +52,11 @@ GameObject* World::addObject(GameObject obj){
     GameObject* ptr = nullptr;
     if(index_to_push == -1){ //if all indeces are busy
         this->objects.push_back(newobj); //Push object to vector's end
-        ptr = (GameObject*)objects[objects.size() - 1];
+        ptr = static_cast<GameObject*>(objects[objects.size() - 1]);
         ptr->array_index = static_cast<int>(objects.size() - 1);
     }else{ //if vector has an empty space
         objects[static_cast<unsigned int>(index_to_push)] = newobj;
-        ptr = (GameObject*)objects[static_cast<unsigned int>(index_to_push)];
+        ptr = static_cast<GameObject*>(objects[static_cast<unsigned int>(index_to_push)]);
         ptr->array_index = index_to_push;
     }
     ptr->world_ptr = this;
@@ -189,17 +189,17 @@ bool World::isPicked(GameObject* obj) {
 void World::writeGameObject(GameObject* object_ptr, std::ofstream* world_stream){
     if(object_ptr->alive == true){
         *world_stream << "\nG_OBJECT " << object_ptr->str_id << " ";
-
+        //Write main flags
         world_stream->write(reinterpret_cast<char*>(&object_ptr->active), sizeof(bool));
         world_stream->write(reinterpret_cast<char*>(&object_ptr->IsStatic), sizeof(bool));
-
-        if(object_ptr->children.size() > 0){ //If object has at least one child object
+        //If object has at least one child object
+        if(object_ptr->children.size() > 0){ 
             int children_num = object_ptr->getAliveChildrenAmount();
             //Write children header
             *world_stream << "\nG_CHI ";
             //Write amount of children i object
             world_stream->write(reinterpret_cast<char*>(&children_num), sizeof(int));
-
+            //get children amount
             unsigned int children_am = static_cast<unsigned int>(object_ptr->children.size());
             for(unsigned int chi_i = 0; chi_i < children_am; chi_i ++){ //iterate over all children
                 Engine::GameObjectLink* link_ptr = &object_ptr->children[chi_i]; //Gettin pointer to child
@@ -396,11 +396,18 @@ void World::openFromFile(std::string file, QTreeWidget* w_ptr){
     //Clear all objects
     clear(); 
 
-
     std::ifstream world_stream;
     world_stream.open(file, std::ifstream::binary | std::ifstream::ate); //Opening to read binary data
+    //Check, if file is open
+    if (!world_stream.is_open()) {
+        game_data->out_manager->spawnRuntimeError(RuntimeErrorType::RE_TYPE_SCENE_OPEN_ERROR);
+    }
 
     unsigned int size = static_cast<unsigned int>(world_stream.tellg());
+    //Check for file size
+    if (size == 0) {
+        game_data->out_manager->spawnRuntimeError(RuntimeErrorType::RE_TYPE_SCENE_OPEN_ERROR);
+    }
 
     world_stream.seekg(0);
     char* data = new char[size];
@@ -443,7 +450,6 @@ void World::processPrefabObject(GameObject* object_ptr, std::vector<GameObject>*
         }
     }
 }
-
 
 void World::writeObjectToPrefab(GameObject* object_ptr, std::ofstream* stream){
     //Write an object
@@ -670,6 +676,16 @@ void World::putToShapshot(WorldSnapshot* snapshot){
             prop_ptr->copyTo(new_prop);
             snapshot->props.push_back(new_prop);
         }
+        //Iterate over all scripts in objects and copy them into snapshot
+        for (unsigned int script_i = 0; script_i < obj_ptr->scripts_num; script_i++) {
+            Engine::ZPScriptProperty* script_ptr = static_cast<Engine::ZPScriptProperty*>
+                (obj_ptr->scripts[script_i]);
+            Engine::ZPScriptProperty* script_prop = static_cast<Engine::ZPScriptProperty*>
+                (_allocProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_AGSCRIPT));
+            script_prop->go_link = script_ptr->go_link;
+            script_ptr->copyTo(script_prop);
+            snapshot->scripts.push_back(script_prop);
+        }
         //Decalare new object
         GameObject newobj;
         //Copy object data
@@ -704,7 +720,18 @@ void World::recoverFromSnapshot(WorldSnapshot* snapshot){
             obj_ptr->item_ptr->setText(0, QString::fromStdString(label_p->label)); //set text to qt widget
             label_p->list_item_ptr = obj_ptr->item_ptr; //send item to LabelProperty
         }
-
+    }
+    //Copy all scripts
+    for (unsigned int script_i = 0; script_i < snapshot->scripts.size(); script_i++) {
+        Engine::ZPScriptProperty* script_ptr = static_cast<Engine::ZPScriptProperty*>
+            (snapshot->scripts[script_i]);
+        Engine::GameObjectLink link = script_ptr->go_link; //Define a link to created object
+        link.world_ptr = this; //Set an new world pointer
+        GameObject* obj_ptr = updateLink(&link); //Calculate pointer to new object
+        obj_ptr->addScript(); //Add new property to created object
+        Engine::ZPScriptProperty* new_script = static_cast<Engine::ZPScriptProperty*>
+            (obj_ptr->scripts[script_i]);
+        script_ptr->copyTo(new_script);
     }
     //iterate over all objects
     for(unsigned int objs_num = 0; objs_num < snapshot->objects.size(); objs_num ++){

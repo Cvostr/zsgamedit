@@ -78,12 +78,14 @@ public:
     std::vector<Engine::GameObjectLink> children; //Vector to store links to children of object
     std::vector<GameObjectSnapshot> children_snapshots;
     Engine::GameObjectProperty* properties[OBJ_PROPS_SIZE]; //pointers to properties of object
+    Engine::GameObjectProperty* scripts[OBJ_SCRIPT_PROPS_SIZE];
 
     Engine::GameObjectLink parent_link;
 
     int props_num; //number of properties
+    int scripts_num; //number of scripts
 
-    int obj_array_ind;
+    int obj_array_ind; //index in objects array
 
     void clear();
     GameObjectSnapshot();
@@ -93,6 +95,7 @@ class WorldSnapshot{
 public:
     std::vector<GameObject> objects;
     std::vector<Engine::GameObjectProperty*> props;
+    std::vector<Engine::GameObjectProperty*> scripts;
 
     WorldSnapshot();
     void clear();

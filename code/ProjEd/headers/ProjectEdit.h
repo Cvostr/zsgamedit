@@ -140,6 +140,7 @@ public slots:
     void openPhysicsSettings();
 
     void onOpenConsoleLog();
+    void onOpenInspectorWin();
 private:
     QApplication* app_ptr;
     //Vector to store all editor managers

@@ -25,13 +25,19 @@ ConsoleLog::ConsoleLog(QWidget* parent) :
 }
 
 void ConsoleLog::resizeEvent(QResizeEvent* event) {
-
+    tabs->resize(QSize(event->size().width(), tabs->size().height()));
+    logs_list->resize(QSize(event->size().width(), event->size().height() - tabs->size().height()));
 }
 
 void ConsoleLog::keyPressEvent(QKeyEvent* ke) {
 	if (ke->key() == Qt::Key_Escape) { //User pressed delete button
         this->close();
 	}
+    if (ke->key() == Qt::Key_Delete) { //User pressed delete button
+        OutputManager* manager = game_data->out_manager;
+        manager->clearMessagesWithType(leType);
+        updateLogsList();
+    }
 
 	QMainWindow::keyPressEvent(ke); // base class implementation
 }
@@ -42,7 +48,9 @@ void ConsoleLog::currentTabChanged(int index) {
 }
 
 void ConsoleLog::updateLogsList() {
+    //remove all messages
     logs_list->clear();
+    //Obtain pointer to manager
     OutputManager* manager = game_data->out_manager;
 
     for (unsigned int i = 0; i < manager->entries.size(); i++) {

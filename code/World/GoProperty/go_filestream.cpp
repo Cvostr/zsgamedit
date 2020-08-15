@@ -10,8 +10,6 @@ extern Project* project_ptr;
 extern ZSGAME_DATA* game_data;
 
 void GameObject::saveProperties(std::ofstream* stream){
-    unsigned int props_num = static_cast<unsigned int>(this->props_num);
-
     for(unsigned int prop_i = 0; prop_i < props_num; prop_i ++){
         Engine::GameObjectProperty* property_ptr = this->properties[prop_i];
         *stream << "\nG_PROPERTY ";
@@ -128,18 +126,7 @@ void GameObject::saveProperties(std::ofstream* stream){
 
                 break;
             }
-            case PROPERTY_TYPE::GO_PROPERTY_TYPE_SCRIPTGROUP:{
-                /*Engine::ScriptGroupProperty* ptr = static_cast<Engine::ScriptGroupProperty*>(property_ptr);
-                int script_num = static_cast<int>(ptr->scr_num);
-                //write amount of scripts
-                stream->write(reinterpret_cast<char*>(&script_num), sizeof(int));
-                *stream << "\n"; //write divider
-                for(unsigned int script_w_i = 0; script_w_i < static_cast<unsigned int>(script_num); script_w_i ++){
-                     *stream << ptr->path_names[script_w_i] << "\n";
-                }
-                */
-                break;
-            }
+            
             case PROPERTY_TYPE::GO_PROPERTY_TYPE_COLLIDER:{
                 Engine::ColliderProperty* ptr = static_cast<Engine::ColliderProperty*>(property_ptr);
                 //write collider type
@@ -291,5 +278,11 @@ void GameObject::saveProperties(std::ofstream* stream){
                     break;
             }
         }
+    }
+    for (unsigned int script_i = 0; script_i < this->scripts_num; script_i++) {
+        Engine::ZPScriptProperty* script = static_cast<Engine::ZPScriptProperty*>(scripts[script_i]);
+        *stream << "\nG_SCRIPT ";
+        stream->write(reinterpret_cast<char*>(&script->active), sizeof(bool));
+        *stream << " ";
     }
 }
