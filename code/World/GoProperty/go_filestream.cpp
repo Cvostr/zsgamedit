@@ -281,8 +281,15 @@ void GameObject::saveProperties(std::ofstream* stream){
     }
     for (unsigned int script_i = 0; script_i < this->scripts_num; script_i++) {
         Engine::ZPScriptProperty* script = static_cast<Engine::ZPScriptProperty*>(scripts[script_i]);
+        //Write header
         *stream << "\nG_SCRIPT ";
         stream->write(reinterpret_cast<char*>(&script->active), sizeof(bool));
+        *stream << " ";
+        //Write script
+        *stream << script->script_path << "\n";
+        unsigned int varsNum = script->vars.size();
+        stream->write(reinterpret_cast<char*>(&varsNum), sizeof(unsigned int));
+
         *stream << " ";
     }
 }

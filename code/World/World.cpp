@@ -96,10 +96,7 @@ GameObject* World::dublicateObject(GameObject* original, bool parent){
     LabelProperty* label_prop = new_obj->getPropertyPtr<LabelProperty>(); //Obtain pointer to label property
     std::string to_paste;
     genRandomString(&to_paste, 3);
-    label_prop->label = label_prop->label + "_" + to_paste;
-    label_prop->list_item_ptr = new_obj->item_ptr; //Setting to label new qt item
-    new_obj->label_ptr = &label_prop->label;
-    new_obj->item_ptr->setText(0, QString::fromStdString(label_prop->label));
+    new_obj->setLabel(label_prop->label + "_" + to_paste);
     //Dublicate chilldren object
     unsigned int children_amount = static_cast<unsigned int>(original->children.size());
     //Iterate over all children
@@ -110,9 +107,18 @@ GameObject* World::dublicateObject(GameObject* original, bool parent){
         GameObject* new_child = dublicateObject((GameObject*)link.ptr, false);
         //parenting
         new_obj->addChildObject(new_child->getLinkToThisObject());
+    }
+    //GameObject* new_obj = (GameObject*)Engine::World::dublicateObject(original, parent);
+    //LabelProperty* label_prop = new_obj->getPropertyPtr<LabelProperty>(); //Obtain pointer to label property
+
+    for (unsigned int child_i = 0; child_i < new_obj->children.size(); child_i++) {
+        GameObject* new_child = (GameObject*)new_obj->children[child_i].updLinkPtr();
         //UI parenting
         new_obj->item_ptr->addChild(new_child->item_ptr);
     }
+
+    label_prop->list_item_ptr = new_obj->item_ptr; //Setting to label new qt item
+    new_obj->item_ptr->setText(0, QString::fromStdString(label_prop->label));
 
     return new_obj;
 }
