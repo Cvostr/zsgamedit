@@ -41,14 +41,14 @@ void ObjTreeWgt::dropEvent(QDropEvent* event){
         if(file_dropped.length() == 0) //if we didn't move a file
             QTreeWidget::dropEvent(event);
 
-        QTreeWidgetItem* nparent = obj_ptr->item_ptr->parent(); //new parent
+        QTreeWidgetItem* nparent = GO_W_I::getItem(obj_ptr->array_index)->parent(); //new parent
         if(nparent != nullptr){ //If we moved obj to another parent
             Engine::GameObject* nparent_go = world_ptr->getGameObjectByLabel(nparent->text(0).toStdString());
             nparent_go->addChildObject(obj_ptr->getLinkToThisObject());
         }else{ //Object hasn't received a parent
             if(pparent != nullptr){//We unparented object
                 obj_ptr->hasParent = false;
-                this->addTopLevelItem(obj_ptr->item_ptr);
+                this->addTopLevelItem(GO_W_I::getItem(obj_ptr->array_index));
             }
         }
     }
@@ -161,9 +161,9 @@ void ObjectCtxMenu::onDublicateClicked(){
     GameObject* result = _editor_win->world.dublicateObject((GameObject*)link.ptr);
 
     if(result->hasParent){ //if object parented
-        ((GameObject*)result->parent.ptr)->item_ptr->addChild(result->item_ptr);
+        GO_W_I::getItem(result->parent.ptr->array_index)->addChild(GO_W_I::getItem(result->array_index));
     }else{
-        _editor_win->getObjectListWidget()->addTopLevelItem(result->item_ptr);
+        _editor_win->getObjectListWidget()->addTopLevelItem(GO_W_I::getItem(result->array_index));
     }
 }
 void ObjectCtxMenu::onStorePrefabPressed(){

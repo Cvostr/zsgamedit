@@ -24,6 +24,8 @@
 
 #include "world/World.h"
 
+#include "../../ProjEd/headers/GO_widget_item.h"
+
 class GameObject;
 class World;
 class GameObjectProperty;
@@ -39,27 +41,9 @@ public:
     ObjectPropertyLink();
 };
 
-class LabelProperty : public Engine::GameObjectProperty {
-public:
-    std::string label; //Label of gameobject
-    QTreeWidgetItem* list_item_ptr;
-
-    void addPropertyInterfaceToInspector();
-    void onValueChanged();
-    void onObjectDeleted();
-    void copyTo(Engine::GameObjectProperty* dest);
-    void loadPropertyFromMemory(const char* data, Engine::GameObject* obj);
-
-    LabelProperty();
-    ~LabelProperty();
-};
-
 class GameObject : public Engine::GameObject{
 public:
-    QTreeWidgetItem* item_ptr;
     void pick(); //Mark object and its children picked
-
-    bool addProperty(PROPERTY_TYPE property); //Adds property with property ID
 
     void setMeshSkinningRootNodeRecursively(GameObject* rootNode);
 
@@ -149,7 +133,6 @@ public:
 
 };
 
-Engine::GameObjectProperty* _allocProperty(PROPERTY_TYPE type);
 QString getPropertyString(PROPERTY_TYPE type);
 
 #endif

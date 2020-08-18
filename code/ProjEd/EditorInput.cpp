@@ -36,7 +36,7 @@ void EditWindow::onLeftBtnClicked(int X, int Y) {
     obj_trstate.obj_ptr = obj_ptr;
     obj_trstate.tprop_ptr = obj_ptr->getTransformProperty();
     _inspector_win->ShowObjectProperties(static_cast<void*>(obj_ptr));
-    this->ui->objsList->setCurrentItem(obj_ptr->item_ptr); //item selected in tree
+    this->ui->objsList->setCurrentItem(GO_W_I::getItem(obj_ptr->array_index)); //item selected in tree
 }
 
 

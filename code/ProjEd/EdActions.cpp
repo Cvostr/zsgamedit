@@ -60,7 +60,7 @@ void EdActions::newPropertyAction(Engine::GameObjectLink link, PROPERTY_TYPE pro
     new_action->linkToObj = link; //Store link to object
     new_action->linkToObj.updLinkPtr();
     new_action->prop_type = property_type; //Sore property type
-    new_action->container_ptr = _allocProperty(property_type); //Allocate property
+    new_action->container_ptr = Engine::allocProperty(property_type); //Allocate property
     //Get pointer to all property
     Engine::GameObjectProperty* origin_prop = link.updLinkPtr()->getPropertyPtrByType(property_type);
     //Check, if property is found
@@ -121,7 +121,7 @@ void EdActions::undo(){
         //Declare pointer to destination
         Engine::GameObjectProperty* dest = snapshot->linkToObj.updLinkPtr()->getPropertyPtrByType(snapshot->prop_type);
         //Backup current property data
-        Engine::GameObjectProperty* cur_state_prop = _allocProperty(snapshot->prop_type); //Allocate property for current state
+        Engine::GameObjectProperty* cur_state_prop = Engine::allocProperty(snapshot->prop_type); //Allocate property for current state
         dest->copyTo(cur_state_prop); //Copy current property data to buffer
 
         //Make undo (copy saved data to property in object)
@@ -173,7 +173,7 @@ void EdActions::redo(){
         //Declare pointer to destination
         Engine::GameObjectProperty* dest = snapshot->linkToObj.updLinkPtr()->getPropertyPtrByType(snapshot->prop_type);
         //Backup current property data
-        Engine::GameObjectProperty* cur_state_prop = _allocProperty(snapshot->prop_type); //Allocate property for current state
+        Engine::GameObjectProperty* cur_state_prop = Engine::allocProperty(snapshot->prop_type); //Allocate property for current state
         dest->copyTo(cur_state_prop); //Copy current property data to buffer
         //Make undo
 

@@ -111,6 +111,7 @@
     <ClCompile Include="code\ProjEd\EditorResources.cpp" />
     <ClCompile Include="code\ProjEd\EditorSettings.cpp" />
     <ClCompile Include="code\ProjEd\EditorUI.cpp" />
+    <ClCompile Include="code\ProjEd\GO_widget_item.cpp" />
     <ClCompile Include="code\ProjEd\InspectorWin.cpp" />
     <ClCompile Include="code\ProjEd\LocStringEditWin.cpp">
       <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">input</DynamicSource>
@@ -148,6 +149,7 @@
     <QtMoc Include="code\ProjEd\headers\LocStringEditWin.h" />
     <QtMoc Include="code\ProjEd\headers\ConsoleLog.h" />
     <ClInclude Include="code\ProjEd\headers\DialogsMaster.h" />
+    <ClInclude Include="code\ProjEd\headers\GO_widget_item.h" />
     <ClInclude Include="code\ProjEd\headers\ResourceImport.h" />
     <ClInclude Include="code\triggers.h" />
     <QtMoc Include="code\mainwin.h" />

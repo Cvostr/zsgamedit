@@ -124,14 +124,14 @@ void TileGroupProperty::process(){
 
             GameObject* parent = (GameObject*)go_link.updLinkPtr();
             Engine::TransformProperty* parent_transform = parent->getPropertyPtr<Engine::TransformProperty>();
-            LabelProperty* parent_label = parent->getPropertyPtr<LabelProperty>();
+            Engine::LabelProperty* parent_label = parent->getPropertyPtr<Engine::LabelProperty>();
 
             //obj->render_type = GO_RENDER_TYPE_TILE;
             obj->addProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_MESH); //Adding mesh
             obj->addProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_TILE); //Adding tile
             //Receive properties ptrs
             Engine::TransformProperty* transform = obj->getPropertyPtr<Engine::TransformProperty>();
-            LabelProperty* label = obj->getPropertyPtr<LabelProperty>();
+            Engine::LabelProperty* label = obj->getPropertyPtr < Engine:: LabelProperty > ();
             Engine::TileProperty* tile_prop = obj->getPropertyPtr<Engine::TileProperty>();
             Engine::MeshProperty* mesh_prop = obj->getPropertyPtr<Engine::MeshProperty>();
 
@@ -146,10 +146,10 @@ void TileGroupProperty::process(){
             transform->translation = transform->translation + parent_transform->translation;
 
             label->label = parent_label->label + std::to_string(x_i) + "," + std::to_string(y_i); //Get new object new name
-            obj->item_ptr->setText(0, QString::fromStdString(label->label));
+            GO_W_I::getItem(obj->array_index)->setText(0, QString::fromStdString(label->label));
 
             parent->addChildObject(obj->getLinkToThisObject()); //Make new object dependent
-            parent->item_ptr->addChild(obj->item_ptr); //Add widget as a child to tree
+            GO_W_I::getItem(parent->array_index)->addChild(GO_W_I::getItem(obj->array_index)); //Add widget as a child to tree
         }
     }
     this->isCreated = true;

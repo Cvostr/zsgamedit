@@ -91,95 +91,6 @@ QString getPropertyString(PROPERTY_TYPE type){
     return QString("NONE");
 }
 
-Engine::GameObjectProperty* _allocProperty(PROPERTY_TYPE type){
-    Engine::GameObjectProperty* _ptr = nullptr;
-    switch (type) {
-        case PROPERTY_TYPE::GO_PROPERTY_TYPE_TRANSFORM:{ //If type is transfrom
-            _ptr = static_cast<Engine::GameObjectProperty*>(new Engine::TransformProperty); //Allocation of transform in heap
-            break;
-        }
-        case PROPERTY_TYPE::GO_PROPERTY_TYPE_NODE:{ //If type is transfrom
-            _ptr = static_cast<Engine::GameObjectProperty*>(new Engine::NodeProperty); //Allocation of transform in heap
-            break;
-        }
-        case PROPERTY_TYPE::GO_PROPERTY_TYPE_ANIMATION:{ //If type is transfrom
-            _ptr = static_cast<Engine::GameObjectProperty*>(new Engine::AnimationProperty); //Allocation of transform in heap
-            break;
-        }
-        case PROPERTY_TYPE::GO_PROPERTY_TYPE_LABEL:{
-            LabelProperty* ptr = new LabelProperty;
-            _ptr = static_cast<Engine::GameObjectProperty*>(ptr);
-            break;
-        }
-        case PROPERTY_TYPE::GO_PROPERTY_TYPE_MESH:{
-            _ptr = static_cast<Engine::GameObjectProperty*>(new Engine::MeshProperty);
-            break;
-        }
-        case PROPERTY_TYPE::GO_PROPERTY_TYPE_LIGHTSOURCE:{
-            _ptr = static_cast<Engine::GameObjectProperty*>(new Engine::LightsourceProperty);
-            break;
-        }
-        case PROPERTY_TYPE::GO_PROPERTY_TYPE_AGSCRIPT:{
-            _ptr = static_cast<Engine::GameObjectProperty*>(new Engine::ZPScriptProperty);
-            break;
-        }
-        case PROPERTY_TYPE::GO_PROPERTY_TYPE_AUDSOURCE:{
-            _ptr = static_cast<Engine::GameObjectProperty*>(new Engine::AudioSourceProperty);
-            break;
-        }
-        case PROPERTY_TYPE::GO_PROPERTY_TYPE_MATERIAL:{
-            _ptr = static_cast<Engine::GameObjectProperty*>(new Engine::MaterialProperty);
-            break;
-        }
-        case PROPERTY_TYPE::GO_PROPERTY_TYPE_COLLIDER:{
-            _ptr = static_cast<Engine::GameObjectProperty*>(new Engine::ColliderProperty);
-            break;
-        }
-        case PROPERTY_TYPE::GO_PROPERTY_TYPE_RIGIDBODY:{
-            _ptr = static_cast<Engine::GameObjectProperty*>(new Engine::RigidbodyProperty);
-            break;
-        }
-        case PROPERTY_TYPE::GO_PROPERTY_TYPE_SKYBOX:{
-            _ptr = static_cast<Engine::GameObjectProperty*>(new Engine::SkyboxProperty);
-            break;
-        }
-        case PROPERTY_TYPE::GO_PROPERTY_TYPE_SHADOWCASTER:{
-            _ptr = static_cast<Engine::GameObjectProperty*>(new Engine::ShadowCasterProperty);
-            break;
-        }
-        case PROPERTY_TYPE::GO_PROPERTY_TYPE_TERRAIN:{
-            _ptr = static_cast<Engine::GameObjectProperty*>(new Engine::TerrainProperty);
-            break;
-        }
-        case PROPERTY_TYPE::GO_PROPERTY_TYPE_CHARACTER_CONTROLLER:{
-            _ptr = static_cast<Engine::GameObjectProperty*>(new Engine::CharacterControllerProperty);
-            break;
-        }
-        case PROPERTY_TYPE::GO_PROPERTY_TYPE_TRIGGER: {
-            _ptr = static_cast<Engine::GameObjectProperty*>(new Engine::TriggerProperty);
-            break;
-        }
-        case PROPERTY_TYPE::GO_PROPERTY_TYPE_TILE_GROUP:{
-            TileGroupProperty* ptr = new TileGroupProperty;
-            _ptr = static_cast<Engine::GameObjectProperty*>(ptr);
-            break;
-        }
-        case PROPERTY_TYPE::GO_PROPERTY_TYPE_TILE:{
-            _ptr = static_cast<Engine::GameObjectProperty*>(new Engine::TileProperty);
-            break;
-        }
-    }
-    return _ptr;
-}
-
-LabelProperty::LabelProperty(){
-    type = PROPERTY_TYPE::GO_PROPERTY_TYPE_LABEL; //its an label
-    active = true;
-    list_item_ptr = nullptr;
-}
-LabelProperty::~LabelProperty() {
-
-}
 //Transform property functions
 void Engine::TransformProperty::addPropertyInterfaceToInspector(){
 
@@ -203,7 +114,7 @@ void Engine::TransformProperty::addPropertyInterfaceToInspector(){
 }
 
 //Label property functions
-void LabelProperty::addPropertyInterfaceToInspector(){
+void Engine::LabelProperty::addPropertyInterfaceToInspector(){
     StringPropertyArea* area = new StringPropertyArea;
     area->setLabel("Label");
     area->value_ptr = &this->label;
@@ -211,44 +122,20 @@ void LabelProperty::addPropertyInterfaceToInspector(){
     _inspector_win->addPropertyArea(area);
 }
 
-void LabelProperty::onObjectDeleted() {
-    if(LabelPropertyDeleteWidget)
-        delete list_item_ptr;
+void Engine::LabelProperty::onObjectDeleted() {
+    if (LabelPropertyDeleteWidget)
+        GO_W_I::recreate(go_link.updLinkPtr()->array_index);
 }
 
-void LabelProperty::onValueChanged(){
+void Engine::LabelProperty::onValueChanged(){
     World* world_ptr = static_cast<World*>(this->world_ptr); //Obtain pointer to world object
     //lets chack if object already exist in world
-    if(!world_ptr->isObjectLabelUnique(this->label)){
+    /*if(!world_ptr->isObjectLabelUnique(this->label)){
         //If object already exist
         int label_add = 0;
         world_ptr->getAvailableNumObjLabel(this->label, &label_add);
         label = label + "_" + std::to_string(label_add);
-    }
-    //Update Object Tree value
-    this->list_item_ptr->setText(0, QString::fromStdString(this->label));
-}
-
-void LabelProperty::copyTo(Engine::GameObjectProperty* dest){
-    if(dest->type != this->type) return; //if it isn't label
-
-    //Do base things
-    GameObjectProperty::copyTo(dest);
-
-    LabelProperty* _dest = static_cast<LabelProperty*>(dest);
-    _dest->label = label;
-}
-
-void LabelProperty::loadPropertyFromMemory(const char* data, Engine::GameObject* obj) {
-    unsigned int offset = 1;
-    std::string label;
-    while (data[offset] != ' ' && data[offset] != '\n') {
-        label += data[offset];
-        offset++;
-    }
-    this->label = label; //Write loaded string
-    obj->label_ptr = &this->label; //Making GameObjects's pointer to string in label property
-    list_item_ptr->setText(0, QString::fromStdString(label)); //Set text on widget
+    }*/
 }
 
 //Mesh property functions
@@ -502,18 +389,19 @@ void Engine::MaterialProperty::addPropertyInterfaceToInspector(){
         }
     }
 }
-void Engine::MaterialProperty::onValueChanged(){
-
+void Engine::MaterialProperty::onValueChanged() {
+    Material* newmat_ptr = game_data->resources->getMaterialByLabel("@default")->material;
+    //Resource of new material
     Engine::MaterialResource* newmat_ptr_res = game_data->resources->getMaterialByLabel(this->material_path);
-    Material* newmat_ptr = nullptr;
-    if(newmat_ptr_res)
+    //if resource exists
+    if (newmat_ptr_res)
         newmat_ptr = newmat_ptr_res->material;
 
     //User changed material
     bool isMaterialChanged = newmat_ptr != this->material_ptr;
 
     //Check, if material file has changed
-    if(isMaterialChanged){
+    if (isMaterialChanged) {
         this->material_ptr = newmat_ptr;
         this->group_label = newmat_ptr->group_ptr->groupCaption;
         //update window
@@ -523,21 +411,23 @@ void Engine::MaterialProperty::onValueChanged(){
     bool hasMaterial = material_ptr != nullptr;
     bool hasMaterialGroup = material_ptr->group_ptr != nullptr;
 
-    if(!hasMaterial) return;
-    if(!hasMaterialGroup) { //if material has no MaterialShaderPropertyGroup
+    if (!hasMaterial) return;
+    if (!hasMaterialGroup) { //if material has no MaterialShaderPropertyGroup
         //if user specified group first time
-        if(MtShProps::getMtShaderPropertyGroupByLabel(this->group_label) != nullptr){
+        if (MtShProps::getMtShaderPropertyGroupByLabel(this->group_label) != nullptr) {
             //then apply that group
             material_ptr->setPropertyGroup(MtShProps::getMtShaderPropertyGroupByLabel(this->group_label));
 
-        }else { //user haven't specified
+        }
+        else { //user haven't specified
             return; //go out
         }
-    }else{ //Material already had group, check, if user decided to change it
-        //Get pointer to new selected shader group
+    }
+    else { //Material already had group, check, if user decided to change it
+       //Get pointer to new selected shader group
         MtShaderPropertiesGroup* newgroup_ptr = MtShProps::getMtShaderPropertyGroupByLabel(this->group_label);
         //if new pointer and old aren't match, then change property group
-        if(newgroup_ptr != this->material_ptr->group_ptr){
+        if (newgroup_ptr != this->material_ptr->group_ptr) {
             //Apply changing
             this->material_ptr->setPropertyGroup(MtShProps::getMtShaderPropertyGroupByLabel(this->group_label));
             //Update material interface
@@ -546,25 +436,25 @@ void Engine::MaterialProperty::onValueChanged(){
     }
 
     unsigned int GroupPropertiesSize = static_cast<unsigned int>(material_ptr->group_ptr->properties.size());
-    for(unsigned int prop_i = 0; prop_i < GroupPropertiesSize; prop_i ++){
+    for (unsigned int prop_i = 0; prop_i < GroupPropertiesSize; prop_i++) {
         MaterialShaderProperty* prop_ptr = material_ptr->group_ptr->properties[prop_i];
         MaterialShaderPropertyConf* conf_ptr = this->material_ptr->confs[prop_i];
-        switch(prop_ptr->type){
-            case MATSHPROP_TYPE_TEXTURE:{
-                //Cast pointer
-                TextureMtShPropConf* texture_conf = static_cast<TextureMtShPropConf*>(conf_ptr);
-                //Update pointer to texture resource
-                texture_conf->texture = game_data->resources->getTextureByLabel(texture_conf->path);
-                break;
-            }
-            case MATSHPROP_TYPE_TEXTURE3:{
-                //Cast pointer
-                Texture3MtShPropConf* texture_conf = static_cast<Texture3MtShPropConf*>(conf_ptr);
-                texture_conf->texture3D->created = false;
-                _inspector_win->updateRequired = true;
+        switch (prop_ptr->type) {
+        case MATSHPROP_TYPE_TEXTURE: {
+            //Cast pointer
+            TextureMtShPropConf* texture_conf = static_cast<TextureMtShPropConf*>(conf_ptr);
+            //Update pointer to texture resource
+            texture_conf->texture = game_data->resources->getTextureByLabel(texture_conf->path);
+            break;
+        }
+        case MATSHPROP_TYPE_TEXTURE3: {
+            //Cast pointer
+            Texture3MtShPropConf* texture_conf = static_cast<Texture3MtShPropConf*>(conf_ptr);
+            texture_conf->texture3D->created = false;
+            _inspector_win->updateRequired = true;
 
-                break;
-            }
+            break;
+        }
         }
     }
     //save changes to material file

@@ -12,6 +12,7 @@ extern ZSGAME_DATA* game_data;
 
 World::World(){
     obj_widget_ptr = nullptr;
+    GO_W_I::reserve(MAX_OBJS);
 }
 
 GameObject* World::updateLink(Engine::GameObjectLink* link){
@@ -93,7 +94,7 @@ GameObject* World::dublicateObject(GameObject* original, bool parent){
             original->parent.ptr->addChildObject(new_obj->getLinkToThisObject());
     }
     //Set new name for object
-    LabelProperty* label_prop = new_obj->getPropertyPtr<LabelProperty>(); //Obtain pointer to label property
+    Engine::LabelProperty* label_prop = new_obj->getPropertyPtr<Engine::LabelProperty>(); //Obtain pointer to label property
     std::string to_paste;
     genRandomString(&to_paste, 3);
     new_obj->setLabel(label_prop->label + "_" + to_paste);
@@ -114,11 +115,8 @@ GameObject* World::dublicateObject(GameObject* original, bool parent){
     for (unsigned int child_i = 0; child_i < new_obj->children.size(); child_i++) {
         GameObject* new_child = (GameObject*)new_obj->children[child_i].updLinkPtr();
         //UI parenting
-        new_obj->item_ptr->addChild(new_child->item_ptr);
+        GO_W_I::getItem(new_obj)->addChild(GO_W_I::getItem(new_child));
     }
-
-    label_prop->list_item_ptr = new_obj->item_ptr; //Setting to label new qt item
-    new_obj->item_ptr->setText(0, QString::fromStdString(label_prop->label));
 
     return new_obj;
 }
@@ -128,9 +126,9 @@ GameObject* World::Instantiate(GameObject* original){
     GameObject* result = this->dublicateObject((GameObject*)link.ptr);
 
     if(result->hasParent){ //if object parented
-        ((GameObject*)result->parent.ptr)->item_ptr->addChild(result->item_ptr);
+        GO_W_I::getItem(result->parent.ptr->array_index)->addChild(GO_W_I::getItem(result->array_index));
     }else{
-        obj_widget_ptr->addTopLevelItem(result->item_ptr);
+        obj_widget_ptr->addTopLevelItem(GO_W_I::getItem(result->array_index));
     }
     return result;
 }
@@ -144,7 +142,6 @@ GameObject* World::newObject(){
     obj.addProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_LABEL);
     obj.label_ptr = &obj.getLabelProperty()->label;
     *obj.label_ptr = "GameObject_" + std::to_string(add_num); //Assigning label to object
-    obj.item_ptr->setText(0, QString::fromStdString(*obj.label_ptr));
 
     obj.addProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_TRANSFORM);
     return this->addObject(obj); //Return pointer to new object
@@ -384,11 +381,11 @@ void World::loadFromMemory(const char* bytes, unsigned int size, QTreeWidget* w_
     for (unsigned int obj_i = 0; obj_i < this->objects.size(); obj_i++) {
         GameObject* obj_ptr = (GameObject*)this->objects[obj_i];
         if (obj_ptr->parent.isEmpty()) { //If object has no parent
-            w_ptr->addTopLevelItem(obj_ptr->item_ptr);
+            w_ptr->addTopLevelItem(GO_W_I::getItem(obj_ptr));
         }
         else { //It has a parent
             GameObject* parent_ptr = (GameObject*)obj_ptr->parent.ptr; //Get parent pointer
-            parent_ptr->item_ptr->addChild(obj_ptr->item_ptr); //Connect Qt Tree Items
+            GO_W_I::getItem(parent_ptr)->addChild(GO_W_I::getItem(obj_ptr)); //Connect Qt Tree Items
         }
     }
 }
@@ -422,7 +419,6 @@ void World::openFromFile(std::string file, QTreeWidget* w_ptr){
     loadFromMemory(data, size, w_ptr);
     //Free allocated data
     delete[] data;
-    
 
     //Disable HACK
     setLabelPropertyDeleteWidget(true);
@@ -511,17 +507,19 @@ void World::addObjectsFromPrefab(char* data, unsigned int size) {
         getAvailableNumObjLabel(label, &add_num);
 
         *mObjects[obj_i].label_ptr += std::to_string(add_num); //Set new label to object
-        mObjects[obj_i].item_ptr->setText(0, QString::fromStdString(*mObjects[obj_i].label_ptr)); //Set text on widget
+        GO_W_I::getItem(mObjects[obj_i].array_index)->setText(0, QString::fromStdString(*mObjects[obj_i].label_ptr)); //Set text on widget
 
         this->addObject(mObjects[obj_i]);
     }
+    GameObject* object = (GameObject*)this->getGameObjectByStrId(mObjects[0].str_id);
     //Add first object to top of tree
-    this->obj_widget_ptr->addTopLevelItem(((GameObject*)this->getGameObjectByStrId(mObjects[0].str_id))->item_ptr);
+    this->obj_widget_ptr->addTopLevelItem(GO_W_I::getItem(object->array_index));
 
     for (unsigned int obj_i = 1; obj_i < mObjects.size(); obj_i++) {
         Engine::GameObject* object_ptr = this->getGameObjectByStrId(mObjects[obj_i].str_id);
         object_ptr->parent.world_ptr = this;
-        ((GameObject*)object_ptr->parent.updLinkPtr())->item_ptr->addChild(((GameObject*)object_ptr)->item_ptr);
+
+        GO_W_I::getItem(object_ptr->parent.updLinkPtr())->addChild(GO_W_I::getItem(object_ptr));
     }
 }
 
@@ -567,7 +565,8 @@ void World::addMeshGroup(std::string file_path){
     }
 
     GameObject* rootobj = addMeshNode(node);
-    this->obj_widget_ptr->addTopLevelItem(rootobj->item_ptr);
+    //GO_W_I::getItem(obj_widget_ptr->arr)
+    this->obj_widget_ptr->addTopLevelItem(GO_W_I::getItem(rootobj->array_index));
     //Add animation property to root object for correct skinning support
     rootobj->addProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_ANIMATION);
     //Set rootNode to meshProperty on all children objects
@@ -588,7 +587,6 @@ GameObject* World::addMeshNode(ZS3M::SceneNode* node){
 
     obj.label_ptr = &obj.getLabelProperty()->label;
     *obj.label_ptr = node->node_label + std::to_string(add_num); //Assigning label to object
-    obj.item_ptr->setText(0, QString::fromStdString(*obj.label_ptr));
 
     Engine::TransformProperty* transform_prop = obj.getTransformProperty();
     transform_prop->setScale(node->node_scaling);
@@ -608,8 +606,7 @@ GameObject* World::addMeshNode(ZS3M::SceneNode* node){
         //Create new node object
         GameObject* newobj = addMeshNode(ptr);
         node_object->addChildObject(newobj->getLinkToThisObject());
-        node_object->item_ptr->addChild(newobj->item_ptr);
-
+        GO_W_I::getItem(node_object->array_index)->addChild(GO_W_I::getItem(newobj->array_index));
     }
 
     //Iterate over all meshes, that inside of node
@@ -634,11 +631,11 @@ GameObject* World::addMeshNode(ZS3M::SceneNode* node){
 
             mesh_obj->label_ptr = &mesh_obj->getLabelProperty()->label;
             *mesh_obj->label_ptr = mesh_label + std::to_string(add_num); //Assigning label to object
-            mesh_obj->item_ptr->setText(0, QString::fromStdString(*mesh_obj->label_ptr));
+
             //Add to world object and parent it
             mesh_obj = this->addObject(*mesh_obj);
             node_object->addChildObject(mesh_obj->getLinkToThisObject(), false);
-            node_object->item_ptr->addChild(mesh_obj->item_ptr);
+            GO_W_I::getItem(node_object)->addChild(GO_W_I::getItem(mesh_obj));
         }
 
         mesh_obj->addProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_MESH); //add mesh property
@@ -677,7 +674,7 @@ void World::putToShapshot(WorldSnapshot* snapshot){
         //Iterate over all properties in object and copy them into snapshot
         for(unsigned int prop_i = 0; prop_i < obj_ptr->props_num; prop_i ++){
             auto prop_ptr = obj_ptr->properties[prop_i];
-            auto new_prop = _allocProperty(prop_ptr->type);
+            auto new_prop = Engine::allocProperty(prop_ptr->type);
             new_prop->go_link = prop_ptr->go_link;
             prop_ptr->copyTo(new_prop);
             snapshot->props.push_back(new_prop);
@@ -687,7 +684,7 @@ void World::putToShapshot(WorldSnapshot* snapshot){
             Engine::ZPScriptProperty* script_ptr = static_cast<Engine::ZPScriptProperty*>
                 (obj_ptr->scripts[script_i]);
             Engine::ZPScriptProperty* script_prop = static_cast<Engine::ZPScriptProperty*>
-                (_allocProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_AGSCRIPT));
+                (Engine::allocProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_AGSCRIPT));
             script_prop->go_link = script_ptr->go_link;
             script_ptr->copyTo(script_prop);
             snapshot->scripts.push_back(script_prop);
@@ -721,10 +718,9 @@ void World::recoverFromSnapshot(WorldSnapshot* snapshot){
         auto new_prop = obj_ptr->getPropertyPtrByType(prop_ptr->type);
         prop_ptr->copyTo(new_prop);
         if(prop_ptr->type == PROPERTY_TYPE::GO_PROPERTY_TYPE_LABEL){ //If it is label, we have to do extra stuff
-            LabelProperty* label_p = static_cast<LabelProperty*>(new_prop);
+            Engine::LabelProperty* label_p = static_cast<Engine::LabelProperty*>(new_prop);
             obj_ptr->label_ptr = &label_p->label;
-            obj_ptr->item_ptr->setText(0, QString::fromStdString(label_p->label)); //set text to qt widget
-            label_p->list_item_ptr = obj_ptr->item_ptr; //send item to LabelProperty
+            //GO_W_I::getItem(obj_ptr->array_index)->setText(0, QString::fromStdString(label_p->label)); //set text to qt widget
         }
     }
     //Copy all scripts
@@ -743,12 +739,12 @@ void World::recoverFromSnapshot(WorldSnapshot* snapshot){
     for(unsigned int objs_num = 0; objs_num < snapshot->objects.size(); objs_num ++){
         GameObject* obj_ptr = (GameObject*)objects[objs_num];
         if(!obj_ptr->hasParent) { //if object is unparented
-            obj_widget_ptr->addTopLevelItem(obj_ptr->item_ptr); //add to top of widget
+            obj_widget_ptr->addTopLevelItem(GO_W_I::getItem(obj_ptr->array_index)); //add to top of widget
             continue;
         }
         GameObject* parent_p = updateLink(&obj_ptr->parent);
         parent_p->children.push_back(obj_ptr->getLinkToThisObject());
-        parent_p->item_ptr->addChild(obj_ptr->item_ptr);
+        GO_W_I::getItem(parent_p->array_index)->addChild(GO_W_I::getItem(obj_ptr->array_index));
     }
 }
 

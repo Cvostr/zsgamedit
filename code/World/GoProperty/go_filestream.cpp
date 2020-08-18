@@ -49,7 +49,7 @@ void GameObject::saveProperties(std::ofstream* stream){
                 break;
             }
             case PROPERTY_TYPE::GO_PROPERTY_TYPE_LABEL:{
-                LabelProperty* ptr = static_cast<LabelProperty*>(property_ptr);
+                Engine::LabelProperty* ptr = static_cast<Engine::LabelProperty*>(property_ptr);
                 *stream << ptr->label;
                 break;
             }

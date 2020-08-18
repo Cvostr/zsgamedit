@@ -292,6 +292,7 @@ void EditWindow::init(){
 void EditWindow::openFile(QString file_path){
 
     if(file_path.endsWith(".scn")){ //If it is scene
+        GO_W_I::recreateAll(MAX_OBJS);
         //Unpick object first
         world.unpickObject();
         QString gl_win_title = "Game View - " + file_path;
@@ -450,7 +451,7 @@ GameObject* EditWindow::onAddNewGameObject(){
     //Add new object to world
     GameObject* obj_ptr = this->world.newObject(); 
     //New object will not have parents, so will be spawned at top
-    ui->objsList->addTopLevelItem(obj_ptr->item_ptr); 
+    ui->objsList->addTopLevelItem(GO_W_I::getItem(obj_ptr->array_index));
 
     return obj_ptr;
 }
@@ -464,7 +465,7 @@ void EditWindow::addNewCube(){
     int add_num = 0; //Declaration of addititonal integer
     world.getAvailableNumObjLabel("Cube_", &add_num);
     *obj->label_ptr = "Cube_" + std::to_string(add_num);
-    obj->item_ptr->setText(0, QString::fromStdString(*obj->label_ptr));
+    GO_W_I::getItem(obj->array_index)->setText(0, QString::fromStdString(*obj->label_ptr));
     //Set MESH properties
     Engine::MeshProperty* mesh = obj->getPropertyPtr<Engine::MeshProperty>();
     mesh->resource_relpath = "@cube";
@@ -482,7 +483,7 @@ void EditWindow::addNewLight(){
     int add_num = 0; //Declaration of addititonal integer
     world.getAvailableNumObjLabel("Light_", &add_num);
     *obj->label_ptr = "Light_" + std::to_string(add_num);
-    obj->item_ptr->setText(0, QString::fromStdString(*obj->label_ptr));
+    GO_W_I::getItem(obj->array_index)->setText(0, QString::fromStdString(*obj->label_ptr));
 }
 
 void EditWindow::addNewTile(){
@@ -494,7 +495,7 @@ void EditWindow::addNewTile(){
     int add_num = 0; //Declaration of addititonal integer
     world.getAvailableNumObjLabel("Tile_", &add_num);
     *obj->label_ptr = "Tile_" + std::to_string(add_num);
-    obj->item_ptr->setText(0, QString::fromStdString(*obj->label_ptr));
+    GO_W_I::getItem(obj->array_index)->setText(0, QString::fromStdString(*obj->label_ptr));
     //Assign @mesh
     Engine::MeshProperty* mesh = obj->getPropertyPtr<Engine::MeshProperty>();
     mesh->resource_relpath = "@plane";
@@ -514,7 +515,7 @@ void EditWindow::addNewTerrain(){
     world.getAvailableNumObjLabel("Terrain_", &add_num);
     *obj->label_ptr = "Terrain_" + std::to_string(add_num);
     //Update object label on widget
-    obj->item_ptr->setText(0, QString::fromStdString(*obj->label_ptr));
+    GO_W_I::getItem(obj->array_index)->setText(0, QString::fromStdString(*obj->label_ptr));
     //Add terrain property
     obj->addProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_TERRAIN); //Creates terrain inside
     obj->getPropertyPtr<Engine::TerrainProperty>()->onAddToObject();
@@ -727,6 +728,8 @@ void EditWindow::toggleCameras(){
 
 void EditWindow::glRender(){
 
+    GO_W_I::updateObjsNames(&world);
+
     if (game_data->out_manager->RE_TYPE == RuntimeErrorType::RE_TYPE_SCRIPT_ERROR) {
         showErrorMessageBox("Error(s) in scripts", "In one or more scripts there are one or more errors! \nPlease fix them, to get your scene running!\nPress CTRL+L to get look at them");
         game_data->out_manager->unsetRuntimeError();
@@ -737,18 +740,18 @@ void EditWindow::glRender(){
         //if object is alive
         if(obj_ptr->alive){
             //if object's name changed
-            if (obj_ptr->item_ptr->text(0).toStdString().compare(*obj_ptr->label_ptr) == 1) {
-                obj_ptr->item_ptr->setText(0, QString::fromStdString(*obj_ptr->label_ptr));
+            if (GO_W_I::getItem(obj_ptr->array_index)->text(0).toStdString().compare(*obj_ptr->label_ptr) == 1) {
+                GO_W_I::getItem(obj_ptr->array_index)->setText(0, QString::fromStdString(*obj_ptr->label_ptr));
             }
             //if object active, and dark theme is on
             if(obj_ptr->active){
                 if(settings.isDarkTheme)
-                    obj_ptr->item_ptr->setTextColor(0, QColor(Qt::white));
+                    GO_W_I::getItem(obj_ptr->array_index)->setTextColor(0, QColor(Qt::white));
                 else {
-                    obj_ptr->item_ptr->setTextColor(0, QColor(Qt::black));
+                    GO_W_I::getItem(obj_ptr->array_index)->setTextColor(0, QColor(Qt::black));
                 }
             }else
-                obj_ptr->item_ptr->setTextColor(0, QColor(Qt::gray));
+                GO_W_I::getItem(obj_ptr->array_index)->setTextColor(0, QColor(Qt::gray));
         }
     }
     //Update inspector position variables
