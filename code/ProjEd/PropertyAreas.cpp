@@ -756,7 +756,7 @@ void PropertyPickArea::setup(){
 
     Engine::GameObjectProperty* property = *property_ptr_ptr;
     if(property != nullptr){
-        GameObject* obj = (GameObject*)property->go_link.updLinkPtr();
+        Engine::GameObject* obj = property->go_link.updLinkPtr();
         link = obj->getLinkToThisObject();
         property_label->setText(QString::fromStdString(*this->link.updLinkPtr()->label_ptr) + "<" +getPropertyString(this->prop_type) + ">");
     }else {

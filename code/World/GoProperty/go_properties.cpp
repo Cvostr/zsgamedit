@@ -130,12 +130,12 @@ void Engine::LabelProperty::onObjectDeleted() {
 void Engine::LabelProperty::onValueChanged(){
     World* world_ptr = static_cast<World*>(this->world_ptr); //Obtain pointer to world object
     //lets chack if object already exist in world
-    /*if(!world_ptr->isObjectLabelUnique(this->label)){
+    if(!world_ptr->isObjectLabelUnique(this->label)){
         //If object already exist
         int label_add = 0;
         world_ptr->getAvailableNumObjLabel(this->label, &label_add);
         label = label + "_" + std::to_string(label_add);
-    }*/
+    }
 }
 
 //Mesh property functions

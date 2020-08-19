@@ -40,7 +40,7 @@ public:
 
 class EdObjectAction : public EdAction{
 public:
-    GameObjectSnapshot snapshot;
+    Engine::GameObjectSnapshot snapshot;
     Engine::GameObjectLink linkToObj;
 
     void clear();

@@ -165,7 +165,7 @@ void QLabelResourcePickWgt::dropEvent( QDropEvent* event ){
     }
 
     if(object_dropped.length() > 0){
-        GameObject* obj = (GameObject*)_editor_win->world.getGameObjectByLabel(object_dropped[0]->text(0).toStdString());
+        Engine::GameObject* obj = _editor_win->world.getGameObjectByLabel(object_dropped[0]->text(0).toStdString());
         //if we picking property
         if(area_ptr->type == PEA_TYPE_PROPPICK){
             PropertyPickArea* _area_ptr = static_cast<PropertyPickArea*>(area_ptr);

@@ -8,7 +8,7 @@ extern InspectorWin* _inspector_win;
 void EditWindow::onLeftBtnClicked(int X, int Y) {
     //Terrain painting
     if (_inspector_win->gameobject_ptr != nullptr) {
-        GameObject* obj = static_cast<GameObject*>(_inspector_win->gameobject_ptr);
+        Engine::GameObject* obj = static_cast<Engine::GameObject*>(_inspector_win->gameobject_ptr);
         Engine::TerrainProperty* terrain = obj->getPropertyPtr<Engine::TerrainProperty>();
 
         if (terrain != nullptr && !isWorldCamera)
@@ -31,7 +31,7 @@ void EditWindow::onLeftBtnClicked(int X, int Y) {
         obj_trstate.obj_ptr = nullptr;
         return;
     }
-    GameObject* obj_ptr = (GameObject*)world.objects[clicked]; //Obtain pointer to selected object by label
+    Engine::GameObject* obj_ptr = world.objects[clicked]; //Obtain pointer to selected object by label
 
     obj_trstate.obj_ptr = obj_ptr;
     obj_trstate.tprop_ptr = obj_ptr->getTransformProperty();
@@ -53,7 +53,7 @@ void EditWindow::onRightBtnClicked(int X, int Y) {
     if (clicked > world.objects.size() || clicked >= 256 * 256 * 256)
         return;
     //Obtain pointer to selected object by label
-    GameObject* obj_ptr = (GameObject*)world.objects[clicked];
+    Engine::GameObject* obj_ptr = world.objects[clicked];
     //Clear isPicked property from all objects
     world.unpickObject();
     obj_ptr->pick(); //mark object picked
@@ -92,7 +92,7 @@ void EditWindow::onMouseWheel(int x, int y) {
 void EditWindow::onMouseMotion(int relX, int relY) {
     //Terrain painting
     if (_inspector_win->gameobject_ptr != nullptr) {
-        GameObject* obj = static_cast<GameObject*>(_inspector_win->gameobject_ptr);
+        Engine::GameObject* obj = static_cast<Engine::GameObject*>(_inspector_win->gameobject_ptr);
         Engine::TerrainProperty* terrain = obj->getPropertyPtr<Engine::TerrainProperty>();
 
         if (terrain != nullptr && !isWorldCamera)
@@ -112,7 +112,7 @@ void EditWindow::onMouseMotion(int relX, int relY) {
             if (clicked > world.objects.size() || clicked >= 256 * 256 * 256 || ppaint_state.last_obj == static_cast<int>(clicked))
                 return;
 
-            GameObject* obj_ptr = (GameObject*)world.objects[clicked]; //Obtain pointer to selected object by label
+            Engine::GameObject* obj_ptr = world.objects[clicked]; //Obtain pointer to selected object by label
 
             ppaint_state.last_obj = static_cast<int>(clicked); //Set clicked as last object ID
             //Obtain pointer to object's property

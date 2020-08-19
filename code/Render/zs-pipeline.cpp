@@ -138,7 +138,7 @@ unsigned int RenderPipeline::render_getpickedObj(void* projectedit_ptr, int mous
 
     //Iterate over all objects in the world
     for(unsigned int obj_i = 0; obj_i < world_ptr->objects.size(); obj_i ++){
-        GameObject* obj_ptr = (GameObject*)world_ptr->objects[obj_i];
+        Engine::GameObject* obj_ptr = world_ptr->objects[obj_i];
 
         if (obj_ptr->alive == false) continue;
 
@@ -299,13 +299,13 @@ void RenderPipeline::processObjects(void* _world_ptr) {
     World* world_ptr = static_cast<World*>(_world_ptr);
     //Iterate over all objects in the world
     for (unsigned int obj_i = 0; obj_i < world_ptr->objects.size(); obj_i++) {
-        GameObject* obj_ptr = (GameObject*)world_ptr->objects[obj_i];
+        Engine::GameObject* obj_ptr = world_ptr->objects[obj_i];
         if (!obj_ptr->hasParent) //if it is a root object
             obj_ptr->processObject(this); //Draw object
         
     }
     for (unsigned int obj_i = 0; obj_i < world_ptr->objects.size(); obj_i++) {
-        GameObject* obj_ptr = (GameObject*)world_ptr->objects[obj_i];
+        Engine::GameObject* obj_ptr = world_ptr->objects[obj_i];
         if (world_ptr->isPicked(obj_ptr) && current_state == PIPELINE_STATE::PIPELINE_STATE_DEFAULT) {
             glDisable(GL_DEPTH_TEST);
             glDisable(GL_CULL_FACE);

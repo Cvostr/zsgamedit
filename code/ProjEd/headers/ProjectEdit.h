@@ -108,7 +108,7 @@ public slots:
     void onFileCtxMenuShow(QPoint point);
     void onCameraToObjTeleport();
 
-    GameObject* onAddNewGameObject();
+    Engine::GameObject* onAddNewGameObject();
     void addNewCube();
     void addNewLight();
     void addNewTile();
@@ -166,7 +166,7 @@ private:
     QString sheduled_world;
     bool hasSheduledWorld;
 
-    GameObject* object_buffer;
+    Engine::GameObject* object_buffer;
 public:
     float deltaTime;
     bool ready; //Is everything loaded?

@@ -2,62 +2,12 @@
 #include "headers/Misc.h"
 #include <world/go_properties.h>
 
-GameObject::GameObject(){
-    //item_ptr = new QTreeWidgetItem; //Allocate tree widget item
-}
-
-GameObject::~GameObject(){
-}
-
-void GameObject::setMeshSkinningRootNodeRecursively(GameObject* rootNode){
-    Engine::MeshProperty* mesh = getPropertyPtr<Engine::MeshProperty>();
-    if(mesh)
-        mesh->skinning_root_node = rootNode;
-
-    for(unsigned int ch_i = 0; ch_i < children.size(); ch_i ++){
-        GameObject* obj_ptr = (GameObject*)children[ch_i].updLinkPtr();
-        obj_ptr->setMeshSkinningRootNodeRecursively(rootNode);
-    }
-}
-
-void GameObject::putToSnapshot(GameObjectSnapshot* snapshot){
-    snapshot->props_num = 0;
-    snapshot->scripts_num = 0;
-
-    snapshot->parent_link = this->parent;
-    snapshot->obj_array_ind = this->array_index;
-
-    this->copyTo(&snapshot->reserved_obj);
-    //Copy all properties
-    for(unsigned int i = 0; i < this->props_num; i ++){
-        Engine::GameObjectProperty* prop_ptr = this->properties[i];
-        Engine::GameObjectProperty* new_prop_ptr = Engine::allocProperty(prop_ptr->type);
-        prop_ptr->copyTo(new_prop_ptr);
-        snapshot->properties[snapshot->props_num] = new_prop_ptr;
-        snapshot->props_num += 1;
-    }
-    for (unsigned int i = 0; i < this->scripts_num; i++) {
-        Engine::ZPScriptProperty* script_ptr = static_cast<Engine::ZPScriptProperty*>(this->scripts[i]);
-        Engine::ZPScriptProperty* new_script_ptr = static_cast<Engine::ZPScriptProperty*>(
-            Engine::allocProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_AGSCRIPT));
-        script_ptr->copyTo(new_script_ptr);
-        snapshot->scripts[snapshot->scripts_num] = new_script_ptr;
-        snapshot->scripts_num += 1;
-    }
-    snapshot->children_snapshots.resize(this->children.size());
-    //Copy all children links
-    for(unsigned int i = 0; i < this->children.size(); i ++){
-        snapshot->children.push_back(this->children[i]);
-        //Call putToSnapshot() on object
-        static_cast<GameObject*>(children[i].ptr)->putToSnapshot(&snapshot->children_snapshots[i]);
-    }
-}
-void GameObject::recoverFromSnapshot(GameObjectSnapshot* snapshot){
+void Engine::GameObject::recoverFromSnapshot(Engine::GameObjectSnapshot* snapshot) {
     this->clearAll();
     //Copy object class content
     snapshot->reserved_obj.copyTo(this);
     //iterate over all properties in snapshot
-    for(unsigned int i = 0; i < static_cast<unsigned int>(snapshot->props_num); i ++){
+    for (unsigned int i = 0; i < static_cast<unsigned int>(snapshot->props_num); i++) {
         //Pointer to property in snapshot
         Engine::GameObjectProperty* prop_ptr = snapshot->properties[i];
         //Pointer to new allocated property
@@ -68,11 +18,9 @@ void GameObject::recoverFromSnapshot(GameObjectSnapshot* snapshot){
         new_prop_ptr->go_link = this->getLinkToThisObject();
         props_num += 1;
 
-        if(prop_ptr->type == PROPERTY_TYPE::GO_PROPERTY_TYPE_LABEL){ //If it is label, we have to do extra stuff
+        if (prop_ptr->type == PROPERTY_TYPE::GO_PROPERTY_TYPE_LABEL) { //If it is label, we have to do extra stuff
             Engine::LabelProperty* label_p = static_cast<Engine::LabelProperty*>(new_prop_ptr);
             this->label_ptr = &label_p->label;
-            GO_W_I::getItem(array_index)->setText(0, QString::fromStdString(*this->label_ptr));
-            //label_p->list_item_ptr = GO_W_I::getItem(array_index);
         }
     }
     //recover scripts
@@ -89,47 +37,19 @@ void GameObject::recoverFromSnapshot(GameObjectSnapshot* snapshot){
         scripts_num += 1;
     }
 
-    if(this->hasParent){ //if object was parented
+    if (this->hasParent) { //if object was parented
         snapshot->parent_link.updLinkPtr()->children.push_back(this->getLinkToThisObject());
         this->parent = snapshot->parent_link;
-        //Show visual parenting in object list
-        GO_W_I::getItem(parent.updLinkPtr()->array_index)->addChild(GO_W_I::getItem(array_index));
-    }else{
-        //Object has no parents, show it in top
-        static_cast<World*>(this->world_ptr)->obj_widget_ptr->addTopLevelItem(GO_W_I::getItem(array_index));
     }
     //Also recover children
-    for(unsigned int i = 0; i < snapshot->children.size(); i ++){
+    for (unsigned int i = 0; i < snapshot->children.size(); i++) {
         Engine::GameObjectLink link = snapshot->children[i];
         static_cast<GameObject*>(parent.updLinkPtr())->recoverFromSnapshot(&snapshot->children_snapshots[i]);
     }
+    GO_W_I::updateGameObjectItem(this);
 }
 
-void GameObjectSnapshot::clear(){
-    //free array of children
-    this->children.clear();
-
-    for(unsigned int prop = 0; prop < static_cast<unsigned int>(this->props_num); prop ++){
-        auto prop_ptr = this->properties[prop];
-        delete prop_ptr;
-        prop_ptr = nullptr;
-    }
-    props_num = 0;
-
-    for(unsigned int child = 0; child < this->children.size(); child ++){
-        children_snapshots[child].clear();
-    }
-    children_snapshots.clear(); //Free snapshot vector
-    this->children.clear(); //Free link vector
-}
-
-GameObjectSnapshot::GameObjectSnapshot(){
-    props_num = 0;
-    scripts_num = 0;
-    obj_array_ind = 0;
-}
-
-void GameObject::pick(){
+void Engine::GameObject::pick(){
     ((World*)world_ptr)->picked_objs_ids.push_back(array_index);
     for(unsigned int chil_i = 0; chil_i < children.size(); chil_i++){
         (static_cast<GameObject*>(children[chil_i].updLinkPtr()))->pick(); //child and his children are picked now

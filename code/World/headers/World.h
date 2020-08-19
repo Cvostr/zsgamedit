@@ -26,7 +26,6 @@
 
 #include "../../ProjEd/headers/GO_widget_item.h"
 
-class GameObject;
 class World;
 class GameObjectProperty;
 class GameObjectSnapshot;
@@ -41,43 +40,9 @@ public:
     ObjectPropertyLink();
 };
 
-class GameObject : public Engine::GameObject{
-public:
-    void pick(); //Mark object and its children picked
-
-    void setMeshSkinningRootNodeRecursively(GameObject* rootNode);
-
-    void saveProperties(std::ofstream* stream); //Writes properties content at end of stream
-
-    void putToSnapshot(GameObjectSnapshot* snapshot);
-    void recoverFromSnapshot(GameObjectSnapshot* snapshot);
-
-    GameObject(); //Default constructor
-    ~GameObject();
-};
-
-class GameObjectSnapshot{
-public:
-    GameObject reserved_obj; //class object
-    std::vector<Engine::GameObjectLink> children; //Vector to store links to children of object
-    std::vector<GameObjectSnapshot> children_snapshots;
-    Engine::GameObjectProperty* properties[OBJ_PROPS_SIZE]; //pointers to properties of object
-    Engine::GameObjectProperty* scripts[OBJ_SCRIPT_PROPS_SIZE];
-
-    Engine::GameObjectLink parent_link;
-
-    int props_num; //number of properties
-    int scripts_num; //number of scripts
-
-    int obj_array_ind; //index in objects array
-
-    void clear();
-    GameObjectSnapshot();
-};
-
 class WorldSnapshot{
 public:
-    std::vector<GameObject> objects;
+    std::vector<Engine::GameObject> objects;
     std::vector<Engine::GameObjectProperty*> props;
     std::vector<Engine::GameObjectProperty*> scripts;
 
@@ -89,19 +54,17 @@ class World : public Engine::World{
 public:
     //-----------------DATA FOR QT INTERFACE-----------
     QTreeWidget* obj_widget_ptr;
-    std::vector<int> picked_objs_ids;
-    bool isPicked(GameObject* obj);
+    bool isPicked(Engine::GameObject* obj);
     void unpickObject();
     //
-    GameObject* addObject(GameObject obj);
-    GameObject* newObject(); //Add new object to world
-    int getFreeObjectSpaceIndex();
-    bool isObjectLabelUnique(std::string label); //Get amount of objects with this label
+    Engine::GameObject* addObject(Engine::GameObject obj);
+    Engine::GameObject* newObject(); //Add new object to world
     
-    GameObject* dublicateObject(GameObject* original, bool parent = true);
-    GameObject* Instantiate(GameObject* original);
     
-    GameObject* updateLink(Engine::GameObjectLink* link);
+    Engine::GameObject* dublicateObject(Engine::GameObject* original, bool parent = true);
+    Engine::GameObject* Instantiate(Engine::GameObject* original);
+    
+    Engine::GameObject* updateLink(Engine::GameObjectLink* link);
     //Save loaded world to file
     void saveToFile(std::string file);
     //open world from file
@@ -109,25 +72,25 @@ public:
     //Load world from bytes
     void loadFromMemory(const char* bytes, unsigned int size, QTreeWidget* w_ptr);
     //Write gameobject data to specified stream
-    void writeGameObject(GameObject* object_ptr, std::ofstream* world_stream);
+    void writeGameObject(Engine::GameObject* object_ptr, std::ofstream* world_stream);
 
-    void loadGameObjectFromMemory(GameObject* object_ptr, const char* bytes, unsigned int left_bytes);
+    void loadGameObjectFromMemory(Engine::GameObject* object_ptr, const char* bytes, unsigned int left_bytes);
 
-    void storeObjectToPrefab(GameObject* object_ptr, QString file);
-    void writeObjectToPrefab(GameObject* object_ptr, std::ofstream* stream);
+    void storeObjectToPrefab(Engine::GameObject* object_ptr, QString file);
+    void writeObjectToPrefab(Engine::GameObject* object_ptr, std::ofstream* stream);
 
     void addObjectsFromPrefab(std::string file);
     void addObjectsFromPrefab(char* data, unsigned int size);
 
-    void processPrefabObject(GameObject* object_ptr, std::vector<GameObject>* objects_array);
+    void processPrefabObject(Engine::GameObject* object_ptr, std::vector<Engine::GameObject>* objects_array);
 
     void addMeshGroup(std::string file_path);
-    GameObject* addMeshNode(ZS3M::SceneNode* node);
+    Engine::GameObject* addMeshNode(ZS3M::SceneNode* node);
 
     void putToShapshot(WorldSnapshot* snapshot);
     void recoverFromSnapshot(WorldSnapshot* snapshot);
 
-    void getAvailableNumObjLabel(std::string label, int* result);
+    
 
     World();
 

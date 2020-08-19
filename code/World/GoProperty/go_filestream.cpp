@@ -9,7 +9,7 @@
 extern Project* project_ptr;
 extern ZSGAME_DATA* game_data;
 
-void GameObject::saveProperties(std::ofstream* stream){
+void Engine::GameObject::saveProperties(std::ofstream* stream){
     for(unsigned int prop_i = 0; prop_i < props_num; prop_i ++){
         Engine::GameObjectProperty* property_ptr = this->properties[prop_i];
         *stream << "\nG_PROPERTY ";
@@ -289,6 +289,14 @@ void GameObject::saveProperties(std::ofstream* stream){
         *stream << script->script_path << "\n";
         unsigned int varsNum = script->vars.size();
         stream->write(reinterpret_cast<char*>(&varsNum), sizeof(unsigned int));
+
+        for (unsigned int v_i = 0; v_i < script->vars.size(); v_i++) {
+            Engine::GlobVarHandle* var = script->vars[v_i];
+
+            stream->write(reinterpret_cast<char*>(&var->index), sizeof(unsigned int));
+            stream->write(reinterpret_cast<char*>(&var->typeID), sizeof(int));
+            stream->write(reinterpret_cast<char*>(var->value_ptr), var->size);
+        }
 
         *stream << " ";
     }

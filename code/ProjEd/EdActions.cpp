@@ -75,7 +75,7 @@ void EdActions::newPropertyAction(Engine::GameObjectLink link, PROPERTY_TYPE pro
 void EdActions::newGameObjectAction(Engine::GameObjectLink link){
     EdObjectAction* new_action = new EdObjectAction;
 
-    GameObject* obj_ptr = (GameObject*)link.updLinkPtr();
+    Engine::GameObject* obj_ptr = link.updLinkPtr();
 
     obj_ptr->putToSnapshot(&new_action->snapshot);
     new_action->linkToObj = link;
@@ -105,12 +105,12 @@ void EdActions::undo(){
     if(act_type == ACT_TYPE_OBJECT){ //if this action is snapshot
         EdObjectAction* snapshot = static_cast<EdObjectAction*>(this->action_list[current_pos - 1]);
 
-        GameObjectSnapshot cur_state_snap; //Declare snapshot to store current state
-        ((GameObject*)snapshot->linkToObj.ptr)->putToSnapshot(&cur_state_snap); //Backup current state
+        Engine::GameObjectSnapshot cur_state_snap; //Declare snapshot to store current state
+        (snapshot->linkToObj.ptr)->putToSnapshot(&cur_state_snap); //Backup current state
 
         unsigned int array_index = static_cast<unsigned int>(snapshot->snapshot.obj_array_ind);
 
-        ((GameObject*)world_ptr->objects[array_index])->recoverFromSnapshot(&snapshot->snapshot); //Recover previous state
+        (world_ptr->objects[array_index])->recoverFromSnapshot(&snapshot->snapshot); //Recover previous state
 
         snapshot->clear(); //Clear previous state
         snapshot->snapshot = cur_state_snap; //put previous state to current actions
@@ -157,12 +157,12 @@ void EdActions::redo(){
     if(act_type == ACT_TYPE_OBJECT){
         EdObjectAction* snapshot = static_cast<EdObjectAction*>(this->action_list[current_pos ]);
 
-        GameObjectSnapshot cur_state_snap; //Declare snapshot to store current state
-        ((GameObject*)snapshot->linkToObj.ptr)->putToSnapshot(&cur_state_snap); //Backup current state
+        Engine::GameObjectSnapshot cur_state_snap; //Declare snapshot to store current state
+        (snapshot->linkToObj.ptr)->putToSnapshot(&cur_state_snap); //Backup current state
 
         unsigned int array_index = static_cast<unsigned int>(snapshot->snapshot.obj_array_ind);
 
-        ((GameObject*)world_ptr->objects[array_index])->recoverFromSnapshot(&snapshot->snapshot); //Recover previous state
+        (world_ptr->objects[array_index])->recoverFromSnapshot(&snapshot->snapshot); //Recover previous state
 
         snapshot->clear(); //Clear previous state
         snapshot->snapshot = cur_state_snap; //put previous state to current actions

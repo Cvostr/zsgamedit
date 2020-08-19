@@ -120,9 +120,9 @@ void TileGroupProperty::process(){
 #ifdef _WIN32
             Sleep(10);
 #endif
-            GameObject* obj = wrld->newObject(); //Invoke new object creation
+            Engine::GameObject* obj = wrld->newObject(); //Invoke new object creation
 
-            GameObject* parent = (GameObject*)go_link.updLinkPtr();
+            Engine::GameObject* parent = go_link.updLinkPtr();
             Engine::TransformProperty* parent_transform = parent->getPropertyPtr<Engine::TransformProperty>();
             Engine::LabelProperty* parent_label = parent->getPropertyPtr<Engine::LabelProperty>();
 

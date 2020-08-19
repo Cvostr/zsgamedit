@@ -308,7 +308,7 @@ void EditWindow::openFile(QString file_path){
         this->render->getRenderSettings()->defaults();
 
         _ed_actions_container->clear();
-        setupObjectsHieList(); //Clear everything, at first
+        //setupObjectsHieList(); //Clear everything, at first
         //world.clear();
         world.openFromFile(file_path.toStdString(), ui->objsList); //Open this scene
 
@@ -435,21 +435,21 @@ void EditWindow::openPhysicsSettings(){
     _inspector_win->addPropertyArea(float3_area);
 }
 
-GameObject* EditWindow::onAddNewGameObject(){
+Engine::GameObject* EditWindow::onAddNewGameObject(){
     //get free index in array
     int free_ind = world.getFreeObjectSpaceIndex();
     //if we have no free space inside array
     if(free_ind == static_cast<int>(world.objects.size())){
-        GameObject* obj = new GameObject;
+        Engine::GameObject* obj = new Engine::GameObject;
         obj->alive = false;
         obj->world_ptr = &world;
         obj->array_index = free_ind;
         world.objects.push_back(obj);
     }
     //Create action
-    _ed_actions_container->newGameObjectAction(((GameObject*)world.objects[static_cast<unsigned int>(free_ind)])->getLinkToThisObject());
+    _ed_actions_container->newGameObjectAction((world.objects[static_cast<unsigned int>(free_ind)])->getLinkToThisObject());
     //Add new object to world
-    GameObject* obj_ptr = this->world.newObject(); 
+    Engine::GameObject* obj_ptr = this->world.newObject();
     //New object will not have parents, so will be spawned at top
     ui->objsList->addTopLevelItem(GO_W_I::getItem(obj_ptr->array_index));
 
@@ -457,7 +457,7 @@ GameObject* EditWindow::onAddNewGameObject(){
 }
 
 void EditWindow::addNewCube(){
-    GameObject* obj = onAddNewGameObject();
+    Engine::GameObject* obj = onAddNewGameObject();
     obj->addProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_MESH);
     obj->addProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_MATERIAL);
 
@@ -476,7 +476,7 @@ void EditWindow::addNewCube(){
 
 }
 void EditWindow::addNewLight(){
-    GameObject* obj = onAddNewGameObject();
+    Engine::GameObject* obj = onAddNewGameObject();
     obj->addProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_LIGHTSOURCE);
 
     //Set new name to object
@@ -487,7 +487,7 @@ void EditWindow::addNewLight(){
 }
 
 void EditWindow::addNewTile(){
-    GameObject* obj = onAddNewGameObject();
+    Engine::GameObject* obj = onAddNewGameObject();
     obj->addProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_TILE); //Creates tile inside
     obj->addProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_MESH); //Creates mesh inside
 
@@ -506,7 +506,7 @@ void EditWindow::addNewTile(){
     transform->updateMatrix();
 }
 void EditWindow::addNewTerrain(){
-    GameObject* obj = onAddNewGameObject();
+    Engine::GameObject* obj = onAddNewGameObject();
     //Creates material inside
     obj->addProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_MATERIAL);
 
@@ -712,7 +712,7 @@ void EditWindow::onRedoPressed(){
 void EditWindow::onObjectCopy(){
     QTreeWidgetItem* selected_item = ui->objsList->currentItem(); //Obtain pointer to clicked obj item
     QString obj_name = selected_item->text(0); //Get label of clicked obj
-    GameObject* obj_ptr = (GameObject*)world.getGameObjectByLabel(obj_name.toStdString()); //Obtain pointer to selected object by label
+    Engine::GameObject* obj_ptr = world.getGameObjectByLabel(obj_name.toStdString()); //Obtain pointer to selected object by label
 
     this->object_buffer = obj_ptr;
 }
@@ -736,7 +736,7 @@ void EditWindow::glRender(){
     }
     //iterate over all objects in world
     for(unsigned int obj_i = 0; obj_i < world.objects.size(); obj_i ++){
-        GameObject* obj_ptr = (GameObject*)world.objects[obj_i];
+        Engine::GameObject* obj_ptr = world.objects[obj_i];
         //if object is alive
         if(obj_ptr->alive){
             //if object's name changed

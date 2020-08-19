@@ -13,5 +13,7 @@ namespace GO_W_I {
 	void recreate(int index);
 	void recreateAll(int max);
 	void updateObjsNames(Engine::World* world);
+	void makeParentings(Engine::World* world, QTreeWidget* obj_widget_ptr);
+	void updateGameObjectItem(Engine::GameObject* obj);
 }
 #endif

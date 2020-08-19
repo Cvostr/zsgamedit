@@ -117,7 +117,7 @@ void InspectorWin::addPropButtons(){
 
 void InspectorWin::ShowObjectProperties(void* object_ptr){
     clearContentLayout(); //Clears everything in content layout
-    GameObject* obj_ptr = static_cast<GameObject*>(object_ptr);
+    Engine::GameObject* obj_ptr = static_cast<Engine::GameObject*>(object_ptr);
     //unpick old object
     _editor_win->world.unpickObject();
     //Object is picked now
@@ -217,7 +217,7 @@ void ManageComponentDialog::refresh_list(){
     //Clear list widget
     this->property_list.clear();
     //cast GameObject class pointer
-    GameObject* obj_ptr = static_cast<GameObject*>(g_object_ptr);
+    Engine::GameObject* obj_ptr = static_cast<Engine::GameObject*>(g_object_ptr);
     for(int prop_i = 0; prop_i < static_cast<int>(obj_ptr->props_num); prop_i ++){ //iterate over all properties
         Engine::GameObjectProperty* prop_ptr = obj_ptr->properties[prop_i]; //obtain property pointer
         QListWidgetItem* item = new QListWidgetItem(getPropertyString(prop_ptr->type), &this->property_list);
@@ -236,7 +236,7 @@ void ManageComponentDialog::onPropertyDoubleClick(){
 }
 
 void ManageComponentDialog::deleteProperty(){
-    GameObject* obj_ptr = static_cast<GameObject*>(g_object_ptr); //cast pointer
+    Engine::GameObject* obj_ptr = static_cast<Engine::GameObject*>(g_object_ptr); //cast pointer
 
     getActionManager()->newGameObjectAction(obj_ptr->getLinkToThisObject());
 
@@ -276,7 +276,7 @@ PropertyCtxMenu::PropertyCtxMenu(InspectorWin* win, ManageComponentDialog* dialo
     QObject::connect(this->toggle_active, SIGNAL(triggered(bool)), this, SLOT(onActiveToggleClicked()));
 }
 void PropertyCtxMenu::show(QPoint point){
-    GameObject* obj_ptr = static_cast<GameObject*>(this->win->gameobject_ptr); //cast pointer
+    Engine::GameObject* obj_ptr = static_cast<Engine::GameObject*>(this->win->gameobject_ptr); //cast pointer
 
     Engine::GameObjectProperty* prop_ptr = obj_ptr->properties[this->selected_property_index];
     //No actions with label property
@@ -295,7 +295,7 @@ void PropertyCtxMenu::onDeleteClicked(){
 void PropertyCtxMenu::onPaintClicked(){
     _editor_win->ppaint_state.enabled = true;
     //cast GameObject class pointer
-    GameObject* obj_ptr = static_cast<GameObject*>(this->dialog->g_object_ptr); //cast pointer
+    Engine::GameObject* obj_ptr = static_cast<Engine::GameObject*>(this->dialog->g_object_ptr); //cast pointer
 
     QListWidgetItem* item = dialog->property_list.currentItem(); //Get pressed item
     QString text = item->text(); //get text of pressed item
@@ -308,7 +308,7 @@ void PropertyCtxMenu::onPaintClicked(){
 }
 
 void PropertyCtxMenu::onActiveToggleClicked(){
-    GameObject* obj_ptr = static_cast<GameObject*>(this->win->gameobject_ptr); //cast pointer
+    Engine::GameObject* obj_ptr = static_cast<Engine::GameObject*>(this->win->gameobject_ptr); //cast pointer
     //Calculate property pointer
     Engine::GameObjectProperty* prop_ptr = obj_ptr->properties[this->selected_property_index];
 
@@ -333,7 +333,7 @@ AddGoComponentDialog::AddGoComponentDialog(void* game_object_ptr, QWidget* paren
     //Add list widget to grid layout
     contentLayout->addWidget(&property_list, 0, 0);
     //Iterate over all base properties and add them to list
-    GameObject* obj = static_cast<GameObject*>(g_object_ptr);
+    Engine::GameObject* obj = static_cast<Engine::GameObject*>(g_object_ptr);
     for(int i = 1; i <= 16; i ++){
         //Check, if property already exist
         if(obj->getPropertyPtrByTypeI(i) == nullptr)
@@ -358,7 +358,7 @@ void AddGoComponentDialog::onAddButtonPressed(){
     QListWidgetItem* item = this->property_list.currentItem();
     PROPERTY_TYPE newtype = static_cast<PROPERTY_TYPE>(item->type());
     //Obtain pointer to object
-    GameObject* object_ptr = static_cast<GameObject*>(this->g_object_ptr);
+    Engine::GameObject* object_ptr = static_cast<Engine::GameObject*>(this->g_object_ptr);
     if (newtype != PROPERTY_TYPE::GO_PROPERTY_TYPE_AGSCRIPT) {
         object_ptr->addProperty(newtype);
         auto prop_ptr = object_ptr->getPropertyPtrByType(newtype);
