@@ -99,6 +99,16 @@ void EditWindow::updateFileList() {
     }
 }
 
+void EditWindow::updateFileListItemIcon(QString file) {
+    unsigned int items = ui->fileList->count();
+    for (unsigned int i = 0; i < items; i++) {
+        QListWidgetItem* item = ui->fileList->item(i);
+        QFileInfo fileInfo = QFileInfo(file);
+
+        if(item->text() == fileInfo.fileName())
+            assignIconFile(item);
+    }
+}
 
 //Signal
 void EditWindow::onFileListItemClicked() {

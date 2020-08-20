@@ -57,9 +57,7 @@ public:
     bool isPicked(Engine::GameObject* obj);
     void unpickObject();
     //
-    Engine::GameObject* addObject(Engine::GameObject obj);
     Engine::GameObject* newObject(); //Add new object to world
-    
     
     Engine::GameObject* dublicateObject(Engine::GameObject* original, bool parent = true);
     Engine::GameObject* Instantiate(Engine::GameObject* original);
@@ -74,8 +72,6 @@ public:
     //Write gameobject data to specified stream
     void writeGameObject(Engine::GameObject* object_ptr, std::ofstream* world_stream);
 
-    void loadGameObjectFromMemory(Engine::GameObject* object_ptr, const char* bytes, unsigned int left_bytes);
-
     void storeObjectToPrefab(Engine::GameObject* object_ptr, QString file);
     void writeObjectToPrefab(Engine::GameObject* object_ptr, std::ofstream* stream);
 
@@ -89,8 +85,6 @@ public:
 
     void putToShapshot(WorldSnapshot* snapshot);
     void recoverFromSnapshot(WorldSnapshot* snapshot);
-
-    
 
     World();
 

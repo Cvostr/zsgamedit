@@ -95,4 +95,10 @@ void GO_W_I::updateGameObjectItem(Engine::GameObject* obj) {
 	else {
 		rootWidget->addTopLevelItem(go_items[obj->array_index]);
 	}
+	unsigned int children_num = obj->children.size();
+
+	for (unsigned int ch_i = 0; ch_i < children_num; ch_i++) {
+		Engine::GameObject* ch = obj->children[ch_i].updLinkPtr();
+		updateGameObjectItem(ch);
+	}
 }

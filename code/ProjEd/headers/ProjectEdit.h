@@ -193,6 +193,7 @@ public:
 
     void init();
     void updateFileList(); //Updates content in file list widget
+    void updateFileListItemIcon(QString file);
     void setupObjectsHieList();
     void setViewDirectory(QString dir_path);
     //Recursively walk through game directory and load founded resources

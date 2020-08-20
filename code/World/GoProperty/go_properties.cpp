@@ -440,29 +440,29 @@ void Engine::MaterialProperty::onValueChanged() {
         MaterialShaderProperty* prop_ptr = material_ptr->group_ptr->properties[prop_i];
         MaterialShaderPropertyConf* conf_ptr = this->material_ptr->confs[prop_i];
         switch (prop_ptr->type) {
-        case MATSHPROP_TYPE_TEXTURE: {
-            //Cast pointer
-            TextureMtShPropConf* texture_conf = static_cast<TextureMtShPropConf*>(conf_ptr);
-            //Update pointer to texture resource
-            texture_conf->texture = game_data->resources->getTextureByLabel(texture_conf->path);
-            break;
-        }
-        case MATSHPROP_TYPE_TEXTURE3: {
-            //Cast pointer
-            Texture3MtShPropConf* texture_conf = static_cast<Texture3MtShPropConf*>(conf_ptr);
-            texture_conf->texture3D->created = false;
-            _inspector_win->updateRequired = true;
-
-            break;
-        }
+            case MATSHPROP_TYPE_TEXTURE: {
+                //Cast pointer
+                TextureMtShPropConf* texture_conf = static_cast<TextureMtShPropConf*>(conf_ptr);
+                //Update pointer to texture resource
+                texture_conf->texture = game_data->resources->getTextureByLabel(texture_conf->path);
+                break;
+            }
+            case MATSHPROP_TYPE_TEXTURE3: {
+                //Cast pointer
+                Texture3MtShPropConf* texture_conf = static_cast<Texture3MtShPropConf*>(conf_ptr);
+                texture_conf->texture3D->created = false;
+                _inspector_win->updateRequired = true;
+                break;
+            }
         }
     }
     //save changes to material file
     material_ptr->saveToFile();
     //Recreate thumbnails for all materials
-    _editor_win->thumb_master->createMaterialThumbnails();
+    _editor_win->thumb_master->createMaterialThumbnail(newmat_ptr_res->resource_label);
     //Update thumbnail in file list
-    _editor_win->updateFileList();
+    //_editor_win->updateFileList();
+    _editor_win->updateFileListItemIcon(QString::fromStdString(material_ptr->file_path));
 }
 
 void Engine::ColliderProperty::addPropertyInterfaceToInspector(){

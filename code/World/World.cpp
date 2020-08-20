@@ -20,87 +20,16 @@ Engine::GameObject* World::updateLink(Engine::GameObjectLink* link){
     return static_cast<Engine::GameObject*>(link->ptr);
 }
 
-Engine::GameObject* World::addObject(Engine::GameObject obj){
-    //Allocate new Object
-    Engine::GameObject* newobj = new Engine::GameObject;
-    //Assign object's data to new object
-    *newobj = obj;
-    //Try to find, if there is a free space in array for new object
-    int index_to_push = -1;
-    unsigned int objects_num = static_cast<unsigned int>(this->objects.size());
-    for(unsigned int objs_i = 0; objs_i < objects_num; objs_i ++){
-        if(objects[objs_i]->alive == false){
-            index_to_push = static_cast<int>(objs_i);
-        }
-    }
-
-    Engine::GameObject* ptr = nullptr;
-    if(index_to_push == -1){ //if all indeces are busy
-        this->objects.push_back(newobj); //Push object to vector's end
-        ptr = static_cast<Engine::GameObject*>(objects[objects.size() - 1]);
-        ptr->array_index = static_cast<int>(objects.size() - 1);
-    }else{ //if vector has an empty space
-        objects[static_cast<unsigned int>(index_to_push)] = newobj;
-        ptr = static_cast<Engine::GameObject*>(objects[static_cast<unsigned int>(index_to_push)]);
-        ptr->array_index = index_to_push;
-    }
-    ptr->world_ptr = this;
-
-    return ptr;
-}
-
 Engine::GameObject* World::dublicateObject(Engine::GameObject* original, bool parent){
-    Engine::GameObject _new_obj;//Create an empty
-    Engine::GameObject* new_obj = addObject(_new_obj);
-
-    //Copying properties data
-    for(unsigned int prop_i = 0; prop_i < original->props_num; prop_i ++){
-        //Get pointer to original property
-        auto prop_ptr = original->properties[prop_i];
-        //register new property in new object
-        new_obj->addProperty(prop_ptr->type);
-        //Get created property
-        auto new_prop = new_obj->getPropertyPtrByType(prop_ptr->type);
-        //start property copying
-        prop_ptr->copyTo(new_prop);
-    }
-
-    if(original->hasParent){ //if original has parent
-        Engine::TransformProperty* transform = new_obj->getPropertyPtr<Engine::TransformProperty>();
-        ZSVECTOR3 p_translation = ZSVECTOR3(0,0,0);
-        ZSVECTOR3 p_scale = ZSVECTOR3(1,1,1);
-        ZSVECTOR3 p_rotation = ZSVECTOR3(0,0,0);
-        original->parent.ptr->getTransformProperty()->getAbsoluteParentTransform(p_translation, p_scale, p_rotation);
-        transform->translation = transform->translation + p_translation;
-        transform->scale = transform->scale * p_scale;
-        transform->rotation = transform->rotation + p_rotation;
-        if(parent == true)
-            original->parent.ptr->addChildObject(new_obj->getLinkToThisObject());
-    }
-    //Set new name for object
+    Engine::GameObject* new_obj = Engine::World::dublicateObject(original, parent);
     Engine::LabelProperty* label_prop = new_obj->getPropertyPtr<Engine::LabelProperty>(); //Obtain pointer to label property
-    std::string to_paste;
-    genRandomString(&to_paste, 3);
-    new_obj->setLabel(label_prop->label + "_" + to_paste);
-    //Dublicate chilldren object
-    unsigned int children_amount = static_cast<unsigned int>(original->children.size());
-    //Iterate over all children
-    for(unsigned int child_i = 0; child_i < children_amount; child_i ++){
-        //Get pointer to original child object
-        Engine::GameObjectLink link = original->children[child_i];
-        //create new child obect by dublication of original
-        Engine::GameObject* new_child = dublicateObject(link.ptr, false);
-        //parenting
-        new_obj->addChildObject(new_child->getLinkToThisObject());
-    }
-    //GameObject* new_obj = (GameObject*)Engine::World::dublicateObject(original, parent);
-    //LabelProperty* label_prop = new_obj->getPropertyPtr<LabelProperty>(); //Obtain pointer to label property
 
     for (unsigned int child_i = 0; child_i < new_obj->children.size(); child_i++) {
         Engine::GameObject* new_child = new_obj->children[child_i].updLinkPtr();
         //UI parenting
         GO_W_I::getItem(new_obj)->addChild(GO_W_I::getItem(new_child));
     }
+    GO_W_I::updateGameObjectItem(new_obj);
 
     return new_obj;
 }
@@ -197,152 +126,11 @@ void World::saveToFile(std::string file){
     world_stream.close();
 }
 
-void World::loadGameObjectFromMemory(Engine::GameObject* object_ptr, const char* bytes, unsigned int left_bytes) {
-    std::string prefix;
-    unsigned int iter = 1;
-    object_ptr->world_ptr = this; //Assign pointer to world
-    object_ptr->str_id.clear(); //Clear old string id
-    while (bytes[iter] != ' ') {
-        object_ptr->str_id += bytes[iter];
-        iter++;
-    }
-    iter++;
-    //Read ACTIVE and STATIC flags
-    memcpy(&object_ptr->active, bytes + iter, sizeof(bool));
-    iter += sizeof(bool);
-    memcpy(&object_ptr->IsStatic, bytes + iter, sizeof(bool));
-    iter += sizeof(bool);
-    //Then do the same sh*t, iterate until "G_END" came up
-    while (iter < left_bytes) {
-        prefix.clear();
-        //Read prefix
-        while (bytes[iter] == ' ' || bytes[iter] == '\n') {
-            iter++;
-        }
-        while (bytes[iter] != ' ' && bytes[iter] != '\n' && iter < left_bytes) {
-            if (bytes[iter] != '\0')
-                prefix += bytes[iter];
-            iter++;
-        }
-
-        if (prefix.compare("G_END") == 0) { //If end reached
-            break; //Then end this infinity loop
-        }
-        if (prefix.compare("G_CHI") == 0) { //Ops, it is chidren header
-            unsigned int amount = 0;
-            iter++;
-            //Read amount of children of object
-            memcpy(&amount, bytes + iter, sizeof(int));
-            iter += sizeof(int);
-            //Iterate over these children
-            for (unsigned int ch_i = 0; ch_i < amount; ch_i++) { //Iterate over all written children to file
-                std::string child_str_id;
-                //Reading child string id
-                while (bytes[iter] == ' ' || bytes[iter] == '\n') {
-                    iter++;
-                }
-                while (bytes[iter] != ' ' && bytes[iter] != '\n') {
-                    child_str_id += bytes[iter];
-                    iter++;
-                }
-                //Create link for object
-                Engine::GameObjectLink link;
-                link.world_ptr = this; //Setting world pointer
-                link.obj_str_id = child_str_id; //Setting string ID
-                object_ptr->children.push_back(link); //Adding to object
-            }
-        }
-        if (prefix.compare("G_PROPERTY") == 0) { //We found an property, zaeb*s'
-            //Call function to load that property
-            PROPERTY_TYPE type;
-            iter++; //Skip space
-            memcpy(&type, bytes + iter, sizeof(int));
-            iter += sizeof(int);
-            //Spawn new property with readed type
-            object_ptr->addProperty(type);
-            auto prop_ptr = object_ptr->getPropertyPtrByType(type); //get created property
-            //Read ACTIVE flag
-            memcpy(&prop_ptr->active, bytes + iter, sizeof(bool));
-            iter += sizeof(bool);
-            //Load property
-            prop_ptr->loadPropertyFromMemory(bytes + iter, object_ptr);
-        }
-        if (prefix.compare("G_SCRIPT") == 0) { //We found an property, zaeb*s'
-            //Call function to load that property
-            iter++; //Skip space
-            //Spawn new property with readed type
-            object_ptr->addScript();
-            auto script_ptr = object_ptr->scripts[object_ptr->scripts_num - 1]; //get created property
-            //Read ACTIVE flag
-            memcpy(&script_ptr->active, bytes + iter, sizeof(bool));
-            iter += sizeof(bool);
-            //Load property
-            script_ptr->loadPropertyFromMemory(bytes + iter, object_ptr);
-        }
-    }
-}
-
 void World::loadFromMemory(const char* bytes, unsigned int size, QTreeWidget* w_ptr) {
     Engine::RenderSettings* settings_ptr = renderer->getRenderSettings();
     this->obj_widget_ptr = w_ptr;
-
-    unsigned int iter = 0;
-    std::string test_header;
-    //Read header
-    while (bytes[iter] != ' ') {
-        test_header += bytes[iter];
-        iter++;
-    }
-
-    if (test_header.compare("ZSP_SCENE") != 0) //If it isn't zspire scene
-        return; //Go out, we have nothing to do
-    iter++;
-    int version = 0; //define version on world file
-    int objs_num = 0; //define number of objects
-    memcpy(&version, bytes + iter, sizeof(int));
-    iter += 4;
-    memcpy(&objs_num, bytes + iter, sizeof(int));
-    iter += 5;
-
-    while (iter < size) { //until file is over
-        std::string prefix;
-        //read prefix
-        while (bytes[iter] == ' ' || bytes[iter] == '\n') {
-            iter++;
-        }
-        while (bytes[iter] != ' ' && bytes[iter] != '\n') {
-            prefix += bytes[iter];
-            iter++;
-        }
-
-        if (prefix.compare("RENDER_SETTINGS_AMB_COLOR") == 0) { //if it is render setting of ambient light color
-            iter++;
-            memcpy(&settings_ptr->ambient_light_color.r, bytes + iter, sizeof(int));
-            iter += 4;
-            memcpy(&settings_ptr->ambient_light_color.g, bytes + iter, sizeof(int));
-            iter += 4;
-            memcpy(&settings_ptr->ambient_light_color.b, bytes + iter, sizeof(int));
-            iter += 4;
-        }
-
-        if (prefix.compare("G_OBJECT") == 0) { //if it is game object
-            Engine::GameObject obj;
-            //Call function to load object
-            loadGameObjectFromMemory(&obj, bytes + iter, size - iter);
-            //Add object to scene
-            this->addObject(obj);
-        }
-    }
-    //Now iterate over all objects and set depencies
-    for (unsigned int obj_i = 0; obj_i < this->objects.size(); obj_i++) {
-        Engine::GameObject* obj_ptr = this->objects[obj_i];
-        for (unsigned int chi_i = 0; chi_i < obj_ptr->children.size(); chi_i++) { //Now iterate over all children
-            Engine::GameObjectLink* child_ptr = &obj_ptr->children[chi_i];
-            Engine::GameObject* child_go_ptr = child_ptr->updLinkPtr();
-            child_go_ptr->parent = obj_ptr->getLinkToThisObject();
-            child_go_ptr->hasParent = true;
-        }
-    }
+    //Perform loading by engine function
+    Engine::World::loadFromMemory(bytes, size, settings_ptr);
     //make parentings
     GO_W_I::makeParentings(this, this->obj_widget_ptr);
 }

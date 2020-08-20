@@ -272,8 +272,8 @@ void EditWindow::init(){
         }
         case PERSP_3D:{ //3D project
             this->edit_camera.setProjectionType(ZSCAMERA_PROJECTION_PERSPECTIVE);
-            edit_camera.setPosition(ZSVECTOR3(0,0,0));
-            edit_camera.setFront(ZSVECTOR3(0,0,1));
+            edit_camera.setPosition(ZSVECTOR3(-20.f, 10.f, 0.f));
+            edit_camera.setFront(ZSVECTOR3(1.f, -0.33f, 0.f));
             edit_camera.setZplanes(0.1f, 5000.f);
             break;
         }
@@ -598,8 +598,9 @@ void EditWindow::runWorld(){
     isWorldCamera = true;
     renderer->allowOnUpdate = true;
     //call onStart() on all objects
-    world.call_onStart();
     world.physical_world = new PhysicalWorld(&world.phys_settngs);
+    world.call_onStart();
+    
 }
 void EditWindow::stopWorld(){
     //Avoi crash on skybox rendering

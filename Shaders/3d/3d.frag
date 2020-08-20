@@ -62,6 +62,49 @@ vec2 processParallaxMapUv(vec2 uv){
     return uv - uv_offset;
 }
 
+void processShadows(){
+    float dist = length(FragPos - cam_position);
+
+        vec4 objPosLightSpace = vec4(0,0,0,0);
+        float offsetx = 0;
+
+        if(dist < 40){
+            objPosLightSpace = LightProjViewMat1 * vec4(FragPos, 1.0);
+            offsetx = 0;
+        }
+        else if(dist < 70){
+            objPosLightSpace = LightProjViewMat2 * vec4(FragPos, 1.0);
+            offsetx = 1.0 / 3.0;
+        }
+        else if(dist < 110){
+            objPosLightSpace = LightProjViewMat3 * vec4(FragPos, 1.0);
+            offsetx = 2.0 / 3.0;
+        }
+        vec3 ShadowProjection = (objPosLightSpace.xyz / objPosLightSpace.w) / 2.0 + 0.5;
+	
+        float real_depth = ShadowProjection.z;
+
+        for(int x = 0; x < 2; x ++){
+            for(int y = 0; y < 2; y ++){
+                vec2 _offset = vec2(x, y);
+
+                _offset.x /= shadowmap_Width;
+                _offset.y /= shadowmap_Height;
+
+                vec2 uvoffset = ShadowProjection.xy + _offset;
+                
+                uvoffset.x /= 3.0;
+                uvoffset.x += offsetx;
+
+                vec4 shadowmap = texture(shadow_map, uvoffset);
+                float texture_depth = shadowmap.r;
+                tMasks.g += (real_depth - shadow_bias > texture_depth) ? 0.15 : 0.0;
+            }
+        }
+        
+        if(real_depth > 1.0) tMasks.g = 0.0;
+}
+
 void main(){
 
 	vec2 uv = vec2(UVCoord.x * _u, UVCoord.y * _v);
@@ -96,45 +139,6 @@ void main(){
 	tMasks = vec4(1.0, 0, 0, 0);
 	//Shadowmapping enabled
 	if(hasShadowMap){
-        float dist = length(FragPos - cam_position);
-
-        vec4 objPosLightSpace = vec4(0,0,0,0);
-        float offsetx = 0;
-
-        if(dist < 20){
-            objPosLightSpace = LightProjViewMat1 * vec4(FragPos, 1.0);
-            offsetx = 0;
-        }
-        else if(dist < 70){
-            objPosLightSpace = LightProjViewMat2 * vec4(FragPos, 1.0);
-            offsetx = 1.0 / 3.0;
-        }
-        else{
-            objPosLightSpace = LightProjViewMat3 * vec4(FragPos, 1.0);
-            offsetx = 2.0 / 3.0;
-        }
-        vec3 ShadowProjection = (objPosLightSpace.xyz / objPosLightSpace.w) / 2.0 + 0.5;
-	
-        float real_depth = ShadowProjection.z;
-
-        for(int x = 0; x < 2; x ++){
-            for(int y = 0; y < 2; y ++){
-                vec2 _offset = vec2(x, y);
-
-                _offset.x /= shadowmap_Width;
-                _offset.y /= shadowmap_Height;
-
-                vec2 uvoffset = ShadowProjection.xy + _offset;
-                
-                uvoffset.x /= 3.0;
-                uvoffset.x += offsetx;
-
-                vec4 shadowmap = texture(shadow_map, uvoffset);
-                float texture_depth = shadowmap.r;
-                tMasks.g += (real_depth - shadow_bias > texture_depth) ? 0.15 : 0.0;
-            }
-        }
-        
-        if(real_depth > 1.0) tMasks.g = 0.0;
+        processShadows();
 	}
 }
