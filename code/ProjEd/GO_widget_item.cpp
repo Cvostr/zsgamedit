@@ -26,6 +26,7 @@ QTreeWidgetItem* GO_W_I::getItem(Engine::GameObject* obj) {
 }
 
 void GO_W_I::recreate(int index) {
+	clearChildrenList(go_items.at(index));
 	delete go_items.at(index);
 	go_items[index] = new QTreeWidgetItem;
 }
@@ -55,8 +56,10 @@ void GO_W_I::updateObjsNames(Engine::World* world) {
 	for (unsigned int i = 0; i < world->objects.size(); i++) {
 		Engine::GameObject* obj = world->objects[i];
 		//check, if object was deleted
-		if (!obj->alive)
+		if (!obj->alive) {
+			recreate(obj->array_index);
 			continue;
+		}
 		Engine::LabelProperty* label = obj->getLabelProperty();
 		if (label == nullptr)
 			continue;
@@ -100,5 +103,14 @@ void GO_W_I::updateGameObjectItem(Engine::GameObject* obj) {
 	for (unsigned int ch_i = 0; ch_i < children_num; ch_i++) {
 		Engine::GameObject* ch = obj->children[ch_i].updLinkPtr();
 		updateGameObjectItem(ch);
+	}
+}
+
+void GO_W_I::clearChildrenList(QTreeWidgetItem* item) {
+	unsigned int ch_num = item->childCount();
+	for (unsigned int ch_i = 0; ch_i < ch_num; ch_i++) {
+		QTreeWidgetItem* c = item->child(0);
+		clearChildrenList(c);
+		item->removeChild(c);
 	}
 }

@@ -78,8 +78,6 @@ public:
     void addObjectsFromPrefab(std::string file);
     void addObjectsFromPrefab(char* data, unsigned int size);
 
-    void processPrefabObject(Engine::GameObject* object_ptr, std::vector<Engine::GameObject>* objects_array);
-
     void addMeshGroup(std::string file_path);
     Engine::GameObject* addMeshNode(ZS3M::SceneNode* node);
 

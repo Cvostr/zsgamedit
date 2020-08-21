@@ -44,7 +44,7 @@ void Engine::GameObject::recoverFromSnapshot(Engine::GameObjectSnapshot* snapsho
     //Also recover children
     for (unsigned int i = 0; i < snapshot->children.size(); i++) {
         Engine::GameObjectLink link = snapshot->children[i];
-        static_cast<GameObject*>(parent.updLinkPtr())->recoverFromSnapshot(&snapshot->children_snapshots[i]);
+        link.updLinkPtr()->recoverFromSnapshot(&snapshot->children_snapshots[i]);
     }
     GO_W_I::updateGameObjectItem(this);
 }
@@ -52,6 +52,6 @@ void Engine::GameObject::recoverFromSnapshot(Engine::GameObjectSnapshot* snapsho
 void Engine::GameObject::pick(){
     ((World*)world_ptr)->picked_objs_ids.push_back(array_index);
     for(unsigned int chil_i = 0; chil_i < children.size(); chil_i++){
-        (static_cast<GameObject*>(children[chil_i].updLinkPtr()))->pick(); //child and his children are picked now
+        children[chil_i].updLinkPtr()->pick(); //child and his children are picked now
     }
 }

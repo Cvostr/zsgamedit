@@ -65,8 +65,10 @@ layout (std140, binding = 0) uniform CamMatrices{
 
 layout (std140, binding = 2) uniform ShadowData{
 //Shadowmapping stuff
-    uniform mat4 LightProjectionMat; // 16 * 4
-    uniform mat4 LightViewMat; // 16 * 4
+    uniform mat4 LightProjViewMat; // 16 * 4
+    uniform mat4 LightProjViewMat1; // 16 * 4
+    uniform mat4 LightProjViewMat2; // 16 * 4
+    uniform mat4 LightProjViewMat3; // 16 * 4
     uniform float shadow_bias; //4
     uniform bool hasShadowMap; //4
     uniform int shadowmap_Width; //4
@@ -264,31 +266,49 @@ vec3 getFragmentNormal(vec2 uv){
     return result;
 }
 
+void processShadows(){
+    float dist = length(FragPos - cam_position);
 
-void _shadow(){
-    if(hasShadowMap){
-        vec4 objPosLightSpace = LightProjectionMat * LightViewMat * vec4(FragPos, 1.0);
-        vec3 ShadowProjection = (objPosLightSpace.xyz / objPosLightSpace.w) / 2.0 + 0.5;
+    vec4 objPosLightSpace = vec4(0,0,0,0);
+    float offsetx = 0;
+
+    if(dist < 40){
+        objPosLightSpace = LightProjViewMat1 * vec4(FragPos, 1.0);
+        offsetx = 0;
+    }
+    else if(dist < 70){
+        objPosLightSpace = LightProjViewMat2 * vec4(FragPos, 1.0);
+        offsetx = 1.0 / 3.0;
+    }
+    else if(dist < 110){
+        objPosLightSpace = LightProjViewMat3 * vec4(FragPos, 1.0);
+        offsetx = 2.0 / 3.0;
+    }
+    vec3 ShadowProjection = (objPosLightSpace.xyz / objPosLightSpace.w) / 2.0 + 0.5;
 	
-        float real_depth = ShadowProjection.z;
+    float real_depth = ShadowProjection.z;
 
-        for(int x = 0; x < 8; x ++){
-            for(int y = 0; y < 8; y ++){
-                vec2 _offset = vec2(x, y);
-            
-                _offset.x /= shadowmap_Width;
-                _offset.y /= shadowmap_Height;
+    for(int x = 0; x < 2; x ++){
+        for(int y = 0; y < 2; y ++){
+            vec2 _offset = vec2(x, y);
 
-                vec4 shadowmap = texture(shadow_map, ShadowProjection.xy + _offset);
-                float texture_depth = shadowmap.r;
-                tMasks.g += (real_depth - shadow_bias > texture_depth) ? 0.01 : 0.0;
-            }
+            _offset.x /= shadowmap_Width;
+            _offset.y /= shadowmap_Height;
+
+            vec2 uvoffset = ShadowProjection.xy + _offset;
+                
+            uvoffset.x /= 3.0;
+            uvoffset.x += offsetx;
+
+            vec4 shadowmap = texture(shadow_map, uvoffset);
+            float texture_depth = shadowmap.r;
+            tMasks.g += (real_depth - shadow_bias > texture_depth) ? 0.15 : 0.0;
         }
+    }
         
-        if(real_depth > 1.0) tMasks.g = 0.0;
-        
-	}
+    if(real_depth > 1.0) tMasks.g = 0.0;
 }
+
 
 void main(){
 
@@ -308,7 +328,7 @@ void main(){
 	    tNormal = getFragmentNormal(uv); //defaultly, use normals from mesh
 	    tMasks = vec4(1.0, 0, 0, 0);
         
-        _shadow();
+        processShadows();
 		FragColor = vec4(getFragment(uv), 0);
 	}	
 }

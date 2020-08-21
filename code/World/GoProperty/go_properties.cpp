@@ -13,12 +13,6 @@ extern ZSGAME_DATA* game_data;
 //Selected animation
 static Engine::AnimationProperty* current_anim;
 
-bool LabelPropertyDeleteWidget = true;
-
-void setLabelPropertyDeleteWidget(bool flag) {
-    LabelPropertyDeleteWidget = flag;
-}
-
 Engine::GameObjectProperty* ObjectPropertyLink::updLinkPtr(){
     ptr = object.updLinkPtr()->getPropertyPtrByType(this->prop_type);
 
@@ -120,11 +114,6 @@ void Engine::LabelProperty::addPropertyInterfaceToInspector(){
     area->value_ptr = &this->label;
     area->go_property = static_cast<void*>(this);
     _inspector_win->addPropertyArea(area);
-}
-
-void Engine::LabelProperty::onObjectDeleted() {
-    if (LabelPropertyDeleteWidget)
-        GO_W_I::recreate(go_link.updLinkPtr()->array_index);
 }
 
 void Engine::LabelProperty::onValueChanged(){
@@ -409,9 +398,9 @@ void Engine::MaterialProperty::onValueChanged() {
     }
 
     bool hasMaterial = material_ptr != nullptr;
-    bool hasMaterialGroup = material_ptr->group_ptr != nullptr;
-
     if (!hasMaterial) return;
+
+    bool hasMaterialGroup = material_ptr->group_ptr != nullptr;
     if (!hasMaterialGroup) { //if material has no MaterialShaderPropertyGroup
         //if user specified group first time
         if (MtShProps::getMtShaderPropertyGroupByLabel(this->group_label) != nullptr) {
@@ -461,7 +450,6 @@ void Engine::MaterialProperty::onValueChanged() {
     //Recreate thumbnails for all materials
     _editor_win->thumb_master->createMaterialThumbnail(newmat_ptr_res->resource_label);
     //Update thumbnail in file list
-    //_editor_win->updateFileList();
     _editor_win->updateFileListItemIcon(QString::fromStdString(material_ptr->file_path));
 }
 
