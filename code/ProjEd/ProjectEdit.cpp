@@ -292,7 +292,6 @@ void EditWindow::init(){
 void EditWindow::openFile(QString file_path){
 
     if(file_path.endsWith(".scn")){ //If it is scene
-        GO_W_I::recreateAll(MAX_OBJS);
         //Unpick object first
         world.unpickObject();
         QString gl_win_title = "Game View - " + file_path;
@@ -431,7 +430,7 @@ void EditWindow::openPhysicsSettings(){
     Float3PropertyArea* float3_area = new Float3PropertyArea;
     float3_area->setLabel("Gravity"); //Its label
     float3_area->vector = &ptr->gravity;
-    float3_area->go_property = static_cast<void*>(this);
+    float3_area->go_property = reinterpret_cast<Engine::GameObjectProperty*>(this);
     _inspector_win->addPropertyArea(float3_area);
 }
 
@@ -666,7 +665,7 @@ void EditWindow::onObjectListItemClicked(){
 
     obj_trstate.obj_ptr = obj_ptr;
     obj_trstate.tprop_ptr = obj_ptr->getTransformProperty();
-    _inspector_win->ShowObjectProperties(static_cast<void*>(obj_ptr));
+    _inspector_win->ShowObjectProperties(obj_ptr);
 }
 //Objects list right pressed
 void EditWindow::onObjectCtxMenuShow(QPoint point){
@@ -777,7 +776,7 @@ void EditWindow::glRender(){
     }
     //if opengl ready, then render scene
     if(ready == true && !hasSheduledWorld)
-        render->render(this->window, static_cast<void*>(this));
+        render->render(this->window, this);
 }
 
 RenderPipeline* EditWindow::getRenderPipeline(){

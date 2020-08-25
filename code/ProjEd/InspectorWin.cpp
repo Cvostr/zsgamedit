@@ -3,6 +3,7 @@
 #include "headers/ProjectEdit.h"
 #include "ui_inspector_win.h"
 
+#include <world/go_properties.h>
 #include "../World/headers/World.h"
 #include <QDoubleValidator>
 #include <QObject>
@@ -20,6 +21,7 @@ InspectorWin::InspectorWin(QWidget *parent) :
     this->ui->propertySpace->setMargin(0);
     this->ui->propertySpace->setSpacing(5);
     this->ui->propertySpace->setContentsMargins(5,1,2,0);
+    this->ui->propertySpace->setAlignment(Qt::AlignTop);
 
      managePropButton = nullptr;
      line = nullptr;
@@ -115,43 +117,53 @@ void InspectorWin::addPropButtons(){
     connect(managePropButton, SIGNAL(clicked()), this, SLOT(onManagePropButtonPressed()));
 }
 
-void InspectorWin::ShowObjectProperties(void* object_ptr){
+void InspectorWin::ShowObjectProperties(Engine::GameObject* object_ptr){
     clearContentLayout(); //Clears everything in content layout
-    Engine::GameObject* obj_ptr = static_cast<Engine::GameObject*>(object_ptr);
     //unpick old object
     _editor_win->world.unpickObject();
     //Object is picked now
-    obj_ptr->pick(); 
+    object_ptr->pick();
     //Add setActive() checkbox
     BoolCheckboxArea* isActive = new BoolCheckboxArea;
     isActive->setLabel("Active ");
     isActive->go_property = nullptr;
-    isActive->bool_ptr = &obj_ptr->active;
+    isActive->bool_ptr = &object_ptr->active;
     addPropertyArea(isActive);
     //Next add all property areas
-    unsigned int props_num = static_cast<unsigned int>(obj_ptr->props_num);
-    unsigned int scripts_num = static_cast<unsigned int>(obj_ptr->scripts_num);
+    unsigned int props_num = static_cast<unsigned int>(object_ptr->props_num);
+    unsigned int scripts_num = static_cast<unsigned int>(object_ptr->scripts_num);
     //iterate over props to show them all
     for(unsigned int prop_it = 0; prop_it < props_num; prop_it ++){ //iterate over all properties and send them to inspector
-        Engine::GameObjectProperty* property_ptr = obj_ptr->properties[prop_it]; //Obtain pointer to object property
+        Engine::GameObjectProperty* property_ptr = object_ptr->properties[prop_it]; //Obtain pointer to object property
         //Add property to inspector
         addPropertyInterfaceToInspector(property_ptr);
     }
     for (unsigned int script_it = 0; script_it < scripts_num; script_it++) { //iterate over all scripts and send them to inspector
-        Engine::GameObjectProperty* script_ptr = obj_ptr->scripts[script_it]; //Obtain pointer to object script
+        Engine::GameObjectProperty* script_ptr = object_ptr->scripts[script_it]; //Obtain pointer to object script
         //Add script to inspector
         addPropertyInterfaceToInspector(script_ptr);
     }
     addPropButtons(); //add buttons
-    gameobject_ptr = static_cast<void*>(obj_ptr);
+    gameobject_ptr = object_ptr;
 }
 
 void InspectorWin::addPropertyInterfaceToInspector(Engine::GameObjectProperty* property_ptr) {
-    AreaPropertyTitle* prop_title = new AreaPropertyTitle;
-    prop_title->prop_title.setText(getPropertyString(property_ptr->type));
-
-    if (!property_ptr->active) //if property is disabled
-        prop_title->prop_title.setStyleSheet("QLabel { color : gray; }"); //then set text color to gray
+    AreaPropertyTitle* prop_title = new AreaPropertyTitle(property_ptr);
+    
+    if (property_ptr->type == PROPERTY_TYPE::GO_PROPERTY_TYPE_AGSCRIPT) {
+        Engine::ZPScriptProperty* prop = static_cast<Engine::ZPScriptProperty*>(property_ptr);
+        std::string spath = prop->script_path;
+        QString strl;
+        unsigned int step = 0;
+        unsigned int len = spath.size();
+        if (len > 0) {
+            while (spath[len - step] != '/') {
+                strl.insert(0, spath[len - step]);
+                step += 1;
+            }
+        }
+        prop_title->prop_title.setText("Script - " + strl);
+    }
 
     getContentLayout()->addLayout(&prop_title->layout);
     this->registerUiObject(prop_title);
@@ -321,7 +333,7 @@ void PropertyCtxMenu::onActiveToggleClicked(){
     dialog->refresh_list();
 }
 
-AddGoComponentDialog::AddGoComponentDialog(void* game_object_ptr, QWidget* parent)
+AddGoComponentDialog::AddGoComponentDialog(Engine::GameObject* game_object_ptr, QWidget* parent)
     : QDialog (parent, Qt::WindowTitleHint | Qt::WindowSystemMenuHint){
     g_object_ptr = game_object_ptr;
     //Allocating buttons

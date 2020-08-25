@@ -16,5 +16,6 @@ namespace GO_W_I {
 	void makeParentings(Engine::World* world, QTreeWidget* obj_widget_ptr);
 	void updateGameObjectItem(Engine::GameObject* obj);
 	void clearChildrenList(QTreeWidgetItem* item);
+	void clearChildrenListOnAll(Engine::World* world);
 }
 #endif

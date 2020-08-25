@@ -42,38 +42,38 @@ void TileGroupProperty::addPropertyInterfaceToInspector(){
     if(!isCreated){ //If tiles haven't been initialized
         IntPropertyArea* tileSizeXArea = new IntPropertyArea;
         tileSizeXArea->setLabel("Tile Width");
-        tileSizeXArea->go_property = static_cast<void*>(this);
+        tileSizeXArea->go_property = this;
         tileSizeXArea->value = &this->geometry.tileWidth;
         _inspector_win->addPropertyArea(tileSizeXArea);
 
         IntPropertyArea* tileSizeYArea = new IntPropertyArea;
         tileSizeYArea->setLabel("Tile Height");
-        tileSizeYArea->go_property = static_cast<void*>(this);
+        tileSizeYArea->go_property = this;
         tileSizeYArea->value = &this->geometry.tileHeight;
         _inspector_win->addPropertyArea(tileSizeYArea);
 
         IntPropertyArea* tilesAmountX = new IntPropertyArea;
         tilesAmountX->setLabel("Tiles amount X");
-        tilesAmountX->go_property = static_cast<void*>(this);
+        tilesAmountX->go_property = this;
         tilesAmountX->value = &this->tiles_amount_X;
         _inspector_win->addPropertyArea(tilesAmountX);
 
         IntPropertyArea* tilesAmountY = new IntPropertyArea;
         tilesAmountY->setLabel("Tiles amount Y");
-        tilesAmountY->go_property = static_cast<void*>(this);
+        tilesAmountY->go_property = this;
         tilesAmountY->value = &this->tiles_amount_Y;
         _inspector_win->addPropertyArea(tilesAmountY);
         //Resources pick
         PickResourceArea* mesh_area = new PickResourceArea(RESOURCE_TYPE_MESH);
         mesh_area->setLabel("Tiles Mesh");
-        mesh_area->go_property = static_cast<void*>(this);
+        mesh_area->go_property = this;
         mesh_area->rel_path_std = &this->mesh_string;
         mesh_area->isShowNoneItem = false;
         _inspector_win->addPropertyArea(mesh_area);
 
         PickResourceArea* diffuse_area = new PickResourceArea(RESOURCE_TYPE_TEXTURE);
         diffuse_area->setLabel("Tiles Diffuse");
-        diffuse_area->go_property = static_cast<void*>(this);
+        diffuse_area->go_property = this;
         diffuse_area->rel_path_std = &this->diffuse_relpath;
         diffuse_area->isShowNoneItem = true;
         _inspector_win->addPropertyArea(diffuse_area);
@@ -189,7 +189,7 @@ void TileGroupProperty::copyTo(Engine::GameObjectProperty* dest){
 void Engine::TileProperty::addPropertyInterfaceToInspector(){
     BoolCheckboxArea* isAnim = new BoolCheckboxArea;
     isAnim->setLabel("Animated ");
-    isAnim->go_property = static_cast<void*>(this);
+    isAnim->go_property = this;
     isAnim->bool_ptr = &this->anim_property.isAnimated;
     isAnim->updateInspectorOnChange = true;
     _inspector_win->addPropertyArea(isAnim);
@@ -197,32 +197,32 @@ void Engine::TileProperty::addPropertyInterfaceToInspector(){
     if(this->anim_property.isAnimated){ //if animation turned on
         IntPropertyArea* rowsAmount = new IntPropertyArea;
         rowsAmount->setLabel("Atlas rows");
-        rowsAmount->go_property = static_cast<void*>(this);
+        rowsAmount->go_property = this;
         rowsAmount->value = &this->anim_property.framesX;
         _inspector_win->addPropertyArea(rowsAmount);
 
         IntPropertyArea* colsAmount = new IntPropertyArea;
         colsAmount->setLabel("Atlas cols");
-        colsAmount->go_property = static_cast<void*>(this);
+        colsAmount->go_property = this;
         colsAmount->value = &this->anim_property.framesY;
         _inspector_win->addPropertyArea(colsAmount);
 
         IntPropertyArea* frameTime = new IntPropertyArea;
         frameTime->setLabel("frame time");
-        frameTime->go_property = static_cast<void*>(this);
+        frameTime->go_property = this;
         frameTime->value = &this->anim_property.frame_time;
         _inspector_win->addPropertyArea(frameTime);
     }
 
     PickResourceArea* area = new PickResourceArea(RESOURCE_TYPE_TEXTURE);
     area->setLabel("Texture");
-    area->go_property = static_cast<void*>(this);
+    area->go_property = this;
     area->rel_path_std = &diffuse_relpath;
     _inspector_win->addPropertyArea(area);
 
     PickResourceArea* transparent_area = new PickResourceArea(RESOURCE_TYPE_TEXTURE);
     transparent_area->setLabel("Secondary Diffuse");
-    transparent_area->go_property = static_cast<void*>(this);
+    transparent_area->go_property = this;
     transparent_area->rel_path_std = &transparent_relpath;
     _inspector_win->addPropertyArea(transparent_area);
 }

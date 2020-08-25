@@ -8,7 +8,7 @@ extern InspectorWin* _inspector_win;
 void Engine::PhysicalProperty::addColliderRadio(){
     AreaRadioGroup* group = new AreaRadioGroup; //allocate button layout
     group->value_ptr = reinterpret_cast<uint8_t*>(&this->coll_type);
-    group->go_property = static_cast<void*>(this);
+    group->go_property = this;
 
     QRadioButton* box_radio = new QRadioButton; //allocate first radio
     box_radio->setText("Box");
@@ -34,14 +34,14 @@ void Engine::PhysicalProperty::addMassField(){
     FloatPropertyArea* mass_area = new FloatPropertyArea;
     mass_area->setLabel("Mass"); //Its label
     mass_area->value = &this->mass;
-    mass_area->go_property = static_cast<void*>(this);
+    mass_area->go_property = this;
     _inspector_win->addPropertyArea(mass_area);
 }
 
 void Engine::PhysicalProperty::addCustomSizeField(){
     BoolCheckboxArea* cust = new BoolCheckboxArea;
     cust->setLabel("Custom size ");
-    cust->go_property = static_cast<void*>(this);
+    cust->go_property = this;
     cust->bool_ptr = &this->isCustomPhysicalSize;
     cust->updateInspectorOnChange = true;
     _inspector_win->addPropertyArea(cust);
@@ -50,13 +50,13 @@ void Engine::PhysicalProperty::addCustomSizeField(){
         Float3PropertyArea* cust = new Float3PropertyArea; //New property area
         cust->setLabel("Scale"); //Its label
         cust->vector = &this->cust_size; //Ptr to our vector
-        cust->go_property = static_cast<void*>(this);
+        cust->go_property = this;
         _inspector_win->addPropertyArea(cust);
 
         Float3PropertyArea* cust_transform = new Float3PropertyArea; //New property area
         cust_transform->setLabel("Transf offset"); //Its label
         cust_transform->vector = &this->transform_offset; //Ptr to our vector
-        cust_transform->go_property = static_cast<void*>(this);
+        cust_transform->go_property = this;
         _inspector_win->addPropertyArea(cust_transform);
 
     }

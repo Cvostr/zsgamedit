@@ -15,9 +15,16 @@ extern Project* project_ptr;
 //Hack to support resources
 extern ZSGAME_DATA* game_data;
 
-AreaPropertyTitle::AreaPropertyTitle(){
+AreaPropertyTitle::AreaPropertyTitle(Engine::GameObjectProperty* prop){
+    pProp = prop; //store pointer to property
+    widg_layout.setAlignment(Qt::AlignLeft);
+    this->widg_layout.addWidget(&this->checkbox);
+    this->widg_layout.addWidget(&this->prop_title);
+    this->widg_layout.addWidget(&this->delete_btn);
+    delete_btn.setText("Delete");
+
     this->layout.addWidget(&this->line);
-    this->layout.addWidget(&this->prop_title);
+    this->layout.addLayout(&this->widg_layout);
     prop_title.setFixedHeight(25);
     prop_title.setMargin(0);
 
@@ -28,6 +35,35 @@ AreaPropertyTitle::AreaPropertyTitle(){
 
     line.setFrameShape(QFrame::HLine);
     line.setFrameShadow(QFrame::Sunken);
+
+    if (!pProp->active) { //if property is disabled
+        this->prop_title.setStyleSheet("QLabel { color : gray; }"); //then set text color to gray
+    }
+    else {
+        checkbox.setChecked(true);
+    }
+
+    this->prop_title.setText(getPropertyString(pProp->type));
+
+    QObject::connect(&checkbox, SIGNAL(stateChanged(int)), this, SLOT(onActiveCheckboxPressed()));
+    QObject::connect(&delete_btn, SIGNAL(clicked()), this, SLOT(onDeleteButtonPressed()));
+}
+
+void AreaPropertyTitle::onActiveCheckboxPressed() {
+    getActionManager()->newPropertyAction(pProp->go_link, pProp->type);
+    //Change state
+    pProp->active = !pProp->active;
+
+    _editor_win->getInspector()->updateObjectProperties();
+}
+void AreaPropertyTitle::onDeleteButtonPressed(){
+    Engine::GameObject* obj_ptr = static_cast<Engine::GameObject*>(pProp->go_link.updLinkPtr()); //cast pointer
+
+    getActionManager()->newGameObjectAction(obj_ptr->getLinkToThisObject());
+
+    obj_ptr->removeProperty(pProp);
+
+    _editor_win->getInspector()->updateObjectProperties();
 }
 
 AreaButton::AreaButton(){
@@ -86,7 +122,7 @@ AreaButton::~AreaButton(){
 void AreaButton::onButtonPressed(){
     if(onPressFuncPtr != nullptr)
         this->onPressFuncPtr();
-    insp_ptr->updateObjectProperties();
+    _editor_win->getInspector()->updateObjectProperties();
 }
 
 PropertyEditArea::PropertyEditArea(){

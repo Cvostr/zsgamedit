@@ -29,13 +29,22 @@ class InspectorWin;
 
 class AreaPropertyTitle : public QObject{
     Q_OBJECT
+public slots:
+    void onActiveCheckboxPressed();
+    void onDeleteButtonPressed();
 public:
+    Engine::GameObjectProperty* pProp;
+
     QVBoxLayout layout;
+    QHBoxLayout widg_layout;
 
     QFrame line;
+
+    QCheckBox checkbox;
+    QPushButton delete_btn;
     QLabel prop_title;
 
-    AreaPropertyTitle();
+    AreaPropertyTitle(Engine::GameObjectProperty* prop);
 };
 
 class AreaButton : public QObject{
@@ -43,7 +52,6 @@ class AreaButton : public QObject{
 public slots:
     void onButtonPressed();
 public:
-    InspectorWin* insp_ptr;
     QPushButton* button;
     void (*onPressFuncPtr)(); //Function pointer
 
@@ -66,7 +74,7 @@ public slots:
     void onRadioClicked();
 public:
     bool updateInspectorOnChange;
-    void* go_property; //Ponter to property, that created this group
+    Engine::GameObjectProperty* go_property; //Ponter to property, that created this group
     QVBoxLayout* btn_layout; //layout to contain everything
     std::vector<QRadioButton*> rad_buttons;
     uint8_t* value_ptr; //pointer to changing value
@@ -81,7 +89,7 @@ public:
     EDITAREA_TYPE type; //Type of EditArea
     QString label; //Label, describing content
     QLabel* label_widget; //Widget for upper variable
-    void* go_property; //Pointer to connected property
+    Engine::GameObjectProperty* go_property; //Pointer to connected property
 
     QHBoxLayout* elem_layout; //Layout to contain everything
 
@@ -131,13 +139,13 @@ public:
     void onPropertyEdited(); //To update property areas states on area edited
     void addPropButtons(); //Adds "Create Property" Btn to content layout
     void updateAreasChanges();
-    void ShowObjectProperties(void* object_ptr);
+    void ShowObjectProperties(Engine::GameObject* object_ptr);
     void updateObjectProperties();
     void addPropertyInterfaceToInspector(Engine::GameObjectProperty* property_ptr);
 
     void resizeEvent(QResizeEvent* event);
 
-    void* gameobject_ptr;
+    Engine::GameObject* gameobject_ptr;
 private:
     Ui::InspectorWin *ui;
 
@@ -157,9 +165,9 @@ public slots:
 public:
     QListWidget property_list; //list to store wgt list of props
     QLineEdit* comp_type;
-    void* g_object_ptr; //Pointer to object, when we'll add components
+    Engine::GameObject* g_object_ptr; //Pointer to object, when we'll add components
 
-    AddGoComponentDialog(void* game_object_ptr, QWidget* parent = nullptr);
+    AddGoComponentDialog(Engine::GameObject* game_object_ptr, QWidget* parent = nullptr);
     ~AddGoComponentDialog();
 };
 

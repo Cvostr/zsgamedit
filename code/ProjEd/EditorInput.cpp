@@ -24,7 +24,7 @@ void EditWindow::onLeftBtnClicked(int X, int Y) {
 
     if (obj_trstate.isTransforming || isWorldCamera)
         return;
-    unsigned int clicked = render->render_getpickedObj(static_cast<void*>(this), X, Y);
+    unsigned int clicked = render->render_getpickedObj(this, X, Y);
 
     if (clicked > world.objects.size() || clicked >= 256 * 256 * 256) {
         world.unpickObject();
@@ -35,7 +35,7 @@ void EditWindow::onLeftBtnClicked(int X, int Y) {
 
     obj_trstate.obj_ptr = obj_ptr;
     obj_trstate.tprop_ptr = obj_ptr->getTransformProperty();
-    _inspector_win->ShowObjectProperties(static_cast<void*>(obj_ptr));
+    _inspector_win->ShowObjectProperties(obj_ptr);
     this->ui->objsList->setCurrentItem(GO_W_I::getItem(obj_ptr->array_index)); //item selected in tree
 }
 
@@ -48,7 +48,7 @@ void EditWindow::onRightBtnClicked(int X, int Y) {
     this->edit_camera.stopMoving();
     //disabling object transform
     this->obj_trstate.isTransforming = false;
-    unsigned int clicked = render->render_getpickedObj(static_cast<void*>(this), X, Y);
+    unsigned int clicked = render->render_getpickedObj(this, X, Y);
     //Check, if picked ID more than object size or ID is incorrect
     if (clicked > world.objects.size() || clicked >= 256 * 256 * 256)
         return;
@@ -107,7 +107,7 @@ void EditWindow::onMouseMotion(int relX, int relY) {
         if (ppaint_state.time == 0.0f && !isSceneRun) {
             ppaint_state.time += deltaTime;
 
-            unsigned int clicked = render->render_getpickedObj(static_cast<void*>(this), input_state.mouseX, input_state.mouseY);
+            unsigned int clicked = render->render_getpickedObj(this, input_state.mouseX, input_state.mouseY);
             //if we pressed on empty space
             if (clicked > world.objects.size() || clicked >= 256 * 256 * 256 || ppaint_state.last_obj == static_cast<int>(clicked))
                 return;
@@ -180,7 +180,7 @@ void EditWindow::onMouseMotion(int relX, int relY) {
         ZSRGBCOLOR color = render->getColorOfPickedTransformControl(
             this->input_state.mouseX,
             this->input_state.mouseY,
-            static_cast<void*>(this));
+            this);
         //If transformation method isn't set
         if (obj_trstate.isModifying == false) {
             //Set all coordinates to 0

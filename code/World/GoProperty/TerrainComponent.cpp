@@ -20,24 +20,24 @@ void Engine::TerrainProperty::addPropertyInterfaceToInspector(){
     IntPropertyArea* HWidth = new IntPropertyArea; //New property area
     HWidth->setLabel("Heightmap Width"); //Its label
     HWidth->value = &this->Width; //Ptr to our vector
-    HWidth->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
+    HWidth->go_property = (this); //Pointer to this to activate matrix recalculaton
     _inspector_win->addPropertyArea(HWidth);
 
     IntPropertyArea* HLength = new IntPropertyArea; //New property area
     HLength->setLabel("Heightmap Length"); //Its label
     HLength->value = &this->Length; //Ptr to our vector
-    HLength->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
+    HLength->go_property = (this); //Pointer to this to activate matrix recalculaton
     _inspector_win->addPropertyArea(HLength);
 
     IntPropertyArea* MHeight = new IntPropertyArea; //New property area
     MHeight->setLabel("Max Height"); //Its label
     MHeight->value = &this->MaxHeight; //Ptr to our vector
-    MHeight->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
+    MHeight->go_property = this; //Pointer to this to activate matrix recalculaton
     _inspector_win->addPropertyArea(MHeight);
 
     BoolCheckboxArea* castShdws = new BoolCheckboxArea;
     castShdws->setLabel("Cast Shadows ");
-    castShdws->go_property = static_cast<void*>(this);
+    castShdws->go_property = this;
     castShdws->bool_ptr = &this->castShadows;
     _inspector_win->addPropertyArea(castShdws);
 
@@ -46,12 +46,11 @@ void Engine::TerrainProperty::addPropertyInterfaceToInspector(){
     clear_btn->onPressFuncPtr = &onClearTerrain;
     clear_btn->button->setText("Clear"); //Setting text to qt button
     _inspector_win->getContentLayout()->addWidget(clear_btn->button);
-    clear_btn->insp_ptr = _inspector_win; //Setting inspector pointer
     _inspector_win->registerUiObject(clear_btn);
 
     AreaRadioGroup* group = new AreaRadioGroup; //allocate button layout
     group->value_ptr = reinterpret_cast<uint8_t*>(&this->edit_mode);
-    group->go_property = static_cast<void*>(this);
+    group->go_property = this;
     group->updateInspectorOnChange = true;
 
     QRadioButton* directional_radio = new QRadioButton; //allocate first radio
@@ -70,7 +69,7 @@ void Engine::TerrainProperty::addPropertyInterfaceToInspector(){
     IntPropertyArea* EditRange = new IntPropertyArea; //New property area
     EditRange->setLabel("brush range"); //Its label
     EditRange->value = &this->range; //Ptr to our vector
-    EditRange->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
+    EditRange->go_property = this; //Pointer to this to activate matrix recalculaton
     _inspector_win->addPropertyArea(EditRange);
     //If selected mode is Height paint
     if(edit_mode == 1){
@@ -78,7 +77,7 @@ void Engine::TerrainProperty::addPropertyInterfaceToInspector(){
         FloatPropertyArea* EditHeight = new FloatPropertyArea; //New property area
         EditHeight->setLabel("brush height"); //Its label
         EditHeight->value = &this->editHeight; //Ptr to our vector
-        EditHeight->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
+        EditHeight->go_property = this; //Pointer to this to activate matrix recalculaton
         _inspector_win->addPropertyArea(EditHeight);
     }
     //if selected mode is texture paint
@@ -86,12 +85,12 @@ void Engine::TerrainProperty::addPropertyInterfaceToInspector(){
 
         AreaRadioGroup* texturegroup_pick = new AreaRadioGroup; //allocate button layout
         texturegroup_pick->value_ptr = reinterpret_cast<uint8_t*>(&this->textureid);
-        texturegroup_pick->go_property = static_cast<void*>(this);
+        texturegroup_pick->go_property = this;
 
         IntPropertyArea* tSize = new IntPropertyArea; //New property area
         tSize->setLabel("Textures"); //Its label
         tSize->value = &this->textures_size; //Ptr to our vector
-        tSize->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
+        tSize->go_property = this; //Pointer to this to activate matrix recalculaton
         _inspector_win->addPropertyArea(tSize);
 
         for(int i = 0; i < this->textures_size; i ++){
@@ -106,14 +105,14 @@ void Engine::TerrainProperty::addPropertyInterfaceToInspector(){
 
             PickResourceArea* diffuse_area = new PickResourceArea(RESOURCE_TYPE_TEXTURE);
             diffuse_area->setLabel("Diffuse");
-            diffuse_area->go_property = static_cast<void*>(this);
+            diffuse_area->go_property = this;
             diffuse_area->rel_path_std = &textures[static_cast<unsigned int>(i)].diffuse_relpath;
             diffuse_area->isShowNoneItem = true;
             _inspector_win->addPropertyArea(diffuse_area);
 
             PickResourceArea* normal_area = new PickResourceArea(RESOURCE_TYPE_TEXTURE);
             normal_area->setLabel("Normal");
-            normal_area->go_property = static_cast<void*>(this);
+            normal_area->go_property = this;
             normal_area->rel_path_std = &textures[static_cast<unsigned int>(i)].normal_relpath;
             normal_area->isShowNoneItem = true;
             _inspector_win->addPropertyArea(normal_area);
@@ -127,18 +126,18 @@ void Engine::TerrainProperty::addPropertyInterfaceToInspector(){
 
         AreaRadioGroup* vegetablegroup_pick = new AreaRadioGroup; //allocate button layout
         vegetablegroup_pick->value_ptr = reinterpret_cast<uint8_t*>(&this->vegetableid);
-        vegetablegroup_pick->go_property = static_cast<void*>(this);
+        vegetablegroup_pick->go_property = this;
 
         IntPropertyArea* vSize = new IntPropertyArea; //New property area
         vSize->setLabel("Grass variants"); //Its label
         vSize->value = &this->grassType_size; //Ptr to our vector
-        vSize->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
+        vSize->go_property = this; //Pointer to this to activate matrix recalculaton
         _inspector_win->addPropertyArea(vSize);
 
         FloatPropertyArea* fDensity = new FloatPropertyArea; //New property area
         fDensity->setLabel("Grass density"); //Its label
         fDensity->value = &data.GrassDensity; //Ptr to our vector
-        fDensity->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
+        fDensity->go_property = this; //Pointer to this to activate matrix recalculaton
         _inspector_win->addPropertyArea(fDensity);
 
         for(int i = 0; i < this->grassType_size; i ++){
@@ -153,7 +152,7 @@ void Engine::TerrainProperty::addPropertyInterfaceToInspector(){
 
             PickResourceArea* diffuse_area = new PickResourceArea(RESOURCE_TYPE_TEXTURE);
             diffuse_area->setLabel("Diffuse");
-            diffuse_area->go_property = static_cast<void*>(this);
+            diffuse_area->go_property = this;
             diffuse_area->rel_path_std = &data.grass[static_cast<unsigned int>(i)].diffuse_relpath;
             diffuse_area->isShowNoneItem = true;
             _inspector_win->addPropertyArea(diffuse_area);
@@ -161,7 +160,7 @@ void Engine::TerrainProperty::addPropertyInterfaceToInspector(){
             Float2PropertyArea* GrassSize = new Float2PropertyArea; //New property area
             GrassSize->setLabel("Size "); //Its label
             GrassSize->vector = &data.grass[static_cast<unsigned int>(i)].scale; //Ptr to our vector
-            GrassSize->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
+            GrassSize->go_property = this; //Pointer to this to activate matrix recalculaton
             _inspector_win->addPropertyArea(GrassSize);
 
         }

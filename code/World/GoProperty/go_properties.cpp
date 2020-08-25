@@ -91,19 +91,19 @@ void Engine::TransformProperty::addPropertyInterfaceToInspector(){
     Float3PropertyArea* area_pos = new Float3PropertyArea; //New property area
     area_pos->setLabel("Position"); //Its label
     area_pos->vector = &this->translation; //Ptr to our vector
-    area_pos->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
+    area_pos->go_property = this; //Pointer to this to activate matrix recalculaton
     _inspector_win->addPropertyArea(area_pos);
 
     Float3PropertyArea* area_scale = new Float3PropertyArea; //New property area
     area_scale->setLabel("Scale"); //Its label
     area_scale->vector = &this->scale; //Ptr to our vector
-    area_scale->go_property = static_cast<void*>(this);
+    area_scale->go_property = this;
     _inspector_win->addPropertyArea(area_scale);
 
     Float3PropertyArea* area_rotation = new Float3PropertyArea; //New property area
     area_rotation->setLabel("Rotation"); //Its label
     area_rotation->vector = &this->rotation; //Ptr to our vector
-    area_rotation->go_property = static_cast<void*>(this);
+    area_rotation->go_property = this;
     _inspector_win->addPropertyArea(area_rotation);
 }
 
@@ -112,7 +112,7 @@ void Engine::LabelProperty::addPropertyInterfaceToInspector(){
     StringPropertyArea* area = new StringPropertyArea;
     area->setLabel("Label");
     area->value_ptr = &this->label;
-    area->go_property = static_cast<void*>(this);
+    area->go_property = this;
     _inspector_win->addPropertyArea(area);
 }
 
@@ -131,13 +131,13 @@ void Engine::LabelProperty::onValueChanged(){
 void Engine::MeshProperty::addPropertyInterfaceToInspector(){
     PickResourceArea* area = new PickResourceArea(RESOURCE_TYPE_MESH);
     area->setLabel("Mesh");
-    area->go_property = static_cast<void*>(this);
+    area->go_property = this;
     area->rel_path_std = &resource_relpath;
     _inspector_win->addPropertyArea(area);
 
     BoolCheckboxArea* IsCastShadows = new BoolCheckboxArea;
     IsCastShadows->setLabel("Cast shadows ");
-    IsCastShadows->go_property = static_cast<void*>(this);
+    IsCastShadows->go_property = this;
     IsCastShadows->bool_ptr = &this->castShadows;
     _inspector_win->addPropertyArea(IsCastShadows);
 
@@ -156,7 +156,7 @@ void Engine::MeshProperty::addPropertyInterfaceToInspector(){
 void Engine::LightsourceProperty::addPropertyInterfaceToInspector(){
     AreaRadioGroup* group = new AreaRadioGroup; //allocate button layout
     group->value_ptr = reinterpret_cast<uint8_t*>(&this->light_type);
-    group->go_property = static_cast<void*>(this);
+    group->go_property = this;
     group->updateInspectorOnChange = true;
 
     QRadioButton* directional_radio = new QRadioButton; //allocate first radio
@@ -176,20 +176,20 @@ void Engine::LightsourceProperty::addPropertyInterfaceToInspector(){
     FloatPropertyArea* intensity_area = new FloatPropertyArea;
     intensity_area->setLabel("Intensity"); //Its intensity
     intensity_area->value = &this->intensity;
-    intensity_area->go_property = static_cast<void*>(this);
+    intensity_area->go_property = this;
     _inspector_win->addPropertyArea(intensity_area);
     if(this->light_type > LIGHTSOURCE_TYPE::LIGHTSOURCE_TYPE_DIRECTIONAL){
 
         FloatPropertyArea* range_area = new FloatPropertyArea;
         range_area->setLabel("Range"); //Its range
         range_area->value = &this->range;
-        range_area->go_property = static_cast<void*>(this);
+        range_area->go_property = this;
         _inspector_win->addPropertyArea(range_area);
         if(this->light_type == LIGHTSOURCE_TYPE::LIGHTSOURCE_TYPE_SPOT){
             FloatPropertyArea* spotangle_area = new FloatPropertyArea;
             spotangle_area->setLabel("Spot Angle"); //Its range
             spotangle_area->value = &this->spot_angle;
-            spotangle_area->go_property = static_cast<void*>(this);
+            spotangle_area->go_property = this;
             _inspector_win->addPropertyArea(spotangle_area);
         }
     }
@@ -197,33 +197,33 @@ void Engine::LightsourceProperty::addPropertyInterfaceToInspector(){
     ColorDialogArea* lcolor = new ColorDialogArea;
     lcolor->setLabel("Light color");
     lcolor->color = &this->color;
-    lcolor->go_property = static_cast<void*>(this);
+    lcolor->go_property = this;
     _inspector_win->addPropertyArea(lcolor);
 }
 
 void Engine::AudioSourceProperty::addPropertyInterfaceToInspector(){
     PickResourceArea* area = new PickResourceArea(RESOURCE_TYPE_AUDIO);
     area->setLabel("Sound");
-    area->go_property = static_cast<void*>(this);
+    area->go_property = this;
     area->rel_path_std = &resource_relpath;
     _inspector_win->addPropertyArea(area);
 
     BoolCheckboxArea* isLooped = new BoolCheckboxArea;
     isLooped->setLabel("Loop ");
-    isLooped->go_property = static_cast<void*>(this);
+    isLooped->go_property = this;
     isLooped->bool_ptr = &this->source.looped;
     _inspector_win->addPropertyArea(isLooped);
 
     FloatPropertyArea* gain_area = new FloatPropertyArea;
     gain_area->setLabel("Gain"); //Its label
     gain_area->value = &this->source.source_gain;
-    gain_area->go_property = static_cast<void*>(this);
+    gain_area->go_property = this;
     _inspector_win->addPropertyArea(gain_area);
 
     FloatPropertyArea* pitch_area = new FloatPropertyArea;
     pitch_area->setLabel("Pitch"); //Its label
     pitch_area->value = &this->source.source_pitch;
-    pitch_area->go_property = static_cast<void*>(this);
+    pitch_area->go_property = this;
     _inspector_win->addPropertyArea(pitch_area);
 }
 
@@ -231,7 +231,7 @@ void Engine::MaterialProperty::addPropertyInterfaceToInspector(){
     //Add area to pick material file
     PickResourceArea* area = new PickResourceArea(RESOURCE_TYPE_MATERIAL);
     area->setLabel("Material");
-    area->go_property = static_cast<void*>(this);
+    area->go_property = this;
     area->rel_path_std = &material_path;
     _inspector_win->addPropertyArea(area);
     //No material, exiting
@@ -241,14 +241,14 @@ void Engine::MaterialProperty::addPropertyInterfaceToInspector(){
     if(material_ptr->group_ptr->acceptShadows){
         BoolCheckboxArea* receiveShdws = new BoolCheckboxArea;
         receiveShdws->setLabel("Receive Shadows ");
-        receiveShdws->go_property = static_cast<void*>(this);
+        receiveShdws->go_property = this;
         receiveShdws->bool_ptr = &this->receiveShadows;
         _inspector_win->addPropertyArea(receiveShdws);
     }
     //Add shader group picker
     ComboBoxArea* mt_shader_group_area = new ComboBoxArea;
     mt_shader_group_area->setLabel("Shader Group");
-    mt_shader_group_area->go_property = static_cast<void*>(this);
+    mt_shader_group_area->go_property = this;
     mt_shader_group_area->result_string_std = &this->group_label;
     //Iterate over all available shader groups and add them to combo box
     for(unsigned int i = 0; i < MtShProps::getMaterialShaderPropertyAmount(); i ++){
@@ -275,7 +275,7 @@ void Engine::MaterialProperty::addPropertyInterfaceToInspector(){
 
                 PickResourceArea* area = new PickResourceArea(RESOURCE_TYPE_TEXTURE);
                 area->setLabel(QString::fromStdString(texture_p->prop_caption));
-                area->go_property = static_cast<void*>(this);
+                area->go_property = this;
                 area->rel_path_std = &texture_conf->path;
                 area->isShowNoneItem = true;
                 _inspector_win->addPropertyArea(area);
@@ -290,7 +290,7 @@ void Engine::MaterialProperty::addPropertyInterfaceToInspector(){
                 FloatPropertyArea* float_area = new FloatPropertyArea;
                 float_area->setLabel(QString::fromStdString(float_p->prop_caption)); //Its label
                 float_area->value = &float_conf->value;
-                float_area->go_property = static_cast<void*>(this);
+                float_area->go_property = this;
                 _inspector_win->addPropertyArea(float_area);
 
                 break;
@@ -303,7 +303,7 @@ void Engine::MaterialProperty::addPropertyInterfaceToInspector(){
                 Float3PropertyArea* float3_area = new Float3PropertyArea;
                 float3_area->setLabel(QString::fromStdString(float3_p->prop_caption)); //Its label
                 float3_area->vector = &float3_conf->value;
-                float3_area->go_property = static_cast<void*>(this);
+                float3_area->go_property = this;
                 _inspector_win->addPropertyArea(float3_area);
 
                 break;
@@ -316,7 +316,7 @@ void Engine::MaterialProperty::addPropertyInterfaceToInspector(){
                 Float2PropertyArea* float2_area = new Float2PropertyArea;
                 float2_area->setLabel(QString::fromStdString(float2_p->prop_caption)); //Its label
                 float2_area->vector = &float2_conf->value;
-                float2_area->go_property = static_cast<void*>(this);
+                float2_area->go_property = this;
                 _inspector_win->addPropertyArea(float2_area);
                 break;
             }
@@ -328,7 +328,7 @@ void Engine::MaterialProperty::addPropertyInterfaceToInspector(){
                 Int2PropertyArea* int2_area = new Int2PropertyArea;
                 int2_area->setLabel(QString::fromStdString(int2_p->prop_caption)); //Its label
                 int2_area->vector = &int2_conf->value[0];
-                int2_area->go_property = static_cast<void*>(this);
+                int2_area->go_property = this;
                 _inspector_win->addPropertyArea(int2_area);
                 break;
             }
@@ -340,7 +340,7 @@ void Engine::MaterialProperty::addPropertyInterfaceToInspector(){
                 IntPropertyArea* integer_area = new IntPropertyArea;
                 integer_area->setLabel(QString::fromStdString(integer_p->prop_caption)); //Its label
                 integer_area->value = &integer_conf->value;
-                integer_area->go_property = static_cast<void*>(this);
+                integer_area->go_property = this;
                 _inspector_win->addPropertyArea(integer_area);
 
                 break;
@@ -353,7 +353,7 @@ void Engine::MaterialProperty::addPropertyInterfaceToInspector(){
                 ColorDialogArea* color_area = new ColorDialogArea;
                 color_area->setLabel(QString::fromStdString(color_p->prop_caption)); //Its label
                 color_area->color = &color_conf->color;
-                color_area->go_property = static_cast<void*>(this);
+                color_area->go_property = this;
                 _inspector_win->addPropertyArea(color_area);
 
                 break;
@@ -367,7 +367,7 @@ void Engine::MaterialProperty::addPropertyInterfaceToInspector(){
                 for(int i = 0; i < 6; i ++){
                     PickResourceArea* area = new PickResourceArea(RESOURCE_TYPE_TEXTURE);
                     area->setLabel(captions[i]);
-                    area->go_property = static_cast<void*>(this);
+                    area->go_property = this;
                     area->rel_path_std = &texture_conf->texture_str[i];
                     area->isShowNoneItem = true;
                     _inspector_win->addPropertyArea(area);
@@ -466,13 +466,13 @@ void Engine::RigidbodyProperty::addPropertyInterfaceToInspector(){
     Float3PropertyArea* gravityE = new Float3PropertyArea; //New property area
     gravityE->setLabel("Gravity"); //Its label
     gravityE->vector = &this->gravity; //Ptr to our vector
-    gravityE->go_property = static_cast<void*>(this);
+    gravityE->go_property = this;
     _inspector_win->addPropertyArea(gravityE);
 
     Float3PropertyArea* linearE = new Float3PropertyArea; //New property area
     linearE->setLabel("Linear"); //Its label
     linearE->vector = &this->linearVel; //Ptr to our vector
-    linearE->go_property = static_cast<void*>(this);
+    linearE->go_property = this;
     _inspector_win->addPropertyArea(linearE);
 }
 
@@ -480,19 +480,19 @@ void Engine::CharacterControllerProperty::addPropertyInterfaceToInspector(){
     FloatPropertyArea* widthField = new FloatPropertyArea; //New property area
     widthField->setLabel("Width"); //Its label
     widthField->value = &this->width; //Ptr to our vector
-    widthField->go_property = static_cast<void*>(this);
+    widthField->go_property = this;
     _inspector_win->addPropertyArea(widthField);
 
     FloatPropertyArea* heightField = new FloatPropertyArea; //New property area
     heightField->setLabel("Height"); //Its label
     heightField->value = &this->height; //Ptr to our vector
-    heightField->go_property = static_cast<void*>(this);
+    heightField->go_property = this;
     _inspector_win->addPropertyArea(heightField);
 
     Float3PropertyArea* transformOffsetField = new Float3PropertyArea; //New property area
     transformOffsetField->setLabel("Transform Offset"); //Its label
     transformOffsetField->vector = &this->transform_offset; //Ptr to our vector
-    transformOffsetField->go_property = static_cast<void*>(this);
+    transformOffsetField->go_property = this;
     _inspector_win->addPropertyArea(transformOffsetField);
 }
 
@@ -521,7 +521,7 @@ void Engine::ZPScriptProperty::addPropertyInterfaceToInspector(){
    
     PickResourceArea* area = new PickResourceArea(RESOURCE_TYPE_SCRIPT);
     area->setLabel("Angel Script");
-    area->go_property = static_cast<void*>(this);
+    area->go_property = this;
     area->rel_path_std = &script_path;
     _inspector_win->addPropertyArea(area);
 
@@ -531,35 +531,42 @@ void Engine::ZPScriptProperty::addPropertyInterfaceToInspector(){
             IntPropertyArea* intH = new IntPropertyArea; //New property area
             intH->setLabel(QString::fromStdString(handle->name)); //Its label
             intH->value = handle->getValue<int>(); //Ptr to our vector
-            intH->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
+            intH->go_property = this; //Pointer to this to activate matrix recalculaton
             _inspector_win->addPropertyArea(intH);
         }
         if (handle->typeID == asTYPEID_FLOAT) {
             FloatPropertyArea* floatH = new FloatPropertyArea; //New property area
             floatH->setLabel(QString::fromStdString(handle->name)); //Its label
             floatH->value = handle->getValue<float>(); //Ptr to our vector
-            floatH->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
+            floatH->go_property = this; //Pointer to this to activate matrix recalculaton
             _inspector_win->addPropertyArea(floatH);
         }
         if (handle->typeID == asTYPEID_BOOL) {
             BoolCheckboxArea* boolH = new BoolCheckboxArea; //New property area
             boolH->setLabel(QString::fromStdString(handle->name)); //Its label
             boolH->bool_ptr = handle->getValue<bool>(); //Ptr to our vector
-            boolH->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
+            boolH->go_property = this; //Pointer to this to activate matrix recalculaton
             _inspector_win->addPropertyArea(boolH);
         }
         if (handle->typeID == AG_VECTOR3) {
             Float3PropertyArea* vec3H = new Float3PropertyArea; //New property area
             vec3H->setLabel(QString::fromStdString(handle->name)); //Its label
             vec3H->vector = handle->getValue<ZSVECTOR3>(); //Ptr to our vector
-            vec3H->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
+            vec3H->go_property = this; //Pointer to this to activate matrix recalculaton
             _inspector_win->addPropertyArea(vec3H);
+        }
+        if (handle->typeID == AG_RGB_COLOR) {
+            ColorDialogArea* color_area = new ColorDialogArea;
+            color_area->setLabel(QString::fromStdString(handle->name)); //Its label
+            color_area->color = handle->getValue<ZSRGBCOLOR>();
+            color_area->go_property = this;
+            _inspector_win->addPropertyArea(color_area);
         }
         if (handle->typeID == AG_STRING) {
             StringPropertyArea* area = new StringPropertyArea;
             area->setLabel(QString::fromStdString(handle->name));
             area->value_ptr = handle->getValue<std::string>();
-            area->go_property = static_cast<void*>(this);
+            area->go_property = this;
             _inspector_win->addPropertyArea(area);
         }
     }
@@ -570,36 +577,36 @@ void Engine::ShadowCasterProperty::addPropertyInterfaceToInspector(){
     IntPropertyArea* textureW = new IntPropertyArea; //New property area
     textureW->setLabel("Texture Width"); //Its label
     textureW->value = &this->TextureWidth; //Ptr to our vector
-    textureW->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
+    textureW->go_property = this; //Pointer to this to activate matrix recalculaton
     _inspector_win->addPropertyArea(textureW);
 
     IntPropertyArea* textureH = new IntPropertyArea; //New property area
     textureH->setLabel("Texture Height"); //Its label
     textureH->value = &this->TextureHeight; //Ptr to our vector
-    textureH->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
+    textureH->go_property = this; //Pointer to this to activate matrix recalculaton
     _inspector_win->addPropertyArea(textureH);
 
     FloatPropertyArea* bias = new FloatPropertyArea; //New property area
     bias->setLabel("Shadow bias"); //Its label
     bias->value = &this->shadow_bias; //Ptr to our vector
-    bias->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
+    bias->go_property = this; //Pointer to this to activate matrix recalculaton
     _inspector_win->addPropertyArea(bias);
 
     FloatPropertyArea* _nearPlane = new FloatPropertyArea; //New property area
     _nearPlane->setLabel("Near plane"); //Its label
     _nearPlane->value = &this->nearPlane; //Ptr to our vector
-    _nearPlane->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
+    _nearPlane->go_property = this; //Pointer to this to activate matrix recalculaton
     _inspector_win->addPropertyArea(_nearPlane);
     FloatPropertyArea* _farPlane = new FloatPropertyArea; //New property area
     _farPlane->setLabel("Far plane"); //Its label
     _farPlane->value = &this->farPlane; //Ptr to our vector
-    _farPlane->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
+    _farPlane->go_property = this; //Pointer to this to activate matrix recalculaton
     _inspector_win->addPropertyArea(_farPlane);
 
     IntPropertyArea* _viewport = new IntPropertyArea; //New property area
     _viewport->setLabel("Shadow viewport"); //Its label
     _viewport->value = &this->projection_viewport; //Ptr to our vector
-    _viewport->go_property = static_cast<void*>(this); //Pointer to this to activate matrix recalculaton
+    _viewport->go_property = this; //Pointer to this to activate matrix recalculaton
     _inspector_win->addPropertyArea(_viewport);
 }
 
@@ -620,7 +627,7 @@ void Engine::AnimationProperty::addPropertyInterfaceToInspector(){
 
     PickResourceArea* area = new PickResourceArea(RESOURCE_TYPE_ANIMATION);
     area->setLabel("Animation");
-    area->go_property = static_cast<void*>(this);
+    area->go_property = this;
     area->rel_path_std = &this->anim_label;
     _inspector_win->addPropertyArea(area);
 
@@ -629,7 +636,6 @@ void Engine::AnimationProperty::addPropertyInterfaceToInspector(){
         btn->onPressFuncPtr = &onAnimPlay;
         btn->button->setText("Play"); //Setting text to qt button
         _inspector_win->getContentLayout()->addWidget(btn->button);
-        btn->insp_ptr = _inspector_win; //Setting inspector pointer
         _inspector_win->registerUiObject(btn);
     }
     if(Playing == true){
@@ -637,7 +643,6 @@ void Engine::AnimationProperty::addPropertyInterfaceToInspector(){
         stopbtn->onPressFuncPtr = &onAnimStop;
         stopbtn->button->setText("Stop"); //Setting text to qt button
         _inspector_win->getContentLayout()->addWidget(stopbtn->button);
-        stopbtn->insp_ptr = _inspector_win; //Setting inspector pointer
         _inspector_win->registerUiObject(stopbtn);
     }
 }

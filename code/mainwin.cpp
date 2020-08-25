@@ -199,7 +199,7 @@ void MainWin::onAddProjButtonClicked(){
 }
 
 void MainWin::onShowCreateNewProjectWindow(){
-    cr_w->mainwin_ptr = static_cast<void*>(this); //Send pointer to this window
+    cr_w->mainwin_ptr = this; //Send pointer to this window
     cr_w->show();
 }
 
@@ -215,7 +215,7 @@ void MainWin::onSelectProjectToOpen(){
             this->hide(); //Close project selection window
             //Open Editor with project
             this->edit_win_ptr = ZSEditor::openProject(app_ptr, conf_ptr->editwin_proj); //Call project opening
-            this->edit_win_ptr->mainwin_ptr = static_cast<void*>(this);
+            this->edit_win_ptr->mainwin_ptr = this;
         }
     }
 

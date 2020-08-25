@@ -157,7 +157,7 @@ void EditWindow::onFileCtxMenuShow(QPoint point) {
     }
 }
 void EditWindow::onNewScript() {
-    std::string scriptContent = "class angel : ZPScript{\n\tangel(GameObject@ o)\n{\n\n}\n\tvoid Start() {\n}\n\tvoid Update(){\n}\n}";
+    std::string scriptContent = "class angel : ZPScript{\n\tangel(GameObject@ o){\n\n\t}\n\tvoid Start() {\n\n\t}\n\tvoid Update(){\n\n\t}\n}";
     this->createNewTextFile(current_dir, "Script", ".as", scriptContent.c_str(), scriptContent.size());
 
     updateFileList(); //Make new file visible

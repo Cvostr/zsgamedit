@@ -32,23 +32,9 @@ void GO_W_I::recreate(int index) {
 }
 
 void GO_W_I::recreateAll(int max) {
-	//counter of deleted items
-	unsigned int total_deleted = 0;
-	//While all objects aren't deleted
-	while (total_deleted < max) {
-		//iterate over all items
-		for (unsigned int i = 0; i < max; i++) {
-			QTreeWidgetItem* item = go_items.at(i);
-			//if item has no children
-			if(item->childCount() == 0)
-				//delete item
-				delete item;
-			//increase counter of deleted items
-			total_deleted++;
-		}
-	}
 	for (unsigned int i = 0; i < max; i++) {
-		go_items[i] = new QTreeWidgetItem;
+		clearChildrenList(go_items[i]);
+		recreate(i);
 	}
 }
 
@@ -70,7 +56,8 @@ void GO_W_I::updateObjsNames(Engine::World* world) {
 
 void GO_W_I::makeParentings(Engine::World* world, QTreeWidget* obj_widget_ptr) {
 	rootWidget = obj_widget_ptr;
-	obj_widget_ptr->clear();
+	//obj_widget_ptr->clear();
+	
 	//Now add all objects to inspector tree
 	for (unsigned int obj_i = 0; obj_i < world->objects.size(); obj_i++) {
 		Engine::GameObject* obj_ptr = world->objects[obj_i];
@@ -78,8 +65,12 @@ void GO_W_I::makeParentings(Engine::World* world, QTreeWidget* obj_widget_ptr) {
 			obj_widget_ptr->addTopLevelItem(GO_W_I::getItem(obj_ptr));
 		}
 		else { //It has a parent
-			Engine::GameObject* parent_ptr = (Engine::GameObject*)obj_ptr->parent.ptr; //Get parent pointer
-			GO_W_I::getItem(parent_ptr)->addChild(GO_W_I::getItem(obj_ptr)); //Connect Qt Tree Items
+			Engine::GameObject* parent_ptr = obj_ptr->parent.ptr; //Get parent pointer
+
+			QTreeWidgetItem* parent_item = GO_W_I::getItem(parent_ptr);
+			QTreeWidgetItem* child_item = GO_W_I::getItem(obj_ptr);
+
+			parent_item->addChild(child_item); //Connect Qt Tree Items
 		}
 	}
 }
@@ -98,8 +89,9 @@ void GO_W_I::updateGameObjectItem(Engine::GameObject* obj) {
 	else {
 		rootWidget->addTopLevelItem(go_items[obj->array_index]);
 	}
+	//Get amount of children
 	unsigned int children_num = obj->children.size();
-
+	//iterate over all children
 	for (unsigned int ch_i = 0; ch_i < children_num; ch_i++) {
 		Engine::GameObject* ch = obj->children[ch_i].updLinkPtr();
 		updateGameObjectItem(ch);
@@ -112,5 +104,11 @@ void GO_W_I::clearChildrenList(QTreeWidgetItem* item) {
 		QTreeWidgetItem* c = item->child(0);
 		clearChildrenList(c);
 		item->removeChild(c);
+	}
+}
+
+void GO_W_I::clearChildrenListOnAll(Engine::World* world) {
+	for (unsigned int obj_i = 0; obj_i < world->objects.size(); obj_i++) {
+		clearChildrenList(getItem(world->objects[obj_i]));
 	}
 }

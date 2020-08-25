@@ -132,14 +132,12 @@ void World::loadFromMemory(const char* bytes, unsigned int size, QTreeWidget* w_
     //Perform loading by engine function
     Engine::World::loadFromMemory(bytes, size, settings_ptr);
     //make parentings
+    GO_W_I::recreateAll(MAX_OBJS);
     GO_W_I::makeParentings(this, this->obj_widget_ptr);
 }
 
 void World::openFromFile(std::string file, QTreeWidget* w_ptr){
     Engine::RenderSettings* settings_ptr = renderer->getRenderSettings();
-    this->obj_widget_ptr = w_ptr;
-    //Clear all objects
-    clear(); 
 
     std::ifstream world_stream;
     world_stream.open(file, std::ifstream::binary | std::ifstream::ate); //Opening to read binary data
@@ -174,7 +172,6 @@ void World::writeObjectToPrefab(Engine::GameObject* object_ptr, std::ofstream* s
         writeObjectToPrefab(link.updLinkPtr(), stream);
     }
 }
-
 
 void World::addObjectsFromPrefab(char* data, unsigned int size) {
     Engine::GameObject* object = Engine::World::addObjectsFromPrefab(data, size);
@@ -357,7 +354,6 @@ void World::putToShapshot(WorldSnapshot* snapshot){
 
 void World::recoverFromSnapshot(WorldSnapshot* snapshot){
     this->clear(); //clear world container first
-    obj_widget_ptr->clear(); //clear objects tree
     //iterate over all objects in snapshot
     for(unsigned int objs_num = 0; objs_num < snapshot->objects.size(); objs_num ++){
         Engine::GameObject* obj_ptr = &snapshot->objects[objs_num];
@@ -401,6 +397,7 @@ void World::recoverFromSnapshot(WorldSnapshot* snapshot){
         Engine::GameObject* parent_p = updateLink(&obj_ptr->parent);
         parent_p->children.push_back(obj_ptr->getLinkToThisObject());
     }
+    GO_W_I::recreateAll(MAX_OBJS);
     //make parentings
     GO_W_I::makeParentings(this, this->obj_widget_ptr);
 }
