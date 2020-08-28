@@ -281,6 +281,7 @@ void RenderPipeline::render3D(void* projectedit_ptr, Engine::Camera* cam)
     setFaceCullState(true);
     //Render objects
     processObjects(world_ptr);
+    renderGizmos(projectedit_ptr);
 
     //Disable depth rendering to draw plane correctly
     setDepthState(false);
@@ -295,18 +296,12 @@ void RenderPipeline::render3D(void* projectedit_ptr, Engine::Camera* cam)
     setLightsToBuffer();
 }
 
-void RenderPipeline::processObjects(void* _world_ptr) {
-    World* world_ptr = static_cast<World*>(_world_ptr);
-    //Iterate over all objects in the world
+void RenderPipeline::renderGizmos(void* projectedit_ptr) {
+    EditWindow* editwin_ptr = static_cast<EditWindow*>(projectedit_ptr);
+    World* world_ptr = &editwin_ptr->world;
     for (unsigned int obj_i = 0; obj_i < world_ptr->objects.size(); obj_i++) {
         Engine::GameObject* obj_ptr = world_ptr->objects[obj_i];
-        if (!obj_ptr->hasParent) //if it is a root object
-            obj_ptr->processObject(this); //Draw object
-        
-    }
-    for (unsigned int obj_i = 0; obj_i < world_ptr->objects.size(); obj_i++) {
-        Engine::GameObject* obj_ptr = world_ptr->objects[obj_i];
-        if (world_ptr->isPicked(obj_ptr) && current_state == PIPELINE_STATE::PIPELINE_STATE_DEFAULT) {
+        if (obj_ptr->active && world_ptr->isPicked(obj_ptr) && current_state == PIPELINE_STATE::PIPELINE_STATE_DEFAULT) {
             glDisable(GL_DEPTH_TEST);
             glDisable(GL_CULL_FACE);
 

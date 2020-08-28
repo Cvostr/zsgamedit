@@ -162,10 +162,10 @@ void EditWindow::onMouseMotion(int relX, int relY) {
                 cam_pitch = -89.0f;
 
             ZSVECTOR3 front;
-            front.X = static_cast<float>((cos(DegToRad(cam_yaw)) * cos(DegToRad(cam_pitch))));
-            front.Y = -sin(DegToRad(cam_pitch));
-            front.Z = sin(DegToRad(cam_yaw)) * cos(DegToRad(cam_pitch));
-            vNormalize(&front);
+            front.X = cosf(DegToRad(cam_yaw)) * cosf(DegToRad(cam_pitch));
+            front.Y = -sinf(DegToRad(cam_pitch));
+            front.Z = sinf(DegToRad(cam_yaw)) * cosf(DegToRad(cam_pitch));
+            front.Normalize();
             edit_camera.setFront(front);
         }
     }

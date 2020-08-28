@@ -34,7 +34,7 @@ public:
     void render3D(void* projectedit_ptr, Engine::Camera* cam);
     unsigned int render_getpickedObj(void* projectedit_ptr, int mouseX, int mouseY);
     ZSRGBCOLOR getColorOfPickedTransformControl(int mouseX, int mouseY, void* projectedit_ptr);
-    void processObjects(void* _world_ptr);
+    void renderGizmos(void* projectedit_ptr);
 
     Engine::Camera* cam;
     void* win_ptr;

@@ -83,7 +83,6 @@ void TileGroupProperty::addPropertyInterfaceToInspector(){
         btn->onPressFuncPtr = &onCreateBtnPress;
         btn->button->setText("Process"); //Setting text to qt button
         _inspector_win->getContentLayout()->addWidget(btn->button);
-        btn->insp_ptr = _inspector_win; //Setting inspector pointer
         _inspector_win->registerUiObject(btn);
     }else{
         QString out = "";
@@ -101,7 +100,6 @@ void TileGroupProperty::addPropertyInterfaceToInspector(){
         btn->onPressFuncPtr = &onClearBtnPress;
         btn->button->setText("Clear");
         _inspector_win->getContentLayout()->addWidget(btn->button);
-        btn->insp_ptr = _inspector_win;
         _inspector_win->registerUiObject(btn);
     }
     current_property = this;

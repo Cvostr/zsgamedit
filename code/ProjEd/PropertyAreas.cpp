@@ -1,6 +1,7 @@
 #include "headers/InspectorWin.h"
 #include "headers/InspEditAreas.h"
 #include "headers/ProjectEdit.h"
+#include <world/go_properties.h>
 #include "../World/headers/World.h"
 #include <QDoubleValidator>
 #include <QDragEnterEvent>
@@ -18,9 +19,15 @@ extern ZSGAME_DATA* game_data;
 AreaPropertyTitle::AreaPropertyTitle(Engine::GameObjectProperty* prop){
     pProp = prop; //store pointer to property
     widg_layout.setAlignment(Qt::AlignLeft);
-    this->widg_layout.addWidget(&this->checkbox);
+
+    bool showControls = true;
+    if (prop->type == PROPERTY_TYPE::GO_PROPERTY_TYPE_LABEL || prop->type == PROPERTY_TYPE::GO_PROPERTY_TYPE_TRANSFORM)
+        showControls = false;
+    if(showControls)
+        this->widg_layout.addWidget(&this->checkbox);
     this->widg_layout.addWidget(&this->prop_title);
-    this->widg_layout.addWidget(&this->delete_btn);
+    if (showControls)
+        this->widg_layout.addWidget(&this->delete_btn);
     delete_btn.setText("Delete");
 
     this->layout.addWidget(&this->line);
@@ -45,6 +52,21 @@ AreaPropertyTitle::AreaPropertyTitle(Engine::GameObjectProperty* prop){
 
     this->prop_title.setText(getPropertyString(pProp->type));
 
+    if (pProp->type == PROPERTY_TYPE::GO_PROPERTY_TYPE_AGSCRIPT) {
+        Engine::ZPScriptProperty* prop = static_cast<Engine::ZPScriptProperty*>(pProp);
+        std::string spath = prop->script_path;
+        QString strl;
+        unsigned int step = 0;
+        unsigned int len = spath.size();
+        if (len > 0) {
+            while (spath[len - step] != '/') {
+                strl.insert(0, spath[len - step]);
+                step += 1;
+            }
+        }
+        prop_title.setText("Script - " + strl);
+    }
+
     QObject::connect(&checkbox, SIGNAL(stateChanged(int)), this, SLOT(onActiveCheckboxPressed()));
     QObject::connect(&delete_btn, SIGNAL(clicked()), this, SLOT(onDeleteButtonPressed()));
 }
@@ -53,16 +75,20 @@ void AreaPropertyTitle::onActiveCheckboxPressed() {
     getActionManager()->newPropertyAction(pProp->go_link, pProp->type);
     //Change state
     pProp->active = !pProp->active;
-
+    //refresh Inspector window content
     _editor_win->getInspector()->updateObjectProperties();
 }
 void AreaPropertyTitle::onDeleteButtonPressed(){
     Engine::GameObject* obj_ptr = static_cast<Engine::GameObject*>(pProp->go_link.updLinkPtr()); //cast pointer
-
+    //Add new action witjh object
     getActionManager()->newGameObjectAction(obj_ptr->getLinkToThisObject());
-
-    obj_ptr->removeProperty(pProp);
-
+    //Call removement
+    if(pProp->type == PROPERTY_TYPE::GO_PROPERTY_TYPE_AGSCRIPT)
+        //if property is script
+        obj_ptr->removeScript(pProp);
+    else
+        obj_ptr->removeProperty(pProp);
+    //refresh Inspector window content
     _editor_win->getInspector()->updateObjectProperties();
 }
 
@@ -419,7 +445,6 @@ void Int2PropertyArea::addToInspector(InspectorWin* win){
     win->connect(&this->x_field, SIGNAL(textEdited(QString)), win, SLOT(onPropertyChange()));
 
     win->getContentLayout()->addLayout(this->elem_layout);
-
 }
 
 void Int2PropertyArea::writeNewValues(){

@@ -72,7 +72,7 @@
       <SubSystem>Windows</SubSystem>
       <OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>assimp.lib;freetype.lib;glew32s.lib;OpenGL32.lib;lua53.lib;OpenAL_x64.lib;SDL2.lib;SDL2main.lib;SDL2test.lib;vulkan-1.lib;engine.lib;LinearMath.lib;BulletDynamics.lib;BulletCollision.lib;angelscript64d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>assimp.lib;freetype.lib;glew32s.lib;OpenGL32.lib;OpenAL_x64.lib;SDL2.lib;SDL2main.lib;SDL2test.lib;vulkan-1.lib;engine.lib;LinearMath.lib;BulletDynamics.lib;BulletCollision.lib;angelscript64d.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -86,7 +86,7 @@
       <SubSystem>Windows</SubSystem>
       <OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
       <GenerateDebugInformation>false</GenerateDebugInformation>
-      <AdditionalDependencies>assimp.lib;freetype.lib;glew32s.lib;OpenGL32.lib;lua53.lib;OpenAL_x64.lib;SDL2.lib;SDL2main.lib;SDL2test.lib;vulkan-1.lib;engine.lib;LinearMath.lib;BulletDynamics.lib;BulletCollision.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>assimp.lib;freetype.lib;glew32s.lib;OpenGL32.lib;OpenAL_x64.lib;SDL2.lib;SDL2main.lib;SDL2test.lib;vulkan-1.lib;engine.lib;LinearMath.lib;BulletDynamics.lib;BulletCollision.lib;angelscript64.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

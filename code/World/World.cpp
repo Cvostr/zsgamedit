@@ -385,7 +385,7 @@ void World::recoverFromSnapshot(WorldSnapshot* snapshot){
         Engine::GameObject* obj_ptr = updateLink(&link); //Calculate pointer to new object
         obj_ptr->addScript(); //Add new property to created object
         Engine::ZPScriptProperty* new_script = static_cast<Engine::ZPScriptProperty*>
-            (obj_ptr->scripts[script_i]);
+            (obj_ptr->scripts[obj_ptr->scripts_num - 1]); ///PIZDEC SUKA NAXUI TUT OSHIBKA BLYAT !!!!
         script_ptr->copyTo(new_script);
     }
     //iterate over all objects

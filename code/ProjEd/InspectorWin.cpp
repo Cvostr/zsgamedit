@@ -149,21 +149,6 @@ void InspectorWin::ShowObjectProperties(Engine::GameObject* object_ptr){
 
 void InspectorWin::addPropertyInterfaceToInspector(Engine::GameObjectProperty* property_ptr) {
     AreaPropertyTitle* prop_title = new AreaPropertyTitle(property_ptr);
-    
-    if (property_ptr->type == PROPERTY_TYPE::GO_PROPERTY_TYPE_AGSCRIPT) {
-        Engine::ZPScriptProperty* prop = static_cast<Engine::ZPScriptProperty*>(property_ptr);
-        std::string spath = prop->script_path;
-        QString strl;
-        unsigned int step = 0;
-        unsigned int len = spath.size();
-        if (len > 0) {
-            while (spath[len - step] != '/') {
-                strl.insert(0, spath[len - step]);
-                step += 1;
-            }
-        }
-        prop_title->prop_title.setText("Script - " + strl);
-    }
 
     getContentLayout()->addLayout(&prop_title->layout);
     this->registerUiObject(prop_title);

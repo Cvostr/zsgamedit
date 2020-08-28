@@ -76,7 +76,7 @@ void Engine::processMesh(aiMesh* mesh, Engine::Mesh* mesh_ptr) {
             mesh_ptr->vertices_arr[v].weights[vw_i] = 0.f;
         }
 
-        vNormalize(&mesh_ptr->vertices_arr[v].normal);
+        mesh_ptr->vertices_arr[v].normal.Normalize();
 
     }
 
