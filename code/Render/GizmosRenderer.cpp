@@ -103,6 +103,7 @@ void GizmosRenderer::drawTransformControls(ZSVECTOR3 position, float tall, float
 
 void GizmosRenderer::drawObjectRigidbodyShape(void* phys_property){
     if(phys_property == nullptr) return;
+    glFeaturesOff();
     this->mark_shader_ptr->Use();
 
     Engine::PhysicalProperty* property = static_cast<Engine::PhysicalProperty*>(phys_property);
@@ -139,7 +140,7 @@ void GizmosRenderer::drawObjectRigidbodyShape(void* phys_property){
     //If mesh exist, then draw
     if(mesh_toDraw)
         mesh_toDraw->DrawLines();
-
+    glFeaturesOn();
 }
 
 void GizmosRenderer::glFeaturesOff(){

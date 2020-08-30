@@ -128,8 +128,10 @@
     <ClCompile Include="code\World\GameObject.cpp" />
     <ClCompile Include="code\World\GoProperty\go_filestream.cpp" />
     <ClCompile Include="code\World\GoProperty\go_properties.cpp" />
+    <ClCompile Include="code\World\GoProperty\MaterialPropertyUI.cpp" />
     <ClCompile Include="code\World\GoProperty\TerrainComponent.cpp" />
     <ClCompile Include="code\World\GoProperty\tile_properties.cpp" />
+    <ClCompile Include="code\World\GoProperty\ZPScriptPropertyUI.cpp" />
     <ClCompile Include="code\World\Misc.cpp" />
     <ClCompile Include="code\World\PhysicsPropertyUI.cpp" />
     <ClCompile Include="code\World\TerrainUtils.cpp" />

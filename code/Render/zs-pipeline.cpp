@@ -193,29 +193,20 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr){
     this->cam = cam_ptr;
     this->win_ptr = editwin_ptr;
     this->updateShadersCameraInfo(cam_ptr); //Send camera properties to all drawing shaders
+    setLightsToBuffer();
 
     switch(this->project_struct_ptr->perspective){
         case PERSP_2D:{
-            render2D(projectedit_ptr);
+            render2D();
             break;
         }
         case PERSP_3D:{
-            render3D(projectedit_ptr, cam);
-            Engine::getPlaneMesh2D()->Draw(); //Draw screen
-            
+            render3D(cam);
+            //gizmos->drawGrid();
             break;
         }
     }
-
-
-    //if we control this object
-    if(editwin_ptr->obj_trstate.isTransforming == true && !editwin_ptr->isWorldCamera){
-
-        float dist = getDistance(cam_ptr->camera_pos, editwin_ptr->obj_trstate.obj_ptr->getPropertyPtr<Engine::TransformProperty>()->abs_translation);
-
-        if(this->project_struct_ptr->perspective == PERSP_2D) dist = 70.0f;
-        getGizmosRenderer()->drawTransformControls(editwin_ptr->obj_trstate.obj_ptr->getPropertyPtr<Engine::TransformProperty>()->abs_translation, dist, dist / 10.f);
-    }
+    renderGizmos(projectedit_ptr, cam);
 
     setDepthState(false);
     setBlendingState(true);
@@ -238,72 +229,19 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr){
 
     SDL_GL_SwapWindow(w); //Send rendered frame
 }
-void RenderPipeline::render2D(void* projectedit_ptr){
+
+void RenderPipeline::renderGizmos(void* projectedit_ptr, Engine::Camera* cam) {
+    //Get all pointers
     EditWindow* editwin_ptr = static_cast<EditWindow*>(projectedit_ptr);
     World* world_ptr = &editwin_ptr->world;
-
-    glClearColor(0,0,0,1);
-    ClearFBufferGL(true, true);
-    glEnable(GL_BLEND); //Disable blending to render Skybox and shadows
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glViewport(0, 0, this->WIDTH, this->HEIGHT);
-
-    glEnable(GL_DEPTH_TEST);
-
-    //Render objects
-    processObjects(world_ptr);
-
-
-    setLightsToBuffer();
-
-}
-void RenderPipeline::render3D(void* projectedit_ptr, Engine::Camera* cam)
-{
-    EditWindow* editwin_ptr = static_cast<EditWindow*>(projectedit_ptr);
-    World* world_ptr = &editwin_ptr->world;
-    Engine::Camera* cam_ptr = cam; //We'll set it next
-
-    //Render shadows, first
-    TryRenderShadows(cam);
-
-    //Active Geometry framebuffer
-    gbuffer->bind();
-    glClearColor(0,0,0,1);
-    ClearFBufferGL(true, true);
-    setBlendingState(false); //Disable blending to render Skybox and shadows
-    setFullscreenViewport(this->WIDTH, this->HEIGHT);
-
-    TryRenderSkybox();
-
-    gizmos->drawGrid();
-
-    setDepthState(true);
-    setFaceCullState(true);
-    //Render objects
-    processObjects(world_ptr);
-    renderGizmos(projectedit_ptr);
-
-    //Disable depth rendering to draw plane correctly
-    setDepthState(false);
-    //Disable face culling
-    setFaceCullState(false);
-
-    glBindFramebuffer(GL_FRAMEBUFFER, 0); //Back to default framebuffer
-    ClearFBufferGL(true, false); //Clear screen
-    gbuffer->bindTextures(10); //Bind gBuffer textures
-    deffered_light->Use(); //use deffered shader
-    //Send lights to OpenGL uniform buffer
-    setLightsToBuffer();
-}
-
-void RenderPipeline::renderGizmos(void* projectedit_ptr) {
-    EditWindow* editwin_ptr = static_cast<EditWindow*>(projectedit_ptr);
-    World* world_ptr = &editwin_ptr->world;
+    //iterate over all objects
     for (unsigned int obj_i = 0; obj_i < world_ptr->objects.size(); obj_i++) {
+        //get object pointer
         Engine::GameObject* obj_ptr = world_ptr->objects[obj_i];
+        //Check, if object is alive and active
         if (obj_ptr->active && world_ptr->isPicked(obj_ptr) && current_state == PIPELINE_STATE::PIPELINE_STATE_DEFAULT) {
-            glDisable(GL_DEPTH_TEST);
-            glDisable(GL_CULL_FACE);
+            setDepthState(false);
+            setFaceCullState(false);
 
             EditWindow* editwin_ptr = static_cast<EditWindow*>(win_ptr);
             Engine::TransformProperty* transform_ptr = obj_ptr->getTransformProperty();
@@ -324,6 +262,17 @@ void RenderPipeline::renderGizmos(void* projectedit_ptr) {
             setDepthState(true);
             glEnable(GL_CULL_FACE);
         }
+    }
+
+    //if we control this object
+    //Draw Transform controls
+    if (editwin_ptr->obj_trstate.isTransforming == true && !editwin_ptr->isWorldCamera) {
+        //calculate distance between object and camera
+        //To set constant size of controls on any distance
+        float dist = getDistance(cam->camera_pos, editwin_ptr->obj_trstate.obj_ptr->getPropertyPtr<Engine::TransformProperty>()->abs_translation);
+        //if we are in 2D mode, then distance is constant
+        if (this->project_struct_ptr->perspective == PERSP_2D) dist = 70.0f;
+        getGizmosRenderer()->drawTransformControls(editwin_ptr->obj_trstate.obj_ptr->getPropertyPtr<Engine::TransformProperty>()->abs_translation, dist, dist / 10.f);
     }
 }
 

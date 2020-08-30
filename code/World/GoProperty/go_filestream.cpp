@@ -295,7 +295,16 @@ void Engine::GameObject::saveProperties(std::ofstream* stream){
 
             stream->write(reinterpret_cast<char*>(&var->index), sizeof(unsigned int));
             stream->write(reinterpret_cast<char*>(&var->typeID), sizeof(int));
-            stream->write(reinterpret_cast<char*>(var->value_ptr), var->size);
+            if(var->typeID != AG_STRING)
+                stream->write(reinterpret_cast<char*>(var->value_ptr), var->size);
+            else {
+                std::string* str = static_cast<std::string*>(var->value_ptr);
+                const char* ch = str->c_str();
+                unsigned int str_size = str->size();
+                stream->write(reinterpret_cast<char*>(&str_size), sizeof(unsigned int));
+                stream->write(ch, str_size);
+            }
+
         }
 
         *stream << " ";

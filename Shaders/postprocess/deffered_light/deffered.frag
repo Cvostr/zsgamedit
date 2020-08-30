@@ -17,6 +17,7 @@ struct Light{ //size = 64
 	vec3 color; //size = 16, offset = 48
 };
 layout(location = 0) out vec4 FragColor;
+layout(location = 1) out vec3 BloomColor;
 
 layout(location = 0) in vec2 UVCoord;
 
@@ -98,4 +99,9 @@ void main(){
 	}
 
 	FragColor = vec4(result, 1);
+    float brightness = dot(FragColor.rgb, vec3(0.2126, 0.7152, 0.0722));
+    if(brightness > 1.0)
+        BloomColor = FragColor.rgb;
+    else
+        BloomColor = vec3(0.0, 0.0, 0.0);
 }

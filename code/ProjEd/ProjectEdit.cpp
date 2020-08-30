@@ -252,6 +252,7 @@ void EditWindow::init(){
     game_data->out_manager = new Engine::OutputManager;
     game_data->out_manager->consoleLogWorking = true;
     game_data->isEditor = true;
+    game_data->world = &this->world;
 
     std::string absolute = project.root_path + "/";
     Engine::Loader::setBlobRootDirectory(absolute);
