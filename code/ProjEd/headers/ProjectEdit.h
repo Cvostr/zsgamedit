@@ -113,6 +113,7 @@ public slots:
     void addNewLight();
     void addNewTile();
     void addNewTerrain();
+    void addNewAudsource();
 
     void onSceneSave();
     void onSceneSaveAs();
@@ -223,6 +224,7 @@ public:
     void onMouseMotion(int relX, int relY);
     void onMouseWheel(int x, int y);
     void onKeyDown(SDL_Keysym sym);
+    void sceneWalkWASD();
 
     void resizeEvent(QResizeEvent* event);
 

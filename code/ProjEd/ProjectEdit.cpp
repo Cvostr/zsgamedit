@@ -82,6 +82,7 @@ EditWindow::EditWindow(QApplication* app, QWidget *parent) :
     QObject::connect(ui->actionNew_Light, SIGNAL(triggered()), this, SLOT(addNewLight()));
     QObject::connect(ui->actionNew_Tile, SIGNAL(triggered()), this, SLOT(addNewTile()));
     QObject::connect(ui->actionNew_Terrain, SIGNAL(triggered()), this, SLOT(addNewTerrain()));
+    QObject::connect(ui->actionNew_Audio_source, SIGNAL(triggered()), this, SLOT(addNewAudsource()));
 
     QObject::connect(ui->actionRender_settings, SIGNAL(triggered()), this, SLOT(openRenderSettings()));
     QObject::connect(ui->actionPhysics_Settings, SIGNAL(triggered()), this, SLOT(openPhysicsSettings()));
@@ -465,7 +466,6 @@ void EditWindow::addNewCube(){
     int add_num = 0; //Declaration of addititonal integer
     world.getAvailableNumObjLabel("Cube_", &add_num);
     *obj->label_ptr = "Cube_" + std::to_string(add_num);
-    GO_W_I::getItem(obj->array_index)->setText(0, QString::fromStdString(*obj->label_ptr));
     //Set MESH properties
     Engine::MeshProperty* mesh = obj->getPropertyPtr<Engine::MeshProperty>();
     mesh->resource_relpath = "@cube";
@@ -483,7 +483,6 @@ void EditWindow::addNewLight(){
     int add_num = 0; //Declaration of addititonal integer
     world.getAvailableNumObjLabel("Light_", &add_num);
     *obj->label_ptr = "Light_" + std::to_string(add_num);
-    GO_W_I::getItem(obj->array_index)->setText(0, QString::fromStdString(*obj->label_ptr));
 }
 
 void EditWindow::addNewTile(){
@@ -495,7 +494,6 @@ void EditWindow::addNewTile(){
     int add_num = 0; //Declaration of addititonal integer
     world.getAvailableNumObjLabel("Tile_", &add_num);
     *obj->label_ptr = "Tile_" + std::to_string(add_num);
-    GO_W_I::getItem(obj->array_index)->setText(0, QString::fromStdString(*obj->label_ptr));
     //Assign @mesh
     Engine::MeshProperty* mesh = obj->getPropertyPtr<Engine::MeshProperty>();
     mesh->resource_relpath = "@plane";
@@ -514,8 +512,6 @@ void EditWindow::addNewTerrain(){
     int add_num = 0; //Declaration of addititonal integer
     world.getAvailableNumObjLabel("Terrain_", &add_num);
     *obj->label_ptr = "Terrain_" + std::to_string(add_num);
-    //Update object label on widget
-    GO_W_I::getItem(obj->array_index)->setText(0, QString::fromStdString(*obj->label_ptr));
     //Add terrain property
     obj->addProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_TERRAIN); //Creates terrain inside
     obj->getPropertyPtr<Engine::TerrainProperty>()->onAddToObject();
@@ -526,6 +522,17 @@ void EditWindow::addNewTerrain(){
     updateFileList();
 
 }
+
+void EditWindow::addNewAudsource() {
+    Engine::GameObject* obj = onAddNewGameObject();
+    obj->addProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_AUDSOURCE);
+
+    //Set new name to object
+    int add_num = 0; //Declaration of addititonal integer
+    world.getAvailableNumObjLabel("Audio_", &add_num);
+    *obj->label_ptr = "Audio_" + std::to_string(add_num);
+}
+
 void EditWindow::setupObjectsHieList(){
     QTreeWidget* w_ptr = ui->objsList; //Getting pointer to objects list widget
     w_ptr->clear(); //Clears widget
@@ -730,6 +737,8 @@ void EditWindow::toggleCameras(){
 void EditWindow::glRender(){
 
     GO_W_I::updateObjsNames(&world);
+
+    sceneWalkWASD();
 
     if (game_data->out_manager->RE_TYPE == RuntimeErrorType::RE_TYPE_SCRIPT_ERROR) {
         showErrorMessageBox("Error(s) in scripts", "In one or more scripts there are one or more errors! \nPlease fix them, to get your scene running!\nPress CTRL+L to get look at them");

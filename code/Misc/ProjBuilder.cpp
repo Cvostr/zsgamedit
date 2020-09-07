@@ -122,7 +122,7 @@ void ProjBuilder::prepareDirectory(){
 BuilderWindow::BuilderWindow(QWidget* parent) : QMainWindow(parent),
 ui(new Ui::BuilderWindow){
     ui->setupUi(this);
-    ui->outputText->resize(this->size().width() - 40, this->size().height() - 40);
+    ui->outputText->resize(this->size().width() - 40, this->size().height() - 60);
 }
 
 BuilderWindow::~BuilderWindow(){

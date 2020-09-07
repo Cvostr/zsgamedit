@@ -26,7 +26,7 @@ ConsoleLog::ConsoleLog(QWidget* parent) :
 
 void ConsoleLog::resizeEvent(QResizeEvent* event) {
     tabs->resize(QSize(event->size().width(), tabs->size().height()));
-    logs_list->resize(QSize(event->size().width(), event->size().height() - tabs->size().height()));
+    logs_list->resize(QSize(event->size().width(), event->size().height() - tabs->size().height() - 50));
 }
 
 void ConsoleLog::keyPressEvent(QKeyEvent* ke) {

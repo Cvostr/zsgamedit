@@ -1,6 +1,7 @@
 #include "headers/ProjectEdit.h"
 #include "headers/InspectorWin.h"
 #include "world/go_properties.h"
+#include <input/zs-input.h>
 #include "ui_editor.h"
 
 extern InspectorWin* _inspector_win;
@@ -214,19 +215,18 @@ void EditWindow::onMouseMotion(int relX, int relY) {
     }
 }
 
-void EditWindow::onKeyDown(SDL_Keysym sym) {
-
-    if (sym.sym == SDLK_a && !isSceneRun && !input_state.isLCtrlHold) {
+void EditWindow::sceneWalkWASD() {
+    if (Input::isKeyHold(SDLK_a) && !isSceneRun && !input_state.isLCtrlHold) {
         ZSVECTOR3 pos = edit_camera.getCameraPosition(); //obtain position
-        pos = pos + edit_camera.getCameraRightVec() * -2.2f * deltaTime;
+        pos = pos + edit_camera.getCameraRightVec() * -1.2f * deltaTime;
         edit_camera.setPosition(pos);
     }
-    if (sym.sym == SDLK_d && !isSceneRun && !input_state.isLCtrlHold) {
+    if (Input::isKeyHold(SDLK_d) && !isSceneRun && !input_state.isLCtrlHold) {
         ZSVECTOR3 pos = edit_camera.getCameraPosition(); //obtain position
-        pos = pos + edit_camera.getCameraRightVec() * 2.2f * deltaTime;
+        pos = pos + edit_camera.getCameraRightVec() * 1.2f * deltaTime;
         edit_camera.setPosition(pos);
     }
-    if (sym.sym == SDLK_w && !isSceneRun && !input_state.isLCtrlHold) {
+    if (Input::isKeyHold(SDLK_w) && !isSceneRun && !input_state.isLCtrlHold) {
         ZSVECTOR3 pos = edit_camera.getCameraPosition(); //obtain position
         if (project.perspective == PERSP_2D)
             pos.Y += 2.2f * deltaTime;
@@ -234,7 +234,7 @@ void EditWindow::onKeyDown(SDL_Keysym sym) {
             pos = pos + edit_camera.getCameraFrontVec() * 1.2f * deltaTime;
         edit_camera.setPosition(pos);
     }
-    if (sym.sym == SDLK_s && !isSceneRun && !input_state.isLCtrlHold) {
+    if (Input::isKeyHold(SDLK_s) && !isSceneRun && !input_state.isLCtrlHold) {
         ZSVECTOR3 pos = edit_camera.getCameraPosition(); //obtain position
         if (project.perspective == PERSP_2D)
             pos.Y -= 2.2f * deltaTime;
@@ -242,6 +242,9 @@ void EditWindow::onKeyDown(SDL_Keysym sym) {
             pos = pos - edit_camera.getCameraFrontVec() * 1.2f * deltaTime;
         edit_camera.setPosition(pos);
     }
+}
+
+void EditWindow::onKeyDown(SDL_Keysym sym) {
 
     if (input_state.isLAltHold && sym.sym == SDLK_t) {
         obj_trstate.setTransformOnObject(GO_TRANSFORM_MODE_TRANSLATE);

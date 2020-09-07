@@ -208,25 +208,6 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr){
     }
     renderGizmos(projectedit_ptr, cam);
 
-    setDepthState(false);
-    setBlendingState(true);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    //GlyphFontContainer* c = game_data->resources->getFontByLabel("LiberationMono-Regular.ttf")->font_ptr;
-    int f[12];
-    f[0] = static_cast<int>(L'H');
-    f[1] = static_cast<int>(L'e');
-    f[2] = static_cast<int>(L'l');
-    f[3] = static_cast<int>(L'l');
-    f[4] = static_cast<int>(L'o');
-    f[5] = static_cast<int>(L'q');
-    f[6] = static_cast<int>(L'W');
-    f[7] = static_cast<int>(L'o');
-    f[8] = static_cast<int>(L'r');
-    f[9] = static_cast<int>(L'l');
-    f[10] = static_cast<int>(L'd');
-    //c->DrawString(f, 11, ZSVECTOR2(10,10));
-
     SDL_GL_SwapWindow(w); //Send rendered frame
 }
 
