@@ -56,8 +56,6 @@ public:
     QTreeWidget* obj_widget_ptr;
     bool isPicked(Engine::GameObject* obj);
     void unpickObject();
-    //
-    Engine::GameObject* newObject(); //Add new object to world
     
     Engine::GameObject* dublicateObject(Engine::GameObject* original, bool parent = true);
     Engine::GameObject* Instantiate(Engine::GameObject* original);

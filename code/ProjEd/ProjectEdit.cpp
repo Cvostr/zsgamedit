@@ -7,7 +7,6 @@
 #include <render/zs-materials.h>
 #include "../World/headers/terrain.h"
 #include "world/go_properties.h"
-#include "../World/headers/2dtileproperties.h"
 #include "../Misc/headers/AssimpMeshLoader.h"
 #include "ui_editor.h"
 #include <iostream>

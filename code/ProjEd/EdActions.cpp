@@ -48,9 +48,9 @@ void EdObjectAction::clear(){
     this->snapshot.clear();
 }
 
-void EdActions::newSnapshotAction(World* world_ptr){
+void EdActions::newSnapshotAction(Engine::World* world_ptr){
     EdSnapshotAction* new_action = new EdSnapshotAction;
-    world_ptr->putToShapshot(&new_action->snapshot);
+    ((World*)world_ptr)->putToShapshot(&new_action->snapshot);
 
     putNewAction(new_action);
 }

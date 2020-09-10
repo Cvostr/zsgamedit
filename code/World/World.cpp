@@ -46,21 +46,6 @@ Engine::GameObject* World::Instantiate(Engine::GameObject* original){
     return result;
 }
 
-Engine::GameObject* World::newObject(){
-    Engine::GameObject obj; //Creating base gameobject
-    int add_num = 0; //Declaration of addititonal integer
-    getAvailableNumObjLabel("GameObject_", &add_num);
-
-    obj.world_ptr = this;
-    obj.addProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_LABEL);
-    obj.label_ptr = &obj.getLabelProperty()->label;
-    *obj.label_ptr = "GameObject_" + std::to_string(add_num); //Assigning label to object
-
-    obj.addProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_TRANSFORM);
-    return this->addObject(obj); //Return pointer to new object
-}
-
-
 void World::unpickObject(){
     picked_objs_ids.clear();
 }

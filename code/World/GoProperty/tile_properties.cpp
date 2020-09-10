@@ -9,13 +9,13 @@
 #include <Windows.h> //For Sleep();
 #endif
 
-#include "../headers/2dtileproperties.h"
+#include <world/tile_properties.h>
 #include "../headers/World.h"
 #include "world/go_properties.h"
 #include "../../ProjEd/headers/InspEditAreas.h"
 
 extern InspectorWin* _inspector_win;
-static TileGroupProperty* current_property; //Property, that shown
+static Engine::TileGroupProperty* current_property; //Property, that shown
 extern ZSGAME_DATA* game_data;
 
 void onCreateBtnPress(){
@@ -26,19 +26,7 @@ void onClearBtnPress(){
     current_property->clear();
 }
 
-TileGroupProperty::TileGroupProperty(){
-    type = PROPERTY_TYPE::GO_PROPERTY_TYPE_TILE_GROUP; //Set correct type
-    active = true; //And it is active
-
-    this->isCreated = false;
-    this->tiles_amount_X = 0;
-    this->tiles_amount_Y = 0;
-
-    this->mesh_string = "@plane";
-    this->diffuse_relpath = "@none";
-}
-
-void TileGroupProperty::addPropertyInterfaceToInspector(){
+void Engine::TileGroupProperty::addPropertyInterfaceToInspector(){
     if(!isCreated){ //If tiles haven't been initialized
         IntPropertyArea* tileSizeXArea = new IntPropertyArea;
         tileSizeXArea->setLabel("Tile Width");
@@ -105,10 +93,9 @@ void TileGroupProperty::addPropertyInterfaceToInspector(){
     current_property = this;
 }
 
-void TileGroupProperty::process(){
+void Engine::TileGroupProperty::process(){
     //receive pointer to object that own this property
-    getActionManager()->newSnapshotAction((World*)go_link.world_ptr);
-    World* wrld = (World*)world_ptr;
+    getActionManager()->newSnapshotAction(go_link.world_ptr);
 
     for(int x_i = 0; x_i < tiles_amount_X; x_i ++){
         for(int y_i = 0; y_i < tiles_amount_Y; y_i ++){
@@ -118,7 +105,7 @@ void TileGroupProperty::process(){
 #ifdef _WIN32
             Sleep(10);
 #endif
-            Engine::GameObject* obj = wrld->newObject(); //Invoke new object creation
+            Engine::GameObject* obj = world_ptr->newObject(); //Invoke new object creation
 
             Engine::GameObject* parent = go_link.updLinkPtr();
             Engine::TransformProperty* parent_transform = parent->getPropertyPtr<Engine::TransformProperty>();
@@ -153,7 +140,7 @@ void TileGroupProperty::process(){
     this->isCreated = true;
 }
 
-void TileGroupProperty::clear(){
+void Engine::TileGroupProperty::clear(){
     this->go_link.updLinkPtr();
     //Create snapshot
     getActionManager()->newSnapshotAction((World*)go_link.world_ptr);
@@ -168,20 +155,6 @@ void TileGroupProperty::clear(){
     }
 
     isCreated = false;
-}
-
-void TileGroupProperty::copyTo(Engine::GameObjectProperty* dest){
-    if(dest->type != this->type) return; //if it isn't transform
-
-    //Do base things
-    Engine::GameObjectProperty::copyTo(dest);
-
-    TileGroupProperty* _dest = static_cast<TileGroupProperty*>(dest);
-    //Transfer all variables
-    _dest->geometry = geometry;
-    _dest->tiles_amount_X = tiles_amount_X;
-    _dest->tiles_amount_Y = tiles_amount_Y;
-    _dest->isCreated = isCreated;
 }
 
 void Engine::TileProperty::addPropertyInterfaceToInspector(){

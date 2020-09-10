@@ -59,7 +59,7 @@ public:
 
     void setStoreActions(bool store);
 
-    void newSnapshotAction(World* world_ptr);
+    void newSnapshotAction(Engine::World* world_ptr);
     void newPropertyAction(Engine::GameObjectLink link, PROPERTY_TYPE property_type);
     void newGameObjectAction(Engine::GameObjectLink link);
 

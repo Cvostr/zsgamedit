@@ -1,7 +1,6 @@
 #include "headers/zs-pipeline.h"
 #include "../World/headers/World.h"
 #include "world/go_properties.h"
-#include "../World/headers/2dtileproperties.h"
 #include "../ProjEd/headers/ProjectEdit.h"
 #include <iostream>
 
@@ -139,8 +138,10 @@ unsigned int RenderPipeline::render_getpickedObj(void* projectedit_ptr, int mous
     //Iterate over all objects in the world
     for(unsigned int obj_i = 0; obj_i < world_ptr->objects.size(); obj_i ++){
         Engine::GameObject* obj_ptr = world_ptr->objects[obj_i];
-
-        if (obj_ptr->alive == false) continue;
+        //Check, if object deleted or deactivated
+        if (obj_ptr->alive == false || obj_ptr->active == false) 
+            //if so, then skip it
+            continue;
 
         //If we picking object
         if (current_state == PIPELINE_STATE::PIPELINE_STATE_PICKING) {

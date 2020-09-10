@@ -163,7 +163,6 @@
     <ClInclude Include="code\ProjEd\headers\EditorSettings.h" />
     <ClInclude Include="code\Render\headers\GizmosRenderer.h" />
     <ClInclude Include="code\Render\headers\zs-pipeline.h" />
-    <ClInclude Include="code\World\headers\2dtileproperties.h" />
     <ClInclude Include="code\World\headers\Misc.h" />
     <ClInclude Include="code\World\headers\terrain.h" />
     <ClInclude Include="code\World\headers\World.h" />
