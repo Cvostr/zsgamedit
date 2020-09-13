@@ -4,6 +4,7 @@
 #include "ui_inspector_win.h"
 
 #include <world/go_properties.h>
+#include <world/tile_properties.h>
 #include "../World/headers/World.h"
 #include <QDoubleValidator>
 #include <QObject>
@@ -23,7 +24,7 @@ InspectorWin::InspectorWin(QWidget *parent) :
     this->ui->propertySpace->setContentsMargins(5,1,2,0);
     this->ui->propertySpace->setAlignment(Qt::AlignTop);
 
-     managePropButton = nullptr;
+    paintTileButton = nullptr;
      line = nullptr;
      this->addObjComponentBtn = nullptr;
      gameobject_ptr = nullptr;
@@ -52,11 +53,7 @@ void InspectorWin::onAddComponentBtnPressed(){
 }
 
 void InspectorWin::onManagePropButtonPressed(){
-    ManageComponentDialog* dialog = new ManageComponentDialog(this, gameobject_ptr);
-    dialog->win = this;
-    dialog->exec();
-    updateObjectProperties();
-    delete dialog;
+    
 }
 
 void InspectorWin::clearContentLayout(){
@@ -74,9 +71,9 @@ void InspectorWin::clearContentLayout(){
     this->additional_objects.clear(); //No objects in list
 
     //remove buttons
-    if(managePropButton != nullptr){
-        delete managePropButton;
-        managePropButton = nullptr;
+    if(paintTileButton != nullptr){
+        delete paintTileButton;
+        paintTileButton = nullptr;
     }
     if(addObjComponentBtn != nullptr){
         delete addObjComponentBtn;
@@ -109,12 +106,19 @@ void InspectorWin::addPropButtons(){
     addObjComponentBtn->setText("Add Property");
     ui->propertySpace->addWidget(addObjComponentBtn);
 
-    managePropButton = new QPushButton;
-    managePropButton->setText("Manage");
-    ui->propertySpace->addWidget(managePropButton);
+    if (_editor_win->project.perspective == PERSP_2D && gameobject_ptr->getPropertyPtr<Engine::TileProperty>() != nullptr) {
+        paintTileButton = new QPushButton;
+        paintTileButton->setText("Paint Tile");
+        ui->propertySpace->addWidget(paintTileButton);
+    }
 
     connect(addObjComponentBtn, SIGNAL(clicked()), this, SLOT(onAddComponentBtnPressed()));
-    connect(managePropButton, SIGNAL(clicked()), this, SLOT(onManagePropButtonPressed()));
+    connect(paintTileButton, SIGNAL(clicked()), this, SLOT(onPaintTileClicked()));
+}
+
+void InspectorWin::onPaintTileClicked() {
+    _editor_win->ppaint_state.enabled = true;
+    _editor_win->ppaint_state.prop_ptr = gameobject_ptr->getPropertyPtr<Engine::TileProperty>();
 }
 
 void InspectorWin::ShowObjectProperties(Engine::GameObject* object_ptr){
@@ -143,8 +147,9 @@ void InspectorWin::ShowObjectProperties(Engine::GameObject* object_ptr){
         //Add script to inspector
         addPropertyInterfaceToInspector(script_ptr);
     }
-    addPropButtons(); //add buttons
     gameobject_ptr = object_ptr;
+    addPropButtons(); //add buttons
+    
 }
 
 void InspectorWin::addPropertyInterfaceToInspector(Engine::GameObjectProperty* property_ptr) {
@@ -189,133 +194,6 @@ void InspectorWin::updateAreasChanges(){
 
 void InspectorWin::onPropertyChange(){
     this->onPropertyEdited();
-}
-
-ManageComponentDialog::ManageComponentDialog(InspectorWin* win, void* g_object_ptr, QWidget* parent) :
-    QDialog (parent, Qt::WindowTitleHint | Qt::WindowSystemMenuHint) {
-
-    ctx_menu = new PropertyCtxMenu(win, this);
-    this->g_object_ptr = g_object_ptr;
-    refresh_list();
-
-    this->close_btn.setText("Close");
-
-    contentLayout.addWidget(&property_list, 0, 0);
-    contentLayout.addWidget(&close_btn, 1, 1);
-
-    connect(&close_btn, SIGNAL(clicked()), this, SLOT(reject()));
-    connect(&property_list, SIGNAL(itemClicked(QListWidgetItem *)), this, SLOT(onPropertyDoubleClick()));
-
-    setLayout(&contentLayout);
-    this->setWindowTitle("Manage properties");
-}
-
-void ManageComponentDialog::refresh_list(){
-    //Clear list widget
-    this->property_list.clear();
-    //cast GameObject class pointer
-    Engine::GameObject* obj_ptr = static_cast<Engine::GameObject*>(g_object_ptr);
-    for(int prop_i = 0; prop_i < static_cast<int>(obj_ptr->props_num); prop_i ++){ //iterate over all properties
-        Engine::GameObjectProperty* prop_ptr = obj_ptr->properties[prop_i]; //obtain property pointer
-        QListWidgetItem* item = new QListWidgetItem(getPropertyString(prop_ptr->type), &this->property_list);
-        if(!prop_ptr->active)
-            item->setTextColor(QColor(Qt::gray));
-    }
-}
-
-ManageComponentDialog::~ManageComponentDialog(){
-
-}
-
-void ManageComponentDialog::onPropertyDoubleClick(){
-    this->ctx_menu->selected_property_index = this->property_list.currentIndex().row();
-    this->ctx_menu->show(QCursor::pos());
-}
-
-void ManageComponentDialog::deleteProperty(){
-    Engine::GameObject* obj_ptr = static_cast<Engine::GameObject*>(g_object_ptr); //cast pointer
-
-    getActionManager()->newGameObjectAction(obj_ptr->getLinkToThisObject());
-
-    QListWidgetItem* item = property_list.currentItem(); //Get pressed item
-    QString text = item->text(); //get text of pressed item
-    int item_ind = 0; //iterator
-    for(int i = 0; i < static_cast<int>(obj_ptr->props_num); i ++){ //Iterate over all properties in object
-        Engine::GameObjectProperty* prop_ptr = obj_ptr->properties[i];
-        if(getPropertyString(prop_ptr->type).compare(text) == 0){
-            item_ind = i;
-        }
-    }
-    //call property deletion
-    obj_ptr->removeProperty(item_ind);
-    //update properties list
-    refresh_list();
-    this->win->updateObjectProperties();
-}
-
-PropertyCtxMenu::PropertyCtxMenu(InspectorWin* win, ManageComponentDialog* dialog, QWidget* parent) : QObject(parent){
-    //Allocate Qt stuff
-    this->menu = new QMenu(win);
-    this->win = win;
-    this->dialog = dialog;
-    selected_property_index = 0;
-
-    this->action_delete = new QAction("Delete", win);
-    this->action_paint_prop = new QAction("Paint", win);
-    this->toggle_active = new QAction("Active", win);
-
-    menu->addAction(toggle_active);
-    menu->addAction(action_delete);
-    menu->addAction(action_paint_prop);
-
-    QObject::connect(this->action_delete, SIGNAL(triggered(bool)), this, SLOT(onDeleteClicked()));
-    QObject::connect(this->action_paint_prop, SIGNAL(triggered(bool)), this, SLOT(onPaintClicked()));
-    QObject::connect(this->toggle_active, SIGNAL(triggered(bool)), this, SLOT(onActiveToggleClicked()));
-}
-void PropertyCtxMenu::show(QPoint point){
-    Engine::GameObject* obj_ptr = static_cast<Engine::GameObject*>(this->win->gameobject_ptr); //cast pointer
-
-    Engine::GameObjectProperty* prop_ptr = obj_ptr->properties[this->selected_property_index];
-    //No actions with label property
-    if(prop_ptr->type == PROPERTY_TYPE::GO_PROPERTY_TYPE_LABEL) return;
-
-    if(!prop_ptr->active)
-        this->toggle_active->setText("Activate");
-    else
-        this->toggle_active->setText("Deactivate");
-    //Show menu
-    this->menu->popup(point);
-}
-void PropertyCtxMenu::onDeleteClicked(){
-    dialog->deleteProperty();
-}
-void PropertyCtxMenu::onPaintClicked(){
-    _editor_win->ppaint_state.enabled = true;
-    //cast GameObject class pointer
-    Engine::GameObject* obj_ptr = static_cast<Engine::GameObject*>(this->dialog->g_object_ptr); //cast pointer
-
-    QListWidgetItem* item = dialog->property_list.currentItem(); //Get pressed item
-    QString text = item->text(); //get text of pressed item
-    for(int i = 0; i < static_cast<int>(obj_ptr->props_num); i ++){ //Iterate over all properties in object
-        Engine::GameObjectProperty* prop_ptr = obj_ptr->properties[i];
-        if(getPropertyString(prop_ptr->type).compare(text) == 0){
-            _editor_win->ppaint_state.prop_ptr = obj_ptr->properties[i];
-        }
-    }
-}
-
-void PropertyCtxMenu::onActiveToggleClicked(){
-    Engine::GameObject* obj_ptr = static_cast<Engine::GameObject*>(this->win->gameobject_ptr); //cast pointer
-    //Calculate property pointer
-    Engine::GameObjectProperty* prop_ptr = obj_ptr->properties[this->selected_property_index];
-
-    //Make action
-    getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
-    //Change state
-    prop_ptr->active = !prop_ptr->active;
-
-    this->win->updateObjectProperties();
-    dialog->refresh_list();
 }
 
 AddGoComponentDialog::AddGoComponentDialog(Engine::GameObject* game_object_ptr, QWidget* parent)

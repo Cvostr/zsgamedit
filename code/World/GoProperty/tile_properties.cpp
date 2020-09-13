@@ -103,7 +103,7 @@ void Engine::TileGroupProperty::process(){
             usleep(1100); //Wait some time to make random generator work properly
 #endif
 #ifdef _WIN32
-            Sleep(10);
+            Sleep(1);
 #endif
             Engine::GameObject* obj = world_ptr->newObject(); //Invoke new object creation
 
@@ -116,7 +116,7 @@ void Engine::TileGroupProperty::process(){
             obj->addProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_TILE); //Adding tile
             //Receive properties ptrs
             Engine::TransformProperty* transform = obj->getPropertyPtr<Engine::TransformProperty>();
-            Engine::LabelProperty* label = obj->getPropertyPtr < Engine:: LabelProperty > ();
+            Engine::LabelProperty* label = obj->getPropertyPtr<Engine::LabelProperty>();
             Engine::TileProperty* tile_prop = obj->getPropertyPtr<Engine::TileProperty>();
             Engine::MeshProperty* mesh_prop = obj->getPropertyPtr<Engine::MeshProperty>();
 
@@ -131,7 +131,6 @@ void Engine::TileGroupProperty::process(){
             transform->translation = transform->translation + parent_transform->translation;
 
             label->label = parent_label->label + std::to_string(x_i) + "," + std::to_string(y_i); //Get new object new name
-            GO_W_I::getItem(obj->array_index)->setText(0, QString::fromStdString(label->label));
 
             parent->addChildObject(obj->getLinkToThisObject()); //Make new object dependent
             GO_W_I::getItem(parent->array_index)->addChild(GO_W_I::getItem(obj->array_index)); //Add widget as a child to tree

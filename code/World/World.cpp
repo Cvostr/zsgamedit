@@ -5,7 +5,7 @@
 #include <world/go_properties.h>
 #include <iostream>
 
-extern RenderPipeline* renderer;
+extern RenderPipelineEditor* renderer;
 extern Material* default3dmat;
 extern Project* project_ptr;
 extern ZSGAME_DATA* game_data;

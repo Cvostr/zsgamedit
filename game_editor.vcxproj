@@ -108,6 +108,7 @@
     <ClCompile Include="code\ProjEd\EdActions.cpp" />
     <ClCompile Include="code\ProjEd\EditorFilemanager.cpp" />
     <ClCompile Include="code\ProjEd\EditorInput.cpp" />
+    <ClCompile Include="code\ProjEd\EditorMenu.cpp" />
     <ClCompile Include="code\ProjEd\EditorResources.cpp" />
     <ClCompile Include="code\ProjEd\EditorSettings.cpp" />
     <ClCompile Include="code\ProjEd\EditorUI.cpp" />
@@ -124,9 +125,8 @@
     <ClCompile Include="code\ProjEd\PropertyAreas.cpp" />
     <ClCompile Include="code\ProjEd\ResourcePicker.cpp" />
     <ClCompile Include="code\Render\GizmosRenderer.cpp" />
-    <ClCompile Include="code\Render\zs-pipeline.cpp" />
+    <ClCompile Include="code\Render\zs-pipeline-editor.cpp" />
     <ClCompile Include="code\World\GameObject.cpp" />
-    <ClCompile Include="code\World\GoProperty\go_filestream.cpp" />
     <ClCompile Include="code\World\GoProperty\go_properties.cpp" />
     <ClCompile Include="code\World\GoProperty\MaterialPropertyUI.cpp" />
     <ClCompile Include="code\World\GoProperty\TerrainComponent.cpp" />

@@ -14,7 +14,7 @@
 #include "render/zs-pipeline.h"
 
 
-class RenderPipeline : public Engine::RenderPipeline{
+class RenderPipelineEditor : public Engine::RenderPipeline{
 private:
     GizmosRenderer* gizmos;
 
@@ -44,8 +44,8 @@ public:
     Engine::Shader* getPickingShader();
     Engine::Shader* getShadowmapShader();
 
-    RenderPipeline();
-    ~RenderPipeline();
+    RenderPipelineEditor();
+    ~RenderPipelineEditor();
 };
 
 

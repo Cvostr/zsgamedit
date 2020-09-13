@@ -4,7 +4,7 @@
 #include <iostream>
 #define THUMBNAIL_IMG_SIZE 512
 
-extern RenderPipeline* renderer;
+extern RenderPipelineEditor* renderer;
 //Hack to support resources
 extern ZSGAME_DATA* game_data;
 extern Project* project_ptr;

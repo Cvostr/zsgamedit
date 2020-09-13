@@ -117,14 +117,14 @@ class InspectorWin : public QMainWindow
     Q_OBJECT
 private:
     QPushButton* addObjComponentBtn;
-    QPushButton* managePropButton;
+    QPushButton* paintTileButton;
 
     QFrame* line; //line to divide props and control buttons
 public slots:
     void onAddComponentBtnPressed();
     void onManagePropButtonPressed();
     void onPropertyChange();
-
+    void onPaintTileClicked();
 public:
     bool updateRequired; //Some properties may set that to TRUE to update inspector content
     bool updatePropertyStateLock;
@@ -171,54 +171,5 @@ public:
     ~AddGoComponentDialog();
 };
 
-class ManageComponentDialog;
-
-class PropertyCtxMenu : public QObject{
-    Q_OBJECT
-public slots:
-    void onDeleteClicked();
-    void onPaintClicked();
-    void onActiveToggleClicked();
-
-private:
-    QMenu* menu; //Menu object to contain everything
-
-    QAction* toggle_active;
-    QAction* action_delete;
-    QAction* action_paint_prop;
-
-    InspectorWin* win;
-    ManageComponentDialog* dialog;
-public:
-
-    int selected_property_index;
-
-    PropertyCtxMenu(InspectorWin* win, ManageComponentDialog* dialog, QWidget* parent = nullptr);
-    void show(QPoint point);
-    void close();
-};
-
-class ManageComponentDialog : public QDialog{
-    Q_OBJECT
-private:
-    QGridLayout contentLayout; //Layout to contain everything
-    QPushButton close_btn;
-    PropertyCtxMenu* ctx_menu; //Ctx menu, that shown on list item press
-
-public slots:
-    void onPropertyDoubleClick();
-    void deleteProperty();
-
-public:
-    QListWidget property_list; //list to store wgt list of props
-
-    InspectorWin* win;
-    void* g_object_ptr; //Pointer to object, when we'll add components
-
-    void refresh_list();
-
-    ManageComponentDialog(InspectorWin* win, void* g_object_ptr, QWidget* parent = nullptr);
-    ~ManageComponentDialog();
-};
 
 #endif // INSPECTORWIN_H

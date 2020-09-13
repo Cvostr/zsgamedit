@@ -8,7 +8,7 @@
 
 extern ZSGAME_DATA* game_data;
 
-RenderPipeline::RenderPipeline(){
+RenderPipelineEditor::RenderPipelineEditor(){
     this->pick_shader = nullptr;
     this->obj_mark_shader = nullptr;
     this->obj_grid_shader = nullptr;
@@ -18,11 +18,11 @@ RenderPipeline::RenderPipeline(){
     win_ptr = nullptr;
 }
 
-GizmosRenderer* RenderPipeline::getGizmosRenderer(){
+GizmosRenderer* RenderPipelineEditor::getGizmosRenderer(){
     return this->gizmos;
 }
 
-void RenderPipeline::setup(int bufWidth, int bufHeight){
+void RenderPipelineEditor::setup(int bufWidth, int bufHeight){
     this->pick_shader = Engine::allocShader();
     this->obj_mark_shader = Engine::allocShader();
     this->obj_grid_shader = Engine::allocShader();
@@ -39,7 +39,7 @@ void RenderPipeline::setup(int bufWidth, int bufHeight){
     editorUniformBuffer->init(8, 16);
 }
 
-void RenderPipeline::initGizmos(int projectPespective){
+void RenderPipelineEditor::initGizmos(int projectPespective){
     gizmos = new GizmosRenderer(obj_mark_shader, 
                                 obj_grid_shader,
                                 this->cullFaces,
@@ -49,7 +49,7 @@ void RenderPipeline::initGizmos(int projectPespective){
                                 this->instancedTransformBuffer);
 }
 
-RenderPipeline::~RenderPipeline(){
+RenderPipelineEditor::~RenderPipelineEditor(){
     this->pick_shader->Destroy();
     this->obj_mark_shader->Destroy();
 
@@ -57,7 +57,7 @@ RenderPipeline::~RenderPipeline(){
     delete gizmos;
 }
 
-bool RenderPipeline::InitGLEW(){
+bool RenderPipelineEditor::InitGLEW(){
     glewExperimental = GL_TRUE;
     std::cout << "Calling GLEW creation" << std::endl;
 
@@ -70,7 +70,7 @@ bool RenderPipeline::InitGLEW(){
         return true;
 }
 
-void RenderPipeline::init(){
+void RenderPipelineEditor::init(){
     setFullscreenViewport(this->WIDTH, this->HEIGHT);
 
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -83,7 +83,7 @@ void RenderPipeline::init(){
     initGizmos(this->project_struct_ptr->perspective);
 }
 
-ZSRGBCOLOR RenderPipeline::getColorOfPickedTransformControl(int mouseX, int mouseY, void* projectedit_ptr){
+ZSRGBCOLOR RenderPipelineEditor::getColorOfPickedTransformControl(int mouseX, int mouseY, void* projectedit_ptr){
 
     EditWindow* editwin_ptr = static_cast<EditWindow*>(projectedit_ptr);
     Engine::Camera* cam_ptr = nullptr; //We'll set it next
@@ -97,8 +97,8 @@ ZSRGBCOLOR RenderPipeline::getColorOfPickedTransformControl(int mouseX, int mous
         cam_ptr = &editwin_ptr->edit_camera;
     }
 
-    glClearColor(0,0,0,1);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    setClearColor(0,0,0,1);
+    ClearFBufferGL(true, true);
     //Picking state
 
     setDepthState(false);
@@ -119,11 +119,11 @@ ZSRGBCOLOR RenderPipeline::getColorOfPickedTransformControl(int mouseX, int mous
     return ZSRGBCOLOR(data[0], data[1], data[2]);
 }
 
-unsigned int RenderPipeline::render_getpickedObj(void* projectedit_ptr, int mouseX, int mouseY){
+unsigned int RenderPipelineEditor::render_getpickedObj(void* projectedit_ptr, int mouseX, int mouseY){
     EditWindow* editwin_ptr = static_cast<EditWindow*>(projectedit_ptr);
     World* world_ptr = &editwin_ptr->world;
 
-    glClearColor(1,1,1,1);
+    setClearColor(1,1,1,1);
     this->ClearFBufferGL(true, true);
     setBlendingState(false);
     pick_shader->Use();
@@ -139,7 +139,7 @@ unsigned int RenderPipeline::render_getpickedObj(void* projectedit_ptr, int mous
     for(unsigned int obj_i = 0; obj_i < world_ptr->objects.size(); obj_i ++){
         Engine::GameObject* obj_ptr = world_ptr->objects[obj_i];
         //Check, if object deleted or deactivated
-        if (obj_ptr->alive == false || obj_ptr->active == false) 
+        if (obj_ptr->alive == false || obj_ptr->isActive() == false) 
             //if so, then skip it
             continue;
 
@@ -171,14 +171,15 @@ unsigned int RenderPipeline::render_getpickedObj(void* projectedit_ptr, int mous
     unsigned int* pr_data_ = reinterpret_cast<unsigned int*>(&data[0]);
     unsigned int pr_data = *pr_data_;
 
-    if(data[2] == 255) pr_data = 256 * 256 * 256; //If we haven't picked any object
+    if(data[2] == 255) 
+        pr_data = 256 * 256 * 256; //If we haven't picked any object
 
     this->current_state = PIPELINE_STATE::PIPELINE_STATE_DEFAULT;
 
     return pr_data;
 }
 
-void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr){
+void RenderPipelineEditor::render(SDL_Window* w, void* projectedit_ptr){
     EditWindow* editwin_ptr = static_cast<EditWindow*>(projectedit_ptr);
     Engine::Camera* cam_ptr = nullptr; //We'll set it next
     World* world_ptr = &editwin_ptr->world;
@@ -203,7 +204,6 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr){
         }
         case PERSP_3D:{
             render3D(cam);
-            //gizmos->drawGrid();
             break;
         }
     }
@@ -212,7 +212,7 @@ void RenderPipeline::render(SDL_Window* w, void* projectedit_ptr){
     SDL_GL_SwapWindow(w); //Send rendered frame
 }
 
-void RenderPipeline::renderGizmos(void* projectedit_ptr, Engine::Camera* cam) {
+void RenderPipelineEditor::renderGizmos(void* projectedit_ptr, Engine::Camera* cam) {
     //Get all pointers
     EditWindow* editwin_ptr = static_cast<EditWindow*>(projectedit_ptr);
     World* world_ptr = &editwin_ptr->world;
@@ -258,6 +258,6 @@ void RenderPipeline::renderGizmos(void* projectedit_ptr, Engine::Camera* cam) {
     }
 }
 
-Engine::Shader* RenderPipeline::getPickingShader(){
+Engine::Shader* RenderPipelineEditor::getPickingShader(){
     return this->pick_shader;
 }

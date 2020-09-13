@@ -154,7 +154,7 @@ private:
     SDL_Window* window; //Editor preview sdl2 window
     SDL_GLContext glcontext; //Editor preview window opengl context
     //Render pipeline manager
-    RenderPipeline* render;
+    RenderPipelineEditor* render;
 
     ObjectCtxMenu* obj_ctx_menu; //Context menu on object right click
     FileCtxMenu* file_ctx_menu;
@@ -216,7 +216,7 @@ public:
 
     void glRender(); //Invoke opengl rendering
 
-    RenderPipeline* getRenderPipeline();
+    RenderPipelineEditor* getRenderPipeline();
     InspectorWin* getInspector();
     //SDL2 input events stuff
     void onLeftBtnClicked(int X, int Y);

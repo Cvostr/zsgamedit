@@ -55,3 +55,25 @@ void Engine::GameObject::pick(){
         children[chil_i].updLinkPtr()->pick(); //child and his children are picked now
     }
 }
+
+void Engine::GameObject::saveProperties(std::ofstream* stream) {
+    for (unsigned int prop_i = 0; prop_i < props_num; prop_i++) {
+        Engine::GameObjectProperty* property_ptr = this->properties[prop_i];
+        *stream << "\nG_PROPERTY ";
+        stream->write(reinterpret_cast<char*>(&property_ptr->type), sizeof(int));
+        stream->write(reinterpret_cast<char*>(&property_ptr->active), sizeof(bool));
+        *stream << " ";
+
+        saveProperty(property_ptr, stream);
+    }
+    for (unsigned int script_i = 0; script_i < this->scripts_num; script_i++) {
+        Engine::ZPScriptProperty* script = static_cast<Engine::ZPScriptProperty*>(scripts[script_i]);
+        saveProperty(script, stream);
+        *stream << '\n';
+    }
+}
+
+void Engine::GameObject::saveProperty(GameObjectProperty* prop, std::ofstream* stream) {
+    auto ptr = prop;
+    ptr->savePropertyToStream(stream, this);
+}
