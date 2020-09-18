@@ -168,6 +168,8 @@ private:
     bool hasSheduledWorld;
 
     Engine::GameObject* object_buffer;
+
+    void createResourceDesc(Engine::ZsResource* _resource, QString absfpath, std::string resource_label);
 public:
     float deltaTime;
     bool ready; //Is everything loaded?

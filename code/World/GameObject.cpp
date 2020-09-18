@@ -56,12 +56,12 @@ void Engine::GameObject::pick(){
     }
 }
 
-void Engine::GameObject::saveProperties(std::ofstream* stream) {
+void Engine::GameObject::saveProperties(ZsStream* stream) {
     for (unsigned int prop_i = 0; prop_i < props_num; prop_i++) {
         Engine::GameObjectProperty* property_ptr = this->properties[prop_i];
         *stream << "\nG_PROPERTY ";
-        stream->write(reinterpret_cast<char*>(&property_ptr->type), sizeof(int));
-        stream->write(reinterpret_cast<char*>(&property_ptr->active), sizeof(bool));
+        stream->writeBinaryValue(&property_ptr->type);
+        stream->writeBinaryValue(&property_ptr->active);
         *stream << " ";
 
         saveProperty(property_ptr, stream);
@@ -73,7 +73,7 @@ void Engine::GameObject::saveProperties(std::ofstream* stream) {
     }
 }
 
-void Engine::GameObject::saveProperty(GameObjectProperty* prop, std::ofstream* stream) {
+void Engine::GameObject::saveProperty(GameObjectProperty* prop, ZsStream* stream) {
     auto ptr = prop;
     ptr->savePropertyToStream(stream, this);
 }

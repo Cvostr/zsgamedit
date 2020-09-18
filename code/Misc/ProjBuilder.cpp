@@ -213,7 +213,7 @@ void BlobWriter::writeToBlob(std::string& file_path, Engine::ZsResource* res_ptr
     //Make string with blob path
     QString blob_path = this->name_prefix + QString::number(created_blobs - 1);
     //Write data to map
-    map_stream << "entry " << res_ptr->rel_path << " " << res_ptr->resource_label << " " << blob_path.toStdString() << " "; //write header
+    map_stream << "entry " << res_ptr->rel_path << '\0' << res_ptr->resource_label << '\0' << blob_path.toStdString() << '\0'; //write header
     map_stream.write(reinterpret_cast<char*>(&written_bytes), sizeof(uint64_t));
     map_stream.write(reinterpret_cast<char*>(&size), sizeof(unsigned int));
     map_stream.write(reinterpret_cast<char*>(&res_ptr->resource_type), sizeof(RESOURCE_TYPE));

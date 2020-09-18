@@ -284,15 +284,15 @@ void Engine::TerrainProperty::onMouseMotion(int posX, int posY, int screenY, boo
     }
 }
 
-void Engine::TerrainProperty::savePropertyToStream(std::ofstream* stream, GameObject* obj) {
-    *stream << file_label << '\0'; //Write material relpath
-                //write dimensions
-    stream->write(reinterpret_cast<char*>(&Width), sizeof(float));
-    stream->write(reinterpret_cast<char*>(&Length), sizeof(float));
-    stream->write(reinterpret_cast<char*>(&MaxHeight), sizeof(float));
-    stream->write(reinterpret_cast<char*>(&castShadows), sizeof(bool));
-    stream->write(reinterpret_cast<char*>(&textures_size), sizeof(int));
-    stream->write(reinterpret_cast<char*>(&grassType_size), sizeof(int));
+void Engine::TerrainProperty::savePropertyToStream(ZsStream* stream, GameObject* obj) {
+    stream->writeString(file_label);//Write material relpath
+    //write dimensions
+    stream->writeBinaryValue(&Width);
+    stream->writeBinaryValue(&Length);
+    stream->writeBinaryValue(&MaxHeight);
+    stream->writeBinaryValue(&castShadows);
+    stream->writeBinaryValue(&textures_size);
+    stream->writeBinaryValue(&grassType_size);
 
     *stream << "\n";
 
@@ -301,16 +301,17 @@ void Engine::TerrainProperty::savePropertyToStream(std::ofstream* stream, GameOb
     //Write textures relative pathes
     for (int texture_i = 0; texture_i < textures_size; texture_i++) {
         HeightmapTexturePair* texture_pair = &textures[static_cast<unsigned int>(texture_i)];
-        *stream << texture_pair->diffuse_relpath << '\0' << texture_pair->normal_relpath << '\0'; //Write material relpath
+        stream->writeString(texture_pair->diffuse_relpath);
+        stream->writeString(texture_pair->normal_relpath);
     }
     //Write info about all vegetable types
     for (int grass_i = 0; grass_i < grassType_size; grass_i++) {
         HeightmapGrass* grass_ptr = &getTerrainData()->grass[static_cast<unsigned int>(grass_i)];
         //Write grass diffuse texture
-        *stream << grass_ptr->diffuse_relpath << '\0';
+        stream->writeString(grass_ptr->diffuse_relpath);
         //Write grass size
-        stream->write(reinterpret_cast<char*>(&grass_ptr->scale.X), sizeof(float));
-        stream->write(reinterpret_cast<char*>(&grass_ptr->scale.Y), sizeof(float));
+        stream->writeBinaryValue(&grass_ptr->scale.X);
+        stream->writeBinaryValue(&grass_ptr->scale.Y);
         *stream << "\n";
     }
 }

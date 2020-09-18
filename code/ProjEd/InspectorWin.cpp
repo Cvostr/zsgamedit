@@ -52,10 +52,6 @@ void InspectorWin::onAddComponentBtnPressed(){
     delete dialog; //Free dialog
 }
 
-void InspectorWin::onManagePropButtonPressed(){
-    
-}
-
 void InspectorWin::clearContentLayout(){
     unsigned int areas_num = static_cast<unsigned int>(this->property_areas.size());
     unsigned int objs_num = static_cast<unsigned int>(this->additional_objects.size());

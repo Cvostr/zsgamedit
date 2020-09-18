@@ -292,7 +292,7 @@ void FileRenameDialog::onRenameButtonPressed(){
     QString rel_path = file_path;
     rel_path = file_path.remove(0, static_cast<int>(_editor_win->project.root_path.size() + 1));
 
-    Engine::ZsResource* _res = game_data->resources->getResource<Engine::ZsResource>(rel_path.toStdString());
+    Engine::ZsResource* _res = game_data->resources->getResource(rel_path.toStdString());
     //if resource, attached to file path exists
     if(_res != nullptr){ //if resource found
         //Store old relative path

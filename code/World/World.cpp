@@ -57,25 +57,25 @@ bool World::isPicked(Engine::GameObject* obj) {
             return true;
     return false;
 }
-void World::writeGameObject(Engine::GameObject* object_ptr, std::ofstream* world_stream){
+void World::writeGameObject(Engine::GameObject* object_ptr, ZsStream* world_stream){
     if(object_ptr->alive == true){
-        *world_stream << "\nG_OBJECT " << object_ptr->str_id << " ";
+        *world_stream << "\nG_OBJECT " << object_ptr->str_id << '\0';
         //Write main flags
-        world_stream->write(reinterpret_cast<char*>(&object_ptr->active), sizeof(bool));
-        world_stream->write(reinterpret_cast<char*>(&object_ptr->IsStatic), sizeof(bool));
+        world_stream->writeBinaryValue(&object_ptr->active);
+        world_stream->writeBinaryValue(&object_ptr->IsStatic);
         //If object has at least one child object
         if(object_ptr->children.size() > 0){ 
             int children_num = object_ptr->getAliveChildrenAmount();
             //Write children header
             *world_stream << "\nG_CHI ";
             //Write amount of children i object
-            world_stream->write(reinterpret_cast<char*>(&children_num), sizeof(int));
+            world_stream->writeBinaryValue(&children_num);
             //get children amount
             unsigned int children_am = static_cast<unsigned int>(object_ptr->children.size());
             for(unsigned int chi_i = 0; chi_i < children_am; chi_i ++){ //iterate over all children
                 Engine::GameObjectLink* link_ptr = &object_ptr->children[chi_i]; //Gettin pointer to child
                 if(!link_ptr->isEmpty()){ //If this link isn't broken (after child removal)
-                    *world_stream << link_ptr->obj_str_id << " "; //Writing child's string id
+                    world_stream->writeString(link_ptr->obj_str_id); //Writing child's string id
                 }
             }
         }
@@ -87,13 +87,13 @@ void World::writeGameObject(Engine::GameObject* object_ptr, std::ofstream* world
 void World::saveToFile(std::string file){
     Engine::RenderSettings* settings_ptr = renderer->getRenderSettings();
 
-    std::ofstream world_stream;
+    ZsStream world_stream;
     world_stream.open(file, std::ofstream::binary);
     int version = 1;
     int obj_num = static_cast<int>(this->objects.size());
     world_stream << "ZSP_SCENE ";
-    world_stream.write(reinterpret_cast<char*>(&version), sizeof(int));//Writing version
-    world_stream.write(reinterpret_cast<char*>(&obj_num), sizeof(int)); //Writing objects amount
+    world_stream.writeBinaryValue(&version);//Writing version
+    world_stream.writeBinaryValue(&obj_num); //Writing objects amount
     //Writing render settings
     world_stream << "\nRENDER_SETTINGS_AMB_COLOR\n";
     world_stream.write(reinterpret_cast<char*>(&settings_ptr->ambient_light_color.r), sizeof(int)); //Writing R component of amb color
@@ -146,7 +146,7 @@ void World::openFromFile(std::string file, QTreeWidget* w_ptr){
     delete[] data;
 }
 
-void World::writeObjectToPrefab(Engine::GameObject* object_ptr, std::ofstream* stream){
+void World::writeObjectToPrefab(Engine::GameObject* object_ptr, ZsStream* stream){
     //Write an object
     writeGameObject(object_ptr, stream);
     //get children amount
@@ -297,7 +297,7 @@ Engine::GameObject* World::addMeshNode(ZS3M::SceneNode* node){
 
 void World::storeObjectToPrefab(Engine::GameObject* object_ptr, QString file){
     //open stream
-    std::ofstream prefab_stream;
+    ZsStream prefab_stream;
     prefab_stream.open(file.toStdString(), std::ofstream::binary);
     //Writing prefab header
     prefab_stream << "ZSPIRE_PREFAB\n";

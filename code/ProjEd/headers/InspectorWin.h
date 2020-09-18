@@ -122,7 +122,6 @@ private:
     QFrame* line; //line to divide props and control buttons
 public slots:
     void onAddComponentBtnPressed();
-    void onManagePropButtonPressed();
     void onPropertyChange();
     void onPaintTileClicked();
 public:

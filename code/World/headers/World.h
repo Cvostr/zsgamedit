@@ -68,10 +68,10 @@ public:
     //Load world from bytes
     void loadFromMemory(const char* bytes, unsigned int size, QTreeWidget* w_ptr);
     //Write gameobject data to specified stream
-    void writeGameObject(Engine::GameObject* object_ptr, std::ofstream* world_stream);
+    void writeGameObject(Engine::GameObject* object_ptr, ZsStream* world_stream);
 
     void storeObjectToPrefab(Engine::GameObject* object_ptr, QString file);
-    void writeObjectToPrefab(Engine::GameObject* object_ptr, std::ofstream* stream);
+    void writeObjectToPrefab(Engine::GameObject* object_ptr, ZsStream* stream);
 
     void addObjectsFromPrefab(std::string file);
     void addObjectsFromPrefab(char* data, unsigned int size);

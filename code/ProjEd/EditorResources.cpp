@@ -26,45 +26,37 @@ void EditWindow::lookForResources(QString path) {
     }
 }
 
+void EditWindow::createResourceDesc(Engine::ZsResource* _resource, QString absfpath, std::string resource_label) {
+    QString rel_path = absfpath;
+    rel_path.remove(0, static_cast<int>(project.root_path.size()) + 1); //Get relative path by removing length of project root from start
+
+    _resource->rel_path = rel_path.toStdString();
+    _resource->blob_path = _resource->rel_path;
+    if (resource_label.empty())
+        _resource->resource_label = _resource->rel_path;
+    else
+        _resource->resource_label = resource_label;
+    game_data->resources->pushResource(_resource);
+}
 
 void EditWindow::processResourceFile(QFileInfo fileInfo) {
     QString name = fileInfo.fileName();
     QString absfpath = fileInfo.absoluteFilePath();
     if (checkExtension(name, ".ttf")) { //if its font
         Engine::ZsResource* _resource = new Engine::GlyphResource;
-
-        QString rel_path = absfpath;
-        rel_path.remove(0, static_cast<int>(project.root_path.size()) + 1); //Get relative path by removing length of project root from start
-
-        _resource->rel_path = rel_path.toStdString();
-        _resource->blob_path = _resource->rel_path;
-        _resource->resource_label = _resource->rel_path;
-        game_data->resources->pushResource(_resource);
+        createResourceDesc(_resource, absfpath, "");
     }
     if (checkExtension(name, ".dds")) { //If its an texture
         Engine::ZsResource* _resource = new Engine::TextureResource;
-
-        QString rel_path = absfpath;
-        rel_path.remove(0, static_cast<int>(project.root_path.size()) + 1); //Get relative path by removing length of project root from start
-
-        _resource->rel_path = rel_path.toStdString();
-        _resource->blob_path = _resource->rel_path;
-        _resource->resource_label = _resource->rel_path;
-        game_data->resources->pushResource(_resource);
+        createResourceDesc(_resource, absfpath, "");
     }
     if (checkExtension(name, ".zs3m")) {
         ZS3M::ImportedSceneFile isf;
         isf.loadFromFile(absfpath.toStdString());
 
         for (unsigned int mesh_i = 0; mesh_i < isf.meshes_toRead.size(); mesh_i++) {
-            QString rel_path = absfpath;
-            rel_path.remove(0, static_cast<int>(project.root_path.size()) + 1); //Get relative path by removing length of project root from start
-
             Engine::ZsResource* _resource = new Engine::MeshResource;
-            _resource->rel_path = rel_path.toStdString();
-            _resource->blob_path = _resource->rel_path;
-            _resource->resource_label = isf.meshes_toRead[mesh_i]->mesh_label;
-            game_data->resources->pushResource(_resource);
+            createResourceDesc(_resource, absfpath, isf.meshes_toRead[mesh_i]->mesh_label);
         }
         isf.clearMeshes();
     }
@@ -73,54 +65,24 @@ void EditWindow::processResourceFile(QFileInfo fileInfo) {
         ZS3M::ImportedAnimationFile* iaf = new ZS3M::ImportedAnimationFile;
         iaf->loadFromFile(absfpath.toStdString());
 
-        QString rel_path = absfpath;
-        rel_path.remove(0, static_cast<int>(project.root_path.size()) + 1); //Get relative path by removing length of project root from start
-
         Engine::ZsResource* _resource = new Engine::AnimationResource;
-        _resource->rel_path = rel_path.toStdString();
-        _resource->blob_path = _resource->rel_path;
-        _resource->resource_label = iaf->anim_ptr->name;
-        game_data->resources->pushResource(_resource);
+        createResourceDesc(_resource, absfpath, iaf->anim_ptr->name);
 
         delete iaf;
     }
 
     if (checkExtension(name, ".wav")) { //If its an mesh
         Engine::ZsResource* _resource = new Engine::AudioResource;
-
-        QString rel_path = absfpath;
-        rel_path.remove(0, static_cast<int>(project.root_path.size()) + 1); //Get relative path by removing length of project root from start
-
-        _resource->rel_path = rel_path.toStdString();
-        _resource->blob_path = _resource->rel_path;
-        _resource->resource_label = _resource->rel_path;
-        game_data->resources->pushResource(_resource);
+        createResourceDesc(_resource, absfpath, "");
     }
     if (checkExtension(name, ".zsmat")) { //If its an mesh
         Engine::ZsResource* _resource = new Engine::MaterialResource;
-
-        QString rel_path = absfpath;
-        rel_path.remove(0, static_cast<int>(project.root_path.size()) + 1); //Get relative path by removing length of project root from start
-
-        _resource->size = 0;
-        _resource->rel_path = rel_path.toStdString();
-        _resource->blob_path = _resource->rel_path;
-        _resource->resource_label = _resource->rel_path;
-        game_data->resources->pushResource(_resource);
+        createResourceDesc(_resource, absfpath, "");
 
     }
     if (checkExtension(name, ".as") || checkExtension(name, ".zscr")) { //If its an mesh
         Engine::ZsResource* _resource = new Engine::ScriptResource;
-
-        QString rel_path = absfpath;
-        rel_path.remove(0, static_cast<int>(project.root_path.size()) + 1); //Get relative path by removing length of project root from start
-
-        _resource->size = 0;
-        _resource->rel_path = rel_path.toStdString();
-        _resource->blob_path = _resource->rel_path;
-        _resource->resource_label = _resource->rel_path;
-        game_data->resources->pushResource(_resource);
-
+        createResourceDesc(_resource, absfpath, "");
     }
 }
 
