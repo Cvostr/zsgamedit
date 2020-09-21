@@ -167,7 +167,7 @@ void ObjectCtxMenu::onDublicateClicked(){
     }
 }
 void ObjectCtxMenu::onStorePrefabPressed(){
-    QString prefab_filepath = _editor_win->getCurrentDirectory() + "/" + QString::fromStdString(*obj_ptr->label_ptr) + ".prefab";
+    QString prefab_filepath = _editor_win->getCurrentDirectory() + "/" + QString::fromStdString(obj_ptr->getLabel()) + ".prefab";
     //Call prefab storing
     _editor_win->world.storeObjectToPrefab(this->obj_ptr, prefab_filepath);
     //update file list in current directory
@@ -176,7 +176,7 @@ void ObjectCtxMenu::onStorePrefabPressed(){
 
 void ObjectCtxMenu::onInfoPressed(){
     QString out = "";
-    out += ("Label : " + QString::fromStdString(*obj_ptr->label_ptr) + QString(" \n"));
+    out += ("Label : " + QString::fromStdString(obj_ptr->getLabel()) + QString(" \n"));
     out += "STR ID : " + QString::fromStdString(obj_ptr->str_id) + QString(" \n");
     out += "ARRAY ID : " + QString::number(obj_ptr->array_index) + QString(" \n");
 

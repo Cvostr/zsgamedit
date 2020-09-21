@@ -51,6 +51,16 @@ void GO_W_I::updateObjsNames(Engine::World* world) {
 			continue;
 		//update text in widget item
 		go_items[obj->array_index]->setText(0, QString::fromStdString(label->label));
+
+		if (obj->isActive()) {
+			//if (settings.isDarkTheme)
+			//	GO_W_I::getItem(obj_ptr->array_index)->setTextColor(0, QColor(Qt::white));
+			//else {
+				GO_W_I::getItem(obj->array_index)->setTextColor(0, QColor(Qt::black));
+			//}
+		}
+		else
+			GO_W_I::getItem(obj->array_index)->setTextColor(0, QColor(Qt::gray));
 	}
 }
 

@@ -117,7 +117,7 @@ void EditWindow::addNewCube() {
     //Set new name to object
     int add_num = 0; //Declaration of addititonal integer
     world.getAvailableNumObjLabel("Cube_", &add_num);
-    *obj->label_ptr = "Cube_" + std::to_string(add_num);
+    obj->setLabel("Cube_" + std::to_string(add_num));
     //Set MESH properties
     Engine::MeshProperty* mesh = obj->getPropertyPtr<Engine::MeshProperty>();
     mesh->resource_relpath = "@cube";
@@ -134,7 +134,7 @@ void EditWindow::addNewLight() {
     //Set new name to object
     int add_num = 0; //Declaration of addititonal integer
     world.getAvailableNumObjLabel("Light_", &add_num);
-    *obj->label_ptr = "Light_" + std::to_string(add_num);
+    obj->setLabel("Light_" + std::to_string(add_num));
 }
 
 void EditWindow::addNewTile() {
@@ -145,7 +145,7 @@ void EditWindow::addNewTile() {
     //Set new name to object
     int add_num = 0; //Declaration of addititonal integer
     world.getAvailableNumObjLabel("Tile_", &add_num);
-    *obj->label_ptr = "Tile_" + std::to_string(add_num);
+    obj->setLabel("Tile_" + std::to_string(add_num));
     //Assign @mesh
     Engine::MeshProperty* mesh = obj->getPropertyPtr<Engine::MeshProperty>();
     mesh->resource_relpath = "@plane";
@@ -163,7 +163,7 @@ void EditWindow::addNewTerrain() {
     //Set new name to object
     int add_num = 0; //Declaration of addititonal integer
     world.getAvailableNumObjLabel("Terrain_", &add_num);
-    *obj->label_ptr = "Terrain_" + std::to_string(add_num);
+    obj->setLabel("Terrain_" + std::to_string(add_num));
     //Add terrain property
     obj->addProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_TERRAIN); //Creates terrain inside
     obj->getPropertyPtr<Engine::TerrainProperty>()->onAddToObject();
@@ -182,5 +182,5 @@ void EditWindow::addNewAudsource() {
     //Set new name to object
     int add_num = 0; //Declaration of addititonal integer
     world.getAvailableNumObjLabel("Audio_", &add_num);
-    *obj->label_ptr = "Audio_" + std::to_string(add_num);
+    obj->setLabel("Audio_" + std::to_string(add_num));
 }

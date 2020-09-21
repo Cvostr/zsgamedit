@@ -20,7 +20,7 @@ void Engine::GameObject::recoverFromSnapshot(Engine::GameObjectSnapshot* snapsho
 
         if (prop_ptr->type == PROPERTY_TYPE::GO_PROPERTY_TYPE_LABEL) { //If it is label, we have to do extra stuff
             Engine::LabelProperty* label_p = static_cast<Engine::LabelProperty*>(new_prop_ptr);
-            this->label_ptr = &label_p->label;
+            //this->label_ptr = &label_p->label;
         }
     }
     //recover scripts

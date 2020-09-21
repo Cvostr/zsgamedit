@@ -205,7 +205,6 @@ void World::addMeshGroup(std::string file_path){
     }
 
     Engine::GameObject* rootobj = addMeshNode(node);
-    //GO_W_I::getItem(obj_widget_ptr->arr)
     this->obj_widget_ptr->addTopLevelItem(GO_W_I::getItem(rootobj->array_index));
     //Add animation property to root object for correct skinning support
     rootobj->addProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_ANIMATION);
@@ -225,8 +224,7 @@ Engine::GameObject* World::addMeshNode(ZS3M::SceneNode* node){
     //Add node property to support skinning
     obj.addProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_NODE);
 
-    obj.label_ptr = &obj.getLabelProperty()->label;
-    *obj.label_ptr = node->node_label + std::to_string(add_num); //Assigning label to object
+    obj.setLabel(node->node_label + std::to_string(add_num)); //Assigning label to object
 
     Engine::TransformProperty* transform_prop = obj.getTransformProperty();
     transform_prop->setScale(node->node_scaling);
@@ -268,9 +266,7 @@ Engine::GameObject* World::addMeshNode(ZS3M::SceneNode* node){
             mesh_obj->world_ptr = this;
             mesh_obj->addProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_LABEL);
             mesh_obj->addProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_TRANSFORM);
-
-            mesh_obj->label_ptr = &mesh_obj->getLabelProperty()->label;
-            *mesh_obj->label_ptr = mesh_label + std::to_string(add_num); //Assigning label to object
+            mesh_obj->setLabel(mesh_label + std::to_string(add_num)); //Assigning label to object
 
             //Add to world object and parent it
             mesh_obj = this->addObject(*mesh_obj);
@@ -356,10 +352,6 @@ void World::recoverFromSnapshot(WorldSnapshot* snapshot){
         obj_ptr->addProperty(prop_ptr->type); //Add new property to created object
         auto new_prop = obj_ptr->getPropertyPtrByType(prop_ptr->type);
         prop_ptr->copyTo(new_prop);
-        if(prop_ptr->type == PROPERTY_TYPE::GO_PROPERTY_TYPE_LABEL){ //If it is label, we have to do extra stuff
-            Engine::LabelProperty* label_p = static_cast<Engine::LabelProperty*>(new_prop);
-            obj_ptr->label_ptr = &label_p->label;
-        }
     }
     //Copy all scripts
     for (unsigned int script_i = 0; script_i < snapshot->scripts.size(); script_i++) {

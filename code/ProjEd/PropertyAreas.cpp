@@ -782,7 +782,7 @@ void GameobjectPickArea::setup(){
     Engine::GameObject* obj_ptr = *this->gameobject_ptr_ptr;
 
     if(obj_ptr != nullptr){
-        property_label->setText(QString::fromStdString(*obj_ptr->label_ptr));
+        property_label->setText(QString::fromStdString(obj_ptr->getLabel()));
     }else {
         property_label->setText("<none>");
     }
@@ -819,7 +819,7 @@ void PropertyPickArea::setup(){
     if(property != nullptr){
         Engine::GameObject* obj = property->go_link.updLinkPtr();
         link = obj->getLinkToThisObject();
-        property_label->setText(QString::fromStdString(*this->link.updLinkPtr()->label_ptr) + "<" +getPropertyString(this->prop_type) + ">");
+        property_label->setText(QString::fromStdString(this->link.updLinkPtr()->getLabel()) + "<" +getPropertyString(this->prop_type) + ">");
     }else {
         property_label->setText("<none>");
     }

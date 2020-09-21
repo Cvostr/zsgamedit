@@ -463,6 +463,8 @@ void EditWindow::onRunProject(){
         runWorld();
         if (game_data->out_manager->RE_TYPE == RuntimeErrorType::RE_TYPE_SCRIPT_ERROR) {
             stopWorld();
+            this->world.recoverFromSnapshot(&run_world_snapshot); //create snapshot of current state to recover it later
+            run_world_snapshot.clear(); //Clear snapshot to free up memory
             return;
         }
         //Change button text
@@ -567,26 +569,7 @@ void EditWindow::glRender(){
         showErrorMessageBox("Error(s) in scripts", "In one or more scripts there are one or more errors! \nPlease fix them, to get your scene running!\nPress CTRL+L to get look at them");
         game_data->out_manager->unsetRuntimeError();
     }
-    //iterate over all objects in world
-    for(unsigned int obj_i = 0; obj_i < world.objects.size(); obj_i ++){
-        Engine::GameObject* obj_ptr = world.objects[obj_i];
-        //if object is alive
-        if(obj_ptr->alive){
-            //if object's name changed
-            if (GO_W_I::getItem(obj_ptr->array_index)->text(0).toStdString().compare(*obj_ptr->label_ptr) == 1) {
-                GO_W_I::getItem(obj_ptr->array_index)->setText(0, QString::fromStdString(*obj_ptr->label_ptr));
-            }
-            //if object active, and dark theme is on
-            if(obj_ptr->isActive()){
-                if(settings.isDarkTheme)
-                    GO_W_I::getItem(obj_ptr->array_index)->setTextColor(0, QColor(Qt::white));
-                else {
-                    GO_W_I::getItem(obj_ptr->array_index)->setTextColor(0, QColor(Qt::black));
-                }
-            }else
-                GO_W_I::getItem(obj_ptr->array_index)->setTextColor(0, QColor(Qt::gray));
-        }
-    }
+
     //Update inspector position variables
     this->settings.inspector_win_pos_X = _inspector_win->pos().x();
     this->settings.inspector_win_pos_Y = _inspector_win->pos().y();

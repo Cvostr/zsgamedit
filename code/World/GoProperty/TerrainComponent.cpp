@@ -201,7 +201,7 @@ void Engine::TerrainProperty::onAddToObject(){
     genRandomString(&terrain_random_prefix, 4);
 
     //relative path to terrain file
-    this->file_label = *this->go_link.updLinkPtr()->label_ptr + "_" + terrain_random_prefix + ".terrain";
+    this->file_label = this->go_link.updLinkPtr()->getLabel() + "_" + terrain_random_prefix + ".terrain";
     //Allocate terrain
     data.alloc(this->Width, this->Length);
     //Generate opengl mesh to draw
