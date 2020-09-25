@@ -96,9 +96,9 @@ void World::saveToFile(std::string file){
     world_stream.writeBinaryValue(&obj_num); //Writing objects amount
     //Writing render settings
     world_stream << "\nRENDER_SETTINGS_AMB_COLOR\n";
-    world_stream.write(reinterpret_cast<char*>(&settings_ptr->ambient_light_color.r), sizeof(int)); //Writing R component of amb color
-    world_stream.write(reinterpret_cast<char*>(&settings_ptr->ambient_light_color.g), sizeof(int)); //Writing G component of amb color
-    world_stream.write(reinterpret_cast<char*>(&settings_ptr->ambient_light_color.b), sizeof(int)); //Writing B component of amb color
+    world_stream.writeBinaryValue(&settings_ptr->ambient_light_color.r); //Writing R component of amb color
+    world_stream.writeBinaryValue(&settings_ptr->ambient_light_color.g); //Writing G component of amb color
+    world_stream.writeBinaryValue(&settings_ptr->ambient_light_color.b); //Writing B component of amb color
     world_stream << "\n_END\n";
 
     //Iterate over all objects and write them
@@ -223,7 +223,7 @@ Engine::GameObject* World::addMeshNode(ZS3M::SceneNode* node){
     obj.addProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_TRANSFORM);
     //Add node property to support skinning
     obj.addProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_NODE);
-
+    //Set label of new object
     obj.setLabel(node->node_label + std::to_string(add_num)); //Assigning label to object
 
     Engine::TransformProperty* transform_prop = obj.getTransformProperty();

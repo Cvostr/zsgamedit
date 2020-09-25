@@ -74,6 +74,14 @@
      <height>26</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuMain">
+    <property name="title">
+     <string>Main</string>
+    </property>
+    <addaction name="actionClear"/>
+    <addaction name="actionClear_all"/>
+   </widget>
+   <addaction name="menuMain"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QToolBar" name="toolBar">
@@ -87,6 +95,16 @@
     <bool>false</bool>
    </attribute>
   </widget>
+  <action name="actionClear">
+   <property name="text">
+    <string>Clear</string>
+   </property>
+  </action>
+  <action name="actionClear_all">
+   <property name="text">
+    <string>Clear all</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>

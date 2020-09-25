@@ -28,7 +28,7 @@ void Engine::ZPScriptProperty::addPropertyInterfaceToInspector() {
     area->rel_path_std = &script_path;
     _inspector_win->addPropertyArea(area);
     //Check, if script contain errors
-    /*if (script->hasCompilerErrors()) {
+    if (this->script_res->hasError) {
         //Show error text message
         QString out = "Script contains errors!\nPlease, fix them in order to start scene";
         AreaText* group_info = new AreaText;
@@ -36,7 +36,7 @@ void Engine::ZPScriptProperty::addPropertyInterfaceToInspector() {
         _inspector_win->getContentLayout()->addWidget(group_info->label);
         _inspector_win->registerUiObject(group_info);
     }
-    else {*/
+    else {
         for (unsigned int var_i = 0; var_i < this->vars.size(); var_i++) {
             GlobVarHandle* handle = vars[var_i];
             if (handle->typeID == asTYPEID_INT32) {
@@ -82,5 +82,5 @@ void Engine::ZPScriptProperty::addPropertyInterfaceToInspector() {
                 _inspector_win->addPropertyArea(area);
             }
         }
-
+    }
 }

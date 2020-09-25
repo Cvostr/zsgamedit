@@ -20,6 +20,9 @@ ConsoleLog::ConsoleLog(QWidget* parent) :
     tabs->setTabText(2, "Script Errors");
 
     QObject::connect(tabs, SIGNAL(currentChanged(int)), this, SLOT(currentTabChanged(int)));
+    QObject::connect(ui->actionClear, SIGNAL(triggered()), this, SLOT(clearLogsOnCurrentType()));
+
+    ui->actionClear->setShortcut(Qt::Key_Delete);
 
     leType = LogEntryType::LE_TYPE_SCRIPT_ERROR;
 }
@@ -34,9 +37,7 @@ void ConsoleLog::keyPressEvent(QKeyEvent* ke) {
         this->close();
 	}
     if (ke->key() == Qt::Key_Delete) { //User pressed delete button
-        OutputManager* manager = game_data->out_manager;
-        manager->clearMessagesWithType(leType);
-        updateLogsList();
+        clearLogsOnType(leType);
     }
 
 	QMainWindow::keyPressEvent(ke); // base class implementation
@@ -44,6 +45,16 @@ void ConsoleLog::keyPressEvent(QKeyEvent* ke) {
 
 void ConsoleLog::currentTabChanged(int index) {
     leType = (LogEntryType)index;
+    updateLogsList();
+}
+
+void ConsoleLog::clearLogsOnCurrentType() {
+    clearLogsOnType(leType);
+}
+
+void ConsoleLog::clearLogsOnType(LogEntryType type) {
+    OutputManager* manager = game_data->out_manager;
+    manager->clearMessagesWithType(type);
     updateLogsList();
 }
 

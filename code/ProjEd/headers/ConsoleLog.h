@@ -16,8 +16,10 @@ class ConsoleLog : public QMainWindow
 
 public slots:
     void currentTabChanged(int index);
+    void clearLogsOnCurrentType();
 public:
 
+    void clearLogsOnType(LogEntryType type);
     void resizeEvent(QResizeEvent* event);
     void keyPressEvent(QKeyEvent*);
 

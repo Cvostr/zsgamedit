@@ -560,7 +560,7 @@ void EditWindow::toggleCameras(){
 }
 
 void EditWindow::glRender(){
-
+    //Look for objects names changes
     GO_W_I::updateObjsNames(&world);
 
     sceneWalkWASD();

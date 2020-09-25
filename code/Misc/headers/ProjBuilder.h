@@ -4,6 +4,7 @@
 
 #include "../../Misc/headers/zs_types.h"
 
+#include <misc/misc.h>
 #include <QDialog>
 #include <QTextBrowser>
 #include <QMainWindow>
@@ -35,7 +36,7 @@ public:
 
 class BlobWriter{
 private:
-    std::ofstream map_stream;
+    ZsStream map_stream;
     std::ofstream blob_stream;
 
     bool bl_stream_opened;
