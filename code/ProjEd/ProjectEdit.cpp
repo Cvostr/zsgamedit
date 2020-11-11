@@ -681,15 +681,15 @@ void ObjectTransformState::setTransformOnObject(GO_TRANSFORM_MODE transformMode)
     this->transformMode = transformMode;
     this->isTransforming = true;
     //Add property action
-    Engine::GameObjectProperty* prop_ptr = static_cast<Engine::GameObjectProperty*>(obj_ptr->getPropertyPtr<Engine::TransformProperty>());
+    Engine::IGameObjectComponent* prop_ptr = static_cast<Engine::IGameObjectComponent*>(obj_ptr->getPropertyPtr<Engine::TransformProperty>());
     getActionManager()->newPropertyAction(prop_ptr->go_link, PROPERTY_TYPE::GO_PROPERTY_TYPE_TRANSFORM);
 }
 
-void EditWindow::startManager(EngineComponentManager* manager){
-    manager->setDpMetrics(this->settings.gameViewWin_Width, this->settings.gameViewWin_Height);
-    manager->setProjectStructPtr(&this->project);
-    manager->init();
-    this->managers.push_back(manager);
+void EditWindow::startManager(IEngineComponent* component){
+    component->setDpMetrics(this->settings.gameViewWin_Width, this->settings.gameViewWin_Height);
+    component->setProjectStructPtr(&this->project);
+    component->init();
+    this->managers.push_back(component);
 }
 
 void EditWindow::updateDeltaTime(float deltaTime){

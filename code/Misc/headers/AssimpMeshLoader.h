@@ -1,5 +1,4 @@
-#ifndef zs_assimploader
-#define zs_assimploader
+#pragma once
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -7,7 +6,7 @@
 
 #include "../../triggers.h"
 #include <render/zs-mesh.h>
-#include <render/zs-animation.h>
+#include <render/Animation.hpp>
 #include <misc/zs3m-master.h>
 #include "zs_types.h"
 
@@ -32,5 +31,3 @@ void processMesh(aiMesh* mesh, Engine::Mesh* mesh_ptr);
 
 bool isBoneAvailable(std::string bone_label, const aiScene* scene);
 }
-
-#endif

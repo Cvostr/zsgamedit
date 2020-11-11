@@ -1,8 +1,7 @@
-#ifndef THUMBNAILSMASTER_H
-#define THUMBNAILSMASTER_H
+#pragma once
 
-#include <render/zs-shader.h>
-#include <render/zs-texture.h>
+#include <render/Shader.hpp>
+#include <render/Texture.h>
 #include <render/zs-mesh.h>
 #include <render/zs-materials.h>
 #include <engine/loader.h>
@@ -12,7 +11,7 @@
 #include <vector>
 #include <QPixmap>
 
-class ThumbnailsMaster : public EngineComponentManager{
+class ThumbnailsMaster : public IEngineComponent{
 public:
 
     std::map<std::string, QImage*> texture_thumbnails;
@@ -20,9 +19,6 @@ public:
 
     Engine::Shader* texture_shader;
     Engine::Shader* mesh_shader;
-
-    //virtual void init();
-    //virtual void updateWindowSize(int W, int H);
 
     void prepareMaterialThumbnailPipeline();
 
@@ -41,5 +37,3 @@ public:
     ThumbnailsMaster();
     ~ThumbnailsMaster();
 };
-
-#endif // THUMBNAILSMASTER_H

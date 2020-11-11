@@ -21,14 +21,14 @@ void Engine::MaterialProperty::addPropertyInterfaceToInspector() {
         BoolCheckboxArea* receiveShdws = new BoolCheckboxArea;
         receiveShdws->setLabel("Receive Shadows ");
         receiveShdws->go_property = this;
-        receiveShdws->bool_ptr = &this->receiveShadows;
+        receiveShdws->pResultBool = &this->receiveShadows;
         _inspector_win->addPropertyArea(receiveShdws);
     }
     //Add shader group picker
     ComboBoxArea* mt_shader_group_area = new ComboBoxArea;
     mt_shader_group_area->setLabel("Shader Group");
     mt_shader_group_area->go_property = this;
-    mt_shader_group_area->result_string_std = &this->group_label;
+    mt_shader_group_area->pResultString = &this->group_label;
     //Iterate over all available shader groups and add them to combo box
     for (unsigned int i = 0; i < MtShProps::getMaterialShaderPropertyAmount(); i++) {
         MtShaderPropertiesGroup* ptr = MtShProps::getMtShaderPropertiesGroupByIndex(i);

@@ -14,14 +14,15 @@
 #include <QDialog>
 #include <QCheckBox>
 #include <QComboBox>
+#include <QSpinBox>
 #include <QScrollArea>
 
-#include <render/zs-math.h>
+#include <render/Math.hpp>
 #include "../../Misc/headers/zs_types.h"
 
 enum EDITAREA_TYPE {PEA_TYPE_NONE, PEA_TYPE_STRING, PEA_TYPE_FLOAT, PEA_TYPE_FLOAT2, PEA_TYPE_FLOAT3, PEA_TYPE_INT,
                     PEA_TYPE_INT2,
-                   PEA_TYPE_RESPICK, PEA_TYPE_COLOR, PEA_TYPE_BOOL, PEA_TYPE_COMBOBOX,
+                   PEA_TYPE_RESPICK, PEA_TYPE_COLOR, PEA_TYPE_BOOL, PEA_TYPE_COMBOBOX, PEA_TYPE_SPINBOX,
                     PEA_TYPE_PROPPICK, PEA_TYPE_GOBJECT_PICK};
 
 
@@ -33,7 +34,7 @@ public slots:
     void onActiveCheckboxPressed();
     void onDeleteButtonPressed();
 public:
-    Engine::GameObjectProperty* pProp;
+    Engine::IGameObjectComponent* pProp;
 
     QVBoxLayout layout;
     QHBoxLayout widg_layout;
@@ -44,7 +45,7 @@ public:
     QPushButton delete_btn;
     QLabel prop_title;
 
-    AreaPropertyTitle(Engine::GameObjectProperty* prop);
+    AreaPropertyTitle(Engine::IGameObjectComponent* prop);
 };
 
 class AreaButton : public QObject{
@@ -74,7 +75,7 @@ public slots:
     void onRadioClicked();
 public:
     bool updateInspectorOnChange;
-    Engine::GameObjectProperty* go_property; //Ponter to property, that created this group
+    Engine::IGameObjectComponent* go_property; //Ponter to property, that created this group
     QVBoxLayout* btn_layout; //layout to contain everything
     std::vector<QRadioButton*> rad_buttons;
     uint8_t* value_ptr; //pointer to changing value
@@ -89,7 +90,7 @@ public:
     EDITAREA_TYPE type; //Type of EditArea
     QString label; //Label, describing content
     QLabel* label_widget; //Widget for upper variable
-    Engine::GameObjectProperty* go_property; //Pointer to connected property
+    Engine::IGameObjectComponent* go_property; //Pointer to connected property
 
     QHBoxLayout* elem_layout; //Layout to contain everything
 
@@ -98,10 +99,10 @@ public:
 
     void destroyLayout(); //Destoroy base layout
     virtual void destroyContent(); //Destroy content, placed by inherited class
-    virtual void setup(); //Uses to prepare base values
-    virtual void writeNewValues(); //if some text edited
-    virtual void updateValues(); //if value changed by other method
-    virtual void addToInspector(InspectorWin* win); //Add edit area to inspector layout
+    virtual void setup() {} //Uses to prepare base values
+    virtual void writeNewValues() {} //if some text edited
+    virtual void updateValues() {} //if value changed by other method
+    virtual void addToInspector(InspectorWin* win) {} //Add edit area to inspector layout
     void callPropertyUpdate(); //Call property, that created this area to update
 
     void setLabel(QString label);
@@ -140,7 +141,7 @@ public:
     void updateAreasChanges();
     void ShowObjectProperties(Engine::GameObject* object_ptr);
     void updateObjectProperties();
-    void addPropertyInterfaceToInspector(Engine::GameObjectProperty* property_ptr);
+    void addPropertyInterfaceToInspector(Engine::IGameObjectComponent* property_ptr);
 
     void resizeEvent(QResizeEvent* event);
 

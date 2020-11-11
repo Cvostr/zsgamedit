@@ -38,7 +38,7 @@ void Engine::TerrainProperty::addPropertyInterfaceToInspector(){
     BoolCheckboxArea* castShdws = new BoolCheckboxArea;
     castShdws->setLabel("Cast Shadows ");
     castShdws->go_property = this;
-    castShdws->bool_ptr = &this->castShadows;
+    castShdws->pResultBool = &this->castShadows;
     _inspector_win->addPropertyArea(castShdws);
 
     //Add button to add objects

@@ -12,7 +12,7 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{BB413EDD-0302-455A-A1A8-67185BB556D5}</ProjectGuid>
-    <Keyword>QtVS_v302</Keyword>
+    <Keyword>QtVS_v303</Keyword>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
     <QtMsBuild Condition="'$(QtMsBuild)'=='' OR !Exists('$(QtMsBuild)\qt.targets')">$(MSBuildProjectDirectory)\QtMsBuild</QtMsBuild>
   </PropertyGroup>
@@ -38,19 +38,13 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>..\LIBS\BULLET;..\LIBS;..\engine\code\headers;$(IncludePath)</IncludePath>
-    <LibraryPath>..\LIBS\BULLET\libsDBG;..\x64\Debug;..\LIBS;$(LibraryPath)</LibraryPath>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>..\engine\code\headers;..\LIBS\BULLET;..\LIBS;$(IncludePath)</IncludePath>
-    <LibraryPath>..\x64\Release;..\LIBS\BULLET\libsREL;..\LIBS;$(LibraryPath)</LibraryPath>
-  </PropertyGroup>
+  
+  
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt_defaults.props')">
     <Import Project="$(QtMsBuild)\qt_defaults.props" />
-  </ImportGroup>
+  </ImportGroup><PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'"><IncludePath>..\engine\code\headers;..\LIBS\BULLET;..\LIBS;$(IncludePath)</IncludePath><LibraryPath>..\x64\Release;..\LIBS\BULLET\libsREL;..\LIBS;$(LibraryPath)</LibraryPath></PropertyGroup><PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'"><IncludePath>..\LIBS\BULLET;..\LIBS;..\engine\code\headers;$(IncludePath)</IncludePath><LibraryPath>..\LIBS\BULLET\libsDBG;..\x64\Debug;..\LIBS;$(LibraryPath)</LibraryPath></PropertyGroup>
   <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <QtInstall>msvc2019_64</QtInstall>
+    <QtInstall>msvc2017_64</QtInstall>
     <QtModules>core;gui;opengl;openglextensions;widgets</QtModules>
   </PropertyGroup>
   <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -67,7 +61,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
-    </ClCompile>
+    <MultiProcessorCompilation>true</MultiProcessorCompilation></ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
@@ -81,7 +75,7 @@
       <DebugInformationFormat />
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
-    </ClCompile>
+    <MultiProcessorCompilation>true</MultiProcessorCompilation></ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>

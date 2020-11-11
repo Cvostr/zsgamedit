@@ -2,6 +2,6 @@
 #define editor_manager
 
 #include "zs_types.h"
-#include "engine/EngineManager.h"
+#include "engine/EngineComponent.h"
 
 #endif

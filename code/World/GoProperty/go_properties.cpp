@@ -12,7 +12,7 @@ extern ZSGAME_DATA* game_data;
 //Selected animation
 static Engine::AnimationProperty* current_anim;
 
-Engine::GameObjectProperty* ObjectPropertyLink::updLinkPtr(){
+Engine::IGameObjectComponent* ObjectPropertyLink::updLinkPtr(){
     ptr = object.updLinkPtr()->getPropertyPtrByType(this->prop_type);
 
     return ptr;
@@ -116,12 +116,11 @@ void Engine::LabelProperty::addPropertyInterfaceToInspector(){
 }
 
 void Engine::LabelProperty::onValueChanged(){
-    World* world_ptr = static_cast<World*>(this->world_ptr); //Obtain pointer to world object
     //lets chack if object already exist in world
-    if(!world_ptr->isObjectLabelUnique(this->label)){
+    if(!mWorld->isObjectLabelUnique(this->label)){
         //If object already exist
         int label_add = 0;
-        world_ptr->getAvailableNumObjLabel(this->label, &label_add);
+        mWorld->getAvailableNumObjLabel(this->label, &label_add);
         label = label + "_" + std::to_string(label_add);
     }
 }
@@ -137,7 +136,7 @@ void Engine::MeshProperty::addPropertyInterfaceToInspector(){
     BoolCheckboxArea* IsCastShadows = new BoolCheckboxArea;
     IsCastShadows->setLabel("Cast shadows ");
     IsCastShadows->go_property = this;
-    IsCastShadows->bool_ptr = &this->castShadows;
+    IsCastShadows->pResultBool = &this->castShadows;
     _inspector_win->addPropertyArea(IsCastShadows);
 
     //Check, if mesh is assigned
@@ -210,7 +209,7 @@ void Engine::AudioSourceProperty::addPropertyInterfaceToInspector(){
     BoolCheckboxArea* isLooped = new BoolCheckboxArea;
     isLooped->setLabel("Loop ");
     isLooped->go_property = this;
-    isLooped->bool_ptr = &this->source.looped;
+    isLooped->pResultBool = &this->source.looped;
     _inspector_win->addPropertyArea(isLooped);
 
     FloatPropertyArea* gain_area = new FloatPropertyArea;

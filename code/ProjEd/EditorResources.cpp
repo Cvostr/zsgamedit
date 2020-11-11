@@ -28,7 +28,8 @@ void EditWindow::lookForResources(QString path) {
 
 void EditWindow::createResourceDesc(Engine::ZsResource* _resource, QString absfpath, std::string resource_label) {
     QString rel_path = absfpath;
-    rel_path.remove(0, static_cast<int>(project.root_path.size()) + 1); //Get relative path by removing length of project root from start
+    int len = project.root_path.size() + 1;
+    rel_path.remove(0, len); //Get relative path by removing length of project root from start
 
     _resource->rel_path = rel_path.toStdString();
     _resource->blob_path = _resource->rel_path;

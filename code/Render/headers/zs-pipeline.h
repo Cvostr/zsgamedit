@@ -2,11 +2,11 @@
 #define ZSPIPELINE_H_1
 #define GLEW_STATIC
 #include <GL/glew.h>
-#include <render/zs-shader.h>
+#include <render/Shader.hpp>
 #include <render/zs-mesh.h>
-#include <render/zs-uniform-buffer.h>
-#include <world/zs-camera.h>
-#include <render/zs-texture.h>
+#include <render/UniformBuffer.hpp>
+#include <world/Camera.hpp>
+#include <render/Texture.h>
 #include "GizmosRenderer.h"
 #include "../../Misc/headers/EditorManager.h"
 #include <QMainWindow>

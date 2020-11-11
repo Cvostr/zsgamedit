@@ -2,7 +2,7 @@
 #define GO_W_I_H
 
 #include <QTreeWidget>
-#include <world/World.h>
+#include <world/World.hpp>
 #include <vector>
 
 namespace GO_W_I {

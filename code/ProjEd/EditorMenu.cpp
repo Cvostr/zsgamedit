@@ -84,7 +84,7 @@ void EditWindow::openPhysicsSettings() {
     Float3PropertyArea* float3_area = new Float3PropertyArea;
     float3_area->setLabel("Gravity"); //Its label
     float3_area->vector = &ptr->gravity;
-    float3_area->go_property = reinterpret_cast<Engine::GameObjectProperty*>(this);
+    float3_area->go_property = reinterpret_cast<Engine::IGameObjectComponent*>(this);
     _inspector_win->addPropertyArea(float3_area);
 }
 
@@ -95,7 +95,7 @@ Engine::GameObject* EditWindow::onAddNewGameObject() {
     if (free_ind == static_cast<int>(world.objects.size())) {
         Engine::GameObject* obj = new Engine::GameObject;
         obj->alive = false;
-        obj->world_ptr = &world;
+        obj->mWorld = &world;
         obj->array_index = free_ind;
         world.objects.push_back(obj);
     }

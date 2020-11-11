@@ -105,7 +105,7 @@ void Engine::TileGroupProperty::process(){
 #ifdef _WIN32
             Sleep(1);
 #endif
-            Engine::GameObject* obj = world_ptr->newObject(); //Invoke new object creation
+            Engine::GameObject* obj = mWorld->newObject(); //Invoke new object creation
 
             Engine::GameObject* parent = go_link.updLinkPtr();
             Engine::TransformProperty* parent_transform = parent->getPropertyPtr<Engine::TransformProperty>();
@@ -145,9 +145,9 @@ void Engine::TileGroupProperty::clear(){
     getActionManager()->newSnapshotAction((World*)go_link.world_ptr);
 
     Engine::GameObject* parent = go_link.updLinkPtr();
-    unsigned int children_am = static_cast<unsigned int>(parent->children.size());
-    for(unsigned int ch_i = 0; ch_i < children_am; ch_i ++){
-        Engine::GameObjectLink link_toremove = parent->children[0];
+    size_t children_am = parent->mChildren.size();
+    for(size_t ch_i = 0; ch_i < children_am; ch_i ++){
+        Engine::GameObjectLink link_toremove = parent->mChildren[0];
         link_toremove.updLinkPtr();
         this->go_link.updLinkPtr();
         parent = go_link.ptr;
@@ -160,7 +160,7 @@ void Engine::TileProperty::addPropertyInterfaceToInspector(){
     BoolCheckboxArea* isAnim = new BoolCheckboxArea;
     isAnim->setLabel("Animated ");
     isAnim->go_property = this;
-    isAnim->bool_ptr = &this->anim_property.isAnimated;
+    isAnim->pResultBool = &this->anim_property.isAnimated;
     isAnim->updateInspectorOnChange = true;
     _inspector_win->addPropertyArea(isAnim);
 

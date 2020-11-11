@@ -127,19 +127,19 @@ void InspectorWin::ShowObjectProperties(Engine::GameObject* object_ptr){
     BoolCheckboxArea* isActive = new BoolCheckboxArea;
     isActive->setLabel("Active ");
     isActive->go_property = nullptr;
-    isActive->bool_ptr = &object_ptr->active;
+    isActive->pResultBool = &object_ptr->mActive;
     addPropertyArea(isActive);
     //Next add all property areas
     unsigned int props_num = static_cast<unsigned int>(object_ptr->props_num);
     unsigned int scripts_num = static_cast<unsigned int>(object_ptr->scripts_num);
     //iterate over props to show them all
     for(unsigned int prop_it = 0; prop_it < props_num; prop_it ++){ //iterate over all properties and send them to inspector
-        Engine::GameObjectProperty* property_ptr = object_ptr->properties[prop_it]; //Obtain pointer to object property
+        Engine::IGameObjectComponent* property_ptr = object_ptr->mComponents[prop_it]; //Obtain pointer to object property
         //Add property to inspector
         addPropertyInterfaceToInspector(property_ptr);
     }
     for (unsigned int script_it = 0; script_it < scripts_num; script_it++) { //iterate over all scripts and send them to inspector
-        Engine::GameObjectProperty* script_ptr = object_ptr->scripts[script_it]; //Obtain pointer to object script
+        Engine::IGameObjectComponent* script_ptr = object_ptr->mScripts[script_it]; //Obtain pointer to object script
         //Add script to inspector
         addPropertyInterfaceToInspector(script_ptr);
     }
@@ -148,7 +148,7 @@ void InspectorWin::ShowObjectProperties(Engine::GameObject* object_ptr){
     
 }
 
-void InspectorWin::addPropertyInterfaceToInspector(Engine::GameObjectProperty* property_ptr) {
+void InspectorWin::addPropertyInterfaceToInspector(Engine::IGameObjectComponent* property_ptr) {
     AreaPropertyTitle* prop_title = new AreaPropertyTitle(property_ptr);
 
     getContentLayout()->addLayout(&prop_title->layout);

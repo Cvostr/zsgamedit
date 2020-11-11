@@ -175,7 +175,7 @@ void MainWin::saveProjectsConfiguration(){
     //Write projects amount
     conf_stream << "proj_num " << static_cast<int>(this->projects.size()) << "\n";
     //Iterate over all projects and write them
-    for(unsigned int i = 0; i < this->projects.size(); i ++){ //Iterate over all projects in vector
+    for(size_t i = 0; i < this->projects.size(); i ++){ //Iterate over all projects in vector
         std::string pth_str_stl = this->projects[i].projFilePath.toStdString();
         conf_stream << "project " << pth_str_stl << "\n";
     }
@@ -207,7 +207,7 @@ void MainWin::onSelectProjectToOpen(){
     QListWidgetItem* selected_proj_item = ui->projList->currentItem();
     QString proj_label = selected_proj_item->text(); //Getting text of pressed entry
 
-    for(unsigned int entry_i = 0; entry_i < projects.size(); entry_i++){ //Iterate over all projects
+    for(size_t entry_i = 0; entry_i < projects.size(); entry_i++){ //Iterate over all projects
         ProjectConf* conf_ptr = &this->projects[entry_i];
         if(proj_label.compare(conf_ptr->projLabel) == 0){ //If strings have same content
             //We found index, keep going
@@ -223,7 +223,7 @@ void MainWin::onSelectProjectToOpen(){
 
 void MainWin::updateListWidgetContent(){
     ui->projList->clear();
-    for(unsigned int i = 0; i < this->projects.size(); i ++){
+    for(size_t i = 0; i < this->projects.size(); i ++){
 
         ProjectConf* conf_ptr = &this->projects[i];
         //Add project entry to list
@@ -296,11 +296,11 @@ void ProjectCtxMenu::show(QPoint point){
 void ProjectCtxMenu::onDeleteClicked(){
     this->project_conf_ptr->removed = true; //mark as removed
 
-    for (unsigned int i = 0; i < win->projects.size(); i ++) { //Iterating over all objects
+    for (size_t i = 0; i < win->projects.size(); i ++) { //Iterating over all objects
 
         if(&win->projects[i] == this->project_conf_ptr){ //we found removed object
 
-            for (unsigned int obj_i = i + 1; obj_i < win->projects.size(); obj_i ++) { //Iterate over all next chidren
+            for (size_t obj_i = i + 1; obj_i < win->projects.size(); obj_i ++) { //Iterate over all next chidren
                 win->projects[obj_i - 1] = win->projects[obj_i]; //Move it to previous place
             }
 

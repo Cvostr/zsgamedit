@@ -1,9 +1,8 @@
-#ifndef zs_gizmosRenderer
-#define zs_gizmosRenderer
+#pragma once
 
-#include <render/zs-shader.h>
+#include <render/Shader.hpp>
 #include <render/zs-mesh.h>
-#include <render/zs-uniform-buffer.h>
+#include <render/UniformBuffer.hpp>
 #include <GL/glew.h>
 
 #define GRID_STROKE_COUNT 45
@@ -41,6 +40,3 @@ public:
                    Engine::UniformBuffer* inst);
     ~GizmosRenderer();
 };
-
-
-#endif

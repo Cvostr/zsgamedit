@@ -117,7 +117,7 @@ void EditWindow::onMouseMotion(int relX, int relY) {
 
             ppaint_state.last_obj = static_cast<int>(clicked); //Set clicked as last object ID
             //Obtain pointer to object's property
-            Engine::GameObjectProperty* prop_ptr = obj_ptr->getPropertyPtrByType(this->ppaint_state.prop_ptr->type);
+            Engine::IGameObjectComponent* prop_ptr = obj_ptr->getPropertyPtrByType(this->ppaint_state.prop_ptr->type);
 
             if (prop_ptr == nullptr) { //if no property with that type in object
                 //add new property

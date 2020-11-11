@@ -1,7 +1,7 @@
 #ifndef TERRAIN_ED_H
 #define TERRAIN_ED_H
 
-#include <world/terrain.h>
+#include <world/Terrain.hpp>
 
 enum TERRAIN_MODIFY_TYPE{
     TMT_HEIGHT,

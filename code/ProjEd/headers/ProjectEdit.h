@@ -12,7 +12,7 @@
 #include "EdActions.h"
 #include "EditorSettings.h"
 #include "../../Render/headers/zs-pipeline.h"
-#include <world/zs-camera.h>
+#include <world/Camera.hpp>
 #include <misc/oal_manager.h>
 
 struct Resource;
@@ -76,7 +76,7 @@ struct ObjectTransformState{
 
 struct PropertyPaintState{
     bool enabled;
-    Engine::GameObjectProperty* prop_ptr;
+    Engine::IGameObjectComponent* prop_ptr;
 
     float time;
     int last_obj = 0;
@@ -145,7 +145,7 @@ public slots:
 private:
     QApplication* app_ptr;
     //Vector to store all editor managers
-    std::vector<EngineComponentManager*> managers;
+    std::vector<IEngineComponent*> managers;
 
     QString current_dir; //current directory path string
     QString scene_path;
@@ -230,7 +230,7 @@ public:
 
     void resizeEvent(QResizeEvent* event);
 
-    void startManager(EngineComponentManager* manager);
+    void startManager(IEngineComponent* manager);
     void updateDeltaTime(float deltaTime);
     void destroyAllManagers();
 

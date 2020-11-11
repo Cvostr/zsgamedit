@@ -42,7 +42,7 @@ void Engine::PhysicalProperty::addCustomSizeField(){
     BoolCheckboxArea* cust = new BoolCheckboxArea;
     cust->setLabel("Custom size ");
     cust->go_property = this;
-    cust->bool_ptr = &this->isCustomPhysicalSize;
+    cust->pResultBool = &this->isCustomPhysicalSize;
     cust->updateInspectorOnChange = true;
     _inspector_win->addPropertyArea(cust);
 

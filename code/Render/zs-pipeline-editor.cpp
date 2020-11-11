@@ -221,7 +221,7 @@ void RenderPipelineEditor::renderGizmos(void* projectedit_ptr, Engine::Camera* c
         //get object pointer
         Engine::GameObject* obj_ptr = world_ptr->objects[obj_i];
         //Check, if object is alive and active
-        if (obj_ptr->active && world_ptr->isPicked(obj_ptr) && current_state == PIPELINE_STATE::PIPELINE_STATE_DEFAULT) {
+        if (obj_ptr->mActive && world_ptr->isPicked(obj_ptr) && current_state == PIPELINE_STATE::PIPELINE_STATE_DEFAULT) {
             setDepthState(false);
             setFaceCullState(false);
 
@@ -234,7 +234,7 @@ void RenderPipelineEditor::renderGizmos(void* projectedit_ptr, Engine::Camera* c
             if (editwin_ptr->obj_trstate.isTransforming == true)
                 color = ZSRGBCOLOR(255.0f, 255.0f, 0.0f);
             //draw wireframe mesh for picked object
-            if (!editwin_ptr->isWorldCamera && obj_ptr->hasMesh() && obj_ptr->active) { //avoid drawing gizmos during playtime
+            if (!editwin_ptr->isWorldCamera && obj_ptr->hasMesh() && obj_ptr->mActive) { //avoid drawing gizmos during playtime
                 //Draw pick mesh
                 getGizmosRenderer()->drawPickedMeshWireframe(mesh_prop->mesh_ptr->mesh_ptr, transform_ptr->transform_mat, color);
                 //Draw collider

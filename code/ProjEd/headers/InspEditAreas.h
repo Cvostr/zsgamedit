@@ -21,6 +21,32 @@ public:
 
 };
 
+class Float4PropertyArea : public PropertyEditArea {
+public:
+
+    QLineEdit x_field; //Text digit field for X coord
+    QLineEdit y_field; //Text digit field for Y coord
+    QLineEdit z_field; //Text digit field for Z coord
+    QLineEdit w_field; //Text digit field for Z coord
+
+    ZSVECTOR4* vector; //Output variable
+
+    QLabel x_label; //To write X separator
+    QLabel y_label; //To write Y separator
+    QLabel z_label; //To write Z separator
+    QLabel w_label; //To write W separator
+
+    Float4PropertyArea();
+    ~Float4PropertyArea();
+
+    void destroyContent();
+    void setup(); //Virtual
+    void updateValues(); //on text fields or other edited
+    void addToInspector(InspectorWin* win);
+    void writeNewValues(); //Virtual, on values changed
+};
+
+
 class Float3PropertyArea : public PropertyEditArea{
 public:
 
@@ -121,7 +147,7 @@ public:
 class BoolCheckboxArea : public PropertyEditArea{
 public:
     bool updateInspectorOnChange;
-    bool* bool_ptr; //pointer to modifying bool
+    bool* pResultBool; //pointer to modifying bool
     QCheckBox checkbox; //pressing checkbox
 
     BoolCheckboxArea();
@@ -134,13 +160,25 @@ public:
 class ComboBoxArea : public PropertyEditArea{
 public:
     QComboBox widget;
-    std::string* result_string_std;
+    std::string* pResultString;
 
     void setup(); //Virtual
     void addToInspector(InspectorWin* win);
     void writeNewValues(); //Virtual, to check widget state
 
     ComboBoxArea();
+};
+
+class SpinBoxArea : public PropertyEditArea {
+public:
+    QSpinBox widget;
+    int* pResultInt;
+
+    void setup(); //Virtual
+    void addToInspector(InspectorWin* win);
+    void writeNewValues(); //Virtual, to check widget state
+
+    SpinBoxArea();
 };
 
 class ResourcePickDialog;
@@ -231,7 +269,7 @@ class PropertyPickArea : public PropertyEditArea{
 public:
     PROPERTY_TYPE prop_type;
 
-    Engine::GameObjectProperty** property_ptr_ptr; //output value
+    Engine::IGameObjectComponent** property_ptr_ptr; //output value
     Engine::GameObjectLink link;
 
     QPushButton pick_button; //button to show color pick dialog

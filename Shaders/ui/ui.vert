@@ -8,15 +8,11 @@ layout(location = 0) out vec2 _UV;
 layout (std140, binding = 7) uniform Ui{
     mat4 cam_projection;
     mat4 object_transform;
-	int render_mode;
+    int render_mode;
     vec3 text_color;
 };
 
 void main(){
-
-_UV = uv;
-
-gl_Position = cam_projection * object_transform * vec4(pos, 1);
-
-
+    _UV = uv;
+    gl_Position = cam_projection * object_transform * vec4(pos, 1);
 }

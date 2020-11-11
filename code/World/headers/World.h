@@ -10,8 +10,8 @@
 
 #include "../../Render/headers/zs-pipeline.h"
 #include <render/zs-mesh.h>
-#include <render/zs-math.h>
-#include <render/zs-shader.h>
+#include <render/Math.hpp>
+#include <render/Shader.hpp>
 #include <render/zs-materials.h>
 #include <misc/oal_manager.h>
 
@@ -22,7 +22,7 @@
 
 #include <game.h>
 
-#include "world/World.h"
+#include "world/World.hpp"
 
 #include "../../ProjEd/headers/GO_widget_item.h"
 
@@ -34,17 +34,17 @@ class ObjectPropertyLink{
 public:
     Engine::GameObjectLink object;
     PROPERTY_TYPE prop_type;
-    Engine::GameObjectProperty* ptr;
+    Engine::IGameObjectComponent* ptr;
 
-    Engine::GameObjectProperty* updLinkPtr();
+    Engine::IGameObjectComponent* updLinkPtr();
     ObjectPropertyLink();
 };
 
 class WorldSnapshot{
 public:
     std::vector<Engine::GameObject> objects;
-    std::vector<Engine::GameObjectProperty*> props;
-    std::vector<Engine::GameObjectProperty*> scripts;
+    std::vector<Engine::IGameObjectComponent*> props;
+    std::vector<Engine::IGameObjectComponent*> scripts;
 
     WorldSnapshot();
     void clear();

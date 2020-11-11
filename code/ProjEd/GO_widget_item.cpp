@@ -71,11 +71,11 @@ void GO_W_I::makeParentings(Engine::World* world, QTreeWidget* obj_widget_ptr) {
 	//Now add all objects to inspector tree
 	for (unsigned int obj_i = 0; obj_i < world->objects.size(); obj_i++) {
 		Engine::GameObject* obj_ptr = world->objects[obj_i];
-		if (obj_ptr->parent.isEmpty()) { //If object has no parent
+		if (obj_ptr->mParent.isEmpty()) { //If object has no parent
 			obj_widget_ptr->addTopLevelItem(GO_W_I::getItem(obj_ptr));
 		}
 		else { //It has a parent
-			Engine::GameObject* parent_ptr = obj_ptr->parent.ptr; //Get parent pointer
+			Engine::GameObject* parent_ptr = obj_ptr->mParent.ptr; //Get parent pointer
 
 			QTreeWidgetItem* parent_item = GO_W_I::getItem(parent_ptr);
 			QTreeWidgetItem* child_item = GO_W_I::getItem(obj_ptr);
@@ -92,7 +92,7 @@ void GO_W_I::updateGameObjectItem(Engine::GameObject* obj) {
 	//update text in widget item
 	go_items[obj->array_index]->setText(0, QString::fromStdString(label->label));
 
-	Engine::GameObject* parent = obj->parent.updLinkPtr();
+	Engine::GameObject* parent = obj->mParent.updLinkPtr();
 	if (parent != nullptr) {
 		go_items[parent->array_index]->addChild(go_items[obj->array_index]);
 	}
@@ -100,10 +100,10 @@ void GO_W_I::updateGameObjectItem(Engine::GameObject* obj) {
 		rootWidget->addTopLevelItem(go_items[obj->array_index]);
 	}
 	//Get amount of children
-	unsigned int children_num = obj->children.size();
+	unsigned int children_num = obj->mChildren.size();
 	//iterate over all children
 	for (unsigned int ch_i = 0; ch_i < children_num; ch_i++) {
-		Engine::GameObject* ch = obj->children[ch_i].updLinkPtr();
+		Engine::GameObject* ch = obj->mChildren[ch_i].updLinkPtr();
 		updateGameObjectItem(ch);
 	}
 }

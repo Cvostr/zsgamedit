@@ -161,7 +161,7 @@ void ObjectCtxMenu::onDublicateClicked(){
     Engine::GameObject* result = _editor_win->world.dublicateObject(link.ptr);
 
     if(result->hasParent){ //if object parented
-        GO_W_I::getItem(result->parent.ptr->array_index)->addChild(GO_W_I::getItem(result->array_index));
+        GO_W_I::getItem(result->mParent.ptr->array_index)->addChild(GO_W_I::getItem(result->array_index));
     }else{
         _editor_win->getObjectListWidget()->addTopLevelItem(GO_W_I::getItem(result->array_index));
     }

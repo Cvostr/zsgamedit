@@ -24,8 +24,8 @@ Engine::GameObject* World::dublicateObject(Engine::GameObject* original, bool pa
     Engine::GameObject* new_obj = Engine::World::dublicateObject(original, parent);
     Engine::LabelProperty* label_prop = new_obj->getPropertyPtr<Engine::LabelProperty>(); //Obtain pointer to label property
 
-    for (unsigned int child_i = 0; child_i < new_obj->children.size(); child_i++) {
-        Engine::GameObject* new_child = new_obj->children[child_i].updLinkPtr();
+    for (size_t child_i = 0; child_i < new_obj->mChildren.size(); child_i++) {
+        Engine::GameObject* new_child = new_obj->mChildren[child_i].updLinkPtr();
         //UI parenting
         GO_W_I::getItem(new_obj)->addChild(GO_W_I::getItem(new_child));
     }
@@ -39,7 +39,7 @@ Engine::GameObject* World::Instantiate(Engine::GameObject* original){
     Engine::GameObject* result = this->dublicateObject(link.ptr);
 
     if(result->hasParent){ //if object parented
-        GO_W_I::getItem(result->parent.ptr->array_index)->addChild(GO_W_I::getItem(result->array_index));
+        GO_W_I::getItem(result->mParent.ptr->array_index)->addChild(GO_W_I::getItem(result->array_index));
     }else{
         obj_widget_ptr->addTopLevelItem(GO_W_I::getItem(result->array_index));
     }
@@ -61,19 +61,19 @@ void World::writeGameObject(Engine::GameObject* object_ptr, ZsStream* world_stre
     if(object_ptr->alive == true){
         *world_stream << "\nG_OBJECT " << object_ptr->str_id << '\0';
         //Write main flags
-        world_stream->writeBinaryValue(&object_ptr->active);
+        world_stream->writeBinaryValue(&object_ptr->mActive);
         world_stream->writeBinaryValue(&object_ptr->IsStatic);
         //If object has at least one child object
-        if(object_ptr->children.size() > 0){ 
+        if(object_ptr->mChildren.size() > 0){
             int children_num = object_ptr->getAliveChildrenAmount();
             //Write children header
             *world_stream << "\nG_CHI ";
             //Write amount of children i object
             world_stream->writeBinaryValue(&children_num);
             //get children amount
-            unsigned int children_am = static_cast<unsigned int>(object_ptr->children.size());
-            for(unsigned int chi_i = 0; chi_i < children_am; chi_i ++){ //iterate over all children
-                Engine::GameObjectLink* link_ptr = &object_ptr->children[chi_i]; //Gettin pointer to child
+            size_t children_am = object_ptr->mChildren.size();
+            for(size_t chi_i = 0; chi_i < children_am; chi_i ++){ //iterate over all children
+                Engine::GameObjectLink* link_ptr = &object_ptr->mChildren[chi_i]; //Gettin pointer to child
                 if(!link_ptr->isEmpty()){ //If this link isn't broken (after child removal)
                     world_stream->writeString(link_ptr->obj_str_id); //Writing child's string id
                 }
@@ -150,10 +150,10 @@ void World::writeObjectToPrefab(Engine::GameObject* object_ptr, ZsStream* stream
     //Write an object
     writeGameObject(object_ptr, stream);
     //get children amount
-    unsigned int children_am = static_cast<unsigned int>(object_ptr->children.size());
+    size_t children_am = object_ptr->mChildren.size();
     //iterate over all children and write them
     for(unsigned int ch_i = 0; ch_i < children_am; ch_i ++){
-        Engine::GameObjectLink link = object_ptr->children[ch_i];
+        Engine::GameObjectLink link = object_ptr->mChildren[ch_i];
         writeObjectToPrefab(link.updLinkPtr(), stream);
     }
 }
@@ -217,7 +217,7 @@ Engine::GameObject* World::addMeshNode(ZS3M::SceneNode* node){
     int add_num = 0; //Declaration of addititonal integer
     getAvailableNumObjLabel(node->node_label, &add_num);
     //Setting base variables
-    obj.world_ptr = this;
+    obj.mWorld = this;
     obj.addProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_LABEL);
     //Add common base property Transform
     obj.addProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_TRANSFORM);
@@ -263,7 +263,7 @@ Engine::GameObject* World::addMeshNode(ZS3M::SceneNode* node){
             int add_num = 0; //Declaration of addititonal integer
             getAvailableNumObjLabel(mesh_label, &add_num);
 
-            mesh_obj->world_ptr = this;
+            mesh_obj->mWorld = this;
             mesh_obj->addProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_LABEL);
             mesh_obj->addProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_TRANSFORM);
             mesh_obj->setLabel(mesh_label + std::to_string(add_num)); //Assigning label to object
@@ -303,13 +303,13 @@ void World::storeObjectToPrefab(Engine::GameObject* object_ptr, QString file){
 
 void World::putToShapshot(WorldSnapshot* snapshot){
     //iterate over all objects in scene
-    for(unsigned int objs_num = 0; objs_num < this->objects.size(); objs_num ++){
+    for(size_t objs_num = 0; objs_num < this->objects.size(); objs_num ++){
         //Obtain pointer to object
         Engine::GameObject* obj_ptr = this->objects[objs_num];
         if(obj_ptr->alive == false) continue;
         //Iterate over all properties in object and copy them into snapshot
         for(unsigned int prop_i = 0; prop_i < obj_ptr->props_num; prop_i ++){
-            auto prop_ptr = obj_ptr->properties[prop_i];
+            auto prop_ptr = obj_ptr->mComponents[prop_i];
             auto new_prop = Engine::allocProperty(prop_ptr->type);
             new_prop->go_link = prop_ptr->go_link;
             prop_ptr->copyTo(new_prop);
@@ -318,7 +318,7 @@ void World::putToShapshot(WorldSnapshot* snapshot){
         //Iterate over all scripts in objects and copy them into snapshot
         for (unsigned int script_i = 0; script_i < obj_ptr->scripts_num; script_i++) {
             Engine::ZPScriptProperty* script_ptr = static_cast<Engine::ZPScriptProperty*>
-                (obj_ptr->scripts[script_i]);
+                (obj_ptr->mScripts[script_i]);
             Engine::ZPScriptProperty* script_prop = static_cast<Engine::ZPScriptProperty*>
                 (Engine::allocProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_AGSCRIPT));
             script_prop->go_link = script_ptr->go_link;
@@ -362,7 +362,7 @@ void World::recoverFromSnapshot(WorldSnapshot* snapshot){
         Engine::GameObject* obj_ptr = updateLink(&link); //Calculate pointer to new object
         obj_ptr->addScript(); //Add new property to created object
         Engine::ZPScriptProperty* new_script = static_cast<Engine::ZPScriptProperty*>
-            (obj_ptr->scripts[obj_ptr->scripts_num - 1]); ///PIZDEC SUKA NAXUI TUT OSHIBKA BLYAT !!!!
+            (obj_ptr->mScripts[obj_ptr->scripts_num - 1]); ///PIZDEC SUKA NAXUI TUT OSHIBKA BLYAT !!!!
         script_ptr->copyTo(new_script);
     }
     //iterate over all objects
@@ -371,8 +371,8 @@ void World::recoverFromSnapshot(WorldSnapshot* snapshot){
         if(!obj_ptr->hasParent)  //if object is unparented
             continue;
         
-        Engine::GameObject* parent_p = updateLink(&obj_ptr->parent);
-        parent_p->children.push_back(obj_ptr->getLinkToThisObject());
+        Engine::GameObject* parent_p = updateLink(&obj_ptr->mParent);
+        parent_p->mChildren.push_back(obj_ptr->getLinkToThisObject());
     }
     GO_W_I::recreateAll(MAX_OBJS);
     //make parentings
@@ -385,10 +385,10 @@ WorldSnapshot::WorldSnapshot(){
 void WorldSnapshot::clear(){
     this->objects.clear(); //clear all object
     //iterate over all properties
-    for(unsigned int prop_it = 0; prop_it < props.size(); prop_it ++){
+    for(size_t prop_it = 0; prop_it < props.size(); prop_it ++){
        delete props[prop_it];
     }
-    for (unsigned int script_it = 0; script_it < scripts.size(); script_it++) {
+    for (size_t script_it = 0; script_it < scripts.size(); script_it++) {
         delete scripts[script_it];
     }
     props.clear();

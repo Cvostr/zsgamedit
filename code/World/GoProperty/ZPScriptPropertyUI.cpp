@@ -27,6 +27,8 @@ void Engine::ZPScriptProperty::addPropertyInterfaceToInspector() {
     area->go_property = this;
     area->rel_path_std = &script_path;
     _inspector_win->addPropertyArea(area);
+    if (this->script_res == nullptr)
+        return;
     //Check, if script contain errors
     if (this->script_res->hasError) {
         //Show error text message
@@ -56,7 +58,7 @@ void Engine::ZPScriptProperty::addPropertyInterfaceToInspector() {
             if (handle->typeID == asTYPEID_BOOL) {
                 BoolCheckboxArea* boolH = new BoolCheckboxArea; //New property area
                 boolH->setLabel(QString::fromStdString(handle->name)); //Its label
-                boolH->bool_ptr = handle->getValue<bool>(); //Ptr to our vector
+                boolH->pResultBool = handle->getValue<bool>(); //Ptr to our vector
                 boolH->go_property = this; //Pointer to this to activate matrix recalculaton
                 _inspector_win->addPropertyArea(boolH);
             }
@@ -66,6 +68,13 @@ void Engine::ZPScriptProperty::addPropertyInterfaceToInspector() {
                 vec3H->vector = handle->getValue<ZSVECTOR3>(); //Ptr to our vector
                 vec3H->go_property = this; //Pointer to this to activate matrix recalculaton
                 _inspector_win->addPropertyArea(vec3H);
+            }
+            if (handle->typeID == AG_QUAT) {
+                Float4PropertyArea* vec4H = new Float4PropertyArea; //New property area
+                vec4H->setLabel(QString::fromStdString(handle->name)); //Its label
+                vec4H->vector = handle->getValue<ZSVECTOR4>(); //Ptr to our vector
+                vec4H->go_property = this; //Pointer to this to activate matrix recalculaton
+                _inspector_win->addPropertyArea(vec4H);
             }
             if (handle->typeID == AG_RGB_COLOR) {
                 ColorDialogArea* color_area = new ColorDialogArea;
