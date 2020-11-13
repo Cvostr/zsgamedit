@@ -51,7 +51,10 @@ void Engine::GameObject::recoverFromSnapshot(Engine::GameObjectSnapshot* snapsho
 void Engine::GameObject::pick(){
     mWorld->picked_objs_ids.push_back(array_index);
     for(unsigned int chil_i = 0; chil_i < mChildren.size(); chil_i++){
-        mChildren[chil_i].updLinkPtr()->pick(); //child and his children are picked now
+        Engine::GameObject* ChildPtr = mChildren[chil_i].updLinkPtr();
+        if (ChildPtr == nullptr)
+            continue;
+        ChildPtr->pick(); //child and his children are picked now
     }
 }
 

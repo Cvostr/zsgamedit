@@ -1,7 +1,7 @@
 #pragma once
 
 #include <render/Shader.hpp>
-#include <render/zs-mesh.h>
+#include <render/Mesh.hpp>
 #include <render/UniformBuffer.hpp>
 #include <GL/glew.h>
 
@@ -19,11 +19,11 @@ private:
     Engine::UniformBuffer* instBuffer;
     bool cullFaceEnabled;
     int projectPerspective;
-    ZSMATRIX4x4 grid_strokes_transf[GRID_STROKE_COUNT * 2];
+    Mat4 grid_strokes_transf[GRID_STROKE_COUNT * 2];
 public:
 
-    void drawPickedMeshWireframe(Engine::Mesh* mesh_ptr, ZSMATRIX4x4 transform, ZSRGBCOLOR color);
-    void drawCube(ZSMATRIX4x4 transform, ZSRGBCOLOR color);
+    void drawPickedMeshWireframe(Engine::Mesh* mesh_ptr, Mat4 transform, ZSRGBCOLOR color);
+    void drawCube(Mat4 transform, ZSRGBCOLOR color);
     void drawTransformControls(ZSVECTOR3 position, float tall, float dim);
     void drawObjectRigidbodyShape(void* phys_property);
     void drawGrid();

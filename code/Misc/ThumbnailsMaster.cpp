@@ -120,16 +120,16 @@ void ThumbnailsMaster::prepareMaterialThumbnailPipeline(){
         cam.setZplanes(0.1f, 5000.f);
 
         renderer->transformBuffer->bind();
-        ZSMATRIX4x4 proj = cam.getProjMatrix();
-        ZSMATRIX4x4 view = cam.getViewMatrix();
-        ZSMATRIX4x4 model = getIdentity();
-        renderer->transformBuffer->writeData(0, sizeof (ZSMATRIX4x4), &proj);
-        renderer->transformBuffer->writeData(sizeof (ZSMATRIX4x4), sizeof (ZSMATRIX4x4), &view);
-        renderer->transformBuffer->writeData(sizeof (ZSMATRIX4x4) * 2, sizeof (ZSMATRIX4x4), &model);
+        Mat4 proj = cam.getProjMatrix();
+        Mat4 view = cam.getViewMatrix();
+        Mat4 model = getIdentity();
+        renderer->transformBuffer->writeData(0, sizeof (Mat4), &proj);
+        renderer->transformBuffer->writeData(sizeof (Mat4), sizeof (Mat4), &view);
+        renderer->transformBuffer->writeData(sizeof (Mat4) * 2, sizeof (Mat4), &model);
         //Send translation to skybox uniform buffer
         renderer->skyboxTransformUniformBuffer->bind();
-        renderer->skyboxTransformUniformBuffer->writeData(0, sizeof (ZSMATRIX4x4), &proj);
-        renderer->skyboxTransformUniformBuffer->writeData(sizeof (ZSMATRIX4x4), sizeof (ZSMATRIX4x4), &view);
+        renderer->skyboxTransformUniformBuffer->writeData(0, sizeof (Mat4), &proj);
+        renderer->skyboxTransformUniformBuffer->writeData(sizeof (Mat4), sizeof (Mat4), &view);
     }
     {
         //Set lights to lighting shader
@@ -272,12 +272,12 @@ void ThumbnailsMaster::DrawMesh(Engine::MeshResource* mesh){
     cam.setZplanes(0.1f, 5000.f);
 
     renderer->transformBuffer->bind();
-    ZSMATRIX4x4 proj = cam.getProjMatrix();
-    ZSMATRIX4x4 view = cam.getViewMatrix();
-    ZSMATRIX4x4 model = getIdentity();
-    renderer->transformBuffer->writeData(0, sizeof (ZSMATRIX4x4), &proj);
-    renderer->transformBuffer->writeData(sizeof (ZSMATRIX4x4), sizeof (ZSMATRIX4x4), &view);
-    renderer->transformBuffer->writeData(sizeof (ZSMATRIX4x4) * 2, sizeof (ZSMATRIX4x4), &model);
+    Mat4 proj = cam.getProjMatrix();
+    Mat4 view = cam.getViewMatrix();
+    Mat4 model = getIdentity();
+    renderer->transformBuffer->writeData(0, sizeof (Mat4), &proj);
+    renderer->transformBuffer->writeData(sizeof (Mat4), sizeof (Mat4), &view);
+    renderer->transformBuffer->writeData(sizeof (Mat4) * 2, sizeof (Mat4), &model);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
 

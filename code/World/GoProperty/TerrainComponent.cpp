@@ -228,7 +228,7 @@ void Engine::TerrainProperty::getPickedVertexId(int posX, int posY, int screenY,
     terrainUniformBuffer->writeData(16 * 12 * 2, 4, &dtrue);
     //Bind transform
     transformBuffer->bind();
-    transformBuffer->writeData(sizeof (ZSMATRIX4x4) * 2, sizeof (ZSMATRIX4x4), &transform->transform_mat);
+    transformBuffer->writeData(sizeof (Mat4) * 2, sizeof (Mat4), &transform->transform_mat);
     //Render terrain mesh without textures
     this->data.Draw(true);
     //read picked pixel

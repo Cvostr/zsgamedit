@@ -4,7 +4,7 @@
 #include "headers/InspEditAreas.h"
 #include "../World/headers/World.h"
 #include <Scripting/AngelScript.hpp>
-#include <render/zs-materials.h>
+#include <render/Material.hpp>
 #include "../World/headers/terrain.h"
 #include "world/go_properties.h"
 #include "../Misc/headers/AssimpMeshLoader.h"
@@ -169,7 +169,7 @@ void EditWindow::init(){
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
     SDL_DisplayMode current;
     SDL_GetCurrentDisplayMode(0, &current);
 
@@ -568,6 +568,11 @@ void EditWindow::glRender(){
     if (game_data->out_manager->RE_TYPE == RuntimeErrorType::RE_TYPE_SCRIPT_ERROR) {
         showErrorMessageBox("Error(s) in scripts", "In one or more scripts there are one or more errors! \nPlease fix them, to get your scene running!\nPress CTRL+L to get look at them");
         game_data->out_manager->unsetRuntimeError();
+    }
+    if (game_data->out_manager->RE_TYPE == RuntimeErrorType::RE_TYPE_SCENE_OPEN_ERROR) {
+        showErrorMessageBox("Error(s) opening scene", "Perhaps, your scene is corrupted");
+        game_data->out_manager->unsetRuntimeError();
+        onNewScene();
     }
 
     //Update inspector position variables

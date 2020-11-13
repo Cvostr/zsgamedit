@@ -3,7 +3,7 @@
 #define GLEW_STATIC
 #include <GL/glew.h>
 #include <render/Shader.hpp>
-#include <render/zs-mesh.h>
+#include <render/Mesh.hpp>
 #include <render/UniformBuffer.hpp>
 #include <world/Camera.hpp>
 #include <render/Texture.h>

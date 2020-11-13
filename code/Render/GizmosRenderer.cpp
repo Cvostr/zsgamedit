@@ -21,7 +21,7 @@ GizmosRenderer::GizmosRenderer(Engine::Shader* mark_shader,
     //Create grid strokes transforms
     int red = GRID_STROKE_COUNT * GRID_DIST * -0.5f;
     for (int i = 0; i < GRID_STROKE_COUNT; i++) {
-        ZSMATRIX4x4 transform = getIdentity();
+        Mat4 transform = getIdentity();
 
         transform = transform * getScaleMat(GRID_STROKE_WIDTH, 100, GRID_STROKE_WIDTH);
         transform = transform * getRotationMat(ZSVECTOR3(90, 0, 0));
@@ -30,7 +30,7 @@ GizmosRenderer::GizmosRenderer(Engine::Shader* mark_shader,
         grid_strokes_transf[i] = transform;
     }
     for (int i = GRID_STROKE_COUNT; i < GRID_STROKE_COUNT * 2; i++) {
-        ZSMATRIX4x4 transform = getIdentity();
+        Mat4 transform = getIdentity();
 
         transform = transform * getScaleMat(GRID_STROKE_WIDTH, 100, GRID_STROKE_WIDTH);
         transform = transform * getRotationMat(ZSVECTOR3(0, 0, 90));
@@ -44,13 +44,13 @@ GizmosRenderer::~GizmosRenderer() {
 
 }
 
-void GizmosRenderer::drawPickedMeshWireframe(Engine::Mesh *mesh_ptr, ZSMATRIX4x4 transform, ZSRGBCOLOR color){
+void GizmosRenderer::drawPickedMeshWireframe(Engine::Mesh *mesh_ptr, Mat4 transform, ZSRGBCOLOR color){
     glFeaturesOff();
 
     this->mark_shader_ptr->Use();
 
     transformBuffer->bind();
-    transformBuffer->writeData(sizeof (ZSMATRIX4x4) * 2, sizeof (ZSMATRIX4x4), &transform);
+    transformBuffer->writeData(sizeof (Mat4) * 2, sizeof (Mat4), &transform);
 
     editorBuffer->bind();
     ZSVECTOR4 v = ZSVECTOR4(color.gl_r, color.gl_g, color.gl_b, color.gl_a);
@@ -61,10 +61,10 @@ void GizmosRenderer::drawPickedMeshWireframe(Engine::Mesh *mesh_ptr, ZSMATRIX4x4
     glFeaturesOn();
 }
 
-void GizmosRenderer::drawCube(ZSMATRIX4x4 transform, ZSRGBCOLOR color){
+void GizmosRenderer::drawCube(Mat4 transform, ZSRGBCOLOR color){
     this->mark_shader_ptr->Use();
     transformBuffer->bind();
-    transformBuffer->writeData(sizeof (ZSMATRIX4x4) * 2, sizeof (ZSMATRIX4x4), &transform);
+    transformBuffer->writeData(sizeof (Mat4) * 2, sizeof (Mat4), &transform);
 
     editorBuffer->bind();
     ZSVECTOR4 v = ZSVECTOR4(color.gl_r, color.gl_g, color.gl_b, color.gl_a);
@@ -79,9 +79,9 @@ void GizmosRenderer::drawTransformControls(ZSVECTOR3 position, float tall, float
         dim /= 10;
     }
 
-    ZSMATRIX4x4 transform;
+    Mat4 transform;
     ZSVECTOR3 scale = ZSVECTOR3(dim, tall, dim);
-    ZSMATRIX4x4 scale_mat = getScaleMat(scale);
+    Mat4 scale_mat = getScaleMat(scale);
 
     glFeaturesOff();
 
@@ -131,12 +131,12 @@ void GizmosRenderer::drawObjectRigidbodyShape(void* phys_property){
     editorBuffer->writeData(0, 16, &v);
 
     transformBuffer->bind();
-    ZSMATRIX4x4 rotation_mat1 = getIdentity();
+    Mat4 rotation_mat1 = getIdentity();
     transform->getAbsoluteRotationMatrix(rotation_mat1);
-    ZSMATRIX4x4 rotation_mat = getRotationMat(transform->abs_rotation);
-    ZSMATRIX4x4 transform_mat = getScaleMat(scale) * rotation_mat * rotation_mat1 * getTranslationMat(transform->abs_translation + property->transform_offset);
+    Mat4 rotation_mat = getRotationMat(transform->abs_rotation);
+    Mat4 transform_mat = getScaleMat(scale) * rotation_mat * rotation_mat1 * getTranslationMat(transform->abs_translation + property->transform_offset);
 
-    transformBuffer->writeData(sizeof (ZSMATRIX4x4) * 2, sizeof (ZSMATRIX4x4), &transform_mat);
+    transformBuffer->writeData(sizeof (Mat4) * 2, sizeof (Mat4), &transform_mat);
     //If mesh exist, then draw
     if(mesh_toDraw)
         mesh_toDraw->DrawLines();
@@ -167,7 +167,7 @@ void GizmosRenderer::drawGrid() {
     instBuffer->bind();
     //Send all transforms to instance buffer
     for (int i = 0; i < GRID_STROKE_COUNT * 2; i++) {
-        instBuffer->writeData(sizeof(ZSMATRIX4x4) * i, sizeof(ZSMATRIX4x4), &grid_strokes_transf[i]);
+        instBuffer->writeData(sizeof(Mat4) * i, sizeof(Mat4), &grid_strokes_transf[i]);
     }
 
     this->grid_shader_ptr->Use();

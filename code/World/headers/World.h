@@ -9,10 +9,10 @@
 #include "../../ProjEd/headers/InspectorWin.h"
 
 #include "../../Render/headers/zs-pipeline.h"
-#include <render/zs-mesh.h>
+#include <render/Mesh.hpp>
 #include <render/Math.hpp>
 #include <render/Shader.hpp>
-#include <render/zs-materials.h>
+#include <render/Material.hpp>
 #include <misc/oal_manager.h>
 
 #include "../../Misc/headers/AssimpMeshLoader.h"

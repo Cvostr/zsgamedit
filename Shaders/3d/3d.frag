@@ -1,4 +1,4 @@
-#version 420 core
+#version 430 core
 
 layout (location = 0) out vec4 tDiffuse;
 layout (location = 1) out vec3 tNormal;
@@ -16,7 +16,7 @@ layout(binding = 1) uniform sampler2D normal_map;
 layout(binding = 2) uniform sampler2D specular_map;
 layout(binding = 3) uniform sampler2D height_map;
 layout(binding = 4) uniform sampler2D occlusion_map;
-layout(binding = 6) uniform sampler2D shadow_map;
+layout(binding = 6) uniform sampler2DArray shadow_map;
 
 layout (std140) uniform Default3d{
     vec3 diffuse_color;
@@ -43,15 +43,23 @@ layout (std140, binding = 0) uniform CamMatrices{
 
 layout (std140, binding = 2) uniform ShadowData{
 //Shadowmapping stuff
-    uniform mat4 LightProjViewMat; // 16 * 4
+    uniform float ShadowBias; //4
+    uniform int ShadowmapSize; //4
+    uniform bool HasShadowMap; //4
+    //16
+    uniform mat4 LightProjViewMat0; // 16 * 4
     uniform mat4 LightProjViewMat1; // 16 * 4
     uniform mat4 LightProjViewMat2; // 16 * 4
     uniform mat4 LightProjViewMat3; // 16 * 4
-    uniform float shadow_bias; //4
-    uniform bool hasShadowMap; //4
-    uniform int shadowmap_Width; //4
-    uniform int shadowmap_Height; //4
+    uniform mat4 LightProjViewMat4; // 16 * 4
+    //336
+    uniform int CasterDistance0; //4
+    uniform int CasterDistance1; //4
+    uniform int CasterDistance2; //4
+    uniform int CasterDistance3; //4
+    uniform int CasterDistance4; //4
 };
+
 vec2 processParallaxMapUv(vec2 uv){
     if(!hasHeightMap) return uv;
     
@@ -66,39 +74,42 @@ void processShadows(){
     float dist = length(FragPos - cam_position);
 
     vec4 objPosLightSpace = vec4(0,0,0,0);
-    float offsetx = 0;
+    if(dist < CasterDistance1){
+        objPosLightSpace = LightProjViewMat0 * vec4(FragPos, 1);
+    }else if(dist < CasterDistance2){
+        objPosLightSpace = LightProjViewMat1 * vec4(FragPos, 1);
+    }else if(dist < CasterDistance3){
+        objPosLightSpace = LightProjViewMat2 * vec4(FragPos, 1);
+    }else if(dist < CasterDistance4){
+        objPosLightSpace = LightProjViewMat3 * vec4(FragPos, 1);
+    }
 
-    if(dist < 40){
-        objPosLightSpace = LightProjViewMat1 * vec4(FragPos, 1.0);
-        offsetx = 0;
-    }
-    else if(dist < 70){
-        objPosLightSpace = LightProjViewMat2 * vec4(FragPos, 1.0);
-        offsetx = 1.0 / 3.0;
-    }
-    else if(dist < 110){
-        objPosLightSpace = LightProjViewMat3 * vec4(FragPos, 1.0);
-        offsetx = 2.0 / 3.0;
-    }
     vec3 ShadowProjection = (objPosLightSpace.xyz / objPosLightSpace.w) / 2.0 + 0.5;
 	
     float real_depth = ShadowProjection.z;
 
     for(int x = 0; x < 2; x ++){
         for(int y = 0; y < 2; y ++){
-            vec2 _offset = vec2(x, y);
+            vec2 offset = vec2(x, y);
 
-            _offset.x /= shadowmap_Width;
-            _offset.y /= shadowmap_Height;
+            offset.x /= ShadowmapSize;
+            offset.y /= ShadowmapSize;
 
-            vec2 uvoffset = ShadowProjection.xy + _offset;
-                
-            uvoffset.x /= 3.0;
-            uvoffset.x += offsetx;
+            vec2 uvoffset = ShadowProjection.xy + offset;
 
-            vec4 shadowmap = texture(shadow_map, uvoffset);
+            vec4 shadowmap = vec4(1,1,1,1);
+            if(dist < CasterDistance1){
+                shadowmap = texture(shadow_map, vec3(uvoffset, 0));
+            }else if(dist < CasterDistance2){
+                shadowmap = texture(shadow_map, vec3(uvoffset, 1));
+            }else if(dist < CasterDistance3){
+                shadowmap = texture(shadow_map, vec3(uvoffset, 2));
+            }else if(dist < CasterDistance4){
+                shadowmap = texture(shadow_map, vec3(uvoffset, 3));
+            }
+           
             float texture_depth = shadowmap.r;
-            tMasks.g += (real_depth - shadow_bias > texture_depth) ? 0.15 : 0.0;
+            tMasks.g += (real_depth - ShadowBias > texture_depth) ? 0.15 : 0.0;
         }
     }
         
@@ -138,7 +149,7 @@ void main(){
 
 	tMasks = vec4(1.0, 0, 0, 0);
 	//Shadowmapping enabled
-	if(hasShadowMap){
+	if(HasShadowMap){
         processShadows();
 	}
 }

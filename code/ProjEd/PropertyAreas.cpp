@@ -863,7 +863,7 @@ void SpinBoxArea::setup() { //Virtual
 }
 void SpinBoxArea::addToInspector(InspectorWin* win) {
     win->getContentLayout()->addLayout(this->elem_layout);
-    win->connect(&this->widget, SIGNAL(currentIndexChanged(int)), win, SLOT(onPropertyChange()));
+    win->connect(&this->widget, SIGNAL(valueChanged(int)), win, SLOT(onPropertyChange()));
 }
 void SpinBoxArea::writeNewValues() { //Virtual, to check widget state
     if (pResultInt == nullptr) return; //pointer not set, exiting
@@ -906,7 +906,6 @@ PropertyPickArea::PropertyPickArea(PROPERTY_TYPE type){
     this->property_label = new QLabelResourcePickWgt(this); //Allocation of resource relpath text
     elem_layout->addWidget(property_label);
 
-    //this->obj_label_ptr = nullptr;
     this->property_ptr_ptr = nullptr;
 
 }

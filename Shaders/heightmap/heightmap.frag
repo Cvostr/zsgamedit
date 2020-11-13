@@ -1,4 +1,4 @@
-#version 420 core
+#version 430 core
 
 #define TEXTURES_AMOUNT 12
 

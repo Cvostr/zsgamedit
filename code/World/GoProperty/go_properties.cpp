@@ -1,7 +1,7 @@
 #include "../headers/World.h"
 #include "world/go_properties.h"
 #include "../../ProjEd/headers/ProjectEdit.h"
-#include <render/zs-mesh.h>
+#include <render/Mesh.hpp>
 #include "../../ProjEd/headers/InspEditAreas.h"
 #include "../headers/Misc.h"
 
@@ -275,21 +275,21 @@ void Engine::TriggerProperty::addPropertyInterfaceToInspector() {
 
 void Engine::ShadowCasterProperty::addPropertyInterfaceToInspector(){
 
+    SpinBoxArea* cascadeSw = new SpinBoxArea;
+    cascadeSw->setLabel("Cascades amount");
+    cascadeSw->pResultInt = &this->mCascadesNum;
+    cascadeSw->go_property = this;
+    _inspector_win->addPropertyArea(cascadeSw);
+
     IntPropertyArea* textureW = new IntPropertyArea; //New property area
     textureW->setLabel("Texture Width"); //Its label
-    textureW->value = &this->TextureWidth; //Ptr to our vector
+    textureW->value = &this->TextureSize; //Ptr to our vector
     textureW->go_property = this; //Pointer to this to activate matrix recalculaton
     _inspector_win->addPropertyArea(textureW);
 
-    IntPropertyArea* textureH = new IntPropertyArea; //New property area
-    textureH->setLabel("Texture Height"); //Its label
-    textureH->value = &this->TextureHeight; //Ptr to our vector
-    textureH->go_property = this; //Pointer to this to activate matrix recalculaton
-    _inspector_win->addPropertyArea(textureH);
-
     FloatPropertyArea* bias = new FloatPropertyArea; //New property area
     bias->setLabel("Shadow bias"); //Its label
-    bias->value = &this->shadow_bias; //Ptr to our vector
+    bias->value = &this->mShadowBias; //Ptr to our vector
     bias->go_property = this; //Pointer to this to activate matrix recalculaton
     _inspector_win->addPropertyArea(bias);
 

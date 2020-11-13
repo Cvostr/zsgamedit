@@ -2,8 +2,8 @@
 
 #include <render/Shader.hpp>
 #include <render/Texture.h>
-#include <render/zs-mesh.h>
-#include <render/zs-materials.h>
+#include <render/Mesh.hpp>
+#include <render/Material.hpp>
 #include <engine/loader.h>
 #include "../../Render/headers/zs-pipeline.h"
 #include "EditorManager.h"

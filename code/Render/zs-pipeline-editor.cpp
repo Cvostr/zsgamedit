@@ -156,7 +156,7 @@ unsigned int RenderPipelineEditor::render_getpickedObj(void* projectedit_ptr, in
 
             //set transform to camera buffer
             transformBuffer->bind();
-            transformBuffer->writeData(sizeof(ZSMATRIX4x4) * 2, sizeof(ZSMATRIX4x4), &transform_ptr->transform_mat);
+            transformBuffer->writeData(sizeof(Mat4) * 2, sizeof(Mat4), &transform_ptr->transform_mat);
 
             editorUniformBuffer->bind();
             editorUniformBuffer->writeData(0, 16, &color);

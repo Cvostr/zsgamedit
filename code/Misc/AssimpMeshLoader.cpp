@@ -9,7 +9,7 @@ static unsigned int loadflagsAnim = aiProcess_Triangulate | aiProcess_JoinIdenti
 
 #include <iostream>
 
-void Engine::cmat(aiMatrix4x4 matin, ZSMATRIX4x4* matout){
+void Engine::cmat(aiMatrix4x4 matin, Mat4* matout){
 
     matout->m[0][0] = matin.a1; matout->m[0][1] = matin.b1;  matout->m[0][2] = matin.c1; matout->m[0][3] = matin.d1;
     matout->m[1][0] = matin.a2; matout->m[1][1] = matin.b2;  matout->m[1][2] = matin.c2; matout->m[1][3] = matin.d2;

@@ -5,7 +5,7 @@
 #include <assimp/postprocess.h>
 
 #include "../../triggers.h"
-#include <render/zs-mesh.h>
+#include <render/Mesh.hpp>
 #include <render/Animation.hpp>
 #include <misc/zs3m-master.h>
 #include "zs_types.h"
@@ -16,7 +16,7 @@
 
 namespace Engine {
 
-void cmat(aiMatrix4x4 matin, ZSMATRIX4x4* matout);
+void cmat(aiMatrix4x4 matin, Mat4* matout);
 
 void processNodeForTree(ZS3M::SceneNode* node, aiNode* node_assimp, const aiScene* scene);
 void loadNodeTree(std::string file_path, ZS3M::SceneNode* node);

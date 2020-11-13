@@ -1,4 +1,4 @@
-#version 420 core
+#version 430 core
 
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec2 uv;
@@ -20,14 +20,21 @@ layout (location = 0) out vec3 frag;
 
 layout (std140, binding = 2) uniform ShadowData{
 //Shadowmapping stuff
-    uniform mat4 LightProjViewMat; // 16 * 4
+    uniform float ShadowBias; //4
+    uniform int ShadowmapSize; //4
+    uniform bool HasShadowMap; //4
+    //16
+    uniform mat4 LightProjViewMat0; // 16 * 4
     uniform mat4 LightProjViewMat1; // 16 * 4
     uniform mat4 LightProjViewMat2; // 16 * 4
     uniform mat4 LightProjViewMat3; // 16 * 4
-    uniform float shadow_bias; //4
-    uniform bool hasShadowMap; //4
-    uniform int shadowmap_Width; //4
-    uniform int shadowmap_Height; //4
+    uniform mat4 LightProjViewMat4; // 16 * 4
+    //336
+    uniform int CasterDistance0; //4
+    uniform int CasterDistance1; //4
+    uniform int CasterDistance2; //4
+    uniform int CasterDistance3; //4
+    uniform int CasterDistance4; //4
 };
 
 layout (std140, binding = 0) uniform CamMatrices{
@@ -40,10 +47,12 @@ layout (std140, binding = 0) uniform CamMatrices{
 layout (std140, binding = 4) uniform BonesData{
     uniform mat4 bone_transform[200];
 };
-//Cascaded projection matrices are stored here
-layout (std140, binding = 9) uniform InstMatrices{
-    uniform mat4 inst_transform[1000];
-};
+
+out VS_OUTPUT
+{
+	float depth;
+	flat int instanceID;
+} vsoutput;
 
 mat4 getBoneTransform(){
     int _ids[12];
@@ -90,8 +99,16 @@ void main(){
 	if(bones > 0)
 		bone_t = getBoneTransform();
 
-    vec4 pos = LightProjViewMat * object_transform * bone_t * vec4(position, 1.0);
+    mat4 PVs[5];
+    PVs[0] = LightProjViewMat0;
+    PVs[1] = LightProjViewMat1;
+    PVs[2] = LightProjViewMat2;
+    PVs[3] = LightProjViewMat3;
+    PVs[4] = LightProjViewMat4;
+
+    vec4 pos = PVs[gl_InstanceID] * object_transform * bone_t * vec4(position, 1.0);
 
 	gl_Position = pos;
-	
+	vsoutput.depth = pos.z;
+	vsoutput.instanceID = gl_InstanceID;
 }
