@@ -22,6 +22,9 @@
 #include "../World/headers/Misc.h"
 #include "headers/LocStringEditWin.h"
 #include "headers/DialogsMaster.h"
+
+#include <ui/UI.hpp>
+
 //Hack to support meshes
 extern ZSpireEngine* engine_ptr;
 //Hack to support resources
@@ -142,6 +145,7 @@ EditWindow::EditWindow(QApplication* app, QWidget *parent) :
 
     engine_ptr = new ZSpireEngine();
     engine_ptr->engine_info = engine_create_info;
+    engine_ptr->window_info = new ZSWINDOW_CREATE_INFO;
 }
 
 EditWindow::~EditWindow()
@@ -210,6 +214,10 @@ void EditWindow::init(){
     }
 
     this->window = SDL_CreateWindow("Game View", this->settings.gameView_win_pos_x, this->settings.gameView_win_pos_y, settings.gameViewWin_Width, settings.gameViewWin_Height, SDL_WINDOW_OPENGL); //Create window
+   
+    engine_ptr->window_info->Width = settings.gameViewWin_Width;
+    engine_ptr->window_info->Height = settings.gameViewWin_Height;
+    
     this->glcontext = SDL_GL_CreateContext(window);
     SDL_GL_SetSwapInterval(1); // Enable vsync
     SDL_SetWindowResizable(window, SDL_TRUE);
@@ -241,11 +249,11 @@ void EditWindow::init(){
     this->thumb_master = new ThumbnailsMaster;
     this->startManager(thumb_master);
 
-
     game_data = new ZSGAME_DATA;
     game_data->resources = new Engine::ResourceManager;
     startManager(game_data->resources);
 
+   
     game_data->script_manager = new Engine::AGScriptMgr;
     game_data->glyph_manager = this->glyph_manager;
     game_data->pipeline = this->render;
@@ -646,6 +654,22 @@ EditWindow* ZSEditor::openEditor(){
     _editor_win->thumb_master->createMeshesThumbnails();
     //Set directory to be shown in file manager
     _editor_win->setViewDirectory(QString::fromStdString(_editor_win->project.root_path));
+
+    {
+        Engine::LinearLayout* rtlayout = new Engine::LinearLayout;
+        rtlayout->move(30, 10);
+        Engine::Button* btn = new Engine::Button;
+        btn->common_sprite = game_data->resources->getTextureByLabel("big_building.dds");
+        btn->hovered_sprite = game_data->resources->getTextureByLabel("textures/floor.DDS");
+
+        Engine::Button* btn1 = new Engine::Button;
+        btn1->common_sprite = game_data->resources->getTextureByLabel("big_building.dds");
+        btn1->hovered_sprite = game_data->resources->getTextureByLabel("textures/floor.DDS");
+
+        rtlayout->AddView(btn);
+        rtlayout->AddView(btn1);
+        game_data->pipeline->RootLayout = rtlayout;
+    }
 
     return _editor_win;
 }

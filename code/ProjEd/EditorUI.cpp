@@ -331,8 +331,8 @@ void EditWindow::resizeEvent(QResizeEvent* event){
     file_list->move(0, (new_height / 3) * 2);
     file_list->resize(new_width, (new_height / 3));
 
-    this->settings.editor_win_width = new_width;
-    this->settings.editor_win_height = new_height;
+    settings.editor_win_width = new_width;
+    settings.editor_win_height = new_height;
 }
 
 void InspectorWin::resizeEvent(QResizeEvent* event){

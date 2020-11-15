@@ -5,6 +5,9 @@
 #include <windows.h>
 #include <input/zs-input.h>
 
+//Hack to support meshes
+extern ZSpireEngine* engine_ptr;
+
 #define SHOW_WIN_CONSOLE
 
 static uint64_t NOW = SDL_GetPerformanceCounter();
@@ -62,6 +65,9 @@ int main(int argc, char *argv[]){
                         //Write new settings
                         w.edit_win_ptr->settings.gameViewWin_Width = event.window.data1;
                         w.edit_win_ptr->settings.gameViewWin_Height = event.window.data2;
+
+                        engine_ptr->window_info->Width = event.window.data1;
+                        engine_ptr->window_info->Height = event.window.data2;
                     }
                     if(event.window.event == SDL_WINDOWEVENT_MOVED){
                         //Write new settings
