@@ -329,7 +329,7 @@ void EditWindow::resizeEvent(QResizeEvent* event){
 
     QListWidget* file_list = this->ui->fileList;
     file_list->move(0, (new_height / 3) * 2);
-    file_list->resize(new_width, (new_height / 3));
+    file_list->resize(new_width, (new_height / 3) - 20);
 
     settings.editor_win_width = new_width;
     settings.editor_win_height = new_height;

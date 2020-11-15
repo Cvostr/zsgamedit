@@ -108,6 +108,7 @@ EditWindow::EditWindow(QApplication* app, QWidget *parent) :
     ui->fileList->setAcceptDrops(true);
     ui->fileList->setDragEnabled(true);
     ui->fileList->setDragDropMode(QAbstractItemView::InternalMove);
+    ui->fileList->setResizeMode(QListView::Adjust);
 
     ui->objsList->world_ptr = &world;
 

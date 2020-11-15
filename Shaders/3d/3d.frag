@@ -82,6 +82,8 @@ void processShadows(){
         objPosLightSpace = LightProjViewMat2 * vec4(FragPos, 1);
     }else if(dist < CasterDistance4){
         objPosLightSpace = LightProjViewMat3 * vec4(FragPos, 1);
+    }else{
+        objPosLightSpace = LightProjViewMat4 * vec4(FragPos, 1);
     }
 
     vec3 ShadowProjection = (objPosLightSpace.xyz / objPosLightSpace.w) / 2.0 + 0.5;
@@ -106,6 +108,8 @@ void processShadows(){
                 shadowmap = texture(shadow_map, vec3(uvoffset, 2));
             }else if(dist < CasterDistance4){
                 shadowmap = texture(shadow_map, vec3(uvoffset, 3));
+            }else{
+                shadowmap = texture(shadow_map, vec3(uvoffset, 4));
             }
            
             float texture_depth = shadowmap.r;

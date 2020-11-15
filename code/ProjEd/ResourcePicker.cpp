@@ -39,7 +39,7 @@ void ResourcePickDialog::onNeedToShow(){
         this->list->setViewMode(QListView::IconMode);
         this->list->setIconSize(QSize(75, 75));
     }
-
+    list->setResizeMode(QListView::Adjust);
     this->extension_mask = area->extension_mask; //send extension mask
     this->list->clear();
     //Receiving pointer to project
