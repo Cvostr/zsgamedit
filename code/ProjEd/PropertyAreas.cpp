@@ -16,8 +16,7 @@ extern Project* project_ptr;
 //Hack to support resources
 extern ZSGAME_DATA* game_data;
 
-AreaPropertyTitle::AreaPropertyTitle(Engine::IGameObjectComponent* prop){
-    pProp = prop; //store pointer to property
+AreaPropertyTitle::AreaPropertyTitle(Engine::IGameObjectComponent* prop) : pProp(prop){
     widg_layout.setAlignment(Qt::AlignLeft);
 
     bool showControls = true;
@@ -92,9 +91,9 @@ void AreaPropertyTitle::onDeleteButtonPressed(){
     _editor_win->getInspector()->updateObjectProperties();
 }
 
-AreaButton::AreaButton(){
-    this->button = new QPushButton;
-    onPressFuncPtr = nullptr;
+AreaButton::AreaButton() : button(new QPushButton),
+    onPressFuncPtr(nullptr)
+{
     connect(this->button, SIGNAL(clicked()), this, SLOT(onButtonPressed()));
 }
 
@@ -580,10 +579,9 @@ Int2PropertyArea::~Int2PropertyArea(){
 
 
 //String property area stuff
-StringPropertyArea::StringPropertyArea(){
+StringPropertyArea::StringPropertyArea() : value_ptr(nullptr)
+{
     type = PEA_TYPE_STRING;
-    this->value_ptr = nullptr;
-
     elem_layout->addWidget(&edit_field);
 }
 

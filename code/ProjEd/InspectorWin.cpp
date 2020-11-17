@@ -14,20 +14,21 @@ extern EditWindow* _editor_win;
 
 InspectorWin::InspectorWin(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::InspectorWin)
+    ui(new Ui::InspectorWin),
+    ThumbnailUpdateRequired(false),
+    updateRequired(false),
+    gameobject_ptr(nullptr),
+
+    paintTileButton(nullptr),
+    addObjComponentBtn(nullptr),
+    line(nullptr)
 {
-    updateRequired = false;
     ui->setupUi(this);
 
     this->ui->propertySpace->setMargin(0);
     this->ui->propertySpace->setSpacing(5);
     this->ui->propertySpace->setContentsMargins(5,1,2,0);
     this->ui->propertySpace->setAlignment(Qt::AlignTop);
-
-    paintTileButton = nullptr;
-     line = nullptr;
-     this->addObjComponentBtn = nullptr;
-     gameobject_ptr = nullptr;
 
      QWidget* widget = new QWidget;
      widget->setLayout(getContentLayout());
@@ -177,8 +178,8 @@ void InspectorWin::updateAreasChanges(){
     //Check, if some property requested to redraw all
     if(this->updateRequired == false){
         //get edit areas amount
-        unsigned int areas_num = static_cast<unsigned int>(this->property_areas.size());
-        for(unsigned int area_i = 0; area_i < areas_num; area_i ++){
+        size_t areas_num = this->property_areas.size();
+        for(size_t area_i = 0; area_i < areas_num; area_i ++){
             PropertyEditArea* pea_ptr = this->property_areas[area_i]; //Obtain pointer to area
             pea_ptr->updateValues(); //Update state on it.
         }
@@ -186,6 +187,7 @@ void InspectorWin::updateAreasChanges(){
         updateRequired = false; //Unset flag
         this->updateObjectProperties(); //Reload UI
     }
+    this->ThumbnailUpdateRequired = false;
 }
 
 void InspectorWin::onPropertyChange(){

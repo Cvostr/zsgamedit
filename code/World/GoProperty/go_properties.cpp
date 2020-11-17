@@ -130,7 +130,7 @@ void Engine::MeshProperty::addPropertyInterfaceToInspector(){
     PickResourceArea* area = new PickResourceArea(RESOURCE_TYPE_MESH);
     area->setLabel("Mesh");
     area->go_property = this;
-    area->rel_path_std = &resource_relpath;
+    area->pResultString = &resource_relpath;
     _inspector_win->addPropertyArea(area);
 
     BoolCheckboxArea* IsCastShadows = new BoolCheckboxArea;
@@ -203,7 +203,7 @@ void Engine::AudioSourceProperty::addPropertyInterfaceToInspector(){
     PickResourceArea* area = new PickResourceArea(RESOURCE_TYPE_AUDIO);
     area->setLabel("Sound");
     area->go_property = this;
-    area->rel_path_std = &resource_relpath;
+    area->pResultString = &resource_relpath;
     _inspector_win->addPropertyArea(area);
 
     BoolCheckboxArea* isLooped = new BoolCheckboxArea;
@@ -329,7 +329,7 @@ void Engine::AnimationProperty::addPropertyInterfaceToInspector(){
     PickResourceArea* area = new PickResourceArea(RESOURCE_TYPE_ANIMATION);
     area->setLabel("Animation");
     area->go_property = this;
-    area->rel_path_std = &this->anim_label;
+    area->pResultString = &this->anim_label;
     _inspector_win->addPropertyArea(area);
 
     if(Playing == false){

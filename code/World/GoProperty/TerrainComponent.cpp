@@ -106,14 +106,14 @@ void Engine::TerrainProperty::addPropertyInterfaceToInspector(){
             PickResourceArea* diffuse_area = new PickResourceArea(RESOURCE_TYPE_TEXTURE);
             diffuse_area->setLabel("Diffuse");
             diffuse_area->go_property = this;
-            diffuse_area->rel_path_std = &textures[static_cast<unsigned int>(i)].diffuse_relpath;
+            diffuse_area->pResultString = &textures[static_cast<unsigned int>(i)].diffuse_relpath;
             diffuse_area->isShowNoneItem = true;
             _inspector_win->addPropertyArea(diffuse_area);
 
             PickResourceArea* normal_area = new PickResourceArea(RESOURCE_TYPE_TEXTURE);
             normal_area->setLabel("Normal");
             normal_area->go_property = this;
-            normal_area->rel_path_std = &textures[static_cast<unsigned int>(i)].normal_relpath;
+            normal_area->pResultString = &textures[static_cast<unsigned int>(i)].normal_relpath;
             normal_area->isShowNoneItem = true;
             _inspector_win->addPropertyArea(normal_area);
         }
@@ -153,7 +153,7 @@ void Engine::TerrainProperty::addPropertyInterfaceToInspector(){
             PickResourceArea* diffuse_area = new PickResourceArea(RESOURCE_TYPE_TEXTURE);
             diffuse_area->setLabel("Diffuse");
             diffuse_area->go_property = this;
-            diffuse_area->rel_path_std = &data.grass[static_cast<unsigned int>(i)].diffuse_relpath;
+            diffuse_area->pResultString = &data.grass[static_cast<unsigned int>(i)].diffuse_relpath;
             diffuse_area->isShowNoneItem = true;
             _inspector_win->addPropertyArea(diffuse_area);
 

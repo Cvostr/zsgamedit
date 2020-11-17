@@ -25,7 +25,7 @@ void Engine::ZPScriptProperty::addPropertyInterfaceToInspector() {
     PickResourceArea* area = new PickResourceArea(RESOURCE_TYPE_SCRIPT);
     area->setLabel("Angel Script");
     area->go_property = this;
-    area->rel_path_std = &script_path;
+    area->pResultString = &script_path;
     _inspector_win->addPropertyArea(area);
     if (this->script_res == nullptr)
         return;

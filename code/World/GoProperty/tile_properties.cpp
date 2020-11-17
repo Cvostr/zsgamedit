@@ -55,14 +55,14 @@ void Engine::TileGroupProperty::addPropertyInterfaceToInspector(){
         PickResourceArea* mesh_area = new PickResourceArea(RESOURCE_TYPE_MESH);
         mesh_area->setLabel("Tiles Mesh");
         mesh_area->go_property = this;
-        mesh_area->rel_path_std = &this->mesh_string;
+        mesh_area->pResultString = &this->mesh_string;
         mesh_area->isShowNoneItem = false;
         _inspector_win->addPropertyArea(mesh_area);
 
         PickResourceArea* diffuse_area = new PickResourceArea(RESOURCE_TYPE_TEXTURE);
         diffuse_area->setLabel("Tiles Diffuse");
         diffuse_area->go_property = this;
-        diffuse_area->rel_path_std = &this->diffuse_relpath;
+        diffuse_area->pResultString = &this->diffuse_relpath;
         diffuse_area->isShowNoneItem = true;
         _inspector_win->addPropertyArea(diffuse_area);
 
@@ -187,13 +187,13 @@ void Engine::TileProperty::addPropertyInterfaceToInspector(){
     PickResourceArea* area = new PickResourceArea(RESOURCE_TYPE_TEXTURE);
     area->setLabel("Texture");
     area->go_property = this;
-    area->rel_path_std = &diffuse_relpath;
+    area->pResultString = &diffuse_relpath;
     _inspector_win->addPropertyArea(area);
 
     PickResourceArea* transparent_area = new PickResourceArea(RESOURCE_TYPE_TEXTURE);
     transparent_area->setLabel("Secondary Diffuse");
     transparent_area->go_property = this;
-    transparent_area->rel_path_std = &transparent_relpath;
+    transparent_area->pResultString = &transparent_relpath;
     _inspector_win->addPropertyArea(transparent_area);
 }
 

@@ -9,12 +9,13 @@
 #include <iostream>
 
 extern EditWindow* _editor_win;
+extern InspectorWin* _inspector_win;
 extern Project* project_ptr;
 //Hack to support resources
 extern ZSGAME_DATA* game_data;
 
 void ResourcePickDialog::onResourceSelected(){
-    if(area->rel_path_std == nullptr) return;
+    if(area->pResultString == nullptr) return;
 
     QListWidgetItem* selected = this->list->currentItem();
     QString resource_path = selected->text(); //Get selected text
@@ -22,10 +23,14 @@ void ResourcePickDialog::onResourceSelected(){
     Engine::IGameObjectComponent* prop_ptr = static_cast<Engine::IGameObjectComponent*>(area->go_property);
     getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
     //Apply resource change
-    *area->rel_path_std = resource_path.toStdString();
+    *area->pResultString = resource_path.toStdString();
 
     area->PropertyEditArea::callPropertyUpdate();
-    this->resource_text->setText(resource_path);
+
+    //Redraw thumbnails in inspector
+    _inspector_win->ThumbnailUpdateRequired = true;
+    area->updateLabel();
+
     emit accept(); //Close dailog with positive answer
 }
 
@@ -74,8 +79,6 @@ void ResourcePickDialog::onNeedToShow(){
         findFiles(QString::fromStdString(project_ptr->root_path));
     }
     this->show();
-    //update label content
-    area->updateLabel();
 }
 
 void ResourcePickDialog::findFiles(QString directory){
@@ -126,8 +129,6 @@ ResourcePickDialog::~ResourcePickDialog(){
     delete contentLayout;
 }
 
-
-
 QLabelResourcePickWgt::QLabelResourcePickWgt(PropertyEditArea* area_ptr, QWidget* parent) : QLabel (parent){
     setAcceptDrops(true);
     this->area_ptr = area_ptr;
@@ -147,7 +148,7 @@ void QLabelResourcePickWgt::dropEvent( QDropEvent* event ){
     if(file_dropped.length() > 0){
         //Get pointer to resource picker
         PickResourceArea* resource_area = static_cast<PickResourceArea*>(area_ptr);
-        if(resource_area->rel_path_std == nullptr) return;
+        if(resource_area->pResultString == nullptr) return;
         //if we drooped texture to texture pick area
         if((resource_area->resource_type == RESOURCE_TYPE_TEXTURE && (file_dropped[0]->text().endsWith(".dds") || file_dropped[0]->text().endsWith(".DDS")))
                 || (resource_area->resource_type == RESOURCE_TYPE_MATERIAL && (file_dropped[0]->text().endsWith(".zsmat")))){
@@ -155,7 +156,7 @@ void QLabelResourcePickWgt::dropEvent( QDropEvent* event ){
             QString newpath = _editor_win->getCurrentDirectory() + "/" + file_dropped[0]->text();
             newpath.remove(0, static_cast<int>(_editor_win->project.root_path.size()) + 1);
             //Set new relative path
-            *resource_area->rel_path_std = newpath.toStdString();
+            *resource_area->pResultString = newpath.toStdString();
 
             Engine::IGameObjectComponent* prop_ptr = area_ptr->go_property;
             getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
@@ -188,12 +189,12 @@ void QLabelResourcePickWgt::dropEvent( QDropEvent* event ){
 }
 
 //Pick resoource area stuff
-PickResourceArea::PickResourceArea(RESOURCE_TYPE resource_type){
+PickResourceArea::PickResourceArea(RESOURCE_TYPE resource_type) : 
+    resource_type(resource_type),
+    isShowNoneItem(false),
+    pResultString(nullptr)
+{
     type = PEA_TYPE_RESPICK;
-    this->rel_path_std = nullptr;
-    this->resource_type = resource_type; //Default type is texture
-
-    isShowNoneItem = false;
 
     respick_btn = new QPushButton; //Allocation of QPushButton
     elem_layout->addSpacing(6);
@@ -222,25 +223,35 @@ void PickResourceArea::destroyContent(){
 void PickResourceArea::addToInspector(InspectorWin* win){
     QObject::connect(respick_btn,  SIGNAL(clicked()), dialog, SLOT(onNeedToShow())); //On click on this button dialog will be shown
     win->getContentLayout()->addLayout(elem_layout);
+    _inspector_win->ThumbnailUpdateRequired = true;
+    updateLabel();
 }
 
 void PickResourceArea::setup(){
 }
 
 void PickResourceArea::updateLabel(){
-    if(this->rel_path_std == nullptr) //If vector hasn't been set
+    if(this->pResultString == nullptr) //If vector hasn't been set
         return; //Go out
 
-    bool resource_specified = *rel_path_std != "@none";
-    relpath_label->setText(QString::fromStdString(*rel_path_std));
-
-    if (this->resource_type == RESOURCE_TYPE_MATERIAL ||
+    bool UseThumbnail = (this->resource_type == RESOURCE_TYPE_MATERIAL ||
         this->resource_type == RESOURCE_TYPE_TEXTURE ||
-        this->resource_type == RESOURCE_TYPE_MESH) {
+        this->resource_type == RESOURCE_TYPE_MESH);
+    bool resource_specified = *pResultString != "@none";
+
+    if (!_inspector_win->ThumbnailUpdateRequired && UseThumbnail)
+        return;
+
+    if (!UseThumbnail) {
+        relpath_label->setText(QString::fromStdString(*pResultString));
+    }
+    
+
+    if (UseThumbnail) {
         if (resource_specified) {
             std::string fpath = _editor_win->project.root_path + "/";
 
-                fpath += *rel_path_std;
+                fpath += *pResultString;
 
                 QImage* img = nullptr;
                 //Set resource pixmap
@@ -261,7 +272,7 @@ void PickResourceArea::updateLabel(){
 }
 
 void PickResourceArea::updateValues(){
-    if(this->rel_path_std == nullptr) //If vector hasn't been set
+    if(this->pResultString == nullptr) //If vector hasn't been set
         return; //Go out
     //Get current value in text field
     QString cur = this->relpath_label->text();

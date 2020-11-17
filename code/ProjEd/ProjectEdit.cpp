@@ -318,7 +318,6 @@ void EditWindow::openFile(QString file_path){
 
         _ed_actions_container->clear();
         //setupObjectsHieList(); //Clear everything, at first
-        //world.clear();
         world.openFromFile(file_path.toStdString(), ui->objsList); //Open this scene
 
         scene_path = file_path; //Assign scene path

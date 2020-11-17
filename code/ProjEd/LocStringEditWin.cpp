@@ -7,7 +7,7 @@
 using namespace ZSPIRE;
 using namespace std;
 
-QString captions[LANGS_COUNT] = { "English (en)", "Deutsche", "Fr", "Es", "Italian", "Russian" };
+QString captions[LANGS_COUNT] = { "English (en)", "Deutsche", "Francais", "Espanol", "Italian", "Russian" };
 
 LocStringEditWindow::LocStringEditWindow(QWidget* parent) :
 	QMainWindow(parent),

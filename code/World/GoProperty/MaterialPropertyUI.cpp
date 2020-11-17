@@ -11,7 +11,7 @@ void Engine::MaterialProperty::addPropertyInterfaceToInspector() {
     PickResourceArea* area = new PickResourceArea(RESOURCE_TYPE_MATERIAL);
     area->setLabel("Material");
     area->go_property = this;
-    area->rel_path_std = &material_path;
+    area->pResultString = &material_path;
     _inspector_win->addPropertyArea(area);
     //No material, exiting
     if (material_ptr == nullptr || material_ptr->file_path[0] == '@')
@@ -55,7 +55,7 @@ void Engine::MaterialProperty::addPropertyInterfaceToInspector() {
             PickResourceArea* area = new PickResourceArea(RESOURCE_TYPE_TEXTURE);
             area->setLabel(QString::fromStdString(texture_p->prop_caption));
             area->go_property = this;
-            area->rel_path_std = &texture_conf->path;
+            area->pResultString = &texture_conf->path;
             area->isShowNoneItem = true;
             _inspector_win->addPropertyArea(area);
 
@@ -147,7 +147,7 @@ void Engine::MaterialProperty::addPropertyInterfaceToInspector() {
                 PickResourceArea* area = new PickResourceArea(RESOURCE_TYPE_TEXTURE);
                 area->setLabel(captions[i]);
                 area->go_property = this;
-                area->rel_path_std = &texture_conf->texture_str[i];
+                area->pResultString = &texture_conf->texture_str[i];
                 area->isShowNoneItem = true;
                 _inspector_win->addPropertyArea(area);
             }
@@ -231,4 +231,6 @@ void Engine::MaterialProperty::onValueChanged() {
     _editor_win->thumb_master->createMaterialThumbnail(newmat_ptr_res->resource_label);
     //Update thumbnail in file list
     _editor_win->updateFileListItemIcon(QString::fromStdString(material_ptr->file_path));
+    //Redraw thumbnails in inspector
+    _inspector_win->ThumbnailUpdateRequired = true;
 }
