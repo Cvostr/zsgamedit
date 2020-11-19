@@ -4,7 +4,7 @@
 #include <render/Texture.h>
 #include <render/Mesh.hpp>
 #include <render/Material.hpp>
-#include <engine/loader.h>
+#include <engine/BackgroundLoader.hpp>
 #include "../../Render/headers/zs-pipeline.h"
 #include "EditorManager.h"
 #include <map>

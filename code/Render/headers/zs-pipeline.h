@@ -11,7 +11,7 @@
 #include "../../Misc/headers/EditorManager.h"
 #include <QMainWindow>
 #include <SDL2/SDL.h>
-#include "render/zs-pipeline.h"
+#include "render/Renderer.hpp"
 
 
 class RenderPipelineEditor : public Engine::RenderPipeline{

@@ -254,11 +254,11 @@ void EditWindow::init(){
     game_data->resources = new Engine::ResourceManager;
     startManager(game_data->resources);
 
-   
     game_data->script_manager = new Engine::AGScriptMgr;
     game_data->glyph_manager = this->glyph_manager;
     game_data->pipeline = this->render;
     game_data->out_manager = new Engine::OutputManager;
+    game_data->ui_manager = new Engine::UiManager;
     game_data->out_manager->consoleLogWorking = true;
     game_data->isEditor = true;
     game_data->world = &this->world;
@@ -668,7 +668,7 @@ EditWindow* ZSEditor::openEditor(){
 
         rtlayout->AddView(btn);
         rtlayout->AddView(btn1);
-        game_data->pipeline->RootLayout = rtlayout;
+        game_data->ui_manager->SetRootLayout(rtlayout);
     }
 
     return _editor_win;

@@ -5,19 +5,22 @@
 #include <fstream>
 #include <vector>
 #include <thread>
+#include <threading/Mutex.hpp>
 
-#define MAX_REQUESTS 150
+#define MAX_REQUESTS 550
 
 static bool terrain_thread_working = true;
 static HeightmapModifyRequest* terrain_mdf_requests[MAX_REQUESTS];
 unsigned int requests_num = 0;
+static Engine::Mutex TerrainEditMutex;
 
 void terrain_loop(){
     while(terrain_thread_working){
         //check, if there are some operation pending
         if(requests_num > 0){
-            unsigned int current = MAX_REQUESTS - 1 - (--requests_num);
-            HeightmapModifyRequest* req = terrain_mdf_requests[current];
+            //Lock mutex
+            TerrainEditMutex.Lock();
+            HeightmapModifyRequest* req = terrain_mdf_requests[0];
             //switch over all modify types
             switch(req->modify_type){
                 case TMT_HEIGHT:{
@@ -47,12 +50,20 @@ void terrain_loop(){
                     break;
                 }
             }
+            for (unsigned int a_i = 1; a_i < requests_num; a_i++) {
+                terrain_mdf_requests[a_i - 1] = terrain_mdf_requests[a_i];
+            }
+            requests_num--;
+            //release mutex
+            TerrainEditMutex.Release();
         }
     }
 }
 
 void queryTerrainModifyRequest(HeightmapModifyRequest* req){
-    terrain_mdf_requests[MAX_REQUESTS - 1 - (requests_num ++)] = req;
+    TerrainEditMutex.Lock();
+    terrain_mdf_requests[(requests_num ++)] = req;
+    TerrainEditMutex.Release();
 }
 
 void startTerrainThread(){
