@@ -18,12 +18,12 @@ void ResourcePickDialog::onResourceSelected(){
     if(area->pResultString == nullptr) return;
 
     QListWidgetItem* selected = this->list->currentItem();
-    QString resource_path = selected->text(); //Get selected text
+    QString resource_label = selected->text(); //Get selected text
     //Make action
     Engine::IGameObjectComponent* prop_ptr = static_cast<Engine::IGameObjectComponent*>(area->go_property);
     getActionManager()->newPropertyAction(prop_ptr->go_link, prop_ptr->type);
     //Apply resource change
-    *area->pResultString = resource_path.toStdString();
+    *area->pResultString = resource_label.toStdString();
 
     area->PropertyEditArea::callPropertyUpdate();
 

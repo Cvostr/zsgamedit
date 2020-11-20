@@ -33,8 +33,16 @@ void EditWindow::createResourceDesc(Engine::ZsResource* _resource, QString absfp
 
     _resource->rel_path = rel_path.toStdString();
     _resource->blob_path = _resource->rel_path;
-    if (resource_label.empty())
+    //if resource label isn't overrided
+    if (resource_label.empty()) {
+        //then set label as rel_path
         _resource->resource_label = _resource->rel_path;
+        //remove extension
+        while (_resource->resource_label[_resource->resource_label.size() - 1] != '.') {
+            _resource->resource_label.pop_back();
+        }
+        _resource->resource_label.pop_back();
+    }
     else
         _resource->resource_label = resource_label;
     game_data->resources->pushResource(_resource);

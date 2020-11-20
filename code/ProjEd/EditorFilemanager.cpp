@@ -28,8 +28,14 @@ void EditWindow::assignIconFile(QListWidgetItem* item) {
     if (checkExtension(item->text(), (".txt")) || checkExtension(item->text(), (".inf"))) {
         item->setIcon(QIcon::fromTheme("text-x-generic"));
     }
-    if (checkExtension(item->text(), (".dds"))) {
+    //Check if this resource is textures or material
+    if (checkExtension(item->text(), (".dds")) || checkExtension(item->text(), ".zsmat")) {
         QString path = this->current_dir + "/" + item->text();
+        //remove extension from back
+        while (path[path.size() - 1] != '.') {
+            path.resize(path.size() - 1);
+        }
+        path.resize(path.size() - 1);
         //Check, if we have thumbnail for this texture
         if (thumb_master->isAvailable(path.toStdString())) {
             //Thumbnail exists
@@ -57,14 +63,6 @@ void EditWindow::assignIconFile(QListWidgetItem* item) {
     }
     if (checkExtension(item->text(), (".prefab"))) {
         item->setIcon(QIcon(":/icons/res/icons/package.png"));
-    }
-    //File is .ZSMAT material
-    if (checkExtension(item->text(), (".zsmat"))) {
-        QString path = this->current_dir + "/" + item->text();
-        if (thumb_master->isAvailable(path.toStdString())) {
-            QImage* img = thumb_master->texture_thumbnails.at(path.toStdString());
-            item->setIcon(QIcon(QPixmap::fromImage(*img)));
-        }
     }
 }
 

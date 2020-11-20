@@ -324,7 +324,7 @@ void EditWindow::openFile(QString file_path){
         hasSceneFile = true; //Scene is saved
         this->edit_camera.setPosition(ZSVECTOR3(0.0f, 0.0f, 0.0f)); //Set camera to 0
         _inspector_win->clearContentLayout(); //Clear content, if not empty
-    }else if(file_path.endsWith(".lcstr")){
+    }else if(checkExtension(file_path, ".lcstr")){
         LocStringEditWindow* lsew = new LocStringEditWindow;
         lsew->showWindowWithFile(file_path.toStdString());
     }
@@ -659,12 +659,12 @@ EditWindow* ZSEditor::openEditor(){
         Engine::LinearLayout* rtlayout = new Engine::LinearLayout;
         rtlayout->move(30, 10);
         Engine::Button* btn = new Engine::Button;
-        btn->common_sprite = game_data->resources->getTextureByLabel("big_building.dds");
-        btn->hovered_sprite = game_data->resources->getTextureByLabel("textures/floor.DDS");
+        btn->common_sprite = game_data->resources->getTextureByLabel("big_building");
+        btn->hovered_sprite = game_data->resources->getTextureByLabel("textures/floor");
 
         Engine::Button* btn1 = new Engine::Button;
-        btn1->common_sprite = game_data->resources->getTextureByLabel("big_building.dds");
-        btn1->hovered_sprite = game_data->resources->getTextureByLabel("textures/floor.DDS");
+        btn1->common_sprite = game_data->resources->getTextureByLabel("big_building");
+        btn1->hovered_sprite = game_data->resources->getTextureByLabel("textures/floor");
 
         rtlayout->AddView(btn);
         rtlayout->AddView(btn1);

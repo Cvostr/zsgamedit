@@ -23,18 +23,21 @@ layout (std140, binding = 2) uniform ShadowData{
     uniform float ShadowBias; //4
     uniform int ShadowmapSize; //4
     uniform bool HasShadowMap; //4
+    uniform int CascadesNum; //4
     //16
     uniform mat4 LightProjViewMat0; // 16 * 4
     uniform mat4 LightProjViewMat1; // 16 * 4
     uniform mat4 LightProjViewMat2; // 16 * 4
     uniform mat4 LightProjViewMat3; // 16 * 4
     uniform mat4 LightProjViewMat4; // 16 * 4
-    //336
+    uniform mat4 LightProjViewMat5; // 16 * 4
+    //400
     uniform int CasterDistance0; //4
     uniform int CasterDistance1; //4
     uniform int CasterDistance2; //4
     uniform int CasterDistance3; //4
     uniform int CasterDistance4; //4
+    uniform int CasterDistance5; //4
 };
 
 layout (std140, binding = 0) uniform CamMatrices{
@@ -99,12 +102,13 @@ void main(){
 	if(bones > 0)
 		bone_t = getBoneTransform();
 
-    mat4 PVs[5];
+    mat4 PVs[6];
     PVs[0] = LightProjViewMat0;
     PVs[1] = LightProjViewMat1;
     PVs[2] = LightProjViewMat2;
     PVs[3] = LightProjViewMat3;
     PVs[4] = LightProjViewMat4;
+    PVs[5] = LightProjViewMat5;
 
     vec4 pos = PVs[gl_InstanceID] * object_transform * bone_t * vec4(position, 1.0);
 

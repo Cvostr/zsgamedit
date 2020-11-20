@@ -92,7 +92,6 @@ void ThumbnailsMaster::createTexturesThumbnails(){
 
         Engine::TextureResource* texture_ptr = static_cast<Engine::TextureResource*>(resource_ptr);
         DrawTexture(texture_ptr);
-        //texture_ptr->Release();
         //Allocate image buffer
         unsigned char* texture_data = new unsigned char[THUMBNAIL_IMG_SIZE * THUMBNAIL_IMG_SIZE * 4];
         memory_buffers.push_back(texture_data);
@@ -100,7 +99,7 @@ void ThumbnailsMaster::createTexturesThumbnails(){
         glReadPixels(0, 0, THUMBNAIL_IMG_SIZE, THUMBNAIL_IMG_SIZE, GL_RGBA, GL_UNSIGNED_BYTE, &texture_data[0]);
 
         QImage* image = new QImage(texture_data, THUMBNAIL_IMG_SIZE, THUMBNAIL_IMG_SIZE, QImage::Format_RGBA8888);
-        texture_thumbnails.insert(std::pair<std::string, QImage*>(project_ptr->root_path + "/" + resource_ptr->rel_path, image));
+        texture_thumbnails.insert(std::pair<std::string, QImage*>(project_ptr->root_path + "/" + resource_ptr->resource_label, image));
     }
 }
 
@@ -177,13 +176,13 @@ void ThumbnailsMaster::createMaterialThumbnails(){
         glReadPixels(0, 0, THUMBNAIL_IMG_SIZE, THUMBNAIL_IMG_SIZE, GL_RGBA, GL_UNSIGNED_BYTE, &texture_data[0]);
         //Create QT image
         QImage* image = new QImage(texture_data, THUMBNAIL_IMG_SIZE, THUMBNAIL_IMG_SIZE, QImage::Format_RGBA8888);
-        if(isAvailable(project_ptr->root_path + "/" + resource_ptr->rel_path)){
-            QImage* img_old = texture_thumbnails.at(project_ptr->root_path + "/" + resource_ptr->rel_path);
+        if(isAvailable(project_ptr->root_path + "/" + resource_ptr->resource_label)){
+            QImage* img_old = texture_thumbnails.at(project_ptr->root_path + "/" + resource_ptr->resource_label);
             delete img_old;
 
-            texture_thumbnails.at(project_ptr->root_path + "/" + resource_ptr->rel_path) = image;
+            texture_thumbnails.at(project_ptr->root_path + "/" + resource_ptr->resource_label) = image;
         }else{
-            texture_thumbnails.insert(std::pair<std::string, QImage*>(project_ptr->root_path + "/" + resource_ptr->rel_path, image));
+            texture_thumbnails.insert(std::pair<std::string, QImage*>(project_ptr->root_path + "/" + resource_ptr->resource_label, image));
         }
     }
 }
@@ -205,13 +204,13 @@ void ThumbnailsMaster::createMaterialThumbnail(std::string name){
     glReadPixels(0, 0, THUMBNAIL_IMG_SIZE, THUMBNAIL_IMG_SIZE, GL_RGBA, GL_UNSIGNED_BYTE, &texture_data[0]);
 
     QImage* image = new QImage(texture_data, THUMBNAIL_IMG_SIZE, THUMBNAIL_IMG_SIZE, QImage::Format_RGBA8888);
-    if(isAvailable(project_ptr->root_path + "/" + resource_ptr->rel_path)){
-        QImage* img_old = texture_thumbnails.at(project_ptr->root_path + "/" + resource_ptr->rel_path);
+    if(isAvailable(project_ptr->root_path + "/" + resource_ptr->resource_label)){
+        QImage* img_old = texture_thumbnails.at(project_ptr->root_path + "/" + resource_ptr->resource_label);
         delete img_old;
 
-        texture_thumbnails.at(project_ptr->root_path + "/" + resource_ptr->rel_path) = image;
+        texture_thumbnails.at(project_ptr->root_path + "/" + resource_ptr->resource_label) = image;
     }else{
-        texture_thumbnails.insert(std::pair<std::string, QImage*>(project_ptr->root_path + "/" + resource_ptr->rel_path, image));
+        texture_thumbnails.insert(std::pair<std::string, QImage*>(project_ptr->root_path + "/" + resource_ptr->resource_label, image));
     }
 
 }
