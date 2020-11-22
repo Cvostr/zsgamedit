@@ -1,10 +1,12 @@
 #include "headers/GO_widget_item.h"
+#include "headers/ProjectEdit.h"
 
 using namespace std;
 
 vector<QTreeWidgetItem*> go_items;
 QTreeWidget* rootWidget;
 bool go_w_i_reserved = false;
+extern EditWindow* _editor_win;
 
 void GO_W_I::reserve(int max) {
 	if (go_w_i_reserved) return;
@@ -42,7 +44,7 @@ void GO_W_I::updateObjsNames(Engine::World* world) {
 	for (unsigned int i = 0; i < world->objects.size(); i++) {
 		Engine::GameObject* obj = world->objects[i];
 		//check, if object was deleted
-		if (!obj->alive) {
+		if (!obj->mAlive) {
 			recreate(obj->array_index);
 			continue;
 		}
@@ -53,11 +55,11 @@ void GO_W_I::updateObjsNames(Engine::World* world) {
 		go_items[obj->array_index]->setText(0, QString::fromStdString(label->label));
 
 		if (obj->isActive()) {
-			//if (settings.isDarkTheme)
-			//	GO_W_I::getItem(obj_ptr->array_index)->setTextColor(0, QColor(Qt::white));
-			//else {
+			if (_editor_win->settings.isDarkTheme)
+				GO_W_I::getItem(obj->array_index)->setTextColor(0, QColor(Qt::white));
+			else {
 				GO_W_I::getItem(obj->array_index)->setTextColor(0, QColor(Qt::black));
-			//}
+			}
 		}
 		else
 			GO_W_I::getItem(obj->array_index)->setTextColor(0, QColor(Qt::gray));

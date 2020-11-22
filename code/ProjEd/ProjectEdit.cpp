@@ -24,6 +24,7 @@
 #include "headers/DialogsMaster.h"
 
 #include <ui/UI.hpp>
+#include <engine/Logger.hpp>
 
 //Hack to support meshes
 extern ZSpireEngine* engine_ptr;
@@ -178,7 +179,8 @@ void EditWindow::init(){
     SDL_DisplayMode current;
     SDL_GetCurrentDisplayMode(0, &current);
 
-    std::cout << "SDL window creation requested" << std::endl;
+    Engine::Logger::Log() << "SDL window creation requested";
+    //std::cout << "SDL window creation requested" << std::endl;
     //If no window settings made
     if(this->settings.isFirstSetup){
         //Set base windows values
@@ -365,24 +367,7 @@ QString EditWindow::createNewTextFile(QString directory, QString name, QString e
 }
 
 void EditWindow::setupObjectsHieList(){
-    QTreeWidget* w_ptr = ui->objsList; //Getting pointer to objects list widget
-    w_ptr->clear(); //Clears widget
-}
-
-void EditWindow::onImportResource(){
-    QString dir = "/home";
-#ifdef _WIN32
-    dir = "C:\\\n";
-#endif
-    QString filter = tr("GPU compressed texture (.DDS) (*.dds *.DDS);; 3D model (*.fbx *.FBX *.dae *.DAE);; Sound (*.wav *.WAV);; All files (*.*);;");
-
-    QFileDialog dialog;
-    QString path = dialog.getOpenFileName(this, tr("Select Resource"), dir, filter);
-
-    if ( path.isNull() == false ) //If user specified file path
-    {
-        ImportResource(path);
-    }
+    GO_W_I::recreateAll(MAX_OBJS);
 }
 
 bool EditWindow::onCloseProject(){

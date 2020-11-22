@@ -94,7 +94,7 @@ Engine::GameObject* EditWindow::onAddNewGameObject() {
     //if we have no free space inside array
     if (free_ind == static_cast<int>(world.objects.size())) {
         Engine::GameObject* obj = new Engine::GameObject;
-        obj->alive = false;
+        obj->mAlive = false;
         obj->mWorld = &world;
         obj->array_index = free_ind;
         world.objects.push_back(obj);
@@ -172,7 +172,6 @@ void EditWindow::addNewTerrain() {
     mat->setMaterial("@defaultHeightmap");
 
     updateFileList();
-
 }
 
 void EditWindow::addNewAudsource() {
@@ -183,4 +182,20 @@ void EditWindow::addNewAudsource() {
     int add_num = 0; //Declaration of addititonal integer
     world.getAvailableNumObjLabel("Audio_", &add_num);
     obj->setLabel("Audio_" + std::to_string(add_num));
+}
+
+void EditWindow::onImportResource() {
+    QString dir = "/home";
+#ifdef _WIN32
+    dir = "C:\\\n";
+#endif
+    QString filter = tr("GPU compressed texture (.DDS) (*.dds *.DDS);; 3D model (*.fbx *.FBX *.dae *.DAE);; Sound (*.wav *.WAV);; All files (*.*);;");
+
+    QFileDialog dialog;
+    QString path = dialog.getOpenFileName(this, tr("Select Resource"), dir, filter);
+
+    if (path.isNull() == false) //If user specified file path
+    {
+        ImportResource(path);
+    }
 }

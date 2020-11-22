@@ -246,8 +246,10 @@ void FileDeleteDialog::onDelButtonPressed(){
 
     QString rel_path = file_path;
     rel_path = rel_path.remove(0, static_cast<int>(_editor_win->project.root_path.size() + 1));
+    std::string RelPathStd = rel_path.toStdString();
+    RemoveExtension(RelPathStd);
 
-    Engine::ZsResource* _res = game_data->resources->getResource<Engine::ZsResource>(rel_path.toStdString());
+    Engine::ZsResource* _res = game_data->resources->getResource<Engine::ZsResource>(RelPathStd);
     //if resource, attached to file path exists
     if (_res != nullptr) { //if resource found
         _res->resource_type = RESOURCE_TYPE::RESOURCE_TYPE_NONE;
@@ -291,8 +293,10 @@ void FileRenameDialog::onRenameButtonPressed(){
 
     QString rel_path = file_path;
     rel_path = file_path.remove(0, static_cast<int>(_editor_win->project.root_path.size() + 1));
+    std::string OldRelPath = rel_path.toStdString();
+    RemoveExtension(OldRelPath);
 
-    Engine::ZsResource* _res = game_data->resources->getResource(rel_path.toStdString());
+    Engine::ZsResource* _res = game_data->resources->getResource(OldRelPath);
     //if resource, attached to file path exists
     if(_res != nullptr){ //if resource found
         //Store old relative path
@@ -305,15 +309,16 @@ void FileRenameDialog::onRenameButtonPressed(){
         _res->rel_path = new_relpath.toStdString();
         _res->blob_path = _res->rel_path;
         _res->resource_label = _res->rel_path;
+        RemoveExtension(_res->resource_label);
 
         if(_res->resource_type == RESOURCE_TYPE_MATERIAL){
             //if we renamed material, update its file path
             Material* mat = static_cast<Engine::MaterialResource*>(_res)->material;
             mat->file_path = (cur_path + edit_field.text()).toStdString();
             //Remove thumbnail with old path
-            _editor_win->thumb_master->texture_thumbnails.erase(old_rel_path.toStdString());
+            _editor_win->thumb_master->texture_thumbnails.erase(OldRelPath);
             //Store thumbnail of new material name
-            _editor_win->thumb_master->createMaterialThumbnail(_res->rel_path);
+            _editor_win->thumb_master->createMaterialThumbnail(_res->resource_label);
         }
     }
 }

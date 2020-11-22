@@ -30,16 +30,14 @@ void EditWindow::assignIconFile(QListWidgetItem* item) {
     }
     //Check if this resource is textures or material
     if (checkExtension(item->text(), (".dds")) || checkExtension(item->text(), ".zsmat")) {
-        QString path = this->current_dir + "/" + item->text();
+        std::string path = (this->current_dir + "/" + item->text()).toStdString();
         //remove extension from back
-        while (path[path.size() - 1] != '.') {
-            path.resize(path.size() - 1);
-        }
-        path.resize(path.size() - 1);
+        RemoveExtension(path);
+       
         //Check, if we have thumbnail for this texture
-        if (thumb_master->isAvailable(path.toStdString())) {
+        if (thumb_master->isAvailable(path)) {
             //Thumbnail exists
-            QImage* img = thumb_master->texture_thumbnails.at(path.toStdString());
+            QImage* img = thumb_master->texture_thumbnails.at(path);
             item->setIcon(QIcon(QPixmap::fromImage(*img)));
         }
     }

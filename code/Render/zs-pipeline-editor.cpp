@@ -139,7 +139,7 @@ unsigned int RenderPipelineEditor::render_getpickedObj(void* projectedit_ptr, in
     for(unsigned int obj_i = 0; obj_i < world_ptr->objects.size(); obj_i ++){
         Engine::GameObject* obj_ptr = world_ptr->objects[obj_i];
         //Check, if object deleted or deactivated
-        if (obj_ptr->alive == false || obj_ptr->isActive() == false) 
+        if (obj_ptr->mAlive == false || obj_ptr->isActive() == false)
             //if so, then skip it
             continue;
 

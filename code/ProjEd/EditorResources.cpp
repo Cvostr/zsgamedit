@@ -38,10 +38,7 @@ void EditWindow::createResourceDesc(Engine::ZsResource* _resource, QString absfp
         //then set label as rel_path
         _resource->resource_label = _resource->rel_path;
         //remove extension
-        while (_resource->resource_label[_resource->resource_label.size() - 1] != '.') {
-            _resource->resource_label.pop_back();
-        }
-        _resource->resource_label.pop_back();
+        RemoveExtension(_resource->resource_label);
     }
     else
         _resource->resource_label = resource_label;
