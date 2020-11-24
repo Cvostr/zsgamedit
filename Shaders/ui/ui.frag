@@ -7,8 +7,8 @@ layout(location = 0) in vec2 _UV;
 layout(location = 0) out vec4 FragColor;
 
 layout (std140, binding = 7) uniform Ui{
-    mat4 cam_projection;
-    mat4 object_transform;
+    mat4 cam_projection_ui;
+    mat4 object_transform_ui;
 	int render_mode;
     vec3 text_color;
 };
@@ -17,7 +17,7 @@ layout(binding = 0) uniform sampler2D sprite_map;
 
 void main(){
 
-vec4 color;
+vec4 color = vec4(0,0,0,1);
 
 if(render_mode == RENDER_SPRITE)
 	color = texture(sprite_map, _UV);

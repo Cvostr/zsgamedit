@@ -43,6 +43,8 @@ extern Material* defaultTerrainMat;
 
 EditWindow::EditWindow(QApplication* app, QWidget *parent) :
     QMainWindow(parent),
+    mFsWatcher(new QFileSystemWatcher(nullptr)),
+    object_buffer(nullptr),
     ui(new Ui::EditWindow)
 {
     ui->setupUi(this);
@@ -93,12 +95,13 @@ EditWindow::EditWindow(QApplication* app, QWidget *parent) :
     QObject::connect(ui->actionConsole_log, SIGNAL(triggered()), this, SLOT(onOpenConsoleLog()));
     QObject::connect(ui->actionInspectorWin, SIGNAL(triggered()), this, SLOT(onOpenInspectorWin()));
 
+    QObject::connect(mFsWatcher, SIGNAL(fileChanged(QString)), this, SLOT(onResourceFileChanged(QString)));
+
     ready = false; //Firstly set it to 0
     hasSceneFile = false; //No scene loaded by default
     isSceneRun = false; //Not running by default
     isWorldCamera = false;
     hasSheduledWorld = false;
-    object_buffer = nullptr;
 
     setupObjectsHieList();
     //Drag & drop in objects tree

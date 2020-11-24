@@ -1,4 +1,4 @@
-#version 420 core
+#version 430 core
 
 layout (location = 0) in vec3 position;
 //IDs of bones, that control this vertex

@@ -65,18 +65,28 @@ void main(){
             if(lights[lg].type == LIGHTSOURCE_DIR){
                 float lightcoeff = max(dot(Normal, normalize(lights[lg].dir)), 0.0) * lights[lg].intensity;
                 vec3 rlight = lightcoeff * lights[lg].color;
-			
                 //Specular calculation
                 vec3 lightDirReflected = reflect(normalize(-lights[lg].dir), Normal);
                 float angle = max(dot(camToFragDirection, lightDirReflected), 0.0);
                 rlight += pow(angle, 32) * specularFactor * lights[lg].color;
-			
+			    //add light to result color
                 result += rlight;
             }
             if(lights[lg].type == LIGHTSOURCE_POINT){
-                float dist = length(lights[lg].pos - FragPos);
-                float factor = 1.0 / ( 1.0 + 1.0 / lights[lg].range * dist + 1.0 / lights[lg].range * dist * dist) * lights[lg].intensity;
-                result += lights[lg].color * factor;
+                //distance from light to fragment
+                float Dist = length(lights[lg].pos - FragPos);
+                vec3 Dir = normalize(lights[lg].pos - FragPos);
+                //calculate factor of light
+                float factor = 1.0 / ( 1.0 + 1.0 / lights[lg].range * Dist + 1.0 / lights[lg].range * Dist * Dist) * lights[lg].intensity;
+                
+                float lightcoeff = max(dot(Normal, normalize(Dir)), 0.0) * lights[lg].intensity;
+                vec3 rlight = lightcoeff * lights[lg].color;
+                //Specular calculation
+               // vec3 lightDirReflected = reflect(normalize(Dir), Normal);
+               // float angle = max(dot(camToFragDirection, lightDirReflected), 0.0);
+                //rlight += pow(angle, 32) * specularFactor * lights[lg].color;
+			    //add light to result color
+                result += rlight * factor;
             }
             if(lights[lg].type == LIGHTSOURCE_SPOT){
                 

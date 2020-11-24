@@ -58,7 +58,7 @@ bool World::isPicked(Engine::GameObject* obj) {
     return false;
 }
 void World::writeGameObject(Engine::GameObject* object_ptr, ZsStream* world_stream){
-    if(object_ptr->alive == true){
+    if(object_ptr->mAlive == true){
         *world_stream << "\nG_OBJECT " << object_ptr->str_id << '\0';
         //Write main flags
         world_stream->writeBinaryValue(&object_ptr->mActive);
@@ -306,7 +306,7 @@ void World::putToShapshot(WorldSnapshot* snapshot){
     for(size_t objs_num = 0; objs_num < this->objects.size(); objs_num ++){
         //Obtain pointer to object
         Engine::GameObject* obj_ptr = this->objects[objs_num];
-        if(obj_ptr->alive == false) continue;
+        if(obj_ptr->mAlive == false) continue;
         //Iterate over all properties in object and copy them into snapshot
         for(unsigned int prop_i = 0; prop_i < obj_ptr->props_num; prop_i ++){
             auto prop_ptr = obj_ptr->mComponents[prop_i];

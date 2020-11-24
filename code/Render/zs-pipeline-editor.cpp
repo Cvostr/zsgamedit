@@ -1,4 +1,4 @@
-#include "headers/zs-pipeline.h"
+#include "headers/zs-renderer-editor.hpp"
 #include "../World/headers/World.h"
 #include "world/go_properties.h"
 #include "../ProjEd/headers/ProjectEdit.h"
@@ -8,15 +8,14 @@
 
 extern ZSGAME_DATA* game_data;
 
-RenderPipelineEditor::RenderPipelineEditor(){
-    this->pick_shader = nullptr;
-    this->obj_mark_shader = nullptr;
-    this->obj_grid_shader = nullptr;
-    editorUniformBuffer = nullptr;
-    gizmos = nullptr;
-    cam = nullptr;
-    win_ptr = nullptr;
-}
+RenderPipelineEditor::RenderPipelineEditor():
+    pick_shader(nullptr),
+    obj_mark_shader(nullptr),
+    obj_grid_shader(nullptr),
+    editorUniformBuffer(nullptr),
+    gizmos(nullptr),
+    cam(nullptr),
+    win_ptr(nullptr) {   }
 
 GizmosRenderer* RenderPipelineEditor::getGizmosRenderer(){
     return this->gizmos;
@@ -26,10 +25,12 @@ void RenderPipelineEditor::setup(int bufWidth, int bufHeight){
     this->pick_shader = Engine::allocShader();
     this->obj_mark_shader = Engine::allocShader();
     this->obj_grid_shader = Engine::allocShader();
+    sprite_shader_3d = Engine::allocShader();
 
     this->pick_shader->compileFromFile("Shaders/pick/pick.vert", "Shaders/pick/pick.frag");
     this->obj_mark_shader->compileFromFile("Shaders/mark/mark.vert", "Shaders/mark/mark.frag");
     this->obj_grid_shader->compileFromFile("Shaders/mark/grid.vert", "Shaders/mark/mark.frag");
+    sprite_shader_3d->compileFromFile("Shaders/ui/sprite.vert", "Shaders/ui/ui.frag");
     //create geometry buffer
     create_G_Buffer(bufWidth, bufHeight);
 
@@ -42,6 +43,7 @@ void RenderPipelineEditor::setup(int bufWidth, int bufHeight){
 void RenderPipelineEditor::initGizmos(int projectPespective){
     gizmos = new GizmosRenderer(obj_mark_shader, 
                                 obj_grid_shader,
+                                sprite_shader_3d,
                                 this->cullFaces,
                                 projectPespective,
                                 transformBuffer,
@@ -52,6 +54,8 @@ void RenderPipelineEditor::initGizmos(int projectPespective){
 RenderPipelineEditor::~RenderPipelineEditor(){
     this->pick_shader->Destroy();
     this->obj_mark_shader->Destroy();
+    obj_grid_shader->Destroy();
+    sprite_shader_3d->Destroy();
 
     removeLights();
     delete gizmos;
@@ -221,7 +225,11 @@ void RenderPipelineEditor::renderGizmos(void* projectedit_ptr, Engine::Camera* c
         //get object pointer
         Engine::GameObject* obj_ptr = world_ptr->objects[obj_i];
         //Check, if object is alive and active
-        if (obj_ptr->mActive && world_ptr->isPicked(obj_ptr) && current_state == PIPELINE_STATE::PIPELINE_STATE_DEFAULT) {
+        if (obj_ptr->mAlive && obj_ptr->hasLightsource()) {
+            Engine::TransformProperty* transform_ptr = obj_ptr->getTransformProperty();
+            getGizmosRenderer()->drawGizmoSprite(getGizmosRenderer()->SunTextureSprite, transform_ptr->abs_translation, ZSVECTOR3(2,2,2), cam->getViewMatrix());
+        }
+        if (obj_ptr->mAlive && obj_ptr->mActive && world_ptr->isPicked(obj_ptr) && current_state == PIPELINE_STATE::PIPELINE_STATE_DEFAULT) {
             setDepthState(false);
             setFaceCullState(false);
 
@@ -242,7 +250,7 @@ void RenderPipelineEditor::renderGizmos(void* projectedit_ptr, Engine::Camera* c
             }
             //Return Depth and face cull back
             setDepthState(true);
-            glEnable(GL_CULL_FACE);
+            setFaceCullState(true);
         }
     }
 

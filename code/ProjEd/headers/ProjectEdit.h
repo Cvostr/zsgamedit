@@ -1,9 +1,9 @@
-#ifndef project_edit_h
-#define project_edit_h
+#pragma once
 
 #include <QMainWindow>
 #include <QTreeWidget>
 #include <QListWidget>
+#include <QFileSystemWatcher>
 #include <QFileInfo>
 #include <QMenu>
 #include <SDL2/SDL.h>
@@ -11,7 +11,7 @@
 
 #include "EdActions.h"
 #include "EditorSettings.h"
-#include "../../Render/headers/zs-pipeline.h"
+#include "../../Render/headers/zs-renderer-editor.hpp"
 #include <world/Camera.hpp>
 #include <misc/oal_manager.h>
 
@@ -142,8 +142,11 @@ public slots:
 
     void onOpenConsoleLog();
     void onOpenInspectorWin();
+
+    void onResourceFileChanged(QString path);
 private:
     QApplication* app_ptr;
+    QFileSystemWatcher* mFsWatcher;
     //Vector to store all editor managers
     std::vector<IEngineComponent*> managers;
 
@@ -383,4 +386,3 @@ namespace ZSEditor {
 }
 
 EdActions* getActionManager();
-#endif

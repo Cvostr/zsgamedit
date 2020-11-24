@@ -8,7 +8,7 @@
 #include <fstream>
 #include "../../ProjEd/headers/InspectorWin.h"
 
-#include "../../Render/headers/zs-pipeline.h"
+#include "../../Render/headers/zs-renderer-editor.hpp"
 #include <render/Mesh.hpp>
 #include <render/Math.hpp>
 #include <render/Shader.hpp>

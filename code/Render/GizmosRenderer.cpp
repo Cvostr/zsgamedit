@@ -3,21 +3,27 @@
 
 GizmosRenderer::GizmosRenderer(Engine::Shader* mark_shader,
                                Engine::Shader* grid_shader,
+                               Engine::Shader* ui_shader,
                                bool cullFaceEnabled,
                                int projectPerspective,
                                Engine::UniformBuffer* buf,
                                Engine::UniformBuffer* editor,
-                               Engine::UniformBuffer* inst){
-    //set shader pointer
-    this->mark_shader_ptr = mark_shader;
-    this->grid_shader_ptr = grid_shader;
+                               Engine::UniformBuffer* inst) :
+    mark_shader_ptr(mark_shader),
+    grid_shader_ptr(grid_shader),
+    ui_shader_ptr(ui_shader),
+
+    transformBuffer(buf),
+    editorBuffer(editor),
+    instBuffer(inst)
+{
 
     this->cullFaceEnabled = cullFaceEnabled;
     this->projectPerspective = projectPerspective;
 
-    this->transformBuffer = buf;
-    this->editorBuffer = editor;
-    this->instBuffer = inst;
+    SunTextureSprite = Engine::allocTexture();
+    SunTextureSprite->LoadPNGTextureFromFile("res/icons/sunlight.png");
+
     //Create grid strokes transforms
     int red = GRID_STROKE_COUNT * GRID_DIST * -0.5f;
     for (int i = 0; i < GRID_STROKE_COUNT; i++) {
@@ -173,5 +179,21 @@ void GizmosRenderer::drawGrid() {
     this->grid_shader_ptr->Use();
        
     Engine::getCubeMesh3D()->DrawInstanced(GRID_STROKE_COUNT * 2);
-    
+}
+
+void GizmosRenderer::drawGizmoSprite(Engine::Texture* texture, ZSVECTOR3 position, ZSVECTOR3 scale, Mat4 CamView) {
+    Mat4 ScaleMat = getScaleMat(scale);
+    Mat4 PosMat = getTranslationMat(position);
+
+    Mat4 Transform = ScaleMat * PosMat;
+    Transform = removeRotationFromTransformMat(Transform, CamView);
+
+    transformBuffer->bind();
+    transformBuffer->writeData(sizeof(Mat4) * 2, sizeof(Mat4), &Transform);
+
+    ui_shader_ptr->Use();
+
+    texture->Use(0);
+
+    Engine::getPlaneMesh2D()->Draw();
 }

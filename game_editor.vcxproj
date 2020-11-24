@@ -165,7 +165,7 @@
     <ClInclude Include="code\ProjEd\headers\EdActions.h" />
     <ClInclude Include="code\ProjEd\headers\EditorSettings.h" />
     <ClInclude Include="code\Render\headers\GizmosRenderer.h" />
-    <ClInclude Include="code\Render\headers\zs-pipeline.h" />
+    <ClInclude Include="code\Render\headers\zs-renderer-editor.hpp" />
     <ClInclude Include="code\World\headers\Misc.h" />
     <ClInclude Include="code\World\headers\terrain.h" />
     <ClInclude Include="code\World\headers\World.h" />

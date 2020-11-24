@@ -2,6 +2,7 @@
 #include "ui_LocStringFileEdit.h"
 #include <fstream>
 #include <qmessagebox.h>
+#include <misc/misc.h>
 #include <QResizeEvent>
 
 using namespace ZSPIRE;
@@ -126,7 +127,7 @@ void LocStringEditWindow::onStringsListItemDoubleClicked() {
 }
 
 void LocStringEditWindow::onSave() {
-	ofstream stream;
+	ZsStream stream;
 	stream.open(file_path, ofstream::binary);
 
 	char header[] = "ZSLOCALIZEDSTRINGSBINARY";
@@ -136,30 +137,30 @@ void LocStringEditWindow::onSave() {
 	unsigned int stringsCount = lsf->getStringsCount();
 	unsigned int langsCount = lsf->getLanguagesCount();
 	//Write amount of strings
-	stream.write((const char*)(&stringsCount), sizeof(unsigned int));
-	stream.write((const char*)(&langsCount), sizeof(unsigned int));
+	stream.writeBinaryValue(&stringsCount);
+	stream.writeBinaryValue(&langsCount);
 	//Write languages
 	for (unsigned int lang_i = 0; lang_i < langsCount; lang_i++) {
 		unsigned int lang = lsf->getLang(lang_i);
-		stream.write((const char*)(&lang), sizeof(unsigned int));
+		stream.writeBinaryValue(&lang);
 	}
 	//Write all strings
 	for (unsigned int str_i = 0; str_i < stringsCount; str_i ++) {
 		LocString* str = lsf->getString(str_i);
 		//Write String ID
-		stream << str->str_ID << '\0';
+		stream.writeString(str->str_ID);
 		//Write Integer ID
-		stream.write((const char*)&str->ID, sizeof(unsigned int));
+		stream.writeBinaryValue(&str->ID);
 		//Write strings for each language
 		for (unsigned int lstr_i = 0; lstr_i < lsf->getLanguagesCount(); lstr_i++) {
 			std::u32string* _str = &str->STR[lstr_i];
 			//Write LANG code of localized string
 			unsigned int lang = lsf->getLang(lstr_i);
-			stream.write((const char*)&lang, sizeof(unsigned int));
+			stream.writeBinaryValue(&lang);
 			//Get length of string
 			unsigned int str_size = _str->size();
 			//Write length of string
-			stream.write((const char*)&str_size, sizeof(unsigned int));
+			stream.writeBinaryValue(&str_size);
 			//Write localized string
 			for (unsigned int c_i = 0; c_i < str_size; c_i++) {
 				char32_t _char = _str->at(c_i);

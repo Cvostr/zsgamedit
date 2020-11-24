@@ -1,5 +1,5 @@
-#ifndef ZSPIPELINE_H_1
-#define ZSPIPELINE_H_1
+#pragma once
+
 #define GLEW_STATIC
 #include <GL/glew.h>
 #include <render/Shader.hpp>
@@ -21,6 +21,7 @@ private:
     Engine::Shader* pick_shader; //Shader to draw & pick objects
     Engine::Shader* obj_mark_shader; //Shader to draw mark of selected objects
     Engine::Shader* obj_grid_shader;
+    Engine::Shader* sprite_shader_3d;
 
 public:
     Engine::UniformBuffer* editorUniformBuffer;
@@ -47,6 +48,3 @@ public:
     RenderPipelineEditor();
     ~RenderPipelineEditor();
 };
-
-
-#endif // ZSPIPELINE_H

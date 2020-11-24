@@ -5,7 +5,7 @@
 #include <render/Mesh.hpp>
 #include <render/Material.hpp>
 #include <engine/BackgroundLoader.hpp>
-#include "../../Render/headers/zs-pipeline.h"
+#include "../../Render/headers/zs-renderer-editor.hpp"
 #include "EditorManager.h"
 #include <map>
 #include <vector>
