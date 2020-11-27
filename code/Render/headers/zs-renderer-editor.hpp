@@ -11,10 +11,10 @@
 #include "../../Misc/headers/EditorManager.h"
 #include <QMainWindow>
 #include <SDL2/SDL.h>
-#include "render/Renderer.hpp"
+#include <ogl/GLRenderer.hpp>
 
 
-class RenderPipelineEditor : public Engine::RenderPipeline{
+class RenderPipelineEditor : public Engine::GLRenderer {
 private:
     GizmosRenderer* gizmos;
 
@@ -35,15 +35,13 @@ public:
     ZSRGBCOLOR getColorOfPickedTransformControl(int mouseX, int mouseY, void* projectedit_ptr);
     void renderGizmos(void* projectedit_ptr, Engine::Camera* cam);
 
-    Engine::Camera* cam;
     void* win_ptr;
 
     GizmosRenderer* getGizmosRenderer();
     //override virtual function from EngineComponentManager
-    void init();
+    void OnCreate();
 
     Engine::Shader* getPickingShader();
-    Engine::Shader* getShadowmapShader();
 
     RenderPipelineEditor();
     ~RenderPipelineEditor();

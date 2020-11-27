@@ -21,7 +21,7 @@ public:
 
 class EdSnapshotAction : public EdAction{
 public:
-    WorldSnapshot snapshot; //Class object to store snapshot
+    Engine::WorldSnapshot snapshot; //Class object to store snapshot
 
     void clear();
     EdSnapshotAction();

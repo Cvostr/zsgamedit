@@ -18,7 +18,7 @@ layout(binding = 3) uniform sampler2D height_map;
 layout(binding = 4) uniform sampler2D occlusion_map;
 layout(binding = 6) uniform sampler2DArray shadow_map;
 
-layout (std140) uniform Default3d{
+layout (std140, binding = 50) uniform Default3d{
     vec3 diffuse_color;
 
     bool hasDiffuseMap;

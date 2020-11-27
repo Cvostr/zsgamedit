@@ -62,12 +62,10 @@ void Engine::MaterialProperty::addPropertyInterfaceToInspector() {
             break;
         }
         case MATSHPROP_TYPE_FLOAT: {
-            //Cast pointer
-            FloatMaterialShaderProperty* float_p = static_cast<FloatMaterialShaderProperty*>(prop_ptr);
             FloatMtShPropConf* float_conf = static_cast<FloatMtShPropConf*>(conf_ptr);
 
             FloatPropertyArea* float_area = new FloatPropertyArea;
-            float_area->setLabel(QString::fromStdString(float_p->prop_caption)); //Its label
+            float_area->setLabel(QString::fromStdString(prop_ptr->prop_caption)); //Its label
             float_area->value = &float_conf->value;
             float_area->go_property = this;
             _inspector_win->addPropertyArea(float_area);
@@ -75,12 +73,10 @@ void Engine::MaterialProperty::addPropertyInterfaceToInspector() {
             break;
         }
         case MATSHPROP_TYPE_FVEC3: {
-            //Cast pointer
-            Float3MaterialShaderProperty* float3_p = static_cast<Float3MaterialShaderProperty*>(prop_ptr);
             Float3MtShPropConf* float3_conf = static_cast<Float3MtShPropConf*>(conf_ptr);
 
             Float3PropertyArea* float3_area = new Float3PropertyArea;
-            float3_area->setLabel(QString::fromStdString(float3_p->prop_caption)); //Its label
+            float3_area->setLabel(QString::fromStdString(prop_ptr->prop_caption)); //Its label
             float3_area->vector = &float3_conf->value;
             float3_area->go_property = this;
             _inspector_win->addPropertyArea(float3_area);
@@ -88,36 +84,30 @@ void Engine::MaterialProperty::addPropertyInterfaceToInspector() {
             break;
         }
         case MATSHPROP_TYPE_FVEC2: {
-            //Cast pointer
-            Float2MaterialShaderProperty* float2_p = static_cast<Float2MaterialShaderProperty*>(prop_ptr);
             Float2MtShPropConf* float2_conf = static_cast<Float2MtShPropConf*>(conf_ptr);
 
             Float2PropertyArea* float2_area = new Float2PropertyArea;
-            float2_area->setLabel(QString::fromStdString(float2_p->prop_caption)); //Its label
+            float2_area->setLabel(QString::fromStdString(prop_ptr->prop_caption)); //Its label
             float2_area->vector = &float2_conf->value;
             float2_area->go_property = this;
             _inspector_win->addPropertyArea(float2_area);
             break;
         }
         case MATSHPROP_TYPE_IVEC2: {
-            //Cast pointer
-            Int2MaterialShaderProperty* int2_p = static_cast<Int2MaterialShaderProperty*>(prop_ptr);
             Int2MtShPropConf* int2_conf = static_cast<Int2MtShPropConf*>(conf_ptr);
 
             Int2PropertyArea* int2_area = new Int2PropertyArea;
-            int2_area->setLabel(QString::fromStdString(int2_p->prop_caption)); //Its label
+            int2_area->setLabel(QString::fromStdString(prop_ptr->prop_caption)); //Its label
             int2_area->vector = &int2_conf->value[0];
             int2_area->go_property = this;
             _inspector_win->addPropertyArea(int2_area);
             break;
         }
         case MATSHPROP_TYPE_INTEGER: {
-            //Cast pointer
-            IntegerMaterialShaderProperty* integer_p = static_cast<IntegerMaterialShaderProperty*>(prop_ptr);
             IntegerMtShPropConf* integer_conf = static_cast<IntegerMtShPropConf*>(conf_ptr);
 
             IntPropertyArea* integer_area = new IntPropertyArea;
-            integer_area->setLabel(QString::fromStdString(integer_p->prop_caption)); //Its label
+            integer_area->setLabel(QString::fromStdString(prop_ptr->prop_caption)); //Its label
             integer_area->value = &integer_conf->value;
             integer_area->go_property = this;
             _inspector_win->addPropertyArea(integer_area);
@@ -125,12 +115,10 @@ void Engine::MaterialProperty::addPropertyInterfaceToInspector() {
             break;
         }
         case MATSHPROP_TYPE_COLOR: {
-            //Cast pointer
-            ColorMaterialShaderProperty* color_p = static_cast<ColorMaterialShaderProperty*>(prop_ptr);
             ColorMtShPropConf* color_conf = static_cast<ColorMtShPropConf*>(conf_ptr);
 
             ColorDialogArea* color_area = new ColorDialogArea;
-            color_area->setLabel(QString::fromStdString(color_p->prop_caption)); //Its label
+            color_area->setLabel(QString::fromStdString(prop_ptr->prop_caption)); //Its label
             color_area->color = &color_conf->color;
             color_area->go_property = this;
             _inspector_win->addPropertyArea(color_area);

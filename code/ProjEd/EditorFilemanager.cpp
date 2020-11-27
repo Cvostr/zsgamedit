@@ -166,6 +166,7 @@ void EditWindow::onNewScript() {
     _resource->rel_path = rel_path.toStdString();
     _resource->blob_path = _resource->rel_path;
     _resource->resource_label = _resource->rel_path;
+    RemoveExtension(_resource->resource_label);
     game_data->resources->pushResource(_resource);
 
     updateFileList(); //Make new file visible
@@ -184,6 +185,7 @@ void EditWindow::onNewMaterial() {
     _resource->rel_path = rel_path.toStdString();
     _resource->blob_path = _resource->rel_path;
     _resource->resource_label = _resource->rel_path;
+    RemoveExtension(_resource->resource_label);
     game_data->resources->pushResource(_resource);
 
     thumb_master->createMaterialThumbnail(_resource->rel_path);

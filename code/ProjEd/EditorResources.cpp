@@ -5,6 +5,8 @@
 extern ZSGAME_DATA* game_data;
 
 void EditWindow::lookForResources(QString path) {
+    //Add new directory
+    mFsWatcher->addPath(path);
     QDir directory(path); //Creating QDir object
     directory.setFilter(QDir::Files | QDir::Dirs | QDir::NoSymLinks | QDir::NoDot | QDir::NoDotDot);
     directory.setSorting(QDir::DirsLast); //I want to recursive call this function after all files
@@ -33,8 +35,10 @@ void EditWindow::onResourceFileChanged(QString path) {
     std::string RelPathStd = rel_path.toStdString();
     RemoveExtension(RelPathStd);
     Engine::ZsResource* pResource = game_data->resources->getResource(RelPathStd);
-    pResource->Release();
-    pResource->load();
+    if (pResource != nullptr) {
+        pResource->Release();
+        pResource->load();
+    }
 }
 
 void EditWindow::createResourceDesc(Engine::ZsResource* _resource, QString absfpath, std::string resource_label) {

@@ -14,7 +14,7 @@ RenderPipelineEditor::RenderPipelineEditor():
     obj_grid_shader(nullptr),
     editorUniformBuffer(nullptr),
     gizmos(nullptr),
-    cam(nullptr),
+    //cam(nullptr),
     win_ptr(nullptr) {   }
 
 GizmosRenderer* RenderPipelineEditor::getGizmosRenderer(){
@@ -74,7 +74,7 @@ bool RenderPipelineEditor::InitGLEW(){
         return true;
 }
 
-void RenderPipelineEditor::init(){
+void RenderPipelineEditor::OnCreate(){
     setFullscreenViewport(this->WIDTH, this->HEIGHT);
 
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);

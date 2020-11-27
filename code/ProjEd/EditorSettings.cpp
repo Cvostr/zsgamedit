@@ -3,7 +3,7 @@
 
 #define ED_SETTINGS_FILE "editor_settings.cfg"
 
-void EditorSettingsManager::init(){
+void EditorSettingsManager::OnCreate(){
     std::ifstream stream;
     stream.open(ED_SETTINGS_FILE, std::ifstream::in);
 

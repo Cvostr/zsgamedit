@@ -178,7 +178,7 @@ void EditWindow::init(){
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);
     SDL_DisplayMode current;
     SDL_GetCurrentDisplayMode(0, &current);
 
@@ -264,6 +264,8 @@ void EditWindow::init(){
     game_data->pipeline = this->render;
     game_data->out_manager = new Engine::OutputManager;
     game_data->ui_manager = new Engine::UiManager;
+    game_data->oal_manager = new Engine::OALManager;
+    this->startManager(game_data->oal_manager);
     game_data->out_manager->consoleLogWorking = true;
     game_data->isEditor = true;
     game_data->world = &this->world;
@@ -274,8 +276,6 @@ void EditWindow::init(){
     startTerrainThread();
 
     ready = true;//Everything is ready
-    //Init OpenAL sound system
-    Engine::SFX::initAL();
 
     switch(project.perspective){
         case PERSP_2D:{ //2D project
@@ -402,7 +402,7 @@ bool EditWindow::onCloseProject(){
         destroyAllManagers();
 
         _ed_actions_container->clear();
-        Engine::SFX::destroyAL();
+        //game_data->oal_manager->destroyAL();
         //won't render anymore
         this->ready = false; 
 
@@ -705,7 +705,7 @@ void ObjectTransformState::setTransformOnObject(GO_TRANSFORM_MODE transformMode)
 void EditWindow::startManager(IEngineComponent* component){
     component->setDpMetrics(this->settings.gameViewWin_Width, this->settings.gameViewWin_Height);
     component->setProjectStructPtr(&this->project);
-    component->init();
+    component->OnCreate();
     this->managers.push_back(component);
 }
 
@@ -736,7 +736,7 @@ void EditWindow::setGameViewWindowSize(int W, int H){
     for(unsigned int i = 0; i < managers.size(); i ++){
         managers[i]->WIDTH = W;
         managers[i]->HEIGHT = H;
-        managers[i]->updateWindowSize(W, H);
+        managers[i]->OnUpdateWindowSize(W, H);
     }
 }
 

@@ -13,7 +13,7 @@
 #include "EditorSettings.h"
 #include "../../Render/headers/zs-renderer-editor.hpp"
 #include <world/Camera.hpp>
-#include <misc/oal_manager.h>
+#include <audio/OALManager.hpp>
 
 struct Resource;
 struct Project;
@@ -188,7 +188,7 @@ public:
     EditorInputState input_state;
     ObjectTransformState obj_trstate; //Describes object transform
     PropertyPaintState ppaint_state; //Describes property painting feature state
-    WorldSnapshot run_world_snapshot; //useful to recover world state after running
+    Engine::WorldSnapshot run_world_snapshot; //useful to recover world state after running
 
     //Thumbnails master
     ThumbnailsMaster* thumb_master;

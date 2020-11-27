@@ -40,7 +40,7 @@ class EditorSettingsManager : public IEngineComponent{
 private:
     EditorSettings* settings_ptr;
 public:
-    void init();
+    void OnCreate();
 
     EditorSettingsManager(EditorSettings* settings_ptr);
     ~EditorSettingsManager();

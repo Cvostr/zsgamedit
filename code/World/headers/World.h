@@ -13,7 +13,7 @@
 #include <render/Math.hpp>
 #include <render/Shader.hpp>
 #include <render/Material.hpp>
-#include <misc/oal_manager.h>
+#include <audio/SoundSource.hpp>
 
 #include "../../Misc/headers/AssimpMeshLoader.h"
 #include "../../Misc/headers/zs_types.h"
@@ -38,16 +38,6 @@ public:
 
     Engine::IGameObjectComponent* updLinkPtr();
     ObjectPropertyLink();
-};
-
-class WorldSnapshot{
-public:
-    std::vector<Engine::GameObject> objects;
-    std::vector<Engine::IGameObjectComponent*> props;
-    std::vector<Engine::IGameObjectComponent*> scripts;
-
-    WorldSnapshot();
-    void clear();
 };
 
 class World : public Engine::World{
@@ -79,8 +69,7 @@ public:
     void addMeshGroup(std::string file_path);
     Engine::GameObject* addMeshNode(ZS3M::SceneNode* node);
 
-    void putToShapshot(WorldSnapshot* snapshot);
-    void recoverFromSnapshot(WorldSnapshot* snapshot);
+    void recoverFromSnapshot(Engine::WorldSnapshot* snapshot);
 
     World();
 

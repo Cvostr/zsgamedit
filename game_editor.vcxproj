@@ -128,7 +128,7 @@
     <ClCompile Include="code\ProjEd\PropertyAreas.cpp" />
     <ClCompile Include="code\ProjEd\ResourcePicker.cpp" />
     <ClCompile Include="code\Render\GizmosRenderer.cpp" />
-    <ClCompile Include="code\Render\zs-pipeline-editor.cpp" />
+    <ClCompile Include="code\Render\zs-renderer-editor.cpp" />
     <ClCompile Include="code\World\GameObject.cpp" />
     <ClCompile Include="code\World\GoProperty\go_properties.cpp" />
     <ClCompile Include="code\World\GoProperty\MaterialPropertyUI.cpp" />

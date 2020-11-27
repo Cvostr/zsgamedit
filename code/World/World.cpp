@@ -301,39 +301,8 @@ void World::storeObjectToPrefab(Engine::GameObject* object_ptr, QString file){
     writeObjectToPrefab(object_ptr, &prefab_stream);
 }
 
-void World::putToShapshot(WorldSnapshot* snapshot){
-    //iterate over all objects in scene
-    for(size_t objs_num = 0; objs_num < this->objects.size(); objs_num ++){
-        //Obtain pointer to object
-        Engine::GameObject* obj_ptr = this->objects[objs_num];
-        if(obj_ptr->mAlive == false) continue;
-        //Iterate over all properties in object and copy them into snapshot
-        for(unsigned int prop_i = 0; prop_i < obj_ptr->props_num; prop_i ++){
-            auto prop_ptr = obj_ptr->mComponents[prop_i];
-            auto new_prop = Engine::allocProperty(prop_ptr->type);
-            new_prop->go_link = prop_ptr->go_link;
-            prop_ptr->copyTo(new_prop);
-            snapshot->props.push_back(new_prop);
-        }
-        //Iterate over all scripts in objects and copy them into snapshot
-        for (unsigned int script_i = 0; script_i < obj_ptr->scripts_num; script_i++) {
-            Engine::ZPScriptProperty* script_ptr = static_cast<Engine::ZPScriptProperty*>
-                (obj_ptr->mScripts[script_i]);
-            Engine::ZPScriptProperty* script_prop = static_cast<Engine::ZPScriptProperty*>
-                (Engine::allocProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_AGSCRIPT));
-            script_prop->go_link = script_ptr->go_link;
-            script_ptr->copyTo(script_prop);
-            snapshot->scripts.push_back(script_prop);
-        }
-        //Decalare new object
-        Engine::GameObject newobj;
-        //Copy object data
-        obj_ptr->copyTo(&newobj);
-        snapshot->objects.push_back(newobj);
-    }
-}
 
-void World::recoverFromSnapshot(WorldSnapshot* snapshot){
+void World::recoverFromSnapshot(Engine::WorldSnapshot* snapshot){
     this->clear(); //clear world container first
     //iterate over all objects in snapshot
     for(unsigned int objs_num = 0; objs_num < snapshot->objects.size(); objs_num ++){
@@ -377,20 +346,4 @@ void World::recoverFromSnapshot(WorldSnapshot* snapshot){
     GO_W_I::recreateAll(MAX_OBJS);
     //make parentings
     GO_W_I::makeParentings(this, this->obj_widget_ptr);
-}
-
-WorldSnapshot::WorldSnapshot(){
-
-}
-void WorldSnapshot::clear(){
-    this->objects.clear(); //clear all object
-    //iterate over all properties
-    for(size_t prop_it = 0; prop_it < props.size(); prop_it ++){
-       delete props[prop_it];
-    }
-    for (size_t script_it = 0; script_it < scripts.size(); script_it++) {
-        delete scripts[script_it];
-    }
-    props.clear();
-    scripts.clear();
 }

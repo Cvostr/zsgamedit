@@ -2,13 +2,14 @@
 
 extern InspectorWin* _inspector_win;
 
-EdActions::EdActions(){
-    this->current_pos = 0; //Default pos is zero
-    this->end_pos = 0; //Default tail pos is zero as well
-    action_list.resize(0);
-    storeActions = false;
-    hasChangesUnsaved = false; //Defaultly, nothing to save
-    world_ptr = nullptr;
+EdActions::EdActions():
+    current_pos(0), //Default pos is zero
+    end_pos(0), //Default tail pos is zero as well
+    storeActions(false),
+    hasChangesUnsaved(false), //Defaultly, nothing to save
+    world_ptr(nullptr)
+{
+        action_list.resize(0);
 }
 
 EdAction::EdAction(){
@@ -50,7 +51,7 @@ void EdObjectAction::clear(){
 
 void EdActions::newSnapshotAction(Engine::World* world_ptr){
     EdSnapshotAction* new_action = new EdSnapshotAction;
-    ((World*)world_ptr)->putToShapshot(&new_action->snapshot);
+    world_ptr->putToShapshot(&new_action->snapshot);
 
     putNewAction(new_action);
 }
@@ -91,7 +92,7 @@ void EdActions::undo(){
     if(act_type == ACT_TYPE_SNAPSHOT){ //if this action is snapshot
         EdSnapshotAction* snapshot = static_cast<EdSnapshotAction*>(this->action_list[current_pos - 1]);
 
-        WorldSnapshot cur_state_snap; //Declare snapshot to store current state
+        Engine::WorldSnapshot cur_state_snap; //Declare snapshot to store current state
         world_ptr->putToShapshot(&cur_state_snap); //Backup current state
 
         world_ptr->recoverFromSnapshot(&snapshot->snapshot); //Recover previous state
@@ -143,7 +144,7 @@ void EdActions::redo(){
     if(act_type == ACT_TYPE_SNAPSHOT){ //if this action is snapshot
         EdSnapshotAction* snapshot = static_cast<EdSnapshotAction*>(this->action_list[current_pos]);
 
-        WorldSnapshot cur_state_snap;
+        Engine::WorldSnapshot cur_state_snap;
         world_ptr->putToShapshot(&cur_state_snap);
 
         world_ptr->recoverFromSnapshot(&snapshot->snapshot);

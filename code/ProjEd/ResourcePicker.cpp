@@ -15,7 +15,7 @@ extern Project* project_ptr;
 extern ZSGAME_DATA* game_data;
 
 void ResourcePickDialog::onResourceSelected(){
-    if(area->pResultString == nullptr) return;
+    if(area->pResultString == nullptr || area->pResultString->size() > 1000) return;
 
     QListWidgetItem* selected = this->list->currentItem();
     QString resource_label = selected->text(); //Get selected text
@@ -27,11 +27,14 @@ void ResourcePickDialog::onResourceSelected(){
 
     area->PropertyEditArea::callPropertyUpdate();
 
+    _inspector_win->updateRequired = true;
     //Redraw thumbnails in inspector
-    _inspector_win->ThumbnailUpdateRequired = true;
-    area->updateLabel();
+    //_inspector_win->ThumbnailUpdateRequired = true;
+    //area->updateLabel();
 
     emit accept(); //Close dailog with positive answer
+
+    
 }
 
 void ResourcePickDialog::onDialogClose(){
@@ -231,7 +234,7 @@ void PickResourceArea::setup(){
 }
 
 void PickResourceArea::updateLabel(){
-    if(this->pResultString == nullptr) //If vector hasn't been set
+    if(this->pResultString == nullptr || pResultString->size() > 1000) //If vector hasn't been set
         return; //Go out
 
     bool UseThumbnail = (this->resource_type == RESOURCE_TYPE_MATERIAL ||
