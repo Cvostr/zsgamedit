@@ -174,7 +174,7 @@ private:
 
     void createResourceDesc(Engine::ZsResource* _resource, QString absfpath, std::string resource_label);
 public:
-    float deltaTime;
+    //float deltaTime;
     bool ready; //Is everything loaded?
     int close_reason;
     bool isSceneRun; //Is scene running right now
@@ -234,7 +234,7 @@ public:
     void resizeEvent(QResizeEvent* event);
 
     void startManager(IEngineComponent* manager);
-    void updateDeltaTime(float deltaTime);
+    void updateDeltaTime();
     void destroyAllManagers();
 
     void setGameViewWindowSize(int W, int H);

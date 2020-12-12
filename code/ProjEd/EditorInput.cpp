@@ -4,7 +4,11 @@
 #include <input/zs-input.h>
 #include "ui_editor.h"
 
+#define MONEMENT_COEFF 0.3f
+
 extern InspectorWin* _inspector_win;
+//Hack to support resources
+extern ZSGAME_DATA* game_data;
 
 void EditWindow::onLeftBtnClicked(int X, int Y) {
     //Terrain painting
@@ -73,8 +77,8 @@ void EditWindow::onMouseWheel(int x, int y) {
     this->edit_camera.stopMoving();
     //If we are in 3D project
     if (project.perspective == PERSP_3D) {
-        ZSVECTOR3 front = edit_camera.getCameraFrontVec(); //obtain front vector
-        ZSVECTOR3 pos = edit_camera.getCameraPosition(); //obtain position
+        Vec3 front = edit_camera.getCameraFrontVec(); //obtain front vector
+        Vec3 pos = edit_camera.getCameraPosition(); //obtain position
 
         edit_camera.setPosition(pos + front * y);
     }
@@ -87,7 +91,7 @@ void EditWindow::onMouseWheel(int x, int y) {
     }
     //Common camera movement
     if (project.perspective == PERSP_2D && !this->input_state.isLCtrlHold)
-        edit_camera.setPosition(edit_camera.getCameraPosition() + ZSVECTOR3(x * 10, y * 10, 0));
+        edit_camera.setPosition(edit_camera.getCameraPosition() + Vec3(x * 10, y * 10, 0));
 }
 
 void EditWindow::onMouseMotion(int relX, int relY) {
@@ -106,7 +110,7 @@ void EditWindow::onMouseMotion(int relX, int relY) {
     //Property painting
     if (this->ppaint_state.enabled && input_state.isLeftBtnHold == true) { //we just move on map
         if (ppaint_state.time == 0.0f && !isSceneRun) {
-            ppaint_state.time += deltaTime;
+            ppaint_state.time += game_data->time->GetDeltaTime();
 
             unsigned int clicked = render->render_getpickedObj(this, input_state.mouseX, input_state.mouseY);
             //if we pressed on empty space
@@ -131,7 +135,7 @@ void EditWindow::onMouseMotion(int relX, int relY) {
             ppaint_state.prop_ptr->copyTo(prop_ptr);
         }
         else {
-            ppaint_state.time += deltaTime;
+            ppaint_state.time += game_data->time->GetDeltaTime();
             if (ppaint_state.time >= 100) ppaint_state.time = 0;
         }
 
@@ -143,7 +147,7 @@ void EditWindow::onMouseMotion(int relX, int relY) {
             //Stop camera moving
             this->edit_camera.stopMoving();
 
-            ZSVECTOR3 cam_pos = edit_camera.getCameraPosition();
+            Vec3 cam_pos = edit_camera.getCameraPosition();
             cam_pos.X += relX;
             cam_pos.Y += relY;
             edit_camera.setPosition(cam_pos);
@@ -162,7 +166,7 @@ void EditWindow::onMouseMotion(int relX, int relY) {
             if (cam_pitch < -89.0f)
                 cam_pitch = -89.0f;
 
-            ZSVECTOR3 front;
+            Vec3 front;
             front.X = cosf(DegToRad(cam_yaw)) * cosf(DegToRad(cam_pitch));
             front.Y = -sinf(DegToRad(cam_pitch));
             front.Z = sinf(DegToRad(cam_yaw)) * cosf(DegToRad(cam_pitch));
@@ -198,7 +202,7 @@ void EditWindow::onMouseMotion(int relX, int relY) {
 
         obj_trstate.isModifying = true;
 
-        ZSVECTOR3* vec_ptr = nullptr; //pointer to modifying vector
+        Vec3* vec_ptr = nullptr; //pointer to modifying vector
         if (obj_trstate.transformMode == GO_TRANSFORM_MODE_TRANSLATE) {
             vec_ptr = &obj_trstate.tprop_ptr->translation;
         }
@@ -211,35 +215,36 @@ void EditWindow::onMouseMotion(int relX, int relY) {
             vec_ptr = &obj_trstate.tprop_ptr->rotation;
         }
         if (obj_trstate.transformMode > 0)
-            *vec_ptr = *vec_ptr + ZSVECTOR3(-relX * sign(edit_camera.camera_front.Z), -relY, relX * sign(edit_camera.camera_front.X)) * ZSVECTOR3(obj_trstate.Xcf, obj_trstate.Ycf, obj_trstate.Zcf);
+            *vec_ptr = *vec_ptr + Vec3(-relX * sign(edit_camera.camera_front.Z), -relY, relX * sign(edit_camera.camera_front.X)) * Vec3(obj_trstate.Xcf, obj_trstate.Ycf, obj_trstate.Zcf);
     }
 }
 
 void EditWindow::sceneWalkWASD() {
+    float deltaTime = game_data->time->GetDeltaTime();
     if (Input::isKeyHold(SDLK_a) && !isSceneRun && !input_state.isLCtrlHold) {
-        ZSVECTOR3 pos = edit_camera.getCameraPosition(); //obtain position
-        pos = pos + edit_camera.getCameraRightVec() * -1.2f * deltaTime;
+        Vec3 pos = edit_camera.getCameraPosition(); //obtain position
+        pos = pos + edit_camera.getCameraRightVec() * -MONEMENT_COEFF * deltaTime;
         edit_camera.setPosition(pos);
     }
     if (Input::isKeyHold(SDLK_d) && !isSceneRun && !input_state.isLCtrlHold) {
-        ZSVECTOR3 pos = edit_camera.getCameraPosition(); //obtain position
-        pos = pos + edit_camera.getCameraRightVec() * 1.2f * deltaTime;
+        Vec3 pos = edit_camera.getCameraPosition(); //obtain position
+        pos = pos + edit_camera.getCameraRightVec() * MONEMENT_COEFF * deltaTime;
         edit_camera.setPosition(pos);
     }
     if (Input::isKeyHold(SDLK_w) && !isSceneRun && !input_state.isLCtrlHold) {
-        ZSVECTOR3 pos = edit_camera.getCameraPosition(); //obtain position
+        Vec3 pos = edit_camera.getCameraPosition(); //obtain position
         if (project.perspective == PERSP_2D)
             pos.Y += 2.2f * deltaTime;
         else
-            pos = pos + edit_camera.getCameraFrontVec() * 1.2f * deltaTime;
+            pos = pos + edit_camera.getCameraFrontVec() * MONEMENT_COEFF * deltaTime;
         edit_camera.setPosition(pos);
     }
     if (Input::isKeyHold(SDLK_s) && !isSceneRun && !input_state.isLCtrlHold) {
-        ZSVECTOR3 pos = edit_camera.getCameraPosition(); //obtain position
+        Vec3 pos = edit_camera.getCameraPosition(); //obtain position
         if (project.perspective == PERSP_2D)
             pos.Y -= 2.2f * deltaTime;
         else
-            pos = pos - edit_camera.getCameraFrontVec() * 1.2f * deltaTime;
+            pos = pos - edit_camera.getCameraFrontVec() * MONEMENT_COEFF * deltaTime;
         edit_camera.setPosition(pos);
     }
 }

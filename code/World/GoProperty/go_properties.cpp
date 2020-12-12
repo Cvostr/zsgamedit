@@ -5,6 +5,8 @@
 #include "../../ProjEd/headers/InspEditAreas.h"
 #include "../headers/Misc.h"
 
+#include <world/ObjectsComponents/AudioSourceComponent.hpp>
+
 extern InspectorWin* _inspector_win;
 extern EditWindow* _editor_win;
 extern Project* project_ptr;

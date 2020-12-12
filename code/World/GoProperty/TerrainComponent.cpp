@@ -1,4 +1,5 @@
-#include <world/go_properties.h>
+#include <world/ObjectsComponents/MaterialComponent.hpp>
+#include <world/ObjectsComponents/TerrainComponent.hpp>
 #include "../headers/terrain.h"
 #include "../../ProjEd/headers/InspEditAreas.h"
 #include "../headers/Misc.h"

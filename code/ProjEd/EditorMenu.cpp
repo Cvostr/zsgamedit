@@ -152,7 +152,7 @@ void EditWindow::addNewTile() {
     mesh->updateMeshPtr();
     //Assign new scale
     Engine::TransformProperty* transform = obj->getPropertyPtr<Engine::TransformProperty>();
-    transform->scale = ZSVECTOR3(100, 100, 1);
+    transform->scale = Vec3(100, 100, 1);
     transform->updateMatrix();
 }
 void EditWindow::addNewTerrain() {
@@ -189,7 +189,7 @@ void EditWindow::onImportResource() {
 #ifdef _WIN32
     dir = "C:\\\n";
 #endif
-    QString filter = tr("GPU compressed texture (.DDS) (*.dds *.DDS);; 3D model (*.fbx *.FBX *.dae *.DAE);; Sound (*.wav *.WAV);; All files (*.*);;");
+    QString filter = tr("GPU compressed texture (.DDS) (*.dds *.DDS);; 3D model (*.fbx *.FBX *.dae *.DAE *zs3m);; Sound (*.wav *.WAV);; Script(*.as *.AS);; All files (*.*);;");
 
     QFileDialog dialog;
     QString path = dialog.getOpenFileName(this, tr("Select Resource"), dir, filter);

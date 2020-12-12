@@ -113,8 +113,8 @@ void ThumbnailsMaster::prepareMaterialThumbnailPipeline(){
     {   //send camera data to transform shader and skybox shader
         Engine::Camera cam;
         cam.setProjectionType(ZSCAMERA_PROJECTION_PERSPECTIVE);
-        cam.setPosition(ZSVECTOR3(0, 0, -2.6f));
-        cam.setFront(ZSVECTOR3(0,0,1));
+        cam.setPosition(Vec3(0, 0, -2.6f));
+        cam.setFront(Vec3(0,0,1));
         cam.setViewport(Engine::ZSVIEWPORT(0,0, THUMBNAIL_IMG_SIZE, THUMBNAIL_IMG_SIZE));
         cam.setZplanes(0.1f, 5000.f);
 
@@ -136,8 +136,8 @@ void ThumbnailsMaster::prepareMaterialThumbnailPipeline(){
         unsigned int light_i = 0;
         int light_type = 1;
         float light_intensity = 0.8f;
-        ZSVECTOR3 pos = ZSVECTOR3(0,0,0);
-        ZSVECTOR3 light_dir = _getDirection(66, 30, 30);
+        Vec3 pos = Vec3(0,0,0);
+        Vec3 light_dir = _getDirection(66, 30, 30);
         ZSRGBCOLOR color = ZSRGBCOLOR(255,255,255,255);
         color.updateGL();
 
@@ -265,8 +265,8 @@ void ThumbnailsMaster::DrawMesh(Engine::MeshResource* mesh){
 
     Engine::Camera cam;
     cam.setProjectionType(ZSCAMERA_PROJECTION_PERSPECTIVE);
-    cam.setPosition(ZSVECTOR3(0, 0, -6));
-    cam.setFront(ZSVECTOR3(0,0,1));
+    cam.setPosition(Vec3(0, 0, -6));
+    cam.setFront(Vec3(0,0,1));
     cam.setViewport(Engine::ZSVIEWPORT(0,0, 512, 512));
     cam.setZplanes(0.1f, 5000.f);
 

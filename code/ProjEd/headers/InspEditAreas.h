@@ -29,7 +29,7 @@ public:
     QLineEdit z_field; //Text digit field for Z coord
     QLineEdit w_field; //Text digit field for Z coord
 
-    ZSVECTOR4* vector; //Output variable
+    Vec4* vector; //Output variable
 
     QLabel x_label; //To write X separator
     QLabel y_label; //To write Y separator
@@ -54,7 +54,7 @@ public:
     QLineEdit y_field; //Text digit field for Y coord
     QLineEdit z_field; //Text digit field for Z coord
 
-    ZSVECTOR3* vector; //Output variable
+    Vec3* vector; //Output variable
 
     QLabel x_label; //To write X separator
     QLabel y_label; //To write Y separator
@@ -76,7 +76,7 @@ public:
     QLineEdit x_field; //Text digit field for X coord
     QLineEdit y_field; //Text digit field for Y coord
 
-    ZSVECTOR2* vector; //Output variable
+    Vec2* vector; //Output variable
 
     QLabel x_label; //To write X separator
     QLabel y_label; //To write Y separator

@@ -207,7 +207,7 @@ void Engine::MaterialProperty::onValueChanged() {
         case MATSHPROP_TYPE_TEXTURE3: {
             //Cast pointer
             Texture3MtShPropConf* texture_conf = static_cast<Texture3MtShPropConf*>(conf_ptr);
-            texture_conf->texture3D->created = false;
+            texture_conf->texture3D->mCreated = false;
             _inspector_win->updateRequired = true;
             break;
         }

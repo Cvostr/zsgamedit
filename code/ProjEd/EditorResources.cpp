@@ -37,7 +37,10 @@ void EditWindow::onResourceFileChanged(QString path) {
     Engine::ZsResource* pResource = game_data->resources->getResource(RelPathStd);
     if (pResource != nullptr) {
         pResource->Release();
+        pResource->size = 0;
         pResource->load();
+        game_data->script_manager->AddScriptFiles();
+        game_data->world->call_onScriptChanged();
     }
 }
 
@@ -107,7 +110,9 @@ void EditWindow::processResourceFile(QFileInfo fileInfo) {
     if (checkExtension(name, ".as") || checkExtension(name, ".zscr")) { //If its an mesh
         Engine::ZsResource* _resource = new Engine::ScriptResource;
         createResourceDesc(_resource, absfpath, "");
+       
     }
+    
 }
 
 void EditWindow::ImportResource(QString pathToResource) {
@@ -121,10 +126,13 @@ void EditWindow::ImportResource(QString pathToResource) {
     if (checkExtension(pathToResource, ".fbx") || checkExtension(pathToResource, ".dae")) {
         workWithFbx = true;
     }
+    if (checkExtension(pathToResource, ".zs3m")) {
+        copyResource = true;
+    }
     if (checkExtension(pathToResource, ".wav")) {
         copyResource = true;
     }
-    if (checkExtension(pathToResource, ".lua")) {
+    if (checkExtension(pathToResource, ".as")) {
         copyResource = true;
     }
 
@@ -153,7 +161,9 @@ void EditWindow::ImportResource(QString pathToResource) {
         for (unsigned int anim_i = 0; anim_i < num_anims; anim_i++) {
             Engine::loadAnimation(pathToResource.toStdString(), &anims[anim_i], static_cast<int>(anim_i));
             ZS3M::AnimationFileExport ex(&anims[anim_i]);
-            QString newanim_path = this->current_dir + "/" + QString::fromStdString(anims[anim_i].name + ".zsanim");
+            std::string ResFile = anims[anim_i].name + ".zsanim";
+            ProcessFileName(ResFile);
+            QString newanim_path = this->current_dir + "/" + QString::fromStdString(ResFile);
             ex.write(newanim_path.toStdString());
             //Register new resource file
             processResourceFile(QFileInfo(newanim_path));

@@ -60,9 +60,9 @@ void Engine::processMesh(aiMesh* mesh, Engine::Mesh* mesh_ptr) {
         float U = mesh->mTextureCoords[0][v].x;
         float V = mesh->mTextureCoords[0][v].y;
         //Set data to vertex
-        mesh_ptr->vertices_arr[v] = ZSVERTEX(ZSVECTOR3(vertex_pos.x, vertex_pos.y, vertex_pos.z), ZSVECTOR2(U, V),
-            ZSVECTOR3(vertex_normal.x, vertex_normal.y, vertex_normal.z), ZSVECTOR3(vertex_tangent.x, vertex_tangent.y, vertex_tangent.z),
-            ZSVECTOR3(vertex_bitangent.x, vertex_bitangent.y, vertex_bitangent.z)
+        mesh_ptr->vertices_arr[v] = ZSVERTEX(Vec3(vertex_pos.x, vertex_pos.y, vertex_pos.z), Vec2(U, V),
+            Vec3(vertex_normal.x, vertex_normal.y, vertex_normal.z), Vec3(vertex_tangent.x, vertex_tangent.y, vertex_tangent.z),
+            Vec3(vertex_bitangent.x, vertex_bitangent.y, vertex_bitangent.z)
         );
 
         mesh_ptr->vertices_coord[v * 3] = vertex_pos.x;
@@ -160,8 +160,8 @@ void Engine::loadAnimation(std::string file_path, Engine::Animation* anim, int i
         }
 
         //Allocate all keys
-        channel->scale = new ZSVECTOR3[ai_channel->mNumScalingKeys];
-        channel->pos = new ZSVECTOR3[ai_channel->mNumPositionKeys];
+        channel->scale = new Vec3[ai_channel->mNumScalingKeys];
+        channel->pos = new Vec3[ai_channel->mNumPositionKeys];
         channel->rot = new ZSQUATERNION[ai_channel->mNumRotationKeys];
         //Allocate times for keys
         channel->posTimes = new double[ai_channel->mNumPositionKeys];
@@ -175,13 +175,13 @@ void Engine::loadAnimation(std::string file_path, Engine::Animation* anim, int i
         //Write all transform data
         for(unsigned int pos_k_i = 0; pos_k_i < channel->posKeysNum; pos_k_i ++){
             aiVector3D ai_pos_key = ai_channel->mPositionKeys[pos_k_i].mValue;
-            channel->pos[pos_k_i] = ZSVECTOR3(ai_pos_key.x, ai_pos_key.y, ai_pos_key.z);
+            channel->pos[pos_k_i] = Vec3(ai_pos_key.x, ai_pos_key.y, ai_pos_key.z);
 
             channel->posTimes[pos_k_i] = ai_channel->mPositionKeys[pos_k_i].mTime;
         }
         for(unsigned int scale_k_i = 0; scale_k_i < channel->scaleKeysNum; scale_k_i ++){
             aiVector3D ai_scale_key = ai_channel->mScalingKeys[scale_k_i].mValue;
-            channel->scale[scale_k_i] = ZSVECTOR3(ai_scale_key.x, ai_scale_key.y, ai_scale_key.z);
+            channel->scale[scale_k_i] = Vec3(ai_scale_key.x, ai_scale_key.y, ai_scale_key.z);
 
             channel->scaleTimes[scale_k_i] = ai_channel->mScalingKeys[scale_k_i].mTime;
         }
@@ -218,8 +218,8 @@ void Engine::processNodeForTree(ZS3M::SceneNode* node, aiNode* node_assimp, cons
     aiQuaternion rotation;
     node_assimp->mTransformation.Decompose(scale, rotation, translation);
 
-    node->node_translation = ZSVECTOR3(translation.x, translation.y, translation.z);
-    node->node_scaling = ZSVECTOR3(scale.x, scale.y, scale.z);
+    node->node_translation = Vec3(translation.x, translation.y, translation.z);
+    node->node_scaling = Vec3(scale.x, scale.y, scale.z);
     node->node_rotation = ZSQUATERNION(rotation.x, rotation.y, rotation.z, rotation.w);
 
     //iterate over all meshes in this node

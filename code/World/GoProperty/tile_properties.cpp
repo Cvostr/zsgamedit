@@ -126,8 +126,8 @@ void Engine::TileGroupProperty::process(){
             tile_prop->diffuse_relpath = this->diffuse_relpath; //Copy texture relpath
             tile_prop->updTexturePtr(); //Find texture pointer
 
-            transform->scale = ZSVECTOR3(geometry.tileWidth, geometry.tileHeight, 1);
-            transform->translation = ZSVECTOR3(geometry.tileWidth * x_i * 2, geometry.tileHeight * y_i * 2, 0);
+            transform->scale = Vec3(geometry.tileWidth, geometry.tileHeight, 1);
+            transform->translation = Vec3(geometry.tileWidth * x_i * 2, geometry.tileHeight * y_i * 2, 0);
             transform->translation = transform->translation + parent_transform->translation;
 
             label->label = parent_label->label + std::to_string(x_i) + "," + std::to_string(y_i); //Get new object new name

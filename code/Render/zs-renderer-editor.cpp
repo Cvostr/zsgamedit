@@ -32,7 +32,7 @@ void RenderPipelineEditor::setup(int bufWidth, int bufHeight){
     this->obj_grid_shader->compileFromFile("Shaders/mark/grid.vert", "Shaders/mark/mark.frag");
     sprite_shader_3d->compileFromFile("Shaders/ui/sprite.vert", "Shaders/ui/ui.frag");
     //create geometry buffer
-    create_G_Buffer(bufWidth, bufHeight);
+    create_G_Buffer_GL(bufWidth, bufHeight);
 
     removeLights();
 
@@ -77,7 +77,6 @@ bool RenderPipelineEditor::InitGLEW(){
 void RenderPipelineEditor::OnCreate(){
     setFullscreenViewport(this->WIDTH, this->HEIGHT);
 
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     glEnable(GL_LINE_SMOOTH);
     glLineWidth(16.0f);
 
@@ -156,7 +155,7 @@ unsigned int RenderPipelineEditor::render_getpickedObj(void* projectedit_ptr, in
             float g = static_cast<float>(to_send[1]);
             float b = static_cast<float>(to_send[2]);
             float a = static_cast<float>(to_send[3]);
-            ZSVECTOR4 color = ZSVECTOR4(r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f);
+            Vec4 color = Vec4(r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f);
 
             //set transform to camera buffer
             transformBuffer->bind();
@@ -227,7 +226,7 @@ void RenderPipelineEditor::renderGizmos(void* projectedit_ptr, Engine::Camera* c
         //Check, if object is alive and active
         if (obj_ptr->mAlive && obj_ptr->hasLightsource()) {
             Engine::TransformProperty* transform_ptr = obj_ptr->getTransformProperty();
-            getGizmosRenderer()->drawGizmoSprite(getGizmosRenderer()->SunTextureSprite, transform_ptr->abs_translation, ZSVECTOR3(2,2,2), cam->getViewMatrix());
+            getGizmosRenderer()->drawGizmoSprite(getGizmosRenderer()->SunTextureSprite, transform_ptr->abs_translation, Vec3(2,2,2), cam->getViewMatrix());
         }
         if (obj_ptr->mAlive && obj_ptr->mActive && world_ptr->isPicked(obj_ptr) && current_state == PIPELINE_STATE::PIPELINE_STATE_DEFAULT) {
             setDepthState(false);

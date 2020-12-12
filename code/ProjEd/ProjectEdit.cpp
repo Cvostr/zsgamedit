@@ -145,7 +145,7 @@ EditWindow::EditWindow(QApplication* app, QWidget *parent) :
 
     ZSENGINE_CREATE_INFO* engine_create_info = new ZSENGINE_CREATE_INFO;
     engine_create_info->createWindow = false; //window already created, we don't need one
-    engine_create_info->graphicsApi = OGL32; //use opengl
+    engine_create_info->graphicsApi = OGL; //use opengl
 
 
     engine_ptr = new ZSpireEngine();
@@ -182,8 +182,7 @@ void EditWindow::init(){
     SDL_DisplayMode current;
     SDL_GetCurrentDisplayMode(0, &current);
 
-    Engine::Logger::Log() << "SDL window creation requested";
-    //std::cout << "SDL window creation requested" << std::endl;
+    Engine::Logger::Log() << "SDL window creation requested\n";
     //If no window settings made
     if(this->settings.isFirstSetup){
         //Set base windows values
@@ -260,11 +259,13 @@ void EditWindow::init(){
     startManager(game_data->resources);
 
     game_data->script_manager = new Engine::AGScriptMgr;
+    
     game_data->glyph_manager = this->glyph_manager;
     game_data->pipeline = this->render;
     game_data->out_manager = new Engine::OutputManager;
     game_data->ui_manager = new Engine::UiManager;
     game_data->oal_manager = new Engine::OALManager;
+    game_data->time = new Engine::Time;
     this->startManager(game_data->oal_manager);
     game_data->out_manager->consoleLogWorking = true;
     game_data->isEditor = true;
@@ -281,14 +282,14 @@ void EditWindow::init(){
         case PERSP_2D:{ //2D project
 
             this->edit_camera.setProjectionType(ZSCAMERA_PROJECTION_ORTHOGONAL);
-            edit_camera.setPosition(ZSVECTOR3(0,0,0));
-            edit_camera.setFront(ZSVECTOR3(0,0,1));
+            edit_camera.setPosition(Vec3(0,0,0));
+            edit_camera.setFront(Vec3(0,0,1));
             break;
         }
         case PERSP_3D:{ //3D project
             this->edit_camera.setProjectionType(ZSCAMERA_PROJECTION_PERSPECTIVE);
-            edit_camera.setPosition(ZSVECTOR3(-20.f, 10.f, 0.f));
-            edit_camera.setFront(ZSVECTOR3(1.f, -0.33f, 0.f));
+            edit_camera.setPosition(Vec3(-20.f, 10.f, 0.f));
+            edit_camera.setFront(Vec3(1.f, -0.33f, 0.f));
             edit_camera.setZplanes(0.1f, 5000.f);
             break;
         }
@@ -327,7 +328,7 @@ void EditWindow::openFile(QString file_path){
 
         scene_path = file_path; //Assign scene path
         hasSceneFile = true; //Scene is saved
-        this->edit_camera.setPosition(ZSVECTOR3(0.0f, 0.0f, 0.0f)); //Set camera to 0
+        this->edit_camera.setPosition(Vec3(0.0f, 0.0f, 0.0f)); //Set camera to 0
         _inspector_win->clearContentLayout(); //Clear content, if not empty
     }else if(checkExtension(file_path, ".lcstr")){
         LocStringEditWindow* lsew = new LocStringEditWindow;
@@ -402,7 +403,6 @@ bool EditWindow::onCloseProject(){
         destroyAllManagers();
 
         _ed_actions_container->clear();
-        //game_data->oal_manager->destroyAL();
         //won't render anymore
         this->ready = false; 
 
@@ -518,14 +518,14 @@ void EditWindow::onCameraToObjTeleport(){
 
     Engine::TransformProperty* transform = obj_ptr->getPropertyPtr<Engine::TransformProperty>(); //Obtain pointer to object transform
     //Define to store absolute transform
-    ZSVECTOR3 _t = ZSVECTOR3(0.0f);
-    ZSVECTOR3 _s = ZSVECTOR3(1.0f);
-    ZSVECTOR3 _r = ZSVECTOR3(0.0f);
+    Vec3 _t = Vec3(0.0f);
+    Vec3 _s = Vec3(1.0f);
+    Vec3 _r = Vec3(0.0f);
     transform->getAbsoluteParentTransform(_t, _s, _r); //Calculate absolute transform
 
     edit_camera._dest_pos = _t; //Sending position
     if(project.perspective == PERSP_3D){ //if we're in 3D
-        ZSVECTOR3 camFront = edit_camera.getCameraFrontVec();
+        Vec3 camFront = edit_camera.getCameraFrontVec();
         edit_camera._dest_pos = edit_camera._dest_pos - camFront * 6; //move back a little
     }
     edit_camera.startMoving();
@@ -556,6 +556,8 @@ void EditWindow::toggleCameras(){
 }
 
 void EditWindow::glRender(){
+    game_data->time->Tick();
+    edit_camera.updateTick(game_data->time->GetDeltaTime()); //Update camera, if it is moving
     //Look for objects names changes
     GO_W_I::updateObjsNames(&world);
 
@@ -577,7 +579,7 @@ void EditWindow::glRender(){
     //if scene is running
     if(isSceneRun){
         //Update physics
-        world.physical_world->stepSimulation(deltaTime);
+        world.physical_world->stepSimulation(game_data->time->GetDeltaTime());
     }
     //if user opened another scene and it had not been opened
     if(hasSheduledWorld){
@@ -619,6 +621,7 @@ EditWindow* ZSEditor::openEditor(){
     _editor_win->close_reason = EW_CLOSE_REASON_UNCLOSED;
     //Make a vector of all resource files
     _editor_win->lookForResources(QString::fromStdString(_editor_win->project.root_path)); 
+    game_data->script_manager->AddScriptFiles();
     _editor_win->move(0,0); //Editor base win would be in the left part of screen
     //resize editor window
     _editor_win->resize(_editor_win->settings.editor_win_width, _editor_win->settings.editor_win_height);
@@ -709,11 +712,9 @@ void EditWindow::startManager(IEngineComponent* component){
     this->managers.push_back(component);
 }
 
-void EditWindow::updateDeltaTime(float deltaTime){
-    this->deltaTime = deltaTime;
-
+void EditWindow::updateDeltaTime(){
     for(unsigned int i = 0; i < managers.size(); i ++){
-        managers[i]->deltaTime = deltaTime;
+        managers[i]->deltaTime = game_data->time->GetDeltaTime();
     }
 }
 

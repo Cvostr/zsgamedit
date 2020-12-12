@@ -30,7 +30,7 @@ GizmosRenderer::GizmosRenderer(Engine::Shader* mark_shader,
         Mat4 transform = getIdentity();
 
         transform = transform * getScaleMat(GRID_STROKE_WIDTH, 100, GRID_STROKE_WIDTH);
-        transform = transform * getRotationMat(ZSVECTOR3(90, 0, 0));
+        transform = transform * getRotationMat(Vec3(90, 0, 0));
         transform = transform * getTranslationMat(red + GRID_DIST * i, 0, 0);
 
         grid_strokes_transf[i] = transform;
@@ -39,7 +39,7 @@ GizmosRenderer::GizmosRenderer(Engine::Shader* mark_shader,
         Mat4 transform = getIdentity();
 
         transform = transform * getScaleMat(GRID_STROKE_WIDTH, 100, GRID_STROKE_WIDTH);
-        transform = transform * getRotationMat(ZSVECTOR3(0, 0, 90));
+        transform = transform * getRotationMat(Vec3(0, 0, 90));
         transform = transform * getTranslationMat(0, 0, red + GRID_DIST * (i - GRID_STROKE_COUNT));
 
         grid_strokes_transf[i] = transform;
@@ -59,7 +59,7 @@ void GizmosRenderer::drawPickedMeshWireframe(Engine::Mesh *mesh_ptr, Mat4 transf
     transformBuffer->writeData(sizeof (Mat4) * 2, sizeof (Mat4), &transform);
 
     editorBuffer->bind();
-    ZSVECTOR4 v = ZSVECTOR4(color.gl_r, color.gl_g, color.gl_b, color.gl_a);
+    Vec4 v = Vec4(color.gl_r, color.gl_g, color.gl_b, color.gl_a);
     editorBuffer->writeData(0, 16, &v);
 
     mesh_ptr->DrawLines();
@@ -73,35 +73,35 @@ void GizmosRenderer::drawCube(Mat4 transform, ZSRGBCOLOR color){
     transformBuffer->writeData(sizeof (Mat4) * 2, sizeof (Mat4), &transform);
 
     editorBuffer->bind();
-    ZSVECTOR4 v = ZSVECTOR4(color.gl_r, color.gl_g, color.gl_b, color.gl_a);
+    Vec4 v = Vec4(color.gl_r, color.gl_g, color.gl_b, color.gl_a);
     editorBuffer->writeData(0, 16, &v);
 
     Engine::getCubeMesh3D()->Draw();
 }
 
-void GizmosRenderer::drawTransformControls(ZSVECTOR3 position, float tall, float dim){
+void GizmosRenderer::drawTransformControls(Vec3 position, float tall, float dim){
     if(projectPerspective == 3){
         tall /= 10;
         dim /= 10;
     }
 
     Mat4 transform;
-    ZSVECTOR3 scale = ZSVECTOR3(dim, tall, dim);
+    Vec3 scale = Vec3(dim, tall, dim);
     Mat4 scale_mat = getScaleMat(scale);
 
     glFeaturesOff();
 
     //X control
-    ZSVECTOR3 rotation = ZSVECTOR3(0,0,90);
-    transform = scale_mat * getRotationMat(rotation) * getTranslationMat(ZSVECTOR3(position.X + tall, position.Y, position.Z));
+    Vec3 rotation = Vec3(0,0,90);
+    transform = scale_mat * getRotationMat(rotation) * getTranslationMat(Vec3(position.X + tall, position.Y, position.Z));
     drawCube(transform, ZSRGBCOLOR(255,0,0));
     //Y control
-    rotation = ZSVECTOR3(0,0,0);
-    transform = scale_mat * getRotationMat(rotation) * getTranslationMat(ZSVECTOR3(position.X, position.Y + tall, position.Z));
+    rotation = Vec3(0,0,0);
+    transform = scale_mat * getRotationMat(rotation) * getTranslationMat(Vec3(position.X, position.Y + tall, position.Z));
     drawCube(transform, ZSRGBCOLOR(0,255,0));
     //Z control
-    rotation = ZSVECTOR3(90,0,0);
-    transform = scale_mat * getRotationMat(rotation) * getTranslationMat(ZSVECTOR3(position.X, position.Y, position.Z + tall));
+    rotation = Vec3(90,0,0);
+    transform = scale_mat * getRotationMat(rotation) * getTranslationMat(Vec3(position.X, position.Y, position.Z + tall));
     drawCube(transform, ZSRGBCOLOR(0,0,255));
 
     glFeaturesOn();
@@ -127,13 +127,13 @@ void GizmosRenderer::drawObjectRigidbodyShape(void* phys_property){
         }
     }
 
-    ZSVECTOR3 scale = transform->abs_scale;
+    Vec3 scale = transform->abs_scale;
     if(property->isCustomPhysicalSize){
         scale = property->cust_size;
     }
 
     editorBuffer->bind();
-    ZSVECTOR4 v = ZSVECTOR4(255, 0, 0, 255);
+    Vec4 v = Vec4(255, 0, 0, 255);
     editorBuffer->writeData(0, 16, &v);
 
     transformBuffer->bind();
@@ -167,7 +167,7 @@ void GizmosRenderer::glFeaturesOn(){
 void GizmosRenderer::drawGrid() {
 
     editorBuffer->bind();
-    ZSVECTOR4 v = ZSVECTOR4(0.3f, 0.3f, 0.3f, 1);
+    Vec4 v = Vec4(0.3f, 0.3f, 0.3f, 1);
     editorBuffer->writeData(0, 16, &v);
 
     instBuffer->bind();
@@ -181,7 +181,7 @@ void GizmosRenderer::drawGrid() {
     Engine::getCubeMesh3D()->DrawInstanced(GRID_STROKE_COUNT * 2);
 }
 
-void GizmosRenderer::drawGizmoSprite(Engine::Texture* texture, ZSVECTOR3 position, ZSVECTOR3 scale, Mat4 CamView) {
+void GizmosRenderer::drawGizmoSprite(Engine::Texture* texture, Vec3 position, Vec3 scale, Mat4 CamView) {
     Mat4 ScaleMat = getScaleMat(scale);
     Mat4 PosMat = getTranslationMat(position);
 

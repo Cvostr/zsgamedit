@@ -19,7 +19,7 @@ void terrain_loop(){
         //check, if there are some operation pending
         if(requests_num > 0){
             //Lock mutex
-            TerrainEditMutex.Lock();
+            //TerrainEditMutex.Lock();
             HeightmapModifyRequest* req = terrain_mdf_requests[0];
             //switch over all modify types
             switch(req->modify_type){
@@ -55,7 +55,7 @@ void terrain_loop(){
             }
             requests_num--;
             //release mutex
-            TerrainEditMutex.Release();
+            //TerrainEditMutex.Release();
         }
     }
 }
@@ -119,7 +119,7 @@ void TerrainData::modifyHeight(int originX, int originY, float originHeight, int
     for(int y = 0; y < W; y ++){
         for(int x = 0; x < H; x ++){
             //if pixel is in circle
-            float dist = getDistance(ZSVECTOR3(x, y, 0), ZSVECTOR3(originX, originY, 0));
+            float dist = getDistance(Vec3(x, y, 0), Vec3(originX, originY, 0));
             if(dist <= range){
                 //calculate modifier
                 float toApply = originHeight - (dist * dist) / static_cast<float>(range);
@@ -138,7 +138,7 @@ void TerrainData::modifyTexture(int originX, int originY, int range, unsigned ch
     for(int y = 0; y < W; y ++){
         for(int x = 0; x < H; x ++){
             //if pixel is in circle
-            float dist = getDistance(ZSVECTOR3(x, y, 0), ZSVECTOR3(originX, originY, 0));
+            float dist = getDistance(Vec3(x, y, 0), Vec3(originX, originY, 0));
             //if vertex is inside circle
             if(dist <= range - modif){
                 for(unsigned char texture_f = 0; texture_f < TERRAIN_TEXTURES_AMOUNT; texture_f ++){
@@ -166,7 +166,7 @@ void TerrainData::plantGrass(int originX, int originY, int range, int grass){
     for(int y = 0; y < W; y ++){
         for(int x = 0; x < H; x ++){
             //if pixel is in circle
-            float dist = getDistance(ZSVECTOR3(x, y, 0), ZSVECTOR3(originX, originY, 0));
+            float dist = getDistance(Vec3(x, y, 0), Vec3(originX, originY, 0));
             if(dist <= range){
                 //calculate modifier
                 data[y * H + x].grass = grass;
