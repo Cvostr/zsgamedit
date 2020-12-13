@@ -10,7 +10,7 @@ void Engine::ZPScriptProperty::onValueChanged() {
         old_res_name = script_res->resource_label;
     
     //Compare strings
-    if (old_res_name.compare(script_res->resource_label) != 0) {
+    if (old_res_name.compare(script_path) != 0) {
         //update resource pointer
         SetScript(game_data->resources->getScriptByLabel(script_path));
         //update interface

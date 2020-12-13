@@ -1,6 +1,6 @@
 #include "headers/ProjectEdit.h"
 #include "headers/InspectorWin.h"
-#include "world/go_properties.h"
+#include <world/ObjectsComponents/TerrainComponent.hpp>
 #include <input/zs-input.h>
 #include "ui_editor.h"
 

@@ -1,9 +1,12 @@
 #include "headers/ProjectEdit.h"
-#include "world/go_properties.h"
 #include "headers/InspectorWin.h"
 #include "headers/InspEditAreas.h"
 #include "ui_editor.h"
 #include <QFileDialog>
+
+#include <world/ObjectsComponents/MeshComponent.hpp>
+#include <world/ObjectsComponents/MaterialComponent.hpp>
+#include <world/ObjectsComponents/TerrainComponent.hpp>
 
 extern InspectorWin* _inspector_win;
 extern EdActions* _ed_actions_container;

@@ -1,6 +1,7 @@
 #include "headers/World.h"
 #include "headers/Misc.h"
 #include <world/go_properties.h>
+#include <world/ObjectsComponents/ZPScriptComponent.hpp>
 
 void Engine::GameObject::recoverFromSnapshot(Engine::GameObjectSnapshot* snapshot) {
     this->clearAll();

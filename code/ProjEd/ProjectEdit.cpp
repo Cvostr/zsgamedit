@@ -650,12 +650,12 @@ EditWindow* ZSEditor::openEditor(){
         Engine::LinearLayout* rtlayout = new Engine::LinearLayout;
         rtlayout->move(30, 10);
         Engine::Button* btn = new Engine::Button;
-        btn->common_sprite = game_data->resources->getTextureByLabel("big_building");
-        btn->hovered_sprite = game_data->resources->getTextureByLabel("textures/floor");
+        btn->SetDefaultSprite(game_data->resources->getTextureByLabel("big_building"));
+        btn->SetHoveredSprite(game_data->resources->getTextureByLabel("textures/floor"));
 
         Engine::Button* btn1 = new Engine::Button;
-        btn1->common_sprite = game_data->resources->getTextureByLabel("big_building");
-        btn1->hovered_sprite = game_data->resources->getTextureByLabel("textures/floor");
+        btn1->SetDefaultSprite(game_data->resources->getTextureByLabel("big_building"));
+        btn1->SetHoveredSprite(game_data->resources->getTextureByLabel("textures/floor"));
 
         rtlayout->AddView(btn);
         rtlayout->AddView(btn1);

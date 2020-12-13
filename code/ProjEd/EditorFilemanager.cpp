@@ -188,7 +188,7 @@ void EditWindow::onNewMaterial() {
     RemoveExtension(_resource->resource_label);
     game_data->resources->pushResource(_resource);
 
-    thumb_master->createMaterialThumbnail(_resource->rel_path);
+    thumb_master->createMaterialThumbnail(_resource->resource_label);
 
     updateFileList(); //Make new file visible
 }
