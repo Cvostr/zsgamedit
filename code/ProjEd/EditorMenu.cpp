@@ -10,6 +10,7 @@
 
 extern InspectorWin* _inspector_win;
 extern EdActions* _ed_actions_container;
+extern ZSGAME_DATA* game_data;
 
 void EditWindow::onOpenScene() {
     QString filter = tr("ZSpire Scene (*.scn *.SCN);;");
@@ -31,6 +32,8 @@ void EditWindow::onSceneSave() {
         _ed_actions_container->hasChangesUnsaved = false;
         //perform scene save
         world.saveToFile(this->scene_path.toStdString());
+        //Save materials also
+        game_data->resources->saveMaterials();
     }
 }
 
@@ -41,6 +44,8 @@ void EditWindow::onSceneSaveAs() {
     if (!filename.endsWith(".scn")) //If filename doesn't end with ".scn"
         filename.append(".scn"); //Add this extension
     world.saveToFile(filename.toStdString()); //Save to picked file
+    //Save materials also
+    game_data->resources->saveMaterials();
     scene_path = filename; //Assign scene path
     hasSceneFile = true; //Scene is saved
 

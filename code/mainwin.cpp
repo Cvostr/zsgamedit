@@ -317,7 +317,7 @@ void ProjectCtxMenu::onOpenDirClicked(){
 }
 
 void ProjectCtxMenu::runEngineClickedGL(){
-    runEngineClicked(OGL32);
+    runEngineClicked(OGL);
 }
 void ProjectCtxMenu::runEngineClickedVK(){
     runEngineClicked(VULKAN);

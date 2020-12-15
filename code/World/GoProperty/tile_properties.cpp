@@ -11,8 +11,8 @@
 
 #include <world/tile_properties.h>
 #include "../headers/World.h"
-#include "world/go_properties.h"
 #include "../../ProjEd/headers/InspEditAreas.h"
+#include <world/ObjectsComponents/MeshComponent.hpp>
 
 extern InspectorWin* _inspector_win;
 static Engine::TileGroupProperty* current_property; //Property, that shown

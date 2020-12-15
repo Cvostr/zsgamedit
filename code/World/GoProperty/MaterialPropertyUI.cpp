@@ -1,6 +1,6 @@
-#include "world/go_properties.h"
 #include "../../ProjEd/headers/InspEditAreas.h"
 #include "../../ProjEd/headers/ProjectEdit.h"
+#include <world/ObjectsComponents/MaterialComponent.hpp>
 
 extern InspectorWin* _inspector_win;
 extern ZSGAME_DATA* game_data;
@@ -213,8 +213,6 @@ void Engine::MaterialProperty::onValueChanged() {
         }
         }
     }
-    //save changes to material file
-    material_ptr->saveToFile();
     //Recreate thumbnails for all materials
     _editor_win->thumb_master->createMaterialThumbnail(newmat_ptr_res->resource_label);
     //Update thumbnail in file list

@@ -2,8 +2,12 @@
 #include "../ProjEd/headers/ProjectEdit.h"
 #include "headers/Misc.h"
 #include <QLineEdit>
-#include <world/go_properties.h>
 #include <iostream>
+
+#include <world/ObjectsComponents/MaterialComponent.hpp>
+#include <world/ObjectsComponents/NodeComponent.hpp>
+#include <world/ObjectsComponents/MeshComponent.hpp>
+#include <world/ObjectsComponents/ZPScriptComponent.hpp>
 
 extern RenderPipelineEditor* renderer;
 extern Material* default3dmat;

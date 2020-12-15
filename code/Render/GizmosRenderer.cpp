@@ -1,5 +1,5 @@
 #include "headers/GizmosRenderer.h"
-#include <world/go_properties.h>
+#include <world/ObjectsComponents/PhysicalComponent.hpp>
 
 GizmosRenderer::GizmosRenderer(Engine::Shader* mark_shader,
                                Engine::Shader* grid_shader,

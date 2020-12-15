@@ -1,13 +1,14 @@
 #include "headers/InspectorWin.h"
 #include "headers/InspEditAreas.h"
 #include "headers/ProjectEdit.h"
-#include <world/go_properties.h>
 #include "../World/headers/World.h"
 #include <QDoubleValidator>
 #include <QDragEnterEvent>
 #include <QObject>
 #include <QDir>
 #include <iostream>
+
+#include <world/ObjectsComponents/ZPScriptComponent.hpp>
 
 #define INSP_DIMENSION_WIDGET_SIZE 11
 

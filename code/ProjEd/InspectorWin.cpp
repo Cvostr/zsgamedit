@@ -3,7 +3,6 @@
 #include "headers/ProjectEdit.h"
 #include "ui_inspector_win.h"
 
-#include <world/go_properties.h>
 #include <world/tile_properties.h>
 #include "../World/headers/World.h"
 #include <QDoubleValidator>
@@ -140,9 +139,9 @@ void InspectorWin::ShowObjectProperties(Engine::GameObject* object_ptr){
         addPropertyInterfaceToInspector(property_ptr);
     }
     for (unsigned int script_it = 0; script_it < scripts_num; script_it++) { //iterate over all scripts and send them to inspector
-        Engine::IGameObjectComponent* script_ptr = object_ptr->mScripts[script_it]; //Obtain pointer to object script
+        Engine::ZPScriptProperty* script_ptr = object_ptr->mScripts[script_it]; //Obtain pointer to object script
         //Add script to inspector
-        addPropertyInterfaceToInspector(script_ptr);
+        addPropertyInterfaceToInspector((Engine::IGameObjectComponent*)script_ptr);
     }
     gameobject_ptr = object_ptr;
     addPropButtons(); //add buttons

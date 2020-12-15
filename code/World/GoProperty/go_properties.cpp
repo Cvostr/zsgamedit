@@ -1,11 +1,18 @@
 #include "../headers/World.h"
-#include "world/go_properties.h"
 #include "../../ProjEd/headers/ProjectEdit.h"
 #include <render/Mesh.hpp>
 #include "../../ProjEd/headers/InspEditAreas.h"
 #include "../headers/Misc.h"
 
 #include <world/ObjectsComponents/AudioSourceComponent.hpp>
+#include <world/ObjectsComponents/AnimationComponent.hpp>
+#include <world/ObjectsComponents/MeshComponent.hpp>
+#include <world/ObjectsComponents/LightSourceComponent.hpp>
+#include <world/ObjectsComponents/RigidbodyComponent.hpp>
+#include <world/ObjectsComponents/ColliderComponent.hpp>
+#include <world/ObjectsComponents/CharacterController.hpp>
+#include <world/ObjectsComponents/TriggerComponent.hpp>
+#include <world/ObjectsComponents/ShadowCasterComponent.hpp>
 
 extern InspectorWin* _inspector_win;
 extern EditWindow* _editor_win;

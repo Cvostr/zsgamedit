@@ -4,6 +4,8 @@
 #include "../ProjEd/headers/ProjectEdit.h"
 #include <iostream>
 
+#include <world/ObjectsComponents/MeshComponent.hpp>
+
 #define LIGHT_STRUCT_SIZE 64
 
 extern ZSGAME_DATA* game_data;
