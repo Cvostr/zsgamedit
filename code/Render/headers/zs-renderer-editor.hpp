@@ -10,7 +10,7 @@
 #include "GizmosRenderer.h"
 #include "../../Misc/headers/EditorManager.h"
 #include <QMainWindow>
-#include <SDL2/SDL.h>
+#include <engine/Window.hpp>
 #include <ogl/GLRenderer.hpp>
 
 
@@ -30,7 +30,7 @@ public:
     bool InitGLEW();
     void initGizmos(int projectPespective);
 
-    void render(SDL_Window* w, void* projectedit_ptr);
+    void render(Engine::Window* window, void* projectedit_ptr);
     unsigned int render_getpickedObj(void* projectedit_ptr, int mouseX, int mouseY);
     ZSRGBCOLOR getColorOfPickedTransformControl(int mouseX, int mouseY, void* projectedit_ptr);
     void renderGizmos(void* projectedit_ptr, Engine::Camera* cam);

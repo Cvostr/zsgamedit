@@ -4,7 +4,7 @@
 #include <input/zs-input.h>
 #include "ui_editor.h"
 
-#define MONEMENT_COEFF 0.3f
+#define MONEMENT_COEFF 40.3f
 
 extern InspectorWin* _inspector_win;
 //Hack to support resources

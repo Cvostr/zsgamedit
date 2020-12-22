@@ -141,8 +141,6 @@ EditWindow::EditWindow(QApplication* app, QWidget *parent) :
     ui->actionNew_Object->setShortcut(Qt::Key_N | Qt::CTRL);
     ui->actionToggle_Cameras->setShortcut(Qt::Key_H | Qt::CTRL);
 
-    this->glcontext = nullptr;
-
     ZSENGINE_CREATE_INFO* engine_create_info = new ZSENGINE_CREATE_INFO;
     engine_create_info->createWindow = false; //window already created, we don't need one
     engine_create_info->graphicsApi = OGL; //use opengl
@@ -150,7 +148,8 @@ EditWindow::EditWindow(QApplication* app, QWidget *parent) :
 
     engine_ptr = new ZSpireEngine();
     engine_ptr->engine_info = engine_create_info;
-    engine_ptr->window_info = new ZSWINDOW_CREATE_INFO;
+
+    mComponentManager = new Engine::EngineComponentManager;
 }
 
 EditWindow::~EditWindow()
@@ -167,22 +166,6 @@ void EditWindow::init(){
     input_state.isLAltHold = false;
     input_state.isMidBtnHold = false;
 
-    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0)
-    {
-        std::cout << "Error: " << SDL_GetError() << std::endl;
-    }
-
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-    SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);
-    SDL_DisplayMode current;
-    SDL_GetCurrentDisplayMode(0, &current);
-
-    Engine::Logger::Log() << "SDL window creation requested\n";
     //If no window settings made
     if(this->settings.isFirstSetup){
         //Set base windows values
@@ -218,15 +201,27 @@ void EditWindow::init(){
         app_ptr->setPalette(palette);
     }
 
-    this->window = SDL_CreateWindow("Game View", this->settings.gameView_win_pos_x, this->settings.gameView_win_pos_y, settings.gameViewWin_Width, settings.gameViewWin_Height, SDL_WINDOW_OPENGL); //Create window
-   
-    engine_ptr->window_info->Width = settings.gameViewWin_Width;
-    engine_ptr->window_info->Height = settings.gameViewWin_Height;
+    ZSENGINE_CREATE_INFO engine_create_info;
+    engine_create_info.appName = (char*)("GameEditorRun");
+    engine_create_info.createWindow = true; //window already created, we don't need one
+    engine_create_info.graphicsApi = OGL; //use selected graphics API
+
+    Engine::ZSWINDOW_CREATE_INFO* window_create_info = new Engine::ZSWINDOW_CREATE_INFO;
+    window_create_info->title = (char*)"Game View";
+    window_create_info->Width = this->settings.gameViewWin_Width;
+    window_create_info->Height = settings.gameViewWin_Width;
+    window_create_info->PosX = this->settings.gameView_win_pos_x;
+    window_create_info->PosY = this->settings.gameView_win_pos_y;
+
+    mWindow = new Engine::Window;
+    mWindow->CreateWindow(window_create_info, &engine_create_info);
+    mWindow->SetComponentManager(this->mComponentManager);
+    //Set window pointer
+    engine_ptr->SetWindow(mWindow);
     
-    this->glcontext = SDL_GL_CreateContext(window);
-    SDL_GL_SetSwapInterval(1); // Enable vsync
-    SDL_SetWindowResizable(window, SDL_TRUE);
-    std::cout << "SDL - GL context creation requested!" << std::endl;
+    mWindow->SetGLSwapInterval(1);
+    mWindow->SetResizeable(true);
+
     glewExperimental = GL_TRUE;
     std::cout << "Calling GLEW creation" << std::endl;
 
@@ -244,19 +239,19 @@ void EditWindow::init(){
 
     //init render
     render = new RenderPipelineEditor;
-    this->startManager(render);
+    mComponentManager->startManager(render);
     renderer = render;
     renderer->allowOnUpdate = false;
     //init glyph manager
     this->glyph_manager = new GlyphManager;
-    this->startManager(glyph_manager);
+    mComponentManager->startManager(glyph_manager);
     //Init thumbnails manager
     this->thumb_master = new ThumbnailsMaster;
-    this->startManager(thumb_master);
+    mComponentManager->startManager(thumb_master);
 
     game_data = new ZSGAME_DATA;
     game_data->resources = new Engine::ResourceManager;
-    startManager(game_data->resources);
+    mComponentManager->startManager(game_data->resources);
 
     game_data->script_manager = new Engine::AGScriptMgr;
     
@@ -266,10 +261,11 @@ void EditWindow::init(){
     game_data->ui_manager = new Engine::UiManager;
     game_data->oal_manager = new Engine::OALManager;
     game_data->time = new Engine::Time;
-    this->startManager(game_data->oal_manager);
+    mComponentManager->startManager(game_data->oal_manager);
     game_data->out_manager->consoleLogWorking = true;
     game_data->isEditor = true;
     game_data->world = &this->world;
+    game_data->window = this->mWindow;
 
     std::string absolute = project.root_path + "/";
     Engine::Loader::setBlobRootDirectory(absolute);
@@ -311,7 +307,7 @@ void EditWindow::openFile(QString file_path){
         //Unpick object first
         world.unpickObject();
         QString gl_win_title = "Game View - " + file_path;
-        SDL_SetWindowTitle(window, gl_win_title.toUtf8());
+        mWindow->SetTitle(gl_win_title.toUtf8());
         //if scene is running, then call onRunProject() to stop scene
         if(isSceneRun == true)
             emit onRunProject();
@@ -381,8 +377,7 @@ bool EditWindow::onCloseProject(){
                                     QMessageBox::Yes|QMessageBox::No);
     if (reply == QMessageBox::Yes) {
         world.clear(); //clear world
-        SDL_DestroyWindow(window); //Destroy SDL and opengl
-        SDL_GL_DeleteContext(glcontext);
+        mWindow->DestroyWindow();
 
         //Clear shader groups
         MtShProps::clearMtShaderGroups();
@@ -400,7 +395,7 @@ bool EditWindow::onCloseProject(){
         //Terminate Terrain Thread
         stopTerrainThread();
 
-        destroyAllManagers();
+        mComponentManager->destroyAllManagers();
 
         _ed_actions_container->clear();
         //won't render anymore
@@ -468,8 +463,8 @@ void EditWindow::onRunProject(){
 
     }else{ //lets stop scene run
         //return base window size
-        SDL_SetWindowSize(this->window, this->settings.gameViewWin_Width, this->settings.gameViewWin_Height);
-        SDL_SetWindowFullscreen(this->window, 0);
+        mWindow->SetSize(this->settings.gameViewWin_Width, this->settings.gameViewWin_Height);
+        mWindow->SetWindowMode(0);
         //Stop world
         stopWorld();
         //Recover world snapshot
@@ -556,7 +551,7 @@ void EditWindow::toggleCameras(){
 }
 
 void EditWindow::glRender(){
-    game_data->time->Tick();
+    
     edit_camera.updateTick(game_data->time->GetDeltaTime()); //Update camera, if it is moving
     //Look for objects names changes
     GO_W_I::updateObjsNames(&world);
@@ -595,7 +590,7 @@ void EditWindow::glRender(){
     }
     //if opengl ready, then render scene
     if(ready == true && !hasSheduledWorld)
-        render->render(this->window, this);
+        render->render(mWindow, this);
 }
 
 RenderPipelineEditor* EditWindow::getRenderPipeline(){
@@ -614,7 +609,7 @@ EditWindow* ZSEditor::openProject(QApplication* app, Project& project){
 }
 EditWindow* ZSEditor::openEditor(){
     EditorSettingsManager* settings_manager = new EditorSettingsManager(&_editor_win->settings);
-    _editor_win->startManager(settings_manager);
+    _editor_win->mComponentManager->startManager(settings_manager);
     //Initialize EditWindow class
     _editor_win->init();
 
@@ -645,22 +640,6 @@ EditWindow* ZSEditor::openEditor(){
     _editor_win->thumb_master->createMeshesThumbnails();
     //Set directory to be shown in file manager
     _editor_win->setViewDirectory(QString::fromStdString(_editor_win->project.root_path));
-
-    {
-        Engine::LinearLayout* rtlayout = new Engine::LinearLayout;
-        rtlayout->move(30, 10);
-        Engine::Button* btn = new Engine::Button;
-        btn->SetDefaultSprite(game_data->resources->getTextureByLabel("big_building"));
-        btn->SetHoveredSprite(game_data->resources->getTextureByLabel("textures/floor"));
-
-        Engine::Button* btn1 = new Engine::Button;
-        btn1->SetDefaultSprite(game_data->resources->getTextureByLabel("big_building"));
-        btn1->SetHoveredSprite(game_data->resources->getTextureByLabel("textures/floor"));
-
-        rtlayout->AddView(btn);
-        rtlayout->AddView(btn1);
-        game_data->ui_manager->SetRootLayout(rtlayout);
-    }
 
     return _editor_win;
 }
@@ -705,44 +684,18 @@ void ObjectTransformState::setTransformOnObject(GO_TRANSFORM_MODE transformMode)
     getActionManager()->newPropertyAction(prop_ptr->go_link, PROPERTY_TYPE::GO_PROPERTY_TYPE_TRANSFORM);
 }
 
-void EditWindow::startManager(IEngineComponent* component){
-    component->setDpMetrics(this->settings.gameViewWin_Width, this->settings.gameViewWin_Height);
-    component->setProjectStructPtr(&this->project);
-    component->OnCreate();
-    this->managers.push_back(component);
-}
-
 void EditWindow::updateDeltaTime(){
-    for(unsigned int i = 0; i < managers.size(); i ++){
-        managers[i]->deltaTime = game_data->time->GetDeltaTime();
-    }
-}
-
-void EditWindow::destroyAllManagers(){
-    //we must do that in reverse order
-    for(int i = static_cast<int>(managers.size()) - 1; i >= 0; i --){
-        delete managers[static_cast<unsigned int>(i)];
-    }
+    if(game_data->time)
+        game_data->time->Tick();
 }
 
 void EditWindow::setGameViewWindowSize(int W, int H){
-    if(W < 1 && H < 1) return;
     //Set SDL window size
-    SDL_SetWindowSize(this->window, W, H);
+    mWindow->SetSize(W, H);
     //Apply new viewport to cameras
     Engine::ZSVIEWPORT viewport = Engine::ZSVIEWPORT(0,0,static_cast<unsigned int>(W),static_cast<unsigned int>(H));
     edit_camera.setViewport(viewport);
     world.world_camera.setViewport(viewport);
-
-    for(unsigned int i = 0; i < managers.size(); i ++){
-        managers[i]->WIDTH = W;
-        managers[i]->HEIGHT = H;
-        managers[i]->OnUpdateWindowSize(W, H);
-    }
-}
-
-void EditWindow::setGameViewWindowMode(unsigned int mode){
-    SDL_SetWindowFullscreen(this->window, mode);
 }
 
 QTreeWidget* EditWindow::getObjectListWidget(){

@@ -14,7 +14,7 @@ void Engine::MaterialProperty::addPropertyInterfaceToInspector() {
     area->pResultString = &material_path;
     _inspector_win->addPropertyArea(area);
     //No material, exiting
-    if (material_ptr == nullptr || material_ptr->file_path[0] == '@')
+    if (material_ptr == nullptr)
         return;
 
     if (material_ptr->group_ptr->acceptShadows) {
@@ -24,6 +24,10 @@ void Engine::MaterialProperty::addPropertyInterfaceToInspector() {
         receiveShdws->pResultBool = &this->receiveShadows;
         _inspector_win->addPropertyArea(receiveShdws);
     }
+
+    if (material_ptr->file_path[0] == '@')
+        return;
+
     //Add shader group picker
     ComboBoxArea* mt_shader_group_area = new ComboBoxArea;
     mt_shader_group_area->setLabel("Shader Group");

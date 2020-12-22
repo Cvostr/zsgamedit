@@ -39,6 +39,7 @@ void EditWindow::onResourceFileChanged(QString path) {
         pResource->Release();
         pResource->size = 0;
         pResource->load();
+        game_data->out_manager->clearMessagesWithType(LogEntryType::LE_TYPE_SCRIPT_ERROR);
         game_data->script_manager->AddScriptFiles();
         game_data->world->call_onScriptChanged();
     }

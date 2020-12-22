@@ -47,14 +47,15 @@ layout (std140, binding = 2) uniform ShadowData{
     uniform int ShadowmapSize; //4
     uniform bool HasShadowMap; //4
     uniform int CascadesNum; //4
-    //16
+    uniform int PcfPassNum; // 4
+    //32
     uniform mat4 LightProjViewMat0; // 16 * 4
     uniform mat4 LightProjViewMat1; // 16 * 4
     uniform mat4 LightProjViewMat2; // 16 * 4
     uniform mat4 LightProjViewMat3; // 16 * 4
     uniform mat4 LightProjViewMat4; // 16 * 4
     uniform mat4 LightProjViewMat5; // 16 * 4
-    //400
+    //416   
     uniform int CasterDistance0; //4
     uniform int CasterDistance1; //4
     uniform int CasterDistance2; //4
@@ -84,16 +85,20 @@ void processShadows(){
         objPosLightSpace = LightProjViewMat2 * vec4(FragPos, 1);
     }else if(dist < CasterDistance4){
         objPosLightSpace = LightProjViewMat3 * vec4(FragPos, 1);
-    }else{
+    }else if(dist < CasterDistance5){
         objPosLightSpace = LightProjViewMat4 * vec4(FragPos, 1);
+    }else{
+        objPosLightSpace = LightProjViewMat5 * vec4(FragPos, 1);
     }
 
     vec3 ShadowProjection = (objPosLightSpace.xyz / objPosLightSpace.w) / 2.0 + 0.5;
 	
     float real_depth = ShadowProjection.z;
 
-    for(int x = 0; x < 2; x ++){
-        for(int y = 0; y < 2; y ++){
+    float ShadowFactor = 0.5 / (PcfPassNum * PcfPassNum);
+
+    for(int x = 0; x < PcfPassNum; x ++){
+        for(int y = 0; y < PcfPassNum; y ++){
             vec2 offset = vec2(x, y);
 
             offset.x /= ShadowmapSize;
@@ -110,12 +115,14 @@ void processShadows(){
                 shadowmap = texture(shadow_map, vec3(uvoffset, 2));
             }else if(dist < CasterDistance4){
                 shadowmap = texture(shadow_map, vec3(uvoffset, 3));
-            }else{
+            }else if(dist < CasterDistance5){
                 shadowmap = texture(shadow_map, vec3(uvoffset, 4));
+            }else{
+                shadowmap = texture(shadow_map, vec3(uvoffset, 5));
             }
            
             float texture_depth = shadowmap.r;
-            tMasks.g += (real_depth - ShadowBias > texture_depth) ? 0.15 : 0.0;
+            tMasks.g += (real_depth - ShadowBias > texture_depth) ? ShadowFactor : 0.0;
         }
     }
         

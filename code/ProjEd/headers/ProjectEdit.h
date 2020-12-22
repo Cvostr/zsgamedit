@@ -6,7 +6,6 @@
 #include <QFileSystemWatcher>
 #include <QFileInfo>
 #include <QMenu>
-#include <SDL2/SDL.h>
 #include <fstream>
 
 #include "EdActions.h"
@@ -14,6 +13,8 @@
 #include "../../Render/headers/zs-renderer-editor.hpp"
 #include <world/Camera.hpp>
 #include <audio/OALManager.hpp>
+#include <engine/Window.hpp>
+#include <engine/EngineComponentManager.hpp>
 
 struct Resource;
 struct Project;
@@ -147,15 +148,13 @@ public slots:
 private:
     QApplication* app_ptr;
     QFileSystemWatcher* mFsWatcher;
-    //Vector to store all editor managers
-    std::vector<IEngineComponent*> managers;
+    
 
     QString current_dir; //current directory path string
     QString scene_path;
     bool hasSceneFile; //Is scene saved or loaded
 
-    SDL_Window* window; //Editor preview sdl2 window
-    SDL_GLContext glcontext; //Editor preview window opengl context
+    Engine::Window* mWindow;
     //Render pipeline manager
     RenderPipelineEditor* render;
 
@@ -174,7 +173,6 @@ private:
 
     void createResourceDesc(Engine::ZsResource* _resource, QString absfpath, std::string resource_label);
 public:
-    //float deltaTime;
     bool ready; //Is everything loaded?
     int close_reason;
     bool isSceneRun; //Is scene running right now
@@ -189,6 +187,9 @@ public:
     ObjectTransformState obj_trstate; //Describes object transform
     PropertyPaintState ppaint_state; //Describes property painting feature state
     Engine::WorldSnapshot run_world_snapshot; //useful to recover world state after running
+
+    //Vector to store all editor managers
+    Engine::EngineComponentManager* mComponentManager;
 
     //Thumbnails master
     ThumbnailsMaster* thumb_master;
@@ -233,12 +234,9 @@ public:
 
     void resizeEvent(QResizeEvent* event);
 
-    void startManager(IEngineComponent* manager);
     void updateDeltaTime();
-    void destroyAllManagers();
 
     void setGameViewWindowSize(int W, int H);
-    void setGameViewWindowMode(unsigned int mode);
 
     Ui::EditWindow* ui;
 

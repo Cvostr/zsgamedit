@@ -195,6 +195,7 @@ void Engine::TerrainProperty::onValueChanged(){
         HeightmapGrass* pair = &data.grass[i];
         pair->diffuse = game_data->resources->getTextureByLabel(pair->diffuse_relpath);
     }
+    this->data.updateGrassBuffers();
 }
 
 void Engine::TerrainProperty::onAddToObject(){
@@ -223,13 +224,14 @@ void Engine::TerrainProperty::getPickedVertexId(int posX, int posY, int screenY,
     if(mat == nullptr || mat->material_ptr == nullptr) return;
     //Apply material shader
     mat->material_ptr->applyMatToPipeline();
-    //Bind terrain buffer and set isPicking to true
-    terrainUniformBuffer->bind();
+    
     int dtrue = 1;
-    terrainUniformBuffer->writeData(16 * 12 * 2, 4, &dtrue);
+    //Bind terrain buffer and set isPicking to true
+    game_data->pipeline->GetTerrainUniformBuffer()->bind();
+    game_data->pipeline->GetTerrainUniformBuffer()->writeData(16 * 12 * 2, 4, &dtrue);
     //Bind transform
-    transformBuffer->bind();
-    transformBuffer->writeData(sizeof (Mat4) * 2, sizeof (Mat4), &transform->transform_mat);
+    game_data->pipeline->GetTransformUniformBuffer()->bind();
+    game_data->pipeline->GetTransformUniformBuffer()->writeData(sizeof (Mat4) * 2, sizeof (Mat4), &transform->transform_mat);
     //Render terrain mesh without textures
     this->data.Draw(true);
     //read picked pixel

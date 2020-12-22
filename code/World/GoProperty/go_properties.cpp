@@ -302,6 +302,12 @@ void Engine::ShadowCasterProperty::addPropertyInterfaceToInspector(){
     bias->go_property = this; //Pointer to this to activate matrix recalculaton
     _inspector_win->addPropertyArea(bias);
 
+    IntPropertyArea* PcfNum = new IntPropertyArea; //New property area
+    PcfNum->setLabel("PCF pass"); //Its label
+    PcfNum->value = &this->mPcfNum; //Ptr to our vector
+    PcfNum->go_property = this; //Pointer to this to activate matrix recalculaton
+    _inspector_win->addPropertyArea(PcfNum);
+
     FloatPropertyArea* _nearPlane = new FloatPropertyArea; //New property area
     _nearPlane->setLabel("Near plane"); //Its label
     _nearPlane->value = &this->nearPlane; //Ptr to our vector

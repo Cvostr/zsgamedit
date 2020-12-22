@@ -328,7 +328,7 @@ void main(){
 	    tNormal = getFragmentNormal(uv); //defaultly, use normals from mesh
 	    tMasks = vec4(1.0, 0, 0, 0);
         
-        processShadows();
+        //processShadows();
 		FragColor = vec4(getFragment(uv), 0);
 	}	
 }

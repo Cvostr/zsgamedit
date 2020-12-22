@@ -342,7 +342,7 @@ void ProjectCtxMenu::runEngineClicked(ZSGAPI gapi){
     engine_create_info.createWindow = true; //window already created, we don't need one
     engine_create_info.graphicsApi = gapi; //use selected graphics API
 
-    ZSWINDOW_CREATE_INFO window_create_info;
+    Engine::ZSWINDOW_CREATE_INFO window_create_info;
     window_create_info.title = (char*)"Preview";
 
     ZSGAME_DESC game_info;

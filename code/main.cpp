@@ -30,7 +30,7 @@ int main(int argc, char *argv[]){
     while (working) {
         //Work on application
         a->processEvents();
-        if(w.edit_win_ptr != nullptr){ //Check if project editor window is created
+        if(w.edit_win_ptr != nullptr) { //Check if project editor window is created
             //Send delta time to all editor managers
             w.edit_win_ptr->updateDeltaTime();
             SDL_Event event;
@@ -56,8 +56,7 @@ int main(int argc, char *argv[]){
                         w.edit_win_ptr->settings.gameViewWin_Width = event.window.data1;
                         w.edit_win_ptr->settings.gameViewWin_Height = event.window.data2;
 
-                        engine_ptr->window_info->Width = event.window.data1;
-                        engine_ptr->window_info->Height = event.window.data2;
+                        engine_ptr->GetWindow()->SetSize(event.window.data1, event.window.data2);
                     }
                     if(event.window.event == SDL_WINDOWEVENT_MOVED){
                         //Write new settings
@@ -131,6 +130,9 @@ int main(int argc, char *argv[]){
             }
             Input::clearMouseState();
             Input::clearPressedKeys();
+        }
+        else {
+            SDL_Delay(5);
         }
     }
     return 0;

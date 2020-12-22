@@ -9,6 +9,8 @@
 #define LIGHT_STRUCT_SIZE 64
 
 extern ZSGAME_DATA* game_data;
+//Hack to support meshes
+extern ZSpireEngine* engine_ptr;
 
 RenderPipelineEditor::RenderPipelineEditor():
     pick_shader(nullptr),
@@ -77,15 +79,16 @@ bool RenderPipelineEditor::InitGLEW(){
 }
 
 void RenderPipelineEditor::OnCreate(){
-    setFullscreenViewport(this->WIDTH, this->HEIGHT);
+    Engine::Window* win = engine_ptr->GetWindow();
+    setFullscreenViewport(win->GetWindowWidth(), win->GetWindowHeight());
 
     glEnable(GL_LINE_SMOOTH);
     glLineWidth(16.0f);
 
     //setup GBUFFER and shaders
-    setup(this->WIDTH, this->HEIGHT);
+    setup(win->GetWindowWidth(), win->GetWindowHeight());
     //initialize gizmos component
-    initGizmos(this->project_struct_ptr->perspective);
+    initGizmos(engine_ptr->desc->game_perspective);
 }
 
 ZSRGBCOLOR RenderPipelineEditor::getColorOfPickedTransformControl(int mouseX, int mouseY, void* projectedit_ptr){
@@ -113,13 +116,14 @@ ZSRGBCOLOR RenderPipelineEditor::getColorOfPickedTransformControl(int mouseX, in
         //Calclate distance between camera and object
         float dist = getDistance(cam_ptr->camera_pos, editwin_ptr->obj_trstate.obj_ptr->getPropertyPtr<Engine::TransformProperty>()->abs_translation);
 
-        if(this->project_struct_ptr->perspective == 2) dist = 85.0f;
+        if(engine_ptr->desc->game_perspective == 2) dist = 85.0f;
         //Draw gizmos
         getGizmosRenderer()->drawTransformControls(editwin_ptr->obj_trstate.obj_ptr->getPropertyPtr<Engine::TransformProperty>()->abs_translation, dist, dist / 10.f);
     }
 
     unsigned char data[4];
-    glReadPixels(mouseX, this->HEIGHT - mouseY, 1,1, GL_RGBA, GL_UNSIGNED_BYTE, data);
+    Engine::Window* win = engine_ptr->GetWindow();
+    glReadPixels(mouseX, win->GetWindowHeight() - mouseY, 1,1, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
     return ZSRGBCOLOR(data[0], data[1], data[2]);
 }
@@ -169,9 +173,9 @@ unsigned int RenderPipelineEditor::render_getpickedObj(void* projectedit_ptr, in
         }
     }
 
-
+    Engine::Window* win = engine_ptr->GetWindow();
     unsigned char data[4];
-    glReadPixels(mouseX, this->HEIGHT - mouseY, 1,1, GL_RGBA, GL_UNSIGNED_BYTE, data);
+    glReadPixels(mouseX, win->GetWindowHeight() - mouseY, 1,1, GL_RGBA, GL_UNSIGNED_BYTE, data);
     data[3] = 0;
     unsigned int* pr_data_ = reinterpret_cast<unsigned int*>(&data[0]);
     unsigned int pr_data = *pr_data_;
@@ -184,7 +188,7 @@ unsigned int RenderPipelineEditor::render_getpickedObj(void* projectedit_ptr, in
     return pr_data;
 }
 
-void RenderPipelineEditor::render(SDL_Window* w, void* projectedit_ptr){
+void RenderPipelineEditor::render(Engine::Window* window, void* projectedit_ptr){
     EditWindow* editwin_ptr = static_cast<EditWindow*>(projectedit_ptr);
     Engine::Camera* cam_ptr = nullptr; //We'll set it next
     World* world_ptr = &editwin_ptr->world;
@@ -202,7 +206,7 @@ void RenderPipelineEditor::render(SDL_Window* w, void* projectedit_ptr){
     this->updateShadersCameraInfo(cam_ptr); //Send camera properties to all drawing shaders
     setLightsToBuffer();
 
-    switch(this->project_struct_ptr->perspective){
+    switch(engine_ptr->desc->game_perspective){
         case PERSP_2D:{
             render2D();
             break;
@@ -212,9 +216,11 @@ void RenderPipelineEditor::render(SDL_Window* w, void* projectedit_ptr){
             break;
         }
     }
-    renderGizmos(projectedit_ptr, cam);
+    if(!editwin_ptr->isWorldCamera)
+        renderGizmos(projectedit_ptr, cam);
 
-    SDL_GL_SwapWindow(w); //Send rendered frame
+    window->SwapGL();
+    //SDL_GL_SwapWindow(w); //Send rendered frame
 }
 
 void RenderPipelineEditor::renderGizmos(void* projectedit_ptr, Engine::Camera* cam) {
@@ -243,7 +249,7 @@ void RenderPipelineEditor::renderGizmos(void* projectedit_ptr, Engine::Camera* c
             if (editwin_ptr->obj_trstate.isTransforming == true)
                 color = ZSRGBCOLOR(255.0f, 255.0f, 0.0f);
             //draw wireframe mesh for picked object
-            if (!editwin_ptr->isWorldCamera && obj_ptr->hasMesh() && obj_ptr->mActive) { //avoid drawing gizmos during playtime
+            if (obj_ptr->hasMesh() && obj_ptr->mActive) { //avoid drawing gizmos during playtime
                 //Draw pick mesh
                 getGizmosRenderer()->drawPickedMeshWireframe(mesh_prop->mesh_ptr->mesh_ptr, transform_ptr->transform_mat, color);
                 //Draw collider
@@ -262,7 +268,7 @@ void RenderPipelineEditor::renderGizmos(void* projectedit_ptr, Engine::Camera* c
         //To set constant size of controls on any distance
         float dist = getDistance(cam->camera_pos, editwin_ptr->obj_trstate.obj_ptr->getPropertyPtr<Engine::TransformProperty>()->abs_translation);
         //if we are in 2D mode, then distance is constant
-        if (this->project_struct_ptr->perspective == PERSP_2D) dist = 70.0f;
+        if (engine_ptr->desc->game_perspective == PERSP_2D) dist = 70.0f;
         getGizmosRenderer()->drawTransformControls(editwin_ptr->obj_trstate.obj_ptr->getPropertyPtr<Engine::TransformProperty>()->abs_translation, dist, dist / 10.f);
     }
 }

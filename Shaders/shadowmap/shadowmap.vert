@@ -24,14 +24,15 @@ layout (std140, binding = 2) uniform ShadowData{
     uniform int ShadowmapSize; //4
     uniform bool HasShadowMap; //4
     uniform int CascadesNum; //4
-    //16
+    uniform int PcfPassNum; // 4
+    //32
     uniform mat4 LightProjViewMat0; // 16 * 4
     uniform mat4 LightProjViewMat1; // 16 * 4
     uniform mat4 LightProjViewMat2; // 16 * 4
     uniform mat4 LightProjViewMat3; // 16 * 4
     uniform mat4 LightProjViewMat4; // 16 * 4
     uniform mat4 LightProjViewMat5; // 16 * 4
-    //400
+    //416   
     uniform int CasterDistance0; //4
     uniform int CasterDistance1; //4
     uniform int CasterDistance2; //4
