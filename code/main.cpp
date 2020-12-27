@@ -52,16 +52,20 @@ int main(int argc, char *argv[]){
 
                     if(event.window.event == SDL_WINDOWEVENT_RESIZED){
                         w.edit_win_ptr->setGameViewWindowSize(event.window.data1, event.window.data2);
-                        //Write new settings
-                        w.edit_win_ptr->settings.gameViewWin_Width = event.window.data1;
-                        w.edit_win_ptr->settings.gameViewWin_Height = event.window.data2;
+                        if (!w.edit_win_ptr->isSceneRun) {
+                            //Write new settings
+                            w.edit_win_ptr->settings.gameViewWin_Width = event.window.data1;
+                            w.edit_win_ptr->settings.gameViewWin_Height = event.window.data2;
+                        }
 
                         engine_ptr->GetWindow()->SetSize(event.window.data1, event.window.data2);
                     }
                     if(event.window.event == SDL_WINDOWEVENT_MOVED){
                         //Write new settings
-                        w.edit_win_ptr->settings.gameView_win_pos_x = event.window.data1;
-                        w.edit_win_ptr->settings.gameView_win_pos_y = event.window.data2;
+                        if (!w.edit_win_ptr->isSceneRun) {
+                            w.edit_win_ptr->settings.gameView_win_pos_x = event.window.data1;
+                            w.edit_win_ptr->settings.gameView_win_pos_y = event.window.data2;
+                        }
                     }
                 }
                 if (event.type == SDL_QUIT) { //If user caused SDL window to close

@@ -22,7 +22,7 @@
 #include "../World/headers/Misc.h"
 #include "headers/LocStringEditWin.h"
 #include "headers/DialogsMaster.h"
-
+#include <input/zs-input.h>
 #include <ui/UI.hpp>
 #include <engine/Logger.hpp>
 
@@ -45,7 +45,8 @@ EditWindow::EditWindow(QApplication* app, QWidget *parent) :
     QMainWindow(parent),
     mFsWatcher(new QFileSystemWatcher(nullptr)),
     object_buffer(nullptr),
-    ui(new Ui::EditWindow)
+    ui(new Ui::EditWindow),
+    app_ptr(app)
 {
     ui->setupUi(this);
 
@@ -124,7 +125,7 @@ EditWindow::EditWindow(QApplication* app, QWidget *parent) :
     //Allocate file ctx menu
     this->file_ctx_menu = new FileCtxMenu(this);
 
-    this->app_ptr = app;
+    
 
     ui->actionCopy->setShortcut(Qt::Key_C | Qt::CTRL);
     ui->actionPaste->setShortcut(Qt::Key_V | Qt::CTRL);
@@ -221,21 +222,14 @@ void EditWindow::init(){
     
     mWindow->SetGLSwapInterval(1);
     mWindow->SetResizeable(true);
-
-    glewExperimental = GL_TRUE;
-    std::cout << "Calling GLEW creation" << std::endl;
-
-    if (glewInit() != GLEW_OK){
-        std::cout << "OPENGL GLEW: Creation failed ";
-        return;
-    }
-
-    std::cout << "GLEW creation successful" << std::endl;
+    
 
     ZSGAME_DESC* game_desc = new ZSGAME_DESC;
     game_desc->game_perspective = project.perspective;
     engine_ptr->desc = game_desc;
     game_desc->game_dir = project.root_path;
+    //Allocate game data
+    game_data = new ZSGAME_DATA;
 
     //init render
     render = new RenderPipelineEditor;
@@ -249,7 +243,7 @@ void EditWindow::init(){
     this->thumb_master = new ThumbnailsMaster;
     mComponentManager->startManager(thumb_master);
 
-    game_data = new ZSGAME_DATA;
+   
     game_data->resources = new Engine::ResourceManager;
     mComponentManager->startManager(game_data->resources);
 
@@ -464,7 +458,9 @@ void EditWindow::onRunProject(){
     }else{ //lets stop scene run
         //return base window size
         mWindow->SetSize(this->settings.gameViewWin_Width, this->settings.gameViewWin_Height);
+        mWindow->SetPosition(this->settings.gameView_win_pos_x, this->settings.gameView_win_pos_y);
         mWindow->SetWindowMode(0);
+        Input::SetMouseRelativeMode(false);
         //Stop world
         stopWorld();
         //Recover world snapshot
@@ -474,6 +470,7 @@ void EditWindow::onRunProject(){
         this->ui->actionRun->setText("Run");
         //Destroy physical world object
         delete world.physical_world;
+        game_data->ui_manager->RemoveAllViews();
     }
 }
 
@@ -685,7 +682,7 @@ void ObjectTransformState::setTransformOnObject(GO_TRANSFORM_MODE transformMode)
 }
 
 void EditWindow::updateDeltaTime(){
-    if(game_data->time)
+    if(mComponentManager->GetComponentsCount() > 0)
         game_data->time->Tick();
 }
 

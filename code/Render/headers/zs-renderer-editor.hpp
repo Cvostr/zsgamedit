@@ -1,7 +1,6 @@
 #pragma once
 
-#define GLEW_STATIC
-#include <GL/glew.h>
+
 #include <render/Shader.hpp>
 #include <render/Mesh.hpp>
 #include <render/UniformBuffer.hpp>
@@ -27,7 +26,6 @@ public:
     Engine::UniformBuffer* editorUniformBuffer;
 
     void setup(int bufWidth, int bufHeight);
-    bool InitGLEW();
     void initGizmos(int projectPespective);
 
     void render(Engine::Window* window, void* projectedit_ptr);

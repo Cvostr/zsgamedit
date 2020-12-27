@@ -1,4 +1,5 @@
 #include "headers/ProjectEdit.h"
+#include <ogl/GLMesh.hpp>
 #include <QDir>
 
 //Hack to support resources
@@ -147,7 +148,7 @@ void EditWindow::ImportResource(QString pathToResource) {
         //Get amount of meshes, animations, textures, materials in file
         Engine::getSizes(pathToResource.toStdString(), &num_meshes, &num_anims, &num_textures, &num_materials);
         //Allocate array for meshes
-        Engine::_ogl_Mesh* meshes = static_cast<Engine::_ogl_Mesh*>(Engine::allocateMesh(num_meshes));
+        Engine::glMesh* meshes = static_cast<Engine::glMesh*>(Engine::allocateMesh(num_meshes));
         //Allocate array for animations
         Engine::Animation* anims = new Engine::Animation[num_anims];
 

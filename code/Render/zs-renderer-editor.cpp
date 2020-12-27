@@ -65,18 +65,6 @@ RenderPipelineEditor::~RenderPipelineEditor(){
     delete gizmos;
 }
 
-bool RenderPipelineEditor::InitGLEW(){
-    glewExperimental = GL_TRUE;
-    std::cout << "Calling GLEW creation" << std::endl;
-
-    if (glewInit() != GLEW_OK){
-        std::cout << "OPENGL GLEW: Creation failed ";
-        return false;
-    }
-
-    std::cout << "GLEW creation successful" << std::endl;
-        return true;
-}
 
 void RenderPipelineEditor::OnCreate(){
     Engine::Window* win = engine_ptr->GetWindow();
@@ -216,11 +204,11 @@ void RenderPipelineEditor::render(Engine::Window* window, void* projectedit_ptr)
             break;
         }
     }
+
     if(!editwin_ptr->isWorldCamera)
         renderGizmos(projectedit_ptr, cam);
 
     window->SwapGL();
-    //SDL_GL_SwapWindow(w); //Send rendered frame
 }
 
 void RenderPipelineEditor::renderGizmos(void* projectedit_ptr, Engine::Camera* cam) {
