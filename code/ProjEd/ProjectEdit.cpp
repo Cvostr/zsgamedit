@@ -544,6 +544,11 @@ void EditWindow::onObjectPaste(){
 
 void EditWindow::toggleCameras(){
     //This slot toggles cameras
+    if(Input::getMouseState().RelativeMode)
+        if(isWorldCamera)
+            SDL_SetRelativeMouseMode(SDL_FALSE);
+        else
+            SDL_SetRelativeMouseMode(SDL_TRUE);
     this->isWorldCamera = !this->isWorldCamera;
 }
 

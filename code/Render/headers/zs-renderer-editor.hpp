@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include <render/Shader.hpp>
 #include <render/Mesh.hpp>
 #include <render/UniformBuffer.hpp>
@@ -11,7 +10,6 @@
 #include <QMainWindow>
 #include <engine/Window.hpp>
 #include <ogl/GLRenderer.hpp>
-
 
 class RenderPipelineEditor : public Engine::GLRenderer {
 private:

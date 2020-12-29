@@ -291,7 +291,7 @@ void Engine::ShadowCasterProperty::addPropertyInterfaceToInspector(){
     _inspector_win->addPropertyArea(cascadeSw);
 
     IntPropertyArea* textureW = new IntPropertyArea; //New property area
-    textureW->setLabel("Texture Width"); //Its label
+    textureW->setLabel("Texture Size"); //Its label
     textureW->value = &this->TextureSize; //Ptr to our vector
     textureW->go_property = this; //Pointer to this to activate matrix recalculaton
     _inspector_win->addPropertyArea(textureW);
@@ -307,6 +307,12 @@ void Engine::ShadowCasterProperty::addPropertyInterfaceToInspector(){
     PcfNum->value = &this->mPcfNum; //Ptr to our vector
     PcfNum->go_property = this; //Pointer to this to activate matrix recalculaton
     _inspector_win->addPropertyArea(PcfNum);
+
+    FloatPropertyArea* ShadStrength = new FloatPropertyArea; //New property area
+    ShadStrength->setLabel("Strength"); //Its label
+    ShadStrength->value = &this->mShadowStrength; //Ptr to our vector
+    ShadStrength->go_property = this; //Pointer to this to activate matrix recalculaton
+    _inspector_win->addPropertyArea(ShadStrength);
 
     FloatPropertyArea* _nearPlane = new FloatPropertyArea; //New property area
     _nearPlane->setLabel("Near plane"); //Its label

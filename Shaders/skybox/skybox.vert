@@ -12,5 +12,5 @@ layout (std140, binding = 6) uniform Skybox{
 void main()
 {
     TexCoords = aPos;
-    gl_Position = projection * view * vec4(aPos, 1.0);
+    gl_Position = projection * view * vec4(aPos * 2, 1.0);
 }  

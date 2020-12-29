@@ -18,7 +18,6 @@ RenderPipelineEditor::RenderPipelineEditor():
     obj_grid_shader(nullptr),
     editorUniformBuffer(nullptr),
     gizmos(nullptr),
-    //cam(nullptr),
     win_ptr(nullptr) {   }
 
 GizmosRenderer* RenderPipelineEditor::getGizmosRenderer(){
@@ -200,7 +199,7 @@ void RenderPipelineEditor::render(Engine::Window* window, void* projectedit_ptr)
             break;
         }
         case PERSP_3D:{
-            render3D(cam);
+            render3D(cam_ptr);
             break;
         }
     }

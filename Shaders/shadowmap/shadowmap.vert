@@ -25,6 +25,7 @@ layout (std140, binding = 2) uniform ShadowData{
     uniform bool HasShadowMap; //4
     uniform int CascadesNum; //4
     uniform int PcfPassNum; // 4
+    uniform float ShadowStrength; // 4
     //32
     uniform mat4 LightProjViewMat0; // 16 * 4
     uniform mat4 LightProjViewMat1; // 16 * 4
