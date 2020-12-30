@@ -41,28 +41,40 @@ const char mesh_shaderVS[590] = "#version 420 core\n\
         gl_Position = cam_projection * cam_view * object_transform * vec4(pos, 1);\n\
         }\n";
 
+void ThumbnailsMaster::Clear() {
+    std::for_each(texture_thumbnails.begin(), texture_thumbnails.end(),
+        [](std::pair<std::string, QImage*> element) {
+            // Accessing KEY from element
+            std::string word = element.first;
+            // Accessing VALUE from element.
+            delete element.second;
+        });
+
+    for (unsigned int i = 0; i < memory_buffers.size(); i ++) {
+        delete memory_buffers[i];
+    }
+    //Clear arrays
+    this->texture_thumbnails.clear();
+    memory_buffers.clear();
+}
+
+void ThumbnailsMaster::CreateAll() {
+    Clear();
+    createTexturesThumbnails();
+    createMaterialThumbnails();
+    createMeshesThumbnails();
+}
+
 ThumbnailsMaster::ThumbnailsMaster(){
 
 }
 
 ThumbnailsMaster::~ThumbnailsMaster(){
     //interate over all textures and clear them
-    std::for_each(texture_thumbnails.begin(), texture_thumbnails.end(),
-        [](std::pair<std::string, QImage*> element) {
-            // Accessing KEY from element
-            std::string word = element.first;
-            // Accessing VALUE from element.
-            delete element.second; 
-        });
-
-    std::vector<unsigned char*>::iterator ptr;
-    for (ptr = memory_buffers.begin(); ptr < memory_buffers.end(); ptr++) {
-        delete *ptr;
-    }
-
-    this->texture_thumbnails.clear();
-    texture_shader->Destroy();
-    mesh_shader->Destroy();
+    Clear();
+    //Clear shaders
+    delete texture_shader;
+    delete mesh_shader;
 }
 
 void ThumbnailsMaster::initShader(){

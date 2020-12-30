@@ -155,47 +155,13 @@ void EditWindow::onFileCtxMenuShow(QPoint point) {
 void EditWindow::onNewScript() {
     std::string scriptContent = "class angel : ZPScript{\n\tangel(GameObject@ o){\n\n\t}\n\tvoid Start() {\n\n\t}\n\tvoid Update(){\n\n\t}\n}";
     QString picked_name = this->createNewTextFile(current_dir, "Script", ".as", scriptContent.c_str(), scriptContent.size());
-
-    //Register new material in list
-    //First, get relative path to new material
-    QString rel_path = picked_name; //Preparing to get relative path
-    rel_path = rel_path.remove(0, static_cast<int>(project.root_path.size() + 1)); //Get relative path by removing length of project root from start
-
-    Engine::ZsResource* _resource = new Engine::ScriptResource;
-    _resource->size = 0;
-    _resource->rel_path = rel_path.toStdString();
-    _resource->blob_path = _resource->rel_path;
-    _resource->resource_label = _resource->rel_path;
-    RemoveExtension(_resource->resource_label);
-    game_data->resources->pushResource(_resource);
-
-    updateFileList(); //Make new file visible
 }
 void EditWindow::onNewMaterial() {
     char* matContent = "ZSP_MATERIAL\nGROUP @default\nENTRY i_uv_repeat \x0\x0\x0\x1\x0\x0\x0\x1\n";
     QString picked_name = this->createNewTextFile(current_dir, "Material", ".zsmat", matContent, 56);
-
-    //Register new material in list
-    //First, get relative path to new material
-    QString rel_path = picked_name; //Preparing to get relative path
-    rel_path = rel_path.remove(0, static_cast<int>(project.root_path.size() + 1)); //Get relative path by removing length of project root from start
-
-    Engine::ZsResource* _resource = new Engine::MaterialResource;
-    _resource->size = 0;
-    _resource->rel_path = rel_path.toStdString();
-    _resource->blob_path = _resource->rel_path;
-    _resource->resource_label = _resource->rel_path;
-    RemoveExtension(_resource->resource_label);
-    game_data->resources->pushResource(_resource);
-
-    thumb_master->createMaterialThumbnail(_resource->resource_label);
-
-    updateFileList(); //Make new file visible
 }
 
 void EditWindow::onNewLocalizedStringFile() {
     char* matContent = "ZSLOCALIZEDSTRINGSBINARY\x0\x0\x0\x0\x0\x0\x0\x0";
     QString picked_name = this->createNewTextFile(current_dir, "LocString", ".lcstr", matContent, 33);
-
-    updateFileList(); //Make new file visible
 }

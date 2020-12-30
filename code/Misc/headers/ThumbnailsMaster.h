@@ -27,12 +27,15 @@ public:
     void createMaterialThumbnails();
     void createMaterialThumbnail(std::string name);
     void createMeshesThumbnails();
+    void CreateAll();
 
     void DrawTexture(Engine::TextureResource* texture);
     void DrawMaterial(Material* material);
     void DrawMesh(Engine::MeshResource* mesh);
 
     bool isAvailable(std::string name);
+
+    void Clear();
 
     ThumbnailsMaster();
     ~ThumbnailsMaster();

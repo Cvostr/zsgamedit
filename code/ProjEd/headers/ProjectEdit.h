@@ -145,6 +145,7 @@ public slots:
     void onOpenInspectorWin();
 
     void onResourceFileChanged(QString path);
+    void onDirectoryChanged(QString path);
 private:
     QApplication* app_ptr;
     QFileSystemWatcher* mFsWatcher;

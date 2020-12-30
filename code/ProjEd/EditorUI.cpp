@@ -170,8 +170,6 @@ void ObjectCtxMenu::onStorePrefabPressed(){
     QString prefab_filepath = _editor_win->getCurrentDirectory() + "/" + QString::fromStdString(obj_ptr->getLabel()) + ".prefab";
     //Call prefab storing
     _editor_win->world.storeObjectToPrefab(this->obj_ptr, prefab_filepath);
-    //update file list in current directory
-    _editor_win->updateFileList();
 }
 
 void ObjectCtxMenu::onInfoPressed(){
@@ -215,13 +213,11 @@ void FileCtxMenu::onDeleteClicked(){
     FileDeleteDialog* dialog = new FileDeleteDialog(file_path);
     dialog->exec();
     delete dialog;
-    _editor_win->updateFileList();
 }
 void FileCtxMenu::onRename(){
     FileRenameDialog* dialog = new FileRenameDialog(file_path, file_name, _editor_win);
     dialog->exec();
     delete dialog;
-    _editor_win->updateFileList();
 }
 
 FileDeleteDialog::FileDeleteDialog(QString file_path, QWidget* parent) : QDialog(parent){
@@ -243,17 +239,6 @@ FileDeleteDialog::FileDeleteDialog(QString file_path, QWidget* parent) : QDialog
 }
 
 void FileDeleteDialog::onDelButtonPressed(){
-
-    QString rel_path = file_path;
-    rel_path = rel_path.remove(0, static_cast<int>(_editor_win->project.root_path.size() + 1));
-    std::string RelPathStd = rel_path.toStdString();
-    RemoveExtension(RelPathStd);
-
-    Engine::ZsResource* _res = game_data->resources->getResource<Engine::ZsResource>(RelPathStd);
-    //if resource, attached to file path exists
-    if (_res != nullptr) { //if resource found
-        _res->resource_type = RESOURCE_TYPE::RESOURCE_TYPE_NONE;
-    }
 
     QFile file(file_path);
     file.remove(); //remove it!
@@ -288,38 +273,38 @@ void FileRenameDialog::onRenameButtonPressed(){
     cur_path.resize(cur_path.size() - file_name.size()); //Calculate current directory path
 
     QFile file(file_path);
-    file.rename(cur_path + edit_field.text()); //remove it!
-    accept();
+    bool Renamed = file.rename(cur_path + edit_field.text()); //rename it!
+    
+    if (Renamed) {
+        //if file renamed successful
+        QString rel_path = file_path;
+        rel_path = file_path.remove(0, static_cast<int>(_editor_win->project.root_path.size() + 1));
+        std::string OldRelPath = rel_path.toStdString();
+        RemoveExtension(OldRelPath);
+        //Try to find resource
+        Engine::ZsResource* _res = game_data->resources->getResource(OldRelPath);
+        //if resource, attached to file path exists
+        if (_res != nullptr) { //if resource found
+            //Store old relative path
+            QString old_rel_path = QString::fromStdString(_res->rel_path);
+            //No need to do that with mesh resources
+            if (_res->resource_type == RESOURCE_TYPE_MESH) return;
+            QString new_relpath = cur_path + edit_field.text();
+            new_relpath = new_relpath.remove(0, static_cast<int>(_editor_win->project.root_path.size() + 1));
 
-    QString rel_path = file_path;
-    rel_path = file_path.remove(0, static_cast<int>(_editor_win->project.root_path.size() + 1));
-    std::string OldRelPath = rel_path.toStdString();
-    RemoveExtension(OldRelPath);
+            _res->rel_path = new_relpath.toStdString();
+            _res->blob_path = _res->rel_path;
+            _res->resource_label = _res->rel_path;
+            RemoveExtension(_res->resource_label);
 
-    Engine::ZsResource* _res = game_data->resources->getResource(OldRelPath);
-    //if resource, attached to file path exists
-    if(_res != nullptr){ //if resource found
-        //Store old relative path
-        QString old_rel_path = QString::fromStdString(_res->rel_path);
-        //No need to do that with mesh resources
-        if(_res->resource_type == RESOURCE_TYPE_MESH) return;
-        QString new_relpath = cur_path + edit_field.text();
-        new_relpath = new_relpath.remove(0, static_cast<int>(_editor_win->project.root_path.size() + 1));
-
-        _res->rel_path = new_relpath.toStdString();
-        _res->blob_path = _res->rel_path;
-        _res->resource_label = _res->rel_path;
-        RemoveExtension(_res->resource_label);
-
-        if(_res->resource_type == RESOURCE_TYPE_MATERIAL){
-            //if we renamed material, update its file path
-            Material* mat = static_cast<Engine::MaterialResource*>(_res)->material;
-            mat->file_path = (cur_path + edit_field.text()).toStdString();
-            //Remove thumbnail with old path
-            _editor_win->thumb_master->texture_thumbnails.erase(OldRelPath);
-            //Store thumbnail of new material name
-            _editor_win->thumb_master->createMaterialThumbnail(_res->resource_label);
+            if (_res->resource_type == RESOURCE_TYPE_MATERIAL) {
+                //if we renamed material, update its file path
+                Material* mat = static_cast<Engine::MaterialResource*>(_res)->material;
+                mat->file_path = (cur_path + edit_field.text()).toStdString();
+            }
         }
+
+        accept();
     }
 }
 

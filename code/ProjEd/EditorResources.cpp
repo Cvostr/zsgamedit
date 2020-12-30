@@ -30,25 +30,58 @@ void EditWindow::lookForResources(QString path) {
 }
 
 void EditWindow::onResourceFileChanged(QString path) {
+    bool Deleted = !mFsWatcher->files().contains(path);
+
     QString rel_path = path;
     int len = project.root_path.size() + 1;
     rel_path.remove(0, len); //Get relative path by removing length of project root from start
     std::string RelPathStd = rel_path.toStdString();
-    RemoveExtension(RelPathStd);
-    Engine::ZsResource* pResource = game_data->resources->getResource(RelPathStd);
-    if (pResource != nullptr) {
-        pResource->Release();
-        pResource->size = 0;
-        pResource->load();
-        game_data->out_manager->clearMessagesWithType(LogEntryType::LE_TYPE_SCRIPT_ERROR);
-        game_data->script_manager->AddScriptFiles();
-        game_data->world->call_onScriptChanged();
+
+    if (Deleted) {
+        //if file deleted
+        Engine::ZsResource* pResource = game_data->resources->getResourceByRelPath(RelPathStd);
+        if (pResource)
+            //if file was resource
+            //Delete it
+            game_data->resources->DeleteResource(pResource);
+        updateFileList(); //Update file list
+    }
+    else
+    {
+        //File content changed
+        Engine::ZsResource* pResource = game_data->resources->getResource(RelPathStd);
+        if (pResource != nullptr && pResource->resource_type == RESOURCE_TYPE_SCRIPT) {
+            //if file was resource
+            pResource->Release();
+            pResource->size = 0;
+            pResource->load();
+            game_data->out_manager->clearMessagesWithType(LogEntryType::LE_TYPE_SCRIPT_ERROR);
+            game_data->script_manager->AddScriptFiles();
+            game_data->world->call_onScriptChanged();
+        }
+    }
+}
+
+void EditWindow::onDirectoryChanged(QString path) {
+    unsigned int old_resources_num = game_data->resources->getResourcesSize();
+    unsigned int new_resources_num = 0;
+    //update resources on this directory
+    lookForResources(path);
+    //get resources amount after resources update
+    new_resources_num = game_data->resources->getResourcesSize();
+    
+    if (new_resources_num != old_resources_num) {
+        //if resources amount changed
+        thumb_master->CreateAll();
+        updateFileList(); //Update file list
     }
 }
 
 void EditWindow::createResourceDesc(Engine::ZsResource* _resource, QString absfpath, std::string resource_label) {
-    //Push file to watcher
-    mFsWatcher->addPath(absfpath);
+    if (!mFsWatcher->directories().contains(absfpath)) {
+        //Push file to watcher
+        mFsWatcher->addPath(absfpath);
+    }
     QString rel_path = absfpath;
     int len = project.root_path.size() + 1;
     rel_path.remove(0, len); //Get relative path by removing length of project root from start
@@ -64,8 +97,13 @@ void EditWindow::createResourceDesc(Engine::ZsResource* _resource, QString absfp
     }
     else
         _resource->resource_label = resource_label;
-    //Add resource to list
-    game_data->resources->pushResource(_resource);
+
+    if (game_data->resources->getResource(_resource->resource_label) == nullptr) {
+        //Add resource to list
+        game_data->resources->pushResource(_resource);
+    }
+    else
+        delete _resource;
 }
 
 void EditWindow::processResourceFile(QFileInfo fileInfo) {
@@ -112,9 +150,15 @@ void EditWindow::processResourceFile(QFileInfo fileInfo) {
     if (checkExtension(name, ".as") || checkExtension(name, ".zscr")) { //If its an mesh
         Engine::ZsResource* _resource = new Engine::ScriptResource;
         createResourceDesc(_resource, absfpath, "");
-       
     }
-    
+    if (checkExtension(name, ".prefab") ) { //If its an prefab
+        Engine::ZsResource* _resource = new Engine::PrefabResource;
+        createResourceDesc(_resource, absfpath, "");
+    }
+    if (checkExtension(name, ".lcstr")) { //If its an localized string
+        Engine::ZsResource* _resource = new Engine::LocalizedStringResource;
+        createResourceDesc(_resource, absfpath, "");
+    }
 }
 
 void EditWindow::ImportResource(QString pathToResource) {

@@ -46,6 +46,10 @@ void ProjBuilder::start(){
                 break;
             case RESOURCE_TYPE_FONT : type_str = "FONT";
                 break;
+            case RESOURCE_TYPE_PREFAB : type_str = "PREFAB";
+                break;
+            case RESOURCE_TYPE_LOCALIZED_STR: type_str = "STRING";
+                break;
         }
         window->addToOutput("Resource #" + QString::number(res_i) + " type: " + type_str + " " + QString::fromStdString(res_ptr->rel_path));
         //Update window content
@@ -82,7 +86,7 @@ void ProjBuilder::_copyOtherFilesDir(const QString dir) {
         if (fileInfo.isDir())
             _copyOtherFilesDir(fileInfo.absoluteFilePath());
         //Check file extension
-        if (fileInfo.fileName().endsWith(".terrain") || fileInfo.fileName().endsWith(".scn") || fileInfo.fileName().endsWith(".lcstr")) {
+        if (fileInfo.fileName().endsWith(".terrain") || fileInfo.fileName().endsWith(".scn") ) {
             //if file is terrain or scene
             QString abs_path = fileInfo.absoluteFilePath();
             //Make relative path from absolute
@@ -93,10 +97,6 @@ void ProjBuilder::_copyOtherFilesDir(const QString dir) {
             resource.rel_path = rel_path.toStdString();
             resource.resource_label = rel_path.toStdString();
             resource.resource_type = RESOURCE_TYPE_NONE;
-
-            if (fileInfo.fileName().endsWith(".lcstr")) {
-                resource.resource_type = RESOURCE_TYPE_LOCALIZED_STR;
-            }
 
             //Write resource to map and blob`
             writer->writeToBlob(fileInfo.absoluteFilePath().toStdString(), &resource);

@@ -97,6 +97,7 @@ EditWindow::EditWindow(QApplication* app, QWidget *parent) :
     QObject::connect(ui->actionInspectorWin, SIGNAL(triggered()), this, SLOT(onOpenInspectorWin()));
 
     QObject::connect(mFsWatcher, SIGNAL(fileChanged(QString)), this, SLOT(onResourceFileChanged(QString)));
+    QObject::connect(mFsWatcher, SIGNAL(directoryChanged(QString)), this, SLOT(onDirectoryChanged(QString)));
 
     ready = false; //Firstly set it to 0
     hasSceneFile = false; //No scene loaded by default
