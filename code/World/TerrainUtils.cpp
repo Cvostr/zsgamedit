@@ -1,4 +1,3 @@
-#include <world/go_properties.h>
 #include "headers/terrain.h"
 #include <GL/glew.h>
 #include "../World/headers/Misc.h"

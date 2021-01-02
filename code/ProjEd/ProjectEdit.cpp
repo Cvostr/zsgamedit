@@ -6,7 +6,6 @@
 #include <Scripting/AngelScript.hpp>
 #include <render/Material.hpp>
 #include "../World/headers/terrain.h"
-#include "world/go_properties.h"
 #include "../Misc/headers/AssimpMeshLoader.h"
 #include "ui_editor.h"
 #include <iostream>

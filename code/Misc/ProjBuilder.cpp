@@ -165,7 +165,7 @@ BlobWriter::~BlobWriter(){
     this->map_stream.close();
 }
 
-unsigned int BlobWriter::getFileSize(std::string file_path){
+unsigned int BlobWriter::getFileSize(const std::string& file_path){
     std::ifstream file_stream;
     //Open file from end
     file_stream.open(file_path, std::iostream::binary | std::iostream::ate);
@@ -179,7 +179,7 @@ unsigned int BlobWriter::getFileSize(std::string file_path){
     return result;
 }
 
-void BlobWriter::writeToBlob(std::string& file_path, Engine::ZsResource* res_ptr){
+void BlobWriter::writeToBlob(const std::string& file_path, Engine::ZsResource* res_ptr){
     //check, if we got over the blob limit
     if(written_bytes >= this->max_blob_size){
         written_bytes = 0;

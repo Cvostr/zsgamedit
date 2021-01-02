@@ -52,8 +52,8 @@ public:
 
     QString map_path; // path to resource map file
 
-    void writeToBlob(std::string& file_path, Engine::ZsResource* res_ptr);
-    unsigned int getFileSize(std::string file_path);
+    void writeToBlob(const std::string& file_path, Engine::ZsResource* res_ptr);
+    unsigned int getFileSize(const std::string& file_path);
 
     BlobWriter(QString map_path, BuilderWindow* window);
     ~BlobWriter();

@@ -14,39 +14,39 @@ void Engine::MaterialProperty::addPropertyInterfaceToInspector() {
     area->pResultString = &material_path;
     _inspector_win->addPropertyArea(area);
     //No material, exiting
-    if (material_ptr == nullptr)
+    if (mMaterial == nullptr)
         return;
 
-    if (material_ptr->group_ptr->acceptShadows) {
+    if (mMaterial->mTemplate->mAcceptShadows) {
         BoolCheckboxArea* receiveShdws = new BoolCheckboxArea;
         receiveShdws->setLabel("Receive Shadows ");
         receiveShdws->go_property = this;
-        receiveShdws->pResultBool = &this->receiveShadows;
+        receiveShdws->pResultBool = &this->mReceiveShadows;
         _inspector_win->addPropertyArea(receiveShdws);
     }
 
-    if (material_ptr->file_path[0] == '@')
+    if (mMaterial->file_path[0] == '@')
         return;
 
     //Add shader group picker
     ComboBoxArea* mt_shader_group_area = new ComboBoxArea;
     mt_shader_group_area->setLabel("Shader Group");
     mt_shader_group_area->go_property = this;
-    mt_shader_group_area->pResultString = &this->group_label;
+    mt_shader_group_area->pResultString = &this->mTemplateLabel;
     //Iterate over all available shader groups and add them to combo box
     for (unsigned int i = 0; i < MtShProps::getMaterialShaderPropertyAmount(); i++) {
-        MtShaderPropertiesGroup* ptr = MtShProps::getMtShaderPropertiesGroupByIndex(i);
-        mt_shader_group_area->widget.addItem(QString::fromStdString(ptr->groupCaption));
+        MaterialTemplate* ptr = MtShProps::getMaterialTemplateByIndex(i);
+        mt_shader_group_area->widget.addItem(QString::fromStdString(ptr->Label));
     }
     _inspector_win->addPropertyArea(mt_shader_group_area);
 
     //if material isn't set up, exiting
-    if (material_ptr->group_ptr == nullptr)
+    if (mMaterial->mTemplate == nullptr)
         return;
     //If set up, iterating over all items
-    for (unsigned int prop_i = 0; prop_i < material_ptr->group_ptr->properties.size(); prop_i++) {
-        MaterialShaderProperty* prop_ptr = material_ptr->group_ptr->properties[prop_i];
-        MaterialShaderPropertyConf* conf_ptr = this->material_ptr->confs[prop_i];
+    for (unsigned int prop_i = 0; prop_i < mMaterial->mTemplate->properties.size(); prop_i++) {
+        MaterialShaderProperty* prop_ptr = mMaterial->mTemplate->properties[prop_i];
+        MaterialShaderPropertyConf* conf_ptr = this->mMaterial->confs[prop_i];
         switch (prop_ptr->type) {
         case MATSHPROP_TYPE_NONE: {
             break;
@@ -159,25 +159,25 @@ void Engine::MaterialProperty::onValueChanged() {
         newmat_ptr = newmat_ptr_res->material;
 
     //User changed material
-    bool isMaterialChanged = newmat_ptr != this->material_ptr;
+    bool isMaterialChanged = newmat_ptr != this->mMaterial;
 
     //Check, if material file has changed
     if (isMaterialChanged) {
-        this->material_ptr = newmat_ptr;
-        this->group_label = newmat_ptr->group_ptr->groupCaption;
+        this->mMaterial = newmat_ptr;
+        this->mTemplateLabel = newmat_ptr->mTemplate->Label;
         //update window
         _inspector_win->updateRequired = true;
     }
 
-    bool hasMaterial = material_ptr != nullptr;
+    bool hasMaterial = mMaterial != nullptr;
     if (!hasMaterial) return;
 
-    bool hasMaterialGroup = material_ptr->group_ptr != nullptr;
+    bool hasMaterialGroup = mMaterial->mTemplate != nullptr;
     if (!hasMaterialGroup) { //if material has no MaterialShaderPropertyGroup
         //if user specified group first time
-        if (MtShProps::getMtShaderPropertyGroupByLabel(this->group_label) != nullptr) {
+        if (MtShProps::getMtShaderPropertyGroupByLabel(this->mTemplateLabel) != nullptr) {
             //then apply that group
-            material_ptr->setPropertyGroup(MtShProps::getMtShaderPropertyGroupByLabel(this->group_label));
+            mMaterial->setTemplate(MtShProps::getMtShaderPropertyGroupByLabel(this->mTemplateLabel));
 
         }
         else { //user haven't specified
@@ -186,20 +186,20 @@ void Engine::MaterialProperty::onValueChanged() {
     }
     else { //Material already had group, check, if user decided to change it
        //Get pointer to new selected shader group
-        MtShaderPropertiesGroup* newgroup_ptr = MtShProps::getMtShaderPropertyGroupByLabel(this->group_label);
+        MaterialTemplate* new_template = MtShProps::getMtShaderPropertyGroupByLabel(this->mTemplateLabel);
         //if new pointer and old aren't match, then change property group
-        if (newgroup_ptr != this->material_ptr->group_ptr) {
+        if (new_template != this->mMaterial->mTemplate) {
             //Apply changing
-            this->material_ptr->setPropertyGroup(MtShProps::getMtShaderPropertyGroupByLabel(this->group_label));
+            this->mMaterial->setTemplate(MtShProps::getMtShaderPropertyGroupByLabel(this->mTemplateLabel));
             //Update material interface
             _inspector_win->updateRequired = true;
         }
     }
 
-    unsigned int GroupPropertiesSize = static_cast<unsigned int>(material_ptr->group_ptr->properties.size());
+    unsigned int GroupPropertiesSize = static_cast<unsigned int>(mMaterial->mTemplate->properties.size());
     for (unsigned int prop_i = 0; prop_i < GroupPropertiesSize; prop_i++) {
-        MaterialShaderProperty* prop_ptr = material_ptr->group_ptr->properties[prop_i];
-        MaterialShaderPropertyConf* conf_ptr = this->material_ptr->confs[prop_i];
+        MaterialShaderProperty* prop_ptr = mMaterial->mTemplate->properties[prop_i];
+        MaterialShaderPropertyConf* conf_ptr = this->mMaterial->confs[prop_i];
         switch (prop_ptr->type) {
         case MATSHPROP_TYPE_TEXTURE: {
             //Cast pointer
@@ -220,7 +220,7 @@ void Engine::MaterialProperty::onValueChanged() {
     //Recreate thumbnails for all materials
     _editor_win->thumb_master->createMaterialThumbnail(newmat_ptr_res->resource_label);
     //Update thumbnail in file list
-    _editor_win->updateFileListItemIcon(QString::fromStdString(material_ptr->file_path));
+    _editor_win->updateFileListItemIcon(QString::fromStdString(mMaterial->file_path));
     //Redraw thumbnails in inspector
     _inspector_win->ThumbnailUpdateRequired = true;
 }

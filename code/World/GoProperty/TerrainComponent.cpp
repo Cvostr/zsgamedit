@@ -221,9 +221,9 @@ void Engine::TerrainProperty::getPickedVertexId(int posX, int posY, int screenY,
     //get pointer to material property
     Engine::MaterialProperty* mat = this->go_link.updLinkPtr()->getPropertyPtr<Engine::MaterialProperty>();
     Engine::TransformProperty* transform = this->go_link.updLinkPtr()->getPropertyPtr<Engine::TransformProperty>();
-    if(mat == nullptr || mat->material_ptr == nullptr) return;
+    if(mat == nullptr || mat->mMaterial == nullptr) return;
     //Apply material shader
-    mat->material_ptr->applyMatToPipeline();
+    mat->mMaterial->applyMatToPipeline();
     
     int dtrue = 1;
     //Bind terrain buffer and set isPicking to true

@@ -8,14 +8,16 @@ GizmosRenderer::GizmosRenderer(Engine::Shader* mark_shader,
                                int projectPerspective,
                                Engine::UniformBuffer* buf,
                                Engine::UniformBuffer* editor,
-                               Engine::UniformBuffer* inst) :
+                               Engine::UniformBuffer* inst,
+                               Engine::UniformBuffer* _uiBuffer) :
     mark_shader_ptr(mark_shader),
     grid_shader_ptr(grid_shader),
     ui_shader_ptr(ui_shader),
 
     transformBuffer(buf),
     editorBuffer(editor),
-    instBuffer(inst)
+    instBuffer(inst),
+    uiBuffer(_uiBuffer)
 {
 
     this->cullFaceEnabled = cullFaceEnabled;
@@ -184,16 +186,20 @@ void GizmosRenderer::drawGrid() {
 void GizmosRenderer::drawGizmoSprite(Engine::Texture* texture, Vec3 position, Vec3 scale, Mat4 CamView) {
     Mat4 ScaleMat = getScaleMat(scale);
     Mat4 PosMat = getTranslationMat(position);
-
+    //Calculate transform matrix
     Mat4 Transform = ScaleMat * PosMat;
     Transform = removeRotationFromTransformMat(Transform, CamView);
-
+    //bind transform
     transformBuffer->bind();
     transformBuffer->writeData(sizeof(Mat4) * 2, sizeof(Mat4), &Transform);
+
+    uiBuffer->bind();
+    int _render_mode = 1;
+    uiBuffer->writeData(sizeof(Mat4) * 2, 4, &_render_mode);
 
     ui_shader_ptr->Use();
 
     texture->Use(0);
-
+    //Draw plane mesh
     Engine::getPlaneMesh2D()->Draw();
 }

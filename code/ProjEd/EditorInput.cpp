@@ -215,7 +215,7 @@ void EditWindow::onMouseMotion(int relX, int relY) {
             vec_ptr = &obj_trstate.tprop_ptr->rotation;
         }
         if (obj_trstate.transformMode > 0)
-            *vec_ptr = *vec_ptr + Vec3(-relX * sign(edit_camera.camera_front.Z), -relY, relX * sign(edit_camera.camera_front.X)) * Vec3(obj_trstate.Xcf, obj_trstate.Ycf, obj_trstate.Zcf);
+            *vec_ptr = *vec_ptr + Vec3(-relX * sign(edit_camera.getCameraFrontVec().Z), -relY, relX * sign(edit_camera.getCameraFrontVec().X)) * Vec3(obj_trstate.Xcf, obj_trstate.Ycf, obj_trstate.Zcf);
     }
 }
 

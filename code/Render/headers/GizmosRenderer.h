@@ -19,6 +19,7 @@ private:
     Engine::UniformBuffer* transformBuffer;
     Engine::UniformBuffer* editorBuffer;
     Engine::UniformBuffer* instBuffer;
+    Engine::UniformBuffer* uiBuffer;
     bool cullFaceEnabled;
     int projectPerspective;
     Mat4 grid_strokes_transf[GRID_STROKE_COUNT * 2];
@@ -43,6 +44,7 @@ public:
                    int projectPerspective,
                    Engine::UniformBuffer* buf,
                    Engine::UniformBuffer* editor,
-                   Engine::UniformBuffer* inst);
+                   Engine::UniformBuffer* inst,
+                   Engine::UniformBuffer* _uiBuffer);
     ~GizmosRenderer();
 };

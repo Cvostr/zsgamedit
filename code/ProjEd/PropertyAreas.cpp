@@ -53,7 +53,7 @@ AreaPropertyTitle::AreaPropertyTitle(Engine::IGameObjectComponent* prop) : pProp
     this->prop_title.setText(getPropertyString(pProp->type));
 
     if (pProp->type == PROPERTY_TYPE::GO_PROPERTY_TYPE_AGSCRIPT) {
-        Engine::ZPScriptProperty* prop = static_cast<Engine::ZPScriptProperty*>(pProp);
+        Engine::ZPScriptComponent* prop = static_cast<Engine::ZPScriptComponent*>(pProp);
         std::string spath = prop->script_path;
         QString strl;
         unsigned int step = 0;

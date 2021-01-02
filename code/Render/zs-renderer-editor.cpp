@@ -1,6 +1,5 @@
 #include "headers/zs-renderer-editor.hpp"
 #include "../World/headers/World.h"
-#include "world/go_properties.h"
 #include "../ProjEd/headers/ProjectEdit.h"
 #include <iostream>
 
@@ -47,11 +46,12 @@ void RenderPipelineEditor::initGizmos(int projectPespective){
     gizmos = new GizmosRenderer(obj_mark_shader, 
                                 obj_grid_shader,
                                 sprite_shader_3d,
-                                this->cullFaces,
+                                cullFaces,
                                 projectPespective,
                                 transformBuffer,
                                 editorUniformBuffer,
-                                this->instancedTransformBuffer);
+                                instancedTransformBuffer,
+                                uiUniformBuffer);
 }
 
 RenderPipelineEditor::~RenderPipelineEditor(){
@@ -101,7 +101,7 @@ ZSRGBCOLOR RenderPipelineEditor::getColorOfPickedTransformControl(int mouseX, in
 
     if(editwin_ptr->obj_trstate.isTransforming == true && !editwin_ptr->isWorldCamera){
         //Calclate distance between camera and object
-        float dist = getDistance(cam_ptr->camera_pos, editwin_ptr->obj_trstate.obj_ptr->getPropertyPtr<Engine::TransformProperty>()->abs_translation);
+        float dist = getDistance(cam_ptr->getCameraPosition(), editwin_ptr->obj_trstate.obj_ptr->getPropertyPtr<Engine::TransformProperty>()->abs_translation);
 
         if(engine_ptr->desc->game_perspective == 2) dist = 85.0f;
         //Draw gizmos
@@ -253,7 +253,7 @@ void RenderPipelineEditor::renderGizmos(void* projectedit_ptr, Engine::Camera* c
     if (editwin_ptr->obj_trstate.isTransforming == true && !editwin_ptr->isWorldCamera) {
         //calculate distance between object and camera
         //To set constant size of controls on any distance
-        float dist = getDistance(cam->camera_pos, editwin_ptr->obj_trstate.obj_ptr->getPropertyPtr<Engine::TransformProperty>()->abs_translation);
+        float dist = getDistance(cam->getCameraPosition(), editwin_ptr->obj_trstate.obj_ptr->getPropertyPtr<Engine::TransformProperty>()->abs_translation);
         //if we are in 2D mode, then distance is constant
         if (engine_ptr->desc->game_perspective == PERSP_2D) dist = 70.0f;
         getGizmosRenderer()->drawTransformControls(editwin_ptr->obj_trstate.obj_ptr->getPropertyPtr<Engine::TransformProperty>()->abs_translation, dist, dist / 10.f);

@@ -328,14 +328,13 @@ void World::recoverFromSnapshot(Engine::WorldSnapshot* snapshot){
     }
     //Copy all scripts
     for (unsigned int script_i = 0; script_i < snapshot->scripts.size(); script_i++) {
-        Engine::ZPScriptProperty* script_ptr = static_cast<Engine::ZPScriptProperty*>
+        Engine::ZPScriptComponent* script_ptr = static_cast<Engine::ZPScriptComponent*>
             (snapshot->scripts[script_i]);
         Engine::GameObjectLink link = script_ptr->go_link; //Define a link to created object
         link.world_ptr = this; //Set an new world pointer
         Engine::GameObject* obj_ptr = updateLink(&link); //Calculate pointer to new object
         obj_ptr->addScript(); //Add new property to created object
-        Engine::ZPScriptProperty* new_script = static_cast<Engine::ZPScriptProperty*>
-            (obj_ptr->mScripts[obj_ptr->scripts_num - 1]); ///PIZDEC SUKA NAXUI TUT OSHIBKA BLYAT !!!!
+        Engine::ZPScriptComponent* new_script = obj_ptr->mScripts[obj_ptr->scripts_num - 1]; ///PIZDEC SUKA NAXUI TUT OSHIBKA BLYAT !!!!
         script_ptr->copyTo(new_script);
     }
     //iterate over all objects

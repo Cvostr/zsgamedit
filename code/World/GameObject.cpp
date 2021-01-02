@@ -1,6 +1,5 @@
 #include "headers/World.h"
 #include "headers/Misc.h"
-#include <world/go_properties.h>
 #include <world/ObjectsComponents/ZPScriptComponent.hpp>
 
 void Engine::GameObject::recoverFromSnapshot(Engine::GameObjectSnapshot* snapshot) {
@@ -26,9 +25,9 @@ void Engine::GameObject::recoverFromSnapshot(Engine::GameObjectSnapshot* snapsho
     //recover scripts
     for (unsigned int i = 0; i < static_cast<unsigned int>(snapshot->scripts_num); i++) {
         //Pointer to property in snapshot
-        Engine::ZPScriptProperty* script_ptr = snapshot->mScripts[i];
+        Engine::ZPScriptComponent* script_ptr = snapshot->mScripts[i];
         //Pointer to new allocated property
-        Engine::ZPScriptProperty* new_script_ptr = static_cast<Engine::ZPScriptProperty*>
+        Engine::ZPScriptComponent* new_script_ptr = static_cast<Engine::ZPScriptComponent*>
             (Engine::allocProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_AGSCRIPT));
         //Copy pointer in snapshot to new pointer
         script_ptr->copyTo(new_script_ptr);
@@ -70,7 +69,7 @@ void Engine::GameObject::saveProperties(ZsStream* stream) {
         saveProperty(property_ptr, stream);
     }
     for (unsigned int script_i = 0; script_i < this->scripts_num; script_i++) {
-        Engine::ZPScriptProperty* script = static_cast<Engine::ZPScriptProperty*>(mScripts[script_i]);
+        Engine::ZPScriptComponent* script = mScripts[script_i];
         saveProperty(script, stream);
         *stream << '\n';
     }

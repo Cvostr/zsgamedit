@@ -4,7 +4,7 @@
 extern ZSGAME_DATA* game_data;
 extern InspectorWin* _inspector_win;
 
-void Engine::ZPScriptProperty::onValueChanged() {
+void Engine::ZPScriptComponent::onValueChanged() {
     std::string old_res_name;
     if (script_res != nullptr)
         old_res_name = script_res->resource_label;
@@ -18,7 +18,7 @@ void Engine::ZPScriptProperty::onValueChanged() {
     }
 }
 
-void Engine::ZPScriptProperty::addPropertyInterfaceToInspector() {
+void Engine::ZPScriptComponent::addPropertyInterfaceToInspector() {
 
     PickResourceArea* area = new PickResourceArea(RESOURCE_TYPE_SCRIPT);
     area->setLabel("Angel Script");
