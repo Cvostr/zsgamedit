@@ -36,6 +36,8 @@ void main(){
 	if(diffuse.a == 0)
        discard;
         
-    FragColor = vec4(diffuse.xyz, 0);    
+    tTransparent = diffuse;    
+    //FragColor = diffuse;    
+    tPos = FragPos;
 }
  

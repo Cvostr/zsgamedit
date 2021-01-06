@@ -27,12 +27,12 @@ private:
     
 public:
     Engine::Texture* SunTextureSprite;
-    void drawPickedMeshWireframe(Engine::Mesh* mesh_ptr, Mat4 transform, ZSRGBCOLOR color);
-    void drawCube(Mat4 transform, ZSRGBCOLOR color);
+    void drawPickedMeshWireframe(Engine::Mesh* mesh_ptr, Mat4 transform, RGBAColor color);
+    void drawCube(Mat4 transform, RGBAColor color);
     void drawTransformControls(Vec3 position, float tall, float dim);
     void drawObjectRigidbodyShape(void* phys_property);
     void drawGrid();
-    void drawGizmoSprite(Engine::Texture* texture, Vec3 position, Vec3 scale, Mat4 CamView);
+    void drawGizmoSprite(Engine::Texture* texture, Vec3 position, Vec3 scale, Mat4 CamView, RGBAColor color);
 
     void glFeaturesOff();
     void glFeaturesOn();

@@ -244,7 +244,7 @@ public slots:
     void onNeedToShow();
 
 public:
-    ZSRGBCOLOR* color_ptr; //Pointer to write color
+    RGBAColor* color_ptr; //Pointer to write color
     ColorDialogArea* area_ptr;
     ZSColorPickDialog(QWidget* parent = nullptr);
 };
@@ -253,7 +253,7 @@ class ColorDialogArea : public PropertyEditArea{
 
 public:
     QLabel digit_str;
-    ZSRGBCOLOR* color; //output value
+    RGBAColor* color; //output value
     ZSColorPickDialog dialog; //Dialog pointer
     QPushButton pick_button; //button to show color pick dialog
     ColorDialogArea();

@@ -82,7 +82,7 @@ void Engine::ZPScriptComponent::addPropertyInterfaceToInspector() {
             if (handle->typeID == AG_RGB_COLOR) {
                 ColorDialogArea* color_area = new ColorDialogArea;
                 color_area->setLabel(QString::fromStdString(handle->name)); //Its label
-                color_area->color = &field->Value<ZSRGBCOLOR>();
+                color_area->color = &field->Value<RGBAColor>();
                 color_area->go_property = this;
                 _inspector_win->addPropertyArea(color_area);
             }

@@ -3,7 +3,7 @@
 #include <SDL2/SDL.h>
 #include <iostream>
 #include <windows.h>
-#include <input/zs-input.h>
+#include <input/Input.hpp>
 
 //Hack to support meshes
 extern ZSpireEngine* engine_ptr;

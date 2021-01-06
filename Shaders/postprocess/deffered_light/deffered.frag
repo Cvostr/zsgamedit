@@ -51,6 +51,7 @@ void main(){
 	vec4 Masks = texture(tMasks, UVCoord);   	
 
     vec3 result = Diffuse.xyz;
+    result = mix(result, Transparent.rgb, Transparent.a);
 
     //Check, if fragment isn't skybox
     if(Masks.r == 1){

@@ -1,7 +1,7 @@
 #include "headers/ProjectEdit.h"
 #include "headers/InspectorWin.h"
 #include <world/ObjectsComponents/TerrainComponent.hpp>
-#include <input/zs-input.h>
+#include <input/Input.hpp>
 #include "ui_editor.h"
 
 #define MONEMENT_COEFF 40.3f
@@ -182,7 +182,7 @@ void EditWindow::onMouseMotion(int relX, int relY) {
     }
     //Visual transform control
     if (obj_trstate.isTransforming == true && input_state.isLeftBtnHold == true) { //Only affective if object is transforming
-        ZSRGBCOLOR color = render->getColorOfPickedTransformControl(
+        RGBAColor color = render->getColorOfPickedTransformControl(
             this->input_state.mouseX,
             this->input_state.mouseY,
             this);

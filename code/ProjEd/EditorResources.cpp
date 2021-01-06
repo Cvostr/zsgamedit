@@ -49,7 +49,7 @@ void EditWindow::onResourceFileChanged(QString path) {
     else
     {
         //File content changed
-        Engine::ZsResource* pResource = game_data->resources->getResource(RelPathStd);
+        Engine::ZsResource* pResource = game_data->resources->getResourceByRelPath(RelPathStd);
         if (pResource != nullptr && pResource->resource_type == RESOURCE_TYPE_SCRIPT) {
             //if file was resource
             pResource->Release();

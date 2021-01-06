@@ -52,7 +52,7 @@ GizmosRenderer::~GizmosRenderer() {
 
 }
 
-void GizmosRenderer::drawPickedMeshWireframe(Engine::Mesh *mesh_ptr, Mat4 transform, ZSRGBCOLOR color){
+void GizmosRenderer::drawPickedMeshWireframe(Engine::Mesh *mesh_ptr, Mat4 transform, RGBAColor color){
     glFeaturesOff();
 
     this->mark_shader_ptr->Use();
@@ -69,7 +69,7 @@ void GizmosRenderer::drawPickedMeshWireframe(Engine::Mesh *mesh_ptr, Mat4 transf
     glFeaturesOn();
 }
 
-void GizmosRenderer::drawCube(Mat4 transform, ZSRGBCOLOR color){
+void GizmosRenderer::drawCube(Mat4 transform, RGBAColor color){
     this->mark_shader_ptr->Use();
     transformBuffer->bind();
     transformBuffer->writeData(sizeof (Mat4) * 2, sizeof (Mat4), &transform);
@@ -96,15 +96,15 @@ void GizmosRenderer::drawTransformControls(Vec3 position, float tall, float dim)
     //X control
     Vec3 rotation = Vec3(0,0,90);
     transform = scale_mat * getRotationMat(rotation) * getTranslationMat(Vec3(position.X + tall, position.Y, position.Z));
-    drawCube(transform, ZSRGBCOLOR(255,0,0));
+    drawCube(transform, RGBAColor(255,0,0));
     //Y control
     rotation = Vec3(0,0,0);
     transform = scale_mat * getRotationMat(rotation) * getTranslationMat(Vec3(position.X, position.Y + tall, position.Z));
-    drawCube(transform, ZSRGBCOLOR(0,255,0));
+    drawCube(transform, RGBAColor(0,255,0));
     //Z control
     rotation = Vec3(90,0,0);
     transform = scale_mat * getRotationMat(rotation) * getTranslationMat(Vec3(position.X, position.Y, position.Z + tall));
-    drawCube(transform, ZSRGBCOLOR(0,0,255));
+    drawCube(transform, RGBAColor(0,0,255));
 
     glFeaturesOn();
 }
@@ -183,7 +183,7 @@ void GizmosRenderer::drawGrid() {
     Engine::getCubeMesh3D()->DrawInstanced(GRID_STROKE_COUNT * 2);
 }
 
-void GizmosRenderer::drawGizmoSprite(Engine::Texture* texture, Vec3 position, Vec3 scale, Mat4 CamView) {
+void GizmosRenderer::drawGizmoSprite(Engine::Texture* texture, Vec3 position, Vec3 scale, Mat4 CamView, RGBAColor color) {
     Mat4 ScaleMat = getScaleMat(scale);
     Mat4 PosMat = getTranslationMat(position);
     //Calculate transform matrix
@@ -194,8 +194,10 @@ void GizmosRenderer::drawGizmoSprite(Engine::Texture* texture, Vec3 position, Ve
     transformBuffer->writeData(sizeof(Mat4) * 2, sizeof(Mat4), &Transform);
 
     uiBuffer->bind();
-    int _render_mode = 1;
-    uiBuffer->writeData(sizeof(Mat4) * 2, 4, &_render_mode);
+    //sending glyph color
+    uiBuffer->writeData(sizeof(Mat4) * 2, 4, &color.gl_r);
+    uiBuffer->writeData(sizeof(Mat4) * 2 + 4, 4, &color.gl_g);
+    uiBuffer->writeData(sizeof(Mat4) * 2 + 8, 4, &color.gl_b);
 
     ui_shader_ptr->Use();
 

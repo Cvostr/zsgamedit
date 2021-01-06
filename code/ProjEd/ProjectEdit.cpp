@@ -21,7 +21,7 @@
 #include "../World/headers/Misc.h"
 #include "headers/LocStringEditWin.h"
 #include "headers/DialogsMaster.h"
-#include <input/zs-input.h>
+#include <input/Input.hpp>
 #include <ui/UI.hpp>
 #include <engine/Logger.hpp>
 

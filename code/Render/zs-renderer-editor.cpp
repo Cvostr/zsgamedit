@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include <world/ObjectsComponents/MeshComponent.hpp>
+#include <world/ObjectsComponents/LightSourceComponent.hpp>
 
 #define LIGHT_STRUCT_SIZE 64
 
@@ -78,7 +79,7 @@ void RenderPipelineEditor::OnCreate(){
     initGizmos(engine_ptr->desc->game_perspective);
 }
 
-ZSRGBCOLOR RenderPipelineEditor::getColorOfPickedTransformControl(int mouseX, int mouseY, void* projectedit_ptr){
+RGBAColor RenderPipelineEditor::getColorOfPickedTransformControl(int mouseX, int mouseY, void* projectedit_ptr){
 
     EditWindow* editwin_ptr = static_cast<EditWindow*>(projectedit_ptr);
     Engine::Camera* cam_ptr = nullptr; //We'll set it next
@@ -112,7 +113,7 @@ ZSRGBCOLOR RenderPipelineEditor::getColorOfPickedTransformControl(int mouseX, in
     Engine::Window* win = engine_ptr->GetWindow();
     glReadPixels(mouseX, win->GetWindowHeight() - mouseY, 1,1, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
-    return ZSRGBCOLOR(data[0], data[1], data[2]);
+    return RGBAColor(data[0], data[1], data[2]);
 }
 
 unsigned int RenderPipelineEditor::render_getpickedObj(void* projectedit_ptr, int mouseX, int mouseY){
@@ -221,7 +222,8 @@ void RenderPipelineEditor::renderGizmos(void* projectedit_ptr, Engine::Camera* c
         //Check, if object is alive and active
         if (obj_ptr->mAlive && obj_ptr->hasLightsource()) {
             Engine::TransformProperty* transform_ptr = obj_ptr->getTransformProperty();
-            getGizmosRenderer()->drawGizmoSprite(getGizmosRenderer()->SunTextureSprite, transform_ptr->abs_translation, Vec3(2,2,2), cam->getViewMatrix());
+            Engine::LightsourceProperty* light_ptr = obj_ptr->getPropertyPtr<Engine::LightsourceProperty>();
+            getGizmosRenderer()->drawGizmoSprite(getGizmosRenderer()->SunTextureSprite, transform_ptr->abs_translation, Vec3(2,2,2), cam->getViewMatrix(), light_ptr->color);
         }
         if (obj_ptr->mAlive && obj_ptr->mActive && world_ptr->isPicked(obj_ptr) && current_state == PIPELINE_STATE::PIPELINE_STATE_DEFAULT) {
             setDepthState(false);
@@ -230,11 +232,11 @@ void RenderPipelineEditor::renderGizmos(void* projectedit_ptr, Engine::Camera* c
             EditWindow* editwin_ptr = static_cast<EditWindow*>(win_ptr);
             Engine::TransformProperty* transform_ptr = obj_ptr->getTransformProperty();
             Engine::MeshProperty* mesh_prop = obj_ptr->getPropertyPtr<Engine::MeshProperty>();
-            ZSRGBCOLOR color = ZSRGBCOLOR(static_cast<int>(0.23f * 255.0f),
+            RGBAColor color = RGBAColor(static_cast<int>(0.23f * 255.0f),
                 static_cast<int>(0.23f * 255.0f),
                 static_cast<int>(0.54f * 255.0f));
             if (editwin_ptr->obj_trstate.isTransforming == true)
-                color = ZSRGBCOLOR(255.0f, 255.0f, 0.0f);
+                color = RGBAColor(255.0f, 255.0f, 0.0f);
             //draw wireframe mesh for picked object
             if (obj_ptr->hasMesh() && obj_ptr->mActive) { //avoid drawing gizmos during playtime
                 //Draw pick mesh

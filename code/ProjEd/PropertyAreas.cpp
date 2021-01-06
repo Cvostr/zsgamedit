@@ -771,7 +771,7 @@ void ZSColorPickDialog::onNeedToShow(){
 
     if(!color.isValid()) return; //user canceled dialog
     //transform QColor to ZSRGBCOLOR
-    ZSRGBCOLOR _color = ZSRGBCOLOR(color.red(), color.green(), color.blue());
+    RGBAColor _color = RGBAColor(color.red(), color.green(), color.blue());
     _color.updateGL();
 
     //Store old values

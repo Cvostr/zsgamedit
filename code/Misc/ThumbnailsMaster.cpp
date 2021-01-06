@@ -150,7 +150,7 @@ void ThumbnailsMaster::prepareMaterialThumbnailPipeline(){
         float light_intensity = 0.8f;
         Vec3 pos = Vec3(0,0,0);
         Vec3 light_dir = _getDirection(66, 30, 30);
-        ZSRGBCOLOR color = ZSRGBCOLOR(255,255,255,255);
+        RGBAColor color = RGBAColor(255,255,255,255);
         color.updateGL();
 
         renderer->lightsBuffer->writeData(64 * light_i, sizeof (int), &light_type);
