@@ -222,7 +222,7 @@ void RenderPipelineEditor::renderGizmos(void* projectedit_ptr, Engine::Camera* c
         //Check, if object is alive and active
         if (obj_ptr->mAlive && obj_ptr->hasLightsource()) {
             Engine::TransformProperty* transform_ptr = obj_ptr->getTransformProperty();
-            Engine::LightsourceProperty* light_ptr = obj_ptr->getPropertyPtr<Engine::LightsourceProperty>();
+            Engine::LightsourceComponent* light_ptr = obj_ptr->getPropertyPtr<Engine::LightsourceComponent>();
             getGizmosRenderer()->drawGizmoSprite(getGizmosRenderer()->SunTextureSprite, transform_ptr->abs_translation, Vec3(2,2,2), cam->getViewMatrix(), light_ptr->color);
         }
         if (obj_ptr->mAlive && obj_ptr->mActive && world_ptr->isPicked(obj_ptr) && current_state == PIPELINE_STATE::PIPELINE_STATE_DEFAULT) {

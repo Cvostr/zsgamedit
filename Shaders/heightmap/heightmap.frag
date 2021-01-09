@@ -2,10 +2,11 @@
 
 #define TEXTURES_AMOUNT 12
 
+layout (location = 0) out vec4 FragColor;
 layout (location = 1) out vec3 tNormal;
 layout (location = 2) out vec3 tPos;
+layout(location = 3) out vec4 tSpec;
 layout (location = 4) out vec4 tMasks;
-layout (location = 0) out vec4 FragColor;
 
 layout(location = 0) in vec3 FragPos;
 layout(location = 1) in vec3 InNormal;
@@ -45,7 +46,7 @@ layout(binding = 25) uniform sampler2D texture_mask1;
 layout(binding = 26) uniform sampler2D texture_mask2;
 
 //Shadowmapping stuff
-layout(binding = 6) uniform sampler2DArray shadow_map;
+layout(binding = 27) uniform sampler2DArray shadow_map;
 
 layout (std140, binding = 3) uniform TerrainData{
 //Shadowmapping stuff
@@ -242,8 +243,8 @@ vec3 getFragment(vec2 uv){
     vec3 result = vec3(0,0,0);
 
     vec2 nuv = uv;
-    nuv.x *= terrain_Width / 50;
-    nuv.y *= terrain_Height / 50;
+    nuv.x *= terrain_Width / 64;
+    nuv.y *= terrain_Height / 64;
 
     for(int i = 0; i < TEXTURES_AMOUNT; i ++){
         if(hasDiffuse[i] == false) continue;
@@ -261,8 +262,8 @@ vec3 getFragmentNormal(vec2 uv){
     vec3 result = InNormal;
 
     vec2 nuv = uv;
-    nuv.x *= terrain_Width / 50;
-    nuv.y *= terrain_Height / 50;
+    nuv.x *= terrain_Width / 64;
+    nuv.y *= terrain_Height / 64;
 
     for(int i = 0; i < TEXTURES_AMOUNT; i ++){
         if(hasNormal[i] == false) continue;
@@ -278,9 +279,9 @@ vec3 getFragmentNormal(vec2 uv){
     return result;
 }
 
-void processShadows(){
+float processShadows(){
     float dist = length(FragPos - cam_position);
-
+    float result = 0;
     vec4 objPosLightSpace = vec4(0,0,0,0);
     if(dist < CasterDistance1){
         objPosLightSpace = LightProjViewMat0 * vec4(FragPos, 1);
@@ -327,11 +328,13 @@ void processShadows(){
             }
            
             float texture_depth = shadowmap.r;
-            tMasks.g += (real_depth - ShadowBias > texture_depth) ? ShadowFactor : 0.0;
+            result += (real_depth - ShadowBias > texture_depth) ? ShadowFactor : 0.0;
         }
     }
         
-    if(real_depth > 1.0) tMasks.g = 0.0;
+    if(real_depth > 1.0) result = 0.0;
+
+    return result;
 }
 
 void main(){
@@ -350,9 +353,15 @@ void main(){
 	   
 	    tPos = FragPos;
 	    tNormal = getFragmentNormal(uv); //defaultly, use normals from mesh
-	    tMasks = vec4(1.0, 0, 0, 0);
-        
-        processShadows();
-		FragColor = vec4(getFragment(uv), 0);
-	}	
+	    
+        float shadow = 0;
+        if(HasShadowMap)
+            shadow = processShadows();
+
+        tMasks = vec4(1.0, shadow, 0, 0);
+
+		FragColor = vec4(getFragment(uv), 1);
+        tSpec.r = 0;	
+	}
+    
 }

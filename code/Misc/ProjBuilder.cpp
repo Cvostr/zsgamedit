@@ -2,11 +2,13 @@
 #include <cstdio>
 #include <cstdlib>
 #include <QDir>
+#include <QScrollBar>
 
 extern QApplication* a;
 extern ZSGAME_DATA* game_data;
 
 void ProjBuilder::showWindow(){
+    window->mBuilder = this;
     window->show();
 }
 void ProjBuilder::start(){
@@ -20,7 +22,9 @@ void ProjBuilder::start(){
     writer->name_prefix = "blob_";
     writer->max_blob_size = 100*1024*1024; //100 megabytes limit
 
-    for(unsigned int res_i = 0; res_i < game_data->resources->getResourcesSize(); res_i ++){ //iterate over all resources
+    mResourcesSize = game_data->resources->getResourcesSize();
+
+    for(unsigned int res_i = 0; res_i < mResourcesSize; res_i ++){ //iterate over all resources
         Engine::ZsResource* res_ptr = game_data->resources->getResourceByIndex(res_i);
         //Not store base resources
         if(res_ptr->rel_path[0] == '@')
@@ -48,7 +52,7 @@ void ProjBuilder::start(){
                 break;
             case RESOURCE_TYPE_PREFAB : type_str = "PREFAB";
                 break;
-            case RESOURCE_TYPE_LOCALIZED_STR: type_str = "STRING";
+            case RESOURCE_TYPE_LOCALIZED_STR: type_str = "LOCALE STRING";
                 break;
         }
         window->addToOutput("Resource #" + QString::number(res_i) + " type: " + type_str + " " + QString::fromStdString(res_ptr->rel_path));
@@ -57,6 +61,7 @@ void ProjBuilder::start(){
         std::string abs_path = (proj_ptr->root_path + "/" + res_ptr->rel_path);
         //write resource to blob
         writer->writeToBlob(abs_path, res_ptr);
+        mResourcesWritten++;
     }
 
     copyOtherFiles();
@@ -135,7 +140,7 @@ void BuilderWindow::resizeEvent(QResizeEvent* event){
     int new_width = event->size().width();
     int new_height = event->size().height();
 
-    ui->outputText->resize(new_width - 40, new_height - 40);
+    ui->outputText->resize(new_width - 40, new_height - 60);
 }
 
 QTextBrowser* BuilderWindow::getTextWgt(){
@@ -144,7 +149,14 @@ QTextBrowser* BuilderWindow::getTextWgt(){
 void BuilderWindow::addToOutput(QString text){
     this->outputTextBuf += text + "\n";
     this->ui->outputText->setText(outputTextBuf);
-    ui->outputText->resize(ui->outputText->size().width(), ui->outputText->size().height() + 10);
+    
+    QScrollBar* sb = ui->outputText->verticalScrollBar();
+    sb->setValue(sb->maximum());
+
+    float progress = (float)mBuilder->mResourcesWritten / mBuilder->mResourcesSize;
+    progress *= 100;
+
+    ui->progressBar->setValue((int)progress);
 }
 
 BlobWriter::BlobWriter(QString map_path, BuilderWindow* window){

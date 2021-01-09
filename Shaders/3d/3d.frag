@@ -3,6 +3,7 @@
 layout (location = 0) out vec4 tDiffuse;
 layout (location = 1) out vec3 tNormal;
 layout (location = 2) out vec3 tPos;
+layout (location = 3) out vec4 tSpec;
 layout (location = 4) out vec4 tMasks;
 
 layout(location = 0) in vec3 FragPos;
@@ -16,7 +17,7 @@ layout(binding = 1) uniform sampler2D normal_map;
 layout(binding = 2) uniform sampler2D specular_map;
 layout(binding = 3) uniform sampler2D height_map;
 layout(binding = 4) uniform sampler2D occlusion_map;
-layout(binding = 6) uniform sampler2DArray shadow_map;
+layout(binding = 27) uniform sampler2DArray shadow_map;
 
 layout (std140, binding = 50) uniform Default3d{
     vec3 diffuse_color;
@@ -157,10 +158,10 @@ void main(){
     if(hasSpecularMap)
         result_shininess *= texture(specular_map, uv).r;
             
-	tDiffuse = vec4(result, result_shininess);
+	tDiffuse = vec4(result, 1);
 	tPos = FragPos;
 	tNormal = Normal;
-
+    tSpec.r = result_shininess / 255.f;
 	tMasks = vec4(1.0, 0, 0, 0);
 	//Shadowmapping enabled
 	if(HasShadowMap){

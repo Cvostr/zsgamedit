@@ -1,6 +1,4 @@
-#ifndef PROJBUILDER_H
-#define PROJBUILDER_H
-
+#pragma once
 
 #include "../../Misc/headers/zs_types.h"
 
@@ -18,13 +16,17 @@ namespace Ui {
 class BuilderWindow;
 }
 
+class ProjBuilder;
+
 class BuilderWindow : public QMainWindow{
     Q_OBJECT
 private:
     QGridLayout layout;
     Ui::BuilderWindow* ui;
     QString outputTextBuf;
+    
 public:
+    ProjBuilder* mBuilder;
     explicit BuilderWindow(QWidget* parent = nullptr);
     QTextBrowser* getTextWgt();
     void addToOutput(QString text);
@@ -69,10 +71,11 @@ private:
     void copyOtherFiles();
     void _copyOtherFilesDir(const QString dir);
 public:
+    unsigned int mResourcesSize;
+    unsigned int mResourcesWritten;
+
     void showWindow();
     void start();
 
     ProjBuilder(Project* proj);
 };
-
-#endif // PROJBUILDER_H

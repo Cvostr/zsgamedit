@@ -17,8 +17,8 @@ void terrain_loop(){
     while(terrain_thread_working){
         //check, if there are some operation pending
         if(requests_num > 0){
-            //Lock mutex
-            //TerrainEditMutex.Lock();
+            
+            
             HeightmapModifyRequest* req = terrain_mdf_requests[0];
             //switch over all modify types
             switch(req->modify_type){
@@ -49,12 +49,14 @@ void terrain_loop(){
                     break;
                 }
             }
+            //Lock mutex
+            TerrainEditMutex.Lock();
             for (unsigned int a_i = 1; a_i < requests_num; a_i++) {
                 terrain_mdf_requests[a_i - 1] = terrain_mdf_requests[a_i];
             }
             requests_num--;
             //release mutex
-            //TerrainEditMutex.Release();
+            TerrainEditMutex.Release();
         }
     }
 }

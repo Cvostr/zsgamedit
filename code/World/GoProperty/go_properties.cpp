@@ -13,6 +13,7 @@
 #include <world/ObjectsComponents/CharacterController.hpp>
 #include <world/ObjectsComponents/TriggerComponent.hpp>
 #include <world/ObjectsComponents/ShadowCasterComponent.hpp>
+#include <world/ObjectsComponents/WindZoneComponent.hpp>
 
 extern InspectorWin* _inspector_win;
 extern EditWindow* _editor_win;
@@ -89,6 +90,12 @@ QString getPropertyString(PROPERTY_TYPE type){
         case PROPERTY_TYPE::GO_PROPERTY_TYPE_TRIGGER: {
             return QString("Trigger");
         }
+        case PROPERTY_TYPE::GO_PROPERTY_TYPE_WINDZONE: {
+            return QString("Wind Zone");
+        }
+        case PROPERTY_TYPE::GO_PROPERTY_TYPE_PARTICLE_EMITTER: {
+            return QString("Particle Emitter");
+        }
     }
     return QString("NONE");
 }
@@ -160,7 +167,7 @@ void Engine::MeshProperty::addPropertyInterfaceToInspector(){
     }
 }
 
-void Engine::LightsourceProperty::addPropertyInterfaceToInspector(){
+void Engine::LightsourceComponent::addPropertyInterfaceToInspector(){
     AreaRadioGroup* group = new AreaRadioGroup; //allocate button layout
     group->value_ptr = reinterpret_cast<uint8_t*>(&this->light_type);
     group->go_property = this;
@@ -367,4 +374,12 @@ void Engine::AnimationProperty::addPropertyInterfaceToInspector(){
         _inspector_win->getContentLayout()->addWidget(stopbtn->button);
         _inspector_win->registerUiObject(stopbtn);
     }
+}
+
+void Engine::WindZoneComponent::addPropertyInterfaceToInspector() {
+    FloatPropertyArea* _farPlane = new FloatPropertyArea; //New property area
+    _farPlane->setLabel("Wind strength"); //Its label
+    _farPlane->value = &this->mStrength; //Ptr to our vector
+    _farPlane->go_property = this; //Pointer to this to activate matrix recalculaton
+    _inspector_win->addPropertyArea(_farPlane);
 }

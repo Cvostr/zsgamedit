@@ -1,4 +1,4 @@
-#version 420 core
+#version 450 core
 
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec2 uv;
@@ -22,11 +22,37 @@ layout (std140, binding = 9) uniform InstMatrices{
     uniform mat4 inst_transform[1000];
 };
 
+layout (std140, binding = 11) uniform Time{
+    uniform uint Frames;
+	uniform float DeltaTime;
+};
+
+vec3 CalcWind(int speed, float amplitude){
+
+	vec3 Pos = position;
+	float NormTime = float((Frames) % speed) / speed;
+	uint full_cycle = Frames % (speed * 4);
+	//Calculate wind
+	if(Pos.y == 0.5){
+		if(full_cycle <= speed)
+			Pos.x += NormTime * amplitude;
+		if(full_cycle >= speed && full_cycle < speed * 2)
+			Pos.x += amplitude - NormTime * amplitude;
+		if(full_cycle >= speed * 2 && full_cycle < speed * 3)
+			Pos.x += -NormTime * amplitude;
+		if(full_cycle >= speed * 3)
+			Pos.x += -amplitude + NormTime * amplitude;
+	}
+	return Pos;
+}
+
 void main(){
 	UVCoord = uv;
 	InNormal = normal;
 	
-	FragPos = (object_transform * inst_transform[gl_InstanceID] * vec4(position, 1.0)).xyz;
+	vec3 Pos = CalcWind(100, 1.f / 10);
+
+	FragPos = (object_transform * inst_transform[gl_InstanceID] * vec4(Pos, 1.0)).xyz;
 
 	//Calculate TBN
 	vec3 TangentVec = normalize(vec3(object_transform * vec4(tangent, 0)));

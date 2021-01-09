@@ -1,14 +1,12 @@
-#version 420 core
+#version 430 core
 
 #define TEXTURES_AMOUNT 12
 
-layout(location = 0) out vec4 FragColor;
+layout (location = 0) out vec4 FragColor;
 layout (location = 1) out vec3 tNormal;
 layout (location = 2) out vec3 tPos;
-layout(location = 3) out vec4 tTransparent;
+layout (location = 3) out vec4 tSpec;
 layout (location = 4) out vec4 tMasks;
-
-
 
 layout (location = 0) in vec3 FragPos;
 layout (location = 1) in vec3 InNormal;
@@ -33,11 +31,12 @@ void main(){
 	
 	vec4 diffuse = texture(diffuse, uv);
 	
-	if(diffuse.a == 0)
+	if(diffuse.a < 0.4)
        discard;
         
-    tTransparent = diffuse;    
-    //FragColor = diffuse;    
+    FragColor = vec4(diffuse.rgb, 1);    
     tPos = FragPos;
+    tMasks.r = 1;
+    tNormal = InNormal;
 }
  

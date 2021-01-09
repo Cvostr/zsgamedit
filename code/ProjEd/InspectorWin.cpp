@@ -206,7 +206,7 @@ AddGoComponentDialog::AddGoComponentDialog(Engine::GameObject* game_object_ptr, 
     contentLayout->addWidget(&property_list, 0, 0);
     //Iterate over all base properties and add them to list
     Engine::GameObject* obj = static_cast<Engine::GameObject*>(g_object_ptr);
-    for(int i = 1; i <= 16; i ++){
+    for(int i = 1; i <= 18; i ++){
         //Check, if property already exist
         if(obj->getPropertyPtrByTypeI(i) == nullptr)
             QListWidgetItem* item = new QListWidgetItem(getPropertyString((PROPERTY_TYPE)i), &this->property_list, i);

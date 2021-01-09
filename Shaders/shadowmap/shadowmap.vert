@@ -1,4 +1,4 @@
-#version 430 core
+#version 450 core
 
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec2 uv;
@@ -15,8 +15,6 @@ layout (location = 9) in vec4 Weights1;
 layout (location = 10) in vec4 Weights2;
 //Amount of bones, that control this vertex
 layout (location = 11) in int bones;
-
-layout (location = 0) out vec3 frag;
 
 layout (std140, binding = 2) uniform ShadowData{
 //Shadowmapping stuff
@@ -53,7 +51,7 @@ layout (std140, binding = 4) uniform BonesData{
     uniform mat4 bone_transform[200];
 };
 
-out VS_OUTPUT
+layout (location = 0) out VS_OUTPUT
 {
 	float depth;
 	flat int instanceID;

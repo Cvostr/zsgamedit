@@ -10,9 +10,26 @@ extern ZSGAME_DATA* game_data;
 extern Project* project_ptr;
 extern InspectorWin* _inspector_win;
 
+char edit_mode;
+
 void onClearTerrain(){
     current_terrain_prop->getTerrainData()->alloc(current_terrain_prop->Width, current_terrain_prop->Length);
     current_terrain_prop->getTerrainData()->generateGLMesh();
+}
+
+void onSetHeightMode() {
+    edit_mode = 1;
+    _inspector_win->updateRequired = true;
+}
+
+void onSetTextureMode() {
+    edit_mode = 2;
+    _inspector_win->updateRequired = true;
+}
+
+void onSetVegetableMode() {
+    edit_mode = 3;
+    _inspector_win->updateRequired = true;
 }
 
 void Engine::TerrainProperty::addPropertyInterfaceToInspector(){
@@ -49,23 +66,23 @@ void Engine::TerrainProperty::addPropertyInterfaceToInspector(){
     _inspector_win->getContentLayout()->addWidget(clear_btn->button);
     _inspector_win->registerUiObject(clear_btn);
 
-    AreaRadioGroup* group = new AreaRadioGroup; //allocate button layout
-    group->value_ptr = reinterpret_cast<uint8_t*>(&this->edit_mode);
-    group->go_property = this;
-    group->updateInspectorOnChange = true;
+    AreaButton* height_btn = new AreaButton;
+    height_btn->onPressFuncPtr = &onSetHeightMode;
+    height_btn->button->setText("Height"); //Setting text to qt button
+    _inspector_win->getContentLayout()->addWidget(height_btn->button);
+    _inspector_win->registerUiObject(height_btn);
+    AreaButton* tex_btn = new AreaButton;
+    tex_btn->onPressFuncPtr = &onSetTextureMode;
+    tex_btn->button->setText("Texture"); //Setting text to qt button
+    _inspector_win->getContentLayout()->addWidget(tex_btn->button);
+    _inspector_win->registerUiObject(tex_btn);
+    AreaButton* veg_btn = new AreaButton;
+    veg_btn->onPressFuncPtr = &onSetVegetableMode;
+    veg_btn->button->setText("Vegetables"); //Setting text to qt button
+    _inspector_win->getContentLayout()->addWidget(veg_btn->button);
+    _inspector_win->registerUiObject(veg_btn);
 
-    QRadioButton* directional_radio = new QRadioButton; //allocate first radio
-    directional_radio->setText("Map");
-    QRadioButton* point_radio = new QRadioButton;
-    point_radio->setText("Texture");
-    QRadioButton* veg_radio = new QRadioButton;
-    veg_radio->setText("Vegetables");
-
-    group->addRadioButton(directional_radio);
-    group->addRadioButton(point_radio);
-    group->addRadioButton(veg_radio);
-    _inspector_win->registerUiObject(group);
-    _inspector_win->getContentLayout()->addLayout(group->btn_layout);
+   
 
     IntPropertyArea* EditRange = new IntPropertyArea; //New property area
     EditRange->setLabel("brush range"); //Its label
@@ -143,7 +160,7 @@ void Engine::TerrainProperty::addPropertyInterfaceToInspector(){
 
         for(int i = 0; i < this->grassType_size; i ++){
             QRadioButton* group_radio = new QRadioButton; //allocate first radio
-            group_radio->setText("Veg " + QString::number(i));
+            group_radio->setText("Veg" + QString::number(i));
             group_radio->setChecked(false);
             if(vegetableid == i)
                 group_radio->setChecked(true);
@@ -159,7 +176,7 @@ void Engine::TerrainProperty::addPropertyInterfaceToInspector(){
             _inspector_win->addPropertyArea(diffuse_area);
 
             Float2PropertyArea* GrassSize = new Float2PropertyArea; //New property area
-            GrassSize->setLabel("Size "); //Its label
+            GrassSize->setLabel("Size"); //Its label
             GrassSize->vector = &data.grass[static_cast<unsigned int>(i)].scale; //Ptr to our vector
             GrassSize->go_property = this; //Pointer to this to activate matrix recalculaton
             _inspector_win->addPropertyArea(GrassSize);
