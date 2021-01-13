@@ -22,7 +22,7 @@ void EditWindow::lookForResources(QString path) {
             processResourceFile(fileInfo);
         }
 
-        if (fileInfo.isDir() == true) { //If it is directory
+        if (fileInfo.isDir() == true && fileInfo.fileName()[0] != '.') { //If it is directory
             QString newdir_str = path + "/" + fileInfo.fileName();
             lookForResources(newdir_str); //Call this function inside next dir
         }

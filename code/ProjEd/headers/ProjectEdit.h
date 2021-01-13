@@ -170,7 +170,7 @@ private:
     QString sheduled_world;
     bool hasSheduledWorld;
 
-    Engine::GameObject* object_buffer;
+    bool mObjectCopied;
 
     void createResourceDesc(Engine::ZsResource* _resource, QString absfpath, std::string resource_label);
 public:

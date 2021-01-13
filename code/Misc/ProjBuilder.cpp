@@ -127,7 +127,7 @@ void ProjBuilder::prepareDirectory(){
 BuilderWindow::BuilderWindow(QWidget* parent) : QMainWindow(parent),
 ui(new Ui::BuilderWindow){
     ui->setupUi(this);
-    ui->outputText->resize(this->size().width() - 40, this->size().height() - 60);
+    ui->outputText->resize(this->size().width() - 40, this->size().height() - 70);
 }
 
 BuilderWindow::~BuilderWindow(){
@@ -140,7 +140,7 @@ void BuilderWindow::resizeEvent(QResizeEvent* event){
     int new_width = event->size().width();
     int new_height = event->size().height();
 
-    ui->outputText->resize(new_width - 40, new_height - 60);
+    ui->outputText->resize(new_width - 40, new_height - 70);
 }
 
 QTextBrowser* BuilderWindow::getTextWgt(){

@@ -14,6 +14,7 @@
 #include <world/ObjectsComponents/TriggerComponent.hpp>
 #include <world/ObjectsComponents/ShadowCasterComponent.hpp>
 #include <world/ObjectsComponents/WindZoneComponent.hpp>
+#include <world/ObjectsComponents/ParticleEmitterComponent.hpp>
 
 extern InspectorWin* _inspector_win;
 extern EditWindow* _editor_win;
@@ -382,4 +383,38 @@ void Engine::WindZoneComponent::addPropertyInterfaceToInspector() {
     _farPlane->value = &this->mStrength; //Ptr to our vector
     _farPlane->go_property = this; //Pointer to this to activate matrix recalculaton
     _inspector_win->addPropertyArea(_farPlane);
+}
+
+void Engine::ParticleEmitterComponent::addPropertyInterfaceToInspector() {
+    FloatPropertyArea* _Duration = new FloatPropertyArea; //New property area
+    _Duration->setLabel("Duration"); //Its label
+    _Duration->value = &this->mDuration; //Ptr to our vector
+    _Duration->go_property = this; //Pointer to this to activate matrix recalculaton
+    _inspector_win->addPropertyArea(_Duration);
+
+    BoolCheckboxArea* _Looping = new BoolCheckboxArea;
+    _Looping->setLabel("Looping");
+    _Looping->go_property = this;
+    _Looping->pResultBool = &this->mLooping;
+    _inspector_win->addPropertyArea(_Looping);
+
+    if (mLooping) {
+        BoolCheckboxArea* _Prewarm = new BoolCheckboxArea;
+        _Prewarm->setLabel("Prewarm");
+        _Prewarm->go_property = this;
+        _Prewarm->pResultBool = &this->mPrewarm;
+        _inspector_win->addPropertyArea(_Prewarm);
+    }
+
+    FloatPropertyArea* _Lifetime = new FloatPropertyArea; //New property area
+    _Lifetime->setLabel("Lifetime"); //Its label
+    _Lifetime->value = &this->mLifetime; //Ptr to our vector
+    _Lifetime->go_property = this; //Pointer to this to activate matrix recalculaton
+    _inspector_win->addPropertyArea(_Lifetime);
+
+    IntPropertyArea* _MaxParticles = new IntPropertyArea; //New property area
+    _MaxParticles->setLabel("Max Particles"); //Its label
+    _MaxParticles->value = &this->mMaxParticles; //Ptr to our vector
+    _MaxParticles->go_property = this; //Pointer to this to activate matrix recalculaton
+    _inspector_win->addPropertyArea(_MaxParticles);
 }

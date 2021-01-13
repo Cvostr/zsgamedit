@@ -82,7 +82,7 @@ void EditWindow::updateFileList() {
         QFileInfo fileInfo = list.at(i);  //get iterated file info
 
         //If file is project info, or terrain, then skip it.
-        if (checkExtension(fileInfo.fileName(), ".inf") || checkExtension(fileInfo.fileName(), ".terrain"))
+        if (fileInfo.fileName()[0] == '.' || checkExtension(fileInfo.fileName(), ".inf") || checkExtension(fileInfo.fileName(), ".terrain"))
             continue;
 
         QListWidgetItem* item = new QListWidgetItem(fileInfo.fileName(), ui->fileList);
@@ -157,7 +157,7 @@ void EditWindow::onNewScript() {
     QString picked_name = this->createNewTextFile(current_dir, "Script", ".as", scriptContent.c_str(), scriptContent.size());
 }
 void EditWindow::onNewMaterial() {
-    char* matContent = "ZSP_MATERIAL\nGROUP @default\nENTRY i_uv_repeat \x0\x0\x0\x1\x0\x0\x0\x1\n";
+    char* matContent = "ZSP_MATERIAL\n_GROUP @default\x0_ENTRY i_uv_repeat\x0\x1\x0\x0\x0\x1\x0\x0\x0\n";
     QString picked_name = this->createNewTextFile(current_dir, "Material", ".zsmat", matContent, 56);
 }
 

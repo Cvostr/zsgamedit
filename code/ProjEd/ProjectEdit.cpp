@@ -43,8 +43,8 @@ extern Material* defaultTerrainMat;
 EditWindow::EditWindow(QApplication* app, QWidget *parent) :
     QMainWindow(parent),
     mFsWatcher(new QFileSystemWatcher(nullptr)),
-    object_buffer(nullptr),
     ui(new Ui::EditWindow),
+    mObjectCopied(false),
     app_ptr(app)
 {
     ui->setupUi(this);
@@ -308,7 +308,6 @@ void EditWindow::openFile(QString file_path){
 
         obj_trstate.isTransforming = false;
         ppaint_state.enabled = false;
-        object_buffer = nullptr;
         //Back render settings to defaults
         this->render->getRenderSettings()->defaults();
 
@@ -535,11 +534,17 @@ void EditWindow::onObjectCopy(){
     QString obj_name = selected_item->text(0); //Get label of clicked obj
     Engine::GameObject* obj_ptr = world.getGameObjectByLabel(obj_name.toStdString()); //Obtain pointer to selected object by label
 
-    this->object_buffer = obj_ptr;
+    QString prefab_filepath = QString::fromStdString(engine_ptr->desc->game_dir) + "/.cache/copying_obj.prefab";
+    //Call prefab storing
+    _editor_win->world.storeObjectToPrefab(obj_ptr, prefab_filepath);
+    mObjectCopied = true;
 }
 void EditWindow::onObjectPaste(){
-    if(object_buffer != nullptr)
-        this->world.Instantiate(object_buffer);
+    if (mObjectCopied) {
+        std::string prefab_filepath = (engine_ptr->desc->game_dir) + "/.cache/copying_obj.prefab";
+        //Call prefab storing
+        world.addObjectsFromPrefab(prefab_filepath);
+    }
 }
 
 void EditWindow::toggleCameras(){

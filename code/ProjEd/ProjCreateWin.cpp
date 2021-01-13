@@ -23,6 +23,11 @@ CreateProjectWindow::~CreateProjectWindow()
     delete ui;
 }
 
+void CreateProjectWindow::CreateDir(QString path, QString DirName) {
+    QDir project_dir = QDir(path);
+    project_dir.mkdir(DirName); //Make project directory
+}
+
 void CreateProjectWindow::onCreateButtonPressed(){
     QString label = ui->prNameEdit->text(); //Get new project label from text field
 
@@ -31,8 +36,10 @@ void CreateProjectWindow::onCreateButtonPressed(){
 
     QString folder_path = root_path + "/" + label; //Getting absolute project root dir path
 
-    QDir project_dir = QDir(root_path);
-    project_dir.mkdir(label); //Make project directory
+    //Create root project dir
+    CreateDir(root_path, label);
+    //Create cache dir
+    CreateDir(folder_path, ".cache");
 
     QString proj_file = folder_path + "/" + label + ".inf";
     std::ofstream proj_conf_stream (proj_file.toStdString(), std::ofstream::out); //Opening file stream

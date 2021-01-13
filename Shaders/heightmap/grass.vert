@@ -11,6 +11,13 @@ layout (location = 1) out vec3 InNormal;
 layout (location = 2) out vec2 UVCoord; 
 layout (location = 3) out mat3 TBN;
 
+struct Wind{
+	vec3 Direction;
+	float Strength;
+	vec3 Pos;
+	float Dist;
+};
+
 layout (std140, binding = 0) uniform CamMatrices{
     uniform mat4 cam_projection;
     uniform mat4 cam_view;
@@ -20,6 +27,11 @@ layout (std140, binding = 0) uniform CamMatrices{
 
 layout (std140, binding = 9) uniform InstMatrices{
     uniform mat4 inst_transform[1000];
+};
+
+layout (std140, binding = 12) uniform Winds{
+    uniform Wind winds[100];
+	uniform int WindsSize;
 };
 
 layout (std140, binding = 11) uniform Time{

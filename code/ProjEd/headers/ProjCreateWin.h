@@ -16,7 +16,7 @@ public slots:
     void onBrowsePathButtonPressed();
 public:
     void* mainwin_ptr;
-
+    void CreateDir(QString path, QString DirName);
     void resizeEvent(QResizeEvent* event);
 
     explicit CreateProjectWindow(QWidget *parent = nullptr);
