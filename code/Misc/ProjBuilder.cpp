@@ -54,6 +54,8 @@ void ProjBuilder::start(){
                 break;
             case RESOURCE_TYPE_LOCALIZED_STR: type_str = "LOCALE STRING";
                 break;
+            case RESOURCE_TYPE_SCENE: type_str = "SCENE";
+                break;
         }
         window->addToOutput("Resource #" + QString::number(res_i) + " type: " + type_str + " " + QString::fromStdString(res_ptr->rel_path));
         //Update window content
@@ -91,7 +93,7 @@ void ProjBuilder::_copyOtherFilesDir(const QString dir) {
         if (fileInfo.isDir())
             _copyOtherFilesDir(fileInfo.absoluteFilePath());
         //Check file extension
-        if (fileInfo.fileName().endsWith(".terrain") || fileInfo.fileName().endsWith(".scn") ) {
+        if (fileInfo.fileName().endsWith(".terrain")  ) {
             //if file is terrain or scene
             QString abs_path = fileInfo.absoluteFilePath();
             //Make relative path from absolute

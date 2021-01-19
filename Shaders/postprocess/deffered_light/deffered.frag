@@ -25,7 +25,7 @@ layout(location = 0) in vec2 UVCoord;
 layout(binding = 10) uniform sampler2D tDiffuse;
 layout(binding = 11) uniform sampler2D tNormal;
 layout(binding = 12) uniform sampler2D tPos;
-layout(binding = 13) uniform sampler2D tTransparent;
+layout(binding = 13) uniform sampler2D tSpec;
 layout(binding = 14) uniform sampler2D tMasks;
 
 layout (std140, binding = 1) uniform Lights{
@@ -47,7 +47,7 @@ void main(){
     vec4 Diffuse = texture(tDiffuse, UVCoord);
     vec3 FragPos = texture(tPos, UVCoord).rgb;
 	vec3 Normal = texture(tNormal, UVCoord).rgb;
-	vec4 Transparent = texture(tTransparent, UVCoord);
+	vec4 Specular = texture(tSpec, UVCoord);
 	vec4 Masks = texture(tMasks, UVCoord);   	
 
     vec3 result = Diffuse.xyz;
@@ -60,7 +60,7 @@ void main(){
         
         bool Shadowed = Masks.g > 0.02; 
 
-        float specularFactor = Transparent.r * 255.f; //Get factor in A channel
+        float specularFactor = Specular.r * 255.f; //Get factor in A channel
         vec3 camToFragDirection = normalize(cam_position - FragPos);
 
         for(int lg = 0; lg < lights_amount; lg ++) {

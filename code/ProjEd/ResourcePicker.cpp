@@ -253,13 +253,15 @@ void PickResourceArea::updateLabel(){
     if (UseThumbnail) {
         if (resource_specified) {
             std::string fpath = _editor_win->project.root_path + "/";
-
+            if (this->resource_type != RESOURCE_TYPE_MESH)
                 fpath += *pResultString;
+            else
+                fpath = *pResultString;
 
-                QImage* img = nullptr;
-                //Set resource pixmap
-                if (_editor_win->thumb_master->isAvailable(fpath))
-                    img = _editor_win->thumb_master->texture_thumbnails.at(fpath);
+            QImage* img = nullptr;
+            //Set resource pixmap
+            if (_editor_win->thumb_master->isAvailable(fpath))
+                img = _editor_win->thumb_master->texture_thumbnails.at(fpath);
             if (img)
                 relpath_label->setPixmap(QPixmap::fromImage(*img));
 

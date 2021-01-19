@@ -159,6 +159,10 @@ void EditWindow::processResourceFile(QFileInfo fileInfo) {
         Engine::ZsResource* _resource = new Engine::LocalizedStringResource;
         createResourceDesc(_resource, absfpath, "");
     }
+    if (checkExtension(name, ".scn")) { //If its an localized string
+        Engine::SceneResource* _resource = new Engine::SceneResource;
+        createResourceDesc(_resource, absfpath, "");
+    }
 }
 
 void EditWindow::ImportResource(QString pathToResource) {

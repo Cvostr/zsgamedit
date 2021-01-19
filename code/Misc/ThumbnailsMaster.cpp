@@ -17,6 +17,13 @@ const char texture_shaderFS[310] = "#version 420 core\n\
         FragColor = texture(texturem, _UV);\n\
         }\n";
 
+const char mesh_shaderFS[310] = "#version 420 core\n\
+        in vec2 _UV;\n\
+        out vec4 FragColor;\n\
+        void main(){\n\
+        FragColor = vec4(1,1,1,1);\n\
+        }\n";
+
 const char texture_shaderVS[343] = "#version 420 core\n\
         layout (location = 0) in vec3 pos;\n\
         layout (location = 1) in vec2 uv;\n\
@@ -82,7 +89,7 @@ void ThumbnailsMaster::initShader(){
     mesh_shader = Engine::allocShader();
 
     texture_shader->compileFromStr(&texture_shaderVS[0], &texture_shaderFS[0]);
-    mesh_shader->compileFromStr(&mesh_shaderVS[0], &texture_shaderFS[0]);
+    mesh_shader->compileFromStr(&mesh_shaderVS[0], &mesh_shaderFS[0]);
 }
 
 void ThumbnailsMaster::createTexturesThumbnails(){
@@ -256,7 +263,8 @@ void ThumbnailsMaster::createMeshesThumbnails(){
     //Iterate over all resources
     for(unsigned int res_i = 0; res_i < game_data->resources->getResourcesSize(); res_i ++){
         Engine::ZsResource* resource_ptr = game_data->resources->getResourceByIndex(res_i);
-        if(resource_ptr->resource_type != RESOURCE_TYPE_MESH) return;
+        if(resource_ptr->resource_type != RESOURCE_TYPE_MESH) 
+            continue;
 
         Engine::MeshResource* m_ptr = static_cast<Engine::MeshResource*>(resource_ptr);
 
@@ -285,7 +293,7 @@ void ThumbnailsMaster::DrawMesh(Engine::MeshResource* mesh){
     renderer->transformBuffer->bind();
     Mat4 proj = cam.getProjMatrix();
     Mat4 view = cam.getViewMatrix();
-    Mat4 model = getIdentity();
+    Mat4 model = getRotationXMat(180) * getRotationYMat(15);
     renderer->transformBuffer->writeData(0, sizeof (Mat4), &proj);
     renderer->transformBuffer->writeData(sizeof (Mat4), sizeof (Mat4), &view);
     renderer->transformBuffer->writeData(sizeof (Mat4) * 2, sizeof (Mat4), &model);
