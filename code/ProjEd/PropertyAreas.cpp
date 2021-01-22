@@ -116,7 +116,7 @@ void AreaRadioGroup::onRadioClicked(){
 
 void AreaRadioGroup::addRadioButton(QRadioButton* btn){
     this->rad_buttons.push_back(btn); //add pointer to vector
-    this->btn_layout->addWidget(btn); //add pointer to layout
+    this->mButtonsLayout->addWidget(btn); //add pointer to layout
     connect(btn, SIGNAL(clicked()), this, SLOT(onRadioClicked()));
     //if button ID equals value, then this button is checked
     if(rad_buttons.size() == *value_ptr){
@@ -125,18 +125,23 @@ void AreaRadioGroup::addRadioButton(QRadioButton* btn){
 }
 
 AreaRadioGroup::AreaRadioGroup(){
-    btn_layout = new QVBoxLayout; //allocate layout object
+    mButtonsLayout = new QVBoxLayout; //allocate layout object
+    mRadioGroup = new QGroupBox;
+    mRadioGroup->setLayout(mButtonsLayout);
     this->value_ptr = nullptr;
     this->go_property = nullptr;
     updateInspectorOnChange = false;
 }
 
 AreaRadioGroup::~AreaRadioGroup(){
-    delete this->btn_layout; //release layout object
+    
+    
 
     for(unsigned int rbutton_it = 0; rbutton_it < this->rad_buttons.size(); rbutton_it ++){
         delete this->rad_buttons[rbutton_it];
     }
+    delete this->mButtonsLayout; //release layout object
+    delete this->mRadioGroup;
 
     this->rad_buttons.clear();
 }

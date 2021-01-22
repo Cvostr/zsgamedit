@@ -6,76 +6,70 @@
 #include <thread>
 #include <threading/Mutex.hpp>
 
-#define MAX_REQUESTS 550
+TerrainEditorThread _TEThread;
 
-static bool terrain_thread_working = true;
-static HeightmapModifyRequest* terrain_mdf_requests[MAX_REQUESTS];
-unsigned int requests_num = 0;
-static Engine::Mutex TerrainEditMutex;
-
-void terrain_loop(){
-    while(terrain_thread_working){
+void TerrainEditorThread::THRFunc() {
+    while (mShouldRun) {
         //check, if there are some operation pending
-        if(requests_num > 0){
-            
-            
+        if (requests_num > 0) {
             HeightmapModifyRequest* req = terrain_mdf_requests[0];
             //switch over all modify types
-            switch(req->modify_type){
-                case TMT_HEIGHT:{
-                    //if height of terrain changed
-                    //Change height
-                    req->terrain->modifyHeight(req->originX, req->originY, req->originHeight, req->range, req->multiplyer);
-                    //Recalculate terrain mesh
-                    req->terrain->updateGeometryBuffers(false);
-                    req->terrain->hasHeightmapChanged = true;
-                    req->terrain->hasPhysicShapeChanged = true;
-                    req->terrain->hasGrassChanged = true;
-                    //Recalculate grass transforms
-                    req->terrain->updateGrassBuffers();
-                    break;
-                }
-                case TMT_TEXTURE:{
-                    req->terrain->modifyTexture(req->originX, req->originY, req->range, req->texture);
-                    req->terrain->updateTextureBuffers(false);
-                    req->terrain->hasPaintingChanged = true;
-                    break;
+            switch (req->modify_type) {
+            case TMT_HEIGHT: {
+                //if height of terrain changed
+                //Change height
+                req->terrain->modifyHeight(req->originX, req->originY, req->originHeight, req->range, req->multiplyer);
+                //Recalculate terrain mesh
+                req->terrain->updateGeometryBuffers(false);
+                req->terrain->hasHeightmapChanged = true;
+                req->terrain->hasPhysicShapeChanged = true;
+                req->terrain->hasGrassChanged = true;
+                //Recalculate grass transforms
+                req->terrain->updateGrassBuffers();
+                break;
+            }
+            case TMT_TEXTURE: {
+                req->terrain->modifyTexture(req->originX, req->originY, req->range, req->texture);
+                req->terrain->updateTextureBuffers(false);
+                req->terrain->hasPaintingChanged = true;
+                break;
 
-                }
-                case TMT_GRASS:{
-                    req->terrain->plantGrass(req->originX, req->originY, req->range, req->grass);
-                    req->terrain->hasGrassChanged = true;
-                    req->terrain->updateGrassBuffers();
-                    break;
-                }
+            }
+            case TMT_GRASS: {
+                req->terrain->plantGrass(req->originX, req->originY, req->range, req->grass);
+                req->terrain->hasGrassChanged = true;
+                req->terrain->updateGrassBuffers();
+                break;
+            }
             }
             //Lock mutex
-            TerrainEditMutex.Lock();
+            mMutex->Lock();
             for (unsigned int a_i = 1; a_i < requests_num; a_i++) {
                 terrain_mdf_requests[a_i - 1] = terrain_mdf_requests[a_i];
             }
             requests_num--;
             //release mutex
-            TerrainEditMutex.Release();
+            mMutex->Release();
         }
     }
 }
 
+void TerrainEditorThread::queryTerrainModifyRequest(HeightmapModifyRequest* req) {
+    mMutex->Lock();
+    terrain_mdf_requests[(requests_num++)] = req;
+    mMutex->Release();
+}
+
 void queryTerrainModifyRequest(HeightmapModifyRequest* req){
-    TerrainEditMutex.Lock();
-    terrain_mdf_requests[(requests_num ++)] = req;
-    TerrainEditMutex.Release();
+    _TEThread.queryTerrainModifyRequest(req);
 }
 
 void startTerrainThread(){
-    terrain_thread_working = true;
-    std::thread loader_loop(terrain_loop);
-    loader_loop.detach();
+    _TEThread.Run();
 }
 
 void stopTerrainThread(){
-    terrain_thread_working = false;
-    requests_num = 0;
+    _TEThread.Stop();
 }
 
 void TerrainData::sum(unsigned char* ptr, int val){

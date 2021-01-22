@@ -192,6 +192,16 @@ void EditWindow::addNewAudsource() {
     obj->setLabel("Audio_" + std::to_string(add_num));
 }
 
+void EditWindow::addNewCamera() {
+    Engine::GameObject* obj = onAddNewGameObject();
+    obj->addProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_CAMERA);
+
+    //Set new name to object
+    int add_num = 0; //Declaration of addititonal integer
+    world.getAvailableNumObjLabel("Camera_", &add_num);
+    obj->setLabel("Camera_" + std::to_string(add_num));
+}
+
 void EditWindow::onImportResource() {
     QString dir = "/home";
 #ifdef _WIN32

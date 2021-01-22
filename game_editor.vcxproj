@@ -170,6 +170,7 @@
     <ClCompile Include="code\ProjEd\ResourcePicker.cpp" />
     <ClCompile Include="code\Render\GizmosRenderer.cpp" />
     <ClCompile Include="code\Render\zs-renderer-editor.cpp" />
+    <ClCompile Include="code\World\EditorCamera.cpp" />
     <ClCompile Include="code\World\GameObject.cpp" />
     <ClCompile Include="code\World\GoProperty\go_properties.cpp" />
     <ClCompile Include="code\World\GoProperty\MaterialPropertyUI.cpp" />
@@ -207,6 +208,7 @@
     <ClInclude Include="code\ProjEd\headers\EditorSettings.h" />
     <ClInclude Include="code\Render\headers\GizmosRenderer.h" />
     <ClInclude Include="code\Render\headers\zs-renderer-editor.hpp" />
+    <ClInclude Include="code\World\headers\EditorCamera.hpp" />
     <ClInclude Include="code\World\headers\Misc.h" />
     <ClInclude Include="code\World\headers\terrain.h" />
     <ClInclude Include="code\World\headers\World.h" />

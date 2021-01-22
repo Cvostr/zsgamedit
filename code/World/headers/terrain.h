@@ -2,6 +2,8 @@
 #define TERRAIN_ED_H
 
 #include <world/Terrain.hpp>
+#include <threading/Thread.hpp>
+#include <threading/Mutex.hpp>
 
 enum TERRAIN_MODIFY_TYPE{
     TMT_HEIGHT,
@@ -25,6 +27,28 @@ typedef struct HeightmapModifyRequest{
     int grass;
 
 }HeightmapModifyRequest;
+
+#define MAX_REQUESTS 550
+
+class TerrainEditorThread : public Engine::Thread {
+private:
+    Engine::Mutex* mMutex;
+
+    bool terrain_thread_working = true;
+    HeightmapModifyRequest* terrain_mdf_requests[MAX_REQUESTS];
+    int requests_num;
+public:
+
+    void THRFunc();
+    void queryTerrainModifyRequest(HeightmapModifyRequest* req);
+
+    TerrainEditorThread() :
+        mMutex(new Engine::Mutex),
+        requests_num(0)
+    {
+        
+    }
+};
 
 void startTerrainThread();
 void stopTerrainThread();

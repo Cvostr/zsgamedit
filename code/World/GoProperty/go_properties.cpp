@@ -15,6 +15,7 @@
 #include <world/ObjectsComponents/ShadowCasterComponent.hpp>
 #include <world/ObjectsComponents/WindZoneComponent.hpp>
 #include <world/ObjectsComponents/ParticleEmitterComponent.hpp>
+#include <world/ObjectsComponents/CameraComponent.hpp>
 
 extern InspectorWin* _inspector_win;
 extern EditWindow* _editor_win;
@@ -96,6 +97,9 @@ QString getPropertyString(PROPERTY_TYPE type){
         }
         case PROPERTY_TYPE::GO_PROPERTY_TYPE_PARTICLE_EMITTER: {
             return QString("Particle Emitter");
+        }
+        case PROPERTY_TYPE::GO_PROPERTY_TYPE_CAMERA: {
+            return QString("Camera");
         }
     }
     return QString("NONE");
@@ -186,7 +190,7 @@ void Engine::LightsourceComponent::addPropertyInterfaceToInspector(){
     group->addRadioButton(point_radio);
     group->addRadioButton(spot_radio);
     _inspector_win->registerUiObject(group);
-    _inspector_win->getContentLayout()->addLayout(group->btn_layout);
+    _inspector_win->getContentLayout()->addWidget(group->mRadioGroup);
 
     FloatPropertyArea* intensity_area = new FloatPropertyArea;
     intensity_area->setLabel("Intensity"); //Its intensity
@@ -417,4 +421,50 @@ void Engine::ParticleEmitterComponent::addPropertyInterfaceToInspector() {
     _MaxParticles->value = &this->mMaxParticles; //Ptr to our vector
     _MaxParticles->go_property = this; //Pointer to this to activate matrix recalculaton
     _inspector_win->addPropertyArea(_MaxParticles);
+}
+
+void Engine::CameraComponent::addPropertyInterfaceToInspector() {
+
+    AreaRadioGroup* projection_pick = new AreaRadioGroup; //allocate button layout
+    projection_pick->value_ptr = reinterpret_cast<uint8_t*>(&this->mProjectionType);
+    projection_pick->go_property = this;
+    
+    QRadioButton* ortho_radio = new QRadioButton; //allocate first radio
+    ortho_radio->setText("Ortho");
+    if (mProjectionType == ZSCAMERA_PROJECTION_ORTHOGONAL)
+        ortho_radio->setChecked(true);
+
+    QRadioButton* persp_radio = new QRadioButton; //allocate second radio
+    persp_radio->setText("Perspective");
+    if (mProjectionType == ZSCAMERA_PROJECTION_PERSPECTIVE)
+        persp_radio->setChecked(true);
+
+    //add created radio button
+    projection_pick->addRadioButton(ortho_radio);
+    projection_pick->addRadioButton(persp_radio);
+
+    _inspector_win->registerUiObject(projection_pick);
+    _inspector_win->getContentLayout()->addWidget(projection_pick->mRadioGroup);
+
+    FloatPropertyArea* Near = new FloatPropertyArea; //New property area
+    Near->setLabel("Near Z"); //Its label
+    Near->value = &this->mNearZ; //Ptr to our vector
+    Near->go_property = this; //Pointer to this to activate matrix recalculaton
+    _inspector_win->addPropertyArea(Near);
+
+    FloatPropertyArea* Far = new FloatPropertyArea; //New property area
+    Far->setLabel("Far Z"); //Its label
+    Far->value = &this->mFarZ; //Ptr to our vector
+    Far->go_property = this; //Pointer to this to activate matrix recalculaton
+    _inspector_win->addPropertyArea(Far);
+
+    FloatPropertyArea* _FOV = new FloatPropertyArea; //New property area
+    _FOV->setLabel("FOV"); //Its label
+    _FOV->value = &this->mFOV; //Ptr to our vector
+    _FOV->go_property = this; //Pointer to this to activate matrix recalculaton
+    _inspector_win->addPropertyArea(_FOV);
+}
+
+void Engine::CameraComponent::onValueChanged() {
+    updateProjectionMat();
 }

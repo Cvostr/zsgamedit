@@ -11,7 +11,7 @@
 #include "EdActions.h"
 #include "EditorSettings.h"
 #include "../../Render/headers/zs-renderer-editor.hpp"
-#include <world/Camera.hpp>
+#include "../../World/headers/EditorCamera.hpp"
 #include <audio/OALManager.hpp>
 #include <engine/Window.hpp>
 #include <engine/EngineComponentManager.hpp>
@@ -115,6 +115,7 @@ public slots:
     void addNewTile();
     void addNewTerrain();
     void addNewAudsource();
+    void addNewCamera();
 
     void onSceneSave();
     void onSceneSaveAs();
@@ -182,7 +183,7 @@ public:
 
     void* mainwin_ptr;
     World world;
-    Engine::Camera edit_camera; //Camera to show editing scene
+    Editor::EditorCamera edit_camera; //Camera to show editing scene
     Project project; //info about current project
     EditorInputState input_state;
     ObjectTransformState obj_trstate; //Describes object transform

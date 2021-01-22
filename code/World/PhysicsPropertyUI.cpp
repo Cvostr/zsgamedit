@@ -29,7 +29,7 @@ void Engine::PhysicalProperty::addColliderRadio(){
     group->addRadioButton(mesh_radio);
     //Register in Inspector
     _inspector_win->registerUiObject(group);
-    _inspector_win->getContentLayout()->addLayout(group->btn_layout);
+    _inspector_win->getContentLayout()->addWidget(group->mRadioGroup);
 }
 void Engine::PhysicalProperty::addMassField(){
     FloatPropertyArea* mass_area = new FloatPropertyArea;

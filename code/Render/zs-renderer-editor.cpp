@@ -37,7 +37,7 @@ void RenderPipelineEditor::setup(int bufWidth, int bufHeight){
     //create geometry buffer
     create_G_Buffer_GL(bufWidth, bufHeight);
 
-    removeLights();
+    removeLightsCameras();
 
     editorUniformBuffer = Engine::allocUniformBuffer();
     editorUniformBuffer->init(8, 16);
@@ -61,7 +61,7 @@ RenderPipelineEditor::~RenderPipelineEditor(){
     obj_grid_shader->Destroy();
     sprite_shader_3d->Destroy();
 
-    removeLights();
+    removeLightsCameras();
     delete gizmos;
 }
 

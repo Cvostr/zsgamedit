@@ -10,6 +10,7 @@
 #include <vector>
 #include <QListWidget>
 #include <QRadioButton>
+#include <QGroupBox>
 #include <QColorDialog>
 #include <QDialog>
 #include <QCheckBox>
@@ -76,7 +77,8 @@ public slots:
 public:
     bool updateInspectorOnChange;
     Engine::IGameObjectComponent* go_property; //Ponter to property, that created this group
-    QVBoxLayout* btn_layout; //layout to contain everything
+    QVBoxLayout* mButtonsLayout; //layout to contain everything
+    QGroupBox* mRadioGroup;
     std::vector<QRadioButton*> rad_buttons;
     uint8_t* value_ptr; //pointer to changing value
 

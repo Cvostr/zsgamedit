@@ -139,8 +139,12 @@ void main(){
 	vec3 Normal = InNormal; //defaultly, use normals from mesh
 	float result_shininess = material_shininess;
 	
+    
 	if(hasDiffuseMap)
 		result = texture(diffuse, processParallaxMapUv(uv)).xyz;
+
+    //if(length(FragPos - cam_position) < 40)
+     //   result = vec3(1,1,0);
 
 	if(hasAoMap){
         vec3 ao_texture = texture(occlusion_map, uv).xyz;
