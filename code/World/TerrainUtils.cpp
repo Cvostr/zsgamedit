@@ -1,6 +1,5 @@
 #include "headers/terrain.h"
 #include <GL/glew.h>
-#include "../World/headers/Misc.h"
 #include <fstream>
 #include <vector>
 #include <thread>

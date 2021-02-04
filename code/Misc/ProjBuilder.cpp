@@ -1,4 +1,5 @@
 #include "headers/ProjBuilder.h"
+#include <game.h>
 #include <cstdio>
 #include <cstdlib>
 #include <QDir>

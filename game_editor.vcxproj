@@ -177,7 +177,6 @@
     <ClCompile Include="code\World\GoProperty\TerrainComponent.cpp" />
     <ClCompile Include="code\World\GoProperty\tile_properties.cpp" />
     <ClCompile Include="code\World\GoProperty\ZPScriptPropertyUI.cpp" />
-    <ClCompile Include="code\World\Misc.cpp" />
     <ClCompile Include="code\World\PhysicsPropertyUI.cpp" />
     <ClCompile Include="code\World\TerrainUtils.cpp" />
     <ClCompile Include="code\World\World.cpp" />
@@ -197,19 +196,16 @@
     <QtMoc Include="code\ProjEd\headers\ConsoleLog.h" />
     <ClInclude Include="code\ProjEd\headers\DialogsMaster.h" />
     <ClInclude Include="code\ProjEd\headers\GO_widget_item.h" />
-    <ClInclude Include="code\ProjEd\headers\ResourceImport.h" />
     <ClInclude Include="code\triggers.h" />
     <QtMoc Include="code\mainwin.h" />
     <ClInclude Include="code\Misc\headers\AssimpMeshLoader.h" />
     <ClInclude Include="code\Misc\headers\EditorManager.h" />
     <ClInclude Include="code\Misc\headers\ThumbnailsMaster.h" />
-    <ClInclude Include="code\Misc\headers\zs_types.h" />
     <ClInclude Include="code\ProjEd\headers\EdActions.h" />
     <ClInclude Include="code\ProjEd\headers\EditorSettings.h" />
     <ClInclude Include="code\Render\headers\GizmosRenderer.h" />
     <ClInclude Include="code\Render\headers\zs-renderer-editor.hpp" />
     <ClInclude Include="code\World\headers\EditorCamera.hpp" />
-    <ClInclude Include="code\World\headers\Misc.h" />
     <ClInclude Include="code\World\headers\terrain.h" />
     <ClInclude Include="code\World\headers\World.h" />
     <QtMoc Include="code\ProjEd\headers\ProjectEdit.h" />

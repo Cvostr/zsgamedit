@@ -1,6 +1,5 @@
 #include "headers/World.h"
 #include "../ProjEd/headers/ProjectEdit.h"
-#include "headers/Misc.h"
 #include <QLineEdit>
 #include <iostream>
 

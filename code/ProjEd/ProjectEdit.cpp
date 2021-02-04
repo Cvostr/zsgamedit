@@ -18,7 +18,6 @@
 #include <QMessageBox>
 #include "../mainwin.h"
 #include <misc/zs3m-master.h>
-#include "../World/headers/Misc.h"
 #include "headers/LocStringEditWin.h"
 #include "headers/DialogsMaster.h"
 #include <input/Input.hpp>
@@ -420,6 +419,7 @@ void EditWindow::runWorld(){
 void EditWindow::stopWorld(){
     //Avoi crash on skybox rendering
     this->render->getRenderSettings()->resetPointers();
+    this->render->removeСameras();
     //Prepare world for stopping
     
     //Set storing actions to undo changes

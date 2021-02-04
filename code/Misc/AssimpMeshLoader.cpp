@@ -1,5 +1,4 @@
 #include "headers/AssimpMeshLoader.h"
-#include "../World/headers/Misc.h"
 #include <cassert>
 
 static Assimp::Importer importer;

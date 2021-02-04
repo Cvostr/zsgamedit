@@ -2,7 +2,6 @@
 #include "../../ProjEd/headers/ProjectEdit.h"
 #include <render/Mesh.hpp>
 #include "../../ProjEd/headers/InspEditAreas.h"
-#include "../headers/Misc.h"
 
 #include <world/ObjectsComponents/AudioSourceComponent.hpp>
 #include <world/ObjectsComponents/AnimationComponent.hpp>
@@ -463,8 +462,24 @@ void Engine::CameraComponent::addPropertyInterfaceToInspector() {
     _FOV->value = &this->mFOV; //Ptr to our vector
     _FOV->go_property = this; //Pointer to this to activate matrix recalculaton
     _inspector_win->addPropertyArea(_FOV);
+
+    BoolCheckboxArea* _ismain = new BoolCheckboxArea;
+    _ismain->setLabel("is Main Camera");
+    _ismain->go_property = this;
+    _ismain->pResultBool = &this->mIsMainCamera;
+    _inspector_win->addPropertyArea(_ismain);
+
+    if (!mIsMainCamera) {
+        PickResourceArea* area = new PickResourceArea(RESOURCE_TYPE_TEXTURE);
+        area->setLabel("Target Texture");
+        area->go_property = this;
+        area->pResultString = &this->TargetResourceName;
+        _inspector_win->addPropertyArea(area);
+    }
 }
 
 void Engine::CameraComponent::onValueChanged() {
     updateProjectionMat();
+    _inspector_win->updateRequired = true;
+    UpdateTextureResource();
 }

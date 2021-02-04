@@ -8,7 +8,6 @@
 #include <render/Mesh.hpp>
 #include <render/Animation.hpp>
 #include <misc/zs3m-master.h>
-#include "zs_types.h"
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>

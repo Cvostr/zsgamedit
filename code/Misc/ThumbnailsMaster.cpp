@@ -1,7 +1,8 @@
 #include "headers/ThumbnailsMaster.h"
 #include <GL/glew.h>
-
+#include <game.h>
 #include <iostream>
+
 #define THUMBNAIL_IMG_SIZE 512
 
 extern RenderPipelineEditor* renderer;

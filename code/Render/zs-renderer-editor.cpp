@@ -37,7 +37,7 @@ void RenderPipelineEditor::setup(int bufWidth, int bufHeight){
     //create geometry buffer
     create_G_Buffer_GL(bufWidth, bufHeight);
 
-    removeLightsCameras();
+    removeLights();
 
     editorUniformBuffer = Engine::allocUniformBuffer();
     editorUniformBuffer->init(8, 16);
@@ -61,7 +61,7 @@ RenderPipelineEditor::~RenderPipelineEditor(){
     obj_grid_shader->Destroy();
     sprite_shader_3d->Destroy();
 
-    removeLightsCameras();
+    removeLights();
     delete gizmos;
 }
 
@@ -189,7 +189,7 @@ void RenderPipelineEditor::render(Engine::Window* window, void* projectedit_ptr)
         cam_ptr = &editwin_ptr->edit_camera;
     }
 
-    this->cam = cam_ptr;
+    this->mMainCamera = cam_ptr;
     this->win_ptr = editwin_ptr;
     this->updateShadersCameraInfo(cam_ptr); //Send camera properties to all drawing shaders
     setLightsToBuffer();
@@ -206,7 +206,7 @@ void RenderPipelineEditor::render(Engine::Window* window, void* projectedit_ptr)
     }
 
     if(!editwin_ptr->isWorldCamera)
-        renderGizmos(projectedit_ptr, cam);
+        renderGizmos(projectedit_ptr, mMainCamera);
 
     window->SwapGL();
 }

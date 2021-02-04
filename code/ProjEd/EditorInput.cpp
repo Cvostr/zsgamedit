@@ -83,11 +83,12 @@ void EditWindow::onMouseWheel(int x, int y) {
         edit_camera.setPosition(pos + front * y);
     }
     //2D project
+    float Scale2D = edit_camera.mViewScale.X + static_cast<float>(y) / 50.F;
     if (project.perspective == PERSP_2D && this->input_state.isLCtrlHold &&
-        edit_camera.orthogonal_factor + static_cast<float>(y) / 50.F >= 0.2f &&
-        edit_camera.orthogonal_factor + static_cast<float>(y) / 50.F <= 1.7f) {
-        edit_camera.orthogonal_factor += static_cast<float>(y) / 50.F;
-        edit_camera.updateProjectionMat();
+        Scale2D >= 0.2f &&
+        Scale2D <= 1.7f) {
+        edit_camera.mViewScale = Vec3(Scale2D, Scale2D, Scale2D);
+        edit_camera.updateViewMat();
     }
     //Common camera movement
     if (project.perspective == PERSP_2D && !this->input_state.isLCtrlHold)

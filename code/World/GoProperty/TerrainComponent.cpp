@@ -2,7 +2,6 @@
 #include <world/ObjectsComponents/TerrainComponent.hpp>
 #include "../headers/terrain.h"
 #include "../../ProjEd/headers/InspEditAreas.h"
-#include "../headers/Misc.h"
 
 //selected terrain
 static Engine::TerrainProperty* current_terrain_prop;

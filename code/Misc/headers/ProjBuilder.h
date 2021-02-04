@@ -1,7 +1,5 @@
 #pragma once
 
-#include "../../Misc/headers/zs_types.h"
-
 #include <misc/misc.h>
 #include <QDialog>
 #include <QTextBrowser>
@@ -10,7 +8,7 @@
 #include <QResizeEvent>
 #include "ui_buildconsole.h"
 #include <fstream>
-
+#include <engine/Resources.hpp>
 
 namespace Ui {
 class BuilderWindow;

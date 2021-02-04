@@ -21,7 +21,6 @@ struct Project;
 
 #include "../../World/headers/World.h"
 #include "../../Misc/headers/ProjBuilder.h"
-#include "../../Misc/headers/zs_types.h"
 #include "misc/GlyphManager.h"
 #include "../../Misc/headers/ThumbnailsMaster.h"
 
