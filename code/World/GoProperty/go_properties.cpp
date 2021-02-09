@@ -463,6 +463,28 @@ void Engine::CameraComponent::addPropertyInterfaceToInspector() {
     _FOV->go_property = this; //Pointer to this to activate matrix recalculaton
     _inspector_win->addPropertyArea(_FOV);
 
+
+    AreaRadioGroup* cullface_pick = new AreaRadioGroup; //allocate button layout
+    cullface_pick->value_ptr = reinterpret_cast<uint8_t*>(&this->mCullFaceDirection);
+    cullface_pick->go_property = this;
+
+    QRadioButton* cw_radio = new QRadioButton; //allocate first radio
+    cw_radio->setText("CW");
+    if (mCullFaceDirection == CCF_DIRECTION_CW)
+        cw_radio->setChecked(true);
+
+    QRadioButton* ccw_radio = new QRadioButton; //allocate second radio
+    ccw_radio->setText("CCW");
+    if (mCullFaceDirection == CCF_DIRECTION_CCW)
+        ccw_radio->setChecked(true);
+
+    //add created radio button
+    cullface_pick->addRadioButton(cw_radio);
+    cullface_pick->addRadioButton(ccw_radio);
+
+    _inspector_win->registerUiObject(cullface_pick);
+    _inspector_win->getContentLayout()->addWidget(cullface_pick->mRadioGroup);
+
     BoolCheckboxArea* _ismain = new BoolCheckboxArea;
     _ismain->setLabel("is Main Camera");
     _ismain->go_property = this;
