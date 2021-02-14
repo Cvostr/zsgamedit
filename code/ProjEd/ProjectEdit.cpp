@@ -63,6 +63,7 @@ EditWindow::EditWindow(QApplication* app, QWidget *parent) :
     QObject::connect(ui->actionCreateMaterial, SIGNAL(triggered()), this, SLOT(onNewMaterial()));
     QObject::connect(ui->actionCreateScript, SIGNAL(triggered()), this, SLOT(onNewScript()));
     QObject::connect(ui->actionLocStringFile, SIGNAL(triggered()), this, SLOT(onNewLocalizedStringFile()));
+    QObject::connect(ui->actionCreateRenderTarget, SIGNAL(triggered()), this, SLOT(onNewRenderTarget()));
 
     QObject::connect(ui->actionImport_Resource, SIGNAL(triggered()), this, SLOT(onImportResource()));
     QObject::connect(ui->actionClose_project, SIGNAL(triggered()), this, SLOT(onCloseProject()));
@@ -701,9 +702,8 @@ void EditWindow::setGameViewWindowSize(int W, int H){
     //Set SDL window size
     mWindow->SetSize(W, H);
     //Apply new viewport to cameras
-    Engine::ZSVIEWPORT viewport = Engine::ZSVIEWPORT(0,0,static_cast<unsigned int>(W),static_cast<unsigned int>(H));
-    edit_camera.setViewport(viewport);
-    world.world_camera.setViewport(viewport);
+    edit_camera.setViewport(static_cast<unsigned int>(W), static_cast<unsigned int>(H));
+    world.world_camera.setViewport(static_cast<unsigned int>(W), static_cast<unsigned int>(H));
 }
 
 QTreeWidget* EditWindow::getObjectListWidget(){

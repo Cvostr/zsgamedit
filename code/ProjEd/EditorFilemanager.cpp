@@ -165,3 +165,9 @@ void EditWindow::onNewLocalizedStringFile() {
     char* matContent = "ZSLOCALIZEDSTRINGSBINARY\x0\x0\x0\x0\x0\x0\x0\x0";
     QString picked_name = this->createNewTextFile(current_dir, "LocString", ".lcstr", matContent, 33);
 }
+
+void EditWindow::onNewRenderTarget() {
+    char* rtbContent = "";
+    QString picked_name = this->createNewTextFile(current_dir, "RenderTarget", ".rtb", rtbContent, 0);
+
+}

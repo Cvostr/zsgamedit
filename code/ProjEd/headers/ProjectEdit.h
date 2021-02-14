@@ -124,6 +124,7 @@ public slots:
     void onNewScript();
     void onNewMaterial();
     void onNewLocalizedStringFile();
+    void onNewRenderTarget();
 
     void onImportResource();
     bool onCloseProject();

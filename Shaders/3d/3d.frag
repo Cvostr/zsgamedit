@@ -143,9 +143,6 @@ void main(){
 	if(hasDiffuseMap)
 		result = texture(diffuse, processParallaxMapUv(uv)).xyz;
 
-    //if(length(FragPos - cam_position) < 40)
-     //   result = vec3(1,1,0);
-
 	if(hasAoMap){
         vec3 ao_texture = texture(occlusion_map, uv).xyz;
         result *= ao_texture.r;

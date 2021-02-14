@@ -5,6 +5,8 @@
 #include <windows.h>
 #include <input/Input.hpp>
 
+#include <hw/CpuInfo.hpp>
+
 //Hack to support meshes
 extern ZSpireEngine* engine_ptr;
 
@@ -16,6 +18,9 @@ bool working = true; //Application started and it is working
 QApplication* a;
 
 int main(int argc, char *argv[]){
+
+    Engine::CpuInfo cpui;
+
 #ifdef SHOW_WIN_CONSOLE
     if (AttachConsole(ATTACH_PARENT_PROCESS) || AllocConsole()) {
         freopen("CONOUT$", "w", stdout);
