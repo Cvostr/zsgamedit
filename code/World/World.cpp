@@ -7,11 +7,13 @@
 #include <world/ObjectsComponents/NodeComponent.hpp>
 #include <world/ObjectsComponents/MeshComponent.hpp>
 #include <world/ObjectsComponents/ZPScriptComponent.hpp>
+#include <world/ObjectsComponents/ShadowCasterComponent.hpp>
 
 extern RenderPipelineEditor* renderer;
 extern Material* default3dmat;
 extern Project* project_ptr;
 extern ZSGAME_DATA* game_data;
+extern EditWindow* _editor_win;
 
 World::World(){
     obj_widget_ptr = nullptr;
@@ -348,4 +350,60 @@ void World::recoverFromSnapshot(Engine::WorldSnapshot* snapshot){
     GO_W_I::recreateAll(MAX_OBJS);
     //make parentings
     GO_W_I::makeParentings(this, this->obj_widget_ptr);
+}
+
+void World::setupDefaultWorld() {
+    if (objects.size() > 0)
+        clear();
+
+    //Default objects
+    Engine::GameObject* MainCameraObject = _editor_win->onAddNewGameObject();
+    MainCameraObject->addProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_CAMERA);
+    MainCameraObject->addProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_AUDIO_LISTENER);
+    //Set new name to object
+    MainCameraObject->setLabel("Main Camera");
+    Engine::TransformProperty* transform = MainCameraObject->getTransformProperty();
+    transform->setTranslation(Vec3(-20,0,0));
+
+    Engine::GameObject* DirectLightObject = _editor_win->onAddNewGameObject();
+    DirectLightObject->addProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_LIGHTSOURCE);
+    DirectLightObject->addProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_SHADOWCASTER);
+    //Set new name to object
+    DirectLightObject->setLabel("Direct Light");
+    transform = DirectLightObject->getTransformProperty();
+    transform->setTranslation(Vec3(10, 0, 10));
+    transform->setRotation(Vec3(-50, 0, 50));
+    Engine::ShadowCasterProperty* caster = DirectLightObject->getPropertyPtr<Engine::ShadowCasterProperty>();
+    caster->mShadowStrength = 0.6f;
+    caster->mPcfNum = 6;
+    caster->mShadowBias = 0.002f;
+
+    Engine::GameObject* CubeObject = _editor_win->onAddNewGameObject();
+    CubeObject->addProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_MESH);
+    CubeObject->addProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_MATERIAL);
+    CubeObject->addProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_RIGIDBODY);
+    CubeObject->setLabel("Cube");
+    //Set MESH properties
+    Engine::MeshProperty* mesh = CubeObject->getPropertyPtr<Engine::MeshProperty>();
+    mesh->resource_relpath = "@cube";
+    mesh->updateMeshPtr();
+    //Set MATERIAL properties
+    Engine::MaterialProperty* mat = CubeObject->getPropertyPtr<Engine::MaterialProperty>();
+    mat->setMaterial("@default");
+
+    Engine::GameObject* LowerObject = _editor_win->onAddNewGameObject();
+    LowerObject->addProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_MESH);
+    LowerObject->addProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_MATERIAL);
+    LowerObject->addProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_COLLIDER);
+    LowerObject->setLabel("Cube 1");
+    //Set MESH properties
+    mesh = LowerObject->getPropertyPtr<Engine::MeshProperty>();
+    mesh->resource_relpath = "@cube";
+    mesh->updateMeshPtr();
+    //Set MATERIAL properties
+    mat = LowerObject->getPropertyPtr<Engine::MaterialProperty>();
+    mat->setMaterial("@default");
+    transform = LowerObject->getTransformProperty();
+    transform->setTranslation(Vec3(0, -5, 0));
+    transform->setScale(Vec3(20, 1, 20));
 }

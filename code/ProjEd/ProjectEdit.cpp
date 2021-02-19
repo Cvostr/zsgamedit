@@ -287,10 +287,6 @@ void EditWindow::init(){
     }
     Engine::ZSVIEWPORT viewport = Engine::ZSVIEWPORT(0,0,static_cast<unsigned int>(this->settings.gameViewWin_Width),static_cast<unsigned int>( this->settings.gameViewWin_Height));
     edit_camera.setViewport(viewport);
-
-    world.world_camera = edit_camera;
-    //World gameplay camera will work with openal listener
-    world.world_camera.isAlListenerCamera = true;
     //Store pointer to Project structure
     project_ptr = &this->project;
 }
@@ -420,9 +416,6 @@ void EditWindow::runWorld(){
 void EditWindow::stopWorld(){
     //Avoi crash on skybox rendering
     this->render->getRenderSettings()->resetPointers();
-    this->render->removeСameras();
-    //Prepare world for stopping
-    
     //Set storing actions to undo changes
     _ed_actions_container->setStoreActions(true);
     //Clear Inspector Win
@@ -703,7 +696,6 @@ void EditWindow::setGameViewWindowSize(int W, int H){
     mWindow->SetSize(W, H);
     //Apply new viewport to cameras
     edit_camera.setViewport(static_cast<unsigned int>(W), static_cast<unsigned int>(H));
-    world.world_camera.setViewport(static_cast<unsigned int>(W), static_cast<unsigned int>(H));
 }
 
 QTreeWidget* EditWindow::getObjectListWidget(){

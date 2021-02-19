@@ -100,6 +100,9 @@ QString getPropertyString(PROPERTY_TYPE type){
         case PROPERTY_TYPE::GO_PROPERTY_TYPE_CAMERA: {
             return QString("Camera");
         }
+        case PROPERTY_TYPE::GO_PROPERTY_TYPE_AUDIO_LISTENER: {
+            return QString("Audio Listener");
+        }
     }
     return QString("NONE");
 }

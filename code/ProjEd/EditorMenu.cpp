@@ -64,11 +64,13 @@ void EditWindow::onNewScene() {
     obj_trstate.isTransforming = false;
     //clear actions history
     _ed_actions_container->clear();
-
+    _inspector_win->clearContentLayout();
     //Back render settings to defaults
     this->render->getRenderSettings()->defaults();
 
     hasSceneFile = false; //We have new scene
+
+    world.setupDefaultWorld();
 }
 
 

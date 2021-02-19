@@ -37,8 +37,6 @@ void RenderPipelineEditor::setup(int bufWidth, int bufHeight){
     //create geometry buffer
     create_G_Buffer_GL(bufWidth, bufHeight);
 
-    removeLights();
-
     editorUniformBuffer = Engine::allocUniformBuffer();
     editorUniformBuffer->init(8, 16);
 }
@@ -61,7 +59,6 @@ RenderPipelineEditor::~RenderPipelineEditor(){
     obj_grid_shader->Destroy();
     sprite_shader_3d->Destroy();
 
-    removeLights();
     delete gizmos;
 }
 
@@ -85,13 +82,9 @@ RGBAColor RenderPipelineEditor::getColorOfPickedTransformControl(int mouseX, int
     Engine::Camera* cam_ptr = nullptr; //We'll set it next
     World* world_ptr = &editwin_ptr->world;
 
-    if(editwin_ptr->isWorldCamera){
-        //if isWorldCamera is true, then we are in gameplay camera
-        cam_ptr = &world_ptr->world_camera;
-    }else{
-        //if isWorldCamera is false, then we are in editor camera
-        cam_ptr = &editwin_ptr->edit_camera;
-    }
+
+    cam_ptr = &editwin_ptr->edit_camera;
+
 
     setClearColor(0,0,0,1);
     ClearFBufferGL(true, true);
@@ -178,35 +171,94 @@ unsigned int RenderPipelineEditor::render_getpickedObj(void* projectedit_ptr, in
 
 void RenderPipelineEditor::render(Engine::Window* window, void* projectedit_ptr){
     EditWindow* editwin_ptr = static_cast<EditWindow*>(projectedit_ptr);
-    Engine::Camera* cam_ptr = nullptr; //We'll set it next
+    Engine::Window* win = engine_ptr->GetWindow();
+
     World* world_ptr = &editwin_ptr->world;
 
-    if(editwin_ptr->isWorldCamera){
-        //if isWorldCamera is true, then we are in gameplay camera
-        cam_ptr = &world_ptr->world_camera;
-    }else{
-        //if isWorldCamera is false, then we are in editor camera
-        cam_ptr = &editwin_ptr->edit_camera;
-    }
-
-    this->mMainCamera = cam_ptr;
     this->win_ptr = editwin_ptr;
-    this->updateShadersCameraInfo(cam_ptr); //Send camera properties to all drawing shaders
+    
     setLightsToBuffer();
 
-    switch(engine_ptr->desc->game_perspective){
-        case PERSP_2D:{
+    lookForCameras(world_ptr);
+    if (editwin_ptr->isWorldCamera) {
+        switch (engine_ptr->desc->game_perspective) {
+        case PERSP_2D: {
             render2D();
             break;
         }
-        case PERSP_3D:{
-            render3D(cam_ptr);
+        case PERSP_3D: {
+            render3D();
             break;
         }
+        }
     }
+    else {
+        Engine::Camera* cam_ptr = &editwin_ptr->edit_camera; //We'll set it next
+        this->updateShadersCameraInfo(cam_ptr); //Send camera properties to all drawing shaders
+        setFrontFace(CCF_DIRECTION_CCW);
+        TryRenderShadows(cam_ptr);
+        mMainCamera = cam_ptr;
 
-    if(!editwin_ptr->isWorldCamera)
-        renderGizmos(projectedit_ptr, mMainCamera);
+        {
+            //Bind Geometry Buffer to make Deferred Shading
+            ((Engine::GLframebuffer*)gbuffer)->bind();
+            setClearColor(0, 0, 0, 0);
+            ClearFBufferGL(true, true);
+            setFullscreenViewport(win->GetWindowWidth(), win->GetWindowHeight());
+            {
+                //Render Skybox
+                setDepthState(false);
+                setBlendingState(false);
+                setFaceCullState(false);
+                TryRenderSkybox();
+            }
+            glEnablei(GL_BLEND, 0);
+            glBlendFunci(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, 0);
+            {
+                //Render World
+                setDepthState(true);
+                setFaceCullState(true);
+                //Render whole world
+                processObjects(world_ptr);
+            }
+        }
+
+        //Process Deffered lights
+        {
+            ((Engine::GLframebuffer*)df_light_buffer)->bind();
+            ClearFBufferGL(true, false); //Clear screen
+            //Disable depth rendering to draw plane correctly
+            setDepthState(false);
+            setFaceCullState(false);
+            ((Engine::GLframebuffer*)gbuffer)->bindTextures(10); //Bind gBuffer textures
+            deffered_light->Use(); //use deffered shader
+            Engine::getPlaneMesh2D()->Draw(); //Draw screen
+        }
+
+        //Render ALL UI
+        {
+            ((Engine::GLframebuffer*)ui_buffer)->bind();
+            setClearColor(0, 0, 0, 0);
+            ClearFBufferGL(true, false); //Clear screen 
+            setDepthState(false);
+            setBlendingState(true);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            renderUI();
+        }
+
+        //Draw result into main buffer
+        {
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            ((Engine::GLframebuffer*)df_light_buffer)->bindTextures(0);
+            ((Engine::GLframebuffer*)ui_buffer)->bindTextures(1);
+            final_shader->Use();
+            Engine::getPlaneMesh2D()->Draw(); //Draw screen
+        }
+
+        renderGizmos(projectedit_ptr, cam_ptr);
+    }
+    //if(!editwin_ptr->isWorldCamera)
+        
 
     window->SwapGL();
 }

@@ -70,6 +70,8 @@ public:
 
     void recoverFromSnapshot(Engine::WorldSnapshot* snapshot);
 
+    void setupDefaultWorld();
+
     World();
 
 };
