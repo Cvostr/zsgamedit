@@ -73,7 +73,7 @@ mat4 getBoneTransform(){
 
 void main(){
 	UVCoord = uv;
-	InNormal = normal;
+	InNormal = normalize(vec3(object_transform * vec4(normal, 0))) ;
 		
 	mat4 bone_t = mat4(1.0);
 

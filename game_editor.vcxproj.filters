@@ -1,0 +1,253 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{D9D6E242-F8AF-46E4-B9FD-80ECBC20BA3E}</UniqueIdentifier>
+      <Extensions>qrc;*</Extensions>
+      <ParseFiles>false</ParseFiles>
+    </Filter>
+    <Filter Include="Form Files">
+      <UniqueIdentifier>{99349809-55BA-4b9d-BF79-8FDBB0286EB3}</UniqueIdentifier>
+      <Extensions>ui</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{D9D6E242-F8AF-46E4-B9FD-80ECBC20BA3E}</UniqueIdentifier>
+      <Extensions>qrc;*</Extensions>
+      <ParseFiles>false</ParseFiles>
+    </Filter>
+    <Filter Include="Source Files\Misc">
+      <UniqueIdentifier>{f3da7037-7225-4a60-9cd8-a9b0e87c4727}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\ProjEd">
+      <UniqueIdentifier>{51b60c76-51a0-4521-9624-e3303f3e45f0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\World">
+      <UniqueIdentifier>{5d3386e2-09a2-459b-9610-9fb5bf09739e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Header Files\Misc">
+      <UniqueIdentifier>{9f52f1e8-7740-4577-8b93-f5dd3f5f86c5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\ProjEd">
+      <UniqueIdentifier>{006cb149-be08-41f1-a57c-a1813187a308}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\World">
+      <UniqueIdentifier>{d7a716a6-1ab7-4915-b8d4-7d9b5231409c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\World\GoProperty">
+      <UniqueIdentifier>{9a892447-2a28-4a47-b396-d2cc8d8b07af}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Render">
+      <UniqueIdentifier>{e78513bd-1d80-4eb4-979a-0bb6be9f6301}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Render">
+      <UniqueIdentifier>{80e0e54e-5bcd-4872-8ea4-efb3379e9419}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <QtRcc Include="game_editor.qrc">
+      <Filter>Resource Files</Filter>
+    </QtRcc>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="code\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="code\mainwin.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="code\Misc\AssimpMeshLoader.cpp">
+      <Filter>Source Files\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="code\Misc\ProjBuilder.cpp">
+      <Filter>Source Files\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="code\Misc\ThumbnailsMaster.cpp">
+      <Filter>Source Files\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="code\ProjEd\EdActions.cpp">
+      <Filter>Source Files\ProjEd</Filter>
+    </ClCompile>
+    <ClCompile Include="code\ProjEd\EditorSettings.cpp">
+      <Filter>Source Files\ProjEd</Filter>
+    </ClCompile>
+    <ClCompile Include="code\ProjEd\EditorUI.cpp">
+      <Filter>Source Files\ProjEd</Filter>
+    </ClCompile>
+    <ClCompile Include="code\ProjEd\InspectorWin.cpp">
+      <Filter>Source Files\ProjEd</Filter>
+    </ClCompile>
+    <ClCompile Include="code\ProjEd\ProjCreateWin.cpp">
+      <Filter>Source Files\ProjEd</Filter>
+    </ClCompile>
+    <ClCompile Include="code\ProjEd\ProjectEdit.cpp">
+      <Filter>Source Files\ProjEd</Filter>
+    </ClCompile>
+    <ClCompile Include="code\ProjEd\PropertyAreas.cpp">
+      <Filter>Source Files\ProjEd</Filter>
+    </ClCompile>
+    <ClCompile Include="code\ProjEd\ResourcePicker.cpp">
+      <Filter>Source Files\ProjEd</Filter>
+    </ClCompile>
+    <ClCompile Include="code\World\GameObject.cpp">
+      <Filter>Source Files\World</Filter>
+    </ClCompile>
+    <ClCompile Include="code\World\TerrainUtils.cpp">
+      <Filter>Source Files\World</Filter>
+    </ClCompile>
+    <ClCompile Include="code\World\World.cpp">
+      <Filter>Source Files\World</Filter>
+    </ClCompile>
+    <ClCompile Include="code\World\GoProperty\go_properties.cpp">
+      <Filter>Source Files\World\GoProperty</Filter>
+    </ClCompile>
+    <ClCompile Include="code\World\GoProperty\TerrainComponent.cpp">
+      <Filter>Source Files\World\GoProperty</Filter>
+    </ClCompile>
+    <ClCompile Include="code\World\GoProperty\tile_properties.cpp">
+      <Filter>Source Files\World\GoProperty</Filter>
+    </ClCompile>
+    <ClCompile Include="code\Render\GizmosRenderer.cpp">
+      <Filter>Source Files\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="code\ProjEd\EditorResources.cpp">
+      <Filter>Source Files\ProjEd</Filter>
+    </ClCompile>
+    <ClCompile Include="code\ProjEd\EditorFilemanager.cpp">
+      <Filter>Source Files\ProjEd</Filter>
+    </ClCompile>
+    <ClCompile Include="code\ProjEd\LocStringEditWin.cpp">
+      <Filter>Source Files\ProjEd</Filter>
+    </ClCompile>
+    <ClCompile Include="code\World\PhysicsPropertyUI.cpp">
+      <Filter>Source Files\World\GoProperty</Filter>
+    </ClCompile>
+    <ClCompile Include="code\ProjEd\ConsoleLog.cpp">
+      <Filter>Source Files\ProjEd</Filter>
+    </ClCompile>
+    <ClCompile Include="code\ProjEd\EditorInput.cpp">
+      <Filter>Source Files\ProjEd</Filter>
+    </ClCompile>
+    <ClCompile Include="code\ProjEd\DialogsMaster.cpp">
+      <Filter>Source Files\ProjEd</Filter>
+    </ClCompile>
+    <ClCompile Include="code\ProjEd\GO_widget_item.cpp">
+      <Filter>Source Files\ProjEd</Filter>
+    </ClCompile>
+    <ClCompile Include="code\World\GoProperty\MaterialPropertyUI.cpp">
+      <Filter>Source Files\World\GoProperty</Filter>
+    </ClCompile>
+    <ClCompile Include="code\World\GoProperty\ZPScriptPropertyUI.cpp">
+      <Filter>Source Files\World\GoProperty</Filter>
+    </ClCompile>
+    <ClCompile Include="code\ProjEd\EditorMenu.cpp">
+      <Filter>Source Files\ProjEd</Filter>
+    </ClCompile>
+    <ClCompile Include="code\Render\zs-renderer-editor.cpp">
+      <Filter>Source Files\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="code\World\EditorCamera.cpp">
+      <Filter>Source Files\World</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <QtUic Include="code\mainwin.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="code\ProjEd\ui\buildconsole.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="code\ProjEd\ui\editor.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="code\ProjEd\ui\inspector_win.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="code\ProjEd\ui\proj_create_win.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="code\ProjEd\ui\LocStringFileEdit.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="code\ProjEd\ui\ConsoleLogWindow.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="code\Misc\headers\AssimpMeshLoader.h">
+      <Filter>Header Files\Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="code\Misc\headers\EditorManager.h">
+      <Filter>Header Files\Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="code\Misc\headers\ThumbnailsMaster.h">
+      <Filter>Header Files\Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="code\ProjEd\headers\EdActions.h">
+      <Filter>Header Files\ProjEd</Filter>
+    </ClInclude>
+    <ClInclude Include="code\ProjEd\headers\EditorSettings.h">
+      <Filter>Header Files\ProjEd</Filter>
+    </ClInclude>
+    <ClInclude Include="code\World\headers\terrain.h">
+      <Filter>Header Files\World</Filter>
+    </ClInclude>
+    <ClInclude Include="code\World\headers\World.h">
+      <Filter>Header Files\World</Filter>
+    </ClInclude>
+    <ClInclude Include="code\Render\headers\GizmosRenderer.h">
+      <Filter>Header Files\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="code\include_engine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="code\triggers.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="code\ProjEd\headers\DialogsMaster.h">
+      <Filter>Header Files\ProjEd</Filter>
+    </ClInclude>
+    <ClInclude Include="code\ProjEd\headers\GO_widget_item.h">
+      <Filter>Header Files\ProjEd</Filter>
+    </ClInclude>
+    <ClInclude Include="code\Render\headers\zs-renderer-editor.hpp">
+      <Filter>Header Files\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="code\World\headers\EditorCamera.hpp">
+      <Filter>Header Files\World</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="code\Misc\headers\ProjBuilder.h">
+      <Filter>Header Files\Misc</Filter>
+    </QtMoc>
+    <QtMoc Include="code\ProjEd\headers\InspectorWin.h">
+      <Filter>Header Files\ProjEd</Filter>
+    </QtMoc>
+    <QtMoc Include="code\ProjEd\headers\InspEditAreas.h">
+      <Filter>Header Files\ProjEd</Filter>
+    </QtMoc>
+    <QtMoc Include="code\ProjEd\headers\ProjCreateWin.h">
+      <Filter>Header Files\ProjEd</Filter>
+    </QtMoc>
+    <QtMoc Include="code\ProjEd\headers\ProjectEdit.h">
+      <Filter>Header Files\ProjEd</Filter>
+    </QtMoc>
+    <QtMoc Include="code\mainwin.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="code\ProjEd\headers\LocStringEditWin.h">
+      <Filter>Header Files\ProjEd</Filter>
+    </QtMoc>
+    <QtMoc Include="code\ProjEd\headers\ConsoleLog.h">
+      <Filter>Header Files\ProjEd</Filter>
+    </QtMoc>
+  </ItemGroup>
+</Project>

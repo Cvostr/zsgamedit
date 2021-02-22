@@ -22,11 +22,11 @@ layout(location = 1) out vec3 BloomColor;
 layout(location = 0) in vec2 UVCoord;
 
 //textures
-layout(binding = 10) uniform sampler2D tDiffuse;
-layout(binding = 11) uniform sampler2D tNormal;
-layout(binding = 12) uniform sampler2D tPos;
-layout(binding = 13) uniform sampler2D tSpec;
-layout(binding = 14) uniform sampler2D tMasks;
+layout(binding = 0) uniform sampler2D tDiffuse;
+layout(binding = 1) uniform sampler2D tNormal;
+layout(binding = 2) uniform sampler2D tPos;
+layout(binding = 3) uniform sampler2D tSpec;
+layout(binding = 4) uniform sampler2D tMasks;
 
 layout (std140, binding = 1) uniform Lights{
     uniform Light lights[MAX_LIGHTS_NUM];

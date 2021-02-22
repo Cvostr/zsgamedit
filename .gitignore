@@ -3,7 +3,6 @@
 /Shaders
 /AS_DEBUG
 *.user
-*.filters
 *.dll
 *.exe
 *.inf

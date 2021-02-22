@@ -230,7 +230,7 @@ void RenderPipelineEditor::render(Engine::Window* window, void* projectedit_ptr)
             //Disable depth rendering to draw plane correctly
             setDepthState(false);
             setFaceCullState(false);
-            ((Engine::GLframebuffer*)gbuffer)->bindTextures(10); //Bind gBuffer textures
+            ((Engine::GLframebuffer*)gbuffer)->bindTextures(0); //Bind gBuffer textures
             deffered_light->Use(); //use deffered shader
             Engine::getPlaneMesh2D()->Draw(); //Draw screen
         }
