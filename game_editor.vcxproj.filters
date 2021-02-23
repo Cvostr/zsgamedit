@@ -156,6 +156,12 @@
     <ClCompile Include="code\World\EditorCamera.cpp">
       <Filter>Source Files\World</Filter>
     </ClCompile>
+    <ClCompile Include="code\World\GoProperty\ParticleEmitterComponent.cpp">
+      <Filter>Source Files\World\GoProperty</Filter>
+    </ClCompile>
+    <ClCompile Include="code\World\GoProperty\CameraComponent.cpp">
+      <Filter>Source Files\World\GoProperty</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="code\mainwin.ui">

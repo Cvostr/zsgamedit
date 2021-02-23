@@ -89,6 +89,7 @@ EditWindow::EditWindow(QApplication* app, QWidget *parent) :
     QObject::connect(ui->actionNew_Terrain, SIGNAL(triggered()), this, SLOT(addNewTerrain()));
     QObject::connect(ui->actionNew_Audio_source, SIGNAL(triggered()), this, SLOT(addNewAudsource()));
     QObject::connect(ui->actionNew_Camera, SIGNAL(triggered()), this, SLOT(addNewCamera()));
+    QObject::connect(ui->actionNew_Particle_Emitter, SIGNAL(triggered()), this, SLOT(addNewParticleEmitter()));
 
     QObject::connect(ui->actionRender_settings, SIGNAL(triggered()), this, SLOT(openRenderSettings()));
     QObject::connect(ui->actionPhysics_Settings, SIGNAL(triggered()), this, SLOT(openPhysicsSettings()));

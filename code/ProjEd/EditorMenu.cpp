@@ -204,6 +204,16 @@ void EditWindow::addNewCamera() {
     obj->setLabel("Camera_" + std::to_string(add_num));
 }
 
+void EditWindow::addNewParticleEmitter() {
+    Engine::GameObject* obj = onAddNewGameObject();
+    obj->addProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_PARTICLE_EMITTER);
+
+    //Set new name to object
+    int add_num = 0; //Declaration of addititonal integer
+    world.getAvailableNumObjLabel("Particles_", &add_num);
+    obj->setLabel("Particles_" + std::to_string(add_num));
+}
+
 void EditWindow::onImportResource() {
     QString dir = "/home";
 #ifdef _WIN32

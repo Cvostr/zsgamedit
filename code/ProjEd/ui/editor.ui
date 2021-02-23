@@ -93,7 +93,7 @@
      <x>0</x>
      <y>0</y>
      <width>392</width>
-     <height>26</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -139,6 +139,7 @@
     <addaction name="actionNew_Terrain"/>
     <addaction name="actionNew_Audio_source"/>
     <addaction name="actionNew_Camera"/>
+    <addaction name="actionNew_Particle_Emitter"/>
     <addaction name="separator"/>
     <addaction name="actionToggle_Cameras"/>
     <addaction name="actionRender_settings"/>
@@ -296,6 +297,11 @@
   <action name="actionCreateRenderTarget">
    <property name="text">
     <string>Render Target</string>
+   </property>
+  </action>
+  <action name="actionNew_Particle_Emitter">
+   <property name="text">
+    <string>New Particle Emitter</string>
    </property>
   </action>
  </widget>

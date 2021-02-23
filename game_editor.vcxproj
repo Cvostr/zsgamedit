@@ -66,7 +66,7 @@
     <LibraryPath>..\LIBS\win64-static\bulletDBG;..\x64\Debug;..\LIBS\win64-static;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <QtInstall>msvc2017_64</QtInstall>
+    <QtInstall>msvc2019_64</QtInstall>
     <QtModules>core;gui;opengl;openglextensions;widgets</QtModules>
   </PropertyGroup>
   <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -172,8 +172,10 @@
     <ClCompile Include="code\Render\zs-renderer-editor.cpp" />
     <ClCompile Include="code\World\EditorCamera.cpp" />
     <ClCompile Include="code\World\GameObject.cpp" />
+    <ClCompile Include="code\World\GoProperty\CameraComponent.cpp" />
     <ClCompile Include="code\World\GoProperty\go_properties.cpp" />
     <ClCompile Include="code\World\GoProperty\MaterialPropertyUI.cpp" />
+    <ClCompile Include="code\World\GoProperty\ParticleEmitterComponent.cpp" />
     <ClCompile Include="code\World\GoProperty\TerrainComponent.cpp" />
     <ClCompile Include="code\World\GoProperty\tile_properties.cpp" />
     <ClCompile Include="code\World\GoProperty\ZPScriptPropertyUI.cpp" />

@@ -115,6 +115,7 @@ public slots:
     void addNewTerrain();
     void addNewAudsource();
     void addNewCamera();
+    void addNewParticleEmitter();
 
     void onSceneSave();
     void onSceneSaveAs();
