@@ -1,6 +1,7 @@
 #pragma once
 
 #include <render/Shader.hpp>
+#include <render/Framebuffer.hpp>
 #include <render/Mesh.hpp>
 #include <render/UniformBuffer.hpp>
 #include <world/Camera.hpp>
@@ -20,6 +21,8 @@ private:
     Engine::Shader* obj_grid_shader;
     Engine::Shader* sprite_shader_3d;
 
+    Engine::Framebuffer* gbuffer;
+    Engine::Framebuffer* df_light_buffer;
 public:
     Engine::UniformBuffer* editorUniformBuffer;
 
@@ -30,6 +33,8 @@ public:
     unsigned int render_getpickedObj(void* projectedit_ptr, int mouseX, int mouseY);
     RGBAColor getColorOfPickedTransformControl(int mouseX, int mouseY, void* projectedit_ptr);
     void renderGizmos(void* projectedit_ptr, Engine::Camera* cam);
+
+    void OnUpdateWindowSize(int W, int H);
 
     void* win_ptr;
 

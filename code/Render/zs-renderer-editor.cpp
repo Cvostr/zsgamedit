@@ -5,6 +5,7 @@
 
 #include <world/ObjectsComponents/MeshComponent.hpp>
 #include <world/ObjectsComponents/LightSourceComponent.hpp>
+#include <ogl/GLFramebuffer.hpp>
 
 #define LIGHT_STRUCT_SIZE 64
 
@@ -39,6 +40,23 @@ void RenderPipelineEditor::setup(int bufWidth, int bufHeight){
 
     editorUniformBuffer = Engine::allocUniformBuffer();
     editorUniformBuffer->init(8, 16);
+
+    gbuffer = new Engine::GLframebuffer(bufWidth, bufHeight);
+
+
+
+    gbuffer->AddDepth();
+    gbuffer->AddTexture(Engine::FORMAT_RGBA); //Diffuse map
+    gbuffer->AddTexture(Engine::FORMAT_RGB16F); //Normal map
+    gbuffer->AddTexture(Engine::FORMAT_RGB16F); //Position map
+    gbuffer->AddTexture(Engine::FORMAT_RGBA); //Transparent map
+    gbuffer->AddTexture(Engine::FORMAT_RGBA); //Masks map
+    gbuffer->Create();
+
+    df_light_buffer = new Engine::GLframebuffer(bufWidth, bufHeight);
+    df_light_buffer->AddTexture(Engine::FORMAT_RGBA); //Diffuse map
+    df_light_buffer->AddTexture(Engine::FORMAT_RGBA); //Bloom map
+    df_light_buffer->Create();
 }
 
 void RenderPipelineEditor::initGizmos(int projectPespective){
@@ -60,8 +78,18 @@ RenderPipelineEditor::~RenderPipelineEditor(){
     sprite_shader_3d->Destroy();
 
     delete gizmos;
+
+    delete gbuffer;
+    delete df_light_buffer;
 }
 
+void RenderPipelineEditor::OnUpdateWindowSize(int W, int H) {
+    if (engine_ptr->desc->game_perspective == PERSP_3D) {
+        gbuffer->SetSize(W, H);
+        df_light_buffer->SetSize(W, H);
+    }
+    ui_buffer->SetSize(W, H);
+}
 
 void RenderPipelineEditor::OnCreate(){
     Engine::Window* win = engine_ptr->GetWindow();
@@ -79,11 +107,8 @@ void RenderPipelineEditor::OnCreate(){
 RGBAColor RenderPipelineEditor::getColorOfPickedTransformControl(int mouseX, int mouseY, void* projectedit_ptr){
 
     EditWindow* editwin_ptr = static_cast<EditWindow*>(projectedit_ptr);
-    Engine::Camera* cam_ptr = nullptr; //We'll set it next
+    Engine::Camera* cam_ptr = &editwin_ptr->edit_camera; //We'll set it next
     World* world_ptr = &editwin_ptr->world;
-
-
-    cam_ptr = &editwin_ptr->edit_camera;
 
 
     setClearColor(0,0,0,1);

@@ -47,7 +47,7 @@ void Engine::MaterialProperty::addPropertyInterfaceToInspector() {
     for (unsigned int prop_i = 0; prop_i < mMaterial->mTemplate->properties.size(); prop_i++) {
         MaterialShaderProperty* prop_ptr = mMaterial->mTemplate->properties[prop_i];
         MaterialShaderPropertyConf* conf_ptr = this->mMaterial->confs[prop_i];
-        switch (prop_ptr->type) {
+        switch (prop_ptr->mType) {
         case MATSHPROP_TYPE_NONE: {
             break;
         }
@@ -57,7 +57,7 @@ void Engine::MaterialProperty::addPropertyInterfaceToInspector() {
             TextureMtShPropConf* texture_conf = static_cast<TextureMtShPropConf*>(conf_ptr);
 
             PickResourceArea* area = new PickResourceArea(RESOURCE_TYPE_TEXTURE);
-            area->setLabel(QString::fromStdString(texture_p->prop_caption));
+            area->setLabel(QString::fromStdString(texture_p->mPropCaption));
             area->go_property = this;
             area->pResultString = &texture_conf->path;
             area->isShowNoneItem = true;
@@ -69,7 +69,7 @@ void Engine::MaterialProperty::addPropertyInterfaceToInspector() {
             FloatMtShPropConf* float_conf = static_cast<FloatMtShPropConf*>(conf_ptr);
 
             FloatPropertyArea* float_area = new FloatPropertyArea;
-            float_area->setLabel(QString::fromStdString(prop_ptr->prop_caption)); //Its label
+            float_area->setLabel(QString::fromStdString(prop_ptr->mPropCaption)); //Its label
             float_area->value = &float_conf->value;
             float_area->go_property = this;
             _inspector_win->addPropertyArea(float_area);
@@ -80,7 +80,7 @@ void Engine::MaterialProperty::addPropertyInterfaceToInspector() {
             Float3MtShPropConf* float3_conf = static_cast<Float3MtShPropConf*>(conf_ptr);
 
             Float3PropertyArea* float3_area = new Float3PropertyArea;
-            float3_area->setLabel(QString::fromStdString(prop_ptr->prop_caption)); //Its label
+            float3_area->setLabel(QString::fromStdString(prop_ptr->mPropCaption)); //Its label
             float3_area->vector = &float3_conf->value;
             float3_area->go_property = this;
             _inspector_win->addPropertyArea(float3_area);
@@ -91,7 +91,7 @@ void Engine::MaterialProperty::addPropertyInterfaceToInspector() {
             Float2MtShPropConf* float2_conf = static_cast<Float2MtShPropConf*>(conf_ptr);
 
             Float2PropertyArea* float2_area = new Float2PropertyArea;
-            float2_area->setLabel(QString::fromStdString(prop_ptr->prop_caption)); //Its label
+            float2_area->setLabel(QString::fromStdString(prop_ptr->mPropCaption)); //Its label
             float2_area->vector = &float2_conf->value;
             float2_area->go_property = this;
             _inspector_win->addPropertyArea(float2_area);
@@ -101,8 +101,8 @@ void Engine::MaterialProperty::addPropertyInterfaceToInspector() {
             Int2MtShPropConf* int2_conf = static_cast<Int2MtShPropConf*>(conf_ptr);
 
             Int2PropertyArea* int2_area = new Int2PropertyArea;
-            int2_area->setLabel(QString::fromStdString(prop_ptr->prop_caption)); //Its label
-            int2_area->vector = &int2_conf->value[0];
+            int2_area->setLabel(QString::fromStdString(prop_ptr->mPropCaption)); //Its label
+            int2_area->vector = &int2_conf->value.X;
             int2_area->go_property = this;
             _inspector_win->addPropertyArea(int2_area);
             break;
@@ -111,7 +111,7 @@ void Engine::MaterialProperty::addPropertyInterfaceToInspector() {
             IntegerMtShPropConf* integer_conf = static_cast<IntegerMtShPropConf*>(conf_ptr);
 
             IntPropertyArea* integer_area = new IntPropertyArea;
-            integer_area->setLabel(QString::fromStdString(prop_ptr->prop_caption)); //Its label
+            integer_area->setLabel(QString::fromStdString(prop_ptr->mPropCaption)); //Its label
             integer_area->value = &integer_conf->value;
             integer_area->go_property = this;
             _inspector_win->addPropertyArea(integer_area);
@@ -122,7 +122,7 @@ void Engine::MaterialProperty::addPropertyInterfaceToInspector() {
             ColorMtShPropConf* color_conf = static_cast<ColorMtShPropConf*>(conf_ptr);
 
             ColorDialogArea* color_area = new ColorDialogArea;
-            color_area->setLabel(QString::fromStdString(prop_ptr->prop_caption)); //Its label
+            color_area->setLabel(QString::fromStdString(prop_ptr->mPropCaption)); //Its label
             color_area->color = &color_conf->color;
             color_area->go_property = this;
             _inspector_win->addPropertyArea(color_area);
@@ -200,7 +200,7 @@ void Engine::MaterialProperty::onValueChanged() {
     for (unsigned int prop_i = 0; prop_i < GroupPropertiesSize; prop_i++) {
         MaterialShaderProperty* prop_ptr = mMaterial->mTemplate->properties[prop_i];
         MaterialShaderPropertyConf* conf_ptr = this->mMaterial->confs[prop_i];
-        switch (prop_ptr->type) {
+        switch (prop_ptr->mType) {
         case MATSHPROP_TYPE_TEXTURE: {
             //Cast pointer
             TextureMtShPropConf* texture_conf = static_cast<TextureMtShPropConf*>(conf_ptr);

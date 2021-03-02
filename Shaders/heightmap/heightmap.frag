@@ -283,15 +283,15 @@ float processShadows(){
     float dist = length(FragPos - cam_position);
     float result = 0;
     vec4 objPosLightSpace = vec4(0,0,0,0);
-    if(dist < CasterDistance1){
+    if(dist < CasterDistance0){
         objPosLightSpace = LightProjViewMat0 * vec4(FragPos, 1);
-    }else if(dist < CasterDistance2){
+    }else if(dist < CasterDistance1){
         objPosLightSpace = LightProjViewMat1 * vec4(FragPos, 1);
-    }else if(dist < CasterDistance3){
+    }else if(dist < CasterDistance2){
         objPosLightSpace = LightProjViewMat2 * vec4(FragPos, 1);
-    }else if(dist < CasterDistance4){
+    }else if(dist < CasterDistance3){
         objPosLightSpace = LightProjViewMat3 * vec4(FragPos, 1);
-    }else if(dist < CasterDistance5){
+    }else if(dist < CasterDistance4){
         objPosLightSpace = LightProjViewMat4 * vec4(FragPos, 1);
     }else{
         objPosLightSpace = LightProjViewMat5 * vec4(FragPos, 1);
@@ -313,15 +313,15 @@ float processShadows(){
             vec2 uvoffset = ShadowProjection.xy + offset;
 
             vec4 shadowmap = vec4(1,1,1,1);
-            if(dist < CasterDistance1){
+            if(dist < CasterDistance0){
                 shadowmap = texture(shadow_map, vec3(uvoffset, 0));
-            }else if(dist < CasterDistance2){
+            }else if(dist < CasterDistance1){
                 shadowmap = texture(shadow_map, vec3(uvoffset, 1));
-            }else if(dist < CasterDistance3){
+            }else if(dist < CasterDistance2){
                 shadowmap = texture(shadow_map, vec3(uvoffset, 2));
-            }else if(dist < CasterDistance4){
+            }else if(dist < CasterDistance3){
                 shadowmap = texture(shadow_map, vec3(uvoffset, 3));
-            }else if(dist < CasterDistance5){
+            }else if(dist < CasterDistance4){
                 shadowmap = texture(shadow_map, vec3(uvoffset, 4));
             }else{
                 shadowmap = texture(shadow_map, vec3(uvoffset, 5));

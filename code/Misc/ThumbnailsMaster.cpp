@@ -237,10 +237,7 @@ void ThumbnailsMaster::createMaterialThumbnail(std::string name){
 
 void ThumbnailsMaster::DrawTexture(Engine::TextureResource* texture){
     //use texture
-    texture->Use(0);
-    while(texture->resource_state != RESOURCE_STATE::STATE_LOADED){
-        texture->Use(0);
-    }
+    texture->loadAndWait();
     texture->Use(0);
     //draw plane
     Engine::getPlaneMesh2D()->Draw();
