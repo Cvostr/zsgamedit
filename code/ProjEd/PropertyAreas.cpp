@@ -548,13 +548,13 @@ void Int2PropertyArea::writeNewValues(){
     int vX = this->x_field.text().toInt();
     int vY = this->y_field.text().toInt();
 
-    if(vector[0] != vX || vector[1] != vY){
+    if(vector->X != vX || vector->Y != vY){
         //Store old values
         getActionManager()->newPropertyAction(go_property->go_link, go_property->type);
     }
     //Write new values
-    this->vector[0] = vX;
-    this->vector[1] = vY;
+    this->vector->X = vX;
+    this->vector->Y = vY;
 
     PropertyEditArea::callPropertyUpdate();
 }
@@ -566,17 +566,17 @@ void Int2PropertyArea::updateValues(){
     int vX = this->x_field.text().toInt();
     int vY = this->y_field.text().toInt();
     //if variables content changed
-    if(vector[0] != vX || vector[1] != vY){
-        this->x_field.setText(QString::number(vector[0]));
-        this->y_field.setText(QString::number(vector[1]));
+    if(vector->X != vX || vector->Y != vY){
+        this->x_field.setText(QString::number(vector->X));
+        this->y_field.setText(QString::number(vector->Y));
     }
 }
 
 void Int2PropertyArea::setup(){
     if(this->vector == nullptr)
         return;
-    this->x_field.setText(QString::number(vector[0]));
-    this->y_field.setText(QString::number(vector[1]));
+    this->x_field.setText(QString::number(vector->X));
+    this->y_field.setText(QString::number(vector->Y));
 }
 
 Int2PropertyArea::~Int2PropertyArea(){

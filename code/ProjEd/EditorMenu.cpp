@@ -151,6 +151,7 @@ void EditWindow::addNewTile() {
     Engine::GameObject* obj = onAddNewGameObject();
     obj->addProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_TILE); //Creates tile inside
     obj->addProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_MESH); //Creates mesh inside
+    obj->addProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_MATERIAL); //Creates material inside
 
     //Set new name to object
     int add_num = 0; //Declaration of addititonal integer

@@ -17,6 +17,7 @@
 extern InspectorWin* _inspector_win;
 static Engine::TileGroupProperty* current_property; //Property, that shown
 extern ZSGAME_DATA* game_data;
+static Engine::TileProperty* current_tile;
 
 void onCreateBtnPress(){
     current_property->process();
@@ -114,6 +115,7 @@ void Engine::TileGroupProperty::process(){
             //obj->render_type = GO_RENDER_TYPE_TILE;
             obj->addProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_MESH); //Adding mesh
             obj->addProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_TILE); //Adding tile
+            obj->addProperty(PROPERTY_TYPE::GO_PROPERTY_TYPE_MATERIAL); //Adding material
             //Receive properties ptrs
             Engine::TransformProperty* transform = obj->getPropertyPtr<Engine::TransformProperty>();
             Engine::LabelProperty* label = obj->getPropertyPtr<Engine::LabelProperty>();
@@ -156,7 +158,18 @@ void Engine::TileGroupProperty::clear(){
     isCreated = false;
 }
 
+void onAnimationStart() {
+    //Call play() on AnimationProperty
+    current_tile->playAnim();
+}
+
+void onAnimationStop() {
+    current_tile->stopAnim();
+}
+
 void Engine::TileProperty::addPropertyInterfaceToInspector(){
+    current_tile = this;
+
     BoolCheckboxArea* isAnim = new BoolCheckboxArea;
     isAnim->setLabel("Animated ");
     isAnim->go_property = this;
@@ -195,6 +208,22 @@ void Engine::TileProperty::addPropertyInterfaceToInspector(){
     transparent_area->go_property = this;
     transparent_area->pResultString = &transparent_relpath;
     _inspector_win->addPropertyArea(transparent_area);
+
+
+    if (!this->anim_state.playing) {
+        AreaButton* btn = new AreaButton;
+        btn->onPressFuncPtr = &onAnimationStart;
+        btn->button->setText("Start"); //Setting text to qt button
+        _inspector_win->getContentLayout()->addWidget(btn->button);
+        _inspector_win->registerUiObject(btn);
+    }
+    if (this->anim_state.playing) {
+        AreaButton* stopbtn = new AreaButton;
+        stopbtn->onPressFuncPtr = &onAnimationStop;
+        stopbtn->button->setText("Stop"); //Setting text to qt button
+        _inspector_win->getContentLayout()->addWidget(stopbtn->button);
+        _inspector_win->registerUiObject(stopbtn);
+    }
 }
 
 void Engine::TileProperty::onValueChanged(){

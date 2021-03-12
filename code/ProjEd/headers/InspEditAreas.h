@@ -129,7 +129,7 @@ public:
     QLineEdit x_field; //Text digit field for X coord
     QLineEdit y_field; //Text digit field for Y coord
 
-    int* vector; //Output variable
+    Vec2i* vector; //Output variable
 
     QLabel x_label; //To write X separator
     QLabel y_label; //To write Y separator

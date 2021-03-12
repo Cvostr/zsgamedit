@@ -26,7 +26,7 @@ layout(location = 1) in vec2 UVCoord;
 layout(binding = 0) uniform sampler2D diffuse;
 layout(binding = 1) uniform sampler2D diffuse2;
 
-layout (std140, binding = 5) uniform Tile{
+layout (std140, binding = 3) uniform Tile{
     uniform int total_rows; //rows in texture atlas, 4 bytes, offset = 0
     uniform int total_cols; //columns in texture atlas, 4 bytes, offset = 4
     uniform int selected_row; //current row, 4 bytes, offset = 8

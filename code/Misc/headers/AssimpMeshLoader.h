@@ -26,6 +26,8 @@ void loadMesh(std::string file_path, Engine::Mesh* mesh_ptr, int index);
 
 void loadAnimation(std::string file_path, Engine::Animation* anim, int index);
 
+void loadMaterial(std::string file_path, aiMaterial* material, int index);
+
 void processMesh(aiMesh* mesh, Engine::Mesh* mesh_ptr);
 
 bool isBoneAvailable(std::string bone_label, const aiScene* scene);

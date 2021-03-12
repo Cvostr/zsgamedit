@@ -231,7 +231,6 @@ void BlobWriter::writeToBlob(const std::string& file_path, Engine::ZsResource* r
     //Write prefix
     map_stream << "entry ";
     //write names
-    map_stream.writeString(res_ptr->rel_path);
     map_stream.writeString(res_ptr->resource_label);
     map_stream.writeString(blob_path.toStdString());
     //write coords

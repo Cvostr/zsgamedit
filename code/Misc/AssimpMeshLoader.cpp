@@ -195,6 +195,14 @@ void Engine::loadAnimation(std::string file_path, Engine::Animation* anim, int i
     importer.FreeScene();
 }
 
+void Engine::loadMaterial(std::string file_path, aiMaterial* material, int index) {
+    const aiScene* scene = importer.ReadFile(file_path, loadflags);
+
+    *material = *(scene->mMaterials[index]);
+
+    importer.FreeScene();
+}
+
 void Engine::loadNodeTree(std::string file_path, ZS3M::SceneNode* node){
     const aiScene* scene = importer.ReadFile(file_path, loadflags);
 

@@ -46,6 +46,10 @@ void Engine::MaterialProperty::addPropertyInterfaceToInspector() {
     //If set up, iterating over all items
     for (unsigned int prop_i = 0; prop_i < mMaterial->mTemplate->properties.size(); prop_i++) {
         MaterialShaderProperty* prop_ptr = mMaterial->mTemplate->properties[prop_i];
+
+        if (!prop_ptr->mShowInEditor)
+            continue;
+
         MaterialShaderPropertyConf* conf_ptr = this->mMaterial->confs[prop_i];
         switch (prop_ptr->mType) {
         case MATSHPROP_TYPE_NONE: {
@@ -102,7 +106,7 @@ void Engine::MaterialProperty::addPropertyInterfaceToInspector() {
 
             Int2PropertyArea* int2_area = new Int2PropertyArea;
             int2_area->setLabel(QString::fromStdString(prop_ptr->mPropCaption)); //Its label
-            int2_area->vector = &int2_conf->value.X;
+            int2_area->vector = &int2_conf->value;
             int2_area->go_property = this;
             _inspector_win->addPropertyArea(int2_area);
             break;

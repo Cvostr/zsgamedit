@@ -243,8 +243,8 @@ void Engine::TerrainProperty::getPickedVertexId(int posX, int posY, int screenY,
     
     int dtrue = 1;
     //Bind terrain buffer and set isPicking to true
-    game_data->pipeline->GetTerrainUniformBuffer()->bind();
-    game_data->pipeline->GetTerrainUniformBuffer()->writeData(16 * 12 * 2, 4, &dtrue);
+    game_data->pipeline->GetMaterialsUniformBuffer()->bind();
+    game_data->pipeline->GetMaterialsUniformBuffer()->writeData(16 * 12 * 2, 4, &dtrue);
     //Bind transform
     game_data->pipeline->GetTransformUniformBuffer()->bind();
     game_data->pipeline->GetTransformUniformBuffer()->writeData(sizeof (Mat4) * 2, sizeof (Mat4), &transform->transform_mat);

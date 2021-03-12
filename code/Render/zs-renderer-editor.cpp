@@ -218,69 +218,74 @@ void RenderPipelineEditor::render(Engine::Window* window, void* projectedit_ptr)
         }
     }
     else {
-        Engine::Camera* cam_ptr = &editwin_ptr->edit_camera; //We'll set it next
-        this->updateShadersCameraInfo(cam_ptr); //Send camera properties to all drawing shaders
-        setFrontFace(CCF_DIRECTION_CCW);
-        TryRenderShadows(cam_ptr);
-        mMainCamera = cam_ptr;
+        if (engine_ptr->desc->game_perspective == PERSP_3D) {
+            Engine::Camera* cam_ptr = &editwin_ptr->edit_camera; //We'll set it next
+            this->updateShadersCameraInfo(cam_ptr); //Send camera properties to all drawing shaders
+            setFrontFace(CCF_DIRECTION_CCW);
+            TryRenderShadows(cam_ptr);
+            mMainCamera = cam_ptr;
+            CurrentCamera = cam_ptr;
 
-        {
-            //Bind Geometry Buffer to make Deferred Shading
-            ((Engine::GLframebuffer*)gbuffer)->bind();
-            setClearColor(0, 0, 0, 0);
-            ClearFBufferGL(true, true);
-            setFullscreenViewport(win->GetWindowWidth(), win->GetWindowHeight());
             {
-                //Render Skybox
+                //Bind Geometry Buffer to make Deferred Shading
+                ((Engine::GLframebuffer*)gbuffer)->bind();
+                setClearColor(0, 0, 0, 0);
+                ClearFBufferGL(true, true);
+                setFullscreenViewport(win->GetWindowWidth(), win->GetWindowHeight());
+                {
+                    //Render Skybox
+                    setDepthState(false);
+                    setBlendingState(false);
+                    setFaceCullState(false);
+                    TryRenderSkybox();
+                }
+                glEnablei(GL_BLEND, 0);
+                glBlendFunci(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, 0);
+                {
+                    //Render World
+                    setDepthState(true);
+                    setFaceCullState(true);
+                    //Render whole world
+                    processObjects(world_ptr);
+                }
+            }
+
+            //Process Deffered lights
+            {
+                ((Engine::GLframebuffer*)df_light_buffer)->bind();
+                ClearFBufferGL(true, false); //Clear screen
+                //Disable depth rendering to draw plane correctly
                 setDepthState(false);
-                setBlendingState(false);
                 setFaceCullState(false);
-                TryRenderSkybox();
+                ((Engine::GLframebuffer*)gbuffer)->bindTextures(0); //Bind gBuffer textures
+                deffered_light->Use(); //use deffered shader
+                Engine::getPlaneMesh2D()->Draw(); //Draw screen
             }
-            glEnablei(GL_BLEND, 0);
-            glBlendFunci(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, 0);
+
+            //Render ALL UI
             {
-                //Render World
-                setDepthState(true);
-                setFaceCullState(true);
-                //Render whole world
-                processObjects(world_ptr);
+                ((Engine::GLframebuffer*)ui_buffer)->bind();
+                setClearColor(0, 0, 0, 0);
+                ClearFBufferGL(true, false); //Clear screen 
+                setDepthState(false);
+                setBlendingState(true);
+                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+                renderUI();
             }
-        }
 
-        //Process Deffered lights
-        {
-            ((Engine::GLframebuffer*)df_light_buffer)->bind();
-            ClearFBufferGL(true, false); //Clear screen
-            //Disable depth rendering to draw plane correctly
-            setDepthState(false);
-            setFaceCullState(false);
-            ((Engine::GLframebuffer*)gbuffer)->bindTextures(0); //Bind gBuffer textures
-            deffered_light->Use(); //use deffered shader
-            Engine::getPlaneMesh2D()->Draw(); //Draw screen
-        }
+            //Draw result into main buffer
+            {
+                glBindFramebuffer(GL_FRAMEBUFFER, 0);
+                ((Engine::GLframebuffer*)df_light_buffer)->bindTextures(0);
+                ((Engine::GLframebuffer*)ui_buffer)->bindTextures(1);
+                final_shader->Use();
+                Engine::getPlaneMesh2D()->Draw(); //Draw screen
+            }
 
-        //Render ALL UI
-        {
-            ((Engine::GLframebuffer*)ui_buffer)->bind();
-            setClearColor(0, 0, 0, 0);
-            ClearFBufferGL(true, false); //Clear screen 
-            setDepthState(false);
-            setBlendingState(true);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            renderUI();
+            renderGizmos(projectedit_ptr, cam_ptr);
         }
-
-        //Draw result into main buffer
-        {
-            glBindFramebuffer(GL_FRAMEBUFFER, 0);
-            ((Engine::GLframebuffer*)df_light_buffer)->bindTextures(0);
-            ((Engine::GLframebuffer*)ui_buffer)->bindTextures(1);
-            final_shader->Use();
-            Engine::getPlaneMesh2D()->Draw(); //Draw screen
-        }
-
-        renderGizmos(projectedit_ptr, cam_ptr);
+        else
+            render2D();
     }
     //if(!editwin_ptr->isWorldCamera)
         
