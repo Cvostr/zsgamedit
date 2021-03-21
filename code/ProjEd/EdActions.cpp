@@ -57,6 +57,8 @@ void EdActions::newSnapshotAction(Engine::World* world_ptr){
 }
 
 void EdActions::newPropertyAction(Engine::GameObjectLink link, PROPERTY_TYPE property_type){
+    if (link.isEmpty())
+        return;
     EdPropertyAction* new_action = new EdPropertyAction; //Allocate memory for action class
     new_action->linkToObj = link; //Store link to object
     new_action->linkToObj.updLinkPtr();

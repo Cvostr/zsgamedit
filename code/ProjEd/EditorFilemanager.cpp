@@ -29,7 +29,7 @@ void EditWindow::assignIconFile(QListWidgetItem* item) {
         item->setIcon(QIcon::fromTheme("text-x-generic"));
     }
     //Check if this resource is textures or material
-    if (checkExtension(item->text(), (".dds")) || checkExtension(item->text(), ".zsmat")) {
+    if (checkExtension(item->text(), (".dds")) || checkExtension(item->text(), ".zsmat") || checkExtension(item->text(), (".png"))) {
         std::string path = (this->current_dir + "/" + item->text()).toStdString();
         //remove extension from back
         RemoveExtension(path);
@@ -157,7 +157,7 @@ void EditWindow::onNewScript() {
     QString picked_name = this->createNewTextFile(current_dir, "Script", ".as", scriptContent.c_str(), scriptContent.size());
 }
 void EditWindow::onNewMaterial() {
-    char* matContent = "ZSP_MATERIAL\n_GROUP @default\x0_ENTRY i_uv_repeat\x0\x1\x0\x0\x0\x1\x0\x0\x0\n";
+    char* matContent = "ZSP_MATERIAL\n_GROUP @default\x0";
     QString picked_name = this->createNewTextFile(current_dir, "Material", ".zsmat", matContent, 56);
 }
 

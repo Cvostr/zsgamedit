@@ -23,6 +23,7 @@
 #include <input/Input.hpp>
 #include <ui/UI.hpp>
 #include <engine/Logger.hpp>
+#include <world/ObjectsComponents/MaterialComponent.hpp>
 
 //Hack to support meshes
 extern ZSpireEngine* engine_ptr;
@@ -320,6 +321,17 @@ void EditWindow::openFile(QString file_path){
     }else if(checkExtension(file_path, ".lcstr")){
         LocStringEditWindow* lsew = new LocStringEditWindow;
         lsew->showWindowWithFile(file_path.toStdString());
+    }
+    else if (checkExtension(file_path, ".zsmat")) {
+        _inspector_win->clearContentLayout();
+        QString relpath = file_path;
+        relpath = relpath.remove(0, static_cast<int>(_editor_win->project.root_path.size() + 1));
+        Engine::ZsResource* resource = game_data->resources->getResourceByRelPath(relpath.toStdString());
+
+        Engine::MaterialProperty* matprop = new Engine::MaterialProperty;
+        matprop->setMaterial(resource->resource_label);
+        matprop->addPropertyInterfaceToInspector();
+        matprop->material_path = resource->resource_label;
     }
     else{
 #ifdef _WIN32

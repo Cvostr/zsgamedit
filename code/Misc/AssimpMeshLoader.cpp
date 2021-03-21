@@ -161,7 +161,7 @@ void Engine::loadAnimation(std::string file_path, Engine::Animation* anim, int i
         //Allocate all keys
         channel->scale = new Vec3[ai_channel->mNumScalingKeys];
         channel->pos = new Vec3[ai_channel->mNumPositionKeys];
-        channel->rot = new ZSQUATERNION[ai_channel->mNumRotationKeys];
+        channel->rot = new Quaternion[ai_channel->mNumRotationKeys];
         //Allocate times for keys
         channel->posTimes = new double[ai_channel->mNumPositionKeys];
         channel->scaleTimes = new double[ai_channel->mNumScalingKeys];
@@ -186,7 +186,7 @@ void Engine::loadAnimation(std::string file_path, Engine::Animation* anim, int i
         }
         for(unsigned int rot_k_i = 0; rot_k_i < channel->rotationKeysNum; rot_k_i ++){
             aiQuaternion ai_rot_key = ai_channel->mRotationKeys[rot_k_i].mValue.Normalize();
-            channel->rot[rot_k_i] = ZSQUATERNION(ai_rot_key.x, ai_rot_key.y, ai_rot_key.z, ai_rot_key.w);
+            channel->rot[rot_k_i] = Quaternion(ai_rot_key.x, ai_rot_key.y, ai_rot_key.z, ai_rot_key.w);
 
             channel->rotTimes[rot_k_i] = ai_channel->mRotationKeys[rot_k_i].mTime;
         }
@@ -227,7 +227,7 @@ void Engine::processNodeForTree(ZS3M::SceneNode* node, aiNode* node_assimp, cons
 
     node->node_translation = Vec3(translation.x, translation.y, translation.z);
     node->node_scaling = Vec3(scale.x, scale.y, scale.z);
-    node->node_rotation = ZSQUATERNION(rotation.x, rotation.y, rotation.z, rotation.w);
+    node->node_rotation = Quaternion(rotation.x, rotation.y, rotation.z, rotation.w);
 
     //iterate over all meshes in this node
     unsigned int meshes_num = node_assimp->mNumMeshes;

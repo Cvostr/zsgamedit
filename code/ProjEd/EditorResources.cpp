@@ -113,7 +113,7 @@ void EditWindow::processResourceFile(QFileInfo fileInfo) {
         Engine::ZsResource* _resource = new Engine::GlyphResource;
         createResourceDesc(_resource, absfpath, "");
     }
-    if (checkExtension(name, ".dds") || checkExtension(name, ".rtb")) { //If its an texture
+    if (checkExtension(name, ".dds") || checkExtension(name, ".rtb") || checkExtension(name, ".png")) { //If its an texture
         Engine::ZsResource* _resource = new Engine::TextureResource;
         createResourceDesc(_resource, absfpath, "");
     }

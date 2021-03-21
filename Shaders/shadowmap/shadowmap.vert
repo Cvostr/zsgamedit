@@ -17,7 +17,7 @@ layout (location = 10) in vec4 Weights2;
 layout (location = 11) in int bones;
 
 layout (std140, binding = 2) uniform ShadowData{
-//Shadowmapping stuff
+    //Shadowmapping stuff
     uniform float ShadowBias; //4
     uniform int ShadowmapSize; //4
     uniform bool HasShadowMap; //4

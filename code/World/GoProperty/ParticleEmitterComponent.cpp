@@ -44,6 +44,19 @@ void Engine::ParticleEmitterComponent::addPropertyInterfaceToInspector() {
         _inspector_win->registerUiObject(shape_pick);
         _inspector_win->getContentLayout()->addWidget(shape_pick->mRadioGroup);
     }
+
+    PickResourceArea* area = new PickResourceArea(RESOURCE_TYPE_MESH);
+    area->setLabel("Mesh");
+    area->go_property = this;
+    area->pResultString = &mMeshResLabel;
+    _inspector_win->addPropertyArea(area);
+
+    PickResourceArea* mat_area = new PickResourceArea(RESOURCE_TYPE_MATERIAL);
+    mat_area->setLabel("Material");
+    mat_area->go_property = this;
+    mat_area->pResultString = &mMaterialResLabel;
+    _inspector_win->addPropertyArea(mat_area);
+
     FloatPropertyArea* _Duration = new FloatPropertyArea; //New property area
     _Duration->setLabel("Duration"); //Its label
     _Duration->value = &this->mDuration; //Ptr to our vector
@@ -56,6 +69,11 @@ void Engine::ParticleEmitterComponent::addPropertyInterfaceToInspector() {
     _Looping->pResultBool = &this->mLooping;
     _inspector_win->addPropertyArea(_Looping);
 
+    BoolCheckboxArea* _Prewarm = new BoolCheckboxArea;
+    _Prewarm->setLabel("Prewarm");
+    _Prewarm->go_property = this;
+    _Prewarm->pResultBool = &this->mPrewarm;
+    _inspector_win->addPropertyArea(_Prewarm);
     
 
     FloatPropertyArea* _Lifetime = new FloatPropertyArea; //New property area
@@ -70,24 +88,41 @@ void Engine::ParticleEmitterComponent::addPropertyInterfaceToInspector() {
     _MaxParticles->go_property = this; //Pointer to this to activate matrix recalculaton
     _inspector_win->addPropertyArea(_MaxParticles);
 
+    IntPropertyArea* _MinParticlesPerSec = new IntPropertyArea; //New property area
+    _MinParticlesPerSec->setLabel("Min Particles per sec"); //Its label
+    _MinParticlesPerSec->value = &this->mEmissionRate.Min; //Ptr to our vector
+    _MinParticlesPerSec->go_property = this; //Pointer to this to activate matrix recalculaton
+    _inspector_win->addPropertyArea(_MinParticlesPerSec);
 
-    Float3PropertyArea* min_velocity_area = new Float3PropertyArea;
-    min_velocity_area->setLabel("Min Velocity"); //Its label
-    min_velocity_area->vector = &mDirection.Min;
-    min_velocity_area->go_property = this;
-    _inspector_win->addPropertyArea(min_velocity_area);
+    IntPropertyArea* _MaxParticlesPerSec = new IntPropertyArea; //New property area
+    _MaxParticlesPerSec->setLabel("Max Particles per sec"); //Its label
+    _MaxParticlesPerSec->value = &this->mEmissionRate.Max; //Ptr to our vector
+    _MaxParticlesPerSec->go_property = this; //Pointer to this to activate matrix recalculaton
+    _inspector_win->addPropertyArea(_MaxParticlesPerSec);
 
-    Float3PropertyArea* max_velocity_area = new Float3PropertyArea;
-    max_velocity_area->setLabel("Max Velocity"); //Its label
-    max_velocity_area->vector = &mDirection.Max;
-    max_velocity_area->go_property = this;
-    _inspector_win->addPropertyArea(max_velocity_area);
+    Float3PropertyArea* min_direction_area = new Float3PropertyArea;
+    min_direction_area->setLabel("Min Direction"); //Its label
+    min_direction_area->vector = &mDirection.Min;
+    min_direction_area->go_property = this;
+    _inspector_win->addPropertyArea(min_direction_area);
+
+    Float3PropertyArea* max_direction_area = new Float3PropertyArea;
+    max_direction_area->setLabel("Max Direction"); //Its label
+    max_direction_area->vector = &mDirection.Max;
+    max_direction_area->go_property = this;
+    _inspector_win->addPropertyArea(max_direction_area);
 
     Float3PropertyArea* constant_force_area = new Float3PropertyArea;
     constant_force_area->setLabel("Constant Force"); //Its label
     constant_force_area->vector = &mConstantForce;
     constant_force_area->go_property = this;
     _inspector_win->addPropertyArea(constant_force_area);
+
+    FloatPropertyArea* damping_force = new FloatPropertyArea; //New property area
+    damping_force->setLabel("Damping Force"); //Its label
+    damping_force->value = &this->mDampingForce; //Ptr to our vector
+    damping_force->go_property = this; //Pointer to this to activate matrix recalculaton
+    _inspector_win->addPropertyArea(damping_force);
 
     Float2PropertyArea* min_size_area = new Float2PropertyArea;
     min_size_area->setLabel("Min Size"); //Its label
@@ -137,6 +172,18 @@ void Engine::ParticleEmitterComponent::addPropertyInterfaceToInspector() {
     MaxRotation->go_property = this; //Pointer to this to activate matrix recalculaton
     _inspector_win->addPropertyArea(MaxRotation);
 
+    FloatPropertyArea* MinRotationSpeed = new FloatPropertyArea; //New property area
+    MinRotationSpeed->setLabel("Min Rotation Speed"); //Its label
+    MinRotationSpeed->value = &this->mRotationSpeed.Min; //Ptr to our vector
+    MinRotationSpeed->go_property = this; //Pointer to this to activate matrix recalculaton
+    _inspector_win->addPropertyArea(MinRotationSpeed);
+
+    FloatPropertyArea* MaxRotationSpeed = new FloatPropertyArea; //New property area
+    MaxRotationSpeed->setLabel("Max Rotation Speed"); //Its label
+    MaxRotationSpeed->value = &this->mRotationSpeed.Max; //Ptr to our vector
+    MaxRotationSpeed->go_property = this; //Pointer to this to activate matrix recalculaton
+    _inspector_win->addPropertyArea(MaxRotationSpeed);
+
     if (mSimulating == false) {
         AreaButton* btn = new AreaButton;
         btn->onPressFuncPtr = &onSimulationStart;
@@ -163,4 +210,8 @@ void onSimulationStart() {
 void onSimulationStop() {
     current_particle_emitter->StopSimulation();
     _inspector_win->updateRequired = true;
+}
+
+void Engine::ParticleEmitterComponent::onValueChanged() {
+    updateMeshPtr();
 }
